@@ -1,0 +1,49 @@
+/* General style elements */
+
+span.nobreak { white-space: nowrap; }
+span.inhead { 
+  font-weight: bold; font-variant: small-caps; font-size: 115%;
+  padding-right: 4px;}
+.narrative {
+  color: purple; font-style: italic; }
+span.narrative_hidden {
+  color: purple; font-style: italic;
+  display: none;}
+p.compact { margin-top: 2px; margin-bottom: 2px;}
+
+div.urlref {
+  margin-top: 2px; margin-bottom: 2px; padding: 0px;
+  font-family: fixed; margin-left: 10%; white-space: nowrap;}
+div.example {
+  margin-top: 2px; margin-bottom: 2px; padding: 0px;
+  font-family: courier,fixed; margin-left: 10%;}
+
+/* Items, pretty much like bullets */
+
+div.items {}
+div.item { margin-left: 10%; margin-top: 2px; margin-bottom: 2px;}
+
+/* Default frame description */
+
+table.fdjtdata th.header { 
+  vertical-align: top; text-align: center; 
+  font-family: sans; font-size: large; }
+table.fdjtdata th {
+  vertical-align: top;
+  text-align: right;
+  padding: 2px;
+  font-family: sans;}
+table.fdjtdata td {
+  vertical-align: top; text-align: left; padding: 2px;
+  background-color: lightblue; color: black;
+  font-family: fixed;}
+table.fdjtdata td span.value {
+  white-space: nowrap;}
+
+/* Centered page heads */
+
+h1#PAGEHEAD {
+  text-align: center;}
+h1#PAGEHEAD div.subtitle {
+  font-size: 60%;}
+h1#PAGEHEAD span.tld { font-size: 90%; opacity: .75;}
