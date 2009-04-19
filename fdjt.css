@@ -18,6 +18,8 @@ div.helptext { display: none; }
 
 /* Tabs */
 
+div.tabbar { line-height: 200%;}
+
 span.tab {
   font-family: sans,sans-serif;
   margin-left: 2px; margin-right: 2px;
