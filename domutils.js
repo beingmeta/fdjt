@@ -4,6 +4,7 @@ var fdjt_domutils_version="$Id:$";
 var _fdjt_debug=false;
 var _fdjt_debug_domedits=false;
 var _fdjt_debug_classedits=false;
+var _fdjt_trace_load=false;
 
 function $(eltarg)
 {
@@ -23,6 +24,12 @@ function fdjtWarn(string)
   if ((console) && (console.log))
     console.log(string);
   else alert(string);
+}
+
+function fdjtLoadMessage(string)
+{
+  if ((_fdjt_trace_load) && (console) && (console.log))
+    console.log.apply(console,arguments);
 }
 
 /* This outputs a warning if a given elements if not found. */
@@ -87,7 +94,7 @@ function fdjtHasClass(elt,classname)
 
 function fdjtAddClass(elt,classname)
 {
-  if (elt instanceof String)
+  if (typeof elt === "string")
     if (elt==="") return false;
     else if (elt[0]==='#') {
       var elts=new Array();
@@ -120,7 +127,7 @@ function fdjtAddClass(elt,classname)
 
 function fdjtDropClass(elt,classname)
 {
-  if (elt instanceof String)
+  if (typeof elt === "string")
     if (elt==="") return false;
     else if (elt[0]==='#') {
       var elts=new Array();
@@ -152,7 +159,7 @@ function fdjtDropClass(elt,classname)
 
 function fdjtSwapClass(elt,classname,newclass)
 {
-  if (elt instanceof String)
+  if (typeof elt === "string")
     if (elt==="") return false;
     else if (elt[0]==='#') {
       var elts=new Array();
@@ -477,6 +484,12 @@ function fdjtAddElements(elt,elts,i)
     var arg=elts[i++];
     if (typeof arg == 'string')
       elt.appendChild(document.createTextNode(arg));
+    else if (arg instanceof Array) {
+      var j=0; while (j<arg.length) {
+	var toadd=arg[j++];
+	if (typeof toadd === "string")
+	  elt.appendChild(document.createTextNode(toadd));
+	else elt.appendChild(toadd);}}
     else elt.appendChild(arg);}
   return elt;
 }
@@ -509,6 +522,12 @@ function fdjtInsertElementsBefore(elt,before,elts,i)
     var arg=elts[i++];
     if (typeof arg == 'string')
       elt.insertBefore(document.createTextNode(arg),before);
+    else if (arg instanceof Array) {
+      var j=0; while (j<arg.length) {
+	var e=arg[j++];
+	if (typeof e === "string")
+	  elt.insertBefore(document.createTextNode(e),before);
+	else elt.insertBefore(e,before);}}
     else elt.insertBefore(arg,before);}
   return elt;
 }
@@ -1031,4 +1050,7 @@ function fdjtGetAnchor(about)
   if (probe) return probe;
   else return fdjtForceId(about);
 }
+
+fdjtLoadMessage("Loaded domutils.js");
+
 

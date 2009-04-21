@@ -79,3 +79,20 @@ span.font_sizer {
 
 div.flexbox { max-height: 128px;}
 div.flexbox_expanded { max-height: inherit;}
+
+/* Auto completion */
+
+div.completions {
+  font-size: 12px; font-family: sans,sans-serif;
+  overflow-y: scroll;}
+div.completions div.completion {
+  display: none; clear: both;}
+div.completions div.completion[displayed="yes"] {
+  display: block;}
+div.completions div.completion[displayed="no"] {
+  display: none;}
+
+
+
+
+

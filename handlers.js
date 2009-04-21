@@ -1,3 +1,5 @@
+fdjtLoadMessage("Loading handlers.js");
+
 /* INPUT SHOWHELP */
 
 function fdjtShowHelp_onfocus(evt)
@@ -560,6 +562,155 @@ function fdjtCoHi_onmouseout(evt,classname_arg)
       setTimeout(function () {fdjtCoHi_unhighlight();},20);
 }
 
+/* Completion */
+
+function _fdjt_get_completions(input_elt,create)
+{
+  if (input_elt.fdjt_completions)
+    return input_elt.fdjt_completions;
+  else if (input_elt.getAttribute("COMPLETIONS")) {
+    var elt=$(input_elt.getAttribute("COMPLETIONS"));
+    if (!(elt))
+      if (create) elt=fdjtCompletions(input_elt.getAttribute("COMPLETIONS"));
+      else return false;
+    input_elt.fdjt_completions=elt;
+    elt.fdjt_input=input_elt;
+    return elt;}
+  else {
+    var id=input_elt.name+"_COMPLETIONS";
+    var elt=$(id);
+    if (!(elt))
+      if (create) elt=fdjtCompletions(id);
+      else return false;
+    input_elt.fdjt_completions=elt;
+    elt.fdjt_input=input_elt;
+    return elt;}
+}
+
+function fdjtCompletions(id,completions)
+{
+  var div=fdjtDiv("completions");
+  div.id=id;
+  div.onclick=fdjtComplete_onclick;
+  fdjtAddCompletions(div,completions);
+  return div;
+}
+
+function fdjtAddCompletions(div,completions)
+{
+  if (typeof div === "string") div=document.getElementById(div);
+  if (!(div instanceof Node))
+    throw {name: 'NotANode', irritant: div};
+  else if ((completions) && (completions instanceof Array)) {
+    var i=0; while (i<completions.length) {
+      var completion=completions[i++];
+      var key; var value; var content=[];
+      if (typeof completion === "string") {
+	key=value=completion; content.push(completion);}
+      else {
+	key=completion.key;
+	value=((completion.value) || (key));
+	content=((completion.content) || (value));}
+      var completion_div=fdjtDiv("completion",content);
+      completion_div.completion_key=key;
+      completion_div.completion_value=value;
+      fdjtAppend(div,completion_div);}}
+  return div;
+}
+
+function fdjtComplete(input_elt,string,prefix)
+{
+  var values=[];
+  var completions=_fdjt_get_completions(input_elt);
+  if (!(completions)) return;
+  /*
+  fdjtLog("fdjtComplete input_elt=%o, comp=%o, string=%o, ac=%o, n=%d",
+	  input_elt,completions,
+	  string,completions,completions.childNodes.length);
+  */
+  var children=completions.childNodes;
+  var i=0; while (i<children.length) {
+    var child=children[i++];
+    if (child.nodeType===Node.ELEMENT_NODE) {
+      var key=child.completion_key;
+      if (!(key)) {
+	key=child.getAttribute("KEY");
+	if (key) child.completion_key=key;}
+      if (key)
+	if ((prefix) ? (key.search(string)===0) :
+	    (key.search(string)>=0)) {
+	  if (child.completion_value)
+	    values.push(child.completion_value);
+	  else values.push(key);
+	  child.setAttribute("displayed","yes");}
+	else child.setAttribute("displayed","no");}}
+  if (values.length) completions.style.display='block';
+  else completions.style.display='none';
+  return values;
+}
+
+function fdjtComplete_onclick(evt)
+{
+  var target=evt.target;
+  fdjtLog("complete onclick %o",target);
+  while (target)
+    if (target.completion_key) break;
+    else target=target.parentNode;
+  if (!(target)) return;
+  var completions=target;
+  while (completions)
+    if (completions.fdjt_input) break;
+    else completions=completions.parentNode;
+  if (!(completions)) return;
+  var input_elt=completions.input_elt;
+  var value=((target.completion_value) ||
+	     (target.getAttribute("value")) ||
+	     (target.completion_key));
+  input_elt.value=value;
+  completions.style.display='none';
+}
+
+var _fdjt_completion_timer=false;
+
+function fdjtComplete_show(evt)
+{
+  var target=evt.target;
+  var keycode=evt.keyCode;
+  if (_fdjt_completion_timer) 
+    clearTimeout(_fdjt_completion_timer);
+  if (target.value!="")
+    fdjt_completion_timer=
+      setTimeout(function () {
+	  fdjtComplete(target,target.value,true);},100);
+}
+
+function fdjtComplete_onkeypress(evt)
+{
+  var target=evt.target;
+  var keycode=evt.keyCode;
+  if (_fdjt_completion_timer) 
+    clearTimeout(_fdjt_completion_timer);
+  if (false) { /*  ((keycode) && (keycode===0x09) && (evt.ctrlKey)) */
+    // Tab completion
+    var results=fdjtComplete(target,target.value,true);
+    if (results.length===1) {
+      target.value=results[0];
+      target.fdjt_completions.style.display='none';}
+    else if (results.length>0) {
+      target.fdjt_completions.style.display='block';}
+    else {}}
+  else _fdjt_completion_timer=
+	 setTimeout(function () {
+	     fdjtComplete(target,target.value,true);},100);
+}
+
+function fdjtComplete_hide(evt)
+{
+  var target=evt.target;
+  if ((target) && (target.fdjt_completions))
+    target.fdjt_completions.style.display='none';
+}
+
 /* Checking control */
 
 /* Some events, like onselect, don't seem to get control key information.
@@ -609,3 +760,6 @@ function fdjt_setup()
   fdjt_setup_done=true;
   fdjtLog("fdjt_setup run");
 }
+
+fdjtLoadMessage("Loaded handlers.js");
+
