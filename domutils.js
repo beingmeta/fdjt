@@ -13,13 +13,13 @@ function $(eltarg)
 
 function fdjtLog(string)
 {
-  if ((typeof console != 'undefined') && (console) && (console.log))
+  if ((console) && (console.log))
     console.log.apply(console,arguments);
 }
 
 function fdjtWarn(string)
 {
-  if ((typeof console != 'undefined') && (console) && (console.log))
+  if ((console) && (console.log))
     console.log(string);
   else alert(string);
 }
@@ -50,7 +50,7 @@ function fdjtBlockEltp(elt)
 
 function fdjtHasAttrib(elt,attribname,attribval)
 {
-  if (typeof attribval == 'undefined')
+  if (!(attribval))
     if (elt.hasAttribute)
       return elt.hasAttribute(attribname);
     else if (elt.getAttribute)
@@ -70,7 +70,7 @@ var _fdjt_whitespace_pat=/\b/;
 
 function _fdjt_get_class_regex(name)
 {
-  var rx=new RegExp("\b"+name+"\b");
+  var rx=new RegExp("\\b"+name+"\\b");
   return rx;
 }
 
@@ -106,7 +106,7 @@ function fdjtDropClass(elt,classname)
   else if (classinfo===classname) {
     elt.className=null;
     return true;}
-  else if (classinfo.search(classpat=_fdjt_get_class_regex(classname))) {
+  else if (classinfo.search(classpat=_fdjt_get_class_regex(classname))>=0) {
     elt.className=
       classinfo.replace(classpat,"").replace(_fdjt_whitespace_pat," ");
     return true;}
@@ -132,7 +132,7 @@ function fdjtNextElement(node)
   else {
     var scan=node;
     while (scan=scan.nextSibling) {
-      if (typeof scan === "undefined") return null;
+      if (!(scan)) return null;
       else if (scan.nodeType==1) break;
       else {}}
     return scan;}
@@ -145,7 +145,7 @@ function fdjtPreviousElement(node)
   else {
     var scan=node;
     while (scan=scan.previousSibling) 
-      if (typeof scan === "undefined") return null;
+      if (!(scan)) return null;
       else if (scan.nodeType==1) break;
       else {}
     return scan;}
@@ -235,7 +235,7 @@ function _fdjtGetChildrenByClassName(under,classname,results)
 
 function fdjtGetElementsByClassName(classname,under_arg)
 {
-  if (typeof under_arg === 'undefined')
+  if (!(under_arg))
     return fdjtGetChildrenByClassName(null,classname);
   else if (typeof under_arg === 'string') {
     var under=document.getElementById(under_arg);
@@ -246,7 +246,7 @@ function fdjtGetElementsByClassName(classname,under_arg)
 
 function fdjtGetElementsByTagName(tagname,under_arg)
 {
-  if (typeof under_arg === 'undefined')
+  if (!(under_arg))
     return fdjtGetChildrenByTagName(null,tagname.toUpperCase());
   else if (typeof under_arg === 'string') {
     var under=document.getElementById(under_arg);
@@ -361,7 +361,7 @@ function fdjtElementMatchesSpec(elt,spec)
 
 function fdjtGetParents(elt,selector,results)
 {
-  if (typeof results === "undefined") results=new Array();
+  if (!(results)) results=new Array();
   if (selector instanceof Array) {
     var i=0; while (i<selector.length) 
       fdjtGetParents(elt,selector[i++],results);
@@ -379,7 +379,7 @@ function fdjtGetParents(elt,selector,results)
 
 function fdjtGetChildren(elt,selector,results)
 {
-  if (typeof results === "undefined") results=new Array();
+  if (!(results)) results=new Array();
   if (selector instanceof Array) {
     var i=0; while (i<selector.length)
 	       fdjtGetChildren(elt,selector[i++],results);
@@ -413,7 +413,7 @@ function fdjtGetChildren(elt,selector,results)
 
 function $$(selector,cxt) 
 {
-  var elt=((typeof cxt === "undefined") ? (document) : (cxt));
+  var elt=((cxt) ? (cxt) : (document));
   return fdjtGetChildren(cxt,selector,new Array());
 }
 
@@ -580,7 +580,7 @@ function fdjtNewElementW(tag,classname,attribs)
 
 function fdjtSpan(classname)
 {
-  if (typeof classname == 'undefined') classname=null;
+  if (!(classname)) classname=null;
   var elt=document.createElement('span');
   if (classname) elt.className=classname;
   fdjtAddElements(elt,arguments,1);
@@ -598,7 +598,7 @@ function fdjtSpanW(classname,attribs)
 
 function fdjtDiv(classname)
 {
-  if (typeof classname == 'undefined') classname=null;
+  if (!(classname)) classname=null;
   var elt=document.createElement('div');
   if (classname) elt.className=classname;
   fdjtAddElements(elt,arguments,1);
@@ -616,7 +616,7 @@ function fdjtDivW(classname,attribs)
 
 function fdjtImage(url,classname,alt)
 {
-  if (typeof classname == 'undefined') classname=null;
+  if (!(classname)) classname=null;
   var elt=document.createElement('img');
   if (classname) elt.className=classname;
   elt.src=url;
@@ -626,7 +626,7 @@ function fdjtImage(url,classname,alt)
 
 function fdjtImageW(url,attribs)
 {
-  if (typeof attribs == 'undefined') attribs=false;
+  if (!(attribs)) attribs=false;
   var elt=document.createElement('img');
   elt.src=url;
   if (attribs) fdjtAddAttributes(elt,attribs);
@@ -689,7 +689,7 @@ var _fdjt_idcounter=0, fdjt_idbase=false;
 
 function fdjtForceId(about)
 {
-  if ((typeof about.id != "undefined") && (about.id))
+  if (about.id)
     return about.id;
   else {
     if (!(fdjt_idbase))
@@ -705,7 +705,7 @@ function fdjtForceId(about)
 
 function fdjtIsVisible(elt,partial)
 {
-  if (typeof partial === "undefined") partial=false;
+  if (!(partial)) partial=false;
   var top = elt.offsetTop;
   var left = elt.offsetLeft;
   var width = elt.offsetWidth;
@@ -785,7 +785,7 @@ function _fdjt_compute_flat_width(node,sofar)
 
 function fdjtFlatWidth(node,sofar)
 {
-  if (typeof sofar === "undefined") sofar=0;
+  if (!(sofar)) sofar=0;
   return _fdjt_compute_flat_width(node,sofar);
 }
 
@@ -884,19 +884,19 @@ function fdjtLookupElement(table,elt)
     probe=table[tagname+"#"+idname];
   else if (classname)
     probe=table[tagname+"."+classname];
-  if ((typeof probe != "undefined") && (probe)) return probe;
+  if (probe) return probe;
   if ((idname) || (classname))
     if (idname)
       probe=table[tagname+"#"+idname];
     else if (classname)
       probe=table[tagname+"."+classname];
-  if ((typeof probe != "undefined") && (probe)) return probe;
-  if (idname) probe=table["#"+idname];
-  if ((typeof probe != "undefined") && (probe)) return probe;
-  if (classname) probe=table["."+classname];
-  if ((typeof probe != "undefined") && (probe)) return probe;
+  if (probe) return probe;
+  else if (idname) probe=table["#"+idname];
+  if (probe) return probe;
+  else if (classname) probe=table["."+classname];
+  if (probe) return probe;
   else probe=table[tagname];
-  if ((typeof probe != "undefined") && (probe)) return probe;
+  if (probe) return probe;
   else return false;
 }
 
@@ -945,7 +945,7 @@ function fdjtResolveHash(eltarg)
 {
   if (typeof eltarg == 'string') {
     var elt=document.getElementById(eltarg);
-    if ((typeof elt != "undefined") && (elt)) return elt;
+    if (elt) return elt;
     else {
       var elts=document.getElementsByName(eltarg);
       if ((elts) && (elts.length>0)) return elts[0];
