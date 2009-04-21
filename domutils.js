@@ -3,6 +3,7 @@
 var fdjt_domutils_version="$Id:$";
 var _fdjt_debug=false;
 var _fdjt_debug_domedits=false;
+var _fdjt_debug_classedits=false;
 
 function $(eltarg)
 {
@@ -86,41 +87,92 @@ function fdjtHasClass(elt,classname)
 
 function fdjtAddClass(elt,classname)
 {
-  var classinfo=elt.className;
-  if ((classinfo===null) || (classinfo=="")) {
-    elt.className=classname;
-    return true;}
-  else if (classinfo===classname)
-    return false;
-  else if (classinfo.search(_fdjt_get_class_regex(classname))>=0)
-    return false;
+  if (elt instanceof String)
+    if (elt==="") return false;
+    else if (elt[0]==='#') {
+      var elts=new Array();
+      var ids=elt.split('#');
+      var i=1; while (i<ids.length) {
+	var e=document.getElementById(ids[i++]);
+	if (e) elts.push(e);}
+      elt=elts;}
+    else elt=document.getElementById(elt);
+  if (!(elt)) return false;
+  else if (elt instanceof Array) {
+    var i=0; while (i<elt.length) {
+      var e=elt[i++]; fdjtAddClass(e,classname);}}
   else {
-    elt.className=classname+" "+classinfo;
-    return true;}
+    var classinfo=elt.className;
+    if (_fdjt_debug_classedits)
+      fdjtLog("Adding class '%s' to (%s) on %o",
+	      classname,classinfo,elt);
+    if ((classinfo===null) || (classinfo=="")) {
+      elt.className=classname;
+      return true;}
+    else if (classinfo===classname)
+      return false;
+    else if (classinfo.search(_fdjt_get_class_regex(classname))>=0)
+      return false;
+    else {
+      elt.className=classname+" "+classinfo;
+      return true;}}
 }
 
 function fdjtDropClass(elt,classname)
 {
-  var classinfo=elt.className, classpat;
-  if ((classinfo===null) || (classinfo=="")) return false;
-  else if (classinfo===classname) {
-    elt.className=null;
-    return true;}
-  else if (classinfo.search(classpat=_fdjt_get_class_regex(classname))>=0) {
-    elt.className=
-      classinfo.replace(classpat,"").replace(_fdjt_whitespace_pat," ");
-    return true;}
-  else return false;
+  if (elt instanceof String)
+    if (elt==="") return false;
+    else if (elt[0]==='#') {
+      var elts=new Array();
+      var ids=elt.split('#');
+      var i=1; while (i<ids.length) {
+	var e=document.getElementById(ids[i++]);
+	if (e) elts.push(e);}
+      elt=elts;}
+    else elt=document.getElementById(elt);
+  if (!(elt)) return false;
+  else if (elt instanceof Array) {
+    var i=0; while (i<elt.length) {
+      var e=elt[i++]; fdjtDropClass(e,classname);}}
+  else {
+    var classinfo=elt.className, classpat;
+    if (_fdjt_debug_classedits)
+      fdjtLog("Dropping class '%s' from (%s) on %o",
+	      classname,classinfo,elt);
+    if ((classinfo===null) || (classinfo=="")) return false;
+    else if (classinfo===classname) {
+      elt.className=null;
+      return true;}
+    else if (classinfo.search(classpat=_fdjt_get_class_regex(classname))>=0) {
+      elt.className=
+	classinfo.replace(classpat,"").replace(_fdjt_whitespace_pat," ");
+      return true;}
+    else return false;}
 }
 
 function fdjtSwapClass(elt,classname,newclass)
 {
-  var classinfo=elt.className, classpat=_fdjt_get_class_regex(classname);
-  if ((classinfo) && ((classinfo.search(classpat))>=0)) {
-    elt.className=
-      classinfo.replace(classpat,newclass).replace(_fdjt_whitespace_pat," ");
-    return true;}
-  else return false;
+  if (elt instanceof String)
+    if (elt==="") return false;
+    else if (elt[0]==='#') {
+      var elts=new Array();
+      var ids=elt.split('#');
+      var i=1; while (i<ids.length) {
+	var e=document.getElementById(ids[i++]);
+	if (e) elts.push(e);}
+      elt=elts;}
+    else elt=document.getElementById(elt);
+  if (!(elt)) return false;
+  else if (elt instanceof Array) {
+    var i=0; while (i<elt.length) {
+      var e=elt[i++]; fdjtDropClass(e,classname);}}
+  else {
+    var classinfo=elt.className, classpat=_fdjt_get_class_regex(classname);
+    if ((classinfo) && ((classinfo.search(classpat))>=0)) {
+      elt.className=
+	classinfo.replace(classpat,newclass).replace(_fdjt_whitespace_pat," ");
+      return true;}
+    else return false;}
 }
 
 /* Next and previous elements */

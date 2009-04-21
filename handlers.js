@@ -504,6 +504,62 @@ function fdjtMarkReduced(elt)
     var i=0; while (i<elts.length) fdjtMarkReduced(elts[i++]);}
 }
 
+/* Co-highlighting */
+
+var fdjt_cohi_classname="cohighlight";
+var _fdjt_cohi_elt=false;
+var _fdjt_cohi_timer=false;
+
+function fdjtCoHi_highlight(target,classname_arg)
+{
+  // fdjtLog("cohi target=%o cohi=%o",target,target.fdjt_cohi);
+  if ((!(target)) || (target===_fdjt_cohi_elt)) {
+    if (_fdjt_cohi_timer) clearTimeout(sbookHUD_hider);
+    _fdjt_cohi_timer=false;
+    return;}
+  else {
+    var classname=((classname_arg) || (fdjt_cohi_classname));
+    var cohi=((target.fdjt_cohi) || (target.getAttribute("cohi")) || (false));
+    if (_fdjt_cohi_elt)
+      fdjtCoHi_unhighlight(_fdjt_cohi_elt,classname);
+    _fdjt_cohi_elt=target;
+    fdjtAddClass(target,classname);
+    if (cohi) fdjtAddClass(cohi,classname);
+    else {}}
+}
+
+function fdjtCoHi_unhighlight(elt_arg,classname_arg)
+{
+  var elt=((elt_arg) || (_fdjt_cohi_elt));
+  var classname=((classname_arg) || (fdjt_cohi_classname));
+  if (elt) {
+    var cohi=((elt.fdjt_cohi) || (elt.getAttribute("cohi")) || (null));
+    fdjtDropClass(elt,classname);
+    if (cohi) fdjtDropClass(cohi,classname);}
+}
+
+function fdjtCoHi_onmouseover(evt,classname_arg)
+{
+  var target=evt.target;
+  while (target)
+    if (target.fdjt_cohi) break;
+    else if (fdjtHasAttrib(target,"cohi")) break;  
+    else target=target.parentNode;
+  if (!(target)) return;
+  else if (target===_fdjt_cohi_elt) {
+    if (_fdjt_cohi_timer) clearTimeout(sbookHUD_hider);
+    _fdjt_cohi_timer=false;
+    return;}
+  else fdjtCoHi_highlight(target);
+}
+
+function fdjtCoHi_onmouseout(evt,classname_arg)
+{
+  if (_fdjt_cohi_elt)
+    _fdjt_cohi_timer=
+      setTimeout(function () {fdjtCoHi_unhighlight();},20);
+}
+
 /* Checking control */
 
 /* Some events, like onselect, don't seem to get control key information.
