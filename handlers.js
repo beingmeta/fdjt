@@ -580,12 +580,16 @@ function fdjtCoHi_onmouseout(evt,classname_arg)
 
 function _fdjt_get_completions(input_elt,create)
 {
+  var cloudp=((input_elt.getAttribute("COMPLETEOPTS")) &&
+	      (input_elt.getAttribute("COMPLETEOPTS").
+	       search(/\bcloud\b/)>=0));
   if (input_elt.fdjt_completions)
     return input_elt.fdjt_completions;
   else if (input_elt.getAttribute("COMPLETIONS")) {
     var elt=$(input_elt.getAttribute("COMPLETIONS"));
     if (!(elt))
-      if (create) elt=fdjtCompletions(input_elt.getAttribute("COMPLETIONS"));
+      if (create) elt=fdjtCompletions
+		    (input_elt.getAttribute("COMPLETIONS"),[],cloudp);
       else return false;
     input_elt.fdjt_completions=elt;
     elt.fdjt_input=input_elt;
@@ -595,23 +599,23 @@ function _fdjt_get_completions(input_elt,create)
     var elt=$(id);
     input_elt.setAttribute("COMPLETIONS",id);
     if (!(elt))
-      if (create) elt=fdjtCompletions(id);
+      if (create) elt=fdjtCompletions(id,[],cloudp);
       else return false;
     elt.fdjt_input=input_elt;
     input_elt.fdjt_completions=elt;
    return elt;}
 }
 
-function fdjtCompletions(id,completions)
+function fdjtCompletions(id,completions,cloudp)
 {
   var div=fdjtDiv("completions");
   div.id=id;
   div.onclick=fdjtComplete_onclick;
-  fdjtAddCompletions(div,completions);
+  fdjtAddCompletions(div,completions,cloudp);
   return div;
 }
 
-function fdjtAddCompletions(div,completions)
+function fdjtAddCompletions(div,completions,cloudp)
 {
   if (typeof div === "string") div=document.getElementById(div);
   if (!(div instanceof Node))
@@ -619,7 +623,7 @@ function fdjtAddCompletions(div,completions)
   else if ((completions) && (completions instanceof Array)) {
     var i=0; while (i<completions.length) {
       var completion=completions[i++];
-      var key; var value; var content=[];
+      var key; var value; var content=[]; var title=false;
       if (typeof completion === "string") {
 	key=value=completion; content.push(completion);}
       else if (typeof completion != "object") {
@@ -632,18 +636,23 @@ function fdjtAddCompletions(div,completions)
 	else {
 	  key=completion.key;
 	  value=((completion.value) || (key));
-	  content=((completion.content) || (value));}}
+	  content=((completion.content) || (value));
+	  if (completion.title) title=completion.title;}}
       else {
 	key=completion.key;
 	value=((completion.value) || (key));
-	content=((completion.content) || (value));}
+	content=((completion.content) || (value));
+	if (completion.title) title=completion.title;}
       if (key instanceof Node)
 	fdjtAppend(div,key);
       else if (key) {
-	var completion_div=fdjtDiv("completion",content);
-	completion_div.completion_key=key;
-	completion_div.completion_value=value;
-	fdjtAppend(div,completion_div);}}}
+	var completion_elt=
+	  ((cloudp) ? (fdjtSpan("completion",content)):
+	   (fdjtDiv("completion",content)));
+	completion_elt.completion_key=key;
+	completion_elt.completion_value=value;
+	if (title) completion_elt.title=title;
+	fdjtAppend(div,completion_elt,"\n");}}}
   return div;
 }
 
