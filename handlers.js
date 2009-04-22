@@ -7,7 +7,7 @@
 */
 
 var fdjt_handlers_id="$Id$";
-var fdjt_handlers_version=parseInt("Revision: 0$".slice(10,-1));
+var fdjt_handlers_version=parseInt("$Revision: 0$".slice(10,-1));
 
 fdjtLoadMessage("Loading handlers.js");
 

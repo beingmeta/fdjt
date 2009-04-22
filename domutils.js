@@ -7,7 +7,7 @@
 */
 
 var fdjt_domutils_id="$Id$";
-var fdjt_domutils_version=parseInt("Revision: 0$".slice(10,-1));
+var fdjt_domutils_version=parseInt("$Revision: 0$".slice(10,-1));
 var _fdjt_debug=false;
 var _fdjt_debug_domedits=false;
 var _fdjt_debug_classedits=false;
