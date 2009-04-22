@@ -22,7 +22,7 @@ function fdjtLog(string)
 function fdjtWarn(string)
 {
   if ((console) && (console.log))
-    console.log(string);
+    console.log.apply(console,arguments);
   else alert(string);
 }
 
