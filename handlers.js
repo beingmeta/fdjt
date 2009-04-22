@@ -650,6 +650,14 @@ function fdjtComplete(input_elt,string,options)
 	  input_elt,completions,
 	  string,completions,completions.childNodes.length);
   */
+  if (nocase)
+    if (typeof string === "string")
+      string=new RegExp(string,"gi");
+    else if (string instanceof RegExp)
+      string=new RegExp(string.source,"gi");
+    else throw { name: "TypeError",
+	     irritant: string,
+	     expected: "string or regex"};
   var children=completions.childNodes;
   var i=0; while (i<children.length) {
     var child=children[i++];
@@ -672,8 +680,7 @@ function fdjtComplete(input_elt,string,options)
 	    else if (child.hasAttribute("VALUE")) {
 	      value=child.completion_value;
 	      child.completion_value=value;}
-	    else value=keys[0];
-	  fdjtLog("Compare %o to %o value=%o",string,key,value);}
+	    else value=keys[0];}
 	if (value) {
 	  values.push(value);
 	  child.setAttribute("displayed","yes");}
@@ -700,7 +707,7 @@ function fdjtHandleCompletion(input_elt,value)
 function fdjtComplete_onclick(evt)
 {
   var target=evt.target;
-  fdjtLog("complete onclick %o",target);
+  // fdjtLog("complete onclick %o",target);
   while (target)
     if (target.completion_key) break;
     else target=target.parentNode;
@@ -725,12 +732,13 @@ function fdjtComplete_show(evt)
   var target=evt.target;
   var keycode=evt.keyCode;
   var value=fdjtCompletionText(target);
+  var options=(target.getAttribute("COMPLETEOPTS")||"");
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
   if (value!="")
     fdjt_completion_timer=
       setTimeout(function () {
-	  fdjtComplete(target,value,true);},100);
+	  fdjtComplete(target,value,options);},100);
 }
 
 function fdjtComplete_onkeypress(evt)
@@ -738,11 +746,12 @@ function fdjtComplete_onkeypress(evt)
   var target=evt.target;
   var keycode=evt.keyCode;
   var value=fdjtCompletionText(target);
+  var options=(target.getAttribute("COMPLETEOPTS")||"");
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
   if (false) { /*  ((keycode) && (keycode===0x09) && (evt.ctrlKey)) */
     // Tab completion
-    var results=fdjtComplete(target,value,true);
+    var results=fdjtComplete(target,value,options);
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0]);
       target.fdjt_completions.style.display='none';}
@@ -751,7 +760,7 @@ function fdjtComplete_onkeypress(evt)
     else {}}
   else _fdjt_completion_timer=
 	 setTimeout(function () {
-	     fdjtComplete(target,fdjtCompletionText(target),true);},100);
+	     fdjtComplete(target,fdjtCompletionText(target),options);},100);
 }
 
 function fdjtComplete_hide(evt)

@@ -14,7 +14,7 @@ function fdjtLog(string)
 
 // Insert these for temporary logging statements, which will be easier
 // to find
-function fdjtTmpLog(string)
+function fdjtTrace(string)
 {
   if ((console) && (console.log))
     console.log.apply(console,arguments);
