@@ -5,7 +5,7 @@
 */
 
 var fdjt_setops_id="$Id$";
-var fdjt_setops_version=parseInt("$Revision: 0$".slice(10,-1));
+var fdjt_setops_version=parseInt("$Revision$".slice(10,-1));
 
 function fdjtSet(arg,destructive)
 {
