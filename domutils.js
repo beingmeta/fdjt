@@ -1,6 +1,13 @@
-/* Various utilities for manipulating the dom */
+/* -*- Mode: Javascript; -*- */
 
-var fdjt_domutils_id="$Id:$";
+/* Copyright (C) 2008-2009 beingmeta, inc.
+   This file is a part of the FDJT web toolkit (www.fdjt.org)
+   This file provides extended functionality for web applications,
+   especially for manipulating the DOM in various ways. 
+*/
+
+var fdjt_domutils_id="$Id$";
+var fdjt_domutils_version=parseInt("Revision: 0$".slice(10,-1));
 var _fdjt_debug=false;
 var _fdjt_debug_domedits=false;
 var _fdjt_debug_classedits=false;
