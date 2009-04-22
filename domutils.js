@@ -1,10 +1,41 @@
 /* Various utilities for manipulating the dom */
 
-var fdjt_domutils_version="$Id:$";
+var fdjt_domutils_id="$Id:$";
 var _fdjt_debug=false;
 var _fdjt_debug_domedits=false;
 var _fdjt_debug_classedits=false;
 var _fdjt_trace_load=false;
+
+function fdjtLog(string)
+{
+  if ((console) && (console.log))
+    console.log.apply(console,arguments);
+}
+
+// Insert these for temporary logging statements, which will be easier
+// to find
+function fdjtTmpLog(string)
+{
+  if ((console) && (console.log))
+    console.log.apply(console,arguments);
+}
+
+// This goes to an alert if it can't get to the console
+function fdjtWarn(string)
+{
+  if ((console) && (console.log))
+    console.log.apply(console,arguments);
+  else alert(string);
+}
+
+// Individually for file loading messages
+function fdjtLoadMessage(string)
+{
+  if ((_fdjt_trace_load) && (console) && (console.log))
+    console.log.apply(console,arguments);
+}
+
+/* Getting elements by ID */
 
 function $(eltarg)
 {
@@ -13,26 +44,8 @@ function $(eltarg)
   else return eltarg;
 }
 
-function fdjtLog(string)
-{
-  if ((console) && (console.log))
-    console.log.apply(console,arguments);
-}
-
-function fdjtWarn(string)
-{
-  if ((console) && (console.log))
-    console.log.apply(console,arguments);
-  else alert(string);
-}
-
-function fdjtLoadMessage(string)
-{
-  if ((_fdjt_trace_load) && (console) && (console.log))
-    console.log.apply(console,arguments);
-}
-
-/* This outputs a warning if a given elements if not found. */
+// Like $, but more needy, it outputs a warning if a given element is
+// not found.
 function fdjtNeedElt(arg,name)
 {
   if (typeof arg == 'string') {
@@ -50,12 +63,32 @@ function fdjtNeedElt(arg,name)
     return null;}
 }
 
+/* DOMish utils */
+
+function fdjtNodify(arg)
+{
+  if (typeof arg === "string")
+    return document.createTextNode(arg);
+  else if (typeof arg != "object")
+    if (arg.toString)
+      return document.createTextNode(arg.toString());
+    else return document.createTextNode("#@!*%!");
+  else if (arg instanceof Node)
+    return arg;
+  else if (arg.fdjtNodify)
+    return (arg.fdjtNodify());
+  else if (arg.toString)
+    return fdbSpan("nodified",arg.toString());
+  else return document.createTextNode("#@!*%!");
+}
+
 function fdjtBlockEltp(elt)
 {
   var name=elt.tagName;
   return ((name==='DIV') || (name==='P') || (name==='LI') || (name==='UL'));
 }
 
+// We define this because .hasAttribute isn't everywhere
 function fdjtHasAttrib(elt,attribname,attribval)
 {
   if (!(attribval))
@@ -482,15 +515,15 @@ function fdjtAddElements(elt,elts,i)
 {
   while (i<elts.length) {
     var arg=elts[i++];
-    if (typeof arg == 'string')
+    if (!(arg)) {}
+    else if (typeof arg == 'string')
       elt.appendChild(document.createTextNode(arg));
     else if (arg instanceof Array) {
       var j=0; while (j<arg.length) {
 	var toadd=arg[j++];
-	if (typeof toadd === "string")
-	  elt.appendChild(document.createTextNode(toadd));
-	else elt.appendChild(toadd);}}
-    else elt.appendChild(arg);}
+	if (!(toadd)) {}
+	else elt.appendChild(fdjtNodify(toadd));}}
+    else elt.appendChild(fdjtNodify(arg));}
   return elt;
 }
 
@@ -520,15 +553,12 @@ function fdjtInsertElementsBefore(elt,before,elts,i)
 	   +" starting with "+elts[0]);
   while (i<elts.length) {
     var arg=elts[i++];
-    if (typeof arg == 'string')
-      elt.insertBefore(document.createTextNode(arg),before);
+    if (!(arg)) {}
     else if (arg instanceof Array) {
       var j=0; while (j<arg.length) {
 	var e=arg[j++];
-	if (typeof e === "string")
-	  elt.insertBefore(document.createTextNode(e),before);
-	else elt.insertBefore(e,before);}}
-    else elt.insertBefore(arg,before);}
+	if (arg) elt.insertBefore(fdjtNodify(e),before);}}
+    else elt.insertBefore(fdjtNodify(arg),before);}
   return elt;
 }
 
@@ -605,10 +635,11 @@ function fdjtReplace(cur_arg,newnode)
   else cur=cur_arg;
   if (cur) {
     var parent=cur.parentNode;
-    parent.replaceChild(newnode,cur);
-    if ((cur.id) && (newnode.id==null)) {
-      newnode.id=cur.id; cur.id=null;}
-    return newnode;}
+    var replacement=fdjtNodify(newnode);
+    parent.replaceChild(replacement,cur);
+    if ((cur.id) && (replacement.id==null)) {
+      replacement.id=cur.id; cur.id=null;}
+    return replacement;}
   else {
     fdjtWarn("Invalid DOM replace argument: "+cur_arg);
     return;}
