@@ -338,7 +338,7 @@ function fdjtCheshire_handler(event)
 {
   if ((fdjt_cheshiresteps) &&
       (fdjt_cheshirecountdown<=0)) {
-    console.log('closing window');
+    fdjtLog('closing window');
     clearInterval(fdjt_cheshiretimer);
     if (fdjt_cheshirefinish)
       fdjt_cheshirefinish();

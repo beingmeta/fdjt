@@ -15,31 +15,31 @@ var _fdjt_trace_load=false;
 
 function fdjtLog(string)
 {
-  if ((console) && (console.log))
-    console.log.apply(console,arguments);
+  if ((window.console) && (window.console.log))
+    window.console.log.apply(window.console,arguments);
 }
 
 // Insert these for temporary logging statements, which will be easier
 // to find
 function fdjtTrace(string)
 {
-  if ((console) && (console.log))
-    console.log.apply(console,arguments);
+  if ((window.console) && (window.console.log))
+    window.console.log.apply(window.console,arguments);
 }
 
 // This goes to an alert if it can't get to the console
 function fdjtWarn(string)
 {
-  if ((console) && (console.log))
-    console.log.apply(console,arguments);
+  if ((window.console) && (window.console.log))
+    window.console.log.apply(window.console,arguments);
   else alert(string);
 }
 
 // Individually for file loading messages
 function fdjtLoadMessage(string)
 {
-  if ((_fdjt_trace_load) && (console) && (console.log))
-    console.log.apply(console,arguments);
+  if ((_fdjt_trace_load) && (window.console) && (window.console.log))
+    window.console.log.apply(window.console,arguments);
 }
 
 /* Getting elements by ID */
