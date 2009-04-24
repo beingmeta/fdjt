@@ -664,7 +664,7 @@ function fdjtComplete(input_elt,string,options)
   var prefix=false; var nocase=false;
   if (!(string)) string=fdjtCompletionText(input_elt);
   if (!(options)) options=input_elt.getAttribute("COMPLETEOPTS")||"";
-  // fdjtTrace("Completing on %s from %o with %s",string,input_elt,options);
+  // fdjtXTrace("Completing on %s from %o with %s",string,input_elt,options);
   if (typeof options === "string") {
     prefix=(options.search(/\bprefix\b/)>=0);
     nocase=(options.search(/\bnocase\b/)>=0);}
@@ -689,7 +689,7 @@ function fdjtComplete(input_elt,string,options)
       if (key) {
 	var keys=((typeof key != "object") ? (new Array(key)) :
 		  (key instanceof Array) ? (key) : (new Array(key)));
-	// fdjtTrace("Comparing '%s' against %o",string,keys);
+	// fdjtXTrace("Comparing '%s' against %o",string,keys);
 	var j=0; while ((j<keys.length) && (!(value))) {
 	  var key=keys[j++];
 	  if ((prefix) ? (key.search(string)===0) :
@@ -703,7 +703,7 @@ function fdjtComplete(input_elt,string,options)
 	  values.push(value);
 	  child.setAttribute("displayed","yes");}
 	else child.setAttribute("displayed","no");
-	// fdjtTrace("Processed %o",child);
+	// fdjtXTrace("Processed %o",child);
       }}}
   if (values.length) completions.style.display='block';
   return values;
@@ -824,15 +824,21 @@ function fdjtScrollSave(ss)
     if (!(_fdjt_saved_scroll)) _fdjt_saved_scroll={};
     _fdjt_saved_scroll.scrollX=window.scrollX;
     _fdjt_saved_scroll.scrollY=window.scrollY;}
+  // fdjtXTrace("Saved scroll %o",_fdjt_saved_scroll);
 }
 
 function fdjtScrollRestore(ss)
 {
+  // fdjtXTrace("Restoring scroll from %o, saved=%o",ss,_fdjt_saved_scroll);
   if ((ss) && (ss.scrollX)) {
+    // fdjtXTrace("Restoring scroll to %d,%d",ss.scrollX,ss.scrollY);    
     window.scrollTo(ss.scrollX,ss.scrollY);
     return true;}
-  else if ((_fdjt_saved_scroll) && (_fdjt_saved_scroll.scrollX)) {
-    window.scrollTo(_fdjt_saved_scroll.scrollY,_fdjt_saved_scroll.scrollX);
+  else if ((_fdjt_saved_scroll) &&
+	   ((_fdjt_saved_scroll.scrollY) ||
+	    (_fdjt_saved_scroll.scrollX))) {
+    // fdjtXTrace("Restoring scroll to %o",_fdjt_saved_scroll);
+    window.scrollTo(_fdjt_saved_scroll.scrollX,_fdjt_saved_scroll.scrollY);
     _fdjt_saved_scroll=false;
     return true;}
   else return false;
@@ -855,7 +861,7 @@ function fdjtScrollTo(target,id)
 
 function fdjtScrollPreview(target,offset)
 {
-  fdjtSaveScroll();
+  if (!(_fdjt_saved_scroll)) fdjtScrollSave();
   target.scrollIntoView(true);
   if (offset) window.scrollBy(0,offset);
 }
