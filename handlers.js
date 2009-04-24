@@ -583,16 +583,16 @@ function _fdjt_get_completions(input_elt,create)
   var cloudp=((input_elt.getAttribute("COMPLETEOPTS")) &&
 	      (input_elt.getAttribute("COMPLETEOPTS").
 	       search(/\bcloud\b/)>=0));
-  if (input_elt.fdjt_completions)
-    return input_elt.fdjt_completions;
+  if (input_elt.completions_elt)
+    return input_elt.completions_elt;
   else if (input_elt.getAttribute("COMPLETIONS")) {
     var elt=$(input_elt.getAttribute("COMPLETIONS"));
     if (!(elt))
       if (create) elt=fdjtCompletions
 		    (input_elt.getAttribute("COMPLETIONS"),[],cloudp);
       else return false;
-    input_elt.fdjt_completions=elt;
-    elt.fdjt_input=input_elt;
+    input_elt.completions_elt=elt;
+    elt.input_elt=input_elt;
     return elt;}
   else {
     var id=input_elt.name+"_COMPLETIONS";
@@ -601,8 +601,8 @@ function _fdjt_get_completions(input_elt,create)
     if (!(elt))
       if (create) elt=fdjtCompletions(id,[],cloudp);
       else return false;
-    elt.fdjt_input=input_elt;
-    input_elt.fdjt_completions=elt;
+    elt.input_elt=input_elt;
+    input_elt.completions_elt=elt;
    return elt;}
 }
 
@@ -623,12 +623,14 @@ function fdjtAddCompletions(div,completions,cloudp)
   else if ((completions) && (completions instanceof Array)) {
     var i=0; while (i<completions.length) {
       var completion=completions[i++];
+      var completion_elt=false;
       var key; var value; var content=[]; var title=false;
       if (typeof completion === "string") {
 	key=value=completion; content.push(completion);}
       else if (typeof completion != "object") {
 	completion=completion.toString();
 	key=value=completion; content.push(completion);}
+      else if (completion instanceof Node) continue;
       else if (completion.getCompletionEntry) {
 	completion=completion.getCompletionEntry();
 	if (completion instanceof Node)
@@ -643,14 +645,12 @@ function fdjtAddCompletions(div,completions,cloudp)
 	value=((completion.value) || (key));
 	content=((completion.content) || (value));
 	if (completion.title) title=completion.title;}
-      if (key instanceof Node)
-	fdjtAppend(div,key);
-      else if (key) {
+      if (key) {
 	var completion_elt=
 	  ((cloudp) ? (fdjtSpan("completion",content)):
 	   (fdjtDiv("completion",content)));
-	completion_elt.completion_key=key;
-	completion_elt.completion_value=value;
+	completion_elt.key=key;
+	completion_elt.value=value;
 	if (title) completion_elt.title=title;
 	fdjtAppend(div,completion_elt,"\n");}}}
   return div;
@@ -662,14 +662,11 @@ function fdjtComplete(input_elt,string,options)
   var completions=_fdjt_get_completions(input_elt);
   if (!(completions)) return;
   var prefix=false; var nocase=false;
+  if (!(string)) string=fdjtCompletionText(input_elt);
+  if (!(options)) options=input_elt.getAttribute("COMPLETEOPTS")||"";
   if (typeof options === "string") {
     prefix=(options.search(/\bprefix\b/)>=0);
     nocase=(options.search(/\bnocase\b/)>=0);}
-  /*
-  fdjtLog("fdjtComplete input_elt=%o, comp=%o, string=%o, ac=%o, n=%d",
-	  input_elt,completions,
-	  string,completions,completions.childNodes.length);
-  */
   if (nocase)
     if (typeof string === "string")
       string=new RegExp(string,"gi");
@@ -683,30 +680,29 @@ function fdjtComplete(input_elt,string,options)
     var child=children[i++];
     if (child.nodeType===Node.ELEMENT_NODE) {
       var value=false;
-      var key=child.completion_key;
+      var key=child.key;
       if (!(key)) {
 	key=child.getAttribute("KEY");
-	if (key) child.completion_key=key;}
+	if (key) child.key=key;}
       if (key) {
-	var keys=((key instanceof Array) ? (key) :
-		  (typeof key === "string") ?
-		  (new Array(key)) : (new Array(key.toString())));
+	var keys=((typeof key != "object") ? (new Array(key)) :
+		  (key instanceof Array) ? (key) : (new Array(key)));
 	var j=0; while ((j<keys.length) && (!(value))) {
 	  var key=keys[j++];
 	  if ((prefix) ? (key.search(string)===0) :
 	      (key.search(string)>=0)) 
-	    if (child.completion_value)
-	      value=child.completion_value;
+	    if (child.value)
+	      value=child.value;
 	    else if (child.hasAttribute("VALUE")) {
-	      value=child.completion_value;
-	      child.completion_value=value;}
+	      value=child.value; child.value=value;}
 	    else value=keys[0];}
+	fdjtTrace("keys=%o, string=%o, value=%o",keys,string,value);
 	if (value) {
 	  values.push(value);
 	  child.setAttribute("displayed","yes");}
-	else child.setAttribute("displayed","no");}}}
+	else child.setAttribute("displayed","no");
+	fdjtTrace("Processed child %o",child);}}}
   if (values.length) completions.style.display='block';
-  else completions.style.display='none';
   return values;
 }
 
@@ -720,7 +716,7 @@ function fdjtCompletionText(input_elt)
 function fdjtHandleCompletion(input_elt,value)
 {
   if (input_elt.handleCompletion)
-    return input_elt.getCompletionText(value);
+    return input_elt.handleCompletion(value);
   else input_elt.value=value;
 }
 
@@ -729,18 +725,18 @@ function fdjtComplete_onclick(evt)
   var target=evt.target;
   // fdjtLog("complete onclick %o",target);
   while (target)
-    if (target.completion_key) break;
+    if (target.key) break;
     else target=target.parentNode;
   if (!(target)) return;
   var completions=target;
   while (completions)
-    if (completions.fdjt_input) break;
+    if (completions.input_elt) break;
     else completions=completions.parentNode;
   if (!(completions)) return;
   var input_elt=completions.input_elt;
-  var value=((target.completion_value) ||
+  var value=((target.value) ||
 	     (target.getAttribute("value")) ||
-	     (target.completion_key));
+	     (target.key));
   fdjtHandleCompletion(input_elt,value);
   completions.style.display='none';
 }
@@ -765,18 +761,26 @@ function fdjtComplete_onkeypress(evt)
 {
   var target=evt.target;
   var keycode=evt.keyCode;
+  var charcode=evt.charCode;
   var value=fdjtCompletionText(target);
   var options=(target.getAttribute("COMPLETEOPTS")||"");
+  var complete_chars=((target.getAttribute("COMPLETECHARS"))||"\t");
+  var char_vec=[];
+  var i=0; while (i<complete_chars.length)
+    char_vec.push(complete_chars.charCodeAt(i++));
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
-  if (false) { /*  ((keycode) && (keycode===0x09) && (evt.ctrlKey)) */
+  if (((keycode) && (char_vec.indexOf(keycode)>=0)) ||
+      ((charcode) && (char_vec.indexOf(charcode)>=0))) {
+    // ((keycode) && (keycode===0x20) && (evt.altKey))
     // Tab completion
     var results=fdjtComplete(target,value,options);
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0]);
-      target.fdjt_completions.style.display='none';}
+      target.completions_elt.style.display='none';
+      evt.preventDefault(); evt.cancelBubble=true;}
     else if (results.length>0) {
-      target.fdjt_completions.style.display='block';}
+      target.completions_elt.style.display='block';}
     else {}}
   else _fdjt_completion_timer=
 	 setTimeout(function () {
@@ -785,9 +789,24 @@ function fdjtComplete_onkeypress(evt)
 
 function fdjtComplete_hide(evt)
 {
+  /*
   var target=evt.target;
-  if ((target) && (target.fdjt_completions))
-    target.fdjt_completions.style.display='none';
+  if ((target) && (target.completions_elt))
+    target.completions_elt.style.display='none';
+  */
+}
+
+function fdjtSetCompletions(id,completions)
+{
+  var current=document.getElementById(id);
+  if (!(current)) {
+    fdjtWarn("Can't find current completions #%s",id);
+    return;}
+  var text_input=current.input_elt;
+  text_input.completion_elt=completions;
+  completions.input_elt=text_input;
+  current.input_elt=false;
+  fdjtReplace(current,completions);
 }
 
 /* Checking control */

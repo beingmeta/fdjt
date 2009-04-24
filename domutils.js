@@ -82,10 +82,10 @@ function fdjtNodify(arg)
     else return document.createTextNode("#@!*%!");
   else if (arg instanceof Node)
     return arg;
-  else if (arg.fdjtNodify)
-    return (arg.fdjtNodify());
+  else if (arg.toHTML)
+    return (arg.toHTML());
   else if (arg.toString)
-    return fdbSpan("nodified",arg.toString());
+    return fdjtSpan("nodified",arg.toString());
   else return document.createTextNode("#@!*%!");
 }
 
@@ -1060,6 +1060,28 @@ function fdjtResolveHash(eltarg)
       if ((elts) && (elts.length>0)) return elts[0];
       else return false;}}
   else return eltarg;
+}
+
+/* Searching content */
+
+function fdjtSearchContent(node,spec,id,results)
+{
+  if (!(results)) results=[];
+  if (!id) id=false;
+  if (node.nodeType===Node.TEXT_NODE)
+    if (id) 
+      if (node.nodeValue.search(spec)>=0)
+	results.push(id);
+      else {}
+    else {}
+  else if (node.nodeType===Node.ELEMENT_NODE) {
+    if (node.id) id=node.id;
+    var children=node.childNodes;
+    var i=0; while (i<children.length) {
+      var child=children[i++];
+      fdjtSearchContent(child,spec,id,results);}}
+  else {}
+  return results;
 }
 
 /* Getting anchors (making up IDs if neccessary) */

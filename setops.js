@@ -54,6 +54,7 @@ function fdjt_intersect(set1,set2)
       results.push(set1[i]); i++; j++;}
     else if (_fdjt_set_sortfn(set1[i],set2[j])<0) i++;
     else j++;
+  results._sortlen=results.length;
   return results;
 }
 
@@ -94,6 +95,7 @@ function fdjt_union(set1,set2)
     else results.push(set2[j++]);
   while (i<len1) results.push(set1[i++]);
   while (j<len2) results.push(set2[j++]);
+  results._sortlen=results.length;
   return results;
 }
 
@@ -114,7 +116,9 @@ function fdjtUnion()
 function fdjtDifference(set1,set2)
 {
   var results=new Array();
-  var i=0; var j=0; var len1=set1.length; var len2=set2.length;
+  var i=0; var j=0;
+  set1=fdjtSet(set1); set2=fdjtSet(set2);
+  var len1=set1.length; var len2=set2.length;
   while ((i<len1) && (j<len2))
     if (set1[i]===set2[j]) {
       i++; j++;}
@@ -122,16 +126,33 @@ function fdjtDifference(set1,set2)
       results.push(set1[i++]);
     else j++;
   while (i<len1) results.push(set1[i++]);
+  results._sortlen=results.length;
   return results;
 }
 
 // This could be faster, but we can do that later
 function fdjtOverlaps(set1,set2)
 {
-  var i=0; var j=0; var len1=set1.length; var len2=set2.length;
+  var i=0; var j=0;
+  set1=fdjtSet(set1); set2=fdjtSet(set2);
+  var len1=set1.length; var len2=set2.length;
   while ((i<len1) && (j<len2))
     if (set1[i]===set2[j]) return true;
     else if (_fdjt_set_sortfn(set1[i],set2[j])<0) i++;
     else j++;
   return false;
 }
+
+// So could this
+function fdjtOverlap(set1,set2)
+{
+  var i=0; var j=0; var overlap=0;
+  set1=fdjtSet(set1); set2=fdjtSet(set2);
+  var len1=set1.length; var len2=set2.length;
+  while ((i<len1) && (j<len2))
+    if (set1[i]===set2[j]) overlap++;
+    else if (_fdjt_set_sortfn(set1[i],set2[j])<0) i++;
+    else j++;
+  return overlap;
+}
+

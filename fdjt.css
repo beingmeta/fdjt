@@ -90,12 +90,20 @@ div.flexbox_expanded { max-height: inherit;}
 
 div.completions {
   font-size: 12px; font-family: sans,sans-serif;
-  overflow-y: scroll;}
+  scroll: auto;}
+div.completions { display: none;}
+div.completions .completion { display: none;}
+body.hudup div.completions { display: block;}
+/* div.completions .completion { display: none;} */
 div.completions div.completion {
-  display: none; clear: both;}
+  clear: both;}
 div.completions div.completion[displayed="yes"] {
   display: block;}
+div.completions span.completion[displayed="yes"] {
+  display: inline;}
 div.completions div.completion[displayed="no"] {
+  display: none;}
+div.completions span.completion[displayed="no"] {
   display: none;}
 
 
