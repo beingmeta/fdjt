@@ -163,9 +163,10 @@ function fdjtAddClass(elt,classname,attrib)
     else if (classinfo.search(class_regex)>=0)
       return false;
     else newinfo=classname+" "+classinfo;
-    newinfo=newinfo.
-      replace(_fdjt_whitespace_pat," ").
-      replace(_fdjt_trimspace_pat,"");
+    if (newinfo)
+      newinfo=newinfo.
+	replace(_fdjt_whitespace_pat," ").
+	replace(_fdjt_trimspace_pat,"");
     if (attrib) elt.setAttribute(attrib,newinfo);
     else elt.className=newinfo;
     return true;}
@@ -202,9 +203,10 @@ function fdjtDropClass(elt,classname,attrib)
 	classinfo.replace(class_regex,"").
 	replace(_fdjt_whitespace_pat," ");
     else return false;
-    newinfo=newinfo.
-      replace(_fdjt_whitespace_pat," ").
-      replace(_fdjt_trimspace_pat,"");
+    if (newinfo)
+      newinfo=newinfo.
+	replace(_fdjt_whitespace_pat," ").
+	replace(_fdjt_trimspace_pat,"");
     if (attrib)
       if (newinfo) elt.setAttribute(attrib,newinfo);
       else elt.removeAttribute(attrib);
@@ -241,9 +243,10 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
 	 newclass,classname,elt);
       return fdjtAddClass(elt,newclass,(attrib||false));}
     else return fdjtAddClass(elt,newclass,(attrib||false));
-    newinfo=newinfo.
-      replace(_fdjt_whitespace_pat," ").
-      replace(_fdjt_trimspace_pat,"");
+    if (newinfo)
+      newinfo=newinfo.
+	replace(_fdjt_whitespace_pat," ").
+	replace(_fdjt_trimspace_pat,"");
     if (attrib)
       if (newinfo) elt.setAttribute(attrib,newinfo);
       else elt.removeAttribute(attrib);
