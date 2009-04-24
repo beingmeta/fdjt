@@ -664,10 +664,12 @@ function fdjtComplete(input_elt,string,options)
   var prefix=false; var nocase=false;
   if (!(string)) string=fdjtCompletionText(input_elt);
   if (!(options)) options=input_elt.getAttribute("COMPLETEOPTS")||"";
+  fdjtTrace("Completing on %s from %o with %s",string,input_elt,options);
   if (typeof options === "string") {
     prefix=(options.search(/\bprefix\b/)>=0);
     nocase=(options.search(/\bnocase\b/)>=0);}
-  if (nocase)
+  if (string==="") {}
+  else if (nocase)
     if (typeof string === "string")
       string=new RegExp(string,"gi");
     else if (string instanceof RegExp)
@@ -687,6 +689,7 @@ function fdjtComplete(input_elt,string,options)
       if (key) {
 	var keys=((typeof key != "object") ? (new Array(key)) :
 		  (key instanceof Array) ? (key) : (new Array(key)));
+	fdjtTrace("Comparing '%s' against %o",string,keys);
 	var j=0; while ((j<keys.length) && (!(value))) {
 	  var key=keys[j++];
 	  if ((prefix) ? (key.search(string)===0) :
@@ -696,12 +699,12 @@ function fdjtComplete(input_elt,string,options)
 	    else if (child.hasAttribute("VALUE")) {
 	      value=child.value; child.value=value;}
 	    else value=keys[0];}
-	fdjtTrace("keys=%o, string=%o, value=%o",keys,string,value);
 	if (value) {
 	  values.push(value);
 	  child.setAttribute("displayed","yes");}
 	else child.setAttribute("displayed","no");
-	fdjtTrace("Processed child %o",child);}}}
+	fdjtTrace("Processed %o",child);
+      }}}
   if (values.length) completions.style.display='block';
   return values;
 }
@@ -777,7 +780,7 @@ function fdjtComplete_onkeypress(evt)
     var results=fdjtComplete(target,value,options);
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0]);
-      target.completions_elt.style.display='none';
+      target.completions_elt.style.display='inherit';
       evt.preventDefault(); evt.cancelBubble=true;}
     else if (results.length>0) {
       target.completions_elt.style.display='block';}
@@ -803,7 +806,7 @@ function fdjtSetCompletions(id,completions)
     fdjtWarn("Can't find current completions #%s",id);
     return;}
   var text_input=current.input_elt;
-  text_input.completion_elt=completions;
+  text_input.completions_elt=completions;
   completions.input_elt=text_input;
   current.input_elt=false;
   fdjtReplace(current,completions);
