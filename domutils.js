@@ -122,9 +122,9 @@ function _fdjt_get_class_regex(name)
   return rx;
 }
 
-function fdjtHasClass(elt,classname)
+function fdjtHasClass(elt,classname,attrib)
 {
-  var classinfo=elt.className;
+  var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") : (elt.className));
   if ((classinfo) &&
       ((classinfo==classname) ||
        (classinfo.search(_fdjt_get_class_regex(classname))>=0)))
@@ -132,7 +132,7 @@ function fdjtHasClass(elt,classname)
   else return false;
 }
 
-function fdjtAddClass(elt,classname)
+function fdjtAddClass(elt,classname,attrib)
 {
   if (typeof elt === "string")
     if (elt==="") return false;
@@ -147,25 +147,27 @@ function fdjtAddClass(elt,classname)
   if (!(elt)) return false;
   else if (elt instanceof Array) {
     var i=0; while (i<elt.length) {
-      var e=elt[i++]; fdjtAddClass(e,classname);}}
+      var e=elt[i++]; fdjtAddClass(e,classname,(attrib||false));}}
   else {
-    var classinfo=elt.className;
+    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
+    var class_regex=_fdjt_get_class_regex(classname);
+    var newinfo=classinfo;
     if (_fdjt_debug_classedits)
-      fdjtLog("Adding class '%s' to (%s) on %o",
-	      classname,classinfo,elt);
-    if ((classinfo===null) || (classinfo=="")) {
-      elt.className=classname;
-      return true;}
+      fdjtLog("Adding %s '%s' to (%s) on %o",
+	      (attrib||"class"),classname,classinfo,elt);
+    if ((classinfo===null) || (classinfo==""))
+      newinfo=classname;
     else if (classinfo===classname)
       return false;
-    else if (classinfo.search(_fdjt_get_class_regex(classname))>=0)
+    else if (classinfo.search(class_regex)>=0)
       return false;
-    else {
-      elt.className=classname+" "+classinfo;
-      return true;}}
+    else newinfo=classname+" "+classinfo;
+    if (attrib) elt.setAttribute(attrib,newinfo);
+    else elt.className=newinfo;
+    return true;}
 }
 
-function fdjtDropClass(elt,classname)
+function fdjtDropClass(elt,classname,attrib)
 {
   if (typeof elt === "string")
     if (elt==="") return false;
@@ -180,24 +182,29 @@ function fdjtDropClass(elt,classname)
   if (!(elt)) return false;
   else if (elt instanceof Array) {
     var i=0; while (i<elt.length) {
-      var e=elt[i++]; fdjtDropClass(e,classname);}}
+      var e=elt[i++]; fdjtDropClass(e,classname,(attrib||false));}}
   else {
-    var classinfo=elt.className, classpat;
+    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
+    var class_regex=_fdjt_get_class_regex(classname);
+    var newinfo=classinfo;
     if (_fdjt_debug_classedits)
       fdjtLog("Dropping class '%s' from (%s) on %o",
-	      classname,classinfo,elt);
+	      (attrib||"class"),classname,classinfo,elt);
     if ((classinfo===null) || (classinfo=="")) return false;
-    else if (classinfo===classname) {
-      elt.className=null;
-      return true;}
-    else if (classinfo.search(classpat=_fdjt_get_class_regex(classname))>=0) {
-      elt.className=
-	classinfo.replace(classpat,"").replace(_fdjt_whitespace_pat," ");
-      return true;}
-    else return false;}
+    else if (classinfo===classname) 
+      newinfo=null;
+    else if (classinfo.search(class_regex)>=0) 
+      newinfo=
+	classinfo.replace(class_regex,"").
+	replace(_fdjt_whitespace_pat," ");
+    else return false;
+    if (attrib)
+      if (newinfo) elt.setAttribute(attrib,newinfo);
+      else elt.removeAttribute(attrib);
+    else elt.className=newinfo;}
 }
 
-function fdjtSwapClass(elt,classname,newclass)
+function fdjtSwapClass(elt,classname,newclass,attrib)
 {
   if (typeof elt === "string")
     if (elt==="") return false;
@@ -212,14 +219,25 @@ function fdjtSwapClass(elt,classname,newclass)
   if (!(elt)) return false;
   else if (elt instanceof Array) {
     var i=0; while (i<elt.length) {
-      var e=elt[i++]; fdjtDropClass(e,classname);}}
+      var e=elt[i++]; fdjtSwapClass(e,classname,(attrib||false));}}
   else {
-    var classinfo=elt.className, classpat=_fdjt_get_class_regex(classname);
-    if ((classinfo) && ((classinfo.search(classpat))>=0)) {
-      elt.className=
-	classinfo.replace(classpat,newclass).replace(_fdjt_whitespace_pat," ");
-      return true;}
-    else return false;}
+    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
+    var class_regex=_fdjt_get_class_regex(classname);
+    var newinfo=classinfo;
+    if ((classinfo) && ((classinfo.search(class_regex))>=0)) 
+      newinfo=
+	classinfo.replace(class_regex,newclass).
+	replace(_fdjt_whitespace_pat," ");
+    else if (_fdjt_debug) {
+      fdjtLog
+	("Couldn't swap '%s' to replace non-existing '%s', just adding to %o",
+	 newclass,classname,elt);
+      return fdjtAddClass(elt,newclass,(attrib||false));}
+    else return fdjtAddClass(elt,newclass,(attrib||false));
+    if (attrib)
+      if (newinfo) elt.setAttribute(attrib,newinfo);
+      else elt.removeAttribute(attrib);
+    else elt.className=newinfo;}
 }
 
 /* Next and previous elements */
