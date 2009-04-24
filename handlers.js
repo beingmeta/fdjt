@@ -816,7 +816,7 @@ function fdjtSetCompletions(id,completions)
 
 var _fdjt_saved_scroll=false;
 
-function fdjtSaveScroll(ss)
+function fdjtScrollSave(ss)
 {
   if (ss) {
     ss.scrollX=window.scrollX; ss.scrollY=window.scrollY;}
@@ -826,16 +826,19 @@ function fdjtSaveScroll(ss)
     _fdjt_saved_scroll.scrollY=window.scrollY;}
 }
 
-function fdjtRestoreScroll(ss)
+function fdjtScrollRestore(ss)
 {
-  if (ss) {
-    window.scrollTo(ss.scrollX,ss.scrollY);}
+  if ((ss) && (ss.scrollX)) {
+    window.scrollTo(ss.scrollX,ss.scrollY);
+    return true;}
   else if ((_fdjt_saved_scroll) && (_fdjt_saved_scroll.scrollX)) {
     window.scrollTo(_fdjt_saved_scroll.scrollY,_fdjt_saved_scroll.scrollX);
-    _fdjt_saved_scroll=false;}
+    _fdjt_saved_scroll=false;
+    return true;}
+  else return false;
 }
 
-function fdjtDiscardScroll(ss)
+function fdjtScrollDiscard(ss)
 {
   if (ss) {
     ss.scrollX=false; ss.scrollY=false;}
@@ -850,7 +853,7 @@ function fdjtScrollTo(target,id)
   _fdjt_saved_scroll=false;
 }
 
-function fdjtPreview(target,offset)
+function fdjtScrollPreview(target,offset)
 {
   fdjtSaveScroll();
   target.scrollIntoView(true);
