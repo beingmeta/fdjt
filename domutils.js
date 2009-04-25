@@ -10,7 +10,8 @@ var fdjt_domutils_id="$Id$";
 var fdjt_domutils_version=parseInt("$Revision$".slice(10,-1));
 var _fdjt_debug=false;
 var _fdjt_debug_domedits=false;
-var _fdjt_debug_classedits=false;
+var _fdjt_debug_domsearches=true;
+var _fdjt_debug_classedits=true;
 var _fdjt_trace_load=false;
 
 function fdjtLog(string)
@@ -133,9 +134,10 @@ function fdjtHasClass(elt,classname,attrib)
   else return false;
 }
 
-function fdjtAddClass(elt,classname,attrib)
+function fdjtAddClass(elt,classname,attrib,keep)
 {
-  if (typeof elt === "string")
+  if (elt===null) return null;
+  else if (typeof elt === "string")
     if (elt==="") return false;
     else if (elt[0]==='#') {
       var elts=new Array();
@@ -172,9 +174,10 @@ function fdjtAddClass(elt,classname,attrib)
     return true;}
 }
 
-function fdjtDropClass(elt,classname,attrib)
+function fdjtDropClass(elt,classname,attrib,keep)
 {
-  if (typeof elt === "string")
+  if (elt===null) return null;
+  else if (typeof elt === "string")
     if (elt==="") return false;
     else if (elt[0]==='#') {
       var elts=new Array();
@@ -209,13 +212,58 @@ function fdjtDropClass(elt,classname,attrib)
 	replace(_fdjt_trimspace_pat,"");
     if (attrib)
       if (newinfo) elt.setAttribute(attrib,newinfo);
-      else elt.removeAttribute(attrib);
+      else if (!(keep)) elt.removeAttribute(attrib);
+    else elt.className=newinfo;}
+}
+
+function fdjtToggleClass(elt,classname,attrib,keep)
+{
+  if (elt===null) return null;
+  else if (typeof elt === "string")
+    if (elt==="") return false;
+    else if (elt[0]==='#') {
+      var elts=new Array();
+      var ids=elt.split('#');
+      var i=1; while (i<ids.length) {
+	var e=document.getElementById(ids[i++]);
+	if (e) elts.push(e);}
+      elt=elts;}
+    else elt=document.getElementById(elt);
+  if (!(elt)) return false;
+  else if (elt instanceof Array) {
+    var i=0; while (i<elt.length) {
+      var e=elt[i++]; fdjtToggleClass(e,classname,(attrib||false));}}
+  else {
+    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
+    var class_regex=_fdjt_get_class_regex(classname);
+    var newinfo=classinfo;
+    if (_fdjt_debug_classedits)
+      fdjtLog("Toggling class '%s' from (%s) on %o",
+	      (attrib||"class"),classname,classinfo,elt);
+    if ((classinfo===null) || (classinfo===""))
+      newinfo=classname;
+    else if (classinfo===classname) 
+      newinfo=null;
+    else if (classinfo.search(class_regex)>=0) 
+      newinfo=
+	classinfo.replace(class_regex,"").
+	replace(_fdjt_whitespace_pat," ");
+    else newinfo=classinfo+" "+classname;
+    if (newinfo)
+      newinfo=newinfo.
+	replace(_fdjt_whitespace_pat," ").
+	replace(_fdjt_trimspace_pat,"");
+    if (attrib)
+      if (newinfo) elt.setAttribute(attrib,newinfo);
+      else if (!(keep)) elt.removeAttribute(attrib);
+      else elt.setAttribute(attrib,"");
     else elt.className=newinfo;}
 }
 
 function fdjtSwapClass(elt,classname,newclass,attrib)
 {
-  if (typeof elt === "string")
+  if (elt===null) return null;
+  else if (typeof elt === "string")
     if (elt==="") return false;
     else if (elt[0]==='#') {
       var elts=new Array();
@@ -507,6 +555,16 @@ function fdjtGetParents(elt,selector,results)
     return results;}
 }
 
+function fdjtGetParent(elt,selector)
+{
+  var scan=elt;
+  while (scan)
+    if (fdjtElementMatches(scan,selector))
+      return scan;
+    else scan=scan.parentNode;
+  return scan;
+}
+
 function fdjtGetChildren(elt,selector,results)
 {
   if (!(results)) results=new Array();
@@ -544,13 +602,19 @@ function fdjtGetChildren(elt,selector,results)
 function $$(selector,cxt) 
 {
   var elt=((cxt) ? (cxt) : (document));
-  return fdjtGetChildren(cxt,selector,new Array());
+  return fdjtGetChildren(elt,selector,new Array());
+}
+
+function $P(selector,cxt) 
+{
+   return fdjtGetParent(cxt,selector);
 }
 
 /* Adding/Inserting nodes */
 
 function fdjtAddElements(elt,elts,i)
 {
+  if (elt===null) return null;
   while (i<elts.length) {
     var arg=elts[i++];
     if (!(arg)) {}
@@ -567,6 +631,7 @@ function fdjtAddElements(elt,elts,i)
 
 function fdjtAddAttributes(elt,attribs)
 {
+  if (elt===null) return null;
   if (attribs) {
     for (key in attribs) {
       if (key=='title')
@@ -584,6 +649,7 @@ function fdjtAddAttributes(elt,attribs)
 
 function fdjtInsertElementsBefore(elt,before,elts,i)
 {
+  if (elt===null) return null;
   if ((_fdjt_debug) || (_fdjt_debug_domedits))
     fdjtLog("Inserting "+elts+" elements "
 	   +"into "+elt
@@ -605,7 +671,8 @@ function fdjtInsertElementsBefore(elt,before,elts,i)
 function fdjtAppend(elt_arg)
 {
   var elt=null;
-  if (typeof elt_arg == 'string')
+  if (elt_arg===null) return null;
+  else if (typeof elt_arg == 'string')
     elt=document.getElementById(elt_arg);
   else if (elt_arg) elt=elt_arg;
   if (elt) return fdjtAddElements(elt,arguments,1);
@@ -615,7 +682,8 @@ function fdjtAppend(elt_arg)
 function fdjtPrepend(elt_arg)
 {
   var elt=null;
-  if (typeof elt_arg == 'string')
+  if (elt_arg===null) return null;
+  else if (typeof elt_arg == 'string')
     elt=document.getElementById(elt_arg);
   else if (elt_arg) elt=elt_arg;
   if (elt)
@@ -628,7 +696,8 @@ function fdjtPrepend(elt_arg)
 function fdjtInsertBefore(before_arg)
 {
   var parent=null, before=null;
-  if (typeof before_arg == 'string') {
+  if (before_arg===null) return null;
+  else if (typeof before_arg == 'string') {
     before=document.getElementById(after_arg);
     if (after==null) {
       fdjtWarn("Invalid DOM before argument: "+before_arg);
@@ -647,7 +716,8 @@ function fdjtInsertBefore(before_arg)
 function fdjtInsertAfter(after_arg)
 {
   var parent=null, after=null;
-  if (typeof after_arg == 'string') {
+  if (after_arg===null) return null;
+  else if (typeof after_arg == 'string') {
     after=document.getElementById(after_arg);
     if (after==null) {
       fdjtWarn("Invalid DOM after argument: "+after_arg);
@@ -668,7 +738,8 @@ function fdjtInsertAfter(after_arg)
 function fdjtReplace(cur_arg,newnode)
 {
   var cur=null;
-  if (typeof cur_arg === 'string')
+  if (cur_arg===null) return null;
+  else if (typeof cur_arg === 'string')
     cur=document.getElementById(cur_arg);
   else cur=cur_arg;
   if (cur) {
@@ -688,7 +759,8 @@ function fdjtReplace(cur_arg,newnode)
 function fdjtRemove(cur_arg)
 {
   var cur=null;
-  if (typeof cur_arg == "string")
+  if (cur_arg===null) return null;
+  else if (typeof cur_arg == "string")
     cur=document.getElementById(cur_arg);
   else cur=cur_arg;
   if (cur) {
