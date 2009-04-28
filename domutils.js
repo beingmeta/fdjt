@@ -10,8 +10,8 @@ var fdjt_domutils_id="$Id$";
 var fdjt_domutils_version=parseInt("$Revision$".slice(10,-1));
 var _fdjt_debug=false;
 var _fdjt_debug_domedits=false;
-var _fdjt_debug_domsearches=true;
-var _fdjt_debug_classedits=true;
+var _fdjt_debug_domsearches=false;
+var _fdjt_debug_classedits=false;
 var _fdjt_trace_load=false;
 
 function fdjtLog(string)
@@ -120,7 +120,7 @@ var _fdjt_trimspace_pat=/^(\s)+|(\s)+$/;
 
 function _fdjt_get_class_regex(name)
 {
-  var rx=new RegExp("\\b"+name+"\\b");
+  var rx=new RegExp("\\b"+name+"\\b","g");
   return rx;
 }
 
@@ -134,7 +134,7 @@ function fdjtHasClass(elt,classname,attrib)
   else return false;
 }
 
-function fdjtAddClass(elt,classname,attrib,keep)
+function fdjtAddClass(elt,classname,attrib)
 {
   if (elt===null) return null;
   else if (typeof elt === "string")
@@ -196,15 +196,13 @@ function fdjtDropClass(elt,classname,attrib,keep)
     var class_regex=_fdjt_get_class_regex(classname);
     var newinfo=classinfo;
     if (_fdjt_debug_classedits)
-      fdjtLog("Dropping class '%s' from (%s) on %o",
+      fdjtLog("Dropping %s '%s' from (%s) on %o",
 	      (attrib||"class"),classname,classinfo,elt);
-    if ((classinfo===null) || (classinfo=="")) return false;
+    if ((classinfo===null) || (classinfo==="")) return false;
     else if (classinfo===classname) 
       newinfo=null;
     else if (classinfo.search(class_regex)>=0) 
-      newinfo=
-	classinfo.replace(class_regex,"").
-	replace(_fdjt_whitespace_pat," ");
+      newinfo=classinfo.replace(class_regex,"");
     else return false;
     if (newinfo)
       newinfo=newinfo.
@@ -213,6 +211,7 @@ function fdjtDropClass(elt,classname,attrib,keep)
     if (attrib)
       if (newinfo) elt.setAttribute(attrib,newinfo);
       else if (!(keep)) elt.removeAttribute(attrib);
+      else {}
     else elt.className=newinfo;}
 }
 
@@ -238,7 +237,7 @@ function fdjtToggleClass(elt,classname,attrib,keep)
     var class_regex=_fdjt_get_class_regex(classname);
     var newinfo=classinfo;
     if (_fdjt_debug_classedits)
-      fdjtLog("Toggling class '%s' from (%s) on %o",
+      fdjtLog("Toggling %s '%s' from (%s) on %o",
 	      (attrib||"class"),classname,classinfo,elt);
     if ((classinfo===null) || (classinfo===""))
       newinfo=classname;
@@ -287,8 +286,8 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
 	replace(_fdjt_whitespace_pat," ");
     else if (_fdjt_debug) {
       fdjtLog
-	("Couldn't swap '%s' to replace non-existing '%s', just adding to %o",
-	 newclass,classname,elt);
+	("Couldn't swap %s '%s' to replace non-existing '%s', just adding to %o",
+	 (attrib||"class"),newclass,classname,elt);
       return fdjtAddClass(elt,newclass,(attrib||false));}
     else return fdjtAddClass(elt,newclass,(attrib||false));
     if (newinfo)
