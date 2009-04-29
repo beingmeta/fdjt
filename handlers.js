@@ -404,16 +404,23 @@ function fdjtTextInput_onkeypress(evt,handler)
     return false;}
   else return;
 }
-function fdjtMultiText_onkeypress(evt)
+function fdjtMultiText_onkeypress(evt,tagname)
 {
+  if (!(tagname)) tagname="span";
   var ch=evt.charCode, kc=evt.keyCode;
   if (kc===13) {
-    var elt=evt.target;
+    var elt=evt.target; var value, new_elt;
     if (elt.value==="") return;
-    var new_elt=elt.cloneNode(false);
-    new_elt.value="";
-    fdjtInsertBefore(elt,new_elt);
-    elt.blur; new_elt.focus();
+    if (elt.handleMultiText) 
+      value=elt.handleMultiText(elt.value);
+    if ((typeof value === "object") && (value instanceof Node))
+      new_elt=value;
+    else {
+      new_elt=fdjtNewElement(tagname,(elt.className||"multitext"));
+      fdjtAppend(new_elt,fdjtInput("CHECKBOX",elt.name,elt.value));
+      fdjtAppend(new_elt,elt.value);}
+    fdjtInsertAfter(elt," ",new_elt);
+    elt.value="";
     return false;}
   else return;
 }
