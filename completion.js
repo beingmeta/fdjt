@@ -18,6 +18,9 @@
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
+var fdjt_completion_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
+var fdjt_completion_version=parseInt("$Revision: 40 $".slice(10,-1));
+
 /* Completion */
 
 /* This is big enough that perhaps it should be in its own file,

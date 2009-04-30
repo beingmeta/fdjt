@@ -18,8 +18,8 @@
 
 */
 
-var fdjt_setops_id="$Id$";
-var fdjt_setops_version=parseInt("$Revision$".slice(10,-1));
+var fdjt_setops_id="$Id: setops.js 40 2009-04-30 13:31:58Z haase $";
+var fdjt_setops_version=parseInt("$Revision: 40 $".slice(10,-1));
 
 function _fdjt_set_sortfn(a,b)
 {

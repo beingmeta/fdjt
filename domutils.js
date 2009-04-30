@@ -20,8 +20,8 @@
 
 */
 
-var fdjt_domutils_id="$Id$";
-var fdjt_domutils_version=parseInt("$Revision$".slice(10,-1));
+var fdjt_domutils_id="$Id: domutils.js 40 2009-04-30 13:31:58Z haase $";
+var fdjt_domutils_version=parseInt("$Revision: 40 $".slice(10,-1));
 var _fdjt_debug=false;
 var _fdjt_debug_domedits=false;
 var _fdjt_debug_domsearches=false;

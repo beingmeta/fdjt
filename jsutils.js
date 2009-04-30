@@ -20,6 +20,10 @@
 
 */
 
+var fdjt_jsutils_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
+var fdjt_jsutils_version=parseInt("$Revision: 40 $".slice(10,-1));
+
+
 function fdjtAdd(object,field,value)
 {
   var values;
