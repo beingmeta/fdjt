@@ -133,4 +133,7 @@ div.richtip div.rel span.relname {
   font-weight: bold; padding: 2px; color: purple;}
 
 
+/* Displaying deadlinks as red, Wikipedia style */
+
+a.deadlink { color: red;}
 
