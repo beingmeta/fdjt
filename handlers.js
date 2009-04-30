@@ -598,6 +598,8 @@ function fdjtCoHi_onmouseout(evt,classname_arg)
 /* Scrolling control */
 
 var _fdjt_saved_scroll=false;
+var _fdjt_preview_elt=false;
+
 
 function fdjtScrollSave(ss)
 {
@@ -612,6 +614,9 @@ function fdjtScrollSave(ss)
 
 function fdjtScrollRestore(ss)
 {
+  if (_fdjt_preview_elt) {
+    fdjtDropClass(_fdjt_preview_elt,"previewing");
+    _fdjt_preview_elt=false;}
   // fdjtXTrace("Restoring scroll from %o, saved=%o",ss,_fdjt_saved_scroll);
   if ((ss) && (ss.scrollX)) {
     // fdjtXTrace("Restoring scroll to %d,%d",ss.scrollX,ss.scrollY);    
@@ -645,6 +650,13 @@ function fdjtScrollTo(target,id)
 function fdjtScrollPreview(target,offset)
 {
   if (!(_fdjt_saved_scroll)) fdjtScrollSave();
+  if ((_fdjt_preview_elt) && (_fdjt_preview_elt.className))
+    fdjtDropClass(preview_elt,"previewing");
+  if (target===document.body)
+    _fdjt_preview_elt=false;
+  else {
+    _fdjt_preview_elt=target;
+    fdjtAddClass(target,"previewing");}
   target.scrollIntoView(true);
   if (offset) window.scrollBy(0,offset);
 }

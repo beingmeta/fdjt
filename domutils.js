@@ -965,6 +965,25 @@ function fdjtIsVisible(elt,partial)
 	       (left + width) <= (window.pageXOffset + window.innerWidth));
 }
 
+/* Getting cumulative offsets */
+
+function fdgtGetOffset(elt,withstack)
+{
+  var top = elt.offsetTop;
+  var left = elt.offsetLeft;
+  var stack = ((withstack) ? (new Array(elt)) : false);
+  
+  while(elt.offsetParent) {
+    elt = elt.offsetParent;
+    if (withstack) withstack.push(elt);
+    top += elt.offsetTop;
+    left += elt.offsetLeft;}
+
+  if (stack)
+    return new Array(left,top,stack);
+  else return new Array(left,top);
+}
+
 /* Computing "flat width" of a node */
 
 var _fdjt_vertical_flat_width=8;
