@@ -3,16 +3,35 @@
 /* Copyright (C) 2009 beingmeta, inc.
 
    This stylesheet is for use with multi-lingual and poly-lingual databases.
-   It implements selective display based on two contextual attributes (lang and langs)
-   and two element attributes (forlang and inlang).  'lang' is single valued (indicating 
-   the primary language) while 'langs' is multi-valued (indicating languages to display).
 
-   'forlang' is controlled by 'lang' so thatan attribute tagged with a 'forlang' 
-    is only displayed if it is within the scope of a corresponding single-valued
-    'lang' attribute.
+   This program comes with absolutely NO WARRANTY, including implied
+   warranties of merchantability or fitness for any particular
+   purpose.
 
-   'inlang' is controlled by 'lang' and 'langs' so that an attribute tagged with 'inlang'
-    is displayed if it's langid matches any of the surrounding lang or langs attributes.
+    Use, modification, and redistribution of this program is permitted
+    under either the GNU General Public License (GPL) Version 2 (or
+    any later version) or under the GNU Lesser General Public License
+    (version 3 or later).
+
+    These licenses may be found at www.fsf.org, particularly:
+      http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+      http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+
+*/
+/* CSS stylesheets for multilingual content
+
+   It implements selective display based on two contextual attributes
+   (lang and langs) and two element attributes (forlang and inlang).
+   'lang' is single valued (indicating the primary language) while
+   'langs' is multi-valued (indicating languages to display).
+
+   'forlang' is controlled by 'lang' so thatan attribute tagged with a
+    'forlang' is only displayed if it is within the scope of a
+    corresponding single-valued 'lang' attribute.
+
+   'inlang' is controlled by 'lang' and 'langs' so that an attribute
+    tagged with 'inlang' is displayed if it's langid matches any of
+    the surrounding lang or langs attributes.
 
    ISO639/1 and ISO369/B language ids are used, all in lower case.
 */

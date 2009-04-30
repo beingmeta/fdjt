@@ -2,6 +2,20 @@
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file implements (relatively) fast set operations using
     Javascript arrays to represent sets.
+
+   This program comes with absolutely NO WARRANTY, including implied
+   warranties of merchantability or fitness for any particular
+   purpose.
+
+    Use, modification, and redistribution of this program is permitted
+    under either the GNU General Public License (GPL) Version 2 (or
+    any later version) or under the GNU Lesser General Public License
+    (version 3 or later).
+
+    These licenses may be found at www.fsf.org, particularly:
+      http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+      http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+
 */
 
 var fdjt_setops_id="$Id$";

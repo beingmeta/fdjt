@@ -3,6 +3,7 @@
 
 all: fdjt.js
 
-fdjt.js: jsutils.js json.js setops.js domutils.js handlers.js completion.js
+fdjt.js: header.js jsutils.js json.js setops.js \
+	 domutils.js handlers.js completion.js
 	cat $^ > $@
 

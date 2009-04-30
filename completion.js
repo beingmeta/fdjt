@@ -3,6 +3,19 @@
 /* Copyright (C) 2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides for input completion.
+
+   This program comes with absolutely NO WARRANTY, including implied
+   warranties of merchantability or fitness for any particular
+   purpose.
+
+    Use, modification, and redistribution of this program is permitted
+    under either the GNU General Public License (GPL) Version 2 (or
+    any later version) or under the GNU Lesser General Public License
+    (version 3 or later).
+
+    These licenses may be found at www.fsf.org, particularly:
+      http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+      http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
 /* Completion */
@@ -96,7 +109,7 @@ function fdjtComplete(input_elt,string,options)
   var prefix=false; var nocase=false;
   if (!(string)) string=fdjtCompletionText(input_elt);
   if (!(options)) options=input_elt.getAttribute("COMPLETEOPTS")||"";
-  // fdjtXTrace("Completing on %s from %o with %s",string,input_elt,options);
+  // fdjtTrace("Completing on %s from %o with %s",string,input_elt,options);
   if (typeof options === "string") {
     prefix=(options.search(/\bprefix\b/)>=0);
     nocase=(options.search(/\bnocase\b/)>=0);}
@@ -137,6 +150,7 @@ function fdjtComplete(input_elt,string,options)
 	else child.setAttribute("displayed","no");
 	// fdjtXTrace("Processed %o",child);
       }}}
+  // fdjtTrace("Completion on %s found %o",string,values);
   if (values.length) completions.style.display='block';
   return values;
 }
