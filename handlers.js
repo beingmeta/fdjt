@@ -23,6 +23,8 @@
 var fdjt_handlers_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
 var fdjt_handlers_version=parseInt("$Revision: 40 $".slice(10,-1));
 
+var graphics_root="/graphics/";
+
 fdjtLoadMessage("Loading handlers.js");
 
 /* INPUT SHOWHELP */
@@ -661,89 +663,6 @@ function fdjtScrollPreview(target,offset)
   if (offset) window.scrollBy(0,offset);
 }
 
-/* Richtips */
-
-/* Richtips are overlayed tooltips for metakeys, displayed
-   in translucent rectangles. */
-
-/* Set to false to suppress richtip display. */
-var fdjt_display_richtips=true;
-/* This is the current 'live' richtip displayed. */
-var fdjt_live_richtip=false;
-
-/* How long to wait before actually getting the richtip element */
-var fdjt_richtip_delay=300;
-var fdjt_richtip_target=false;
-var fdjt_richtip_timeout=null;
-
-var fdjt_richtip_classfns=[];
-
-function fdjtGetRichTip(elt)
-{
-  if (elt.getRichTip) return elt.getRichTip(elt);
-  else if ((elt.className) && (fdjt_richtip_classfns[elt.className]))
-    return fdjt_richtip_classfns[elt.className](elt);
-  else if (elt.getAttribute("norichtips")) return false;
-  else elt=elt.parentNode;
-  return false;
-}
-
-function fdjtRichTip_display(elt)
-{
-  var elt=evt.target;
-  if (!(fdjt_display_richtips)) return;
-  var richtip=fdjtGetRichTip(elt);
-  if (!(richtip)) return;
-  if (live_richtip==richtip) {
-    richtip.style.display='block';
-    return;}
-  else if (live_richtip)
-    live_richtip.style.display='none';
-  live_richtip=richtip;
-  var xoff=0, yoff=0; var node=elt;
-  while (node) {
-    xoff=xoff+node.offsetLeft;
-    yoff=yoff+node.offsetTop;
-    node=node.offsetParent;}
-  yoff=yoff+elt.offsetHeight;
-  richtip.style.left=xoff+'px';
-  richtip.style.top=yoff+'px';
-  richtip.style.display='block';
-  // window.status='display_expansion='+oid+'; height='+expansions_elt.offsetHeight;
-  if ((xoff+richtip.offsetWidth)>window.innerWidth)
-    xoff=xoff-((xoff+richtip.offsetWidth)-window.innerWidth);
-  if (xoff<0) xoff=1;
-  richtip.style.left=xoff+'px';
-  richtip.style.top=yoff+'px';
-}
-
-function fdjtRichTip_onmouseover(evt)
-{
-  var target=evt.target;
-  if (fdjt_richtip_target===target) return;
-  else if (fdjt_richtip_target) {
-    clearTimeout(fdjt_richtip_timeout);
-    fdjt_richtip_timeout=false;
-    fdjt_richtip_target=false;}
-  fdjt_richtip_target=target;
-  fdjt_richtip_target=
-    setTimeout(function (evt) {
-	fdjtRichTip_display(target);},
-      fdjt_richtip_delay,richtip);
-}
-
-function fdjtRichTip_onmouseout(evt)
-{
-  // fdbMessage("richtip_mouseout");
-  if (!(display_richtips)) return;
-  if (live_richtip) 
-    live_richtip.style.display='none';
-  if (fdjt_richtip_target) {
-    clearTimeout(fdjt_richtip_timeout);
-    fdjt_richtip_timeout=false;
-    fdjt_richtip_target=false;}
-}
-
 /* Checking control */
 
 /* Some events, like onselect, don't seem to get control key information.
@@ -785,13 +704,13 @@ function fdjtSetup()
 {
   if (fdjt_setup_started) return;
   fdjt_setup_started=true;
-  fdjtLog("fdjt_setup running");
+  fdjtLog("fdjtSetup running");
   fdjtAutoPrompt_setup();
   fdjtCheckSpan_setup(null);
   fdjtAdjustFontSizes();
   fdjtMarkReduced();
   fdjt_setup_done=true;
-  fdjtLog("fdjt_setup run");
+  fdjtLog("fdjtSetup run");
 }
 
 fdjtLoadMessage("Loaded handlers.js");

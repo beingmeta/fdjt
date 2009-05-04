@@ -69,6 +69,17 @@ span.dterm span.disambig {
 span.dterm .langid {
   color: green; font-style:italic; font-family: fixed;}
 
+/*
+span.dterm { 
+  background-color: lightblue; 
+  padding: 4px; padding-top: 2px; padding-bottom: 2px;
+  -khtml-border-radius: 8px; 
+  -webkit-border-radius: 8px; 
+  -moz-border-radius: 8px;
+  border-radius: 8px;}
+*/
+/* :hover > .dterm { text-decoration: overline; } */
+
 /* Wordforms and langids */
 
 span.wordform {
@@ -130,7 +141,10 @@ div.richtip {
   font-size: 12px; font-family: sans-serif; font-weight: normal;
   width: 33%; position: absolute; top: 24pt; left: 24pt;
   display: none; background: lightgray;
-  opacity: .80; -moz-opacity: .80; z-index: 32;}
+  opacity: .85; -moz-opacity: .85; -webkit-opacity: 0.85;
+  z-index: 32;}
+div.richtip:hover { 
+  opacity: 0.95; -moz-opacity: 0.95; -webkit-opacity: 0.95;}
 
 div.richtip span.dterm {
   color: blue; font-size: 14px; font-weight: bold;}
@@ -145,6 +159,24 @@ div.richtip div.rel {}
 div.richtip div.rel span.relname {
   font-weight: bold; padding: 2px; color: purple;}
 
+div.richtip span.controls { 
+  float: right; display: none;
+  text-align: right; vertical-align: top;}
+div.richtip.static span.controls { 
+  float: right; display: inline; padding-left: 5px;}
+div.static.richtip { display: block;}
+div.live.richtip { display: block;}
+
+div.richtip span.controls .button {
+  font-weight: bold; font-size: 150%; color: brown; 
+  padding: 0px; margin: 0px; padding-right: 1px;
+  cursor: pointer; vertical-align: top;}
+
+div.richtip.minimized { max-height: 45px;}
+div.richtip.minimized .maximize { display: inline; }
+div.richtip.minimized .minimize { display: none; }
+div.richtip .minimize { display: inline; }
+div.richtip .maximize { display: none; }
 
 /* Displaying deadlinks as red, Wikipedia style */
 

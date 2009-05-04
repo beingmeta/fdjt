@@ -1,8 +1,8 @@
 # This is the makefile for generating combination files
 # from the individual fdjt files.
 
-FDJT_FILES=header.js jsutils.js json.js setops.js \
-	    domutils.js handlers.js completion.js
+FDJT_FILES=header.js jsutils.js json.js domutils.js \
+	    handlers.js richtips.js completion.js
 
 all: fdjt.js
 

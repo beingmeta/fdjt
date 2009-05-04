@@ -392,7 +392,10 @@ function fdjtGetParentByClassName(node,classname)
   if (typeof node === "string") scan=document.getElementById(node);
   else scan=node;
   while ((scan) && (scan.parentNode))
-    if (scan.className===classname) return scan;
+    if (scan.className===classname)
+      return scan;
+    else if ((scan.className) && (fdjtHasClassName(scan,classname)))
+      return scan;
     else scan=scan.parentNode;
   if ((scan) && (scan.className===classname)) return scan;
   else return null;
@@ -525,7 +528,7 @@ function fdjtParseSelector(spec)
   if ((tagname==="") || (tagname==="*")) tagname=null;
   if ((classname==="") || (classname==="*")) tagname=null;
   if ((idname==="") || (idname==="*")) tagname=null;
-  return new Array(tagname,classname,idname);
+  return new Array(tagname,_fdjt_get_class_regex(classname),idname);
 }
 
 function fdjtElementMatches(elt,selector)
@@ -539,14 +542,16 @@ function fdjtElementMatches(elt,selector)
   else {
     var spec=fdjtParseSelector(selector);
     return (((spec[0]===null) || (elt.tagName===spec[0])) &&
-	    ((spec[1]===null) || (elt.className===spec[1])) &&
+	    ((spec[1]===null) ||
+	     ((elt.className) && (elt.className.search(spec[1])>=0))) &&
 	    ((spec[2]===null) || (elt.id===spec[2])));}
 }
 
 function fdjtElementMatchesSpec(elt,spec)
 {
   return (((spec[0]===null) || (elt.tagName===spec[0])) &&
-	  ((spec[1]===null) || (elt.className===spec[1])) &&
+	  ((spec[1]===null) ||
+	   ((elt.className) && (elt.className.search(spec[1])>=0))) &&
 	  ((spec[2]===null) || (elt.id===spec[2])));
 }
 
@@ -802,6 +807,18 @@ function fdjtNewElementW(tag,classname,attribs)
   elt.className=classname;
   fdjtAddAttributes(elt,attribs);
   fdjtAddElements(elt,arguments,3);
+  return elt;
+}
+
+function fdjtWithId(elt,id)
+{
+  elt.id=id;
+  return elt;
+}
+
+function fdjtWithTitle(elt,title)
+{
+  elt.title=title;
   return elt;
 }
 
