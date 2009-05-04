@@ -2,7 +2,7 @@
 # from the individual fdjt files.
 
 FDJT_FILES=header.js jsutils.js json.js domutils.js \
-	    handlers.js richtips.js completion.js
+	    handlers.js richtips.js completion.js ajax.js
 
 all: fdjt.js
 

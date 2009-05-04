@@ -84,6 +84,17 @@ function fdjtRemove(array,value,count)
   return array;
 }
 
+/* Turning an arguments object into an array. */
+
+function fdjtArguments(argobj,start)
+{
+  var i=((start) ? (start) : (0));
+  var result=new Array(argobj.length-i);
+  while (i<argobj.length) {
+    result[i]=argobj[i]; i++;}
+  return result;
+}
+
 /* Fast set operations */
 
 function _fdjt_set_sortfn(a,b)
