@@ -663,6 +663,34 @@ function fdjtScrollPreview(target,offset)
   if (offset) window.scrollBy(0,offset);
 }
 
+/* Radio Selection */
+
+/* This is a generalization of 'radio buttons' which handle
+   arbitrary elements. */
+
+function fdjtRadioSelect(elt,radioname,under,selname)
+{
+  if (!(radioname))
+    if (under) radioname=((under.getAttribute("RADIO"))||("radio"));
+    else {
+      under=fdjtGetParentByAttrib(elt,"RADIO");
+      if (under) radioname=under.getAttribute("RADIO");
+      else {under=document.body; radioname="radio";}}
+  else if (!(under)) {
+    under=fdjtGetParentByAttrib(elt,"RADIO",radioname);
+    if (!(under)) under=document.body;}
+  else {}
+  var target=fdjtGetParentByClassName(radioname);
+  if (fdjtHasClass(elt,selname))
+    fdjtDropClass(elt,selname);
+  else {
+    var all=fdjtGetChildrenByClassName(radioname);
+    var i=0; while (i<all.length) {
+      var node=all[i++];
+      if (node!==target) fdjtDropClass(node,selname);}
+    fdjtAddClass(node,selname);}
+}
+
 /* Checking control */
 
 /* Some events, like onselect, don't seem to get control key information.
