@@ -127,12 +127,26 @@ function fdjtHasAttrib(elt,attribname,attribval)
   else return false;
 }
 
+/* This is a kludge which is probably not very portable */
+
+function fdjtRedisplay(arg)
+{
+  if (arg===null) return;
+  else if (typeof arg === "string")
+    fdjtRedisplay($(arg));
+  else if (arg instanceof Array) {
+    var i=0; while (i<arg.length) fdjtRedisplay(arg[i++]);}
+  else if (arg instanceof Node)
+    arg.className=arg.className;
+  else return;
+}
+
 /* Manipluating class names */
 
 var _fdjt_whitespace_pat=/(\s)+/;
 var _fdjt_trimspace_pat=/^(\s)+|(\s)+$/;
 
-function _fdjt_get_class_regex(name)
+function _fdjtclasspat(name)
 {
   var rx=new RegExp("\\b"+name+"\\b","g");
   return rx;
@@ -143,7 +157,7 @@ function fdjtHasClass(elt,classname,attrib)
   var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") : (elt.className));
   if ((classinfo) &&
       ((classinfo==classname) ||
-       (classinfo.search(_fdjt_get_class_regex(classname))>=0)))
+       (classinfo.search(_fdjtclasspat(classname))>=0)))
     return true;
   else return false;
 }
@@ -167,7 +181,7 @@ function fdjtAddClass(elt,classname,attrib)
       var e=elt[i++]; fdjtAddClass(e,classname,(attrib||false));}}
   else {
     var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
-    var class_regex=_fdjt_get_class_regex(classname);
+    var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
     if (_fdjt_debug_classedits)
       fdjtLog("Adding %s '%s' to (%s) on %o",
@@ -207,7 +221,7 @@ function fdjtDropClass(elt,classname,attrib,keep)
       var e=elt[i++]; fdjtDropClass(e,classname,(attrib||false));}}
   else {
     var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
-    var class_regex=_fdjt_get_class_regex(classname);
+    var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
     if (_fdjt_debug_classedits)
       fdjtLog("Dropping %s '%s' from (%s) on %o",
@@ -248,7 +262,7 @@ function fdjtToggleClass(elt,classname,attrib,keep)
       var e=elt[i++]; fdjtToggleClass(e,classname,(attrib||false));}}
   else {
     var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
-    var class_regex=_fdjt_get_class_regex(classname);
+    var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
     if (_fdjt_debug_classedits)
       fdjtLog("Toggling %s '%s' from (%s) on %o",
@@ -292,7 +306,7 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
       var e=elt[i++]; fdjtSwapClass(e,classname,(attrib||false));}}
   else {
     var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
-    var class_regex=_fdjt_get_class_regex(classname);
+    var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
     if ((classinfo) && ((classinfo.search(class_regex))>=0)) 
       newinfo=
@@ -360,7 +374,7 @@ function fdjtGetParentByTagName(node,tagname)
 
 function fdjtGetChildrenByTagName(under,tagname)
 {
-  if (typeof under == 'string') {
+  if (typeof under === 'string') {
     under=document.getElementById(under);
     if (under===null) return new Array();}
   tagname=tagname.toUpperCase();
@@ -403,7 +417,7 @@ function fdjtGetParentByClassName(node,classname)
 
 function fdjtGetChildrenByClassName(under,classname)
 {
-  if (typeof under == 'string')
+  if (typeof under === 'string')
     under=document.getElementById(under);
   if ((under) && (under.getElementsByClassName))
     return under.getElementsByClassName(classname);
@@ -528,7 +542,7 @@ function fdjtParseSelector(spec)
   if ((tagname==="") || (tagname==="*")) tagname=null;
   if ((classname==="") || (classname==="*")) tagname=null;
   if ((idname==="") || (idname==="*")) tagname=null;
-  return new Array(tagname,_fdjt_get_class_regex(classname),idname);
+  return new Array(tagname,classname,idname);
 }
 
 function fdjtElementMatches(elt,selector)
@@ -542,16 +556,16 @@ function fdjtElementMatches(elt,selector)
   else {
     var spec=fdjtParseSelector(selector);
     return (((spec[0]===null) || (elt.tagName===spec[0])) &&
-	    ((spec[1]===null) ||
-	     ((elt.className) && (elt.className.search(spec[1])>=0))) &&
+	    ((spec[1]===null) || (spec[1]===elt.className) ||
+	     (elt.className.search(_fdjtclasspat(spec[1]))>=0)) &&
 	    ((spec[2]===null) || (elt.id===spec[2])));}
 }
 
 function fdjtElementMatchesSpec(elt,spec)
 {
   return (((spec[0]===null) || (elt.tagName===spec[0])) &&
-	  ((spec[1]===null) ||
-	   ((elt.className) && (elt.className.search(spec[1])>=0))) &&
+	  ((spec[1]===null) || (spec[1]===elt.className) ||
+	   (elt.className.search(_fdjtclasspat(spec[1]))>=0)) &&
 	  ((spec[2]===null) || (elt.id===spec[2])));
 }
 
@@ -586,7 +600,8 @@ function fdjtGetParent(elt,selector)
 function fdjtGetChildren(elt,selector,results)
 {
   if (!(results)) results=new Array();
-  if (selector instanceof Array) {
+  if ((typeof selector === "object") &&
+      (selector instanceof Array)) {
     var i=0; while (i<selector.length)
 	       fdjtGetChildren(elt,selector[i++],results);
     return results;}
@@ -612,7 +627,7 @@ function fdjtGetChildren(elt,selector,results)
       return results;}
     else if (spec[0]) {
       var candidates=fdjtGetChildrenByTagName(elt,spec[0]);
-      results.concat(candidates);
+      var i=0; while (i<candidates.length) results.push(candidates[i++]);
       return results;}
     else return results;}
 }
