@@ -30,7 +30,8 @@ var _fdjt_trace_load=false;
 
 function fdjtLog(string)
 {
-  if ((window.console) && (window.console.log))
+  if ((window.console) && (window.console.log) &&
+      (window.console.count))
     window.console.log.apply(window.console,arguments);
 }
 
@@ -38,14 +39,16 @@ function fdjtLog(string)
 // to find
 function fdjtTrace(string)
 {
-  if ((window.console) && (window.console.log))
+  if ((window.console) && (window.console.log) &&
+      (window.console.count))
     window.console.log.apply(window.console,arguments);
 }
 
 // This goes to an alert if it can't get to the console
 function fdjtWarn(string)
 {
-  if ((window.console) && (window.console.log))
+  if ((window.console) && (window.console.log) &&
+      (window.console.count))
     window.console.log.apply(window.console,arguments);
   else alert(string);
 }
@@ -53,7 +56,8 @@ function fdjtWarn(string)
 // Individually for file loading messages
 function fdjtLoadMessage(string)
 {
-  if ((_fdjt_trace_load) && (window.console) && (window.console.log))
+  if ((_fdjt_trace_load) && (window.console) && (window.console.log) &&
+      (window.console.count))
     window.console.log.apply(window.console,arguments);
 }
 
