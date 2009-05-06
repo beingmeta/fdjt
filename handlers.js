@@ -429,7 +429,7 @@ function fdjtMultiText_onkeypress(evt,tagname)
     if (elt.value==="") return;
     if (elt.handleMultiText) 
       value=elt.handleMultiText(elt.value);
-    if ((typeof value === "object") && (value instanceof Node))
+    if ((typeof value === "object") && (value.nodeType))
       new_elt=value;
     else {
       new_elt=fdjtNewElement(tagname,(elt.className||"multitext"));

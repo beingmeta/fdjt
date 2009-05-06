@@ -66,7 +66,7 @@ function fdjtCompletions(id,completions,cloudp)
 function fdjtAddCompletions(div,completions,cloudp)
 {
   if (typeof div === "string") div=document.getElementById(div);
-  if (!(div instanceof Node))
+  if (!(div.nodeType))
     throw {name: 'NotANode', irritant: div};
   else if ((completions) && (completions instanceof Array)) {
     var i=0; while (i<completions.length) {
@@ -78,10 +78,10 @@ function fdjtAddCompletions(div,completions,cloudp)
       else if (typeof completion != "object") {
 	completion=completion.toString();
 	key=value=completion; content.push(completion);}
-      else if (completion instanceof Node) continue;
+      else if (completion.nodeType) continue;
       else if (completion.getCompletionEntry) {
 	completion=completion.getCompletionEntry();
-	if (completion instanceof Node)
+	if (completion.nodeType)
 	  value=key=completion;
 	else {
 	  key=completion.key;

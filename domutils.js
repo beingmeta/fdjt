@@ -87,6 +87,12 @@ function fdjtNeedElt(arg,name)
 
 /* DOMish utils */
 
+// Not sure what to have as a final clause.
+//  IE seems to support Element but not Node.
+var fdjtNode=((typeof Node == "undefined") ?
+	      ((Element) ? (Element.prototype) : (false)) :
+	      (Node));
+
 function fdjtNodify(arg)
 {
   if (typeof arg === "string")
@@ -95,7 +101,7 @@ function fdjtNodify(arg)
     if (arg.toString)
       return document.createTextNode(arg.toString());
     else return document.createTextNode("#@!*%!");
-  else if (arg instanceof Node)
+  else if (arg.nodeType)
     return arg;
   else if (arg.toHTML)
     return (arg.toHTML());
@@ -131,13 +137,15 @@ function fdjtHasAttrib(elt,attribname,attribval)
 
 function fdjtRedisplay(arg)
 {
-  if (arg===null) return;
+  if (!(arg)) return;
   else if (typeof arg === "string")
     fdjtRedisplay($(arg));
   else if (arg instanceof Array) {
     var i=0; while (i<arg.length) fdjtRedisplay(arg[i++]);}
-  else if (arg instanceof Node)
-    arg.className=arg.className;
+  else if ((arg.nodeType) && (arg.nodeType===1)) {
+    var oldclass=arg.className;
+    arg.className=null;
+    arg.className=oldclass;}
   else return;
 }
 
@@ -434,7 +442,7 @@ function _fdjtGetChildrenByClassName(under,classname,results)
   var children=under.childNodes;
   var i=0; while (i<children.length)
     if (children[i].nodeType===1)
-      _fdjtGetChildrenByClassName(children[i++],tagname,results);
+      _fdjtGetChildrenByClassName(children[i++],classname,results);
     else i++;
   return results;
 }     
