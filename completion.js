@@ -13,7 +13,7 @@
     any later version) or under the GNU Lesser General Public License
     (version 3 or later).
 
-    These licenses may be found at www.fsf.org, particularly:
+    These licenses may be found at www.gnu.org, particularly:
       http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */

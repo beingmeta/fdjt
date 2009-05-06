@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; -*- */
 
-/* Copyright (C) 2008-2009 beingmeta, inc.
+/* Copyright (C) 2001-2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides DHTML handlers for a variety of UI conventions
    and interactions.
@@ -14,7 +14,7 @@
     any later version) or under the GNU Lesser General Public License
     (version 3 or later).
 
-    These licenses may be found at www.fsf.org, particularly:
+    These licenses may be found at www.gnu.org, particularly:
       http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
@@ -653,7 +653,7 @@ function fdjtScrollPreview(target,offset)
 {
   if (!(_fdjt_saved_scroll)) fdjtScrollSave();
   if ((_fdjt_preview_elt) && (_fdjt_preview_elt.className))
-    fdjtDropClass(preview_elt,"previewing");
+    fdjtDropClass(_fdjt_preview_elt,"previewing");
   if (target===document.body)
     _fdjt_preview_elt=false;
   else {
