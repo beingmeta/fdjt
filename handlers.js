@@ -32,7 +32,7 @@ fdjtLoadMessage("Loading handlers.js");
 function fdjtShowHelp_onfocus(evt)
 {
   var target=evt.target;
-  fdjtStopCheshire(evt);
+  fdjtCheshire_stop(evt);
   while (target)
     if ((target.nodeType==1) &&
 	((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
@@ -135,7 +135,7 @@ function fdjtSetClear_onclick(evt)
 function fdjtAutoPrompt_onfocus(evt)
 {
   var elt=evt.target;
-  fdjtStopCheshire(evt);
+  fdjtCheshire_stop(evt);
   if ((elt) && (fdjtHasAttrib(elt,'isempty'))) {
     elt.value='';
     elt.removeAttribute('isempty');}
@@ -168,11 +168,15 @@ function fdjtAutoPrompt_setup()
 	if (elt.className==='autoprompt')
 	  prompt=elt.title;
 	else continue;
-      // fdjtLog('Considering '+elt+' class='+elt.className+' value='+elt.value);
+      fdjtLog('Considering '+elt+' class='+elt.className+' value='+elt.value);
       if ((elt.value=='') || (elt.value==prompt)) {
 	// fdjtLog('Marking empty');
 	elt.value=prompt;
-	elt.setAttribute('isempty','yes');}}}
+	elt.setAttribute('isempty','yes');}
+      if ((!(elt.onfocus)) && (!(elt.getAttribute("onfocus"))))
+	elt.onfocus=fdjtAutoPrompt_onfocus;
+      if ((!(elt.onblur)) && (!(elt.getAttribute("onblur"))))
+      elt.onblur=fdjtAutoPrompt_onblur;}}
 }
 
 // Removes autoprompt text from empty fields
@@ -349,7 +353,7 @@ var fdjt_cheshireelt=null;
 var fdjt_cheshiresteps=false;
 var fdjt_cheshirecountdown=false;
 var fdjt_cheshiretimer=false;
-var fdjt_cheshirefinish=null;
+var fdjtCheshire_finish=null;
 
 function fdjtCheshire_handler(event)
 {
@@ -357,8 +361,8 @@ function fdjtCheshire_handler(event)
       (fdjt_cheshirecountdown<=0)) {
     fdjtLog('closing window');
     clearInterval(fdjt_cheshiretimer);
-    if (fdjt_cheshirefinish)
-      fdjt_cheshirefinish();
+    if (fdjtCheshire_finish)
+      fdjtCheshire_finish();
     else window.close();}
   else if ((fdjt_cheshiresteps) &&
 	   (fdjt_cheshirecountdown)) {
@@ -369,7 +373,7 @@ function fdjtCheshire_handler(event)
   else {}
 }
 
-function fdjtStartCheshire(eltid,interval,steps)
+function fdjtCheshire_start(eltid,interval,steps)
 {
   if (typeof(interval) === 'undefined') interval=30;
   if (typeof(steps) === 'undefined') steps=interval*2;
@@ -386,7 +390,7 @@ function fdjtStartCheshire(eltid,interval,steps)
   fdjt_cheshiretimer=setInterval(fdjtCheshire_handler,(1000*interval)/steps);
 }
 
-function fdjtStopCheshire(event)
+function fdjtCheshire_stop(event)
 {
   if (fdjt_cheshireelt) {
     var msg_elt=document.getElementById('CHESHIREMSG');

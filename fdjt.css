@@ -21,6 +21,9 @@
 
 .checkspan { white-space: nowrap; cursor: pointer;}
 .checkspan[ischecked] { font-weight: bold; }
+/* This enables checkspans which have both left and right
+   display values to control which side the text appears on */
+.checkspan span.left { display: none;}
 
 /* Autoprompt classes */
 
@@ -117,7 +120,6 @@ div.completions {
   scroll: auto;}
 div.completions { display: none;}
 div.completions .completion { display: none;}
-body.hudup div.completions { display: block;}
 /* div.completions .completion { display: none;} */
 div.completions div.completion {
   clear: both;}

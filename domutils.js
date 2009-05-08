@@ -652,7 +652,7 @@ function $$(selector,cxt)
 
 function $P(selector,cxt) 
 {
-   return fdjtGetParent(cxt,selector);
+  return fdjtGetParent(cxt,selector);
 }
 
 /* Adding/Inserting nodes */

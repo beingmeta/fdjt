@@ -21,6 +21,8 @@
 var fdjt_completion_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
 var fdjt_completion_version=parseInt("$Revision: 40 $".slice(10,-1));
 
+var fdjt_trace_completion=false;
+
 /* Completion */
 
 /* This is big enough that perhaps it should be in its own file,
@@ -108,6 +110,8 @@ function fdjtComplete(input_elt,string,options)
 {
   var values=[];
   var completions=_fdjt_get_completions(input_elt);
+  if (fdjt_trace_completion)
+    fdjtLog("fdjtComplete on %s in %o from %o",string,input_elt,completions);
   if (!(completions)) return;
   var prefix=false; var nocase=false;
   if (!(string)) string=fdjtCompletionText(input_elt);
@@ -115,9 +119,9 @@ function fdjtComplete(input_elt,string,options)
   // fdjtTrace("Completing on %s from %o with %s",string,input_elt,options);
   if (typeof options === "string") {
     prefix=(options.search(/\bprefix\b/)>=0);
-    nocase=(options.search(/\bnocase\b/)>=0);}
+    matchcase=(options.search(/\bmatchcase\b/)>=0);}
   if (string==="") {}
-  else if (nocase)
+  else if (!(matchcase))
     if (typeof string === "string")
       string=new RegExp(string,"gi");
     else if (string instanceof RegExp)
@@ -129,31 +133,37 @@ function fdjtComplete(input_elt,string,options)
   var i=0; while (i<children.length) {
     var child=children[i++];
     if (child.nodeType===Node.ELEMENT_NODE) {
-      var value=false;
       var key=child.key;
       if (!(key)) {
 	key=child.getAttribute("KEY");
 	if (key) child.key=key;}
       if (key) {
+	var value=false;
 	var keys=((typeof key != "object") ? (new Array(key)) :
 		  (key instanceof Array) ? (key) : (new Array(key)));
-	// fdjtXTrace("Comparing '%s' against %o",string,keys);
+	if (fdjt_trace_completion)
+	  fdjtLog("Comparing '%s' against %o",string,keys);
 	var j=0; while ((j<keys.length) && (!(value))) {
-	  var key=keys[j++];
+	  var key=keys[j++]; 
 	  if ((prefix) ? (key.search(string)===0) :
 	      (key.search(string)>=0)) 
-	    if (child.value)
-	      value=child.value;
+	    if (child.value) {
+	      value=child.value; break;}
 	    else if (child.hasAttribute("VALUE")) {
-	      value=child.value; child.value=value;}
+	      value=child.getAttribute("VALUE");
+	      child.value=value;
+	      break;}
 	    else value=keys[0];}
+	if (fdjt_trace_completion)
+	  fdjtLog("Found %o from %s",value,string);
 	if (value) {
 	  values.push(value);
 	  child.setAttribute("displayed","yes");}
 	else child.setAttribute("displayed","no");
 	// fdjtXTrace("Processed %o",child);
       }}}
-  // fdjtTrace("Completion on %s found %o",string,values);
+  if (fdjt_trace_completion)
+    fdjtLog("Completion on %s found %o",string,values);
   if (values.length) completions.style.display='block';
   return values;
 }
@@ -209,6 +219,11 @@ function fdjtComplete_show(evt)
 	  fdjtComplete(target,value,options);},100);
 }
 
+function fdjtComplete_onfocus(evt)
+{
+  fdjtComplete(evt.target);
+}
+
 function fdjtComplete_onkeypress(evt)
 {
   var target=evt.target;
@@ -260,4 +275,5 @@ function fdjtSetCompletions(id,completions)
   current.input_elt=false;
   fdjtReplace(current,completions);
 }
+
 
