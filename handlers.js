@@ -170,7 +170,6 @@ function fdjtAutoPrompt_setup()
 	if (elt.className==='autoprompt')
 	  prompt=elt.title;
 	else continue;
-      fdjtLog('Considering '+elt+' class='+elt.className+' value='+elt.value);
       if ((elt.value=='') || (elt.value==prompt)) {
 	// fdjtLog('Marking empty');
 	elt.value=prompt;
@@ -202,7 +201,7 @@ function fdjtTab_onclick(evt,shown)
     while (elt.parentNode)
       if (fdjtHasAttrib(elt,"contentid")) break;
       else elt=elt.parentNode;
-    if (elt===null) return;
+    if ((!(elt)) || (!(elt.getAttribute))) return;
     var select_var=elt.getAttribute('selectvar');
     var content_id=elt.getAttribute('contentid');
     var content=document.getElementById(content_id);
