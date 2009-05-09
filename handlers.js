@@ -66,6 +66,7 @@ function fdjtHideHelp_onblur(evt)
 function fdjtShowHide_onclick(evt)
 {
   var target=evt.target;
+  fdjtCheshire_stop(evt);
   // fdjtLog('target='+target);
   while (target.parentNode)
     if ((fdjtHasAttrib(target,'CLICKTOHIDE')) ||
@@ -111,6 +112,7 @@ function fdjtShowHide_onclick(evt)
 function fdjtSetClear_onclick(evt)
 {
   var target=evt.target;
+  fdjtCheshire_stop(evt);
   while (target.parentNode)
     if ((fdjtHasAttrib(target,'SETONCLICK'))) {
       var toset=target.getAttribute('SETONCLICK');
@@ -194,6 +196,7 @@ function fdjtAutoPrompt_cleanup()
 function fdjtTab_onclick(evt,shown)
 {
   if (!(shown)) shown="shown";
+  fdjtCheshire_stop(evt);
   var elt=evt.target;
   if (elt) {
     while (elt.parentNode)
@@ -249,6 +252,7 @@ function fdjtAddBrowserSearchPlugin(spec,name,cat)
 function fdjtFlexpand_onclick(event)
 {
   var target=event.target; var functional=false;
+  fdjtCheshire_stop(event);
   while (target.parentNode)
     if (fdjtHasAttrib(target,'expanded')) break;
     else if (target.tagName==='A')
@@ -290,6 +294,7 @@ function _fdjt_close_window(event)
 function fdjtCheckSpan_onclick(event)
 {
   var target=event.target; var clickinput=null;
+  fdjtCheshire_stop(event);
   while (target.parentNode) {
     if (target.nodeType!=1) target=target.parentNode;
     else if (target.className==='checkspan') break;
