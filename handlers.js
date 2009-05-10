@@ -159,35 +159,33 @@ function fdjtAutoPrompt_onblur(evt)
 
 function fdjtAutoPrompt_setup()
 {
-  var elements=document.getElementsByTagName('INPUT');
+  var elements=$$('INPUT').concat($$('TEXTAREA'));
   var i=0; if (elements) while (i<elements.length) {
-    var elt=elements[i++];
-    if ((elt.type==='text') &&
-	((elt.className==='autoprompt') ||
-	 (fdjtHasAttrib(elt,'prompt')))) {
-      var prompt=elt.getAttribute('prompt');
-      if (prompt===null)
-	if (elt.className==='autoprompt')
-	  prompt=elt.title;
-	else continue;
-      if ((elt.value=='') || (elt.value==prompt)) {
-	// fdjtLog('Marking empty');
-	elt.value=prompt;
-	elt.setAttribute('isempty','yes');}
-      if ((!(elt.onfocus)) && (!(elt.getAttribute("onfocus"))))
-	elt.onfocus=fdjtAutoPrompt_onfocus;
-      if ((!(elt.onblur)) && (!(elt.getAttribute("onblur"))))
-      elt.onblur=fdjtAutoPrompt_onblur;}}
+      var elt=elements[i++];
+      if (((elt.tagName==="TEXTAREA") || (elt.type==='text')) &&
+	  ((elt.className==='autoprompt') || (fdjtHasAttrib(elt,'prompt')))) {
+	var prompt=elt.getAttribute('prompt');
+	if (prompt===null)
+	  if (fdjtHasClass(elt,'autoprompt'))
+	    prompt=elt.title;
+	  else continue;
+	if ((elt.value=='') || (elt.value==prompt)) {
+	  // fdjtLog('Marking empty');
+	  elt.value=prompt;
+	  elt.setAttribute('isempty','yes');}
+	if ((!(elt.onfocus)) && (!(elt.getAttribute("onfocus"))))
+	  elt.onfocus=fdjtAutoPrompt_onfocus;
+	if ((!(elt.onblur)) && (!(elt.getAttribute("onblur"))))
+	  elt.onblur=fdjtAutoPrompt_onblur;}}
 }
 
 // Removes autoprompt text from empty fields
 function fdjtAutoPrompt_cleanup()
 {
-  var elements=document.getElementsByTagName('INPUT');
+  var elements=$$('INPUT').concat($$('TEXTAREA'));
   var i=0; if (elements) while (i<elements.length) {
-    var elt=elements[i++];
-    if (fdjtHasAttrib(elt,'isempty'))
-      elt.value="";}
+      var elt=elements[i++];
+      if (fdjtHasAttrib(elt,'isempty')) elt.value="";}
 }
 
 /* Tabs */
@@ -296,13 +294,12 @@ function fdjtCheckSpan_onclick(event)
   fdjtCheshire_stop(event);
   while (target.parentNode) {
     if (target.nodeType!=1) target=target.parentNode;
-    else if (target.className==='checkspan') break;
+    else if (fdjtHasClass(target,'checkspan')) break;
     else if (target.tagName==='A') return;
     else if (target.tagName==='INPUT') {
       clickinput=target; target=target.parentNode;} /* return; */
     else target=target.parentNode;}
-  // if (target) fdjtLog('Found checkspan '+target);
-  if (target) {
+  if ((target) && (fdjtHasClass(target,'checkspan'))) {
     var children=target.childNodes;
     var i=0; while (i<children.length) {
       var child=children[i++];
@@ -441,7 +438,12 @@ function fdjtMultiText_onkeypress(evt,tagname)
       new_elt=value;
     else {
       new_elt=fdjtNewElement(tagname,(elt.className||"multitext"));
-      fdjtAppend(new_elt,fdjtInput("CHECKBOX",elt.name,elt.value));
+      // Just in case we're combining these two functions, it doesn't
+      // really make sense for the checkspan to have an autoprompt class
+      fdjtDropClass(new_elt,"autoprompt");
+      fdjtAddClass(new_elt,"checkspan");
+      new_elt.setAttribute("ischecked","yes");
+      fdjtAppend(new_elt,fdjtCheckbox(elt.name,elt.value,true));
       fdjtAppend(new_elt,elt.value);}
     fdjtInsertAfter(elt," ",new_elt);
     elt.value="";

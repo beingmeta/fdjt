@@ -34,6 +34,10 @@ input.autoprompt_empty {
   font-family: sans,sans-serif; font-weight: normal; font-style: italic;
   color: gray; height: 18px; }
 
+textarea.autoprompt {
+  font-family: sans,sans-serif; }
+textarea.autoprompt[isempty] { font-style: italic; color: gray;}
+
 /* Input help classes */
 
 div.helptext { display: none; }
