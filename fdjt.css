@@ -40,7 +40,23 @@ textarea.autoprompt[isempty] { font-style: italic; color: gray;}
 
 /* Input help classes */
 
+.helptext { color: purple;}
+span.helptext { display: none; }
 div.helptext { display: none; }
+td.helptext { display: none; }
+p.helptext { display: none; }
+
+body.showhelp span.helptext { display: block;}
+body.showhelp div.helptext { display: block;}
+body.showhelp td.helptext { display: table-cell;}
+body.showhelp p.helptext { display: block;}
+
+img.helpicon { 
+  padding-right: 2px; padding-left: 2px;
+  margin-left: 1px; margin-right: 0px;
+  color: yellow; background-color: gray;
+  font-size: 80%; vertical-align: middle;
+  font-weight: bold; font-style: normal;}
 
 /* Tabs */
 

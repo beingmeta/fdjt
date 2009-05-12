@@ -63,6 +63,14 @@ function fdjtHideHelp_onblur(evt)
 
 /* SHOWHIDE */
 
+var fdjt_tag_display_styles={
+  "DIV": "block","P": "block","LI": "list-item",
+  "UL": "block","BLOCKQUOTE":"block","PRE":"block",
+  "SPAN": "inline","EM": "inline","STRONG": "inline",
+  "TT": "inline","DEFN": "inline","A": "inline",
+  "TD": "table-cell","TR": "table-row"};
+  
+
 function fdjtShowHide_onclick(evt)
 {
   var target=evt.target;
@@ -97,10 +105,15 @@ function fdjtShowHide_onclick(evt)
 	    var display=elt.style.display;
 	    if ((display===null) || (display===''))
 	      display=window.getComputedStyle(elt,null).display;
-	    if (display==='none')
-	      if (fdjtBlockEltp(elt)) elt.style.display='block';
-	      else elt.style.display='inline';
-	    else elt.style.display='none';
+	    if (display==='none') {
+	      var style=((elt.fdjtSavedStyle) ||
+			 (elt.getAttribute("DISPLAYSTYLE")) ||
+			 (fdjt_tag_display_styles[elt.tagName]) ||
+			  "inline");
+	      elt.style.display=style;}
+	    else {
+	      elt.fdjtSavedStyle=elt.style.display;
+	      elt.style.display='none';}
 	    target.setAttribute('displayed',elt.style.display);}
 	  i++;}}
       return;}
