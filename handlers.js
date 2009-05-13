@@ -642,15 +642,14 @@ function fdjtScrollRestore(ss)
   if (_fdjt_preview_elt) {
     fdjtDropClass(_fdjt_preview_elt,"previewing");
     _fdjt_preview_elt=false;}
-  // fdjtXTrace("Restoring scroll from %o, saved=%o",ss,_fdjt_saved_scroll);
   if ((ss) && (ss.scrollX)) {
-    // fdjtXTrace("Restoring scroll to %d,%d",ss.scrollX,ss.scrollY);    
+    // fdjtTrace("Restoring scroll to %d,%d",ss.scrollX,ss.scrollY);    
     window.scrollTo(ss.scrollX,ss.scrollY);
     return true;}
   else if ((_fdjt_saved_scroll) &&
 	   ((_fdjt_saved_scroll.scrollY) ||
 	    (_fdjt_saved_scroll.scrollX))) {
-    // fdjtXTrace("Restoring scroll to %o",_fdjt_saved_scroll);
+    // fdjtTrace("Restoring scroll to %o",_fdjt_saved_scroll);
     window.scrollTo(_fdjt_saved_scroll.scrollX,_fdjt_saved_scroll.scrollY);
     _fdjt_saved_scroll=false;
     return true;}
@@ -664,15 +663,21 @@ function fdjtScrollDiscard(ss)
   else _fdjt_saved_scroll=false;
 }
 
-function fdjtScrollTo(target,id)
+function fdjtScrollTo(target,id,context)
 {
-  if (id)
+  if ((context) && (context.scrollIntoView)) {
+    fdjtTrace("Trying to scroll to %o under %o",target,context);
+    window.location.hash=id;
+    context.scrollIntoView(true);
+    if (!(fdjtIsVisible(target)))
+      target.scrollIntoView(true);}
+  else if (id)
     window.location.hash=id;
   else target.scrollIntoView(true);
   _fdjt_saved_scroll=false;
 }
 
-function fdjtScrollPreview(target,offset)
+function fdjtScrollPreview(target,context)
 {
   if (!(_fdjt_saved_scroll)) fdjtScrollSave();
   if ((_fdjt_preview_elt) && (_fdjt_preview_elt.className))
@@ -682,8 +687,16 @@ function fdjtScrollPreview(target,offset)
   else {
     _fdjt_preview_elt=target;
     fdjtAddClass(target,"previewing");}
-  target.scrollIntoView(true);
-  if (offset) window.scrollBy(0,offset);
+  if (!(context))
+    target.scrollIntoView(true);
+  else if (typeof context === "number") {
+    target.scrollIntoView(true);
+    window.scrollBy(0,context);}
+  else if (context.scrollIntoView) {
+    context.scrollIntoView(true);
+    if (!(fdjtIsVisible(target)))
+      target.scrollIntoView(true);}
+  else target.scrollIntoView(false);
 }
 
 /* Radio Selection */
