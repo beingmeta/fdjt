@@ -209,7 +209,9 @@ function fdjtAddClass(elt,classname,attrib)
       newinfo=newinfo.
 	replace(_fdjt_whitespace_pat," ").
 	replace(_fdjt_trimspace_pat,"");
-    if (attrib) elt.setAttribute(attrib,newinfo);
+    if (attrib) {
+      elt.setAttribute(attrib,newinfo);
+      elt.className=elt.className;}
     else elt.className=newinfo;
     return true;}
 }
@@ -249,8 +251,12 @@ function fdjtDropClass(elt,classname,attrib,keep)
 	replace(_fdjt_whitespace_pat," ").
 	replace(_fdjt_trimspace_pat,"");
     if (attrib)
-      if (newinfo) elt.setAttribute(attrib,newinfo);
-      else if (!(keep)) elt.removeAttribute(attrib);
+      if (newinfo) {
+	elt.setAttribute(attrib,newinfo);
+	elt.className=elt.className;}
+      else if (!(keep)) {
+	elt.removeAttribute(attrib);
+	elt.className=elt.className;}
       else {}
     else elt.className=newinfo;}
 }
