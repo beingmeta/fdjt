@@ -138,9 +138,10 @@ div.flexbox_expanded { max-height: inherit;}
 div.completions {
   font-size: 12px; font-family: sans,sans-serif;
   scroll: auto;}
-div.completions { display: none;}
-div.completions .completion { display: none;}
-/* div.completions .completion { display: none;} */
+.completions { display: none;}
+div.completions.open { display: block;}
+span.completions.open { display: inline;}
+
 div.completions div.completion {
   clear: both;}
 div.completions div.completion[displayed="yes"] {

@@ -120,8 +120,7 @@ function fdjtComplete(input_elt,string,options)
   if (typeof options === "string") {
     prefix=(options.search(/\bprefix\b/)>=0);
     matchcase=(options.search(/\bmatchcase\b/)>=0);}
-  if (string==="") {}
-  else if (!(matchcase))
+  if (!(matchcase))
     if (typeof string === "string")
       string=new RegExp(string,"gi");
     else if (string instanceof RegExp)
@@ -159,12 +158,10 @@ function fdjtComplete(input_elt,string,options)
 	if (value) {
 	  values.push(value);
 	  child.setAttribute("displayed","yes");}
-	else child.setAttribute("displayed","no");
-	// fdjtXTrace("Processed %o",child);
-      }}}
+	else child.setAttribute("displayed","no");}}}
   if (fdjt_trace_completion)
     fdjtLog("Completion on %s found %o",string,values);
-  if (values.length) completions.style.display='block';
+  if (values.length) fdjtAddClass(completions,'open');
   return values;
 }
 
@@ -200,7 +197,7 @@ function fdjtComplete_onclick(evt)
 	     (target.getAttribute("value")) ||
 	     (target.key));
   fdjtHandleCompletion(input_elt,value);
-  completions.style.display='none';
+  fdjtDropClass(completions,"open");
 }
 
 var _fdjt_completion_timer=false;
@@ -242,16 +239,17 @@ function fdjtComplete_onkeypress(evt)
     // ((keycode) && (keycode===0x20) && (evt.altKey))
     // Tab completion
     var results=fdjtComplete(target,value,options);
+    evt.preventDefault(); evt.cancelBubble=true;
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0]);
-      target.completions_elt.style.display='inherit';
-      evt.preventDefault(); evt.cancelBubble=true;}
+      fdjtDropClass(target.completions_elt,"open");}
     else if (results.length>0) {
-      target.completions_elt.style.display='block';}
+      fdjtAddClass(target.completions_elt,"open");}
     else {}}
   else _fdjt_completion_timer=
 	 setTimeout(function () {
 	     fdjtComplete(target,fdjtCompletionText(target),options);},100);
+  return true;
 }
 
 function fdjtComplete_hide(evt)
@@ -272,8 +270,9 @@ function fdjtSetCompletions(id,completions)
   var text_input=current.input_elt;
   text_input.completions_elt=completions;
   completions.input_elt=text_input;
-  current.input_elt=false;
+  if (current!=completions) current.input_elt=false;
   fdjtReplace(current,completions);
+  completions.id=id;
 }
 
 
