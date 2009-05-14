@@ -63,14 +63,6 @@ function fdjtHideHelp_onblur(evt)
 
 /* SHOWHIDE */
 
-var fdjt_tag_display_styles={
-  "DIV": "block","P": "block","LI": "list-item",
-  "UL": "block","BLOCKQUOTE":"block","PRE":"block",
-  "SPAN": "inline","EM": "inline","STRONG": "inline",
-  "TT": "inline","DEFN": "inline","A": "inline",
-  "TD": "table-cell","TR": "table-row"};
-  
-
 function fdjtShowHide_onclick(evt)
 {
   var target=evt.target;

@@ -89,6 +89,26 @@ function fdjtNeedElt(arg,name)
     return null;}
 }
 
+/* Getting display style information */
+
+var fdjt_tag_display_styles={
+  "DIV": "block","P": "block","LI": "list-item",
+  "UL": "block","BLOCKQUOTE":"block","PRE":"block",
+  "SPAN": "inline","EM": "inline","STRONG": "inline",
+  "TT": "inline","DEFN": "inline","A": "inline",
+  "TD": "table-cell","TR": "table-row",
+  "TABLE": "table"};
+
+function fdjtDisplayStyle(elt)
+{
+  return fdjt_tag_display_styles[elt.tagName]||"inline";
+}
+
+function fdjtBlockEltp(elt)
+{
+  return (fdjtDisplayStyle(elt)==="block");
+}
+
 /* DOMish utils */
 
 // Not sure what to have as a final clause.
@@ -114,10 +134,34 @@ function fdjtNodify(arg)
   else return document.createTextNode("#@!*%!");
 }
 
-function fdjtBlockEltp(elt)
+function fdjtTextify(arg,inside)
 {
-  var name=elt.tagName;
-  return ((name==='DIV') || (name==='P') || (name==='LI') || (name==='UL'));
+  if (arg.nodeType)
+    if (arg.nodeType===3)
+      return arg.nodeValue;
+    else if (arg.nodeType===1) {
+      var children=arg.childNodes;
+      var display_type=fdjtDisplayStyle(arg);
+      var string=""; var suffix="";
+      if (inside) {}
+      else if (!(display_type)) {}
+      else if (display_type==="inline") {}
+      else if ((display_type==="block") ||
+	       (display_type==="table")) {
+	string="\n"; suffix="\n";}
+      else if (display_style==="table-row") suffix="\n";
+      else if (display_style==="table-cell") string="\t";
+      else {}
+      var i=0; while (i<children.length) {
+	var child=children[i++];
+	if ((child.nodeType) && (child.nodeType===3))
+	  string=string+child.nodeValue;
+	else {
+	  var stringval=fdjtTextify(child);
+	  if (stringval) string=string+stringval;}}
+      return string+suffix;}
+    else return false;
+  else return false;
 }
 
 // We define this because .hasAttribute isn't everywhere
@@ -409,10 +453,11 @@ function _fdjtGetChildrenByTagName(under,tagname,results)
   if ((under.nodeType===1) && (under.tagName==tagname))
     results.push(under);
   var children=under.childNodes;
-  var i=0; while (i<children.length)
-    if (children[i].nodeType==1)
-      _fdjtGetChildrenByTagName(children[i++],tagname,results);
-    else i++;
+  if (children) {
+    var i=0; while (i<children.length)
+	       if (children[i].nodeType==1)
+		 _fdjtGetChildrenByTagName(children[i++],tagname,results);
+	       else i++;}
   return results;
 }
 
@@ -450,10 +495,11 @@ function _fdjtGetChildrenByClassName(under,classname,results)
   if ((under.nodeType===1) && (under.className===classname))
     results.push(under);
   var children=under.childNodes;
-  var i=0; while (i<children.length)
-    if (children[i].nodeType===1)
-      _fdjtGetChildrenByClassName(children[i++],classname,results);
-    else i++;
+  if (children) {
+    var i=0; while (i<children.length)
+	       if (children[i].nodeType===1)
+		 _fdjtGetChildrenByClassName(children[i++],classname,results);
+	       else i++;}
   return results;
 }     
 
@@ -516,10 +562,11 @@ function _fdjtGetChildrenByAttrib(under,attribname,results)
        (under.getAttribute(attribname))))
     results.push(under);
   var children=under.childNodes;
-  var i=0; while (i<children.length)
-    if (children[i].nodeType==1)
-      _fdjtGetChildrenByAttrib(children[i++],attribname,results);
-    else i++;
+  if (children) {
+    var i=0; while (i<children.length)
+	       if (children[i].nodeType==1)
+		 _fdjtGetChildrenByAttrib(children[i++],attribname,results);
+	       else i++;}
   return results;
 }
 function _fdjtGetChildrenByAttribValue(under,attribname,attribval,results)
@@ -528,10 +575,12 @@ function _fdjtGetChildrenByAttribValue(under,attribname,attribval,results)
       (under.getAttribute(attribname)==attribval))
     results.push(under);
   var children=under.childNodes;
-  var i=0; while (i<children.length)
-    if (children[i].nodeType==1)
-      _fdjtGetChildrenByAttrib(children[i++],attribname,attribval,results);
-    else i++;
+  if (children) {
+    var i=0; while (i<children.length)
+	       if (children[i].nodeType==1)
+		 _fdjtGetChildrenByAttribValue
+		   (children[i++],attribname,attribval,results);
+	       else i++;}
   return results;
 }
 
