@@ -108,7 +108,7 @@ function fdjtAddCompletions(div,completions,cloudp)
 
 function fdjtComplete(input_elt,string,options)
 {
-  var values=[];
+  var results=[];
   var completions=_fdjt_get_completions(input_elt);
   if (fdjt_trace_completion)
     fdjtLog("fdjtComplete on %s in %o from %o",string,input_elt,completions);
@@ -138,31 +138,33 @@ function fdjtComplete(input_elt,string,options)
 	if (key) child.key=key;}
       if (key) {
 	var value=false;
-	var keys=((typeof key != "object") ? (new Array(key)) :
-		  (key instanceof Array) ? (key) : (new Array(key)));
+	var keys=
+	  (((typeof key == "string") && (key.indexOf(';')>0))
+	   ? (key.split(';'))
+	   : ((typeof key != "object") ? (new Array(key))
+	      : ((key instanceof Array) ? (key) : (new Array(key)))));
+	if (key!=keys) child.key=keys;
 	if (fdjt_trace_completion)
 	  fdjtLog("Comparing '%s' against %o",string,keys);
 	var j=0; while ((j<keys.length) && (!(value))) {
 	  var key=keys[j++]; 
 	  if ((prefix) ? (key.search(string)===0) :
-	      (key.search(string)>=0)) 
-	    if (child.value) {
-	      value=child.value; break;}
-	    else if (child.hasAttribute("VALUE")) {
-	      value=child.getAttribute("VALUE");
-	      child.value=value;
-	      break;}
-	    else value=keys[0];}
-	if (fdjt_trace_completion)
-	  fdjtLog("Found %o from %s",value,string);
+	      (key.search(string)>=0)) {
+	    if (child.value) value=child.value;
+	    else if (fdjtHasAttrib(child,"VALUE")) 
+	      value=child.value=child.getAttribute("VALUE");
+	    else value=child.value=keys[0];
+	    break;}}
 	if (value) {
-	  values.push(value);
+	  if (fdjt_trace_completion)
+	    fdjtLog("Found %o on %o from %s",value,child,string);
+	  results.push(child);
 	  child.setAttribute("displayed","yes");}
 	else child.setAttribute("displayed","no");}}}
   if (fdjt_trace_completion)
-    fdjtLog("Completion on %s found %o",string,values);
-  if (values.length) fdjtAddClass(completions,'open');
-  return values;
+    fdjtLog("Completion on %s found %o",string,results);
+  if (results.length) fdjtAddClass(completions,'open');
+  return results;
 }
 
 function fdjtCompletionText(input_elt)
@@ -172,10 +174,14 @@ function fdjtCompletionText(input_elt)
   else return input_elt.value;
 }
 
-function fdjtHandleCompletion(input_elt,value)
+function fdjtHandleCompletion(input_elt,elt,value)
 {
-  if (input_elt.handleCompletion)
-    return input_elt.handleCompletion(value);
+  if (input_elt.oncomplete)
+    return input_elt.oncomplete.call(input_elt,elt,elt.value);
+  else if (input_elt.getAttribute("ONCOMPLETE")) {
+    input_elt.oncomplete=
+      new Function("elt","value",input_elt.getAttribute("ONCOMPLETE"));
+    return input_elt.oncomplete.call(input_elt,elt,elt.value);}
   else input_elt.value=value;
 }
 
@@ -196,7 +202,7 @@ function fdjtComplete_onclick(evt)
   var value=((target.value) ||
 	     (target.getAttribute("value")) ||
 	     (target.key));
-  fdjtHandleCompletion(input_elt,value);
+  fdjtHandleCompletion(input_elt,target,value);
   fdjtDropClass(completions,"open");
 }
 
@@ -241,7 +247,7 @@ function fdjtComplete_onkeypress(evt)
     var results=fdjtComplete(target,value,options);
     evt.preventDefault(); evt.cancelBubble=true;
     if (results.length===1) {
-      fdjtHandleCompletion(target,results[0]);
+      fdjtHandleCompletion(target,results[0],results[0].value);
       fdjtDropClass(target.completions_elt,"open");}
     else if (results.length>0) {
       fdjtAddClass(target.completions_elt,"open");}
