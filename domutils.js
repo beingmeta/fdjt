@@ -255,6 +255,7 @@ function fdjtAddClass(elt,classname,attrib)
 	replace(_fdjt_trimspace_pat,"");
     if (attrib) {
       elt.setAttribute(attrib,newinfo);
+      // This sometimes trigger a CSS update that doesn't happen otherwise
       elt.className=elt.className;}
     else elt.className=newinfo;
     return true;}
@@ -346,7 +347,8 @@ function fdjtToggleClass(elt,classname,attrib,keep)
       if (newinfo) elt.setAttribute(attrib,newinfo);
       else if (!(keep)) elt.removeAttribute(attrib);
       else elt.setAttribute(attrib,"");
-    else elt.className=newinfo;}
+    else elt.className=newinfo;
+    if (attrib) elt.className=elt.className;}
 }
 
 function fdjtSwapClass(elt,classname,newclass,attrib)
@@ -387,7 +389,8 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
     if (attrib)
       if (newinfo) elt.setAttribute(attrib,newinfo);
       else elt.removeAttribute(attrib);
-    else elt.className=newinfo;}
+    else elt.className=newinfo;
+    if (attrib) elt.className=elt.className;}
 }
 
 /* Next and previous elements */
