@@ -246,3 +246,12 @@ function fdjtOverlap(set1,set2)
   return overlap;
 }
 
+/* Converting numeric HTML entities */
+
+function fdjtUnEntify(string)
+{
+  return string.replace(/&#(\d+);/g,
+			function(whole,paren) {
+			  return String.fromCharCode(+paren);});
+}
+
