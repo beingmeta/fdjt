@@ -164,6 +164,28 @@ function fdjtTextify(arg,inside)
   else return false;
 }
 
+function fdjtHasParent(node,parent)
+{
+  while (node)
+    if (node===parent) return true;
+    else node=node.parentNode;
+  return false;
+}
+
+function fdjtHasContent(node)
+{
+  if (node.childNodes) {
+    var children=node.childNodes;
+    var i=0; while (i<children.length) {
+      var child=children[i++];
+      if (child.nodeType===3) {
+	var string=child.nodeValue;
+	if (string.search(/\w/g)>=0) return true;}}
+    return false;}
+  else return false;
+}
+
+
 // We define this because .hasAttribute isn't everywhere
 function fdjtHasAttrib(elt,attribname,attribval)
 {
@@ -1352,3 +1374,9 @@ function fdjtGetAnchor(about)
 
 fdjtLoadMessage("Loaded domutils.js");
 
+
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "cd ..; make" ***
+;;;  End: ***
+*/

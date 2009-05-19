@@ -771,3 +771,9 @@ function fdjtSetup()
 
 fdjtLoadMessage("Loaded handlers.js");
 
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "cd ..; make" ***
+;;;  End: ***
+*/
+
