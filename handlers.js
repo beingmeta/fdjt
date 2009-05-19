@@ -680,15 +680,15 @@ function fdjtScrollPreview(target,context)
     _fdjt_preview_elt=target;
     fdjtAddClass(target,"previewing");}
   if (!(context))
-    target.scrollIntoView(true);
+    target.scrollIntoView();
   else if (typeof context === "number") {
-    target.scrollIntoView(true);
+    target.scrollIntoView();
     window.scrollBy(0,context);}
   else if (context.scrollIntoView) {
-    context.scrollIntoView(true);
-    if (!(fdjtIsVisible(target)))
-      target.scrollIntoView(true);}
-  else target.scrollIntoView(false);
+    context.scrollIntoView();
+    if (!(fdjtIsVisible(target))) 
+      target.scrollIntoView();}
+  else target.scrollIntoView();
 }
 
 /* Radio Selection */
