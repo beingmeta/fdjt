@@ -923,6 +923,12 @@ function fdjtWithId(elt,id)
   return elt;
 }
 
+function fdjtId(elt,id)
+{
+  elt.id=id;
+  return elt;
+}
+
 function fdjtWithTitle(elt,title)
 {
   elt.title=title;

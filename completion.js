@@ -167,6 +167,14 @@ function fdjtComplete(input_elt,string,options)
   return results;
 }
 
+function fdjtForceComplete(input_elt)
+{
+  var completions=fdjtComplete(input_elt,false,false);
+  if (completions.length===1)
+    fdjtHandleCompletion(input_elt,completions[0],false);
+    
+}
+
 function fdjtCompletionText(input_elt)
 {
   if (input_elt.getCompletionText)
@@ -177,12 +185,12 @@ function fdjtCompletionText(input_elt)
 function fdjtHandleCompletion(input_elt,elt,value)
 {
   if (input_elt.oncomplete)
-    return input_elt.oncomplete.call(input_elt,elt,elt.value);
+    return input_elt.oncomplete.call(input_elt,elt,value||elt.value);
   else if (input_elt.getAttribute("ONCOMPLETE")) {
     input_elt.oncomplete=
       new Function("elt","value",input_elt.getAttribute("ONCOMPLETE"));
-    return input_elt.oncomplete.call(input_elt,elt,elt.value);}
-  else input_elt.value=value;
+    return input_elt.oncomplete.call(input_elt,elt,value||elt.value);}
+  else input_elt.value=value||elt.value;
 }
 
 function fdjtComplete_onclick(evt)
@@ -246,6 +254,8 @@ function fdjtComplete_onkeypress(evt)
     // Tab completion
     var results=fdjtComplete(target,value,options);
     evt.preventDefault(); evt.cancelBubble=true;
+    target.setAttribute
+      ("ncompletions",new String(results.length));
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0],results[0].value);
       fdjtDropClass(target.completions_elt,"open");}
@@ -281,4 +291,8 @@ function fdjtSetCompletions(id,completions)
   completions.id=id;
 }
 
-
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "cd ..; make" ***
+;;;  End: ***
+*/
