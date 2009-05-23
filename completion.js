@@ -22,6 +22,7 @@ var fdjt_completion_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
 var fdjt_completion_version=parseInt("$Revision: 40 $".slice(10,-1));
 
 var fdjt_trace_completion=false;
+var fdjt_detail_completion=false;
 
 /* Completion */
 
@@ -106,70 +107,91 @@ function fdjtAddCompletions(div,completions,cloudp)
   return div;
 }
 
-function fdjtComplete(input_elt,string,options)
+function fdjtComplete(input_elt,string,options,exact)
 {
   var results=[];
   var completions=_fdjt_get_completions(input_elt);
-  if (fdjt_trace_completion)
+  var maxcomplete=
+    input_elt.maxcomplete||fdjtCacheAttrib(input_elt,"maxcomplete");
+  var n_complete=0;
+  if (fdjt_detail_completion)
     fdjtLog("fdjtComplete on %s in %o from %o",string,input_elt,completions);
   if (!(completions)) return;
   var prefix=false; var nocase=false;
   if (!(string)) string=fdjtCompletionText(input_elt);
   if (!(options)) options=input_elt.getAttribute("COMPLETEOPTS")||"";
   // fdjtTrace("Completing on %s from %o with %s",string,input_elt,options);
+  if (!(exact)) exact=false;
   if (typeof options === "string") {
     prefix=(options.search(/\bprefix\b/)>=0);
     matchcase=(options.search(/\bmatchcase\b/)>=0);}
-  if (!(matchcase))
-    if (typeof string === "string")
-      string=new RegExp(string,"gi");
-    else if (string instanceof RegExp)
-      string=new RegExp(string.source,"gi");
-    else throw { name: "TypeError",
-	     irritant: string,
-	     expected: "string or regex"};
-  var children=completions.childNodes;
-  var i=0; while (i<children.length) {
-    var child=children[i++];
-    if (child.nodeType===Node.ELEMENT_NODE) {
-      var key=child.key;
-      if (!(key)) {
-	key=child.getAttribute("KEY");
-	if (key) child.key=key;}
-      if (key) {
-	var value=false;
-	var keys=
-	  (((typeof key == "string") && (key.indexOf(';')>0))
-	   ? (key.split(';'))
-	   : ((typeof key != "object") ? (new Array(key))
-	      : ((key instanceof Array) ? (key) : (new Array(key)))));
-	if (key!=keys) child.key=keys;
-	if (fdjt_trace_completion)
-	  fdjtLog("Comparing '%s' against %o",string,keys);
-	var j=0; while ((j<keys.length) && (!(value))) {
-	  var key=keys[j++]; 
-	  if ((prefix) ? (key.search(string)===0) :
-	      (key.search(string)>=0)) {
-	    if (child.value) value=child.value;
-	    else if (fdjtHasAttrib(child,"VALUE")) 
-	      value=child.value=child.getAttribute("VALUE");
-	    else value=child.value=keys[0];
-	    break;}}
-	if (value) {
-	  if (fdjt_trace_completion)
-	    fdjtLog("Found %o on %o from %s",value,child,string);
-	  results.push(child);
-	  child.setAttribute("displayed","yes");}
-	else child.setAttribute("displayed","no");}}}
+  if (string==="") {
+    var children=completions.childNodes;
+    var i=0; while (i<children.length) {
+      var child=children[i++];
+      if (child.nodeType===Node.ELEMENT_NODE) {
+	n_complete++;
+	results.push(child);
+	if ((maxcomplete==false) || (n_complete<max_complete))
+	  child.setAttribute("displayed","yes");}}}
+  else {
+    if (exact) {
+      if (!(matchcase)) string=string.toLowerCase();}
+    else if (!(matchcase))
+      if (typeof string === "string")
+	string=new RegExp(string,"gi");
+      else if (string instanceof RegExp)
+	string=new RegExp(string.source,"gi");
+      else throw { name: "TypeError",
+	       irritant: string,
+	       expected: "string or regex"};
+    var children=completions.childNodes;
+    var i=0; while (i<children.length) {
+      var child=children[i++];
+      if (child.nodeType===Node.ELEMENT_NODE) {
+	var keys=child.key||fdjtCacheAttrib(child,"keys",fdjtSemiSplit);
+	if (keys) {
+	  var value=false;
+	  if (fdjt_detail_completion)
+	    fdjtLog("Comparing '%s' against %o",string,keys);
+	  var j=0; while ((j<keys.length) && (!(value))) {
+	    var key=keys[j++]; 
+	    if ((exact) ?
+		((matchcase) ? (key===string) : (key.toLowerCase()===string)) :
+		((prefix) ? (key.search(string)===0) :
+		 (key.search(string)>=0))) {
+	      if (child.value) value=child.value;
+	      else if (fdjtHasAttrib(child,"VALUE")) 
+		value=child.value=child.getAttribute("VALUE");
+	      else value=child.value=keys[0];
+	      break;}}
+	  if (value) {
+	    if (fdjt_trace_completion)
+	      fdjtLog("Found %o on %o from %s",value,child,string);
+	    n_complete++;
+	    results.push(child);
+	    if ((maxcomplete==false) ||
+		(n_complete<max_complete))
+	      child.setAttribute("displayed","yes");
+	    
+	    else child.setAttribute("displayed","no");}
+	  else child.setAttribute("displayed","no");}}}}
   if (fdjt_trace_completion)
-    fdjtLog("Completion on %s found %o",string,results);
+    if (string==="")
+      fdjtLog("Completion on empty string returned all %d results",
+	      string,results.length);
+    else fdjtLog("Completion on '%s' found %o",string,results);
   if (results.length) fdjtAddClass(completions,'open');
   return results;
 }
-
-function fdjtForceComplete(input_elt)
+  
+  function fdjtForceComplete(input_elt)
 {
-  var completions=fdjtComplete(input_elt,false,false);
+  var completions=fdjtComplete(input_elt,false,false,true);
+  if (completions.length!=1)
+    completions=fdjtComplete(input_elt,false,false,false);
+  if (fdjt_trace_completion)
+    fdjtLog("Trying to force completion on %o:",input_elt,completions);
   if (completions.length===1)
     fdjtHandleCompletion(input_elt,completions[0],false);
     
@@ -184,6 +206,9 @@ function fdjtCompletionText(input_elt)
 
 function fdjtHandleCompletion(input_elt,elt,value)
 {
+  if (fdjt_trace_completion)
+    fdjtLog("Handling completion on %o with %o (%o):",
+	    input_elt,elt,value);
   if (input_elt.oncomplete)
     return input_elt.oncomplete.call(input_elt,elt,value||elt.value);
   else if (input_elt.getAttribute("ONCOMPLETE")) {
@@ -252,7 +277,9 @@ function fdjtComplete_onkeypress(evt)
       ((charcode) && (char_vec.indexOf(charcode)>=0))) {
     // ((keycode) && (keycode===0x20) && (evt.altKey))
     // Tab completion
-    var results=fdjtComplete(target,value,options);
+    var results=fdjtComplete(target,value,options,true);
+    if (results.length!=1)
+      results=fdjtComplete(target,value,options);
     evt.preventDefault(); evt.cancelBubble=true;
     target.setAttribute
       ("ncompletions",new String(results.length));
