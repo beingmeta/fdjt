@@ -658,14 +658,15 @@ function fdjtScrollDiscard(ss)
 function fdjtScrollTo(target,id,context)
 {
   if ((context) && (context.scrollIntoView)) {
-    fdjtTrace("Trying to scroll to %o under %o",target,context);
-    window.location.hash=id;
-    context.scrollIntoView(true);
+    // We try to get context and target on the screen at the same time.
+    // fdjtTrace("Trying to scroll to %o under %o",target,context);
+    if (id) window.location.hash=id;
+    context.scrollIntoView();
     if (!(fdjtIsVisible(target)))
-      target.scrollIntoView(true);}
+      target.scrollIntoView();}
   else if (id)
     window.location.hash=id;
-  else target.scrollIntoView(true);
+  else target.scrollIntoView();
   _fdjt_saved_scroll=false;
 }
 
