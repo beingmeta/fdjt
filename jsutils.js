@@ -90,6 +90,35 @@ function fdjtRemove(array,value,count)
   return array;
 }
 
+/* Maintaining inverted indices of values */
+
+function fdjtIndexAdd(index,object,rel,value)
+{
+  var subindex;
+  if (!(subindex=index[rel])) {
+    subindex={}; index[rel]=subindex;}
+  if (subindex[value])
+    if (subindex[value].indexOf(object)>=0) {}
+    else subindex[value].push(object);
+  else subindex[value]=new Array(object);
+}
+
+function fdjtIndexDrop(index,object,rel,value)
+{
+  var subindex; var vals; var pos;
+  if (!(subindex=index[rel])) return;
+  if (vals=subindex[value])
+    if ((pos=(vals.indexOf(object)))>=0)
+      subindex[value]=vals.splice(pos,1);
+}
+
+function fdjtIndexFind(index,rel,value)
+{
+  var subindex;
+  if (!(subindex=index[rel])) return [];
+  else return subindex[value]|[];
+}
+
 /* Turning an arguments object into an array. */
 
 function fdjtArguments(argobj,start)
