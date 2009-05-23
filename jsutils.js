@@ -24,14 +24,20 @@ var fdjt_jsutils_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
 var fdjt_jsutils_version=parseInt("$Revision: 40 $".slice(10,-1));
 
 
-function fdjtAdd(object,field,value)
+function fdjtAdd(object,field,value,nodup)
 {
   var values;
-  if (values=object[field]) 
-    if (values.indexOf(value)<0)  
-      object[field].push(value);
-    else {}
+  if (nodup) 
+    if (values=object[field]) 
+      if (values.indexOf(value)<0)  
+	object[field].push(value);
+      else {}
+    else object[field]=new Array(value);
+  else if (object[field])
+    object[field].push(value);
   else object[field]=new Array(value);
+  if ((object._all) && (object._all.indexOf(field)<0))
+    object._all.push(field);
 }
 
 function fdjtDrop(object,field,value)
@@ -255,3 +261,14 @@ function fdjtUnEntify(string)
 			  return String.fromCharCode(+paren);});
 }
 
+/* Other utility functions */
+
+function fdjtSemiSplit(string)
+{
+  return string.split(';');
+}
+
+function fdjtLineSplit(string)
+{
+  return string.split('\n');
+}
