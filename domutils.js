@@ -185,6 +185,7 @@ function fdjtHasContent(node)
   else return false;
 }
 
+/* Attribute functions of various sorts */
 
 // We define this because .hasAttribute isn't everywhere
 function fdjtHasAttrib(elt,attribname,attribval)
@@ -200,6 +201,21 @@ function fdjtHasAttrib(elt,attribname,attribval)
   else if ((elt.getAttribute) &&
 	   (elt.getAttribute(attribname)==attribval))
     return true;
+  else return false;
+}
+
+// We define this because .hasAttribute isn't everywhere
+function fdjtCacheAttrib(elt,attribname,xform,dflt)
+{
+  var aval;
+  if (aval=elt[attribname]) return aval;
+  else if (aval=elt.getAttribute(attribname)) {
+    var val=((xform) ? (xform(aval)) : (aval));
+    elt[attribname]=val;
+    return val;}
+  else if (dflt) {
+    elt[attribname]=dflt;
+    return dflt;}
   else return false;
 }
 
