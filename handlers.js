@@ -68,48 +68,41 @@ function fdjtShowHide_onclick(evt)
   var target=evt.target;
   fdjtCheshire_stop(evt);
   // fdjtLog('target='+target);
-  while (target.parentNode)
-    if ((fdjtHasAttrib(target,'CLICKTOHIDE')) ||
-	(fdjtHasAttrib(target,'CLICKTOSHOW')) ||
-	(fdjtHasAttrib(target,'CLICKTOTOGGLE'))) {
-      var tohide=target.getAttribute('CLICKTOHIDE');
-      var toshow=target.getAttribute('CLICKTOSHOW');
-      var toflip=target.getAttribute('CLICKTOTOGGLE');
-      if (tohide) tohide=tohide.split(',');
-      if (toshow) toshow=toshow.split(',');
-      if (toflip) toflip=toflip.split(',');
-      if (tohide) {
-	var i=0; while (i<tohide.length) {
-	  var elt=document.getElementById(tohide[i]); 
-	  if (elt) elt.style.display='none';
-	  i++;}}
-      if (toshow) {
-	var i=0; while (i<toshow.length) {
-	  var elt=document.getElementById(toshow[i]); 
-	  if (elt)
-	    if (fdjtBlockEltp(elt)) elt.style.display='block';
-	    else elt.style.display='block';
-	  i++;}}
-      if (toflip) {
-	var i=0; while (i<toflip.length) {
-	  var elt=document.getElementById(toflip[i]);
-	  if (elt) {
-	    var display=elt.style.display;
-	    if ((display===null) || (display===''))
-	      display=window.getComputedStyle(elt,null).display;
-	    if (display==='none') {
-	      var style=((elt.fdjtSavedStyle) ||
-			 (elt.getAttribute("DISPLAYSTYLE")) ||
-			 (fdjt_tag_display_styles[elt.tagName]) ||
-			  "inline");
-	      elt.style.display=style;}
-	    else {
-	      elt.fdjtSavedStyle=elt.style.display;
-	      elt.style.display='none';}
-	    target.setAttribute('displayed',elt.style.display);}
-	  i++;}}
-      return;}
-    else target=target.parentNode;
+  while (target.parentNode) {
+    var tohide=fdjtCacheAttrib(target,"clicktohide",fdjtGetIds);
+    var toshow=fdjtCacheAttrib(target,"clicktoshow",fdjtGetIds);
+    var totoggle=fdjtCacheAttrib(target,"clicktotoggle",fdjtGetIds);
+    if (tohide) {
+      var i=0; while (i<tohide.length) {
+	var elt=tohide[i++]; 
+	if (elt) elt.style.display='none';}}
+    if (toshow) {
+      var i=0; while (i<toshow.length) {
+	var elt=toshow[++i]; 
+	if (elt)
+	  if (fdjtBlockEltp(elt)) elt.style.display='block';
+	  else elt.style.display='block';}}
+    if (totoggle) {
+      var i=0; while (i<totoggle.length) {
+	var elt=totoggle[i++];
+	if (elt) {
+	  var display=elt.style.display;
+	  if ((display===null) || (display===''))
+	    display=window.getComputedStyle(elt,null).display;
+	  if (display==='none') {
+	    var style=((elt.fdjtSavedStyle) ||
+		       (elt.getAttribute("DISPLAYSTYLE")) ||
+		       (fdjt_tag_display_styles[elt.tagName]) ||
+		       "inline");
+	    elt.style.display=style;}
+	  else {
+	    elt.fdjtSavedStyle=elt.style.display;
+	    elt.style.display='none';}
+	  target.setAttribute('displayed',elt.style.display);}}}
+    if ((tohide) || (toshow) || (totoggle)) {
+      evt.preventDefault(); evt.cancelBubble=true;
+      return false;}
+    target=target.parentNode;}
 }
 
 /* SETCLEAR */

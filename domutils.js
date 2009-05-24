@@ -219,6 +219,18 @@ function fdjtCacheAttrib(elt,attribname,xform,dflt)
   else return false;
 }
 
+// This takes a series of space or separated elt ids and resolves
+// them
+function fdjtGetIds(string)
+{
+  var elts=string.split(/;|\W/g);
+  var results=[];
+  var i=0; while (i<elts.length) {
+    var elt=document.getElementById(elts[i++]);
+    if (elt) results.push(elt);}
+  return results;
+}
+
 /* This is a kludge which is probably not very portable */
 
 function fdjtRedisplay(arg)
