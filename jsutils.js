@@ -24,51 +24,43 @@ var fdjt_jsutils_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
 var fdjt_jsutils_version=parseInt("$Revision: 40 $".slice(10,-1));
 
 
-function fdjtAdd(object,field,value,nodup)
+function fdjtAdd(obj,field,val,nodup)
 {
-  var values;
   if (nodup) 
-    if (values=object[field]) 
-      if (values.indexOf(value)<0)  
-	object[field].push(value);
-      else {}
-    else object[field]=new Array(value);
-  else if (object[field])
-    object[field].push(value);
-  else object[field]=new Array(value);
-  if ((object._all) && (object._all.indexOf(field)<0))
-    object._all.push(field);
+    if (obj.hasOwnProperty(field)) {
+      var vals=obj[field];
+      if (vals.indexOf(val)<0)  
+	obj[field].push(val);
+      else {}}
+    else obj[field]=new Array(val);
+  else if (obj.hasOwnProperty(field))
+    obj[field].push(val);
+  else obj[field]=new Array(val);
+  if ((obj._all) && (obj._all.indexOf(field)<0))
+    obj._all.push(field);
 }
 
-function fdjtDrop(object,field,value)
+function fdjtDrop(obj,field,val)
 {
-  var values;
-  if (!(value))
-    /* Drop all values */
-    if ((values=object[field])) {
-      object[field]=values=new Array();
-      values._nvals=0;}
-    else {}
-  else if ((values=object[field])) {
-    var pos=values.indexOf(value);
+  if (!(val))
+    /* Drop all vals */
+    obj[field]=new Array();
+  else if (obj.hasOwnProperty(field)) {
+    var vals=obj[field];
+    var pos=vals.indexOf(val);
     if (pos<0) return;
-    if (nvals===0) return;
-    else if (nvals===1) 
-      object[field]=values=new Array();
-    else values.splice(pos,1);}
+    else vals.splice(pos,1);}
   else {}
 }
 
-function fdjtTest(object,field,value)
+function fdjtTest(obj,field,val)
 {
-  var values;
-  if (!(value))
-    if ((object[field]) &&
-	(object[field].length>0))
-      return true;
-    else return false;
-  else if ((values=object[field])) 
-    if (values.indexOf(value)<0)
+  var vals;
+  if (typeof val === "undefined")
+    return ((obj.hasOwnProperty(field)) &&
+	    ((obj[field].length)>0));
+  else if (obj.hasOwnProperty(field)) 
+    if (obj[field].indexOf(val)<0)
       return false;
     else return true;
   else return false;
@@ -92,31 +84,39 @@ function fdjtRemove(array,value,count)
 
 /* Maintaining inverted indices of values */
 
-function fdjtIndexAdd(index,object,rel,value)
+function fdjtIndexAdd(index,obj,rel,val)
 {
   var subindex;
-  if (!(subindex=index[rel])) {
+  if (index.hasOwnProperty(rel)) 
+    subindex=index[rel];
+  else {
     subindex={}; index[rel]=subindex;}
-  if (subindex[value])
-    if (subindex[value].indexOf(object)>=0) {}
-    else subindex[value].push(object);
-  else subindex[value]=new Array(object);
+  if (subindex.hasOwnProperty(val)) {
+    var objects=subindex[val];
+    if (objects.indexOf(obj)<0)
+      objects.push(obj);}
+  else subindex[val]=new Array(obj);
 }
 
-function fdjtIndexDrop(index,object,rel,value)
+function fdjtIndexDrop(index,obj,rel,val)
 {
   var subindex; var vals; var pos;
-  if (!(subindex=index[rel])) return;
-  if (vals=subindex[value])
-    if ((pos=(vals.indexOf(object)))>=0)
-      subindex[value]=vals.splice(pos,1);
+  if (index.hasOwnProperty(rel)) {
+    var subindex=index[rel];
+    if (subindex.hasOwnProperty(val)) {
+      var objects=subindex[val]; var pos;
+      if ((pos=objects.indexOf(obj))>=0)
+	subindex[val]=objects.splice(pos,1);}}
 }
 
-function fdjtIndexFind(index,rel,value)
+function fdjtIndexFind(index,rel,val)
 {
   var subindex;
-  if (!(subindex=index[rel])) return [];
-  else return subindex[value]|[];
+  if (index.hasOwnProperty(rel)) {
+    var subindex=index[rel];
+    if (subindex.hasOwnProperty(val))
+      return subindex[val];}
+  return [];
 }
 
 /* Turning an arguments object into an array. */
