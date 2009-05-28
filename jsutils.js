@@ -327,11 +327,14 @@ function fdjtStringToKCodes(string)
 {
   var vec=[];
   var i=0; while (i<string.length) {
-    if (string[i]==="[") {
+    if (string[i]==="\\") {
+      vec.push(string.charCodeAt(i+1));
+      i=i+2;}
+    else if (string[i]==="[") {
       var end=string.indexOf("]",i+1);
       if (end<0) {
-	vec.push(string.charCodeAt(i+1));
-	i=i+2;}
+	fdjtWarn("Unmatched [ in KCode spec %s",string);
+	i=i+1;}
       else {
 	var probe=string.slice(i+1,end);
 	fdjtTrace("probe=%s, vec=%o",probe,vec);

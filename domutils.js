@@ -134,14 +134,21 @@ function fdjtNodify(arg)
   else return document.createTextNode("#@!*%!");
 }
 
-function fdjtTextify(arg,inside)
+// These are selectors (<tag,class,id,attrib> vectors)
+//  for nodes which don't include any text.
+var fdjt_notext_rules=[];
+
+function fdjtTextify(arg,flat,inside)
 {
   if (arg.nodeType)
     if (arg.nodeType===3)
       return arg.nodeValue;
     else if (arg.nodeType!==1) return false;
-    else if ((arg.fdjtNoText) || (arg.getAttribute("NOTEXTIFY")))
-      return false;
+    else if ((arg.fdjtNoText) ||
+	     (arg.getAttribute("NOTEXTIFY")) ||
+	     (fdjtElementMatches(arg,fdjt_notext_rules))) {
+      arg.fdjtNoText=true;
+      return false;}
     else {
       var children=arg.childNodes;
       var display_type=fdjtDisplayStyle(arg);
@@ -151,6 +158,7 @@ function fdjtTextify(arg,inside)
       if (!(inside)) {}
       else if (!(display_type)) {}
       else if (display_type==="inline") {}
+      else if (flat) suffix=" ";
       else if ((display_type==="block") ||
 	       (display_type==="table")) {
 	string="\n"; suffix="\n";}
@@ -162,7 +170,7 @@ function fdjtTextify(arg,inside)
 	if ((child.nodeType) && (child.nodeType===3))
 	  string=string+child.nodeValue;
 	else {
-	  var stringval=fdjtTextify(child,true);
+	  var stringval=fdjtTextify(child,flat,true);
 	  if (stringval) string=string+stringval;}}
       return string+suffix;}
   else return false;
@@ -233,6 +241,17 @@ function fdjtGetIds(string)
     var elt=document.getElementById(elts[i++]);
     if (elt) results.push(elt);}
   return results;
+}
+
+// This gets a META content field
+function fdjtGetMeta(name)
+{
+  var elts=document.getElementsByTagName("META");
+  var i=0; while (i<elts.length)
+	     if ((elts[i]) && (elts[i].name===name))
+	       return elts[i].content;
+	     else i++;
+  return false;
 }
 
 /* This is a kludge which is probably not very portable */
@@ -666,31 +685,40 @@ function fdjtParseSelector(spec)
   if ((tagname==="") || (tagname==="*")) tagname=null;
   if ((classname==="") || (classname==="*")) tagname=null;
   if ((idname==="") || (idname==="*")) tagname=null;
-  return new Array(tagname,classname,idname);
+  return new Array("selector",tagname,classname,idname);
 }
 
 function fdjtElementMatches(elt,selector)
 {
-  if (selector instanceof Array) {
-    var i=0; while (i<spec.length)
+  if (!(selector)) return false;
+  else if (typeof selector === "string") {
+    var spec=fdjtParseSelector(selector);
+    return (((spec[1]===null) || (elt.tagName===spec[1])) &&
+	    ((spec[2]===null) || (spec[2]===elt.className) ||
+	     (elt.className.search(_fdjtclasspat(spec[2]))>=0)) &&
+	    ((spec[3]===null) || (elt.id===spec[3])));}
+  else if (!(selector instanceof Array)) return false;
+  else if (selector.length===0) return false;
+  else if (selector[0]==="selector") {
+    var spec=selector;
+    return (((spec[1]===null) || (elt.tagName===spec[1])) &&
+	    ((spec[2]===null) || (spec[2]===elt.className) ||
+	     (elt.className.search(_fdjtclasspat(spec[2]))>=0)) &&
+	    ((spec[3]===null) || (elt.id===spec[3])));}
+  else {
+    var i=0; while (i<selector.length)
 	       if (fdjtElementMatches(elt,selector[i]))
 		 return true;
 	       else i++;
     return false;}
-  else {
-    var spec=fdjtParseSelector(selector);
-    return (((spec[0]===null) || (elt.tagName===spec[0])) &&
-	    ((spec[1]===null) || (spec[1]===elt.className) ||
-	     (elt.className.search(_fdjtclasspat(spec[1]))>=0)) &&
-	    ((spec[2]===null) || (elt.id===spec[2])));}
 }
 
 function fdjtElementMatchesSpec(elt,spec)
 {
-  return (((spec[0]===null) || (elt.tagName===spec[0])) &&
-	  ((spec[1]===null) || (spec[1]===elt.className) ||
-	   (elt.className.search(_fdjtclasspat(spec[1]))>=0)) &&
-	  ((spec[2]===null) || (elt.id===spec[2])));
+  return (((spec[1]===null) || (elt.tagName===spec[1])) &&
+	  ((spec[2]===null) || (spec[2]===elt.className) ||
+	   (elt.className.search(_fdjtclasspat(spec[2]))>=0)) &&
+	  ((spec[3]===null) || (elt.id===spec[3])));
 }
 
 function fdjtGetParents(elt,selector,results)
@@ -724,17 +752,17 @@ function fdjtGetParent(elt,selector)
 function fdjtGetChildren(elt,selector,results)
 {
   if (!(results)) results=new Array();
-  if ((typeof selector === "object") &&
-      (selector instanceof Array)) {
-    var i=0; while (i<selector.length)
-	       fdjtGetChildren(elt,selector[i++],results);
-    return results;}
-  else {
-    var spec=fdjtParseSelector(selector);
-    if (spec[2]) {
-      var candidate=document.getElementById(spec[2]);
+  if (typeof selector === "string")
+    selector=fdjtParseSelector(selector);
+  if (!((typeof selector === "object") &&
+	(selector instanceof Array) &&
+	(selector.length>0)))
+    return results;
+  else if (selector[0]==="selector") {
+    if (selector[3]) {
+      var candidate=document.getElementById(selector[3]);
       if (candidate)
-	if (fdjtElemenMatchesSpec(candidate,spec)) {
+	if (fdjtElementMatchesSpec(candidate,selector)) {
 	  var scan=candidate;
 	  while (scan)
 	    if (scan===elt) break;
@@ -742,18 +770,23 @@ function fdjtGetChildren(elt,selector,results)
 	  if (scan===elt) results.push(candidate);
 	  return results;}
 	else return results;}
-    else if (spec[1]) {
-      var candidates=fdjtGetChildrenByClassName(elt,spec[1]);
+    else if (selector[2]) {
+      var candidates=fdjtGetChildrenByClassName(elt,selector[2]);
       var i=0; while (i<candidates.length) {
 	var candidate=candidates[i++];
-	if (fdjtElementMatchesSpec(candidate,spec))
+	if (fdjtElementMatchesSpec(candidate,selector))
 	  results.push(candidate);}
       return results;}
-    else if (spec[0]) {
-      var candidates=fdjtGetChildrenByTagName(elt,spec[0]);
-      var i=0; while (i<candidates.length) results.push(candidates[i++]);
+    else if (selector[1]) {
+      var candidates=fdjtGetChildrenByTagName(elt,selector[1]);
+      var i=0; while (i<candidates.length)
+		 results.push(candidates[i++]);
       return results;}
     else return results;}
+  else {
+    var i=0; while (i<selector.length)
+	       fdjtGetChildren(elt,selector[i++],results);
+    return results;}
 }
 
 function $$(selector,cxt) 
@@ -1197,85 +1230,25 @@ function fdjtFlatWidth(node,sofar)
   return _fdjt_compute_flat_width(node,sofar);
 }
 
-/* CLeaning up markup */
+/* Transplanting nodes */
 
-
-/* Cleaning up headers for the HUD */
+var fdjt_transplant_rules=[];
 
-var fdjt_cleanup_tags=["A","BR","HR"];
-var fdjt_cleanup_classes=[];
-
-function _fdjt_cleanup_tags(elt,name)
+function fdjtTransplant(orig,transplant_rules,use_defaults)
 {
-  var toremove=fdjtGetChildrenByTagName(name);
-  var i=0; while (i<toremove.length) fdjtRemove(toremove[i++]);
-}
-
-function _fdjt_cleanup_classes(elt,classname)
-{
-  var toremove=fdjtGetChildrenByClassName(classname);
-  var i=0; while (i<toremove.length) fdjtRemove(toremove[i++]);
-}
-
-function _fdjt_cleanup_content(elt)
-{
-  var tagname=elt.tagName, classname=elt.className;
-  if (fdjt_cleanup_tags.indexOf(tagname)>=0)
+  if ((transplant_rules) && (fdjtElementMatches(orig,transplant_rules)))
     return false;
-  else if ((classname) &&
-	   ((fdjt_cleanup_classes.indexOf(classname))>=0))
+  else if (((!(transplant_rules)) || (use_defaults)) &&
+	   (fdjtElementMatches(orig,fdjt_transplant_rules)))
     return false;
-  else {
-    var i=0; while (i<fdjt_cleanup_tags.length)
-	       _fdjt_cleanup_tags(elt,fdjt_cleanup_tags[i++]);
-    i=0; while (i<fdjt_cleanup_classes.length)
-	   _fdjt_cleanup_classes(elt,fdjt_cleanup_classes[i++]);
-    return elt;}
-}
-
-function fdjt_cleanup_content(elt)
-{
-  var contents=new Array();
-  var children=elt.childNodes;
-  var i=0; while (i<children.length) {
-    var child=children[i++];
-    if (child.nodeType===1) {
-      var converted=_fdjt_cleanup_content(child.cloneNode(true));
-      if (converted) contents.push(converted);}
-    else contents.push(child.cloneNode(true));}
-  return contents;
-}
-
-/* Getting simple text */
-
-function _fdjt_extract_strings(node,strings)
-{
-  if (node.nodeType===Node.TEXT_NODE) {
-    var value=node.nodeValue;
-    if (typeof value === "string") 
-      strings.push(node.nodeValue);}
-  else if (node.nodeType===Node.ELEMENT_NODE)
-    if (fdjt_cleanup_tags.indexOf(node.tagName)>=0) {}
-    else if ((node.className) &&
-	     (fdjt_cleanup_classes.indexOf(node.className)>=0)) {}
-    else if (node.hasChildNodes()) {
-      var children=node.childNodes;
-      var i=0; while (i<children.length) {
-	var child=children[i++];
-	if (child.nodeType===Node.TEXT_NODE) {
-	  var value=child.nodeValue;
-	  if (typeof value === "string") strings.push(value);}
-	else if (child.nodeType===Node.ELEMENT_NODE)
-	  _fdjt_extract_strings(child,strings);
-	else {}}}
-    else  {}
-}
-
-function fdjtJustText(node)
-{
-  var strings=new Array();
-  _fdjt_extract_strings(node,strings);
-  return strings.join("");
+  var node=orig.cloneNode(true);
+  if (transplant_rules) {
+    var toremove=fdjtGetChildren(node,transplant_rules);
+    var i=0; while (i<toremove.length) fdjtRemove(toremove[i++]);}
+  if ((!(transplant_rules)) || (use_defaults)) {
+    var toremove=fdjtGetChildren(node,fdjt_transplant_rules);
+    var i=0; while (i<toremove.length) fdjtRemove(toremove[i++]);}
+  return node;
 }
 
 /* Looking up elements, CSS-style, in tables */
@@ -1408,6 +1381,26 @@ function fdjtGetAnchor(about)
   var probe=fdjtGuessAnchor(about);
   if (probe) return probe;
   else return fdjtForceId(about);
+}
+
+/* Various set up things */
+
+var fdjt_domutils_setup=false;
+
+function fdjtDomutils_setup()
+{
+  if (fdjt_domutils_setup) return;
+  fdjt_transplant_rules.push(fdjtParseSelector("A"));
+  fdjt_transplant_rules.push(fdjtParseSelector("BR"));
+  fdjt_transplant_rules.push(fdjtParseSelector("HR"));
+  var textless=fdjtGetMeta("DOM:TEXTFREE");
+  if (textless) {
+    textless=textless.split(';');
+    var i=0; while (i<textless.length) {
+      var sel=fdjtParseSelector(textless[i++]);
+      fdjt_transplant_rules.push(sel);
+      fdjt_notext_rules.push(sel);}}
+  fdjt_domutils_setup=true;
 }
 
 fdjtLoadMessage("Loaded domutils.js");

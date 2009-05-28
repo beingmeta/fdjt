@@ -761,6 +761,7 @@ function fdjtSetup()
   if (fdjt_setup_started) return;
   fdjt_setup_started=true;
   fdjtLog("fdjtSetup running");
+  fdjtDomutils_setup();
   fdjtAutoPrompt_setup();
   fdjtCheckSpan_setup(null);
   fdjtAdjustFontSizes();

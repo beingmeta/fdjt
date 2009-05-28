@@ -267,12 +267,12 @@ function fdjtComplete_onkeypress(evt)
   var charcode=evt.charCode;
   var value=fdjtCompletionText(target);
   var options=(target.getAttribute("COMPLETEOPTS")||"");
-  var complete_chars=
+  var cchars=
     fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[32,-13]);    
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
-  if (((keycode) && (char_vec.indexOf(-keycode)>=0)) ||
-      ((charcode) && (char_vec.indexOf(charcode)>=0))) {
+  if (((keycode) && (cchars.indexOf(-keycode)>=0)) ||
+      ((charcode) && (cchars.indexOf(charcode)>=0))) {
     // ((keycode) && (keycode===0x20) && (evt.altKey))
     // Tab completion
     var results=fdjtComplete(target,value,options,true);
