@@ -301,3 +301,20 @@ function fdjtLineSplit(string)
 {
   return string.split('\n');
 }
+
+function fdjtStringTrim(string)
+{
+  var start=string.search(/\b/g); var end=string.search(/\B\$/g);
+  if ((start===0) && (end<0)) return string;
+  else return string.slice(start,end);
+}
+
+fdjtLoadMessage("Loaded jsutils.js");
+
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "cd ..; make" ***
+;;;  End: ***
+*/
+
+

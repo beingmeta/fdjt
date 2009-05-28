@@ -194,7 +194,6 @@ function fdjtComplete(input_elt,string,options,exact)
     fdjtLog("Trying to force completion on %o:",input_elt,completions);
   if (completions.length===1)
     fdjtHandleCompletion(input_elt,completions[0],false);
-    
 }
 
 function fdjtCompletionText(input_elt)
@@ -213,7 +212,8 @@ function fdjtHandleCompletion(input_elt,elt,value)
     return input_elt.oncomplete.call(input_elt,elt,value||elt.value);
   else if (input_elt.getAttribute("ONCOMPLETE")) {
     input_elt.oncomplete=
-      new Function("elt","value",input_elt.getAttribute("ONCOMPLETE"));
+      new Function("elt","value",
+		   input_elt.getAttribute("ONCOMPLETE"));
     return input_elt.oncomplete.call(input_elt,elt,value||elt.value);}
   else input_elt.value=value||elt.value;
 }
@@ -223,7 +223,7 @@ function fdjtComplete_onclick(evt)
   var target=evt.target;
   // fdjtLog("complete onclick %o",target);
   while (target)
-    if (target.key) break;
+    if ((target.keys) || (target.getAttribute('keys'))) break;
     else target=target.parentNode;
   if (!(target)) return;
   var completions=target;
@@ -234,7 +234,7 @@ function fdjtComplete_onclick(evt)
   var input_elt=completions.input_elt;
   var value=((target.value) ||
 	     (target.getAttribute("value")) ||
-	     (target.key));
+	     (target.keys));
   fdjtHandleCompletion(input_elt,target,value);
   fdjtDropClass(completions,"open");
 }

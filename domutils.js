@@ -139,11 +139,16 @@ function fdjtTextify(arg,inside)
   if (arg.nodeType)
     if (arg.nodeType===3)
       return arg.nodeValue;
-    else if (arg.nodeType===1) {
+    else if (arg.nodeType!==1) return false;
+    else if ((arg.fdjtNoText) || (arg.getAttribute("NOTEXTIFY")))
+      return false;
+    else {
       var children=arg.childNodes;
       var display_type=fdjtDisplayStyle(arg);
       var string=""; var suffix="";
-      if (inside) {}
+      // Figure out what suffix and prefix to use for this element
+      // If inside is false, don't use anything.
+      if (!(inside)) {}
       else if (!(display_type)) {}
       else if (display_type==="inline") {}
       else if ((display_type==="block") ||
@@ -157,10 +162,9 @@ function fdjtTextify(arg,inside)
 	if ((child.nodeType) && (child.nodeType===3))
 	  string=string+child.nodeValue;
 	else {
-	  var stringval=fdjtTextify(child);
+	  var stringval=fdjtTextify(child,true);
 	  if (stringval) string=string+stringval;}}
       return string+suffix;}
-    else return false;
   else return false;
 }
 
@@ -1407,7 +1411,6 @@ function fdjtGetAnchor(about)
 }
 
 fdjtLoadMessage("Loaded domutils.js");
-
 
 /* Emacs local variables
 ;;;  Local variables: ***
