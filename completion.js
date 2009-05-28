@@ -267,13 +267,11 @@ function fdjtComplete_onkeypress(evt)
   var charcode=evt.charCode;
   var value=fdjtCompletionText(target);
   var options=(target.getAttribute("COMPLETEOPTS")||"");
-  var complete_chars=((target.getAttribute("COMPLETECHARS"))||"\t");
-  var char_vec=[];
-  var i=0; while (i<complete_chars.length)
-    char_vec.push(complete_chars.charCodeAt(i++));
+  var complete_chars=
+    fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[32,-13]);    
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
-  if (((keycode) && (char_vec.indexOf(keycode)>=0)) ||
+  if (((keycode) && (char_vec.indexOf(-keycode)>=0)) ||
       ((charcode) && (char_vec.indexOf(charcode)>=0))) {
     // ((keycode) && (keycode===0x20) && (evt.altKey))
     // Tab completion

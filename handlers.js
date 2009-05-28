@@ -425,9 +425,14 @@ function fdjtTextInput_onkeypress(evt,handler)
 }
 function fdjtMultiText_onkeypress(evt,tagname)
 {
+  var enter_chars=
+    fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[-13]);
   if (!(tagname)) tagname="span";
   var ch=evt.charCode, kc=evt.keyCode;
-  if (kc===13) {
+  if ((kc===13)||
+      ((enter_chars) && (enter_chars.indexOf) &&
+       ((enter_chars.indexOf(ch)>=0) ||
+	(enter_chars.indexOf(-kc)>=0)))) {
     var elt=evt.target; var value, new_elt;
     if (elt.value==="") return;
     if (elt.handleMultiText) 
@@ -445,6 +450,7 @@ function fdjtMultiText_onkeypress(evt,tagname)
       fdjtAppend(new_elt,elt.value);}
     fdjtInsertAfter(elt," ",new_elt);
     elt.value="";
+    evt.preventDefault(); evt.cancelBubble=true;
     return false;}
   else return;
 }

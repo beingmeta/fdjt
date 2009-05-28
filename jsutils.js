@@ -309,6 +309,42 @@ function fdjtStringTrim(string)
   else return string.slice(start,end);
 }
 
+/* Getting key/char codes */
+
+var _fdjt_char_codes={
+  "enter":13,"tab":9,"backspace":8,"esc":27,
+  "shift":16,"ctrl":17,"alt":17,"break":19,
+  "capslock":20,"pageup":33,"pagedown":33,
+  "end":34,"home":36,"custom":91,
+  "leftarrow":37,"rightarrow":39,
+  "uparrow":38,"downarrow":40,
+  "insert":45,"delete":46};
+
+/* This converts a string into a vector of integers with
+   positive numbers representing character codes and negative
+   numbers representing keycodes. */
+function fdjtStringToKCodes(string)
+{
+  var vec=[];
+  var i=0; while (i<string.length) {
+    if (string[i]==="[") {
+      var end=string.indexOf("]",i+1);
+      if (end<0) {
+	vec.push(string.charCodeAt(i+1));
+	i=i+2;}
+      else {
+	var probe=string.slice(i+1,end);
+	fdjtTrace("probe=%s, vec=%o",probe,vec);
+	if (typeof _fdjt_char_codes[probe] === "number") 
+	  vec.push(-(_fdjt_char_codes[probe]));
+	else if (typeof parseInt(probe,16) === "number")
+	  vec.push(-(parseInt(probe)));
+	i=end+1;}}
+    else vec.push(string.charCodeAt(i++));}
+  return vec;
+}
+
+
 fdjtLoadMessage("Loaded jsutils.js");
 
 /* Emacs local variables
