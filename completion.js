@@ -109,6 +109,8 @@ function fdjtAddCompletions(div,completions,cloudp)
 
 function fdjtComplete(input_elt,string,options,exact)
 {
+  if (!(string)) string=fdjtCompletionText(input_elt);
+  if (!(options)) options=input_elt.getAttribute("COMPLETEOPTS")||"";
   var results=[];
   var completions=_fdjt_get_completions(input_elt);
   var maxcomplete=
@@ -118,22 +120,20 @@ function fdjtComplete(input_elt,string,options,exact)
     fdjtLog("fdjtComplete on %s in %o from %o",string,input_elt,completions);
   if (!(completions)) return;
   var prefix=false; var nocase=false;
-  if (!(string)) string=fdjtCompletionText(input_elt);
-  if (!(options)) options=input_elt.getAttribute("COMPLETEOPTS")||"";
-  // fdjtTrace("Completing on %s from %o with %s",string,input_elt,options);
   if (!(exact)) exact=false;
   if (typeof options === "string") {
     prefix=(options.search(/\bprefix\b/)>=0);
     matchcase=(options.search(/\bmatchcase\b/)>=0);}
   if (string==="") {
-    var children=completions.childNodes;
-    var i=0; while (i<children.length) {
-      var child=children[i++];
-      if (child.nodeType===Node.ELEMENT_NODE) {
-	n_complete++;
-	results.push(child);
-	if ((maxcomplete==false) || (n_complete<max_complete))
-	  child.setAttribute("displayed","yes");}}}
+    if (fdjt_trace_completion) fdjtLog("Completion on empty string");
+    var all_completions=$$(".completion",completions);
+    var results=[];
+    var i=0; while (i<all_completions.length) {
+      var completion=all_completions[i++];
+      completion.setAttribute("displayed","yes");
+      results.push(completion);}
+    fdjtAddClass(completions,"showall");
+    return results;}
   else {
     if (exact) {
       if (!(matchcase)) string=string.toLowerCase();}
@@ -177,18 +177,15 @@ function fdjtComplete(input_elt,string,options,exact)
 	    else child.setAttribute("displayed","no");}
 	  else child.setAttribute("displayed","no");}}}}
   if (fdjt_trace_completion)
-    if (string==="")
-      fdjtLog("Completion on empty string returned all %d results",
-	      string,results.length);
-    else fdjtLog("Completion on '%s' found %o",string,results);
+    fdjtLog("Completion on '%s' found %o",string,results);
   if (results.length) fdjtAddClass(completions,'open');
   return results;
 }
   
-  function fdjtForceComplete(input_elt)
+function fdjtForceComplete(input_elt)
 {
   var completions=fdjtComplete(input_elt,false,false,true);
-  if (completions.length!=1)
+  if (completions.length!=1) 
     completions=fdjtComplete(input_elt,false,false,false);
   if (fdjt_trace_completion)
     fdjtLog("Trying to force completion on %o:",input_elt,completions);
@@ -205,6 +202,8 @@ function fdjtCompletionText(input_elt)
 
 function fdjtHandleCompletion(input_elt,elt,value)
 {
+  if (_fdjt_completion_timer) 
+    clearTimeout(_fdjt_completion_timer);
   if (fdjt_trace_completion)
     fdjtLog("Handling completion on %o with %o (%o):",
 	    input_elt,elt,value);
@@ -221,10 +220,13 @@ function fdjtHandleCompletion(input_elt,elt,value)
 function fdjtComplete_onclick(evt)
 {
   var target=evt.target;
-  // fdjtLog("complete onclick %o",target);
+  // fdjtTrace("complete onclick %o",target);
   while (target)
-    if ((target.keys) || (target.getAttribute('keys'))) break;
+    if ((target.key) ||
+	((target.getAttribute) &&
+	 (target.getAttribute('key')))) break;
     else target=target.parentNode;
+  // fdjtTrace("complete onclick %o",target);
   if (!(target)) return;
   var completions=target;
   while (completions)
@@ -234,7 +236,7 @@ function fdjtComplete_onclick(evt)
   var input_elt=completions.input_elt;
   var value=((target.value) ||
 	     (target.getAttribute("value")) ||
-	     (target.keys));
+	     (target.key));
   fdjtHandleCompletion(input_elt,target,value);
   fdjtDropClass(completions,"open");
 }
@@ -305,6 +307,10 @@ function fdjtComplete_hide(evt)
 function fdjtSetCompletions(id,completions)
 {
   var current=document.getElementById(id);
+  if (fdjt_trace_completion)
+    fdjtLog("Setting current completions #%s=%o to %o/%d",
+	    id,current,completions,
+	    $$(".completion",completions).length);
   if (!(current)) {
     fdjtWarn("Can't find current completions #%s",id);
     return;}

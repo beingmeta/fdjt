@@ -760,14 +760,12 @@ function fdjtSetup()
 {
   if (fdjt_setup_started) return;
   fdjt_setup_started=true;
-  fdjtLog("fdjtSetup running");
   fdjtDomutils_setup();
   fdjtAutoPrompt_setup();
   fdjtCheckSpan_setup(null);
   fdjtAdjustFontSizes();
   fdjtMarkReduced();
   fdjt_setup_done=true;
-  fdjtLog("fdjtSetup run");
 }
 
 fdjtLoadMessage("Loaded handlers.js");

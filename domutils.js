@@ -804,18 +804,31 @@ function $P(selector,cxt)
 
 function fdjtAddElements(elt,elts,i)
 {
+  var curstring=false;
   if (elt===null) return null;
   while (i<elts.length) {
-    var arg=elts[i++];
-    if (!(arg)) {}
-    else if (typeof arg == 'string')
-      elt.appendChild(document.createTextNode(arg));
-    else if (arg instanceof Array) {
-      var j=0; while (j<arg.length) {
-	var toadd=arg[j++];
-	if (!(toadd)) {}
-	else elt.appendChild(fdjtNodify(toadd));}}
-    else elt.appendChild(fdjtNodify(arg));}
+    var arg=elts[i++]; 
+    if (!(arg)) continue;
+    else if ((typeof arg === 'string') || (typeof arg === "number")) {
+      if (curstring) curstring=curstring+arg;
+      else if (typeof arg === 'string')
+	curstring=arg;
+      else curstring=arg.toString();
+      continue;}
+    else {
+      if (curstring) {
+	elt.appendChild(document.createTextNode(curstring));
+	curstring=false;}
+      if (arg.nodeType) elt.appendChild(arg);
+      else if ((typeof arg === "object") &&
+	       (arg instanceof Array)) {
+	var j=0; while (j<arg.length) {
+	  var toadd=arg[j++];
+	  if (!(toadd)) {}
+	  else elt.appendChild(fdjtNodify(toadd));}}
+      else elt.appendChild(fdjtNodify(arg));}}
+  if (curstring)
+    elt.appendChild(document.createTextNode(curstring));
   return elt;
 }
 
