@@ -168,7 +168,9 @@ function fdjtComplete(input_elt,string,options,exact)
 	      else if (fdjtHasAttrib(child,"VALUE")) 
 		value=child.value=child.getAttribute("VALUE");
 	      else value=child.value=keys[0];
-	      break;}}
+	      break;}
+	    /* If exact is 2, just match the first key. */
+	    if (exact===2) break;}
 	  if (value) {
 	    if (fdjt_trace_completion)
 	      fdjtLog("Found %o on %o from %s",value,child,string);
@@ -187,15 +189,21 @@ function fdjtComplete(input_elt,string,options,exact)
   
 function fdjtForceComplete(input_elt)
 {
-  var completions=fdjtComplete(input_elt,false,false,true);
-  if (completions.length!=1) 
-    completions=fdjtComplete(input_elt,false,false,false);
+  var completions=fdjtComplete(input_elt,false,false,2);
+  if (completions.length!=1) {
+    completions=fdjtComplete(input_elt,false,false,true);
+    if ((!completions) || (completions.length==0))
+      completions=fdjtComplete(input_elt,false,false,false);
+    if ((completions) && (completions.length>0)) 
+      fdjtHandleCompletion(input_elt,completions[0],false);
+    return;}
   if (fdjt_trace_completion)
     fdjtLog("Trying to force completion on %o:",input_elt,completions);
   if (completions.length===1)
     fdjtHandleCompletion(input_elt,completions[0],false);
 }
 
+ 
 function fdjtCompletionText(input_elt)
 {
   if (input_elt.getCompletionText)
