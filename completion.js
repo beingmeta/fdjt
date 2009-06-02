@@ -114,7 +114,7 @@ function fdjtComplete(input_elt,string,options,exact)
   var results=[];
   var completions=_fdjt_get_completions(input_elt);
   var maxcomplete=
-    input_elt.maxcomplete||fdjtCacheAttrib(input_elt,"maxcomplete");
+    input_elt.maxcomplete||fdjtCacheAttrib(input_elt,"maxcomplete",false,false);
   var n_complete=0;
   if (fdjt_detail_completion)
     fdjtLog("fdjtComplete on %s in %o from %o",string,input_elt,completions);
@@ -130,7 +130,11 @@ function fdjtComplete(input_elt,string,options,exact)
     var results=[];
     var i=0; while (i<all_completions.length) {
       var completion=all_completions[i++];
-      completion.setAttribute("displayed","yes");
+      if (maxcomplete===false)
+	completion.setAttribute("displayed","yes");
+      else if (i<maxcomplete)
+	completion.setAttribute("displayed","yes");
+      else completion.setAttribute("displayed","no");
       results.push(completion);}
     fdjtAddClass(completions,"showall");
     return results;}
@@ -170,10 +174,9 @@ function fdjtComplete(input_elt,string,options,exact)
 	      fdjtLog("Found %o on %o from %s",value,child,string);
 	    n_complete++;
 	    results.push(child);
-	    if ((maxcomplete==false) ||
-		(n_complete<max_complete))
+	    if ((maxcomplete===false) ||
+		(n_complete<maxcomplete))
 	      child.setAttribute("displayed","yes");
-	    
 	    else child.setAttribute("displayed","no");}
 	  else child.setAttribute("displayed","no");}}}}
   if (fdjt_trace_completion)
