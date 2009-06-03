@@ -189,12 +189,13 @@ function fdjtComplete(input_elt,string,options,exact)
   
 function fdjtForceComplete(input_elt)
 {
+  if (input_elt.value==="") return;
   var completions=fdjtComplete(input_elt,false,false,2);
   if (completions.length!=1) {
     completions=fdjtComplete(input_elt,false,false,true);
     if ((!completions) || (completions.length==0))
       completions=fdjtComplete(input_elt,false,false,false);
-    if ((completions) && (completions.length>0)) 
+    if ((completions) && (completions.length==1)) 
       fdjtHandleCompletion(input_elt,completions[0],false);
     return;}
   if (fdjt_trace_completion)
@@ -250,6 +251,7 @@ function fdjtComplete_onclick(evt)
 	     (target.key));
   fdjtHandleCompletion(input_elt,target,value);
   fdjtDropClass(completions,"open");
+  input_elt.focus();
 }
 
 var _fdjt_completion_timer=false;

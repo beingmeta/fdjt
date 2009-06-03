@@ -669,7 +669,7 @@ function fdjtScrollTo(target,id,context)
   _fdjt_saved_scroll=false;
 }
 
-function fdjtScrollPreview(target,context)
+function fdjtScrollPreview(target,context,delta)
 {
   if (!(_fdjt_saved_scroll)) fdjtScrollSave();
   if ((_fdjt_preview_elt) && (_fdjt_preview_elt.className))
@@ -681,14 +681,13 @@ function fdjtScrollPreview(target,context)
     fdjtAddClass(target,"previewing");}
   if (!(context))
     target.scrollIntoView();
-  else if (typeof context === "number") {
-    target.scrollIntoView();
-    window.scrollBy(0,context);}
   else if (context.scrollIntoView) {
     context.scrollIntoView();
     if (!(fdjtIsVisible(target))) 
-      target.scrollIntoView();}
+      target.scrollIntoView();
+    else return;}
   else target.scrollIntoView();
+  if (delta) window.scrollBy(0,delta);
 }
 
 /* Radio Selection */
