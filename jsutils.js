@@ -348,6 +348,51 @@ function fdjtStringToKCodes(string)
 }
 
 
+/* Internationalization */
+
+var fdjt_language='en';
+var fdjt_translations={};
+var fdjt_default_translations={};
+fdjt_translations.en=fdjt_default_translations;
+
+function _(string)
+{
+  var fmt=fdjt_translations[string]||string;
+  if (arguments.length===1)
+    return fmt;
+  else {
+    var output=""; var scan=0; var next=fmt.indexOf('%',scan);
+    while ((next>=0) && (next>scan)) {
+      if (fmt[next+1]==="%") {
+	next=fmt.indexOf('%',next+2); continue;}
+      else {
+	var numlen=fmt.slice(next+1).search(/\D/);
+	if (numlen===0) {
+	  next=fmt.indexOf('%',next+2); continue;}
+	output=output+fmt.slice(scan,next);
+	var num=((numlen<0)?(parseInt(fmt.slice(next+1))):
+		 (parseInt(fmt.slice(next+1,next+1+numlen))));
+	if (num>arguments.length)
+	  output=output+"??";
+	else {
+	  var arg=arguments[num];
+	  if (typeof arg === "object")
+	    if (arg.toHuman)
+	      output=output+arg.toHuman(fdjt_language);
+	    else if (arg.toFDJTString)
+	      output=output+arg.toFDJTString();
+	    else output=output+arg;
+	  else output=output+arg;
+	  if (numlen<0) scan=fmt.length;
+	  else scan=next+1+numlen;}
+	next=fmt.indexOf('%',scan);}}
+    output=output+fmt.slice(scan);
+    return output;}
+}
+
+
+/* All done, just begun */
+
 fdjtLoadMessage("Loaded jsutils.js");
 
 /* Emacs local variables
