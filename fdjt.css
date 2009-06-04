@@ -141,6 +141,18 @@ div.completions {
 .completions { display: none;}
 div.completions.open { display: block;}
 span.completions.open { display: inline;}
+div.completions .completion { display: none;}
+div.completions .completion .variation { 
+  font-size: 80%; display: none;}
+div.completions .completion .variation[displayed="yes"] { 
+  font-size: 80%; display: none;}
+div.completions .completion[displayed="no"] .variation[displayed="yes"] { 
+  display: none;}
+
+div.completions .completion[displayed="yes"] span.variation[displayed="yes"] { 
+  display: inline;}
+div.completions .completion[displayed="yes"] div.variation[displayed="yes"] { 
+  display: block;}
 
 div.completions div.completion {
   clear: both;}

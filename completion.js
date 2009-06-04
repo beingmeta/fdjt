@@ -26,21 +26,54 @@ var fdjt_detail_completion=false;
 
 /* Completion */
 
-/* This is big enough that perhaps it should be in its own file,
-   but it's living here for now. */
+var FDJT_COMPLETE_OPTIONS=1;
+var FDJT_COMPLETE_CLOUD=2;
+var FDJT_COMPLETE_PREFIX=4;
+var FDJT_COMPLETE_MATCHCASE=8;
+var FDJT_COMPLETE_SHOWVARY=16;
 
+var fdjt_complete_options=FDJT_COMPLETE_OPTIONS;
+
+function _fdjt_get_complete_opts(arg)
+{
+  if (!(arg)) return fdjt_complete_options;
+  else if (typeof arg === "number") return arg;
+  else if (typeof arg === "string") {
+    var opt=
+      (((arg.search(/\bprefix\b/)<0)?(0):((FDJT_COMPLETE_PREFIX)))|
+       ((arg.search(/\bmatchcase\b/)<0)?(0):((FDJT_COMPLETE_MATCHCASE)))|
+       ((arg.search(/\bcloud\b/)<0)?(0):((FDJT_COMPLETE_CLOUD)))|
+       ((arg.search(/\bvary\b/)<0)?(0):((FDJT_COMPLETE_SHOWVARY)))|1);
+    // fdjtTrace("Getting complete options from %o=%o",arg,opt);
+    return opt;}
+  else if (arg.completeopts)
+    return arg.completeopts;
+  else if (arg.getAttribute) {
+    var opts=_fdjt_get_complete_opts(arg.getAttribute("completeopts"));
+    arg.completeopts=opts;
+    // fdjtTrace("Got completeopts for %o %o/%o",arg,opts,arg.completeopts);
+    return opts;}
+  else return fdjt_complete_options;
+}
+
+
+// This gets the completions element for an input element
+// A completion element is a "cloud" if new completions are typically
+// spans rather than divs.
 function _fdjt_get_completions(input_elt,create)
 {
-  var cloudp=((input_elt.getAttribute("COMPLETEOPTS")) &&
-	      (input_elt.getAttribute("COMPLETEOPTS").
-	       search(/\bcloud\b/)>=0));
   if (input_elt.completions_elt)
+    // For fast access, cache it or put it here
     return input_elt.completions_elt;
   else if (input_elt.getAttribute("COMPLETIONS")) {
+    // This is the case where the COMPLETIONS element is
+    // the ID of another element
     var elt=$(input_elt.getAttribute("COMPLETIONS"));
     if (!(elt))
-      if (create) elt=fdjtCompletions
-		    (input_elt.getAttribute("COMPLETIONS"),[],cloudp);
+      if (create)
+	elt=fdjtCompletions
+	  (input_elt.getAttribute("COMPLETIONS"),[],
+	   _fdjt_get_complete_opts(input_elt));
       else return false;
     input_elt.completions_elt=elt;
     elt.input_elt=input_elt;
@@ -50,23 +83,24 @@ function _fdjt_get_completions(input_elt,create)
     var elt=$(id);
     input_elt.setAttribute("COMPLETIONS",id);
     if (!(elt))
-      if (create) elt=fdjtCompletions(id,[],cloudp);
+      if (create)
+	elt=fdjtCompletions(id,[],_fdjt_get_complete_opts(input_elt));
       else return false;
     elt.input_elt=input_elt;
     input_elt.completions_elt=elt;
    return elt;}
 }
 
-function fdjtCompletions(id,completions,cloudp)
+function fdjtCompletions(id,completions,opts)
 {
   var div=fdjtDiv("completions");
   div.id=id;
   div.onclick=fdjtComplete_onclick;
-  fdjtAddCompletions(div,completions,cloudp);
+  fdjtAddCompletions(div,completions,opts);
   return div;
 }
 
-function fdjtAddCompletions(div,completions,cloudp)
+function fdjtAddCompletions(div,completions,opts)
 {
   if (typeof div === "string") div=document.getElementById(div);
   if (!(div.nodeType))
@@ -98,7 +132,8 @@ function fdjtAddCompletions(div,completions,cloudp)
 	if (completion.title) title=completion.title;}
       if (key) {
 	var completion_elt=
-	  ((cloudp) ? (fdjtSpan("completion",content)):
+	  ((opts&FDJT_COMPLETE_CLOUD) ?
+	   (fdjtSpan("completion",content)):
 	   (fdjtDiv("completion",content)));
 	completion_elt.key=key;
 	completion_elt.value=value;
@@ -107,11 +142,15 @@ function fdjtAddCompletions(div,completions,cloudp)
   return div;
 }
 
-function fdjtComplete(input_elt,string,options,exact)
+// This looks for completions matching *string* among the completions
+//  associated with input_elt.  Note that *string* might not be the value
+//  of input_elt, but might just be a component returned by fdjtCompletionText.
+function fdjtComplete(input_elt,string,options,all)
 {
   if (!(string)) string=fdjtCompletionText(input_elt);
-  if (!(options)) options=input_elt.getAttribute("COMPLETEOPTS")||"";
-  var results=[];
+  if (!(options))
+    options=input_elt.completeopts||_fdjt_get_complete_opts(input_elt);
+  var results=[]; var exact_results=[]; var head_results=[];
   var completions=_fdjt_get_completions(input_elt);
   var maxcomplete=
     input_elt.maxcomplete||fdjtCacheAttrib(input_elt,"maxcomplete",false,false);
@@ -119,11 +158,9 @@ function fdjtComplete(input_elt,string,options,exact)
   if (fdjt_detail_completion)
     fdjtLog("fdjtComplete on %s in %o from %o",string,input_elt,completions);
   if (!(completions)) return;
-  var prefix=false; var nocase=false;
+  var prefix=(options&FDJT_COMPLETE_PREFIX);
+  var matchcase=(options&FDJT_COMPLETE_MATCHCASE);
   if (!(exact)) exact=false;
-  if (typeof options === "string") {
-    prefix=(options.search(/\bprefix\b/)>=0);
-    matchcase=(options.search(/\bmatchcase\b/)>=0);}
   if (string==="") {
     if (fdjt_trace_completion) fdjtLog("Completion on empty string");
     var all_completions=$$(".completion",completions);
@@ -137,73 +174,100 @@ function fdjtComplete(input_elt,string,options,exact)
       else completion.setAttribute("displayed","no");
       results.push(completion);}
     fdjtAddClass(completions,"showall");
-    return results;}
+    return new Array(results,[],[]);}
   else {
-    if (exact) {
-      if (!(matchcase)) string=string.toLowerCase();}
-    else if (!(matchcase))
-      if (typeof string === "string")
-	string=new RegExp(string,"gi");
-      else if (string instanceof RegExp)
-	string=new RegExp(string.source,"gi");
-      else throw { name: "TypeError",
-	       irritant: string,
-	       expected: "string or regex"};
-    var children=completions.childNodes;
+    var qstring; var qpat=false;
+    if (typeof string !== "string")
+      throw {name: "TypeError",irritant: string,expected: "string or regex"};
+    else if (matchcase)
+      qpat=qstring=string;
+    else {qpat=new RegExp(string,"gi"); qstring=string.toLowerCase();}
+    var children=fdjtGetChildrenByClassName(completions,"completion");
     var i=0; while (i<children.length) {
       var child=children[i++];
-      if (child.nodeType===Node.ELEMENT_NODE) {
-	var keys=child.key||fdjtCacheAttrib(child,"keys",fdjtSemiSplit);
-	if (keys) {
-	  var value=false;
-	  if (fdjt_detail_completion)
-	    fdjtLog("Comparing '%s' against %o",string,keys);
-	  var j=0; while ((j<keys.length) && (!(value))) {
-	    var key=keys[j++]; 
-	    if ((exact) ?
-		((matchcase) ? (key===string) : (key.toLowerCase()===string)) :
-		((prefix) ? (key.search(string)===0) :
-		 (key.search(string)>=0))) {
-	      if (child.value) value=child.value;
-	      else if (fdjtHasAttrib(child,"VALUE")) 
-		value=child.value=child.getAttribute("VALUE");
-	      else value=child.value=keys[0];
-	      break;}
-	    /* If exact is 2, just match the first key. */
-	    if (exact===2) break;}
-	  if (value) {
-	    if (fdjt_trace_completion)
-	      fdjtLog("Found %o on %o from %s",value,child,string);
-	    n_complete++;
-	    results.push(child);
-	    if ((maxcomplete===false) ||
-		(n_complete<maxcomplete))
-	      child.setAttribute("displayed","yes");
-	    else child.setAttribute("displayed","no");}
-	  else child.setAttribute("displayed","no");}}}}
+      var found=false; var exact=false; var head=false;
+      var key=child.key||fdjtCacheAttrib(child,"key");
+      if ((matchcase) ? (key===qstring) : (key.toLowerCase()===qstring)) {
+	found=true; exact=true; head=true;}
+      else if ((prefix) ? (key.search(qpat)===0) : (key.search(qpat)>=0)) {
+	found=true; head=true;}
+      /* We iterate over variants in any case, because we may want to
+	 hide them if their displayed from a past completion. */
+      var variants=fdjtGetChildrenByClassName(child,"variation");
+      if (variants.length)
+	if (found) {
+	  // Make all the variants be unshown, just in case
+	  var j=0; while (i<variants.length)
+		     variants[j++].setAttribute("displayed","no");}
+	else {
+	  /* Look for a matching variant */
+	  var j=0; while (j<variants.length) {
+	    var variant=variants[j++]; 
+	    var key=variant.key||fdjtCacheAttrib(variant,"key");
+	    if ((found) && (exact))
+	      variant.setAttribute("displayed","no");
+	    else if ((matchcase)?
+		     (key===qstring) :
+		     (key.toLowerCase()===qstring)) {
+	      found=true; exact=true;}
+	    else if (found) {}
+	    else if ((prefix) ?
+		     (key.search(qpat)===0) :
+		     (key.search(qpat)>=0)) {
+	      variant.setAttribute("displayed","yes");
+	      found=true;}}}
+      if (found) {
+	n_complete++; 
+	if (exact) exact_results.push(child);
+	if (head) head_results.push(child);
+	else results.push(child);
+	if ((maxcomplete===false) ||
+	    (n_complete<maxcomplete))
+	  child.setAttribute("displayed","yes");
+	else child.setAttribute("displayed","no");}
+      else child.setAttribute("displayed","no");}}
+  var len=head_results.length+results.length;
   if (fdjt_trace_completion)
-    fdjtLog("Completion on '%s' found %o",string,results);
-  if (results.length) fdjtAddClass(completions,'open');
-  return results;
+    fdjtLog("Completion on '%s' (%d) found %d: %o/%o",
+	    string,options,len,head_results,results);
+  /* This lets us do styling on the rough number of attributes */
+  completions.setAttribute
+    ("ncompletions",
+     ((len===0) ? "none" :
+      (len===1) ? "one" :
+      (len<=5) ? "five" :
+      (len<=10) ? "ten" :
+      (len<=15) ? "fifteen" :
+      (len<=20) ? "twenty" :
+      (len<=30) ? "thirty" :
+      (len<=40) ? "forty" :
+      (len<=50) ? "fifty" :
+      (len<=60) ? "sixty" :
+      (len<=70) ? "seventy" :
+      "many"));
+  /* Update the class name if there are any results, or just set it
+     to trigger some redisplay (kludge). */
+  if (len) fdjtAddClass(completions,'open');
+  else completions.className=completions.className;
+  if (all) {
+    head_results.concat(results);
+    return head_results;}
+  else if (exact_results.length)
+    return exact_results;
+  else return head_results.concat(results);
 }
   
+// This 'forces' a completion presumably when the user indicates a decisive
+// action (like a return) as opposed to milder requests.
 function fdjtForceComplete(input_elt)
 {
   if (input_elt.value==="") return;
-  var completions=fdjtComplete(input_elt,false,false,2);
-  if (completions.length!=1) {
-    completions=fdjtComplete(input_elt,false,false,true);
-    if ((!completions) || (completions.length==0))
-      completions=fdjtComplete(input_elt,false,false,false);
-    if ((completions) && (completions.length==1)) 
-      fdjtHandleCompletion(input_elt,completions[0],false);
-    return;}
   if (fdjt_trace_completion)
     fdjtLog("Trying to force completion on %o:",input_elt,completions);
-  if (completions.length===1)
+  var completions=fdjtComplete(input_elt,false,false);
+  if ((completions) && (completions.length==1)) 
     fdjtHandleCompletion(input_elt,completions[0],false);
 }
-
  
 function fdjtCompletionText(input_elt)
 {
@@ -261,13 +325,13 @@ function fdjtComplete_show(evt)
   var target=evt.target;
   var keycode=evt.keyCode;
   var value=fdjtCompletionText(target);
-  var options=(target.getAttribute("COMPLETEOPTS")||"");
+  var options=target.completeopts||_fdjt_get_complete_opts(target);
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
   if (value!="")
     fdjt_completion_timer=
       setTimeout(function () {
-	  fdjtComplete(target,value,options);},100);
+	  fdjtComplete(target,value,options,true);},100);
 }
 
 function fdjtComplete_onfocus(evt)
@@ -281,26 +345,19 @@ function fdjtComplete_onkeypress(evt)
   var keycode=evt.keyCode;
   var charcode=evt.charCode;
   var value=fdjtCompletionText(target);
-  var options=(target.getAttribute("COMPLETEOPTS")||"");
+  var options=target.completeopts||_fdjt_get_complete_opts(target);
   var cchars=
     fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[32,-13]);    
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
   if (((keycode) && (cchars.indexOf(-keycode)>=0)) ||
       ((charcode) && (cchars.indexOf(charcode)>=0))) {
-    // ((keycode) && (keycode===0x20) && (evt.altKey))
     // Tab completion
     var results=fdjtComplete(target,value,options,true);
-    if (results.length!=1)
-      results=fdjtComplete(target,value,options);
     evt.preventDefault(); evt.cancelBubble=true;
-    target.setAttribute
-      ("ncompletions",new String(results.length));
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0],results[0].value);
       fdjtDropClass(target.completions_elt,"open");}
-    else if (results.length>0) {
-      fdjtAddClass(target.completions_elt,"open");}
     else {}}
   else _fdjt_completion_timer=
 	 setTimeout(function () {
