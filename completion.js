@@ -209,8 +209,10 @@ function fdjtComplete(input_elt,string,options,all)
 	    else if ((matchcase)?
 		     (key===qstring) :
 		     (key.toLowerCase()===qstring)) {
+	      variant.setAttribute("displayed",((found)?("no"):("yes")));
 	      found=true; exact=true;}
-	    else if (found) {}
+	    else if (found)
+	      variant.setAttribute("displayed",((found)?("no"):("yes")));
 	    else if ((prefix) ?
 		     (key.search(qpat)===0) :
 		     (key.search(qpat)>=0)) {
