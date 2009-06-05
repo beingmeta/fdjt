@@ -718,6 +718,24 @@ function fdjtRadioSelect(elt,radioname,under,selname)
     fdjtAddClass(node,selname);}
 }
 
+/* Delaying handlers */
+
+var fdjt_global_delays=[];
+
+function fdjtDelayHandler(delay,handler,arg,context,delayname)
+{
+  if (!(context)) context=arg;
+  else if (context===true) context=fdjt_global_delays;
+  if (!(delayname)) delayname=handler.name||"delay";
+  if (context[delayname]) {
+    clearTimeout(context[delayname]);
+    context[delayname]=false;}
+  context[delayname]=
+    setTimeout(function() {
+	handler(arg); context[delayname]=false;},
+      delay);
+}
+
 /* Checking control */
 
 /* Some events, like onselect, don't seem to get control key information.
