@@ -31,8 +31,10 @@ var FDJT_COMPLETE_CLOUD=2;
 var FDJT_COMPLETE_PREFIX=4;
 var FDJT_COMPLETE_MATCHCASE=8;
 var FDJT_COMPLETE_SHOWVARY=16;
+var FDJT_COMPLETE_SHOWEMPTY=32;
 
-var fdjt_complete_options=FDJT_COMPLETE_OPTIONS;
+var fdjt_complete_options=
+  FDJT_COMPLETE_OPTIONS|FDJT_COMPLETE_PREFIX|FDJT_COMPLETE_SHOWVARY;
 
 function _fdjt_get_complete_opts(arg)
 {
@@ -145,38 +147,44 @@ function fdjtAddCompletions(div,completions,opts)
 // This looks for completions matching *string* among the completions
 //  associated with input_elt.  Note that *string* might not be the value
 //  of input_elt, but might just be a component returned by fdjtCompletionText.
-function fdjtComplete(input_elt,string,options,all)
+function fdjtComplete(input_elt,string,options)
 {
   if (!(string)) string=fdjtCompletionText(input_elt);
   if (!(options))
     options=input_elt.completeopts||_fdjt_get_complete_opts(input_elt);
-  var results=[]; var exact_results=[]; var head_results=[];
   var completions=_fdjt_get_completions(input_elt);
   var maxcomplete=
     input_elt.maxcomplete||fdjtCacheAttrib(input_elt,"maxcomplete",false,false);
-  var n_complete=0;
   if (fdjt_detail_completion)
     fdjtLog("fdjtComplete on %s in %o from %o",string,input_elt,completions);
   if (!(completions)) return;
-  var prefix=(options&FDJT_COMPLETE_PREFIX);
-  var matchcase=(options&FDJT_COMPLETE_MATCHCASE);
   if (!(exact)) exact=false;
-  if (string==="") {
-    if (fdjt_trace_completion) fdjtLog("Completion on empty string");
-    var all_completions=$$(".completion",completions);
-    var results=[];
-    var i=0; while (i<all_completions.length) {
-      var completion=all_completions[i++];
-      if (maxcomplete===false)
-	completion.setAttribute("displayed","yes");
-      else if (i<maxcomplete)
-	completion.setAttribute("displayed","yes");
-      else completion.setAttribute("displayed","no");
-      results.push(completion);}
-    fdjtAddClass(completions,"showall");
-    return new Array(results,[],[]);}
+  if ((!string) || (string===""))
+    if (options&FDJT_COMPLETE_SHOWEMPTY) {
+      if (fdjt_trace_completion) fdjtLog("Completion on empty string");
+      var all_completions=$$(".completion",completions);
+      var results=[];
+      var i=0; while (i<all_completions.length) {
+	var completion=all_completions[i++];
+	if (maxcomplete===false)
+	  completion.setAttribute("displayed","yes");
+	else if (i<maxcomplete)
+	  completion.setAttribute("displayed","yes");
+	else completion.setAttribute("displayed","no");
+	results.push(completion);}
+      fdjtAddClass(completions,"showall");
+      results.heads=results; result.exact=[]; results.exactheads=[];
+      return results;}
+    else {
+      var results=[];
+      results.heads=[]; results.exact=[]; results.exactheads=[];
+      return results;}
   else {
+    var results=[]; var exacts=[]; var heads=[]; var exactheads=[];
+    var matchcase=(options&FDJT_COMPLETE_MATCHCASE);
+    var prefix=(options&FDJT_COMPLETE_PREFIX);
     var qstring; var qpat=false;
+    var n_complete=0;
     if (typeof string !== "string")
       throw {name: "TypeError",irritant: string,expected: "string or regex"};
     else if (matchcase)
@@ -221,18 +229,20 @@ function fdjtComplete(input_elt,string,options,all)
 	    else variant.setAttribute("displayed","no");}}
       if (found) {
 	n_complete++; 
-	if (exact) exact_results.push(child);
-	if (head) head_results.push(child);
-	else results.push(child);
+	results.push(child);
+	if (exact) exacts.push(child); if (head) heads.push(child);
+	if ((exact) && (head)) exactheads.push(child);
 	if ((maxcomplete===false) ||
 	    (n_complete<maxcomplete))
 	  child.setAttribute("displayed","yes");
 	else child.setAttribute("displayed","no");}
       else child.setAttribute("displayed","no");}}
-  var len=head_results.length+results.length;
+  var len=results.length;
   if (fdjt_trace_completion)
-    fdjtLog("Completion on '%s' (%d) found %d: %o/%o",
-	    string,options,len,head_results,results);
+    fdjtLog("Completion on '%s' (%d) found %d/%dh/%de/%dhe: %o",
+	    string,options,len,
+	    heads.length,exacts.length,exactheads.length,
+	    results);
   /* This lets us do styling on the rough number of attributes */
   completions.setAttribute
     ("ncompletions",
@@ -252,12 +262,8 @@ function fdjtComplete(input_elt,string,options,all)
      to trigger some redisplay (kludge). */
   if (len) fdjtAddClass(completions,'open');
   else completions.className=completions.className;
-  if (all) {
-    head_results.concat(results);
-    return head_results;}
-  else if (exact_results.length)
-    return exact_results;
-  else return head_results.concat(results);
+  results.heads=heads; results.exact=exacts; results.exactheads=exactheads;
+  return results;
 }
   
 // This 'forces' a completion presumably when the user indicates a decisive
@@ -283,6 +289,7 @@ function fdjtHandleCompletion(input_elt,elt,value)
 {
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
+  if (!(elt)) return;
   if (fdjt_trace_completion)
     fdjtLog("Handling completion on %o with %o (%o):",
 	    input_elt,elt,value);
@@ -334,7 +341,7 @@ function fdjtComplete_show(evt)
   if (value!="")
     fdjt_completion_timer=
       setTimeout(function () {
-	  fdjtComplete(target,value,options,true);},100);
+	  fdjtComplete(target,value,options);},100);
 }
 
 function fdjtComplete_onfocus(evt)
@@ -342,7 +349,7 @@ function fdjtComplete_onfocus(evt)
   fdjtComplete(evt.target);
 }
 
-function fdjtComplete_onkeypress(evt)
+function fdjtComplete_onkey(evt)
 {
   var target=evt.target;
   var keycode=evt.keyCode;
@@ -351,21 +358,19 @@ function fdjtComplete_onkeypress(evt)
   var options=target.completeopts||_fdjt_get_complete_opts(target);
   var cchars=
     fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[32,-13]);    
-  // fdjtTrace("Complete_onkeypress %o",evt);
+  // fdjtTrace("Complete_onkey %o",evt);
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
   if (((keycode) && (cchars.indexOf(-keycode)>=0)) ||
       ((charcode) && (cchars.indexOf(charcode)>=0))) {
-    // Tab completion
-    var results=fdjtComplete(target,value,options,true);
-    evt.preventDefault(); evt.cancelBubble=true;
+    // These complete right away
+    var results=fdjtComplete(target,false,options);
+    // evt.preventDefault(); evt.cancelBubble=true;
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0],results[0].value);
       fdjtDropClass(target.completions_elt,"open");}
     else {}}
-  else _fdjt_completion_timer=
-	 setTimeout(function () {
-	     fdjtComplete(target,fdjtCompletionText(target),options);},100);
+  else fdjtDelayHandler(400,fdjtComplete,target,false,"complete");
   return true;
 }
 
