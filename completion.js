@@ -212,12 +212,13 @@ function fdjtComplete(input_elt,string,options,all)
 	      variant.setAttribute("displayed",((found)?("no"):("yes")));
 	      found=true; exact=true;}
 	    else if (found)
-	      variant.setAttribute("displayed",((found)?("no"):("yes")));
+	      variant.setAttribute("displayed","no");
 	    else if ((prefix) ?
 		     (key.search(qpat)===0) :
 		     (key.search(qpat)>=0)) {
 	      variant.setAttribute("displayed","yes");
-	      found=true;}}}
+	      found=true;}
+	    else variant.setAttribute("displayed","no");}}
       if (found) {
 	n_complete++; 
 	if (exact) exact_results.push(child);
@@ -350,6 +351,7 @@ function fdjtComplete_onkeypress(evt)
   var options=target.completeopts||_fdjt_get_complete_opts(target);
   var cchars=
     fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[32,-13]);    
+  // fdjtTrace("Complete_onkeypress %o",evt);
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
   if (((keycode) && (cchars.indexOf(-keycode)>=0)) ||
