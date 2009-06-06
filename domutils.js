@@ -22,44 +22,10 @@
 
 var fdjt_domutils_id="$Id: domutils.js 40 2009-04-30 13:31:58Z haase $";
 var fdjt_domutils_version=parseInt("$Revision: 40 $".slice(10,-1));
-var _fdjt_debug=false;
+var _fdjt_debug_dom=false;
 var _fdjt_debug_domedits=false;
 var _fdjt_debug_domsearches=false;
 var _fdjt_debug_classedits=false;
-var _fdjt_trace_load=false;
-
-function fdjtLog(string)
-{
-  if ((window.console) && (window.console.log) &&
-      (window.console.count))
-    window.console.log.apply(window.console,arguments);
-}
-
-// Insert these for temporary logging statements, which will be easier
-// to find
-function fdjtTrace(string)
-{
-  if ((window.console) && (window.console.log) &&
-      (window.console.count))
-    window.console.log.apply(window.console,arguments);
-}
-
-// This goes to an alert if it can't get to the console
-function fdjtWarn(string)
-{
-  if ((window.console) && (window.console.log) &&
-      (window.console.count))
-    window.console.log.apply(window.console,arguments);
-  else alert(string);
-}
-
-// Individually for file loading messages
-function fdjtLoadMessage(string)
-{
-  if ((_fdjt_trace_load) && (window.console) && (window.console.log) &&
-      (window.console.count))
-    window.console.log.apply(window.console,arguments);
-}
 
 /* Getting elements by ID */
 
@@ -449,7 +415,7 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
       newinfo=
 	classinfo.replace(class_regex,newclass).
 	replace(_fdjt_whitespace_pat," ");
-    else if (_fdjt_debug) {
+    else if (_fdjt_debug_dom) {
       fdjtLog
 	("Couldn't swap %s '%s' to replace non-existing '%s', just adding to %o",
 	 (attrib||"class"),newclass,classname,elt);
@@ -853,7 +819,7 @@ function fdjtAddAttributes(elt,attribs)
 function fdjtInsertElementsBefore(elt,before,elts,i)
 {
   if (elt===null) return null;
-  if ((_fdjt_debug) || (_fdjt_debug_domedits))
+  if ((_fdjt_debug_dom) || (_fdjt_debug_domedits))
     fdjtLog("Inserting "+elts+" elements "
 	   +"into "+elt
 	   +" before "+before
