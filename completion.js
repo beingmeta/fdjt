@@ -26,12 +26,22 @@ var fdjt_detail_completion=false;
 
 /* Completion */
 
+// Always set to distinguish no options from false
 var FDJT_COMPLETE_OPTIONS=1;
+// Whether the completion element is a cloud (made of spans)
 var FDJT_COMPLETE_CLOUD=2;
+// Whether to require that completion match an initial segment
 var FDJT_COMPLETE_PREFIX=4;
+// Whether to match case in keys to completions
 var FDJT_COMPLETE_MATCHCASE=8;
+// Whether to show "variations" which are matched
+//  (they will influence selection regardless)
 var FDJT_COMPLETE_SHOWVARY=16;
+// Whether to show completions when the input string is empty
 var FDJT_COMPLETE_SHOWEMPTY=32;
+// Whether the key fields may contain disjoins (e.g. (dog|friend))
+// to be accomodated in matching
+var FDJT_COMPLETE_DISJOINS=64;
 
 var fdjt_complete_options=
   FDJT_COMPLETE_OPTIONS|FDJT_COMPLETE_PREFIX|FDJT_COMPLETE_SHOWVARY;
@@ -191,7 +201,9 @@ function fdjtComplete(input_elt,string,options)
 		 all_completions[i++].setAttribute("displayed","no"); 
       return results;}}
   else {
-    var results=[]; var exacts=[]; var heads=[]; var exactheads=[];
+    var results=[]; var heads=[];
+    var exacts=[]; var exactheads=[];
+    var keys=[];
     var matchcase=(options&FDJT_COMPLETE_MATCHCASE);
     var prefix=(options&FDJT_COMPLETE_PREFIX);
     var qstring; var qpat=false;
@@ -201,18 +213,23 @@ function fdjtComplete(input_elt,string,options)
     else if (matchcase)
       qpat=qstring=string;
     else {qpat=new RegExp(string,"gi"); qstring=string.toLowerCase();}
-    var children=fdjtGetChildrenByClassName(completions,"completion");
+    var children=(completions.completions)||
+      (completions.completions=
+       fdjtGetChildrenByClassName(completions,"completion"));
     var i=0; while (i<children.length) {
       var child=children[i++];
       var found=false; var exact=false; var head=false;
       var key=child.key||fdjtCacheAttrib(child,"key");
       if ((matchcase) ? (key===qstring) : (key.toLowerCase()===qstring)) {
+	results.push(child); keys.push(key);
 	found=true; exact=true; head=true;}
       else if ((prefix) ? (key.search(qpat)===0) : (key.search(qpat)>=0)) {
 	found=true; head=true;}
       /* We iterate over variants in any case, because we may want to
 	 hide them if their displayed from a past completion. */
-      var variants=fdjtGetChildrenByClassName(child,"variation");
+      var variants=
+	((child.variants)||
+	 (child.variants=fdjtGetChildrenByClassName(child,"variation")));
       if (variants.length)
 	if (found) {
 	  // Make all the variants be unshown, just in case
@@ -236,11 +253,13 @@ function fdjtComplete(input_elt,string,options)
 		     (key.search(qpat)===0) :
 		     (key.search(qpat)>=0)) {
 	      variant.setAttribute("displayed","yes");
+	      results.push(child); keys.push(key);
 	      found=true;}
 	    else variant.setAttribute("displayed","no");}}
+      if (head) child.setAttribute("head","yes");
+      else child.removeAttribute("head");
       if (found) {
 	n_complete++; 
-	results.push(child);
 	if (exact) exacts.push(child); if (head) heads.push(child);
 	if ((exact) && (head)) exactheads.push(child);
 	if ((maxcomplete===false) ||
@@ -381,7 +400,7 @@ function fdjtComplete_onkey(evt)
       fdjtHandleCompletion(target,results[0],results[0].value);
       fdjtDropClass(target.completions_elt,"open");}
     else {}}
-  else fdjtDelayHandler(400,fdjtComplete,target,false,"complete");
+  else fdjtDelayHandler(100,fdjtComplete,target,false,"complete");
   return true;
 }
 

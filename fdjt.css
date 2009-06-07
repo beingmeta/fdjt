@@ -141,11 +141,14 @@ div.completions {
 .completions { display: none;}
 div.completions.open { display: block;}
 span.completions.open { display: inline;}
-div.completions .completion { display: none;}
+div.completions .completion { 
+  margin-right: 5px; padding-left: 2px; padding-right: 2px;
+  border: hidden 1px;
+  display: none;}
 div.completions .completion .variation { 
-  font-size: 80%; display: none;}
+  display: none;}
 div.completions .completion .variation[displayed="yes"] { 
-  font-size: 80%; display: none;}
+  display: none;}
 div.completions .completion[displayed="no"] .variation[displayed="yes"] { 
   display: none;}
 
