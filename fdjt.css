@@ -35,7 +35,7 @@ input.autoprompt_empty {
   color: gray; height: 18px; }
 
 textarea.autoprompt {
-  font-family: sans,sans-serif; }
+  font-family: sans,sans-serif;}
 textarea.autoprompt[isempty] { font-style: italic; color: gray;}
 
 /* Input help classes */
@@ -136,8 +136,7 @@ div.flexbox_expanded { max-height: inherit;}
 /* Auto completion */
 
 div.completions {
-  font-size: 12px; font-family: sans,sans-serif;
-  scroll: auto;}
+  font-size: 12px; font-family: sans,sans-serif;}
 .completions { display: none;}
 div.completions.open { display: block;}
 span.completions.open { display: inline;}
@@ -220,3 +219,8 @@ div.richtip .maximize { display: none; }
 
 a.deadlink { color: red;}
 
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "cd ..; make" ***
+;;;  End: ***
+*/
