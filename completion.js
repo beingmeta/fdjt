@@ -36,6 +36,10 @@ var FDJT_COMPLETE_SHOWEMPTY=32;
 var fdjt_complete_options=
   FDJT_COMPLETE_OPTIONS|FDJT_COMPLETE_PREFIX|FDJT_COMPLETE_SHOWVARY;
 
+/* When completing on an empty string, show completions if there are fewer
+   than this number (customizable by the maxshowempty attribute).  */
+var fdjt_complete_maxshowempty=12;
+
 function _fdjt_get_complete_opts(arg)
 {
   if (!(arg)) return fdjt_complete_options;
@@ -45,6 +49,7 @@ function _fdjt_get_complete_opts(arg)
       (((arg.search(/\bprefix\b/)<0)?(0):((FDJT_COMPLETE_PREFIX)))|
        ((arg.search(/\bmatchcase\b/)<0)?(0):((FDJT_COMPLETE_MATCHCASE)))|
        ((arg.search(/\bcloud\b/)<0)?(0):((FDJT_COMPLETE_CLOUD)))|
+       ((arg.search(/\bshowempty\b/)<0)?(0):((FDJT_COMPLETE_SHOWEMPTY)))|
        ((arg.search(/\bvary\b/)<0)?(0):((FDJT_COMPLETE_SHOWVARY)))|1);
     // fdjtTrace("Getting complete options from %o=%o",arg,opt);
     return opt;}
@@ -155,14 +160,18 @@ function fdjtComplete(input_elt,string,options)
   var completions=_fdjt_get_completions(input_elt);
   var maxcomplete=
     input_elt.maxcomplete||fdjtCacheAttrib(input_elt,"maxcomplete",false,false);
+  var maxshowempty=
+    input_elt.maxshowempty||
+    fdjtCacheAttrib(input_elt,"maxshowempty",false,fdjt_complete_maxshowempty);
   if (fdjt_detail_completion)
     fdjtLog("fdjtComplete on %s in %o from %o",string,input_elt,completions);
   if (!(completions)) return;
   if (!(exact)) exact=false;
-  if ((!string) || (string===""))
-    if (options&FDJT_COMPLETE_SHOWEMPTY) {
+  if ((!string) || (string==="")) {
+    var all_completions=$$(".completion",completions);
+    if ((options&FDJT_COMPLETE_SHOWEMPTY)||
+	(all_completions.length<=maxshowempty)) {
       if (fdjt_trace_completion) fdjtLog("Completion on empty string");
-      var all_completions=$$(".completion",completions);
       var results=[];
       var i=0; while (i<all_completions.length) {
 	var completion=all_completions[i++];
@@ -173,12 +182,14 @@ function fdjtComplete(input_elt,string,options)
 	else completion.setAttribute("displayed","no");
 	results.push(completion);}
       fdjtAddClass(completions,"showall");
-      results.heads=results; result.exact=[]; results.exactheads=[];
+      results.heads=results; results.exact=[]; results.exactheads=[];
       return results;}
     else {
       var results=[];
       results.heads=[]; results.exact=[]; results.exactheads=[];
-      return results;}
+      var i=0; while (i<all_completions.length)
+		 all_completions[i++].setAttribute("displayed","no"); 
+      return results;}}
   else {
     var results=[]; var exacts=[]; var heads=[]; var exactheads=[];
     var matchcase=(options&FDJT_COMPLETE_MATCHCASE);
