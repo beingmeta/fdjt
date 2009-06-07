@@ -182,9 +182,15 @@ function fdjtComplete(input_elt,string,options)
     if ((options&FDJT_COMPLETE_SHOWEMPTY)||
 	(all_completions.length<=maxshowempty)) {
       if (fdjt_trace_completion) fdjtLog("Completion on empty string");
-      var results=[];
+      var results=[]; results.string=string;
       var i=0; while (i<all_completions.length) {
 	var completion=all_completions[i++];
+	var variants=
+	  ((completion.variants)||
+	   (completion.variants=
+	    fdjtGetChildrenByClassName(completion,"variation")));
+	var j=0; while (j<variants.length)
+		   variants[j++].setAttribute("displayed","no");
 	if (maxcomplete===false)
 	  completion.setAttribute("displayed","yes");
 	else if (i<maxcomplete)
@@ -195,10 +201,17 @@ function fdjtComplete(input_elt,string,options)
       results.heads=results; results.exact=[]; results.exactheads=[];
       return results;}
     else {
-      var results=[];
+      var results=[]; results.string=string;
       results.heads=[]; results.exact=[]; results.exactheads=[];
-      var i=0; while (i<all_completions.length)
-		 all_completions[i++].setAttribute("displayed","no"); 
+      var i=0; while (i<all_completions.length) {
+	var completion=all_completions[i++];
+	var variants=
+	  ((completion.variants)||
+	   (completion.variants=
+	    fdjtGetChildrenByClassName(completion,"variation")));
+	var j=0; while (j<variants.length)
+		   variants[j++].setAttribute("displayed","no");
+	completion.setAttribute("displayed","no");}
       return results;}}
   else {
     var results=[]; var heads=[];
@@ -206,13 +219,19 @@ function fdjtComplete(input_elt,string,options)
     var keys=[];
     var matchcase=(options&FDJT_COMPLETE_MATCHCASE);
     var prefix=(options&FDJT_COMPLETE_PREFIX);
-    var qstring; var qpat=false;
+    var qpat=string; var qstring=string;
     var n_complete=0;
     if (typeof string !== "string")
       throw {name: "TypeError",irritant: string,expected: "string or regex"};
+    else if ((matchcase) && (prefix))
+      qpat=new RegExp("^"+string,"g");
     else if (matchcase)
-      qpat=qstring=string;
-    else {qpat=new RegExp(string,"gi"); qstring=string.toLowerCase();}
+      qpat=new RegExp(string,"");
+    else if (prefix)
+      qpat=new RegExp("^"+string,"i");
+    else qpat=new RegExp(string,"gi");
+    results.string=string;
+    if (!(matchcase)) qstring=string.toLowerCase();
     var children=(completions.completions)||
       (completions.completions=
        fdjtGetChildrenByClassName(completions,"completion"));
@@ -220,11 +239,12 @@ function fdjtComplete(input_elt,string,options)
       var child=children[i++];
       var found=false; var exact=false; var head=false;
       var key=child.key||fdjtCacheAttrib(child,"key");
-      if ((matchcase) ? (key===qstring) : (key.toLowerCase()===qstring)) {
-	results.push(child); keys.push(key);
-	found=true; exact=true; head=true;}
-      else if ((prefix) ? (key.search(qpat)===0) : (key.search(qpat)>=0)) {
-	found=true; head=true;}
+      if (key.search(qpat)>=0)
+	if ((matchcase) ? (key===qstring) : (key.toLowerCase()===qstring)) {
+	  results.push(child); keys.push(key);
+	  found=true; exact=true; head=true;}
+	else {
+	  found=true; head=true;}
       /* We iterate over variants in any case, because we may want to
 	 hide them if their displayed from a past completion. */
       var variants=
@@ -233,7 +253,7 @@ function fdjtComplete(input_elt,string,options)
       if (variants.length)
 	if (found) {
 	  // Make all the variants be unshown, just in case
-	  var j=0; while (i<variants.length)
+	  var j=0; while (j<variants.length)
 		     variants[j++].setAttribute("displayed","no");}
 	else {
 	  /* Look for a matching variant */
@@ -242,19 +262,18 @@ function fdjtComplete(input_elt,string,options)
 	    var key=variant.key||fdjtCacheAttrib(variant,"key");
 	    if ((found) && (exact))
 	      variant.setAttribute("displayed","no");
-	    else if ((matchcase)?
-		     (key===qstring) :
-		     (key.toLowerCase()===qstring)) {
-	      variant.setAttribute("displayed",((found)?("no"):("yes")));
-	      found=true; exact=true;}
-	    else if (found)
-	      variant.setAttribute("displayed","no");
-	    else if ((prefix) ?
-		     (key.search(qpat)===0) :
-		     (key.search(qpat)>=0)) {
-	      variant.setAttribute("displayed","yes");
-	      results.push(child); keys.push(key);
-	      found=true;}
+	    else if (key.search(qpat)>=0)
+	      if ((matchcase)?
+		  (key===qstring) :
+		  (key.toLowerCase()===qstring)) {
+		variant.setAttribute("displayed",((found)?("no"):("yes")));
+		found=true; exact=true;}
+	      else if (found)
+		variant.setAttribute("displayed","no");
+	      else {
+		variant.setAttribute("displayed","yes");
+		results.push(child); keys.push(key);
+		found=true;}
 	    else variant.setAttribute("displayed","no");}}
       if (head) child.setAttribute("head","yes");
       else child.removeAttribute("head");
