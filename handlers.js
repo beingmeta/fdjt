@@ -1,5 +1,8 @@
 /* -*- Mode: Javascript; -*- */
 
+var fdjt_handlers_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
+var fdjt_handlers_version=parseInt("$Revision: 40 $".slice(10,-1));
+
 /* Copyright (C) 2001-2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides DHTML handlers for a variety of UI conventions
@@ -19,9 +22,6 @@
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
-
-var fdjt_handlers_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
-var fdjt_handlers_version=parseInt("$Revision: 40 $".slice(10,-1));
 
 var graphics_root="/graphics/";
 

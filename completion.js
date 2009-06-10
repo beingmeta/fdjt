@@ -1,5 +1,8 @@
 /* -*- Mode: Javascript; -*- */
 
+var fdjt_completion_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
+var fdjt_completion_version=parseInt("$Revision: 40 $".slice(10,-1));
+
 /* Copyright (C) 2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides for input completion.
@@ -17,9 +20,6 @@
       http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
-
-var fdjt_completion_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
-var fdjt_completion_version=parseInt("$Revision: 40 $".slice(10,-1));
 
 var fdjt_trace_completion=false;
 var fdjt_detail_completion=false;
@@ -155,6 +155,7 @@ function fdjtAddCompletions(div,completions,opts)
 	completion_elt.key=key;
 	completion_elt.value=value;
 	if (title) completion_elt.title=title;
+	else completion_elt.title=key;
 	fdjtAppend(div,completion_elt,"\n");}}}
   return div;
 }

@@ -1,5 +1,8 @@
 /* -*- Mode: Javascript; -*- */
 
+var fdjt_domutils_id="$Id: domutils.js 40 2009-04-30 13:31:58Z haase $";
+var fdjt_domutils_version=parseInt("$Revision: 40 $".slice(10,-1));
+
 /* Copyright (C) 2001-2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended functionality for web applications,
@@ -20,8 +23,6 @@
 
 */
 
-var fdjt_domutils_id="$Id: domutils.js 40 2009-04-30 13:31:58Z haase $";
-var fdjt_domutils_version=parseInt("$Revision: 40 $".slice(10,-1));
 var _fdjt_debug_dom=false;
 var _fdjt_debug_domedits=false;
 var _fdjt_debug_domsearches=false;
@@ -243,8 +244,12 @@ var _fdjt_trimspace_pat=/^(\s)+|(\s)+$/;
 
 function _fdjtclasspat(name)
 {
-  var rx=new RegExp("\\b"+name+"\\b","g");
-  return rx;
+  if (typeof name === "string") {
+    var rx=new RegExp("\\b"+name+"\\b","g");
+    return rx;}
+  else if ((typeof name === "object") && (name instanceof RegExp))
+    return name;
+  else throw { name: "invalid class name", irritant: name};
 }
 
 function fdjtHasClass(elt,classname,attrib)
@@ -416,10 +421,10 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
 	classinfo.replace(class_regex,newclass).
 	replace(_fdjt_whitespace_pat," ");
     else if (_fdjt_debug_dom) {
-      fdjtLog
-	("Couldn't swap %s '%s' to replace non-existing '%s', just adding to %o",
-	 (attrib||"class"),newclass,classname,elt);
-      return fdjtAddClass(elt,newclass,(attrib||false));}
+	fdjtLog
+	  ("Couldn't swap %s '%s' to replace non-existing '%s', just adding to %o",
+	   (attrib||"class"),newclass,classname,elt);
+	return fdjtAddClass(elt,newclass,(attrib||false));}
     else return fdjtAddClass(elt,newclass,(attrib||false));
     if (newinfo)
       newinfo=newinfo.
@@ -492,12 +497,12 @@ function fdjtGetChildrenByTagName(under,tagname)
 }
 function _fdjtGetChildrenByTagName(under,tagname,results)
 {
-  if ((under.nodeType===1) && (under.tagName==tagname))
+  if ((under.nodeType===1) && (under.tagName===tagname))
     results.push(under);
   var children=under.childNodes;
   if (children) {
     var i=0; while (i<children.length)
-	       if (children[i].nodeType==1)
+	       if (children[i].nodeType===1)
 		 _fdjtGetChildrenByTagName(children[i++],tagname,results);
 	       else i++;}
   return results;
@@ -946,18 +951,32 @@ function fdjtRemove(cur_arg)
 function fdjtNewElement(tag,classname)
 {
   var elt=document.createElement(tag);
-  if (typeof classname === "string")
-    elt.className=classname;
-  fdjtAddElements(elt,arguments,2);
+  if ((typeof classname === "string") &&
+      (classname.length>0)) {
+    if (classname[0]==="#") {
+      var dotpos=classname.indexOf(".");
+      if (dotpos>0) {
+	elt.id=classname.slice(1,dotpos);
+	elt.className=classname.slice(dotpos+1);}
+      else elt.id=classname.slice(1);}
+    else if (classname[0]===".") {
+      var hashpos=classname.indexOf("#");
+      if (hashpos>0) {
+	elt.id=classname.slice(hashpos+1);
+	elt.className=classname.slice(1,hashpos);}
+      else elt.className=classname.slice(1);}
+    else elt.className=classname;}
+  if (arguments.length>2)
+    fdjtAddElements(elt,arguments,2);
   return elt;
 }
 
 function fdjtNewElementW(tag,classname,attribs)
 {
-  var elt=document.createElement(tag);
-  elt.className=classname;
+  var elt=fdjtNewElement(tag,classname);
   fdjtAddAttributes(elt,attribs);
-  fdjtAddElements(elt,arguments,3);
+  if (arguments.length>3)
+    fdjtAddElements(elt,arguments,3);
   return elt;
 }
 
@@ -981,36 +1000,32 @@ function fdjtWithTitle(elt,title)
 
 function fdjtSpan(classname)
 {
-  if (!(classname)) classname=null;
-  var elt=document.createElement('span');
-  if (classname) elt.className=classname;
+  var elt=((classname) ?
+	   (fdjtNewElement('span',classname)) :
+	   (document.createElement('span')));
   fdjtAddElements(elt,arguments,1);
   return elt;
 }
 
 function fdjtSpanW(classname,attribs)
 {
-  var elt=document.createElement('span');
-  elt.className=classname;
-  fdjtAddAttributes(elt,attribs);
+  var elt=fdjtNewElementW('span',classname,attribs);
   fdjtAddElements(elt,arguments,2);
   return elt;
 }
 
 function fdjtDiv(classname)
 {
-  if (!(classname)) classname=null;
-  var elt=document.createElement('div');
-  if (classname) elt.className=classname;
+  var elt=((classname) ?
+	   (fdjtNewElement('div',classname)) :
+	   (document.createElement('div')));
   fdjtAddElements(elt,arguments,1);
   return elt;
 }
 
 function fdjtDivW(classname,attribs)
 {
-  var elt=document.createElement('div');
-  elt.className=classname;
-  fdjtAddAttributes(elt,attribs);
+  var elt=fdjtNewElementW('div',classname,attribs);
   fdjtAddElements(elt,arguments,2);
   return elt;
 }

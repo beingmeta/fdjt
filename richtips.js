@@ -1,5 +1,8 @@
 /* -*- Mode: Javascript; -*- */
 
+var fdjt_richtips_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
+var fdjt_richtips_version=parseInt("$Revision: 40 $".slice(10,-1));
+
 /* Copyright (C) 2007-2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides for mouseover tooltips with rich content
@@ -17,9 +20,6 @@
       http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
-
-var fdjt_richtips_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
-var fdjt_richtips_version=parseInt("$Revision: 40 $".slice(10,-1));
 
 /* RICHTIPS
      are overlayed tooltips displayed in translucent rectangles. */
