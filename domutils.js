@@ -147,6 +147,7 @@ function fdjtHasParent(node,parent)
 {
   while (node)
     if (node===parent) return true;
+    else if (node===document) return false;
     else node=node.parentNode;
   return false;
 }
@@ -247,7 +248,7 @@ function _fdjtclasspat(name)
   if (typeof name === "string") {
     var rx=new RegExp("\\b"+name+"\\b","g");
     return rx;}
-  else if ((typeof name === "object") && (name instanceof RegExp))
+  else if (name instanceof RegExp)
     return name;
   else throw { name: "invalid class name", irritant: name};
 }
@@ -476,6 +477,7 @@ function fdjtGetParentByTagName(node,tagname)
   tagname=tagname.toUpperCase();
   while ((scan) && (scan.parentNode)) 
     if (scan.tagName===tagname) return scan;
+    else if (node===document) return null;
     else scan=scan.parentNode;
   if ((scan) && (scan.tagName===tagname)) return scan;
   else return null;
@@ -520,6 +522,7 @@ function fdjtGetParentByClassName(node,classname)
       return scan;
     else if ((scan.className) && (fdjtHasClassName(scan,classname)))
       return scan;
+    else if (node===document) return null;
     else scan=scan.parentNode;
   if ((scan) && (scan.className===classname)) return scan;
   else return null;
@@ -585,12 +588,15 @@ function fdjtGetParentByAttrib(node,attribName,attribValue)
     while ((scan) && (scan.parentNode))
       if (scan.getAttribute(attribName)==attribValue)
 	return scan;
+      else if (scan===document) return null;
       else parent=scan.parentNode;
   else while ((scan) && (scan.parentNode))
     if ((scan.hasAttribute) ? (scan.hasAttribute(attribName)) :
 	(!(!(scan.getAttribute(attribName)))))
       return scan;
+    else if (scan===document) return null;
     else scan=scan.parentNode;
+  return null;
 }
 
 function fdjtGetChildrenByAttrib(under,attribName,attribValue)
@@ -706,6 +712,7 @@ function fdjtGetParents(elt,selector,results)
       else if (fdjtElementMatchesSpec(scan,spec)) 
 	results.push(scan);
       else {}
+      if (scan===document) return results;
       scan=scan.parentNode;}
     return results;}
 }
@@ -716,8 +723,9 @@ function fdjtGetParent(elt,selector)
   while (scan)
     if (fdjtElementMatches(scan,selector))
       return scan;
+    else if (scan===document) return null;
     else scan=scan.parentNode;
-  return scan;
+  return null;
 }
 
 function fdjtGetChildren(elt,selector,results)
@@ -737,6 +745,7 @@ function fdjtGetChildren(elt,selector,results)
 	  var scan=candidate;
 	  while (scan)
 	    if (scan===elt) break;
+	    else if (scan===document) break;
 	    else scan=scan.parentNode;
 	  if (scan===elt) results.push(candidate);
 	  return results;}
@@ -957,14 +966,14 @@ function fdjtNewElement(tag,classname)
       var dotpos=classname.indexOf(".");
       if (dotpos>0) {
 	elt.id=classname.slice(1,dotpos);
-	elt.className=classname.slice(dotpos+1);}
+	elt.className=classname.slice(dotpos+1).replace("."," ");}
       else elt.id=classname.slice(1);}
     else if (classname[0]===".") {
       var hashpos=classname.indexOf("#");
       if (hashpos>0) {
-	elt.id=classname.slice(hashpos+1);
+	elt.id=classname.slice(hashpos+1).replace("."," ");
 	elt.className=classname.slice(1,hashpos);}
-      else elt.className=classname.slice(1);}
+      else elt.className=classname.slice(1).replace("."," ");}
     else elt.className=classname;}
   if (arguments.length>2)
     fdjtAddElements(elt,arguments,2);
