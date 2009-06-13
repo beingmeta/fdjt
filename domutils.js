@@ -1337,6 +1337,19 @@ function fdjtResolveHash(eltarg)
   else return eltarg;
 }
 
+/* Getting selected text */
+
+function fdjtSelectedText()
+{
+  if (window.getSelection)
+    return window.getSelection();
+  else if (document.getSelection)
+    return document.getSelection();
+  else if (document.selection)
+    return document.selection.createRange().text;
+  else return null;
+}
+
 /* Searching content */
 
 function fdjtSearchContent(node,spec,id,results)
