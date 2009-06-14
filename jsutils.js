@@ -1,7 +1,7 @@
 /* -*- Mode: Javascript; -*- */
 
-var fdjt_jsutils_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
-var fdjt_jsutils_version=parseInt("$Revision: 40 $".slice(10,-1));
+var fdjt_jsutils_id="$Id$";
+var fdjt_jsutils_version=parseInt("$Revision$".slice(10,-1));
 
 /* Copyright (C) 2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
@@ -437,7 +437,7 @@ fdjtLoadMessage("Loaded jsutils.js");
 
 /* Emacs local variables
 ;;;  Local variables: ***
-;;;  compile-command: "cd ..; make" ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
 ;;;  End: ***
 */
 

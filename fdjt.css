@@ -221,6 +221,6 @@ a.deadlink { color: red;}
 
 /* Emacs local variables
 ;;;  Local variables: ***
-;;;  compile-command: "cd ..; make" ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
 ;;;  End: ***
 */

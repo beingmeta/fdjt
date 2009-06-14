@@ -1,7 +1,7 @@
 /* -*- Mode: Javascript; -*- */
 
-var fdjt_richtips_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
-var fdjt_richtips_version=parseInt("$Revision: 40 $".slice(10,-1));
+var fdjt_richtips_id="$Id$";
+var fdjt_richtips_version=parseInt("$Revision$".slice(10,-1));
 
 /* Copyright (C) 2007-2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
@@ -165,3 +165,8 @@ function fdjtRichTip_init(elt) {
   fdjtPrepend(elt,controls);
   return elt;}
 
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+;;;  End: ***
+*/

@@ -7434,3 +7434,9 @@
 [langs~='per'] span[inlang='per'] {display: inline;}
 [langs~='per'] div[inlang='per'] {display: block;}
 [langs~='per'] p[inlang='per'] {display: block;}
+
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+;;;  End: ***
+*/

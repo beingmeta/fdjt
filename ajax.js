@@ -18,8 +18,8 @@
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
-var fdjt_ajax_id="$Id: handlers.js 40 2009-04-30 13:31:58Z haase $";
-var fdjt_ajax_version=parseInt("$Revision: 40 $".slice(10,-1));
+var fdjt_ajax_id="$Id$";
+var fdjt_ajax_version=parseInt("$Revision$".slice(10,-1));
 
 var fdjt_trace_ajax=false;
 
@@ -96,4 +96,8 @@ function fdjtAjaxGetXML(base_uri)
 		     base_uri,fdjtArguments(arguments,1));
 }
 
-
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+;;;  End: ***
+*/
