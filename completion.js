@@ -313,6 +313,8 @@ function fdjtComplete(input_elt,string,options)
   if (len) fdjtAddClass(completions,'open');
   else completions.className=completions.className;
   results.heads=heads; results.exact=exacts; results.exactheads=exactheads;
+  if (input_elt.noteCompletions) {
+    input_elt.noteCompletions(results);}
   return results;
 }
   

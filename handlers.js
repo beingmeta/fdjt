@@ -693,9 +693,14 @@ function fdjtScrollPreview(target,context,delta)
 /* Radio Selection */
 
 /* This is a generalization of 'radio buttons' which handle
-   arbitrary elements. */
+   arbitrary elements.  This basically gives ELT the SELNAME
+   class and removes the SELNAME class from all other elements
+   of class RADIONAME under UNDER.  If RADIONAME is not specified,
+   the RADIO attribute of UNDER is used, and if UNDER is not specified,
+   UNDER is identified by searching up from ELT to find a RADIO
+   attribute. */
 
-function fdjtRadioSelect(elt,radioname,under,selname)
+function fdjtRadioSelect(elt,under,radioname,selname,toggle)
 {
   if (!(radioname))
     if (under) radioname=((under.getAttribute("RADIO"))||("radio"));
@@ -707,15 +712,21 @@ function fdjtRadioSelect(elt,radioname,under,selname)
     under=fdjtGetParentByAttrib(elt,"RADIO",radioname);
     if (!(under)) under=document.body;}
   else {}
-  var target=fdjtGetParentByClassName(radioname);
-  if (fdjtHasClass(elt,selname))
+  // fdjtTrace("RadioSelect of %o with %o/%o under %o",elt,radioname,selname,under);
+  var target=fdjtGetParentByClassName(elt,radioname);
+  if (!(selname)) selname="radioselected";
+  if ((toggle) && (fdjtHasClass(elt,selname)))
     fdjtDropClass(elt,selname);
   else {
-    var all=fdjtGetChildrenByClassName(radioname);
+    var all=fdjtGetChildrenByClassName(under,radioname);
     var i=0; while (i<all.length) {
-      var node=all[i++];
-      if (node!==target) fdjtDropClass(node,selname);}
-    fdjtAddClass(node,selname);}
+      var node=all[i++]; fdjtDropClass(node,selname);}
+    fdjtAddClass(elt,selname);}
+}
+
+function fdjtRadioToggle(elt,under,radioname,selname)
+{
+  return fdjtRadioSelect(elt,under,radioname,selname,true);
 }
 
 /* Delaying handlers */

@@ -257,7 +257,7 @@ function fdjtHasClass(elt,classname,attrib)
 {
   var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") : (elt.className));
   if ((classinfo) &&
-      ((classinfo==classname) ||
+      ((classinfo===classname) ||
        (classinfo.search(_fdjtclasspat(classname))>=0)))
     return true;
   else return false;
@@ -520,7 +520,7 @@ function fdjtGetParentByClassName(node,classname)
   while ((scan) && (scan.parentNode))
     if (scan.className===classname)
       return scan;
-    else if ((scan.className) && (fdjtHasClassName(scan,classname)))
+    else if ((scan.className) && (fdjtHasClass(scan,classname)))
       return scan;
     else if (node===document) return null;
     else scan=scan.parentNode;
