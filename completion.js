@@ -355,8 +355,6 @@ function fdjtHandleCompletion(input_elt,elt,value)
     input_elt.oncomplete=
       new Function("elt","value",
 		   input_elt.getAttribute("ONCOMPLETE"));
-    fdjtTrace("Generated oncomplete function from %s",
-	      input_elt.getAttribute("ONCOMPLETE"));
     return input_elt.oncomplete.call(input_elt,elt,value||elt.value);}
   else input_elt.value=value||elt.value;
 }

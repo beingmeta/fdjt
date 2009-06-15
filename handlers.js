@@ -788,6 +788,7 @@ var fdjt_setups=[];
 function fdjtAddSetup(fcn)
 {
   if (fdjt_setup_done) {
+    if (fdjt_setups.indexOf(fcn)>=0) return;
     fdjtWarn("Running setup %o late",fcn);
     fcn();}
   else if (fdjt_setups.indexOf(fcn)<0)
