@@ -334,11 +334,15 @@ function fdjtCompletionText(input_elt)
 {
   if (input_elt.getCompletionText)
     return input_elt.getCompletionText();
+  else if (fdjtHasAttrib(input_elt,"isempty"))
+    return "";
   else return input_elt.value;
 }
 
 function fdjtHandleCompletion(input_elt,elt,value)
 {
+  if (!(value))
+    value=elt.value||(fdjtCacheAttrib(elt,"value"));
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
   if (!(elt)) return;
@@ -351,6 +355,8 @@ function fdjtHandleCompletion(input_elt,elt,value)
     input_elt.oncomplete=
       new Function("elt","value",
 		   input_elt.getAttribute("ONCOMPLETE"));
+    fdjtTrace("Generated oncomplete function from %s",
+	      input_elt.getAttribute("ONCOMPLETE"));
     return input_elt.oncomplete.call(input_elt,elt,value||elt.value);}
   else input_elt.value=value||elt.value;
 }
@@ -399,6 +405,11 @@ function fdjtComplete_show(evt)
 function fdjtComplete_onfocus(evt)
 {
   fdjtComplete(evt.target);
+}
+
+function fdjtComplete_setup(target)
+{
+  fdjtComplete(target);
 }
 
 function fdjtComplete_onkey(evt)

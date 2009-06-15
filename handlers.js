@@ -793,6 +793,13 @@ function fdjtSetup()
   fdjtCheckSpan_setup(null);
   fdjtAdjustFontSizes();
   fdjtMarkReduced();
+  var setups=fdjtGetChildrenByClassName(document.body,"onsetup");
+  var i=0; while (i<setups.length) {
+    var node=setups[i++];
+    if (node.onsetup) node.onsetup.call(node);
+    else if (node.getAttribute("onsetup")) {
+      var fn=new Function(node.getAttribute("onsetup"));
+      fn.call(node);}}
   fdjt_setup_done=true;
 }
 
