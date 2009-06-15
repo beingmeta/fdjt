@@ -1042,8 +1042,8 @@ function fdjtDivW(classname,attribs)
 function fdjtImage(url,classname,alt)
 {
   if (!(classname)) classname=null;
-  var elt=document.createElement('img');
-  if (classname) elt.className=classname;
+  var elt=((classname) ? (fdjtNewElement("img",classname)) :
+	   (document.createElement('img')));
   elt.src=url;
   if (typeof alt == "string") elt.alt=alt;
   return elt;
@@ -1063,6 +1063,14 @@ function fdjtAnchor(url)
   var elt=document.createElement('a');
   elt.href=url;
   fdjtAddElements(elt,arguments,1);
+  return elt;
+}
+
+function fdjtAnchorC(url,spec)
+{
+  var elt=fdjtNewElement("a",spec);
+  elt.href=url;
+  fdjtAddElements(elt,arguments,2);
   return elt;
 }
 

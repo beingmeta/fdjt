@@ -402,7 +402,7 @@ function _(string)
     return fmt;
   else {
     var output=""; var scan=0; var next=fmt.indexOf('%',scan);
-    while ((next>=0) && (next>scan)) {
+    while ((next>=0) && (next>=scan)) {
       if (fmt[next+1]==="%") {
 	next=fmt.indexOf('%',next+2); continue;}
       else {
@@ -428,6 +428,58 @@ function _(string)
 	next=fmt.indexOf('%',scan);}}
     output=output+fmt.slice(scan);
     return output;}
+}
+
+/* Time functions */
+
+function fdjtTick()
+{
+  return (new Date()).getTime()/1000;
+}
+
+function fdjtIntervalString(interval)
+{
+  if (interval===1)
+    return _("%1 second",interval);
+  else if (interval<10)
+    return _("%1 seconds",interval);
+  else if (interval<60)
+    return _("~%1 seconds",Math.round(interval/60));
+  else if (interval<120) {
+    var minutes=Math.floor(interval/60);
+    var seconds=Math.round(interval-minutes*60);
+    if (seconds==1)
+      return _("one minute, one second");
+    else return _("one minute, %1 seconds",seconds);}
+  else if (interval<3600) {
+    var minutes=Math.floor(interval/60);
+    return _("~%1 minutes",minutes);}
+  else if (interval<(2*3600)) {
+    var hours=Math.floor(interval/3600);
+    var minutes=Math.round((interval-(minutes*3600))/60);
+    if (minutes===1)
+      return _("one hour and one minutes");
+    else return _("one hour, %1 minutes",seconds);}
+  else if (interval<(24*3600)) {
+    var hours=Math.floor(interval/3600);
+    return _("~%1 hours",hours);}
+  else if (interval<(2*24*3600)) {
+    var hours=Math.floor((interval-24*3600)/3600);
+    if (hours===1)
+      return _("one day and one hour");
+    else return _("one day, %1 hours",hours);}
+  else if (interval<(7*24*3600)) {
+    var days=Math.floor(interval/(24*3600));
+    return _("%1 days",days);}
+  else if (interval<(14*24*3600)) {
+    var days=Math.floor((interval-(7*24*3600))/(24*3600));
+    if (days===1)
+      return "one week and one day";
+    else return _("one week and %1 days",days);}
+  else {
+    var weeks=Math.floor(interval/(7*24*3600));
+    var days=Math.round((interval-(days*7*24*3600))/(7*24*3600));
+    return _("%1 weeks, %2 days",weeks,days);}
 }
 
 
