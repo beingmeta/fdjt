@@ -447,8 +447,8 @@ function fdjtIntervalString(interval)
     return _("~%1 seconds",Math.round(interval/60));
   else if (interval<120) {
     var minutes=Math.floor(interval/60);
-    var seconds=Math.round(interval-minutes*60);
-    if (seconds==1)
+    var seconds=Math.round(interval-(minutes*60));
+    if (seconds===1)
       return _("one minute, one second");
     else return _("one minute, %1 seconds",seconds);}
   else if (interval<3600) {
@@ -456,10 +456,10 @@ function fdjtIntervalString(interval)
     return _("~%1 minutes",minutes);}
   else if (interval<(2*3600)) {
     var hours=Math.floor(interval/3600);
-    var minutes=Math.round((interval-(minutes*3600))/60);
+    var minutes=Math.round((interval-(hours*3600))/60);
     if (minutes===1)
       return _("one hour and one minutes");
-    else return _("one hour, %1 minutes",seconds);}
+    else return _("one hour, %1 minutes",minutes);}
   else if (interval<(24*3600)) {
     var hours=Math.floor(interval/3600);
     return _("~%1 hours",hours);}

@@ -783,6 +783,17 @@ function fdjtCheckAlt_onevent(evt)
 
 var fdjt_setup_started=false;
 var fdjt_setup_done=false;
+var fdjt_setups=[];
+
+function fdjtAddSetup(fcn)
+{
+  if (fdjt_setup_done) {
+    fdjtWarn("Running setup %o late",fcn);
+    fcn();}
+  else if (fdjt_setups.indexOf(fcn)<0)
+    fdjt_setups.push(fcn);
+  else {}
+}
 
 function fdjtSetup()
 {
@@ -793,6 +804,7 @@ function fdjtSetup()
   fdjtCheckSpan_setup(null);
   fdjtAdjustFontSizes();
   fdjtMarkReduced();
+  var i=0; while (i<fdjt_setups.length) fdjt_setups[i++]();
   var setups=fdjtGetChildrenByClassName(document.body,"onsetup");
   var i=0; while (i<setups.length) {
     var node=setups[i++];
