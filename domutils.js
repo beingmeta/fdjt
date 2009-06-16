@@ -1173,7 +1173,7 @@ function fdjtIsVisible(elt,partial)
 
 /* Getting cumulative offsets */
 
-function fdgtGetOffset(elt,withstack)
+function fdjtGetOffset(elt,withstack)
 {
   var top = elt.offsetTop;
   var left = elt.offsetLeft;

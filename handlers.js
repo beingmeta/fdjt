@@ -739,12 +739,17 @@ function fdjtDelayHandler(delay,handler,arg,context,delayname)
   else if (context===true) context=fdjt_global_delays;
   if (!(delayname)) delayname=handler.name||"delay";
   if (context[delayname]) {
-    clearTimeout(context[delayname]);
+    var info=context[delayname];
+    /* Don't delay for what you're already doing. */
+    if ((info.handler===handler) && (info.arg===arg))
+      return;
+    clearTimeout(info.timeout);
     context[delayname]=false;}
-  context[delayname]=
-    setTimeout(function() {
-	handler(arg); context[delayname]=false;},
-      delay);
+  var info={}; info.handler=handler; info.arg=arg;
+  context[delayname]=info;
+  info.timeout=setTimeout(function() {
+      handler(arg); context[delayname]=false;},
+    delay);
 }
 
 /* Checking control */
