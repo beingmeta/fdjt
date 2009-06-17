@@ -378,7 +378,6 @@ function fdjtStringToKCodes(string)
 	i=i+1;}
       else {
 	var probe=string.slice(i+1,end);
-	fdjtTrace("probe=%s, vec=%o",probe,vec);
 	if (typeof _fdjt_char_codes[probe] === "number") 
 	  vec.push(-(_fdjt_char_codes[probe]));
 	else if (typeof parseInt(probe,16) === "number")
