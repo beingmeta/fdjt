@@ -40,7 +40,7 @@ function fdjtShowHelp_onfocus(evt)
 	 (target.getAttribute('HELPTEXT')))) {
       var helptext=document.getElementById(target.getAttribute('HELPTEXT'));
       if (helptext) {
-	if (fdjtBlockEltp(helptext))
+	if (fdjtIsBlockElt(helptext))
 	  helptext.style.display='block';
 	else helptext.style.display='inline';}
       return;}
@@ -80,7 +80,7 @@ function fdjtShowHide_onclick(evt)
       var i=0; while (i<toshow.length) {
 	var elt=toshow[++i]; 
 	if (elt)
-	  if (fdjtBlockEltp(elt)) elt.style.display='block';
+	  if (fdjtIsBlockElt(elt)) elt.style.display='block';
 	  else elt.style.display='block';}}
     if (totoggle) {
       var i=0; while (i<totoggle.length) {

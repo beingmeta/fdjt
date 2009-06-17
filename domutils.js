@@ -71,14 +71,26 @@ function fdjtDisplayStyle(elt)
   return fdjt_tag_display_styles[elt.tagName]||"inline";
 }
 
-function fdjtBlockEltp(elt)
+function fdjtIsBlockElt(elt)
 {
   return (fdjtDisplayStyle(elt)==="block");
 }
 
+function fdjtIsTextInput(target)
+{
+  while (target)
+    if ((target.tagName==="INPUT") ||
+	(target.tagName==="TEXTAREA") ||
+	(target.className==="sbooknokeys") ||
+	((target.onkeypress) && (target.onkeypress!=sbook_onkeypress)))
+      return true;
+    else target=target.parentNode;
+  return false;
+}
+
 /* DOMish utils */
 
-// Not sure what to have as a final clause.
+// Not sure what is most portable to have as a final clause.
 //  IE seems to support Element but not Node.
 var fdjtNode=((typeof Node == "undefined") ?
 	      ((Element) ? (Element.prototype) : (false)) :
