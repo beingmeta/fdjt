@@ -660,12 +660,12 @@ function fdjtScrollTo(target,id,context)
     // We try to get context and target on the screen at the same time.
     // fdjtTrace("Trying to scroll to %o under %o",target,context);
     if (id) window.location.hash=id;
-    context.scrollIntoView();
+    context.scrollIntoView(true);
     if (!(fdjtIsVisible(target)))
-      target.scrollIntoView();}
+      target.scrollIntoView(true);}
   else if (id)
     window.location.hash=id;
-  else target.scrollIntoView();
+  else target.scrollIntoView(true);
   _fdjt_saved_scroll=false;
 }
 
@@ -680,13 +680,13 @@ function fdjtScrollPreview(target,context,delta)
     _fdjt_preview_elt=target;
     fdjtAddClass(target,"previewing");}
   if (!(context))
-    target.scrollIntoView();
+    target.scrollIntoView(true);
   else if (context.scrollIntoView) {
-    context.scrollIntoView();
+    context.scrollIntoView(true);
     if (!(fdjtIsVisible(target))) 
-      target.scrollIntoView();
+      target.scrollIntoView(true);
     else return;}
-  else target.scrollIntoView();
+  else target.scrollIntoView(true);
   if (delta) window.scrollBy(0,delta);
 }
 
