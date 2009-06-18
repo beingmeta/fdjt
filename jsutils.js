@@ -481,6 +481,16 @@ function fdjtIntervalString(interval)
     return _("%1 weeks, %2 days",weeks,days);}
 }
 
+function fdjtRunTimes(pname,start)
+{
+  var point=start; var report="";
+  var i=2; while (i<arguments.length) {
+    var phase=arguments[i++]; var time=arguments[i++];
+    report=report+"; "+phase+": "+
+      ((time.getTime()-point.getTime())/1000)+"s";
+    point=time;}
+  return ((point.getTime()-start.getTime())/1000)+"s"+report;
+}
 
 /* All done, just begun */
 

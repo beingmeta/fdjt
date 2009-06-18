@@ -164,15 +164,18 @@ function fdjtHasParent(node,parent)
   return false;
 }
 
-function fdjtHasContent(node)
+function fdjtHasContent(node,recur)
 {
   if (node.childNodes) {
     var children=node.childNodes;
     var i=0; while (i<children.length) {
       var child=children[i++];
-      if (child.nodeType===3) {
-	var string=child.nodeValue;
-	if (string.search(/\w/g)>=0) return true;}}
+      if (child.nodeType===3)
+	if (child.nodeValue.search(/\w/g)>=0) return true;
+	else {}
+      else if ((recur) && (child.nodeType===1))
+	if (fdjtHasContent(child)) return true;
+	else {}}
     return false;}
   else return false;
 }
@@ -803,8 +806,7 @@ function fdjtAddElements(elt,elts,i)
     if (!(arg)) continue;
     else if ((typeof arg === 'string') || (typeof arg === "number")) {
       if (curstring) curstring=curstring+arg;
-      else if (typeof arg === 'string')
-	curstring=arg;
+      else if (typeof arg === 'string') curstring=arg;
       else curstring=arg.toString();
       continue;}
     else {
@@ -812,12 +814,8 @@ function fdjtAddElements(elt,elts,i)
 	elt.appendChild(document.createTextNode(curstring));
 	curstring=false;}
       if (arg.nodeType) elt.appendChild(arg);
-      else if ((typeof arg === "object") &&
-	       (arg instanceof Array)) {
-	var j=0; while (j<arg.length) {
-	  var toadd=arg[j++];
-	  if (!(toadd)) {}
-	  else elt.appendChild(fdjtNodify(toadd));}}
+      else if (arg instanceof Array)
+	fdjtAddElements(elt,arg,0);
       else elt.appendChild(fdjtNodify(arg));}}
   if (curstring)
     elt.appendChild(document.createTextNode(curstring));
@@ -1208,15 +1206,14 @@ var _fdjt_vertical_flat_width=8;
 var _fdjt_vertical_tags=["P","DIV","BR","UL","LI","BLOCKQUOTE",
 			 "H1","H2","H3","H4","H5","H6"];
 var _fdjt_flat_width_fns={};
-
 function _fdjt_compute_flat_width(node,sofar)
 {
   if (node.nodeType===Node.ELEMENT_NODE) {
     if (typeof _fdjt_flat_width_fns[node.tagName] == "function")
-      sofar=sofar+_fdjt_flat_width_fns[node.tagName];
+      sofar=sofar+_fdjt_flat_width_fns[node.tagName](node);
     else if (_fdjt_vertical_tags.indexOf(node.tagName)>=0)
       sofar=sofar+_fdjt_vertical_flat_width;
-    else if (fdjtHasAttrib(node,"flatwidth")) {
+    else if (note.getAttribute("flatwidth")) {
       var fw=node.getAttribute("flatwidth");
       if (typeof fw == "string") {
 	if ((fw.length>0) && (fw[0]=='+'))
@@ -1247,10 +1244,32 @@ function _fdjt_compute_flat_width(node,sofar)
   else return sofar;
 }
 
-function fdjtFlatWidth(node,sofar)
+var _fdjt_tag_widths=
+  {"P": 8,"DIV": 8,"BR": 8,"UL": 8,"LI": 8,"BLOCKQUOTE": 8,
+   "H1": 8,"H2": 8,"H3": 8,"H4": 8,"H5": 8,"H6": 8};
+
+function _fdjt_flat_width(node,sofar)
 {
-  if (!(sofar)) sofar=0;
-  return _fdjt_compute_flat_width(node,sofar);
+  if (node.nodeType===1) {
+    var children=node.childNodes;
+    sofar=sofar+_fdjt_tag_widths[node.tagName]||4;
+    if (children) {
+      var i=0; while (i<children.nodes) {
+	var child=children[i++];
+	if (child.nodeType===3)
+	  sofar=sofar+child.nodeValue.length;
+	else if (child.nodeType===1)
+	  sofar=_fdjt_flat_width(node,sofar);
+	else {}}}
+    return sofar;}
+  else if (child.nodeType===3)
+    return sofar+child.nodeValue.length;
+  else return sofar;
+}
+
+function fdjtFlatWidth(node)
+{
+  return _fdjt_flat_width(node,0);
 }
 
 /* Transplanting nodes */
