@@ -204,7 +204,8 @@ function fdjtCacheAttrib(elt,attribname,xform,dflt)
 {
   var aval;
   if (aval=elt[attribname]) return aval;
-  else if (aval=elt.getAttribute(attribname)) {
+  else if ((elt.getAttribute) &&
+	   (aval=elt.getAttribute(attribname))) {
     var val=((xform) ? (xform(aval)) : (aval));
     elt[attribname]=val;
     return val;}
