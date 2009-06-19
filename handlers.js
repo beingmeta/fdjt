@@ -611,6 +611,48 @@ function fdjtCoHi_onmouseout(evt,classname_arg)
       setTimeout(function () {fdjtCoHi_unhighlight();},20);
 }
 
+/* More consistent scrollintoview */
+
+var fdjt_use_native_scroll=false;
+
+function _fdjt_get_scroll_offset(wleft,eleft,eright,wright)
+{
+  var result;
+  if ((eleft>wleft) && (eright<wright)) return wleft;
+  else if ((eright-eleft)<(wright-wleft)) 
+    return eleft-Math.floor(((wright-wleft)-(eright-eleft))/2);
+  else return eleft;
+}
+
+function fdjtScrollIntoView(elt,topedge)
+{
+  if ((!topedge) && (fdjtIsVisible(elt)))
+    return;
+  else if ((fdjt_use_native_scroll) && (elt.scrollIntoView)) {
+    elt.scrollIntoView(top);
+    if ((!topedge) && (fdjtIsVisible(elt,true)))
+      return;}
+  else {
+    var top = elt.offsetTop;
+    var left = elt.offsetLeft;
+    var width = elt.offsetWidth;
+    var height = elt.offsetHeight;
+    var winx=window.pageXOffset;
+    var winy=window.pageYOffset;
+    var winxedge=winx+window.innerWidth;
+    var winyedge=winy+window.innerHeight;
+    
+    while(elt.offsetParent) {
+      elt = elt.offsetParent;
+      top += elt.offsetTop;
+      left += elt.offsetLeft;}
+
+    var targetx=_fdjt_get_scroll_offset(winx,left,left+width,winxedge);
+    var targety=_fdjt_get_scroll_offset(winy,top,top+height,winyedge);
+
+    window.scrollTo(targetx,targety);}
+}
+
 /* Scrolling control */
 
 var _fdjt_saved_scroll=false;
@@ -656,17 +698,11 @@ function fdjtScrollDiscard(ss)
 
 function fdjtScrollTo(target,id,context)
 {
-  if ((context) && (context.scrollIntoView)) {
-    // We try to get context and target on the screen at the same time.
-    // fdjtTrace("Trying to scroll to %o under %o",target,context);
-    if (id) window.location.hash=id;
-    context.scrollIntoView(true);
+  if (context) {
+    fdjtScrollIntoView(context,true);
     if (!(fdjtIsVisible(target)))
-      target.scrollIntoView(true);}
-  else if (id)
-    window.location.hash=id;
-  else target.scrollIntoView(true);
-  _fdjt_saved_scroll=false;
+      fdjtScrollIntoView(target,true);}
+  else fdjtScrollIntoView(target,false);
 }
 
 function fdjtScrollPreview(target,context,delta)
@@ -680,15 +716,19 @@ function fdjtScrollPreview(target,context,delta)
     _fdjt_preview_elt=target;
     fdjtAddClass(target,"previewing");}
   if (!(context))
-    target.scrollIntoView(true);
-  else if (context.scrollIntoView) {
-    context.scrollIntoView(true);
+    fdjtScrollIntoView(target);
+  else {
+    fdjtScrollIntoView(context);
     if (!(fdjtIsVisible(target))) 
-      target.scrollIntoView(true);
-    else return;}
-  else target.scrollIntoView(true);
-  if (delta) window.scrollBy(0,delta);
+      fdjtScrollIntoView(target);}
 }
+
+function fdjtClearPreview()
+{
+  if ((_fdjt_preview_elt) && (_fdjt_preview_elt.className))
+    fdjtDropClass(_fdjt_preview_elt,"previewing");
+}
+
 
 /* Radio Selection */
 

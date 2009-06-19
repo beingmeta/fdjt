@@ -1201,6 +1201,22 @@ function fdjtGetOffset(elt,withstack)
   else return new Array(left,top);
 }
 
+function fdjtComputeOffsets(node,recache)
+{
+  if (!(node)) return node;
+  else if ((!(recache)) && (node.Xoff)) return node;
+  else {
+    var parent=fdjtComputeOffsets(node.offsetParent,recache);
+    if (parent) {
+      var xoff=((node.offsetLeft)||(0))+parent.Xoff;
+      var yoff=((node.offsetTop)||(0))+parent.Yoff;
+      node.Xoff=xoff; node.Yoff=yoff;
+      return node;}
+    else {
+      node.Xoff=node.offsetLeft; node.Yoff=node.offsetTop;
+      return node;}}
+}
+
 /* Computing "flat width" of a node */
 
 var _fdjt_vertical_flat_width=8;
