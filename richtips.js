@@ -134,7 +134,7 @@ function fdjtRichTip_onclick(evt)
 
 function fdjtRichTip_onmouseout(evt)
 {
-  fdjtTrace("richtip_mouseout");
+  // fdjtTrace("richtip_mouseout");
   if (!(fdjt_display_richtips)) return;
   if (fdjt_live_richtip) {
     fdjtDropClass(fdjt_live_richtip,"live");
