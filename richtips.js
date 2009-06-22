@@ -34,7 +34,7 @@ var fdjt_richtip_delay=300;
 var fdjt_richtip_pending=false;
 var fdjt_richtip_timeout=null;
 
-var fdjt_richtip_classfns=[];
+var fdjt_richtip_classfns={};
 
 function fdjtFindRichTip(elt)
 {
@@ -135,7 +135,7 @@ function fdjtRichTip_onclick(evt)
 function fdjtRichTip_onmouseout(evt)
 {
   fdjtTrace("richtip_mouseout");
-  if (!(display_richtips)) return;
+  if (!(fdjt_display_richtips)) return;
   if (fdjt_live_richtip) {
     fdjtDropClass(fdjt_live_richtip,"live");
     fdjt_live_richtip=false;}
