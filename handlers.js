@@ -643,7 +643,10 @@ function fdjtScrollIntoView(elt,topedge)
       left += elt.offsetLeft;}
 
     var targetx=_fdjt_get_scroll_offset(winx,left,left+width,winxedge);
-    var targety=_fdjt_get_scroll_offset(winy,top,top+height,winyedge);
+    var targety=
+      ((topedge) ?
+       ((typeof topedge === "number") ? (top+topedge) : (top)) :
+       (_fdjt_get_scroll_offset(winy,top,top+height,winyedge)));
 
     window.scrollTo(targetx,targety);}
 }
