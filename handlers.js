@@ -702,10 +702,15 @@ function fdjtScrollTo(target,id,context)
 
 function fdjtScrollPreview(target,context,delta)
 {
+  /* Stop the preview */
+  if (!(target)) {
+    fdjtStopPreview(); return;}
+  /* Already previewing */
+  if (target===_fdjt_preview_elt) return;
   if (!(_fdjt_saved_scroll)) fdjtScrollSave();
   if ((_fdjt_preview_elt) && (_fdjt_preview_elt.className))
     fdjtDropClass(_fdjt_preview_elt,"previewing");
-  if (target===document.body)
+  if (target===document.body) 
     _fdjt_preview_elt=false;
   else {
     _fdjt_preview_elt=target;
@@ -722,6 +727,7 @@ function fdjtClearPreview()
 {
   if ((_fdjt_preview_elt) && (_fdjt_preview_elt.className))
     fdjtDropClass(_fdjt_preview_elt,"previewing");
+  _fdjt_preview_elt=false;
 }
 
 
