@@ -673,13 +673,13 @@ function fdjtScrollRestore(ss)
   if (_fdjt_preview_elt) {
     fdjtDropClass(_fdjt_preview_elt,"previewing");
     _fdjt_preview_elt=false;}
-  if ((ss) && (ss.scrollX)) {
+  if ((ss) && (typeof ss.scrollX === "number")) {
     // fdjtTrace("Restoring scroll to %d,%d",ss.scrollX,ss.scrollY);    
     window.scrollTo(ss.scrollX,ss.scrollY);
     return true;}
   else if ((_fdjt_saved_scroll) &&
-	   ((_fdjt_saved_scroll.scrollY) ||
-	    (_fdjt_saved_scroll.scrollX))) {
+	   ((typeof _fdjt_saved_scroll.scrollY === "number") ||
+	    (typeof _fdjt_saved_scroll.scrollX === "number"))) {
     // fdjtTrace("Restoring scroll to %o",_fdjt_saved_scroll);
     window.scrollTo(_fdjt_saved_scroll.scrollX,_fdjt_saved_scroll.scrollY);
     _fdjt_saved_scroll=false;
