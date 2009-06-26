@@ -656,7 +656,6 @@ function fdjtScrollIntoView(elt,topedge)
 var _fdjt_saved_scroll=false;
 var _fdjt_preview_elt=false;
 
-
 function fdjtScrollSave(ss)
 {
   if (ss) {
@@ -694,13 +693,17 @@ function fdjtScrollDiscard(ss)
   else _fdjt_saved_scroll=false;
 }
 
-function fdjtScrollTo(target,id,context)
+function fdjtScrollTo(target,id,context,discard)
 {
-  if (context) {
-    fdjtScrollIntoView(context,true);
-    if (!(fdjtIsVisible(target)))
-      fdjtScrollIntoView(target,true);}
-  else fdjtScrollIntoView(target,false);
+  fdjtScrollDiscard(discard);
+  if (id) document.location.hash=id;
+  if (context)
+    setTimeout(function() {
+	fdjtScrollIntoView(context,true);
+	if (!(fdjtIsVisible(target)))
+	  fdjtScrollIntoView(target,true);},
+      100);
+  else setTimeout(function() {fdjtScrollIntoView(target,true);},100);
 }
 
 function fdjtScrollPreview(target,context,delta)

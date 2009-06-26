@@ -1176,10 +1176,29 @@ function fdjtIsVisible(elt,partial)
 	    // top above/left of window, bottom below/right of window
 	    (((top < winy) || (left < winx)) &&
 	     ((top+height > winyedge) && (left+width > winxedge))));
-  else return (top >= window.pageYOffset &&
-	       left >= window.pageXOffset &&
-	       (top + height) <= (window.pageYOffset + window.innerHeight) &&
-	       (left + width) <= (window.pageXOffset + window.innerWidth));
+  else return (top >= winx && left >= winy &&
+	       (top + height) <= (winyedge) &&
+	       (left + width) <= (winxedge));
+}
+
+function fdjtIsAtTop(elt,delta)
+{
+  if (!(delta)) delta=50;
+  var top = elt.offsetTop;
+  var left = elt.offsetLeft;
+  var width = elt.offsetWidth;
+  var height = elt.offsetHeight;
+  var winx=window.pageXOffset;
+  var winy=window.pageYOffset;
+  var winxedge=winx+window.innerWidth;
+  var winyedge=winy+window.innerHeight;
+  
+  while(elt.offsetParent) {
+    elt = elt.offsetParent;
+    top += elt.offsetTop;
+    left += elt.offsetLeft;}
+
+  return ((top>winx) && (top<winyedge) && (top<winx+delta));
 }
 
 /* Getting cumulative offsets */
