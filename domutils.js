@@ -199,11 +199,10 @@ function fdjtHasAttrib(elt,attribname,attribval)
   else return false;
 }
 
-// We define this because .hasAttribute isn't everywhere
 function fdjtCacheAttrib(elt,attribname,xform,dflt)
 {
   var aval;
-  if (aval=elt[attribname]) return aval;
+  if (elt.hasOwnProperty(attribname)) return elt[attribname];
   else if ((elt.getAttribute) &&
 	   (aval=elt.getAttribute(attribname))) {
     var val=((xform) ? (xform(aval)) : (aval));
@@ -1423,6 +1422,23 @@ function fdjtSelectedText()
   else if (document.selection)
     return document.selection.createRange().text;
   else return null;
+}
+
+/* Accessing stylesheets */
+
+function fdjtFindCSS(selector,first)
+{
+  var sheets=document.styleSheets;
+  var rules=[];
+  var i=0; while (i<sheets.length) {
+    var sheet=sheets[i++];
+    var rules=sheet.cssRules;
+    var j=0; while (j<rules.length) {
+      var rule=rules[j++];
+      if (rule.selectorText.search(selector)>0)
+	if (first) return new Array(rule);
+	else rules.push(rule);}}
+  return rules;
 }
 
 /* Searching content */

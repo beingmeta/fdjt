@@ -31,7 +31,7 @@ var FDJT_COMPLETE_OPTIONS=1;
 // Whether the completion element is a cloud (made of spans)
 var FDJT_COMPLETE_CLOUD=2;
 // Whether to require that completion match an initial segment
-var FDJT_COMPLETE_PREFIX=4;
+var FDJT_COMPLETE_ANYWHERE=4;
 // Whether to match case in keys to completions
 var FDJT_COMPLETE_MATCHCASE=8;
 // Whether to show "variations" which are matched
@@ -44,7 +44,7 @@ var FDJT_COMPLETE_SHOWEMPTY=32;
 var FDJT_COMPLETE_DISJOINS=64;
 
 var fdjt_complete_options=
-  FDJT_COMPLETE_OPTIONS|FDJT_COMPLETE_PREFIX|FDJT_COMPLETE_SHOWVARY;
+  FDJT_COMPLETE_OPTIONS|FDJT_COMPLETE_SHOWVARY;
 
 /* When completing on an empty string, show completions if there are fewer
    than this number (customizable by the maxshowempty attribute).  */
@@ -56,7 +56,7 @@ function _fdjt_get_complete_opts(arg)
   else if (typeof arg === "number") return arg;
   else if (typeof arg === "string") {
     var opt=
-      (((arg.search(/\bprefix\b/)<0)?(0):((FDJT_COMPLETE_PREFIX)))|
+      (((arg.search(/\banywhere\b/)<0)?(0):((FDJT_COMPLETE_ANYWHERE)))|
        ((arg.search(/\bmatchcase\b/)<0)?(0):((FDJT_COMPLETE_MATCHCASE)))|
        ((arg.search(/\bcloud\b/)<0)?(0):((FDJT_COMPLETE_CLOUD)))|
        ((arg.search(/\bshowempty\b/)<0)?(0):((FDJT_COMPLETE_SHOWEMPTY)))|
@@ -219,18 +219,23 @@ function fdjtComplete(input_elt,string,options)
     var exacts=[]; var exactheads=[];
     var keys=[];
     var matchcase=(options&FDJT_COMPLETE_MATCHCASE);
-    var prefix=(options&FDJT_COMPLETE_PREFIX);
-    var qpat=string; var qstring=string;
+    var prefix=(!(options&FDJT_COMPLETE_ANYWHERE));
+    var qpat=string; var qanypat; var qstring=string;
     var n_complete=0;
     if (typeof string !== "string")
       throw {name: "TypeError",irritant: string,expected: "string or regex"};
-    else if ((matchcase) && (prefix))
-      qpat=new RegExp("^"+string,"g");
-    else if (matchcase)
+    else if ((matchcase) && (prefix)) {
+      qpat=new RegExp("^"+string,"");
+      qanypat=new RegExp(string,"g");}
+    else if (matchcase) {
       qpat=new RegExp(string,"");
-    else if (prefix)
+      qanypat=qpat;}
+    else if (prefix) {
       qpat=new RegExp("^"+string,"i");
-    else qpat=new RegExp(string,"gi");
+      qanypat=new RegExp(string,"i");}
+    else {
+      qpat=new RegExp(string,"gi");
+      qanypat=qpat;}
     results.string=string;
     if (!(matchcase)) qstring=string.toLowerCase();
     var children=(completions.completions)||
@@ -240,14 +245,13 @@ function fdjtComplete(input_elt,string,options)
       var child=children[i++];
       var found=false; var exact=false; var head=false;
       var key=child.key||fdjtCacheAttrib(child,"key");
-      if (key.search(qpat)>=0)
-	if ((matchcase) ? (key===qstring) : (key.toLowerCase()===qstring)) {
-	  results.push(child); keys.push(key);
-	  found=true; exact=true; head=true;}
-	else {
-	  found=true; head=true;}
+      var anymatch=child.anymatch||fdjtCacheAttrib(child,"anymatch",false,false);
+      if ((anymatch) ? (key.search(qanypat)>=0) : (key.search(qpat)>=0)) {
+	results.push(child); keys.push(key); found=true; head=true;
+	if ((matchcase) ? (key===qstring) : (key.toLowerCase()===qstring))
+	  exact=true;}
       /* We iterate over variants in any case, because we may want to
-	 hide them if their displayed from a past completion. */
+	 hide them if they're displayed from a past completion. */
       var variants=
 	((child.variants)||
 	 (child.variants=fdjtGetChildrenByClassName(child,"variation")));
@@ -349,13 +353,13 @@ function fdjtHandleCompletion(input_elt,elt,value)
   if (fdjt_trace_completion)
     fdjtLog("Handling completion on %o with %o (%o):",
 	    input_elt,elt,value);
-  if (input_elt.oncomplete)
-    return input_elt.oncomplete.call(input_elt,elt,value||elt.value);
+  if (input_elt.oncomplete) {
+    return input_elt.oncomplete(elt,value||elt.value);}
   else if (input_elt.getAttribute("ONCOMPLETE")) {
     input_elt.oncomplete=
       new Function("elt","value",
 		   input_elt.getAttribute("ONCOMPLETE"));
-    return input_elt.oncomplete.call(input_elt,elt,value||elt.value);}
+    return input_elt.oncomplete(elt,value||elt.value);}
   else input_elt.value=value||elt.value;
 }
 
@@ -419,14 +423,14 @@ function fdjtComplete_onkey(evt)
   var options=target.completeopts||_fdjt_get_complete_opts(target);
   var cchars=
     fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[32,-13]);    
-  // fdjtTrace("Complete_onkey %o",evt);
+  // fdjtTrace("Complete_onkey %o, cchars=%o",evt,cchars);
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
   if (((keycode) && (cchars.indexOf(-keycode)>=0)) ||
       ((charcode) && (cchars.indexOf(charcode)>=0))) {
     // These complete right away
     var results=fdjtComplete(target,false,options);
-    // evt.preventDefault(); evt.cancelBubble=true;
+    evt.preventDefault(); evt.cancelBubble=true;
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0],results[0].value);
       fdjtDropClass(target.completions_elt,"open");}
