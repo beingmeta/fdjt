@@ -333,14 +333,64 @@ function fdjtUnEntify(string)
 
 /* Other utility functions */
 
-function fdjtSemiSplit(string)
+function fdjtStringSplit(string,split,escape,mapfn)
 {
-  return string.split(';');
+  if ((mapfn) || (escape)) {
+    var results=[];
+    var start=0; var next;
+    while ((next=string.indexOf(split,start))>=0) 
+      if ((escape) && (next>0) && (string[next-1]===escape))
+	start=next+1;
+      else if ((mapfn) && (next>start)) {
+	results.push(mapfn(string.slice(start,next))); start=next+1;}
+      else if (next>start) {
+	results.push(string.slice(start,next)); start=next+1;}
+      else start=next+1;
+    if (string.length>start)
+      if (mapfn) results.push(mapfn(string.slice(start)));
+      else results.push(string.slice(start));
+    return results;}
+  else return string.split(split);
 }
 
-function fdjtLineSplit(string)
+function fdjtSemiSplit(string,escape,mapfn)
 {
-  return string.split('\n');
+  if ((mapfn) || (escape)) {
+    var results=[];
+    var start=0; var next;
+    while ((next=string.indexOf(';',start))>=0) 
+      if ((escape) && (next>0) && (string[next-1]===escape))
+	start=next+1;
+      else if ((mapfn) && (next>start)) {
+	results.push(mapfn(string.slice(start,next))); start=next+1;}
+      else if (next>start) {
+	results.push(string.slice(start,next)); start=next+1;}
+      else start=next+1;
+    if (string.length>start)
+      if (mapfn) results.push(mapfn(string.slice(start)));
+      else results.push(string.slice(start));
+    return results;}
+  else return string.split(';');
+}
+
+function fdjtLineSplit(string,escapes,mapfn)
+{
+  if ((mapfn) || (escape)) {
+    var results=[];
+    var start=0; var next;
+    while ((next=string.indexOf('\n',start))>=0) 
+      if ((escape) && (next>0) && (string[next-1]===escape))
+	start=next+1;
+      else if ((mapfn) && (next>start)) {
+	results.push(mapfn(string.slice(start,next))); start=next+1;}
+      else if (next>start) {
+	results.push(string.slice(start,next)); start=next+1;}
+      else start=next+1;
+    if (string.length>start)
+      if (mapfn) results.push(mapfn(string.slice(start)));
+      else results.push(string.slice(start));
+    return results;}
+  else return string.split('\n');
 }
 
 function fdjtStringTrim(string)
