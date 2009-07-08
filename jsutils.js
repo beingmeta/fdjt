@@ -333,6 +333,17 @@ function fdjtUnEntify(string)
 
 /* Other utility functions */
 
+function fdjtFindSplit(string,split,escape)
+{
+  var start=0;
+  var next;
+  while ((next=string.indexOf(split,start))>=0) 
+    if ((escape) && (next>0) && (string[next-1]===escape))
+      start=next+1;
+    else return next;
+  return -1;
+}
+
 function fdjtStringSplit(string,split,escape,mapfn)
 {
   if ((mapfn) || (escape)) {
