@@ -45,6 +45,14 @@ function fdjtTrace(string)
     window.console.log.apply(window.console,arguments);
 }
 
+// Insert these for breakpoints you can set
+function fdjtBreak(string)
+{
+  if ((window.console) && (window.console.log) &&
+      (window.console.count))
+    window.console.log.apply(window.console,arguments);
+}
+
 // This goes to an alert if it can't get to the console
 function fdjtWarn(string)
 {
