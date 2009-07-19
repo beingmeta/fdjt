@@ -981,8 +981,8 @@ function fdjtNewElement(tag,classname)
     else if (classname[0]===".") {
       var hashpos=classname.indexOf("#");
       if (hashpos>0) {
-	elt.id=classname.slice(hashpos+1).replace("."," ");
-	elt.className=classname.slice(1,hashpos);}
+	elt.id=classname.slice(hashpos+1);
+	elt.className=classname.slice(1,hashpos).replace("."," ");}
       else elt.className=classname.slice(1).replace("."," ");}
     else elt.className=classname;}
   if (arguments.length>2)
