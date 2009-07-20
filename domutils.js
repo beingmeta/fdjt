@@ -296,7 +296,8 @@ function fdjtAddClass(elt,classname,attrib)
     var i=0; while (i<elt.length) {
       var e=elt[i++]; fdjtAddClass(e,classname,(attrib||false));}}
   else {
-    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
+    var classinfo=
+      (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
     var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
     if (_fdjt_debug_classedits)
@@ -339,7 +340,8 @@ function fdjtDropClass(elt,classname,attrib,keep)
     var i=0; while (i<elt.length) {
       var e=elt[i++]; fdjtDropClass(e,classname,(attrib||false));}}
   else {
-    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
+    var classinfo=
+      (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
     var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
     if (_fdjt_debug_classedits)
@@ -384,7 +386,8 @@ function fdjtToggleClass(elt,classname,attrib,keep)
     var i=0; while (i<elt.length) {
       var e=elt[i++]; fdjtToggleClass(e,classname,(attrib||false));}}
   else {
-    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
+    var classinfo=
+      (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
     var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
     if (_fdjt_debug_classedits)
@@ -429,7 +432,8 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
     var i=0; while (i<elt.length) {
       var e=elt[i++]; fdjtSwapClass(e,classname,(attrib||false));}}
   else {
-    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className));
+    var classinfo=
+      (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
     var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
     if ((classinfo) && ((classinfo.search(class_regex))>=0)) 
@@ -1175,7 +1179,7 @@ function fdjtIsVisible(elt,partial)
 	    // top above/left of window, bottom below/right of window
 	    (((top < winy) || (left < winx)) &&
 	     ((top+height > winyedge) && (left+width > winxedge))));
-  else return (top >= winx && left >= winy &&
+  else return (top >= winy && left >= winx &&
 	       (top + height) <= (winyedge) &&
 	       (left + width) <= (winxedge));
 }
