@@ -697,18 +697,18 @@ function fdjtScrollTo(target,id,context,discard)
 {
   fdjtScrollDiscard(discard);
   if (id) document.location.hash=id;
-  if (context)
+  if (context) {
     setTimeout(function() {
 	fdjtScrollIntoView(context,true);
-	if (!(fdjtIsVisible(target)))
-	  fdjtScrollIntoView(target,true);},
-      100);
+	if (!(fdjtIsVisible(target))) {
+	  fdjtScrollIntoView(target,true);}},
+      100);}
   else setTimeout(function() {fdjtScrollIntoView(target,true);},100);
 }
 
 function fdjtScrollPreview(target,context,delta)
 {
-  /* Stop the preview */
+  /* Stop the current preview */
   if (!(target)) {
     fdjtStopPreview(); return;}
   /* Already previewing */
