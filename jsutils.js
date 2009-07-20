@@ -184,8 +184,16 @@ function fdjtArguments(argobj,start)
 function _fdjt_set_sortfn(a,b)
 {
   if (a===b) return 0;
-  else if (typeof a === typeof b)
-    if (a<b) return -1; else return 1;
+  else if (typeof a === typeof b) {
+    if ((typeof a === "number") || (typeof a === "string"))
+      if (a<b) return -1; else return 1;
+    else if (a.sortkey)
+      if (b.sortkey)
+	if (a.sortkey === b.sortkey) return 0;
+	else return (a.sortkey>b.sortkey)-(a.sortkey<b.sortkey);
+      else return -1;
+    else if (b.sortkey) return 1;
+    else return (a>b)-(a<b);}
   else if (typeof a < typeof b)
     return -1;
   else return 1;
@@ -503,6 +511,16 @@ function _(string)
 function fdjtTick()
 {
   return (new Date()).getTime()/1000;
+}
+
+function fdjtTickString(tick)
+{
+  return (new Date(tick*1000)).toString();
+}
+
+function fdjtTickDate(tick)
+{
+  return (new Date(tick*1000)).toDateString();
 }
 
 function fdjtIntervalString(interval)
