@@ -360,7 +360,9 @@ function fdjtHandleCompletion(input_elt,elt,value)
       new Function("elt","value",
 		   input_elt.getAttribute("ONCOMPLETE"));
     return input_elt.oncomplete(elt,value||elt.value);}
-  else input_elt.value=value||elt.value;
+  else {
+    input_elt.value=value||elt.value;
+    input_elt.focus();}
 }
 
 function fdjtComplete_onclick(evt)
@@ -385,7 +387,6 @@ function fdjtComplete_onclick(evt)
 	     (target.key));
   fdjtHandleCompletion(input_elt,target,value);
   fdjtDropClass(completions,"open");
-  input_elt.focus();
 }
 
 var _fdjt_completion_timer=false;

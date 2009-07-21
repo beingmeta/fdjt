@@ -693,17 +693,17 @@ function fdjtScrollDiscard(ss)
   else _fdjt_saved_scroll=false;
 }
 
-function fdjtScrollTo(target,id,context,discard)
+function fdjtScrollTo(target,id,context,discard,topedge)
 {
   fdjtScrollDiscard(discard);
   if (id) document.location.hash=id;
   if (context) {
     setTimeout(function() {
-	fdjtScrollIntoView(context,true);
+	fdjtScrollIntoView(context,topedge);
 	if (!(fdjtIsVisible(target))) {
-	  fdjtScrollIntoView(target,true);}},
+	  fdjtScrollIntoView(target,topedge);}},
       100);}
-  else setTimeout(function() {fdjtScrollIntoView(target,true);},100);
+  else setTimeout(function() {fdjtScrollIntoView(target,topedge);},100);
 }
 
 function fdjtScrollPreview(target,context,delta)
@@ -722,11 +722,13 @@ function fdjtScrollPreview(target,context,delta)
     _fdjt_preview_elt=target;
     fdjtAddClass(target,"previewing");}
   if (!(context))
-    fdjtScrollIntoView(target);
+    fdjtScrollIntoView(target,delta);
   else {
-    fdjtScrollIntoView(context);
-    if (!(fdjtIsVisible(target))) 
-      fdjtScrollIntoView(target);}
+    fdjtScrollIntoView(context,delta);
+    if (!(fdjtIsVisible(target))) {
+      fdjtScrollIntoView(context);
+      if (!(fdjtIsVisible(target))) 
+	fdjtScrollIntoView(target);}}
 }
 
 function fdjtClearPreview()
