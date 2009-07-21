@@ -313,10 +313,11 @@ function fdjtDifference(set1,set2)
 }
 
 // This could be faster, but we can do that later
-function fdjtOverlaps(set1,set2)
+function fdjtOverlaps(set1,set2,destructive)
 {
   var i=0; var j=0;
-  set1=fdjtSet(set1); set2=fdjtSet(set2);
+  set1=fdjtSet(set1,destructive||false);
+  set2=fdjtSet(set2,destructive|false);
   var len1=set1.length; var len2=set2.length;
   while ((i<len1) && (j<len2))
     if (set1[i]===set2[j]) return true;
