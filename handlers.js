@@ -801,6 +801,29 @@ function fdjtDelayHandler(delay,handler,arg,context,delayname)
     delay);
 }
 
+/* Gradual transformation */
+
+function fdjtGradually(nsteps,interval,startval,endval,stepfn)
+{
+  var args=[]; var timer;
+  var delta=(endval-startval)/nsteps; 
+  var val=startval; args.push(startval);
+  var i=5; while (i<arguments.length) args.push(arguments[i++]);
+  stepfn.apply(this,args);
+  timer=window.setInterval(function() {
+      fdjtTrace("val=%o, delta=%o, startval=%o endval=%o nsteps=%o",
+		val,delta,startval,endval,nsteps);
+      val=val+delta;
+      if (((delta<0) && (val<endval)) ||
+	  ((delta>0) && (val>endval))) {
+	args[0]=false; stepfn.apply(this,args);
+	clearInterval(timer);}
+      else {
+	args[0]=val; stepfn.apply(this,args);}},
+    interval);
+  return timer;
+}
+
 /* Checking control */
 
 /* Some events, like onselect, don't seem to get control key information.
