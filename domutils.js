@@ -1003,6 +1003,19 @@ function fdjtNewElementW(tag,classname,attribs)
   return elt;
 }
 
+function fdjtNewElt(eltspec)
+{
+  var hashpos=tag.indexOf('#'); var dotpos=tag.indexOf('.');
+  var tagend=(((hashpos) && (dotpos)&&((hashpos<dotpos)?hashpos:dotpos))
+	      |(hashpos)|(dotpos));
+  var elt=((tagend)?
+	   (fdjtNewElement(tag.slice(classend),tag.slice(0,classend))) :
+	   (fdjtNewElement(tag)));
+  if (arguments.length>1)
+    fdjtAddElements(elt,arguments,1);
+  return elt;
+}
+
 function fdjtWithId(elt,id)
 {
   elt.id=id;
