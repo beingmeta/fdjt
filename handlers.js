@@ -147,7 +147,7 @@ function fdjtAutoPrompt_onblur(evt)
   var elt=evt.target;
   if (elt.value==='') {
     elt.setAttribute('isempty','yes');
-    var prompt=elt.getAttribute('prompt');
+    var prompt=(elt.prompt)||(elt.getAttribute('prompt'));
     if ((prompt===null) && (elt.className==='autoprompt'))
       prompt=elt.title;
     elt.value=prompt;}
@@ -155,22 +155,26 @@ function fdjtAutoPrompt_onblur(evt)
   fdjtHideHelp_onblur(evt);
 }
 
-function fdjtAutoPrompt_setup()
+function fdjtAutoPrompt_setup(elt)
 {
-  var elements=$$('INPUT').concat($$('TEXTAREA'));
+  if (!(elt)) elt=document.body;
+  var elements=$$('INPUT',elt).concat($$('TEXTAREA',elt));
   var i=0; if (elements) while (i<elements.length) {
       var elt=elements[i++];
-      if (((elt.tagName==="TEXTAREA") || (elt.type==='text')) &&
-	  ((elt.className==='autoprompt') || (fdjtHasAttrib(elt,'prompt')))) {
-	var prompt=elt.getAttribute('prompt');
-	if (prompt===null)
+      if (((elt.tagName==="TEXTAREA") ||
+	   ((elt.tagName==="INPUT") && (elt.type==='text'))) &&
+	  ((fdjtHasClass(elt,'autoprompt')) ||
+	   (elt.prompt) || (fdjtHasAttrib(elt,'prompt')))) {
+	var prompt=(elt.prompt)||elt.getAttribute('prompt');
+	if (!(prompt))
 	  if (fdjtHasClass(elt,'autoprompt'))
 	    prompt=elt.title;
 	  else continue;
-	if ((elt.value=='') || (elt.value==prompt)) {
-	  // fdjtLog('Marking empty');
-	  elt.value=prompt;
-	  elt.setAttribute('isempty','yes');}
+	if (prompt)
+	  if ((!(elt.value)) || (elt.value=='') || (elt.value===prompt)) {
+	    // fdjtLog('Marking empty');
+	    elt.value=prompt;
+	    elt.setAttribute('isempty','yes');}
 	if ((!(elt.onfocus)) && (!(elt.getAttribute("onfocus"))))
 	  elt.onfocus=fdjtAutoPrompt_onfocus;
 	if ((!(elt.onblur)) && (!(elt.getAttribute("onblur"))))
@@ -811,8 +815,6 @@ function fdjtGradually(nsteps,interval,startval,endval,stepfn)
   var i=5; while (i<arguments.length) args.push(arguments[i++]);
   stepfn.apply(this,args);
   timer=window.setInterval(function() {
-      fdjtTrace("val=%o, delta=%o, startval=%o endval=%o nsteps=%o",
-		val,delta,startval,endval,nsteps);
       val=val+delta;
       if (((delta<0) && (val<endval)) ||
 	  ((delta>0) && (val>endval))) {

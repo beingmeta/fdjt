@@ -121,7 +121,9 @@ function fdjtTextify(arg,flat,inside)
 {
   if (arg.nodeType)
     if (arg.nodeType===3)
-      return arg.nodeValue;
+      if (flat)
+	return fdjtStdSpace(arg.nodeValue);
+      else return arg.nodeValue;
     else if (arg.nodeType!==1) return false;
     else if ((arg.fdjtNoText) ||
 	     (arg.getAttribute("NOTEXTIFY")) ||
@@ -147,7 +149,9 @@ function fdjtTextify(arg,flat,inside)
       var i=0; while (i<children.length) {
 	var child=children[i++];
 	if ((child.nodeType) && (child.nodeType===3))
-	  string=string+child.nodeValue;
+	  if (flat)
+	    string=string+fdjtStdSpace(child.nodeValue);
+	  else string=string+child.nodeValue;
 	else {
 	  var stringval=fdjtTextify(child,flat,true);
 	  if (stringval) string=string+stringval;}}
@@ -1112,9 +1116,8 @@ function fdjtAnchorW(url,attribs)
 
 function fdjtInput(type,name,value,classname)
 {
-  var elt=document.createElement('input');
+  var elt=fdjtNewElement('INPUT',classname);
   elt.type=type; elt.name=name; elt.value=value;
-  if (classname) elt.className=classname;
   return elt;
 }
 

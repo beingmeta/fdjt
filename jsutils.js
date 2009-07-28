@@ -428,6 +428,12 @@ function fdjtStringTrim(string)
   else return string.slice(start,end);
 }
 
+function fdjtStdSpace(string)
+{
+  var trimmed=string.replace(/(^(\W)+)|((\W)+$)/g,"");
+  return trimmed.replace(/(\W)+/g," ");
+}
+
 /* Getting key/char codes */
 
 var _fdjt_char_codes={
