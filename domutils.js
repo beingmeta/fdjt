@@ -984,14 +984,14 @@ function fdjtNewElement(tag,classname)
       var dotpos=classname.indexOf(".");
       if (dotpos>0) {
 	elt.id=classname.slice(1,dotpos);
-	elt.className=classname.slice(dotpos+1).replace("."," ");}
+	elt.className=classname.slice(dotpos+1).replace(/[.]/g," ");}
       else elt.id=classname.slice(1);}
     else if (classname[0]===".") {
       var hashpos=classname.indexOf("#");
       if (hashpos>0) {
 	elt.id=classname.slice(hashpos+1);
-	elt.className=classname.slice(1,hashpos).replace("."," ");}
-      else elt.className=classname.slice(1).replace("."," ");}
+	elt.className=classname.slice(1,hashpos).replace(/[.]/g," ");}
+      else elt.className=classname.slice(1).replace(/[.]/g," ");}
     else elt.className=classname;}
   if (arguments.length>2)
     fdjtAddElements(elt,arguments,2);
