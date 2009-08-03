@@ -25,6 +25,14 @@
    display values to control which side the text appears on */
 .checkspan span.left { display: none;}
 
+.checkspan .checkspan input[type='CHECKBOX'] { display: none;}
+.checkspan > img.checked { 
+  display: none; vertical-align: bottom; margin: 1px;}
+.checkspan > img.unchecked { 
+  display: inline; vertical-align: bottom; margin: 1px;}
+.checkspan[ischecked] > img.unchecked { display: none;}
+.checkspan[ischecked] > img.checked { display: inline;}
+
 /* Autoprompt classes */
 
 input.autoprompt {

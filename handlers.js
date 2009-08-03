@@ -290,41 +290,40 @@ function _fdjt_close_window(event)
 
 /* checkspan handling */
 
-function fdjtCheckSpan_onclick(event)
+function fdjtCheckSpan_onclick(evt)
 {
-  var target=event.target; var clickinput=null;
-  fdjtCheshire_stop(event);
+  var target=evt.target; var clickinput=null;
+  fdjtCheshire_stop(evt);
   while (target.parentNode) {
     if (target.nodeType!=1) target=target.parentNode;
     else if (fdjtHasClass(target,'checkspan')) break;
     else if (target.tagName==='A') return;
     else if (target.tagName==='INPUT') {
-      clickinput=target; target=target.parentNode;} /* return; */
+      clickinput=target; target=target.parentNode;}
     else target=target.parentNode;}
   if ((target) && (fdjtHasClass(target,'checkspan'))) {
-    var children=target.childNodes;
-    var i=0; while (i<children.length) {
-      var child=children[i++];
-      if ((child.nodeType===1) &&
-	  (child.tagName==='INPUT') &&
-	  ((child.type==='radio') ||
-	   (child.type==='checkbox'))) {
-	var checked=child.checked;
-	if (child==clickinput)
+    var inputs=fdjtGetChildrenByTagName(target,'INPUT');
+    var i=0; while (i<inputs.length) {
+      var input=inputs[i++];
+      if ((input.type==='radio') || (input.type==='checkbox')) {
+	var checked=input.checked;
+	if (input==clickinput)
 	  if (typeof checked == null)
 	    target.removeAttribute('ischecked');
 	  else if (checked)
 	    target.setAttribute('ischecked','yes');
 	  else target.removeAttribute('ischecked');
 	else if (typeof(checked) === null) {
-	  child.checked=false;
+	  input.checked=false;
 	  target.removeAttribute('ischecked');}
 	else if (checked) {
-	  child.checked=false;
+	  input.checked=false;
 	  target.removeAttribute('ischecked');}
 	else {
-	  child.checked=true;
-	  target.setAttribute('ischecked','yes');}}}}
+	  input.checked=true;
+	  target.setAttribute('ischecked','yes');}
+	evt.cancelBubble=true; 
+	return false;}}}
 }
 
 function fdjtCheckSpan_setup(checkspan)
@@ -625,11 +624,11 @@ function _fdjt_get_scroll_offset(wleft,eleft,eright,wright)
 
 function fdjtScrollIntoView(elt,topedge)
 {
-  if ((!topedge) && (fdjtIsVisible(elt)))
+  if ((topedge!==0) && (!topedge) && (fdjtIsVisible(elt)))
     return;
   else if ((fdjt_use_native_scroll) && (elt.scrollIntoView)) {
     elt.scrollIntoView(top);
-    if ((!topedge) && (fdjtIsVisible(elt,true)))
+    if ((topedge!==0) && (!topedge) && (fdjtIsVisible(elt,true)))
       return;}
   else {
     var top = elt.offsetTop;
@@ -648,7 +647,7 @@ function fdjtScrollIntoView(elt,topedge)
 
     var targetx=_fdjt_get_scroll_offset(winx,left,left+width,winxedge);
     var targety=
-      ((topedge) ?
+      (((topedge)||(topedge===0)) ?
        ((typeof topedge === "number") ? (top+topedge) : (top)) :
        (_fdjt_get_scroll_offset(winy,top,top+height,winyedge)));
 

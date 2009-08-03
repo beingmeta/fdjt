@@ -1070,13 +1070,15 @@ function fdjtDivW(classname,attribs)
   return elt;
 }
 
-function fdjtImage(url,classname,alt)
+function fdjtImage(url,classname,alt,title)
 {
   if (!(classname)) classname=null;
   var elt=((classname) ? (fdjtNewElement("img",classname)) :
 	   (document.createElement('img')));
   elt.src=url;
   if (typeof alt == "string") elt.alt=alt;
+  if (title) elt.title=title;
+  else if (alt) elt.title=alt;
   return elt;
 }
 
