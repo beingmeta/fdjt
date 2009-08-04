@@ -254,7 +254,8 @@ function fdjtComplete(input_elt,string,options)
       var found=false; var exact=false; var head=false;
       var key=child.key||fdjtCacheAttrib(child,"key");
       var anymatch=child.anymatch||fdjtCacheAttrib(child,"anymatch",false,false);
-      if ((anymatch) ? (key.search(qanypat)>=0) : (key.search(qpat)>=0)) {
+      if (!(key)) fdjtWarn("Invalid key %o on %o",key,child);
+      else if ((anymatch) ? (key.search(qanypat)>=0) : (key.search(qpat)>=0)) {
 	results.push(child); keys.push(key); found=true; head=true;
 	if ((matchcase) ? (key===qstring) : (key.toLowerCase()===qstring))
 	  exact=true;}
