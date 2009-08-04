@@ -186,6 +186,11 @@ function fdjtComplete(input_elt,string,options)
       var results=[]; results.string=string;
       var i=0; while (i<all_completions.length) {
 	var completion=all_completions[i++];
+	// Suppressed completions are, for example, choices which
+	//  have alrady been taken.
+	if (completion.getAttribute("suppressed")) {
+	  completion.setAttribute("displayed","no");
+	  continue;}
 	var variants=
 	  ((completion.variants)||
 	   (completion.variants=
@@ -243,6 +248,9 @@ function fdjtComplete(input_elt,string,options)
        fdjtGetChildrenByClassName(completions,"completion"));
     var i=0; while (i<children.length) {
       var child=children[i++];
+      if (child.getAttribute("suppressed")) {
+	child.setAttribute("displayed","no");
+	continue;}
       var found=false; var exact=false; var head=false;
       var key=child.key||fdjtCacheAttrib(child,"key");
       var anymatch=child.anymatch||fdjtCacheAttrib(child,"anymatch",false,false);

@@ -303,27 +303,25 @@ function fdjtCheckSpan_onclick(evt)
     else target=target.parentNode;}
   if ((target) && (fdjtHasClass(target,'checkspan'))) {
     var inputs=fdjtGetChildrenByTagName(target,'INPUT');
-    var i=0; while (i<inputs.length) {
+    var i=0; var checkstate; while (i<inputs.length) {
       var input=inputs[i++];
       if ((input.type==='radio') || (input.type==='checkbox')) {
-	var checked=input.checked;
-	if (input==clickinput)
-	  if (typeof checked == null)
-	    target.removeAttribute('ischecked');
-	  else if (checked)
-	    target.setAttribute('ischecked','yes');
-	  else target.removeAttribute('ischecked');
-	else if (typeof(checked) === null) {
-	  input.checked=false;
-	  target.removeAttribute('ischecked');}
-	else if (checked) {
-	  input.checked=false;
-	  target.removeAttribute('ischecked');}
-	else {
-	  input.checked=true;
-	  target.setAttribute('ischecked','yes');}
-	evt.cancelBubble=true; 
-	return false;}}}
+	checkstate=input.checked; break;}
+      else i++;}
+    if (checkstate)
+      target.setAttribute('ischecked','true');
+    else target.removeAttribute('ischecked');
+    var checkspans=fdjtGetChildrenByClassName(target,"checkspan");
+    i=0; while (i<checkspans.length) 
+      if (checkstate)
+	checkspans[i++].setAttribute('ischecked','true');
+      else checkspans[i++].removeAttribute('ischecked');
+    i=0; while (i<inputs.length) {
+      var input=inputs[i++];
+      if ((input.type==='radio') || (input.type==='checkbox'))
+	if (checkstate) input.checked=true; else input.checked=false;}
+    evt.cancelBubble=true; 
+    return false;}
 }
 
 function fdjtCheckSpan_setup(checkspan)
