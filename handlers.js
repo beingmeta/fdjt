@@ -292,7 +292,7 @@ function _fdjt_close_window(event)
 
 function fdjtCheckSpan_onclick(evt)
 {
-  var target=evt.target; var clickinput=null;
+  var target=evt.target; var clickinput=null; var checkstate=false;
   fdjtCheshire_stop(evt);
   while (target.parentNode) {
     if (target.nodeType!=1) target=target.parentNode;
@@ -302,25 +302,33 @@ function fdjtCheckSpan_onclick(evt)
       clickinput=target; target=target.parentNode;}
     else target=target.parentNode;}
   if ((target) && (fdjtHasClass(target,'checkspan'))) {
+    evt.cancelBubble=true; evt.preventDefault();
     var inputs=fdjtGetChildrenByTagName(target,'INPUT');
-    var i=0; var checkstate; while (i<inputs.length) {
-      var input=inputs[i++];
-      if ((input.type==='radio') || (input.type==='checkbox')) {
-	checkstate=input.checked; break;}
-      else i++;}
+    {var i=0; while (i<inputs.length) {
+	var input=inputs[i++];
+	if ((input.type==='radio') || (input.type==='checkbox')) {
+	  if ((input.checked===false)||(input.checked))
+	    checkstate=(!(input.checked));
+	  else checkstate=input.defaultChecked;
+	  break;}
+	else i++;}}
+    fdjtTrace("checkstate=%o clickinput=%o clickinput.checked=%o target=%o",
+	      checkstate,clickinput,
+	      ((clickinput)&&(clickinput.checked)),
+	      target);
+    checkstate=!(checkstate);
     if (checkstate)
       target.setAttribute('ischecked','true');
     else target.removeAttribute('ischecked');
-    var checkspans=fdjtGetChildrenByClassName(target,"checkspan");
-    i=0; while (i<checkspans.length) 
-      if (checkstate)
-	checkspans[i++].setAttribute('ischecked','true');
-      else checkspans[i++].removeAttribute('ischecked');
-    i=0; while (i<inputs.length) {
-      var input=inputs[i++];
-      if ((input.type==='radio') || (input.type==='checkbox'))
-	if (checkstate) input.checked=true; else input.checked=false;}
-    evt.cancelBubble=true; 
+    {var i=0; while (i<inputs.length) {
+	var input=inputs[i++];
+	if ((input.type==='radio') || (input.type==='checkbox'))
+	  input.checked=checkstate;}}
+    {var checkspans=fdjtGetChildrenByClassName(target,"checkspan");
+      var i=0; while (i<checkspans.length) 
+		 if (checkstate)
+		   checkspans[i++].setAttribute('ischecked','true');
+		 else checkspans[i++].removeAttribute('ischecked');}
     return false;}
 }
 
