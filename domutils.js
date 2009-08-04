@@ -1009,12 +1009,12 @@ function fdjtNewElementW(tag,classname,attribs)
 
 function fdjtNewElt(eltspec)
 {
-  var hashpos=tag.indexOf('#'); var dotpos=tag.indexOf('.');
-  var tagend=(((hashpos) && (dotpos)&&((hashpos<dotpos)?hashpos:dotpos))
-	      |(hashpos)|(dotpos));
+  var hashpos=eltspec.indexOf('#'); var dotpos=eltspec.indexOf('.');
+  var tagend=(((hashpos>0) && (dotpos>0)&&((hashpos<dotpos)?hashpos:dotpos))
+	      ||((hashpos>0) ? (hashpos) : ((dotpos>0)&&(dotpos))));
   var elt=((tagend)?
-	   (fdjtNewElement(tag.slice(classend),tag.slice(0,classend))) :
-	   (fdjtNewElement(tag)));
+	   (fdjtNewElement(eltspec.slice(0,tagend),eltspec.slice(tagend))) :
+	   (fdjtNewElement(eltspec)));
   if (arguments.length>1)
     fdjtAddElements(elt,arguments,1);
   return elt;
