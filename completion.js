@@ -217,7 +217,9 @@ function fdjtComplete(input_elt,string,options)
 	    fdjtGetChildrenByClassName(completion,"variation")));
 	var j=0; while (j<variants.length)
 		   variants[j++].setAttribute("displayed","no");
-	completion.setAttribute("displayed","no");}
+	if (completion.getAttribute("showonempty"))
+	  completion.setAttribute("displayed","yes");
+	else completion.setAttribute("displayed","no");}
       return results;}}
   else {
     var results=[]; var heads=[];
