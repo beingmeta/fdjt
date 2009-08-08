@@ -134,23 +134,30 @@ function fdjtFormSubmit(form,action,callback)
     var req=new XMLHttpRequest();
     fdjtAddClass(form,"submitting");
     req.onreadystatechange=function () {
+      fdjtTrace("Calling callback %o on %o and %o status=%o state=%o",
+		callback,req,form,req.status,req.readyState);
       if ((req.readyState == 4) && (req.status == 200)) {
 	fdjtDropClass(form,"submitting");
-	callback(req);}
-      else fdjtLaunchForm(form);};
-    if (form.method==="GET") {
+	callback(req,form);}
+      else {
+	var win=window.open(action+"?"+params,target,windowopts);}};
+    if (true) { /* (form.method==="GET") */
       req.open('GET', ajax_uri+"?"+params, true);
-      req.send(params);}
+      req.send();}
     else {
-      req.open('POST', url, true);
+      req.open('POST', ajax_uri, true);
       req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       req.setRequestHeader("Content-length", params.length);
       req.setRequestHeader("Connection", "close");
       req.send(params);}
     return true;}
-  else if (form.target)
-    return fdjtLaunchForm(form,form.action,callback,true);
-  else return false;
+  else try {
+      var win=window.open(action+"?"+params,target,windowopts);
+      win.onload=
+	function(evt) {
+	if (callback) callback(false,form);};
+      return true;}
+    catch (ex) { return false;}
 }
 
 function fdjtForm_onsubmit(evt)
@@ -160,8 +167,11 @@ function fdjtForm_onsubmit(evt)
   if (fdjtHasClass(form,"submitting")) {
     fdjtDropClass(form,"submitting");
     return;}
+  fjdtAddClass(form,"fdjtsubmit");
   if (fdjtFormSubmit(form)) {evt.preventDefault(); return;}
-  // fjdtAddClass(form,"submitting");
+  window.setTimeout(function() {
+      fjdtDropClass(form,"fdjtsubmit");
+      form.reset();},3000);
 }
 
 /* Synchronous calls */
