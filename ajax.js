@@ -67,6 +67,89 @@ function fdjtAjaxXMLCall(callback,base_uri)
     base_uri,fdjtArguments(arguments,2));
 }
 
+/* AJAX submit */
+
+function _fdjtAddParam(parameters,name,value)
+{
+  return ((parameters)?(parameters+"&"):(""))+
+    name+"="+encodeURIComponent(value);
+}
+
+function fdjtFormParams(form)
+{
+  var parameters=false;
+  var inputs=fdjtGetChildrenByTagName(form,"INPUT");
+  var i=0; while (i<inputs.length) {
+    var input=inputs[i++];
+    if ((!(input.disabled)) &&
+	(((input.type==="RADIO") || (input.type==="CHECKBOX")) ?
+	 (input.checked) : (true)))
+      parameters=_fdjtAddParam(parameters,input.name,input.value);}
+  var textareas=fdjtGetChildrenByTagName(form,"TEXTAREA");
+  i=0; while (i<textareas.length) {
+    var textarea=textareas[i++];
+    if (!(textarea.disabled)) {
+      parameters=_fdjtAddParam(parameters,textarea.name,textarea.value);}}
+  return parameters;
+}
+
+var fdjt_form_window=false;
+
+function fdjtFormSubmit(form,auri,callback)
+{
+  var parameters=false;
+  var target=form.getAttribute("target")||"fdjtform";
+  var windowopts=(form.windowopts)||fdjtCacheAttrib(form,"windowopts");
+  var ajax_uri=(auri)||(form.ajaxuri)||fdjtCacheAttrib(target,"ajaxuri");
+  var action=form.action;
+  var params=fdjtFormParams(form);
+  if (!(callback))
+    if (form.oncallback) callback=form.oncallback;
+    else if (form.getAttribute("ONCALLBACK")) {
+      callback=new Function
+	("req","form",input_elt.getAttribute("ONCALLBACK"));
+      form.oncallback=callback;}
+    else callback=false;
+  if (ajax_uri) {
+    var req=new XMLHTTPRequest();
+    req.onreadystatechange=function () {
+      if ((req.readyState == 4) && (req.status == 200)) {
+	callback(req);}
+      else {
+	var win=window.open(action+"?"+params,target,windowopts);
+	win.onload=
+	function(evt) {
+	  if (callback) callback(win.document,form);};
+	fdjt_form_window=win;
+	return true;}};
+    if (form.method==="GET") {
+      req.open('GET', ajax_uri+"?"+params, true);}
+    else {
+      req.open('POST', url, true);
+      req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      req.setRequestHeader("Content-length", params.length);
+      req.setRequestHeader("Connection", "close");
+      req.send(params);}}
+  else try {
+      var win=window.open(action+"?"+params,target,windowopts);
+      win.onload=
+	function(evt) {
+	if (callback) callback(win.document,form);};
+      return true;}
+    catch (ex) { return false;}
+}
+
+function fdjtForm_onsubmit(evt)
+{
+  var form=evt.target;
+  fdjtAutoPrompt_cleanup();
+  if (fdjtFormSubmit(form)) {evt.preventDefault(); return;}
+  fjdtAddClass(form,"fdjtsubmit");
+  window.setTimeout(function() {
+      fjdtDropClass(form,"fdjtsubmit");
+      form.reset();},3000);
+}
+
 /* Synchronous calls */
 
 function fdjtAjaxGet(callback,base_uri,args)
