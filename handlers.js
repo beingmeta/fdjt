@@ -182,9 +182,11 @@ function fdjtAutoPrompt_setup(elt)
 }
 
 // Removes autoprompt text from empty fields
-function fdjtAutoPrompt_cleanup()
+function fdjtAutoPrompt_cleanup(form)
 {
-  var elements=$$('INPUT').concat($$('TEXTAREA'));
+  var elements=((form) ?
+		($$('INPUT',form).concat($$('TEXTAREA',form))) :
+		($$('INPUT').concat($$('TEXTAREA'))));
   var i=0; if (elements) while (i<elements.length) {
       var elt=elements[i++];
       if (fdjtHasAttrib(elt,'isempty')) elt.value="";}

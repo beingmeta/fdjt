@@ -77,6 +77,7 @@ function _fdjtAddParam(parameters,name,value)
 
 function fdjtFormParams(form)
 {
+  fdjtAutoPrompt_cleanup(form);
   var parameters=false;
   var inputs=fdjtGetChildrenByTagName(form,"INPUT");
   var i=0; while (i<inputs.length) {
@@ -93,16 +94,35 @@ function fdjtFormParams(form)
   return parameters;
 }
 
-var fdjt_form_window=false;
+function fdjtLaunchForm(form,action_arg,callback,insubmit)
+{
+  try {
+    fdjtAddClass(form,"submitting");
+    var action=(action_arg)||form.action;
+    var windowopts=(form.windowopts)||fdjtCacheAttrib(form,"windowopts");
+    var target=form.getAttribute("target")||"fdjtform";
+    var resetdelay=form.getAttribute("resetdelay");
+    var params=fdjtFormParams(form);
+    var win=window.open(action+"?"+params,target,windowopts);
+    if (resetdelay!=="none") {
+      var delay=((resetdelay) ? (parseInt(resetdelay)) : (3000));
+      window.setTimeout(function() {
+	  fdjtDropClass(form,"submitting");
+	  if (callback) callback(false,form);
+	  form.reset();},delay);}
+    return true;}
+  catch (ex) {
+    form.fdjtlaunchfailed=true;
+    fdjtDropClass(form,"submitting");
+    if (!(insubmit)) form.submit();
+    return false;}
+}
 
-function fdjtFormSubmit(form,auri,callback)
+function fdjtFormSubmit(form,action,callback)
 {
   var parameters=false;
-  var target=form.getAttribute("target")||"fdjtform";
-  var windowopts=(form.windowopts)||fdjtCacheAttrib(form,"windowopts");
-  var ajax_uri=(auri)||(form.ajaxuri)||fdjtCacheAttrib(target,"ajaxuri");
-  var action=form.action;
-  var params=fdjtFormParams(form);
+  var target=form.target;
+  var ajax_uri=(action)||(form.ajaxuri)||fdjtCacheAttrib(form,"ajaxuri");
   if (!(callback))
     if (form.oncallback) callback=form.oncallback;
     else if (form.getAttribute("ONCALLBACK")) {
@@ -111,43 +131,37 @@ function fdjtFormSubmit(form,auri,callback)
       form.oncallback=callback;}
     else callback=false;
   if (ajax_uri) {
-    var req=new XMLHTTPRequest();
+    var req=new XMLHttpRequest();
+    fdjtAddClass(form,"submitting");
     req.onreadystatechange=function () {
       if ((req.readyState == 4) && (req.status == 200)) {
+	fdjtDropClass(form,"submitting");
 	callback(req);}
-      else {
-	var win=window.open(action+"?"+params,target,windowopts);
-	win.onload=
-	function(evt) {
-	  if (callback) callback(win.document,form);};
-	fdjt_form_window=win;
-	return true;}};
+      else fdjtLaunchForm(form);};
     if (form.method==="GET") {
-      req.open('GET', ajax_uri+"?"+params, true);}
+      req.open('GET', ajax_uri+"?"+params, true);
+      req.send(params);}
     else {
       req.open('POST', url, true);
       req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       req.setRequestHeader("Content-length", params.length);
       req.setRequestHeader("Connection", "close");
-      req.send(params);}}
-  else try {
-      var win=window.open(action+"?"+params,target,windowopts);
-      win.onload=
-	function(evt) {
-	if (callback) callback(win.document,form);};
-      return true;}
-    catch (ex) { return false;}
+      req.send(params);}
+    return true;}
+  else if (form.target)
+    return fdjtLaunchForm(form,form.action,callback,true);
+  else return false;
 }
 
 function fdjtForm_onsubmit(evt)
 {
   var form=evt.target;
-  fdjtAutoPrompt_cleanup();
+  fdjtAutoPrompt_cleanup(form);
+  if (fdjtHasClass(form,"submitting")) {
+    fdjtDropClass(form,"submitting");
+    return;}
   if (fdjtFormSubmit(form)) {evt.preventDefault(); return;}
-  fjdtAddClass(form,"fdjtsubmit");
-  window.setTimeout(function() {
-      fjdtDropClass(form,"fdjtsubmit");
-      form.reset();},3000);
+  // fjdtAddClass(form,"submitting");
 }
 
 /* Synchronous calls */
