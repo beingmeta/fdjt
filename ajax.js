@@ -137,11 +137,10 @@ function fdjtFormSubmit(form,action,callback)
       req.open('GET', ajax_uri+"?"+params, true);
     else req.open('POST', ajax_uri, true);
     req.onreadystatechange=function () {
-      fdjtTrace("Calling callback %o on %o and %o status=%o state=%o",
-		callback,req,form,req.status,req.readyState);
-      if ((req.readyState == 4) && (req.status == 200)) {
+      if ((req.readyState === 4) && (req.status === 200)) {
 	fdjtDropClass(form,"submitting");
 	callback(req,form);}
+      else if (req.readyState !== 4) {}
       else fdjtLaunchForm(form);};
     if (form.method==="GET") req.send();
     else {
