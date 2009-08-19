@@ -104,6 +104,11 @@ function fdjtLaunchForm(form,action_arg,callback)
     var resetdelay=form.getAttribute("resetdelay");
     var params=fdjtFormParams(form);
     var win=window.open(action+"?"+params,target,windowopts);
+    if (!(win)) {
+      form.fdjtlaunchfailed=true;
+      fdjtDropClass(form,"submitting");
+      form.submit();
+      return false;}
     if (resetdelay!=="none") {
       var delay=((resetdelay) ? (parseInt(resetdelay)) : (3000));
       window.setTimeout(function() {
@@ -114,7 +119,7 @@ function fdjtLaunchForm(form,action_arg,callback)
   catch (ex) {
     form.fdjtlaunchfailed=true;
     fdjtDropClass(form,"submitting");
-    if (!(form.fdjtsubmit)) form.submit();
+    form.submit();
     return false;}
 }
 
