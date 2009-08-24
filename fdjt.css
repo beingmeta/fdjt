@@ -79,17 +79,20 @@ span.tab[shown] {
   /* font-weight: bold; */
   border: inset black 2px;
   border-bottom: hidden;}
+div.tabbar.vertical[shown] {
+  border-bottom: inset;}
 div.tabcontent {
  margin-left: 9px; margin-top: 6px; margin-right: 9px;
  text-align: left;
  display: none;}
 div.tabcontent[shown] { display: block; }
+div.tabcontent div.tabcontent[shown] { display: none; }
+div.tabcontent[shown] div.tabcontent[shown] { display: block; }
 
 div.tabcontent div.narrative {
  color: purple; font-family: sans; font-style: italic;}
 div.tabcontent p {
- margin: 2px; padding: 2px;
- margin-left: 15%; text-indent: -5%; margin-right: 10%;}
+ margin: 2px; padding: 2px;}
 
 /* DTerms (from knowlets) */
 
