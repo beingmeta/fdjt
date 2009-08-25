@@ -438,8 +438,8 @@ function fdjtComplete_onkey(evt)
   // fdjtTrace("Complete_onkey %o, cchars=%o",evt,cchars);
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
-  if (((keycode) && (cchars.indexOf(-keycode)>=0)) ||
-      ((charcode) && (cchars.indexOf(charcode)>=0))) {
+  if (((keycode) && (fdjtIndexOf(cchars,-keycode)>=0)) ||
+      ((charcode) && (fdjtIndexOf(cchars,charcode)>=0))) {
     // These complete right away
     var results=fdjtComplete(target,false,options);
     evt.preventDefault(); evt.cancelBubble=true;

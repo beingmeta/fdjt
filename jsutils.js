@@ -78,14 +78,14 @@ function fdjtAdd(obj,field,val,nodup)
   if (nodup) 
     if (obj.hasOwnProperty(field)) {
       var vals=obj[field];
-      if (vals.indexOf(val)<0)  
+      if (fdjtIndexOf(vals,val)<0)  
 	obj[field].push(val);
       else {}}
     else obj[field]=new Array(val);
   else if (obj.hasOwnProperty(field))
     obj[field].push(val);
   else obj[field]=new Array(val);
-  if ((obj._all) && (obj._all.indexOf(field)<0))
+  if ((obj._all) && (fdjtIndexOf(obj._all,field)<0))
     obj._all.push(field);
 }
 
@@ -96,7 +96,7 @@ function fdjtDrop(obj,field,val)
     obj[field]=new Array();
   else if (obj.hasOwnProperty(field)) {
     var vals=obj[field];
-    var pos=vals.indexOf(val);
+    var pos=fdjtIndexOf(vals,val);
     if (pos<0) return;
     else vals.splice(pos,1);}
   else {}
@@ -106,7 +106,8 @@ function fdjtTest(obj,field,val)
 {
   var vals;
   if (typeof val === "undefined")
-    return ((obj.hasOwnProperty(field)) &&
+    return (((obj.hasOwnProperty) ?
+	     (obj.hasOwnProperty(field)) : (obj[field])) &&
 	    ((obj[field].length)>0));
   else if (obj.hasOwnProperty(field)) 
     if (obj[field].indexOf(val)<0)
@@ -117,32 +118,55 @@ function fdjtTest(obj,field,val)
 
 function fdjtInsert(array,value)
 {
-  if (array.indexOf(value)<0) array.push(value);
+  if (fdjtIndexOf(array,value)<0) array.push(value);
 }
 
 function fdjtRemove(array,value,count)
 {
-  var pos=array.indexOf(value);
+  var pos=fdjtIndexOf(array,value);
   if (pos<0) return array;
   array.splice(pos,1);
   if (count) {
-    count--; while ((count>0) && ((pos=array.indexOf(value,pos))>=0)) {
+    count--; while ((count>0) && ((pos=fdjtIndexOf(array,value,pos))>=0)) {
       array.splice(pos,1); count--;}}
   return array;
 }
+
+function fdjtIndexOf(array,elt,pos)
+{
+  if (array.indexOf)
+    if (pos)
+      return array.indexOf(elt,pos);
+    else return array.indexOf(elt);
+  else {
+    var i=pos||0;
+    while (i<array.length)
+      if (array[i]===elt) return i;
+      else i++;
+    return -1;}
+}
+
+/*
+if (!(Array.indexOf))
+  Array.indexOf=function(elt) {
+    var i=0; while (i<this.length)
+	       if (this[i]===elt) return i;
+	       else i++;
+    return -1;};
+*/
 
 /* Maintaining inverted indices of values */
 
 function fdjtIndexAdd(index,obj,rel,val)
 {
   var subindex;
-  if (index.hasOwnProperty(rel)) 
+  if (index.hasOwnProperty(field))
     subindex=index[rel];
   else {
     subindex={}; index[rel]=subindex;}
   if (subindex.hasOwnProperty(val)) {
     var objects=subindex[val];
-    if (objects.indexOf(obj)<0)
+    if (fdjtIndexOf(objects,obj)<0)
       objects.push(obj);}
   else subindex[val]=new Array(obj);
 }
@@ -154,7 +178,7 @@ function fdjtIndexDrop(index,obj,rel,val)
     var subindex=index[rel];
     if (subindex.hasOwnProperty(val)) {
       var objects=subindex[val]; var pos;
-      if ((pos=objects.indexOf(obj))>=0)
+      if ((pos=fdjtIndexOf(objects,obj))>=0)
 	subindex[val]=objects.splice(pos,1);}}
 }
 
@@ -584,6 +608,41 @@ function fdjtRunTimes(pname,start)
       ((time.getTime()-point.getTime())/1000)+"s";
     point=time;}
   return ((point.getTime()-start.getTime())/1000)+"s"+report;
+}
+
+/* Setups */
+
+var fdjt_setup_started=false;
+var fdjt_setup_done=false;
+var fdjt_setups=[];
+var fdjt_final_setups=[];
+
+function fdjtAddSetup(fcn,final)
+{
+  if (fcn instanceof Array) {
+    var i=0; while (i<fcn.length) fdjtAddSetup(fcn[i++],final);}
+  else if (fdjt_setup_done) {
+    if ((fdjtIndexOf(fdjt_setups,fcn)>=0)||
+	(fdjtIndexOf(fdjt_final_setups,fcn)>=0))
+      return;
+    fdjtWarn("Running setup %o late",fcn);
+    fcn();}
+  else if (final)
+    if (fdjtIndexOf(fdjt_final_setups,fcn)<0)
+      fdjt_final_setups.push(fcn);
+    else {}
+  else if (fdjtIndexOf(fdjt_setups,fcn)<0)
+    fdjt_setups.push(fcn);
+  else {}
+}
+
+function fdjtSetup()
+{
+  if (fdjt_setup_started) return;
+  fdjt_setup_started=true;
+  var i=0; while (i<fdjt_setups.length) fdjt_setups[i++]();
+  var i=0; while (i<fdjt_final_setups.length) fdjt_final_setups[i++]();
+  fdjt_setup_done=true;
 }
 
 /* All done, just begun */

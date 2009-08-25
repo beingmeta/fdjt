@@ -41,6 +41,7 @@ function $(eltarg)
 
 function $T(evt)
 {
+  if (!(evt)) evt=event;
   return evt.target||evt.srcElement;
 }
 
@@ -248,11 +249,14 @@ function fdjtGetMeta(name)
   return false;
 }
 
-/* This is a kludge which is probably not very portable */
-
+/* This is a kludge to force a redisplay when the browser
+   doesn't neccessarily do it automatically.  (you know who
+   I'm talking about, IE!) */
 function fdjtRedisplay(arg)
 {
   if (!(arg)) return;
+  else if (arguments.length>1) {
+    var i=0; while (i<arguments.length) fdjtRedisplay(arguments[i++]);}
   else if (typeof arg === "string")
     fdjtRedisplay($(arg));
   else if (arg instanceof Array) {
@@ -738,7 +742,7 @@ function fdjtGetParents(elt,selector,results)
   else {
     var scan=elt;
     while (scan) {
-      if (results.indexOf(scan)>=0) {}
+      if (fdjtIndexOf(results,scan)>=0) {}
       else if (fdjtElementMatchesSpec(scan,spec)) 
 	results.push(scan);
       else {}
@@ -1275,7 +1279,7 @@ function _fdjt_compute_flat_width(node,sofar)
   if (node.nodeType===Node.ELEMENT_NODE) {
     if (typeof _fdjt_flat_width_fns[node.tagName] == "function")
       sofar=sofar+_fdjt_flat_width_fns[node.tagName](node);
-    else if (_fdjt_vertical_tags.indexOf(node.tagName)>=0)
+    else if (fdjtIndexOf(_fdjt_vertical_tags,node.tagName)>=0)
       sofar=sofar+_fdjt_vertical_flat_width;
     else if (note.getAttribute("flatwidth")) {
       var fw=node.getAttribute("flatwidth");
@@ -1290,9 +1294,9 @@ function _fdjt_compute_flat_width(node,sofar)
       var children=node.childNodes;
       var i=0; while (i<children.length) {
 	var child=children[i++];
-	if (child.nodeType===Node.TEXT_NODE)
+	if (child.nodeType===3)
 	  sofar=sofar+child.nodeValue.length;
-	else if (child.nodeType===Node.ELEMENT_NODE)
+	else if (child.nodeType===1)
 	  sofar=_fdjt_compute_flat_width(child,sofar);
 	else {}}
       return sofar;}
@@ -1303,7 +1307,7 @@ function _fdjt_compute_flat_width(node,sofar)
       return sofar+Math.ceil(node.width/10)+
 	Math.floor(node.height/16)*_fdjt_vertical_flat_width;
     else return sofar;}
-  else if (node.nodeType===Node.TEXT_NODE)
+  else if (node.nodeType===3)
     return sofar+node.nodeValue.length;
   else return sofar;
 }
@@ -1476,13 +1480,13 @@ function fdjtSearchContent(node,spec,id,results)
 {
   if (!(results)) results=[];
   if (!id) id=false;
-  if (node.nodeType===Node.TEXT_NODE)
+  if (node.nodeType===3)
     if (id) 
       if (node.nodeValue.search(spec)>=0)
 	results.push(id);
       else {}
     else {}
-  else if (node.nodeType===Node.ELEMENT_NODE) {
+  else if (node.nodeType===1) {
     if (node.id) id=node.id;
     var children=node.childNodes;
     var i=0; while (i<children.length) {

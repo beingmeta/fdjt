@@ -174,7 +174,8 @@ function fdjtAutoPrompt_setup(elt)
 	  if ((!(elt.value)) || (elt.value=='') || (elt.value===prompt)) {
 	    // fdjtLog('Marking empty');
 	    elt.value=prompt;
-	    elt.setAttribute('isempty','yes');}
+	    elt.setAttribute('isempty','yes');
+	    fdjtRedisplay(elt);}
 	if ((!(elt.onfocus)) && (!(elt.getAttribute("onfocus"))))
 	  elt.onfocus=fdjtAutoPrompt_onfocus;
 	if ((!(elt.onblur)) && (!(elt.getAttribute("onblur"))))
@@ -224,13 +225,18 @@ function fdjtTab_onclick(evt,shown)
 	if (node===elt) {}
 	else if (fdjtHasAttrib(node,shown)) {
 	  node.removeAttribute(shown);
-	  if (cdoc) cdoc.removeAttribute(shown);}}}
+	  if (cdoc) {
+	    cdoc.removeAttribute(shown);
+	    cdoc.className=cdoc.className;}
+	  fdjtRedisplay(node,cdoc);}}}
     if (fdjtHasAttrib(elt,shown))
       elt.removeAttribute(shown);
     else elt.setAttribute(shown,'yes');
     if (fdjtHasAttrib(content,shown))
       content.removeAttribute(shown);
     else content.setAttribute(shown,'yes');
+    // Force a redisplay on CSS-challenged browsers
+    fdjtRedisplay(elt,content);
     return false;}
 }
 
@@ -378,7 +384,7 @@ function fdjtCheckSpan_old_onclick(event)
 
 function fdjtCheckSpan_setup(checkspan)
 {
-  if (checkspan===null) {
+  if (!(checkspan)) {
     var elements=fdjtGetElementsByClassName('checkspan');
     var i=0; if (elements) while (i<elements.length) {
       var checkspan=elements[i++];
@@ -909,31 +915,8 @@ function fdjtCheckAlt_onevent(evt)
 
 /* Setup */
 
-var fdjt_setup_started=false;
-var fdjt_setup_done=false;
-var fdjt_setups=[];
-
-function fdjtAddSetup(fcn)
+function fdjtNodeSetup()
 {
-  if (fdjt_setup_done) {
-    if (fdjt_setups.indexOf(fcn)>=0) return;
-    fdjtWarn("Running setup %o late",fcn);
-    fcn();}
-  else if (fdjt_setups.indexOf(fcn)<0)
-    fdjt_setups.push(fcn);
-  else {}
-}
-
-function fdjtSetup()
-{
-  if (fdjt_setup_started) return;
-  fdjt_setup_started=true;
-  fdjtDomutils_setup();
-  fdjtAutoPrompt_setup();
-  fdjtCheckSpan_setup(null);
-  fdjtAdjustFontSizes();
-  fdjtMarkReduced();
-  var i=0; while (i<fdjt_setups.length) fdjt_setups[i++]();
   var setups=fdjtGetChildrenByClassName(document.body,"onsetup");
   var i=0; while (i<setups.length) {
     var node=setups[i++];
@@ -941,8 +924,14 @@ function fdjtSetup()
     else if (node.getAttribute("onsetup")) {
       var fn=new Function(node.getAttribute("onsetup"));
       fn.call(node);}}
-  fdjt_setup_done=true;
 }
+
+fdjtAddSetup(fdjtDomutils_setup);
+fdjtAddSetup(fdjtAutoPrompt_setup);
+fdjtAddSetup(fdjtCheckSpan_setup);
+fdjtAddSetup(fdjtAdjustFontSizes);
+fdjtAddSetup(fdjtMarkReduced);
+fdjtAddSetup(fdjtNodeSetup,true);
 
 fdjtLoadMessage("Loaded handlers.js");
 
