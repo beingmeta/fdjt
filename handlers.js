@@ -31,7 +31,7 @@ fdjtLoadMessage("Loading handlers.js");
 
 function fdjtShowHelp_onfocus(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   fdjtCheshire_stop(evt);
   while (target)
     if ((target.nodeType==1) &&
@@ -49,7 +49,7 @@ function fdjtShowHelp_onfocus(evt)
 
 function fdjtHideHelp_onblur(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   while (target)
     if ((target.nodeType==1) &&
 	((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
@@ -65,7 +65,7 @@ function fdjtHideHelp_onblur(evt)
 
 function fdjtShowHide_onclick(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   fdjtCheshire_stop(evt);
   // fdjtLog('target='+target);
   while (target.parentNode) {
@@ -109,7 +109,7 @@ function fdjtShowHide_onclick(evt)
 
 function fdjtSetClear_onclick(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   fdjtCheshire_stop(evt);
   while (target.parentNode)
     if ((fdjtHasAttrib(target,'SETONCLICK'))) {
@@ -134,7 +134,7 @@ function fdjtSetClear_onclick(evt)
 
 function fdjtAutoPrompt_onfocus(evt)
 {
-  var elt=evt.target;
+  var elt=$T(evt);
   fdjtCheshire_stop(evt);
   if ((elt) && (fdjtHasAttrib(elt,'isempty'))) {
     elt.value='';
@@ -144,7 +144,7 @@ function fdjtAutoPrompt_onfocus(evt)
 
 function fdjtAutoPrompt_onblur(evt)
 {
-  var elt=evt.target;
+  var elt=$T(evt);
   if (elt.value==='') {
     elt.setAttribute('isempty','yes');
     var prompt=(elt.prompt)||(elt.getAttribute('prompt'));
@@ -198,7 +198,7 @@ function fdjtTab_onclick(evt,shown)
 {
   if (!(shown)) shown="shown";
   fdjtCheshire_stop(evt);
-  var elt=evt.target;
+  var elt=$T(evt);
   if (elt) {
     while (elt.parentNode)
       if (fdjtHasAttrib(elt,"contentid")) break;
@@ -313,7 +313,7 @@ function fdjtCheckSpan_update(checkspan,checked)
 
 function fdjtCheckSpan_onclick(evt)
 {
-  var target=evt.target; var checkspan=$P(".checkspan",target);
+  var target=$T(evt); var checkspan=$P(".checkspan",target);
   fdjtCheshire_stop(evt);
   while (target.parentNode) {
     if (target.nodeType!=1) target=target.parentNode;
@@ -334,9 +334,9 @@ function fdjtCheckSpan_onclick(evt)
 
 function fdjtCheckSpan_onchange(evt)
 {
-  var target=evt.target; var checkspan=$P(".checkspan",target);
+  var target=$T(evt); var checkspan=$P(".checkspan",target);
   fdjtCheckSpan_update(checkspan,target.checked);
-  evt.target.blur();
+  $T(evt).blur();
 }
 
 function fdjtCheckSpan_old_onclick(event)
@@ -469,7 +469,7 @@ function fdjtTextInput_onkeypress(evt,handler)
 {
   var ch=evt.charCode, kc=evt.keyCode;
   if (kc===13) {
-    var elt=evt.target;
+    var elt=$T(evt);
     var val=elt.value;
     elt.value="";
     handler(val);
@@ -479,14 +479,14 @@ function fdjtTextInput_onkeypress(evt,handler)
 function fdjtMultiText_onkeypress(evt,tagname)
 {
   var enter_chars=
-    fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[-13]);
+    fdjtCacheAttrib($T(evt),"enterchars",fdjtStringToKCodes,[-13]);
   if (!(tagname)) tagname="span";
   var ch=evt.charCode, kc=evt.keyCode;
   if ((kc===13)||
       ((enter_chars) && (enter_chars.indexOf) &&
        ((enter_chars.indexOf(ch)>=0) ||
 	(enter_chars.indexOf(-kc)>=0)))) {
-    var elt=evt.target; var value, new_elt;
+    var elt=$T(evt); var value, new_elt;
     if (elt.value==="") return;
     if (elt.handleMultiText) 
       value=elt.handleMultiText(elt.value);
@@ -638,7 +638,7 @@ function fdjtCoHi_unhighlight(elt_arg,classname_arg)
 
 function fdjtCoHi_onmouseover(evt,classname_arg)
 {
-  var target=evt.target;
+  var target=$T(evt);
   while (target)
     if (target.fdjt_cohi) break;
     else if (fdjtHasAttrib(target,"cohi")) break;  
@@ -650,7 +650,7 @@ function fdjtCoHi_onmouseover(evt,classname_arg)
 
 function fdjtCoHi_onmouseout(evt,classname_arg)
 {
-  var target=evt.target;
+  var target=$T(evt);
   while (target)
     if (target===_fdjt_cohi_elt) {
       fdjtDelayHandler
@@ -885,7 +885,7 @@ function fdjtGradually(nsteps,interval,startval,endval,stepfn)
 
 function fdjtCheckControl_onevent(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   if (typeof evt.ctrlKey === 'undefined') return;
   if (evt.ctrlKey) target.setAttribute('controldown','yes');
   else target.removeAttribute('controldown');
@@ -893,7 +893,7 @@ function fdjtCheckControl_onevent(evt)
 
 function fdjtCheckShift_onevent(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   if (typeof evt.shiftKey === 'undefined') return;
   if (evt.shiftKey) target.setAttribute('shiftdown','yes');
   else target.removeAttribute('shiftdown');
@@ -901,7 +901,7 @@ function fdjtCheckShift_onevent(evt)
 
 function fdjtCheckAlt_onevent(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   if (typeof evt.altKey === 'undefined') return;
   if (evt.altKey) target.setAttribute('altdown','yes');
   else target.removeAttribute('altdown');

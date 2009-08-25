@@ -100,7 +100,7 @@ function fdjtRichTip_display(elt)
 
 function fdjtRichTip_onmouseover(evt)
 {
-  var target=fdjtGetRichParent(evt.target);
+  var target=fdjtGetRichParent($T(evt));
   if ((!(target)) && (fdjt_live_richtip)) {
     fdjtDropClass(fdjt_live_richtip,"live");
     fdjt_live_richtip=false;}
@@ -122,7 +122,7 @@ function fdjtRichTip_onmouseover(evt)
 
 function fdjtRichTip_onclick(evt)
 {
-  var target=fdjtFindRichTip(evt.target);
+  var target=fdjtFindRichTip($T(evt));
   if (target) 
     if (fdjtHasClass(target,"static")) {
       fdjtDropClass(target,"static");
@@ -145,13 +145,13 @@ function fdjtRichTip_onmouseout(evt)
 }
 
 function fdjtRichTip_minimize(evt) {
-  fdjtAddClass($P(".richtip",evt.target),"minimized"); }
+  fdjtAddClass($P(".richtip",$T(evt)),"minimized"); }
 
 function fdjtRichTip_maximize(evt) {
-  fdjtDropClass($P(".richtip",evt.target),"minimized");}
+  fdjtDropClass($P(".richtip",$T(evt)),"minimized");}
 
 function fdjtRichTip_hide(evt) {
-  fdjtDropClass($P(".richtip",evt.target),"static");}
+  fdjtDropClass($P(".richtip",$T(evt)),"static");}
 
 function fdjtRichTip_init(elt) {
   var minbutton=fdjtImage(graphics_root+"minimize.png","minimize button","-");

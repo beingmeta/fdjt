@@ -378,7 +378,7 @@ function fdjtHandleCompletion(input_elt,elt,value)
 
 function fdjtComplete_onclick(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   // fdjtTrace("complete onclick %o",target);
   while (target)
     if ((target.key) ||
@@ -404,7 +404,7 @@ var _fdjt_completion_timer=false;
 
 function fdjtComplete_show(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   var keycode=evt.keyCode;
   var value=fdjtCompletionText(target);
   var options=target.completeopts||_fdjt_get_complete_opts(target);
@@ -418,7 +418,7 @@ function fdjtComplete_show(evt)
 
 function fdjtComplete_onfocus(evt)
 {
-  fdjtComplete(evt.target);
+  fdjtComplete($T(evt));
 }
 
 function fdjtComplete_setup(target)
@@ -428,13 +428,13 @@ function fdjtComplete_setup(target)
 
 function fdjtComplete_onkey(evt)
 {
-  var target=evt.target;
+  var target=$T(evt);
   var keycode=evt.keyCode;
   var charcode=evt.charCode;
   var value=fdjtCompletionText(target);
   var options=target.completeopts||_fdjt_get_complete_opts(target);
   var cchars=
-    fdjtCacheAttrib(evt.target,"enterchars",fdjtStringToKCodes,[32,-13]);    
+    fdjtCacheAttrib($T(evt),"enterchars",fdjtStringToKCodes,[32,-13]);    
   // fdjtTrace("Complete_onkey %o, cchars=%o",evt,cchars);
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
@@ -454,7 +454,7 @@ function fdjtComplete_onkey(evt)
 function fdjtComplete_hide(evt)
 {
   /*
-  var target=evt.target;
+  var target=$T(evt);
   if ((target) && (target.completions_elt))
     target.completions_elt.style.display='none';
   */

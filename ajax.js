@@ -162,7 +162,7 @@ function fdjtFormSubmit(form,action,callback)
 
 function fdjtForm_onsubmit(evt)
 {
-  var form=evt.target;
+  var form=$T(evt);
   fdjtAutoPrompt_cleanup(form);
   if (fdjtHasClass(form,"submitting")) {
     fdjtDropClass(form,"submitting");

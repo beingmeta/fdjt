@@ -37,6 +37,13 @@ function $(eltarg)
   else return eltarg;
 }
 
+/* Getting event targets */
+
+function $T(evt)
+{
+  return evt.target||evt.srcElement;
+}
+
 // Like $, but more needy, it outputs a warning if a given element is
 // not found.
 function fdjtNeedElt(arg,name)
