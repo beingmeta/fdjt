@@ -1366,29 +1366,32 @@ function fdjtTransplant(orig,transplant_rules,use_defaults)
 function fdjtLookupElement(table,elt)
 {
   var tagname=elt.tagName;
-  var classname=elt.className;
+  var classnames=((elt.className)?(elt.className.split(' ')):new Array(false));
   var idname=elt.id;
-  var probe;
-  if ((idname) && (classname))
-    probe=table[tagname+"."+classname+"#"+idname];
-  else if (idname)
-    probe=table[tagname+"#"+idname];
-  else if (classname)
-    probe=table[tagname+"."+classname];
-  if (probe) return probe;
-  if ((idname) || (classname))
-    if (idname)
+  var probe=false;
+  var i=0; while (i<classnames.length) {
+    var classname=classnames[i++];
+    if ((idname) && (classname))
+      probe=table[tagname+"."+classname+"#"+idname];
+    if (probe) return probe;
+    else if ((idname) && (classname))
+      probe=table["."+classname+"#"+idname];
+    if (probe) return probe;
+    else if (idname)
       probe=table[tagname+"#"+idname];
+    if (probe) return probe;
     else if (classname)
       probe=table[tagname+"."+classname];
-  if (probe) return probe;
-  else if (idname) probe=table["#"+idname];
-  if (probe) return probe;
-  else if (classname) probe=table["."+classname];
-  if (probe) return probe;
-  else probe=table[tagname];
-  if (probe) return probe;
-  else return false;
+    if (probe) return probe;
+    else if (idname)
+      probe=table["#"+idname];
+    if (probe) return probe;
+    else if (classname)
+      probe=table["."+classname];
+    if (probe) return probe;
+    else probe=table[tagname];
+    if (probe) return probe;}
+  return false;
 }
 
 /* Guessing IDs to use from the DOM */
