@@ -1208,7 +1208,7 @@ function fdjtIsVisible(elt,partial)
 	    // top above/left of window, bottom below/right of window
 	    (((top < winy) || (left < winx)) &&
 	     ((top+height > winyedge) && (left+width > winxedge))));
-  else return (top >= winy && left >= winx &&
+  else return ((top > winy) && (left > winx) &&
 	       (top + height) <= (winyedge) &&
 	       (left + width) <= (winxedge));
 }
