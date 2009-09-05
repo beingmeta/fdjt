@@ -70,12 +70,12 @@ img.helpicon {
 
 div.tabbar { line-height: 200%;}
 
-span.tab {
+a.tab, span.tab {
   font-family: sans,sans-serif;
   margin-left: 2px; margin-right: 2px;
   border: outset black 2px;
   padding: 3px;}
-span.tab[shown] {
+a.tab[shown], span.tab[shown] {
   /* font-weight: bold; */
   border: inset black 2px;
   border-bottom: hidden;}
