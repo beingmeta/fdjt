@@ -56,7 +56,8 @@ function fdjtHideHelp_onblur(evt)
 	((target.hasAttribute) ? (target.hasAttribute('HELPTEXT')) :
 	 (target.getAttribute('HELPTEXT')))) {
       var helptext=document.getElementById(target.getAttribute('HELPTEXT'));
-      if (helptext) helptext.style.display='none';
+      if (helptext) {
+	setTimeout(function() {if (helptext) helptext.style.display='none';},300);}
       return;}
     else target=target.parentNode;
 }

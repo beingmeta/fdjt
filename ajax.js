@@ -83,7 +83,7 @@ function fdjtFormParams(form)
   var i=0; while (i<inputs.length) {
     var input=inputs[i++];
     if ((!(input.disabled)) &&
-	(((input.type==="RADIO") || (input.type==="CHECKBOX")) ?
+	(((input.type==="radio") || (input.type==="checkbox")) ?
 	 (input.checked) : (true)))
       parameters=_fdjtAddParam(parameters,input.name,input.value);}
   var textareas=fdjtGetChildrenByTagName(form,"TEXTAREA");
@@ -91,6 +91,14 @@ function fdjtFormParams(form)
     var textarea=textareas[i++];
     if (!(textarea.disabled)) {
       parameters=_fdjtAddParam(parameters,textarea.name,textarea.value);}}
+  var selectboxes=fdjtGetChildrenByTagName(form,"SELECT");
+  i=0; while (i<selectboxes.length) {
+    var selectbox=selectboxes[i++]; var name=selectbox.name;
+    var options=fdjtGetChildrenByTagName(form,"OPTION");
+    var j=0; while (j<options.length) {
+      var option=options[j++];
+      if (option.selected)
+	paramaters=_fdjtAddParam(parameters,name,option.value);}}
   return parameters;
 }
 
