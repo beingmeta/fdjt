@@ -385,7 +385,7 @@ function fdjtComplete_onclick(evt)
 	((target.getAttribute) &&
 	 (target.getAttribute('key')))) break;
     else target=target.parentNode;
-  // fdjtTrace("complete onclick %o",target);
+  // fdjtTrace("complete onclick/2 %o",target);
   if (!(target)) return;
   var completions=target;
   while (completions)
