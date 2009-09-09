@@ -94,11 +94,11 @@ function fdjtFormParams(form)
   var selectboxes=fdjtGetChildrenByTagName(form,"SELECT");
   i=0; while (i<selectboxes.length) {
     var selectbox=selectboxes[i++]; var name=selectbox.name;
-    var options=fdjtGetChildrenByTagName(form,"OPTION");
+    var options=fdjtGetChildrenByTagName(selectbox,"OPTION");
     var j=0; while (j<options.length) {
       var option=options[j++];
       if (option.selected)
-	paramaters=_fdjtAddParam(parameters,name,option.value);}}
+	parameters=_fdjtAddParam(parameters,name,option.value);}}
   return parameters;
 }
 
