@@ -1499,6 +1499,61 @@ function fdjtSearchContent(node,spec,id,results)
   return results;
 }
 
+/* Accessing cookies */
+
+function fdjtGetCookie(name,parse)
+{
+  var cookies=document.cookie;
+  var namepat=new RegExp("(^|(; ))"+name+"=");
+  var pos=cookies.search(namepat);
+  var valuestring;
+  if (pos>=0) {
+    var start=cookies.indexOf('=',pos)+1;
+    var end=cookies.indexOf(';',start);
+    if (end>0) valuestring=cookies.slice(start,end);
+    else valuestring=cookies.slice(start);}
+  else return false;
+  if (parse)
+    return JSON.parse(decodeURIComponent(valuestring));
+  else return decodeURIComponent(valuestring);
+}
+
+function fdjtSetCookie(name,value,expires,path,domain)
+{
+  var valuestring=
+    ((typeof value === 'string') ? (value) :
+     (value.toJSON) ? (value.toJSON()) :
+     (value.toString) ? (value.toString()) : (value));
+  var cookietext=name+"="+encodeURIComponent(valuestring);
+  if (expires)
+    if (typeof(expires)==='string')
+      cookietext=cookitext+'; '+expires;
+    else if (expires.toGMTString)
+      cookietext=cookietext+"; expires="+expires.toGMTString();
+    else if (typeof(expires)==='number')
+      if (expires>0) {
+	var now=new Date();
+	now.setTime(now.getTime()+expires);
+	cookietext=cookietext+"; expires="+now.toGMTString;}
+      else cookietext=cookietext+"; expires=Sun 1 Jan 2000 00:00:00 UTC";
+    else {}
+  if (path) cookietext=cookietext+"; path="+path;
+  // This certainly doesn't work generally and might not work ever
+  if (domain) cookietext=cookietext+"; domain="+domain;
+  document.cookie=cookietext;
+}
+
+function fdjtClearCookie(name,path,domain)
+{
+  var valuestring="ignoreme";
+  var cookietext=name+"="+encodeURIComponent(valuestring)+
+    "; expires=Sun 1 Jan 2000 00:00:00 UTC";
+  if (path) cookietext=cookietext+"; path="+path;
+  // This certainly doesn't work generally and might not work ever
+  if (domain) cookietext=cookietext+"; domain="+domain;
+  document.cookie=cookietext;
+}
+
 /* Getting anchors (making up IDs if neccessary) */
 
 var _fdjt_idcounter=0, fdjt_idbase=false;
