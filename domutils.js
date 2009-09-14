@@ -1527,7 +1527,7 @@ function fdjtSetCookie(name,value,expires,path,domain)
   var cookietext=name+"="+encodeURIComponent(valuestring);
   if (expires)
     if (typeof(expires)==='string')
-      cookietext=cookitext+'; '+expires;
+      cookietext=cookietext+'; '+expires;
     else if (expires.toGMTString)
       cookietext=cookietext+"; expires="+expires.toGMTString();
     else if (typeof(expires)==='number')
@@ -1540,6 +1540,7 @@ function fdjtSetCookie(name,value,expires,path,domain)
   if (path) cookietext=cookietext+"; path="+path;
   // This certainly doesn't work generally and might not work ever
   if (domain) cookietext=cookietext+"; domain="+domain;
+  // fdjtTrace("Setting cookie %o cookietext=%o",name,cookietext);
   document.cookie=cookietext;
 }
 
@@ -1551,6 +1552,7 @@ function fdjtClearCookie(name,path,domain)
   if (path) cookietext=cookietext+"; path="+path;
   // This certainly doesn't work generally and might not work ever
   if (domain) cookietext=cookietext+"; domain="+domain;
+  // fdjtTrace("Clearing cookie %o: text=%o",name,cookietext);
   document.cookie=cookietext;
 }
 
