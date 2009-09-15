@@ -207,6 +207,7 @@ function fdjtTab_onclick(evt,shown)
       else elt=elt.parentNode;
     if ((!(elt)) || (!(elt.getAttribute))) return;
     var select_var=elt.getAttribute('selectvar');
+    var tabcookie=elt.getAttribute('tabcookie');
     var content_id=elt.getAttribute('contentid');
     var content=document.getElementById(content_id);
     var select_elt=document.getElementById(select_var+'_INPUT');
@@ -236,6 +237,11 @@ function fdjtTab_onclick(evt,shown)
     if (fdjtHasAttrib(content,shown))
       content.removeAttribute(shown);
     else content.setAttribute(shown,'yes');
+    if (tabcookie) {
+      var eqpos=tabcookie.indexOf('=');
+      if (eqpos<0) fdjtSetCookie(tabcookie,cid);
+      else fdjtSetCookie(tabcookie.slice(0,eqpos),
+			 tabcookie.slice(eqpos+1));}
     // Force a redisplay on CSS-challenged browsers
     fdjtRedisplay(elt,content);
     return false;}
