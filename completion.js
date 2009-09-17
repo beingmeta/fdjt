@@ -332,6 +332,8 @@ function fdjtComplete(input_elt,string,options)
   results.heads=heads; results.exact=exacts; results.exactheads=exactheads;
   if (input_elt.noteCompletions) {
     input_elt.noteCompletions(results);}
+  if (fdjt_trace_completion)
+    fdjtTrace("Complete in %o on %o yields %o",input_elt,string,results);
   return results;
 }
   
@@ -453,7 +455,7 @@ function fdjtComplete_onkey(evt)
   else {
     if (fdjt_trace_completion)
       fdjtTrace("Delaying handler fdjtComplete on %o",target);
-    fdjtDelayHandler(100,fdjtComplete,target,false,"complete");}
+    fdjtDelayHandler(500,fdjtComplete,target,target,"completedelay");}
   return true;
 }
 

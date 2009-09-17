@@ -857,23 +857,38 @@ function fdjtDelayHandler(delay,handler,arg,context,delayname)
   if (context[delayname]) {
     var info=context[delayname];
     /* Don't delay for what you're already doing. */
-    if ((info.handler===handler) && (info.arg===arg))
-      return;
+    if ((info.handler===handler) && (info.arg===arg)) {
+      if (fdjt_trace_delays) {
+	var now=new Date();
+	fdjtLog("(%s:%dms) Alreadying delaying #%o from %o:%o %o of %o with %o",
+		now.toLocaleTimeString(),now.getTime(),
+		info.timeout,info.start.toLocaleTimeString(),info.start.getTime(),
+		info.handler,info.arg,info,info.start,
+		delayname,context);}
+      return;}
     if (fdjt_trace_delays)
-      fdjtLog("Clearing delay %o[%o]=%o %o(%0)",context,delayname,info,info.hander,info.arg);
+      fdjtLog("Clearing delay %o[%o]=%o %o(%o)",
+	      context,delayname,info,info.handler,info.arg);
     clearTimeout(info.timeout);
     context[delayname]=false;}
-  var info={}; info.handler=handler; info.arg=arg;
+  var info={}; info.handler=handler; info.arg=arg; info.start=new Date();
   context[delayname]=info;
-  if (fdjt_trace_delays)
-    fdjtTrace("Setting delay [delay=%o] %o[%o]=%o %o(%o)",
-	      delay,context,delayname,info,info.handler,info.arg);
   info.timeout=setTimeout(function() {
-      if (fdjt_trace_delays)
-	fdjtTrace("Gratifying delay %o[%o]=%o %o(%o)",
-		  context,delayname,info,info.handler,info.arg);
-      handler(arg); context[delayname]=false;},
+      if (fdjt_trace_delays) {
+	var now=new Date();
+	fdjtTrace("(%s:%dms) Gratifying delay #%o after %oms %o of %o info=%o %o(%o)",
+		  now.toLocaleTimeString(),now.getTime(),
+		  info.timeout,now.getTime()-info.start.getTime(),
+		  context,delayname,
+		  info,info.handler,info.arg);}
+      context[delayname]=false;
+      handler(arg);},
     delay);
+  if (fdjt_trace_delays)
+    fdjtTrace("(%s:%dms) Set delay [#%o:%oms] %o on %o; info=%o %o(%o)",
+	      info.start.toLocaleTimeString(),info.start.getTime(),
+	      info.timeout,delay,delayname,context,
+	      info,info.handler,info.arg);
 }
 
 /* Gradual transformation */

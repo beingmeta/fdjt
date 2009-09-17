@@ -272,15 +272,22 @@ function fdjtRedisplay(arg)
 
 var _fdjt_whitespace_pat=/(\s)+/;
 var _fdjt_trimspace_pat=/^(\s)+|(\s)+$/;
+var _fdjt_classpats={};
 
 function _fdjtclasspat(name)
 {
-  if (typeof name === "string") {
-    var rx=new RegExp("\\b"+name+"\\b","g");
-    return rx;}
+  if (typeof name === "string")
+    return (_fdjt_classpats[name])||(_fdjtmakeclasspat(name));
   else if (name instanceof RegExp)
     return name;
   else throw { name: "invalid class name", irritant: name};
+}
+
+function _fdjtmakeclasspat(name)
+{
+  var rx=new RegExp("(^|\\s)"+name+"(\\s|$)","g");
+  _fdjt_classpats[name]=rx;
+  return rx;
 }
 
 function fdjtHasClass(elt,classname,attrib)
@@ -369,9 +376,7 @@ function fdjtDropClass(elt,classname,attrib,keep)
       newinfo=classinfo.replace(class_regex,"");
     else return false;
     if (newinfo)
-      newinfo=newinfo.
-	replace(_fdjt_whitespace_pat," ").
-	replace(_fdjt_trimspace_pat,"");
+      newinfo=newinfo.replace(_fdjt_whitespace_pat," ");
     if (attrib)
       if (newinfo) {
 	elt.setAttribute(attrib,newinfo);
@@ -418,9 +423,7 @@ function fdjtToggleClass(elt,classname,attrib,keep)
 	replace(_fdjt_whitespace_pat," ");
     else newinfo=classinfo+" "+classname;
     if (newinfo)
-      newinfo=newinfo.
-	replace(_fdjt_whitespace_pat," ").
-	replace(_fdjt_trimspace_pat,"");
+      newinfo=newinfo.replace(_fdjt_whitespace_pat," ");
     if (attrib)
       if (newinfo) elt.setAttribute(attrib,newinfo);
       else if (!(keep)) elt.removeAttribute(attrib);
@@ -463,8 +466,7 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
     else return fdjtAddClass(elt,newclass,(attrib||false));
     if (newinfo)
       newinfo=newinfo.
-	replace(_fdjt_whitespace_pat," ").
-	replace(_fdjt_trimspace_pat,"");
+	replace(_fdjt_whitespace_pat," ");
     if (attrib)
       if (newinfo) elt.setAttribute(attrib,newinfo);
       else elt.removeAttribute(attrib);
