@@ -846,6 +846,7 @@ function fdjtRadioToggle(elt,under,radioname,selname)
 
 /* Delaying handlers */
 
+var fdjt_trace_delays=false;
 var fdjt_global_delays=[];
 
 function fdjtDelayHandler(delay,handler,arg,context,delayname)
@@ -858,11 +859,19 @@ function fdjtDelayHandler(delay,handler,arg,context,delayname)
     /* Don't delay for what you're already doing. */
     if ((info.handler===handler) && (info.arg===arg))
       return;
+    if (fdjt_trace_delays)
+      fdjtLog("Clearing delay %o[%o]=%o %o(%0)",context,delayname,info,info.hander,info.arg);
     clearTimeout(info.timeout);
     context[delayname]=false;}
   var info={}; info.handler=handler; info.arg=arg;
   context[delayname]=info;
+  if (fdjt_trace_delays)
+    fdjtTrace("Setting delay [delay=%o] %o[%o]=%o %o(%o)",
+	      delay,context,delayname,info,info.handler,info.arg);
   info.timeout=setTimeout(function() {
+      if (fdjt_trace_delays)
+	fdjtTrace("Gratifying delay %o[%o]=%o %o(%o)",
+		  context,delayname,info,info.handler,info.arg);
       handler(arg); context[delayname]=false;},
     delay);
 }

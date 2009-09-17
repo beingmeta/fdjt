@@ -168,6 +168,8 @@ function fdjtComplete(input_elt,string,options)
   if (!(string)) string=fdjtCompletionText(input_elt);
   if (!(options))
     options=input_elt.completeopts||_fdjt_get_complete_opts(input_elt);
+  if (fdjt_trace_completion)
+    fdjtTrace("Complete in %o on %o",input_elt,string);
   var completions=_fdjt_get_completions(input_elt);
   var maxcomplete=
     input_elt.maxcomplete||fdjtCacheAttrib(input_elt,"maxcomplete",false,false);
@@ -435,19 +437,23 @@ function fdjtComplete_onkey(evt)
   var options=target.completeopts||_fdjt_get_complete_opts(target);
   var cchars=
     fdjtCacheAttrib($T(evt),"enterchars",fdjtStringToKCodes,[32,-13]);    
-  // fdjtTrace("Complete_onkey %o, cchars=%o",evt,cchars);
   if (_fdjt_completion_timer) 
     clearTimeout(_fdjt_completion_timer);
+  // fdjtTrace("Complete_onkey %o, cchars=%o",evt,cchars);
   if (((keycode) && (fdjtIndexOf(cchars,-keycode)>=0)) ||
       ((charcode) && (fdjtIndexOf(cchars,charcode)>=0))) {
     // These complete right away
     var results=fdjtComplete(target,false,options);
+    // fdjtTrace("Escape complete on %o, results=%o",target,results);
     evt.preventDefault(); evt.cancelBubble=true;
     if (results.length===1) {
       fdjtHandleCompletion(target,results[0],results[0].value);
       fdjtDropClass(target.completions_elt,"open");}
     else {}}
-  else fdjtDelayHandler(100,fdjtComplete,target,false,"complete");
+  else {
+    if (fdjt_trace_completion)
+      fdjtTrace("Delaying handler fdjtComplete on %o",target);
+    fdjtDelayHandler(100,fdjtComplete,target,false,"complete");}
   return true;
 }
 
