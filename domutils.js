@@ -285,7 +285,7 @@ function _fdjtclasspat(name)
 
 function _fdjtmakeclasspat(name)
 {
-  var rx=new RegExp("(^|\\s)"+name+"(\\s|$)","g");
+  var rx=new RegExp("\\b"+name+"\\b","g");
   _fdjt_classpats[name]=rx;
   return rx;
 }
@@ -332,10 +332,6 @@ function fdjtAddClass(elt,classname,attrib)
     else if (classinfo.search(class_regex)>=0)
       return false;
     else newinfo=classname+" "+classinfo;
-    if (newinfo)
-      newinfo=newinfo.
-	replace(_fdjt_whitespace_pat," ").
-	replace(_fdjt_trimspace_pat,"");
     if (attrib) {
       elt.setAttribute(attrib,newinfo);
       // This sometimes trigger a CSS update that doesn't happen otherwise
@@ -376,7 +372,9 @@ function fdjtDropClass(elt,classname,attrib,keep)
       newinfo=classinfo.replace(class_regex,"");
     else return false;
     if (newinfo)
-      newinfo=newinfo.replace(_fdjt_whitespace_pat," ");
+      newinfo=newinfo.
+	replace(_fdjt_whitespace_pat," ").
+	replace(_fdjt_trimspace_pat,"");
     if (attrib)
       if (newinfo) {
 	elt.setAttribute(attrib,newinfo);

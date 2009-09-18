@@ -374,6 +374,16 @@ function fdjtUnEntify(string)
 
 /* Other utility functions */
 
+function fdjtIsEmptyString(string)
+{
+  if (typeof string === "string") 
+    if (string.length===0) return true;
+    else if (string.search(/\S/g)>=0)
+      return false;
+    else return true;
+  else return false;
+}
+
 function fdjtFindSplit(string,split,escape)
 {
   var start=0;
