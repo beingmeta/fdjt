@@ -238,13 +238,36 @@ function fdjtGetIds(string)
   return results;
 }
 
+var fdjt_meta_foldcase=true;
 // This gets a META content field
-function fdjtGetMeta(name)
+function fdjtGetMeta(name,foldcase)
 {
+  if (typeof foldcase==='undefined') foldcase=fdjt_meta_foldcase;
+  var uppername=((foldcase)&&(name.toUpperCase()));
   var elts=document.getElementsByTagName("META");
   var i=0; while (i<elts.length)
 	     if ((elts[i]) && (elts[i].name===name))
 	       return elts[i].content;
+	     else if ((foldcase)&&(elts[i])&&
+		      (elts[i].name.toUpperCase()===uppername))
+	       return elts[i].content;
+	     else i++;
+  return false;
+}
+
+var fdjt_link_foldcase=true;
+// This gets a LINK href field
+function fdjtGetLink(name,foldcase)
+{
+  if (typeof foldcase==='undefined') foldcase=fdjt_link_foldcase;
+  var uppername=((foldcase)&&(name.toUpperCase()));
+  var elts=document.getElementsByTagName("LINK");
+  var i=0; while (i<elts.length)
+	     if ((elts[i]) && (elts[i].rel===name))
+	       return elts[i].href;
+	     else if ((foldcase)&&(elts[i])&&
+		      (elts[i].rel.toUpperCase()===uppername))
+	       return elts[i].href;
 	     else i++;
   return false;
 }
