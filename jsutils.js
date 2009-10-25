@@ -468,6 +468,18 @@ function fdjtStdSpace(string)
   return trimmed.replace(/(\W)+/g," ");
 }
 
+function fdjtStripMarkup(string)
+{
+  return string.replace(/<[^>]*>/g,"");
+}
+
+function fdjtUnEscape(string)
+{
+  if (string.indexOf('\\')>=0)
+    return string.replace(/\\(.)/g,"$1");
+  else return string;
+}
+
 /* Getting key/char codes */
 
 var _fdjt_char_codes={
