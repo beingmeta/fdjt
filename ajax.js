@@ -104,29 +104,42 @@ function fdjtFormParams(form)
 
 function fdjtLaunchForm(form,action_arg,callback)
 {
-  try {
-    fdjtAddClass(form,"submitting");
-    var action=(action_arg)||form.action;
-    var windowopts=(form.windowopts)||fdjtCacheAttrib(form,"windowopts");
-    var target=form.getAttribute("target")||"fdjtform";
-    var resetdelay=form.getAttribute("resetdelay");
-    var params=fdjtFormParams(form);
-    var win=window.open(action+"?"+params,target,windowopts);
-    if (!(win)) {
+  if ((form.windowopts)||fdjtCacheAttrib(form,"windowopts"))
+    try {
+      fdjtAddClass(form,"submitting");
+      var action=(action_arg)||form.action;
+      var windowopts=(form.windowopts)||fdjtCacheAttrib(form,"windowopts");
+      var target=form.getAttribute("target")||"fdjtform";
+      var resetdelay=form.getAttribute("resetdelay");
+      var params=fdjtFormParams(form);
+      var win=window.open(action+"?"+params,target,windowopts);
+      if (win) win.focus();
+      if ((!(win))||(!(win.top))) {
+	form.fdjtlaunchfailed=true;
+	fdjtDropClass(form,"submitting");
+	form.submit();
+	return false;}
+      if (resetdelay!=="none") {
+	var delay=((resetdelay) ? (parseInt(resetdelay)) : (3000));
+	window.setTimeout(function() {
+	    fdjtDropClass(form,"submitting");
+	    if (callback) callback(false,form);
+	    form.reset();},delay);}
+      return true;}
+    catch (ex) {
       form.fdjtlaunchfailed=true;
       fdjtDropClass(form,"submitting");
       form.submit();
       return false;}
-    if (resetdelay!=="none") {
-      var delay=((resetdelay) ? (parseInt(resetdelay)) : (3000));
-      window.setTimeout(function() {
-	  fdjtDropClass(form,"submitting");
-	  if (callback) callback(false,form);
-	  form.reset();},delay);}
-    return true;}
-  catch (ex) {
-    form.fdjtlaunchfailed=true;
+  else if ((form.iframe)||fdjtCacheAttrib(form,"iframe")) {
+    var iframe=(form.iframe)||fdjtCacheAttrib(form,"iframe");
+    if ((iframe)&&(typeof iframe === 'string')) iframe=$(iframe);
+    var params=fdjtFormParams(form);
+    var action=(action_arg)||form.action;
+    iframe.src=action+src;}
+  else {
     fdjtDropClass(form,"submitting");
+    fdjtAutoPrompt_cleanup(form);
     form.submit();
     return false;}
 }
@@ -175,6 +188,7 @@ function fdjtForm_onsubmit(evt)
   if (fdjtHasClass(form,"submitting")) {
     fdjtDropClass(form,"submitting");
     return;}
+  if (form.fdjtlaunchfailed) return;
   form.fdjtsubmit=true;
   fdjtAddClass(form,"submitting");
   if (fdjtFormSubmit(form)) {evt.preventDefault(); return;}

@@ -729,7 +729,7 @@ function fdjtElementMatches(elt,selector)
     var spec=fdjtParseSelector(selector);
     return (((spec[1]===null) || (elt.tagName===spec[1])) &&
 	    ((spec[2]===null) || (spec[2]===elt.className) ||
-	     (elt.className.search(_fdjtclasspat(spec[2]))>=0)) &&
+	     ((elt.className)&&(elt.className.search(_fdjtclasspat(spec[2]))>=0))) &&
 	    ((spec[3]===null) || (elt.id===spec[3])));}
   else if (!(selector instanceof Array)) return false;
   else if (selector.length===0) return false;
@@ -737,7 +737,7 @@ function fdjtElementMatches(elt,selector)
     var spec=selector;
     return (((spec[1]===null) || (elt.tagName===spec[1])) &&
 	    ((spec[2]===null) || (spec[2]===elt.className) ||
-	     (elt.className.search(_fdjtclasspat(spec[2]))>=0)) &&
+	     ((elt.className)&&(elt.className.search(_fdjtclasspat(spec[2]))>=0))) &&
 	    ((spec[3]===null) || (elt.id===spec[3])));}
   else {
     var i=0; while (i<selector.length)
