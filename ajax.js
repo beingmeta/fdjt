@@ -67,12 +67,23 @@ function fdjtAjaxXMLCall(callback,base_uri)
     base_uri,fdjtArguments(arguments,2));
 }
 
-function fdjtJSONPCall(uri)
+function fdjtJSONPCall(uri,id,cleanup)
 {
+  if ((id)&&($(id))) return false;
   var script_elt=fdjtNewElement("SCRIPT");
+  if (id) script_elt.id=id;
+  if (cleanup) script_elt.oncleanup=cleanup;
   script_elt.language='javascript';
   script_elt.src=uri;
   document.body.appendChild(script_elt);
+}
+
+function fdjtJSONPFinish(id)
+{
+  var script_elt=$(id);
+  if (!(script_elt)) return;
+  if (script_elt.oncleanup) script_elt.oncleanup();
+  fdjtRemove(script_elt);
 }
 
 /* AJAX submit */
@@ -153,12 +164,14 @@ function fdjtJSONPSubmit(form)
   var jsonp_uri=(form.jsonpuri)||fdjtCacheAttrib(form,"jsonpuri");
   if (!(jsonp_uri)) return false;
   var success=false;
-  var req=new XMLHttpRequest();
-  var params=fdjtFormParams(form);
+  var jsonid=((form.id)?("JSONP"+form.id):("FORMJSONP")):
   fdjtAddClass(form,"submitting");
   try {
-    fdjtJSONPCall(jsonp_uri+"?"+params);}
+    fdjtJSONPCall
+      (jsonp_uri+"?"+params,jsonid,
+       function(){fdjtDropClass(form,"submitting")});}
   catch (ex) {
+    fdjtJSONPFinish(jsonid);
     fdjtWarn("Attempted JSONP call signalled %o",ex);
     return false;}
   return true;
