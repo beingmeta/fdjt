@@ -67,6 +67,14 @@ function fdjtAjaxXMLCall(callback,base_uri)
     base_uri,fdjtArguments(arguments,2));
 }
 
+function fdjtJSONPCall(uri)
+{
+  var script_elt=fdjtNewElement("SCRIPT");
+  script_elt.language='javascript';
+  script_elt.src=uri;
+  document.body.appendChild(script_elt);
+}
+
 /* AJAX submit */
 
 function _fdjtAddParam(parameters,name,value)
@@ -102,83 +110,58 @@ function fdjtFormParams(form)
   return parameters;
 }
 
-function fdjtLaunchForm(form,action_arg,callback)
+function fdjtAjaxSubmit(form)
 {
-  if ((form.windowopts)||fdjtCacheAttrib(form,"windowopts"))
+  var bridge=form.ajaxbridge||false;
+  var ajax_uri=(form.ajaxuri)||fdjtCacheAttrib(form,"ajaxuri");
+  if (!(ajax_uri)) return false;
+  if ((bridge)&&(bridge!==window)) 
     try {
-      fdjtAddClass(form,"submitting");
-      var action=(action_arg)||form.action;
-      var windowopts=(form.windowopts)||fdjtCacheAttrib(form,"windowopts");
-      var target=form.getAttribute("target")||"fdjtform";
-      var resetdelay=form.getAttribute("resetdelay");
-      var params=fdjtFormParams(form);
-      var win=window.open(action+"?"+params,target,windowopts);
-      if (win) win.focus();
-      if ((!(win))||(!(win.top))) {
-	form.fdjtlaunchfailed=true;
-	fdjtDropClass(form,"submitting");
-	form.submit();
-	return false;}
-      if (resetdelay!=="none") {
-	var delay=((resetdelay) ? (parseInt(resetdelay)) : (3000));
-	window.setTimeout(function() {
-	    fdjtDropClass(form,"submitting");
-	    if (callback) callback(false,form);
-	    form.reset();},delay);}
-      return true;}
+      return bridge.fdjtAjaxSubmit(form);}
     catch (ex) {
-      form.fdjtlaunchfailed=true;
-      fdjtDropClass(form,"submitting");
-      form.submit();
+      fdjtLog("Bridge call yielded %o",ex);
       return false;}
-  else if ((form.iframe)||fdjtCacheAttrib(form,"iframe")) {
-    var iframe=(form.iframe)||fdjtCacheAttrib(form,"iframe");
-    if ((iframe)&&(typeof iframe === 'string')) iframe=$(iframe);
-    var params=fdjtFormParams(form);
-    var action=(action_arg)||form.action;
-    iframe.src=action+src;}
+  var callback=false;
+  if (form.oncallback) callback=form.oncallback;
+  else if (form.getAttribute("ONCALLBACK")) {
+    callback=new Function
+      ("req","form",input_elt.getAttribute("ONCALLBACK"));
+    form.oncallback=callback;}
+  var success=false;
+  var req=new XMLHttpRequest();
+  var params=fdjtFormParams(form);
+  fdjtAddClass(form,"submitting");
+  req.onreadystatechange=function () {
+    if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
+      fdjtDropClass(form,"submitting");
+      success=true;
+      callback(req,form);}};
+  if (form.method==="GET")
+    req.open('GET',ajax_uri+"?"+params,false);
+  else req.open('POST',ajax_uri,false);
+  if (form.method==="GET") req.send();
   else {
-    fdjtDropClass(form,"submitting");
-    fdjtAutoPrompt_cleanup(form);
-    form.submit();
-    return false;}
+    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    // req.setRequestHeader("Content-length", params.length);
+    // req.setRequestHeader("Connection", "close");
+    req.send(params);}
+  return success;
 }
 
-function fdjtFormSubmit(form,action,callback)
+function fdjtJSONPSubmit(form)
 {
-  var target=form.target;
-  var ajax_uri=(action)||(form.ajaxuri)||fdjtCacheAttrib(form,"ajaxuri");
-  if (!(callback))
-    if (form.oncallback) callback=form.oncallback;
-    else if (form.getAttribute("ONCALLBACK")) {
-      callback=new Function
-	("req","form",input_elt.getAttribute("ONCALLBACK"));
-      form.oncallback=callback;}
-    else callback=false;
-  if (ajax_uri) {
-    var req=new XMLHttpRequest();
-    var params=fdjtFormParams(form);
-    fdjtAddClass(form,"submitting");
-    if (form.method==="GET")
-      req.open('GET', ajax_uri+"?"+params, true);
-    else req.open('POST', ajax_uri, true);
-    req.onreadystatechange=function () {
-      if ((req.readyState === 4) && (req.status === 200)) {
-	fdjtDropClass(form,"submitting");
-	callback(req,form);}
-      else if (req.readyState !== 4) {}
-      else fdjtLaunchForm(form);};
-    if (form.method==="GET") req.send();
-    else {
-      req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      // req.setRequestHeader("Content-length", params.length);
-      // req.setRequestHeader("Connection", "close");
-      req.send(params);}
-    return true;}
-  else try {
-      fdjtLaunchForm(form,false,false,true);
-      return true;}
-    catch (ex) { return false;}
+  var jsonp_uri=(form.jsonpuri)||fdjtCacheAttrib(form,"jsonpuri");
+  if (!(jsonp_uri)) return false;
+  var success=false;
+  var req=new XMLHttpRequest();
+  var params=fdjtFormParams(form);
+  fdjtAddClass(form,"submitting");
+  try {
+    fdjtJSONPCall(jsonp_uri+"?"+params);}
+  catch (ex) {
+    fdjtWarn("Attempted JSONP call signalled %o",ex);
+    return false;}
+  return true;
 }
 
 function fdjtForm_onsubmit(evt)
@@ -191,11 +174,11 @@ function fdjtForm_onsubmit(evt)
   if (form.fdjtlaunchfailed) return;
   form.fdjtsubmit=true;
   fdjtAddClass(form,"submitting");
-  if (fdjtFormSubmit(form)) {evt.preventDefault(); return;}
-  form.fdjtsubmit=false;
-  window.setTimeout(function() {
-      fjdtDropClass(form,"submitting");
-      form.reset();},3000);
+  if (fdjtAjaxSubmit(form)) {
+    evt.preventDefault(); return;}
+  else if (fdjtJSONPSubmit(form)) {
+    evt.preventDefault(); return;}
+  else return;
 }
 
 /* Synchronous calls */
@@ -225,6 +208,16 @@ function fdjtAjaxGetXML(base_uri)
 {
   return fdjtAjaxGet(function (req) { return JSON.parse(req.responseXML); },
 		     base_uri,fdjtArguments(arguments,1));
+}
+
+function fdjtAjaxProbe(uri)
+{
+  var req=new XMLHttpRequest();
+  req.open("GET",uri,false);
+  req.send(null);
+  if ((req.readyState === 4) && (req.status >= 200) && (req.status < 300))
+    return true;
+  else return false;
 }
 
 /* Emacs local variables
