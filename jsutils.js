@@ -480,6 +480,46 @@ function fdjtUnEscape(string)
   else return string;
 }
 
+/* More string functions */
+
+function fdjtHasPrefix(string,prefix)
+{
+  return ((string.indexOf(prefix))===0);
+}
+
+function fdjtHasSuffix(string,suffix)
+{
+  return ((string.lastIndexOf(suffix))===(string.length-suffix.length));
+}
+
+function fdjtCommonPrefix(string1,string2,brk)
+{
+  var i=0; var last=0;
+  while ((i<string1.length) && (i<string2.length))
+    if (string1[i]===string2[i])
+      if (brk)
+	if (brk===string1[i]) {last=i-1; i++;}
+	else i++;
+      else last=i++;
+    else break;
+  if (last>0) return string1.slice(0,last+1);
+  else return false;
+}
+
+function fdjtCommonSuffix(string1,string2,brk)
+{
+  var i=string1.length, j=string2.length; var last=0;
+  while ((i>=0) && (j>=0))
+    if (string1[i]===string2[j])
+      if (brk)
+	if (brk===string1[i]) {last=i+1; i--; j--;}
+	else {i--; j--;}
+      else {last=i; i--; j--;}
+    else break;
+  if (last>0) return string1.slice(last);
+  else return false;
+}
+
 /* Getting key/char codes */
 
 var _fdjt_char_codes={
