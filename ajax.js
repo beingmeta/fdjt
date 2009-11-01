@@ -164,7 +164,8 @@ function fdjtJSONPSubmit(form)
   var jsonp_uri=(form.jsonpuri)||fdjtCacheAttrib(form,"jsonpuri");
   if (!(jsonp_uri)) return false;
   var success=false;
-  var jsonid=((form.id)?("JSONP"+form.id):("FORMJSONP")):
+  var jsonid=((form.id)?("JSONP"+form.id):("FORMJSONP"));
+  var params=fdjtFormParams(form);
   fdjtAddClass(form,"submitting");
   try {
     fdjtJSONPCall
