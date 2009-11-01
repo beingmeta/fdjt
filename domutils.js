@@ -1318,7 +1318,8 @@ function _fdjt_compute_flat_width(node,sofar)
       var i=0; while (i<children.length) {
 	var child=children[i++];
 	if (child.nodeType===3)
-	  sofar=sofar+child.nodeValue.length;
+	  if (fdjtIsEmptyString(child.nodeValue)) {}
+	  else sofar=sofar+child.nodeValue.length;
 	else if (child.nodeType===1)
 	  sofar=_fdjt_compute_flat_width(child,sofar);
 	else {}}
@@ -1331,19 +1332,21 @@ function _fdjt_compute_flat_width(node,sofar)
 	Math.floor(node.height/16)*_fdjt_vertical_flat_width;
     else return sofar;}
   else if (node.nodeType===3)
-    return sofar+node.nodeValue.length;
+    if (fdjtIsEmptyString(node.nodeValue))
+      return sofar;
+    else return sofar+node.nodeValue.length;
   else return sofar;
 }
 
 var _fdjt_tag_widths=
-  {"P": 8,"DIV": 8,"BR": 8,"UL": 8,"LI": 8,"BLOCKQUOTE": 8,
+  {"P": 8,"BR": 8,"UL": 8,"LI": 8,"BLOCKQUOTE": 8,
    "H1": 8,"H2": 8,"H3": 8,"H4": 8,"H5": 8,"H6": 8};
 
 function _fdjt_flat_width(node,sofar)
 {
   if (node.nodeType===1) {
-    var children=node.childNodes;
-    sofar=sofar+_fdjt_tag_widths[node.tagName]||4;
+    var children=node.childNodes; var start=sofar;
+    sofar=sofar+_fdjt_tag_widths[node.tagName]||0;
     if (children) {
       var i=0; while (i<children.nodes) {
 	var child=children[i++];
