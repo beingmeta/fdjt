@@ -165,33 +165,38 @@ div.completions {
 .completions { display: none;}
 div.completions.open { display: block;}
 span.completions.open { display: inline;}
-.completions .completion { 
-  margin-right: 5px; padding-left: 2px; padding-right: 2px;
-  border: hidden 1px;
-  display: none;}
-.completions .completion .variation { 
-  display: none;}
-.completions .completion .variation[displayed="yes"] { 
-  display: none;}
-.completions .completion[displayed="no"] .variation[displayed="yes"] { 
-  display: none;}
 
-.completions .completion[displayed="yes"] span.variation[displayed="yes"] { 
-  display: inline;}
-.completions .completion[displayed="yes"] div.variation[displayed="yes"] { 
-  display: block;}
+.completions .nocompletemsg { display: none;}
+.completions.noresults span.nocompletemsg { display: inline;}
+.completions.noresults li.nocompletemsg { display: list-item;}
+.completions.noresults div.nocompletemsg { display: block;}
+.completions.noresults p.nocompletemsg { display: block;}
 
-.completions div.completion {
-  clear: both;}
-.completions div.completion[displayed="yes"] {
-  display: block;}
-.completions span.completion[displayed="yes"] {
-  display: inline;}
-.completions div.completion[displayed="no"] {
-  display: none;}
-.completions span.completion[displayed="no"] {
-  display: none;}
+.completions .completion { display: none; }
+.completions .completion .variation { display: none; }
+.completions .completion[displayed] .variation { display: none; }
 
+.completions.noinput span.completion.cue { display: inline; }
+.completions.noinput li.completion.cue { display: list-item; }
+.completions.noinput div.completion.cue { display: block; }
+
+.completions.showempty.noinput span.completion { display: inline; }
+.completions.showempty.noinput li.completion { display: list-item; }
+.completions.showempty.noinput div.completion { display: block; }
+
+.completions .noinputmsg { display: none;}
+.completions.noinput span.noinputmsg { display: inline;}
+.completions.noinput li.noinputmsg { display: list-item;}
+.completions.noinput div.noinputmsg { display: block;}
+.completions.noinput p.noinputmsg { display: block;}
+
+.completions span.completion[displayed] { display: inline;}
+.completions li.completion[displayed] { display: list-item;}
+.completions div.completion[displayed] { display: block;}
+
+.completions .completion[displayed] span.variation[displayed] { display: inline; }
+.completions .completion[displayed] li.variation[displayed] { display: list-item; }
+.completions .completion[displayed] div.variation[displayed] { display: block; }
 
 /* Rich tips 
    Richtips are overlayed tooltips for metakeys, displayed

@@ -520,6 +520,64 @@ function fdjtCommonSuffix(string1,string2,brk)
   else return false;
 }
 
+/* Prefix trees */
+
+function fdjtPrefixAdd(ptree,string,i)
+{
+  if (i===string.length) 
+    if (ptree.strings.indexOf(string)>=0) return false;
+    else {
+      ptree.strings.push(string);
+      return true;}
+  else if (ptree.splits) {
+    var splitchar=string[i];
+    var split=ptree[splitchar];
+    if (!(split)) {
+      // Create a new split
+      split={};
+      split.strings=[];
+      // We don't really use this, but it might be handy for debugging
+      split.splitchar=splitchar;
+      ptree[splitchar]=split;
+      ptree.splits.push(split);}
+    if (fdjtPrefixAdd(split,string,i+1)) {
+      ptree.strings.push(string);
+      return true;}
+    else return false;}
+  else if (ptree.strings.length<5)
+    if (ptree.strings.indexOf(string)>=0)
+      return false;
+    else {
+      ptree.strings.push(string);
+      return true;}
+  else {
+    // Subdivide
+    ptree.splits=[];
+    var strings=ptree.strings;
+    var j=0; while (j<strings.length) 
+	       fdjtPrefixAdd(ptree,strings[j++],i);
+    return fdjtPrefixAdd(ptree,string,i);}
+}
+
+function fdjtPrefixFind(ptree,prefix,i,plen)
+{
+  if (!(plen)) plen=prefix.length;
+  if (i===plen)
+    return ptree.strings;
+  else if (ptree.strings.length<=5) {
+    var strings=ptree.strings;
+    var results=[];
+    var j=0; while (j<strings.length) {
+      var string=strings[j++];
+      if (fdjtHasPrefix(string,prefix)) results.push(string);}
+    if (results.length) return results;
+    else return false;}
+  else {
+    var split=ptree[prefix[i]];
+    if (split) return fdjtPrefixFind(split,prefix,i+1,plen);
+    else return false;}
+}
+
 /* Getting key/char codes */
 
 var _fdjt_char_codes={

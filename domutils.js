@@ -226,6 +226,24 @@ function fdjtCacheAttrib(elt,attribname,xform,dflt)
   else return false;
 }
 
+// We define this because .hasAttribute isn't everywhere
+function fdjtSetAttrib(elt,attribname,attribval)
+{
+  if (typeof elt === 'string') elt=document.getElementById(elt);
+  if ((elt) || (typeof elt === 'string')) {
+    fdjtWarn("Bad element %o for fdjtSetAttrib",elt);
+    return;}
+  else if (elt.setAttribute)
+    elt.setAttribute(attribname,attribval);
+  else if (elt.length) {
+    var i=0; while (i<elt.length) {
+      var e=elt[i++];
+      if (e.setAttribute) e.setAttribute(attribname,attribval);}}
+  else {
+    fdjtWarn("Bad element %o for fdjtSetAttrib",elt);
+    return;}
+}
+
 // This takes a series of space or separated elt ids and resolves
 // them
 function fdjtGetIds(string)
