@@ -205,21 +205,30 @@ function fdjtArguments(argobj,start)
 
 /* Fast set operations */
 
+var _fdjt_idcounter=0;
+
 function _fdjt_set_sortfn(a,b)
 {
   if (a===b) return 0;
   else if (typeof a === typeof b) {
-    if ((typeof a === "number") || (typeof a === "string"))
-      if (a<b) return -1; else return 1;
-    else if (a.sortkey)
-      if (b.sortkey)
-	if (a.sortkey === b.sortkey) return 0;
-	else return (a.sortkey>b.sortkey)-(a.sortkey<b.sortkey);
-      else return -1;
-    else if (b.sortkey) return 1;
-    else return (a>b)-(a<b);}
-  else if (typeof a < typeof b)
-    return -1;
+    if (typeof a === "number")
+      return a-b;
+    else if (typeof a === "string")
+      if (a<b) return -1;
+      else return 1;
+    else if (a._fdjtid)
+      if (b._fdjtid) return a._fdjtid-b._fdjtid;
+      else {
+	b._fdjtid=++_fdjt_idcounter;
+	return -1;}
+    else if (b._fdjtid) {
+      a._fdjtid=++_fdjt_idcounter;
+      return 1;}
+    else {
+      a._fdjtid=++_fdjt_idcounter;
+      b._fdjtid=++_fdjt_idcounter;
+      return -1;}}
+  else if (typeof a < typeof b) return -1;
   else return 1;
 }
 
