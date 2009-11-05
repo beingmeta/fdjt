@@ -21,7 +21,7 @@ var fdjt_completion_version=parseInt("$Revision$".slice(10,-1));
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
-var fdjt_trace_completion=false;
+var fdjt_trace_completion=true;
 var fdjt_detail_completion=false;
 
 /* Completion */
@@ -166,10 +166,12 @@ function fdjtAddCompletion(div,completion,opts,init)
       if (div.allcues)
 	div.allcues.push(completion);
       else div.allcues=new Array(completion);
+    var value=completion.value;
     var variations=fdjtGetChildrenByClassName(completion,"variation");
     var i=0; while (i<variations.length) {
       var variation=variations[i++];
       var stdkey=fdjtStdSpace(variation.key);
+      variation.value=value;
       if (!(opts&FDJT_COMPLETE_MATCHCASE)) stdkey=stdkey.toLowerCase();
       fdjtAddKeys(variation,prefixtree,cmap,stdkey,(opts&FDJT_COMPLETE_ANYWHERE));}}
 }
@@ -180,8 +182,9 @@ function fdjtAddKeys(value,ptree,cmap,keystring,anywhere)
   var i=0; while (i<keys.length) {
     var key=keys[i++];
     fdjtPrefixAdd(ptree,key,0);
-    if (cmap[key]) cmap[key].push(value);
-    else cmap[key]=new Array(value);}
+    if (cmap)
+      if (cmap[key]) cmap[key].push(value);
+      else cmap[key]=new Array(value);}
 }
 
 function fdjtInitCompletions(div,completions,opts)
@@ -234,7 +237,7 @@ function fdjtComplete(input_elt,string,options)
   else if ((container.curstring) && (string===container.curstring)) {
     return container.results;}
   else {
-    var qstring=string.toLowerCase();
+    var qstring=((options&FDJT_COMPLETE_MATCHCASE)?(string):(string.toLowerCase()));
     var prefixtree=container.prefixtree;
     var cmap=container.completionmap;
     var strings=fdjtPrefixFind(prefixtree,qstring,0);
@@ -272,13 +275,14 @@ function fdjtComplete(input_elt,string,options)
     container.displayed=heads.concat(variations);
     if (fdjt_trace_completion)
       fdjtTrace("Complete in %o on %o yields %o",input_elt,string,results);
+    input_elt.completeString=string;
     container.curstring=string;
     container.results=heads;
     fdjtDropClass(container,"noinput");
     // Force redisplay?
     container.className=container.className;
     heads.exact=cmap[qstring]||[];
-    if (results.length===0) fdjtAddClass(container,"noresults");
+    if (heads.length===0) fdjtAddClass(container,"noresults");
     return heads;}
 }
   
@@ -376,6 +380,13 @@ function fdjtComplete_setup(target)
   fdjtComplete(target);
 }
 
+function fdjtCheckComplete(target)
+{
+  if ((!(target.completeString))||
+      (target.completeString!==fdjtCompletionText(target)))
+    fdjtComplete(target);
+}
+
 function fdjtComplete_onkey(evt)
 {
   var target=$T(evt);
@@ -403,15 +414,6 @@ function fdjtComplete_onkey(evt)
       fdjtTrace("Delaying handler fdjtComplete on %o",target);
     fdjtDelayHandler(500,fdjtComplete,target,target,"completedelay");}
   return true;
-}
-
-function fdjtComplete_hide(evt)
-{
-  /*
-  var target=$T(evt);
-  if ((target) && (target.completions_elt))
-    target.completions_elt.style.display='none';
-  */
 }
 
 function fdjtSetCompletions(id,completions)
