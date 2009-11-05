@@ -21,7 +21,7 @@ var fdjt_completion_version=parseInt("$Revision$".slice(10,-1));
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
-var fdjt_trace_completion=true;
+var fdjt_trace_completion=false;
 var fdjt_detail_completion=false;
 
 /* Completion */
