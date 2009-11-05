@@ -146,7 +146,7 @@ function fdjtAddCompletion(div,completion,opts,init)
   if (!(div.nodeType)) throw {name: 'NotANode', irritant: div};
   if (!(completion.nodeType)) throw {name: 'NotANode', irritant: completion};
   if (!(div.allcompletions)) fdjtInitCompletions(div,false,opts);
-  fdjtTrace("add completion %o to %o",completion,div);
+  // fdjtTrace("add completion %o to %o",completion,div);
   if ((init)||(!(div.allcompletions.indexOf(completion)))) {
     var prefixtree=div.prefixtree;
     var cmap=div.completionmap;
@@ -263,19 +263,20 @@ function fdjtComplete(input_elt,string,options)
 	node.removeAttribute("displayed"); node.className=node.className;}}
     i=0; while (i<variations.length) {
       var node=variations[i++]; 
-      node.setAttribute('displayed','yes'); node.className=node.className;}
+      node.setAttribute('displayed','yes');}
     var results=[];
     i=0; while (i<heads.length) {
       var head=heads[i++];
       head.setAttribute('displayed','yes');
-      results.push(head.value);
-      head.className=head.className;}
+      results.push(head.value);}
     container.displayed=heads.concat(variations);
     if (fdjt_trace_completion)
       fdjtTrace("Complete in %o on %o yields %o",input_elt,string,results);
     container.curstring=string;
     container.results=heads;
     fdjtDropClass(container,"noinput");
+    // Force redisplay?
+    container.className=container.className;
     heads.exact=cmap[qstring]||[];
     if (results.length===0) fdjtAddClass(container,"noresults");
     return heads;}

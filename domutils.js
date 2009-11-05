@@ -597,7 +597,7 @@ function fdjtGetParentByClassName(node,classname)
       return scan;
     else if ((scan.className) && (fdjtHasClass(scan,classname)))
       return scan;
-    else if (node===document) return null;
+    else if (scan===document) return null;
     else scan=scan.parentNode;
   if ((scan) && (scan.className===classname)) return scan;
   else return null;

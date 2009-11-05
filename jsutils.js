@@ -774,5 +774,3 @@ fdjtLoadMessage("Loaded jsutils.js");
 ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
 ;;;  End: ***
 */
-
-
