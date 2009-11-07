@@ -739,6 +739,36 @@ function fdjtRunTimes(pname,start)
   return ((point.getTime()-start.getTime())/1000)+"s"+report;
 }
 
+function fdjtDiffTime(time1,time2)
+{
+  if (!(time2)) time2=new Date();
+  var diff=time1.getTime()-time2.getTime();
+  if (diff>0) return diff/1000; else return -(diff/1000);
+}
+
+function fdjtDeltaTime(time1)
+{
+  var time2=new Date();
+  var diff=time1.getTime()-time2.getTime();
+  time1.setTime(time2.getTime());
+  if (diff>0) return diff/1000; else return -(diff/1000);
+}
+
+var fdjt_loaded=(new Date()).getTime();
+function fdjtDeltaTime(time1)
+{
+  var time2=new Date();
+  var diff=time1.getTime()-time2.getTime();
+  time1.setTime(time2.getTime());
+  if (diff>0) return diff/1000; else return -(diff/1000);
+}
+
+function fdjtElapsedTime(arg)
+{
+  if (!(arg)) arg=new Date();
+  return (arg.getTime()-fdjt_loaded)/1000;
+}
+
 /* Setups */
 
 var fdjt_setup_started=false;

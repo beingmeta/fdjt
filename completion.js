@@ -21,6 +21,7 @@ var fdjt_completion_version=parseInt("$Revision$".slice(10,-1));
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
+var fdjt_trace_completion_setup=false;
 var fdjt_trace_completion=false;
 var fdjt_detail_completion=false;
 
@@ -182,9 +183,11 @@ function fdjtAddKeys(value,ptree,cmap,keystring,anywhere)
   var i=0; while (i<keys.length) {
     var key=keys[i++];
     fdjtPrefixAdd(ptree,key,0);
-    if (cmap)
-      if (cmap[key]) cmap[key].push(value);
-      else cmap[key]=new Array(value);}
+    if (cmap) {
+      if ((cmap[key])&&(cmap.hasOwnProperty(key)))
+	cmap[key].push(value);
+      else cmap[key]=new Array(value);
+      cmap._count++;}}
 }
 
 function fdjtInitCompletions(div,completions,opts)
@@ -194,10 +197,19 @@ function fdjtInitCompletions(div,completions,opts)
   div.allcues=[];
   div.prefixtree={};
   div.prefixtree.strings=[];
-  div.completionmap={};
+  div.completionmap={}; div.completionmap._count=0;
+  var start=new Date();
   var completions=(completions)||fdjtGetChildrenByClassName(div,"completion");
+  if (fdjt_trace_completion_setup)
+    fdjtTrace("Initializing %d completions for %o",completions.length,div);
   var i=0; while (i<completions.length)
 	     fdjtAddCompletion(div,completions[i++],opts,true);
+  if (fdjt_trace_completion_setup)
+    fdjtTrace("[%fs] Initialized %d completions, %d strings, %d items for %o",
+	      fdjtDiffTime(start),
+	      completions.length,div.prefixtree.strings.length,
+	      div.completionmap._count,
+	      div);
 }
 
 // Adds a vector of completions to a completions DIV
@@ -222,7 +234,8 @@ function fdjtComplete(input_elt,string,options)
   var container=_fdjt_get_completions(input_elt);
   if (!(container.allcompletions)) fdjtInitCompletions(container,false,options);
   if (fdjt_trace_completion)
-    fdjtTrace("Complete in %o on '%o' against %o",input_elt,string,container);
+    fdjtLog("[%f] Complete in %o on '%o' against %o",
+	    fdjtElapsedTime(),input_elt,string,container);
   if ((!string) || (fdjtIsEmptyString(string))) {
     var empty=[];
     fdjtAddClass(container,"noinput");
@@ -233,14 +246,25 @@ function fdjtComplete(input_elt,string,options)
 	var node=displayed[i++];
 	node.removeAttribute('displayed');
 	node.className=node.className;}}
+    if ((fdjt_trace_completion)&&(displayed))
+      fdjtLog("[%f] Hiding %d displayed items in %o",
+	      fdjtElapsedTime(),displayed.length,container);
+    container.displayed=[];
     return empty;}
   else if ((container.curstring) && (string===container.curstring)) {
+    if (fdjt_trace_completion)
+      fdjtLog("[%f] Using %d cached result for %s against %o",
+	      fdjtElapsedTime(),container.results.length,string,container);
     return container.results;}
   else {
     var qstring=((options&FDJT_COMPLETE_MATCHCASE)?(string):(string.toLowerCase()));
     var prefixtree=container.prefixtree;
     var cmap=container.completionmap;
+    var start=new Date(); var timer=new Date();
     var strings=fdjtPrefixFind(prefixtree,qstring,0);
+    if (fdjt_detail_completion)
+      fdjtLog("[%f][%fs] Found %d strings from %s",
+	      fdjtElapsedTime(),fdjtDeltaTime(timer),strings.length,qstring);
     if ((!(strings))||(strings.length===0)) {
       var results=[];
       results.exact=[];
@@ -258,12 +282,18 @@ function fdjtComplete(input_elt,string,options)
 	  if (heads.indexOf(parent)<0) {
 	    heads.push(parent); variations.push(completion);}}
 	else heads.push(completion);}}
-    var displayed=container.displayed||[];
+    if (fdjt_detail_completion)
+      fdjtLog("[%f][%fs] Found %d completions including %d variations",
+	      fdjtElapsedTime(),fdjtDeltaTime(timer),heads.length,variations.length);
+    var displayed=container.displayed||[]; var hidden=0; var revealed=0;
     i=0; while (i<displayed.length) {
       var node=displayed[i++];
       if (!((heads.indexOf(node)>=0)||(variations.indexOf(node)>=0))) {
 	// Reset the class name to kludge redisplay
-	node.removeAttribute("displayed"); node.className=node.className;}}
+	node.removeAttribute("displayed"); hidden++;}}
+    if (fdjt_detail_completion)
+      fdjtLog("[%f][%fs] Hid %d of %d displayed items",
+	      fdjtElapsedTime(),fdjtDeltaTime(timer),hidden,displayed.length);
     i=0; while (i<variations.length) {
       var node=variations[i++]; 
       node.setAttribute('displayed','yes');}
@@ -272,9 +302,16 @@ function fdjtComplete(input_elt,string,options)
       var head=heads[i++];
       head.setAttribute('displayed','yes');
       results.push(head.value);}
+    if (fdjt_detail_completion)
+      fdjtLog("[%f][%fs] Revealed %d heads and %d variations",
+	      fdjtElapsedTime(),fdjtDeltaTime(timer),heads.length,variations.length);
     container.displayed=heads.concat(variations);
     if (fdjt_trace_completion)
-      fdjtTrace("Complete in %o on %o yields %o",input_elt,string,results);
+      if (results.length>10)
+	fdjtTrace("[%f][%fs] Completing over %o on %o yields %d results",
+		  fdjtElapsedTime(),fdjtDiffTime(start),input_elt,string,results.length);
+      else fdjtTrace("[%f][%fs] Completing over %o on %o yields %o",
+		     fdjtElapsedTime(),fdjtDiffTime(start),input_elt,string,results);
     input_elt.completeString=string;
     container.curstring=string;
     container.results=heads;
@@ -420,9 +457,11 @@ function fdjtSetCompletions(id,completions)
 {
   var current=document.getElementById(id);
   if (fdjt_trace_completion)
-    fdjtLog("Setting current completions #%s=%o to %o/%d",
-	    id,current,completions,
-	    $$(".completion",completions).length);
+    if (current===completions)
+      fdjtLog("[%f] Completions for #%s are unchanged",fdjtElapsedTime(),id);
+    else fdjtLog("[%f] Setting current completions #%s=%o to %o/%d",
+		 fdjtElapsedTime(),id,current,completions,
+		 $$(".completion",completions).length);
   if (!(current)) {
     fdjtWarn("Can't find current completions #%s",id);
     return;}

@@ -739,13 +739,13 @@ function fdjtScrollRestore(ss)
     fdjtDropClass(_fdjt_preview_elt,"previewing");
     _fdjt_preview_elt=false;}
   if ((ss) && (typeof ss.scrollX === "number")) {
-    // fdjtTrace("Restoring scroll to %d,%d",ss.scrollX,ss.scrollY);    
+    // fdjtLog("Restoring scroll to %d,%d",ss.scrollX,ss.scrollY);    
     window.scrollTo(ss.scrollX,ss.scrollY);
     return true;}
   else if ((_fdjt_saved_scroll) &&
 	   ((typeof _fdjt_saved_scroll.scrollY === "number") ||
 	    (typeof _fdjt_saved_scroll.scrollX === "number"))) {
-    // fdjtTrace("Restoring scroll to %o",_fdjt_saved_scroll);
+    // fdjtLog("Restoring scroll to %o",_fdjt_saved_scroll);
     window.scrollTo(_fdjt_saved_scroll.scrollX,_fdjt_saved_scroll.scrollY);
     _fdjt_saved_scroll=false;
     return true;}
@@ -827,7 +827,7 @@ function fdjtRadioSelect(elt,under,radioname,selname,toggle)
     under=fdjtGetParentByAttrib(elt,"RADIO",radioname);
     if (!(under)) under=document.body;}
   else {}
-  // fdjtTrace("RadioSelect of %o with %o/%o under %o",elt,radioname,selname,under);
+  // fdjtLog("RadioSelect of %o with %o/%o under %o",elt,radioname,selname,under);
   var target=fdjtGetParentByClassName(elt,radioname);
   if (!(selname)) selname="radioselected";
   if ((toggle) && (fdjtHasClass(elt,selname)))
@@ -863,7 +863,7 @@ function fdjtDelayHandler(delay,handler,arg,context,delayname)
 	fdjtLog("(%s:%dms) Alreadying delaying #%o from %o:%o %o of %o with %o",
 		now.toLocaleTimeString(),now.getTime(),
 		info.timeout,info.start.toLocaleTimeString(),info.start.getTime(),
-		info.handler,info.arg,info,info.start,
+		(info.handler.name||info.handler),info.arg,info,info.start,
 		delayname,context);}
       return;}
     if (fdjt_trace_delays)
@@ -876,19 +876,19 @@ function fdjtDelayHandler(delay,handler,arg,context,delayname)
   info.timeout=setTimeout(function() {
       if (fdjt_trace_delays) {
 	var now=new Date();
-	fdjtTrace("(%s:%dms) Gratifying delay #%o after %oms %o of %o info=%o %o(%o)",
-		  now.toLocaleTimeString(),now.getTime(),
-		  info.timeout,now.getTime()-info.start.getTime(),
-		  context,delayname,
-		  info,info.handler,info.arg);}
+	fdjtLog("(%s:%d(e)) Gratifying delay #%o after %oms %o of %o info=%o %o(%o)",
+		now.toLocaleTimeString(),fdjtElapsedTime(now),
+		info.timeout,now.getTime()-info.start.getTime(),
+		context,delayname,
+		info,(info.handler.name||info.handler),info.arg);}
       context[delayname]=false;
       handler(arg);},
     delay);
   if (fdjt_trace_delays)
-    fdjtTrace("(%s:%dms) Set delay [#%o:%oms] %o on %o; info=%o %o(%o)",
-	      info.start.toLocaleTimeString(),info.start.getTime(),
-	      info.timeout,delay,delayname,context,
-	      info,info.handler,info.arg);
+    fdjtLog("(%s:%dms) Set delay [#%o:%oms] %o on %o; info=%o %o(%o)",
+	    info.start.toLocaleTimeString(),info.start.getTime(),
+	    info.timeout,delay,delayname,context,
+	    info,info.handler,info.arg);
 }
 
 /* Gradual transformation */
