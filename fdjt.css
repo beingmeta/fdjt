@@ -198,6 +198,28 @@ span.completions.open { display: inline;}
 .completions .completion[displayed] li.variation[displayed] { display: list-item; }
 .completions .completion[displayed] div.variation[displayed] { display: block; }
 
+.completions.checkspans span.completion.checkspan[ischecked] { 
+  display: inline; }
+.completions.checkspans li.completion.checkspan[ischecked] { 
+  display: list-item; }
+.completions.checkspans div.completion.checkspan[ischecked] { 
+  display: block; }
+.completions.checkspans p.completion.checkspan[ischecked] { 
+  display: block; }
+
+.completions.checkspans .
+  completion.checkspan[ischecked]
+     span.variation[displayed] { display: inline; }
+.completions.checkspans .
+  completion.checkspan[ischecked]
+     li.variation[displayed] { display: list-item; }
+.completions.checkspans .
+  completion.checkspan[ischecked]
+     div.variation[displayed] { display: block; }
+.completions.checkspans .
+  completion.checkspan[ischecked]
+     div.variation[displayed] { display: block; }
+
 /* Rich tips 
    Richtips are overlayed tooltips for metakeys, displayed
    in translucent rectangles.

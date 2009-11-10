@@ -56,6 +56,8 @@ function _fdjt_get_complete_opts(arg)
     return opt;}
   else if (arg.completeopts)
     return arg.completeopts;
+  else if (arg.input_elt)
+    return _fdjt_get_complete_opts(arg.input_elt);
   else if (arg.getAttribute) {
     var opts=_fdjt_get_complete_opts(arg.getAttribute("completeopts"));
     arg.completeopts=opts;
@@ -146,9 +148,10 @@ function fdjtAddCompletion(div,completion,opts,init)
 {
   if (!(div.nodeType)) throw {name: 'NotANode', irritant: div};
   if (!(completion.nodeType)) throw {name: 'NotANode', irritant: completion};
+  if (!(opts)) opts=_fdjt_get_complete_opts(div);
   if (!(div.allcompletions)) fdjtInitCompletions(div,false,opts);
   // fdjtTrace("add completion %o to %o",completion,div);
-  if ((init)||(!(div.allcompletions.indexOf(completion)))) {
+  if ((init)||(div.allcompletions.indexOf(completion)<0)) {
     var prefixtree=div.prefixtree;
     var cmap=div.completionmap;
     var stdkey=fdjtStdSpace(completion.key);
@@ -159,7 +162,8 @@ function fdjtAddCompletion(div,completion,opts,init)
     if (!(cmap)) cmap=div.completionmap={};
     if (!(fdjtHasParent(completion,div)))
       fdjtAppend(div,completion," ");
-    fdjtAddKeys(completion,prefixtree,cmap,stdkey,(opts&FDJT_COMPLETE_ANYWHERE));
+    fdjtAddKeys(completion,prefixtree,cmap,stdkey,
+		(opts&FDJT_COMPLETE_ANYWHERE));
     if (div.allcompletions)
       div.allcompletions.push(completion);
     else div.allcompletions=new Array(completion);
@@ -174,7 +178,8 @@ function fdjtAddCompletion(div,completion,opts,init)
       var stdkey=fdjtStdSpace(variation.key);
       variation.value=value;
       if (!(opts&FDJT_COMPLETE_MATCHCASE)) stdkey=stdkey.toLowerCase();
-      fdjtAddKeys(variation,prefixtree,cmap,stdkey,(opts&FDJT_COMPLETE_ANYWHERE));}}
+      fdjtAddKeys(variation,prefixtree,cmap,stdkey,
+		  (opts&FDJT_COMPLETE_ANYWHERE));}}
 }
 
 function fdjtAddKeys(value,ptree,cmap,keystring,anywhere)
@@ -471,6 +476,35 @@ function fdjtSetCompletions(id,completions)
   if (current!=completions) current.input_elt=false;
   fdjtReplace(current,completions);
   completions.id=id;
+}
+
+/* Setting cues */
+
+function fdjtSetCompletionCues(div,cues,onmissing)
+{
+  fdjtTrace("Setting completion cues on %o to %o",div,cues);
+  var cur=div._cues||[];
+  var cmap=div.completionmap;
+  var newcues=[];
+  var i=0; while (i<cues.length) {
+    var cue=cues[i++];
+    if (typeof cue === 'string')
+      if (cmap[cue]) newcues.push(cmap[cue]);
+      else if (onmissing) {
+	var new_elt=onmissing(div,cue);
+	if (new_elt) newcues.push(new_elt);}
+      else {}
+    else if (fdjtHasClass(cue,"completion"))
+      newcues.push(cue);
+    else {}}
+  var i=0; while (i<newcues.length) {
+    var cue=newcues[i++];
+    if (cur.indexOf(cue)<0) {
+      fdjtAddClass(cue,"cue");}}
+  var i=0; while (i<cur.length) {
+    var elt=cur[i++];
+    if (newcues.indexOf(elt)<0) fdjtDropClass(cue,"cue");}
+  div._cues=newcues;
 }
 
 /* Emacs local variables

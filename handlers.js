@@ -305,6 +305,20 @@ function _fdjt_close_window(event)
 
 /* checkspan handling */
 
+function fdjtCheckspan(varname,value,checked)
+{
+  var checkbox=fdjtInput("CHECKBOX",varname,value);
+  var checkspan=fdjtSpan("checkspan",checkbox);
+  if (checked) {
+    checkspan.setAttribute('ischecked','true');
+    checkbox.checked=true;}
+  else {
+    checkbox.checked=false;}
+  if (arguments.length>3)
+    fdjtAddElements(checkspan,arguments,3);
+  else fdjtAppend(checkspan,value);
+  return checkspan;
+}
 
 function fdjtCheckSpan_update(checkspan,checked)
 {
