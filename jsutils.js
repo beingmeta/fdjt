@@ -501,11 +501,12 @@ function fdjtHasSuffix(string,suffix)
   return ((string.lastIndexOf(suffix))===(string.length-suffix.length));
 }
 
-function fdjtCommonPrefix(string1,string2,brk)
+function fdjtCommonPrefix(string1,string2,brk,foldcase)
 {
   var i=0; var last=0;
   while ((i<string1.length) && (i<string2.length))
-    if (string1[i]===string2[i])
+    if ((string1[i]===string2[i])||
+	((foldcase)&&(string1[i].toLowerCase()===string2[i].toLowerCase())))
       if (brk)
 	if (brk===string1[i]) {last=i-1; i++;}
 	else i++;
@@ -515,11 +516,12 @@ function fdjtCommonPrefix(string1,string2,brk)
   else return false;
 }
 
-function fdjtCommonSuffix(string1,string2,brk)
+function fdjtCommonSuffix(string1,string2,brk,foldcase)
 {
   var i=string1.length, j=string2.length; var last=0;
   while ((i>=0) && (j>=0))
-    if (string1[i]===string2[j])
+    if ((string1[i]===string2[j])||
+	((foldcase)&&(string1[i].toLowerCase()===string2[i].toLowerCase())))
       if (brk)
 	if (brk===string1[i]) {last=i+1; i--; j--;}
 	else {i--; j--;}
@@ -533,10 +535,14 @@ function fdjtCommonSuffix(string1,string2,brk)
 
 function fdjtPrefixAdd(ptree,string,i)
 {
+  var strings=ptree.strings;
   if (i===string.length) 
-    if (ptree.strings.indexOf(string)>=0) return false;
+    if ((strings.indexOf) ?
+	(strings.indexOf(string)>=0) :
+	(fdjtIndexOf(strings,string)>=0))
+      return false;
     else {
-      ptree.strings.push(string);
+      strings.push(string);
       return true;}
   else if (ptree.splits) {
     var splitchar=string[i];
@@ -550,14 +556,16 @@ function fdjtPrefixAdd(ptree,string,i)
       ptree[splitchar]=split;
       ptree.splits.push(split);}
     if (fdjtPrefixAdd(split,string,i+1)) {
-      ptree.strings.push(string);
+      strings.push(string);
       return true;}
     else return false;}
   else if (ptree.strings.length<5)
-    if (ptree.strings.indexOf(string)>=0)
+    if ((strings.indexOf) ?
+	(strings.indexOf(string)>=0) :
+	(fdjtIndexOf(strings,string)>=0))
       return false;
     else {
-      ptree.strings.push(string);
+      strings.push(string);
       return true;}
   else {
     // Subdivide
