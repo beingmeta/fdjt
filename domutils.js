@@ -1171,7 +1171,11 @@ function fdjtAnchorW(url,attribs)
 function fdjtInput(type,name,value,classname)
 {
   var elt=fdjtNewElement('INPUT',classname);
-  elt.type=type; elt.name=name; elt.value=value;
+  elt.type=type; elt.name=name;
+  if (typeof value === 'string') elt.value=value;
+  else if (value.toFormString)
+    elt.value=value.toFormString()||value.toString();
+  else elt.value=value.toString();
   return elt;
 }
 
