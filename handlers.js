@@ -408,22 +408,26 @@ function fdjtCheckSpan_setup(checkspan)
   if (!(checkspan)) {
     var elements=fdjtGetElementsByClassName('checkspan');
     var i=0; if (elements) while (i<elements.length) {
-      var checkspan=elements[i++];
-      fdjtCheckSpan_setup(checkspan);}}
+	var checkspan=elements[i++];
+	fdjtCheckSpan_setup(checkspan);}}
   else {
-    var children=checkspan.childNodes;
-    var j=0; while (j<children.length) {
-      var child=children[j++];
-      if ((child.nodeType===1) &&
-	  (child.tagName==='INPUT') &&
-	  ((child.type==='radio') ||
-	   (child.type==='checkbox'))) {
-	var checked=child.checked;
-	if (checked === null) {
-	  child.checked=false;
-	  checkspan.removeAttribute('ischecked');}
-	else if (checked) {
-	  checkspan.setAttribute('ischecked','yes');}}}}
+    var checkspans=((fdjtHasClass(checkspan,"checkspan"))?
+		    (new Array(checkspan)):
+		    (fdjtGetElementsByClassName('checkspan',checkspan)));
+    var i=0; while (i<checkspans.length) {
+      var checkspan=checkspans[i++];
+      var inputs=fdjtGetElementsByTagName("INPUT",checkspan);
+      var j=0; while (j<inputs.length) {
+	var input=inputs[j++];
+	if ((input.type==='radio')||(input.type==='checkbox')) {
+	  var checked=input.checked;
+	  if (checked === null) {
+	    child.checked=false;
+	    checkspan.removeAttribute('ischecked');}
+	  else if (checked) {
+	    checkspan.setAttribute('ischecked','yes');}
+	  else checkspan.removeAttribute('ischecked');
+	  break;}}}}
 }
 
 /* Cheshire handling */
