@@ -305,7 +305,7 @@ function _fdjt_close_window(event)
 
 /* checkspan handling */
 
-function fdjtCheckspan(varname,value,checked)
+function fdjtCheckSpan(varname,value,checked)
 {
   var checkbox=fdjtInput("CHECKBOX",varname,value);
   var checkspan=fdjtSpan("checkspan",checkbox);
