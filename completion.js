@@ -40,6 +40,7 @@ var FDJT_COMPLETE_MATCHCASE=8;
 var FDJT_COMPLETE_DISJOINS=16;
 
 var fdjt_complete_options=FDJT_COMPLETE_OPTIONS;
+var fdjt_maxcomplete_default=50;
 
 // This parses the options for completion
 function _fdjt_get_complete_opts(arg)
@@ -211,12 +212,13 @@ function fdjtInitCompletions(div,completions,opts)
   var start=new Date();
   var completions=(completions)||fdjtGetChildrenByClassName(div,"completion");
   if (fdjt_trace_completion_setup)
-    fdjtTrace("Initializing %d completions for %o",completions.length,div);
+    fdjtTrace("[%fs] Initializing %d completions for %o",
+	      fdjtElapsedTime(),completions.length,div);
   var i=0; while (i<completions.length)
 	     fdjtAddCompletion(div,completions[i++],opts,true);
   if (fdjt_trace_completion_setup)
-    fdjtTrace("[%fs] Initialized %d completions, %d strings, %d items for %o",
-	      fdjtDiffTime(start),
+    fdjtTrace("[%fs][%fs] Initialized %d completions, %d strings, %d items for %o",
+	      fdjtElapsedTime(),fdjtDiffTime(start),
 	      completions.length,div.prefixtree.strings.length,
 	      div.completionmap._count,
 	      div);
@@ -236,120 +238,153 @@ function fdjtAddCompletions(div,completions,opts)
 // This looks for completions matching *string* among the completions
 //  associated with input_elt.  Note that *string* might not be the value
 //  of input_elt, but might just be a component returned by fdjtCompletionText.
-function fdjtComplete(input_elt,string,options)
+function fdjtComplete(input_elt,string,options,maxcomplete)
 {
   if (!(string)) string=fdjtCompletionText(input_elt);
   if (!(options))
     options=input_elt.completeopts||_fdjt_get_complete_opts(input_elt);
+  if (typeof maxcomplete==='undefined')
+    maxcomplete=
+      input_elt.maxcomplete||(fdjtCacheAttrib(input_elt,"maxcomplete"))||
+      fdjt_maxcomplete_default;
   var container=_fdjt_get_completions(input_elt);
-  if (!(container.allcompletions)) fdjtInitCompletions(container,false,options);
+  var cmap=container.completionmap;
+  if (!(container.allcompletions))
+    fdjtInitCompletions(container,false,options);
   if (fdjt_trace_completion)
-    fdjtLog("[%f] Complete in %o on '%o' against %o",
-	    fdjtElapsedTime(),input_elt,string,container);
+    fdjtLog("[%f] Complete on '%o' in %o against %o, cs=%o",
+	    fdjtElapsedTime(),string,input_elt,container,
+	    container._curstring);
+  var start=new Date();
+  var timer=new Date();
+  var heads=[]; var variations=[]; var strings=[]; var values=[];
   if ((!string) || (fdjtIsEmptyString(string))) {
     var empty=[];
     fdjtAddClass(container,"noinput");
     empty.exact=[];
-    var displayed=container.displayed;
+    empty.values=[];
+    empty.strings=[];
+    var displayed=container._displayed;
     if (displayed) {
       var i=0; while (i<displayed.length) {
 	var node=displayed[i++];
-	node.removeAttribute('displayed');
-	node.className=node.className;}}
+	node.removeAttribute('displayed');}}
     if ((fdjt_trace_completion)&&(displayed))
       fdjtLog("[%f] Hiding %d displayed items in %o",
 	      fdjtElapsedTime(),displayed.length,container);
-    container.displayed=[];
+    container._displayed=[];
     return empty;}
-  else if ((container.curstring) && (string===container.curstring)) {
+  else if ((container._curstring) && (string===container._curstring)) {
+    fdjtDropClass(container,"noinput");
     if (fdjt_trace_completion)
-      fdjtLog("[%f] Using %d cached result for %s against %o",
-	      fdjtElapsedTime(),container.results.length,string,container);
-    return container.results;}
+      fdjtLog("[%f] Using %d cached results for %s against %o",
+	      fdjtElapsedTime(),container._results.length,string,container);
+    heads=container._results;
+    variations=heads.variations;
+    strings=heads.strings;
+    values=heads.values;}
   else {
     var qstring=((options&FDJT_COMPLETE_MATCHCASE)?(string):
 		 (string.toLowerCase()));
     var prefixtree=container.prefixtree;
-    var cmap=container.completionmap;
-    var start=new Date(); var timer=new Date();
-    var strings=fdjtPrefixFind(prefixtree,qstring,0);
+    strings=fdjtPrefixFind(prefixtree,qstring,0);
     if (fdjt_detail_completion)
-      fdjtLog("[%f][%fs] Found %d strings from %s",
-	      fdjtElapsedTime(),fdjtDeltaTime(timer),strings.length,qstring);
-    if ((!(strings))||(strings.length===0)) {
-      var results=[];
-      results.exact=[];
-      results.strings=[];
-      container.results=results;
-      container.curstring=string;
-      return results;}
-    var heads=[]; var variations=[];
-    var i=0; while (i<strings.length) {
-      var string=strings[i++];
-      var completions=cmap[string];
-      var j=0; while (j<completions.length) {
-	var completion=completions[j++];
-	if (fdjtHasClass(completion,"variation")) {
-	  var parent=fdjtGetParentByClassName(completion,"completion");
-	  if (!(parent))
-	    fdjtWarn("Couldn't find completion parent of %o",completion);
-	  if (heads.indexOf(parent)<0) {
-	    heads.push(parent); variations.push(completion);}}
-	else heads.push(completion);}}
-    if (fdjt_trace_completion)
-      fdjtLog("[%f][%fs] Found %d completions based on %d strings including %d variations",
+      fdjtLog("[%f][%fs] Found %d strings from %s/%s",
 	      fdjtElapsedTime(),fdjtDeltaTime(timer),
-	      heads.length,strings.length,variations.length);
-    var displayed=container.displayed||[]; var hidden=0; var revealed=0;
-    i=0; while (i<displayed.length) {
-      var node=displayed[i++];
-      if (!((heads.indexOf(node)>=0)||(variations.indexOf(node)>=0))) {
-	// Reset the class name to kludge redisplay
-	node.removeAttribute("displayed"); hidden++;}}
-    if (fdjt_detail_completion)
-      fdjtLog("[%f][%fs] Hid %d of %d displayed items",
-	      fdjtElapsedTime(),fdjtDeltaTime(timer),hidden,displayed.length);
+	      strings.length,qstring,string);
+    if ((!(strings))||(strings.length===0)) {
+      heads.variations=variations;
+      heads.exact=[];
+      heads.strings=strings;
+      heads.values=values;
+      container._results=heads;
+      container._curstring=string;}
+    else {
+      var i=0; while (i<strings.length) {
+	var completions=cmap[strings[i++]];
+	var j=0; while (j<completions.length) {
+	  var completion=completions[j++];
+	  var head=(completion.completehead)||(fdjtGetCompleteHead(completion));
+	  if (head===true) {
+	    if (heads.indexOf(head)<0) heads.push(completion);}
+	  else if (heads.indexOf(head)<0) {
+	    variations.push(completion);
+	    heads.push(head);}}}
+      // Accumulate values
+      i=0; while (i<heads.length) values.push(heads[i++].value);
+      /* Convert non-canonicalized strings */
+      if (container.stringmap) {
+	var smap=container.stringmap;
+	var norms=[];
+	var j=0; while (j<strings.length) {
+	  norms[j]=smap[strings[j]]||strings[j];
+	  j++;}
+	heads.strings=norms;}
+      else heads.strings=strings;
+      if (fdjt_trace_completion)
+	fdjtLog("[%f][%fs] Got %d(%d) matches from %d strings matching %s/%s",
+		fdjtElapsedTime(),fdjtDeltaTime(timer),
+		heads.length,variations.length,
+		strings.length,string,qstring);}}
+  var displayed=container._displayed||[]; var hidden=0; var revealed=0;
+  var overload=((maxcomplete)&&(heads.length>maxcomplete));
+  i=0; while (i<displayed.length) {
+    var node=displayed[i++];
+    if ((overload)||((heads.indexOf(node)<0)&&(variations.indexOf(node)<0))) {
+      node.removeAttribute("displayed"); hidden++;}}
+  if (fdjt_detail_completion)
+    fdjtLog("[%f][%fs] Hid %d of %d displayed items",
+	    fdjtElapsedTime(),fdjtDeltaTime(timer),hidden,displayed.length);
+  fdjtDropClass(container,"noinput");
+  if (overload) {
+    container._displayed=[];
+    fdjtAddClass(container,"maxcomplete");}
+  else {
+    fdjtDropClass(container,"maxcomplete");
+    i=0; while (i<heads.length) {
+      var head=heads[i++]; 
+      head.setAttribute('displayed','yes');}
     i=0; while (i<variations.length) {
       var node=variations[i++]; 
       node.setAttribute('displayed','yes');}
-    var results=[];
-    i=0; while (i<heads.length) {
-      var head=heads[i++];
-      head.setAttribute('displayed','yes');
-      results.push(head.value);}
     if (fdjt_detail_completion)
       fdjtLog("[%f][%fs] Revealed %d heads and %d variations",
 	      fdjtElapsedTime(),fdjtDeltaTime(timer),
 	      heads.length,variations.length);
-    container.displayed=heads.concat(variations);
-    if (fdjt_trace_completion)
-      if (results.length>10)
-	fdjtTrace("[%f][%fs] Completing over %o on %o yields %d results",
-		  fdjtElapsedTime(),fdjtDiffTime(start),input_elt,
-		  string,results.length);
-      else fdjtTrace("[%f][%fs] Completing over %o on %o yields %o",
-		     fdjtElapsedTime(),fdjtDiffTime(start),input_elt,
-		     string,results);
-    input_elt.completeString=string;
-    container.curstring=string;
-    container.results=heads;
-    /* Convert the completed string values into their non lower case versions */
-    if (container.stringmap) {
-      var smap=container.stringmap;
-      var norms=[];
-      var j=0; while (j<strings.length) {
-	norms[j]=smap[strings[j]]||strings[j];
-	j++;}
-      heads.strings=norms;}
-    else heads.strings=strings;
-    fdjtDropClass(container,"noinput");
-    fdjtRedisplay(container);
-    heads.exact=cmap[qstring]||[];
-    heads.variations=variations;
-    if (heads.length===0) fdjtAddClass(container,"noresults");
-    return heads;}
+    container._displayed=heads.concat(variations);}
+  if (fdjt_trace_completion)
+    if (heads.length>10)
+      fdjtTrace("[%f][%fs] Completing on %o over %o yields %d results",
+		fdjtElapsedTime(),fdjtDiffTime(start),
+		string,input_elt,heads.length);
+    else fdjtTrace("[%f][%fs] Completing over %o on %o yields %d results: %o",
+		   fdjtElapsedTime(),fdjtDiffTime(start),input_elt,
+		   string,heads.length,heads.values);
+  input_elt.completeString=string;
+  heads.heads=heads; heads.variations=variations;
+  container._curstring=string;
+  container._results=heads;
+  fdjtRedisplay(container);
+  heads.exact=cmap[qstring]||[];
+  heads.variations=variations;
+  if (heads.length===0) fdjtAddClass(container,"noresults");
+  return heads;
 }
   
+function fdjtGetCompleteHead(completion)
+{
+  var head=completion.completehead;
+  if (head) return head;
+  if (fdjtHasClass(completion,"variation")) {
+    head=fdjtGetParentByClassName(completion,"completion");
+    if (!(head)) {
+      fdjtWarn("Couldn't find completion parent of %o",completion);
+      completion.completehead=head=true;}
+    else completion.completehead=head;}
+  else completion.completehead=head=true;
+  return head;
+}
+
 // This 'forces' a completion presumably when the user indicates a decisive
 // action (like a return) as opposed to milder requests.
 function fdjtForceComplete(input_elt)
@@ -476,8 +511,9 @@ function fdjtComplete_onkey(evt)
     else {}}
   else {
     if (fdjt_trace_completion)
-      fdjtTrace("Delaying handler fdjtComplete on %o",target);
-    fdjtDelayHandler(500,fdjtComplete,target,target,"completedelay");}
+      fdjtTrace("[%fs] Delaying handler fdjtComplete on %o",
+		fdjtElapsedTime(),target);
+    fdjtDelayHandler(200,fdjtComplete,target,target,"completedelay");}
   return true;
 }
 

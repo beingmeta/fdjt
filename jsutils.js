@@ -51,6 +51,7 @@ function fdjtBreak(string)
   if ((window.console) && (window.console.log) &&
       (window.console.count))
     window.console.log.apply(window.console,arguments);
+  return false;
 }
 
 // This goes to an alert if it can't get to the console

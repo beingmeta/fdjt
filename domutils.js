@@ -1237,6 +1237,7 @@ function fdjtIsVisible(elt,partial)
   var winyedge=winy+window.innerHeight;
   
   while(elt.offsetParent) {
+    if (elt===window) break;
     elt = elt.offsetParent;
     top += elt.offsetTop;
     left += elt.offsetLeft;}

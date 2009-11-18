@@ -185,6 +185,14 @@ span.completions.open { display: inline;}
 .completions.showempty.noinput div.completion { display: block; }
 
 .completions .noinputmsg { display: none;}
+
+.completions.maxcomplete .completion[displayed] { display: none;}
+/*
+.completions.maxcomplete span.completion[displayed] { display: none;}
+.completions.maxcomplete li.completion[displayed] { display: none;}
+.completions.maxcomplete div.completion[displayed] { display: none;}
+*/
+
 .completions.noinput span.noinputmsg { display: inline;}
 .completions.noinput li.noinputmsg { display: list-item;}
 .completions.noinput div.noinputmsg { display: block;}
@@ -194,9 +202,23 @@ span.completions.open { display: inline;}
 .completions li.completion[displayed] { display: list-item;}
 .completions div.completion[displayed] { display: block;}
 
-.completions .completion[displayed] span.variation[displayed] { display: inline; }
-.completions .completion[displayed] li.variation[displayed] { display: list-item; }
-.completions .completion[displayed] div.variation[displayed] { display: block; }
+.completions .completion[displayed] span.variation[displayed] { 
+   display: inline; }
+.completions .completion[displayed] li.variation[displayed] { 
+   display: list-item; }
+.completions .completion[displayed] div.variation[displayed] { 
+   display: block; }
+
+.completions.maxcomplete .completion[displayed] .variation[displayed] { 
+   display: none; }
+/*
+.completions.maxcomplete .completion[displayed] li.variation[displayed] { 
+   display: none; }
+.completions.maxcomplete .completion[displayed] li.variation[displayed] { 
+   display: none; }
+.completions.maxcomplete .completion[displayed] div.variation[displayed] { 
+   display: none; }
+*/
 
 .completions.checkspans span.completion.checkspan[ischecked] { 
   display: inline; }
