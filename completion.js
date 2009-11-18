@@ -327,6 +327,7 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
 		heads.length,variations.length,
 		strings.length,string,qstring);}}
   var displayed=container._displayed||[]; var hidden=0; var revealed=0;
+  var counts=fdjtGetCompletionCounts(container);
   var overload=((maxcomplete)&&(heads.length>maxcomplete));
   i=0; while (i<displayed.length) {
     var node=displayed[i++];
@@ -335,6 +336,8 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
   if (fdjt_detail_completion)
     fdjtLog("[%f][%fs] Hid %d of %d displayed items",
 	    fdjtElapsedTime(),fdjtDeltaTime(timer),hidden,displayed.length);
+  i=0; while (i<counts.length) {
+    counts[i++].innerHTML=""+heads.length;}
   fdjtDropClass(container,"noinput");
   if (overload) {
     container._displayed=[];
@@ -383,6 +386,16 @@ function fdjtGetCompleteHead(completion)
     else completion.completehead=head;}
   else completion.completehead=head=true;
   return head;
+}
+
+function fdjtGetCompletionCounts(container)
+{
+  if (container._completioncounts)
+    return container._completioncounts;
+  else {
+    var children=fdjtGetChildrenByClassName(container,"completioncount");
+    container._completioncounts=children;
+    return children;}
 }
 
 // This 'forces' a completion presumably when the user indicates a decisive
@@ -467,6 +480,16 @@ function fdjtComplete_show(evt)
     fdjt_completion_timer=
       setTimeout(function () {
 	  fdjtComplete(target,value,options);},100);
+}
+
+function fdjtComplete_toggleshowall(evt)
+{
+  var target=$T(evt);
+  var container=$P(".completions",target);
+  if (fdjtHasClass(container,"maxcomplete"))
+    fdjtSwapClass(container,"maxcomplete","showmaxcomplete");
+  else if (fdjtHasClass(container,"showmaxcomplete"))
+    fdjtSwapClass(container,"showmaxcomplete","maxcomplete");
 }
 
 function fdjtComplete_onfocus(evt)
