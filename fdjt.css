@@ -17,6 +17,8 @@
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
+@charset "UTF-8";
+
 /* New simplified display classes */
 
 .checkspan { white-space: nowrap; cursor: pointer;}
