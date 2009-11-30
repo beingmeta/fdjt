@@ -23,10 +23,10 @@ var fdjt_domutils_version=parseInt("$Revision$".slice(10,-1));
 
 */
 
-var _fdjt_debug_dom=false;
-var _fdjt_debug_domedits=false;
-var _fdjt_debug_domsearches=false;
-var _fdjt_debug_classedits=false;
+var _fdjt_trace_dom=false;
+var _fdjt_trace_domedits=false;
+var _fdjt_trace_domsearches=false;
+var _fdjt_trace_classedits=false;
 
 /* Getting elements by ID */
 
@@ -385,7 +385,7 @@ function fdjtAddClass(elt,classname,attrib)
       (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
     var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
-    if (_fdjt_debug_classedits)
+    if (_fdjt_trace_classedits)
       fdjtLog("Adding %s '%s' to (%s) on %o",
 	      (attrib||"class"),classname,classinfo,elt);
     if ((classinfo===null) || (classinfo==""))
@@ -430,7 +430,7 @@ function fdjtDropClass(elt,classname,attrib,keep)
       (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
     var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
-    if (_fdjt_debug_classedits)
+    if (_fdjt_trace_classedits)
       fdjtLog("Dropping %s '%s' from (%s) on %o",
 	      (attrib||"class"),classname,classinfo,elt);
     if ((classinfo===null) || (classinfo==="")) return false;
@@ -481,7 +481,7 @@ function fdjtToggleClass(elt,classname,attrib,keep)
       (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
     var class_regex=_fdjtclasspat(classname);
     var newinfo=classinfo;
-    if (_fdjt_debug_classedits)
+    if (_fdjt_trace_classedits)
       fdjtLog("Toggling %s '%s' from (%s) on %o",
 	      (attrib||"class"),classname,classinfo,elt);
     if ((classinfo===null) || (classinfo===""))
@@ -529,7 +529,7 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
       newinfo=
 	classinfo.replace(class_regex,newclass).
 	replace(_fdjt_whitespace_pat," ");
-    else if (_fdjt_debug_dom) {
+    else if (_fdjt_trace_dom) {
 	fdjtLog
 	  ("Couldn't swap %s '%s' to replace non-existing '%s', just adding to %o",
 	   (attrib||"class"),newclass,classname,elt);
@@ -935,7 +935,7 @@ function fdjtAddAttributes(elt,attribs)
 function fdjtInsertElementsBefore(elt,before,elts,i)
 {
   if (elt===null) return null;
-  if ((_fdjt_debug_dom) || (_fdjt_debug_domedits))
+  if ((_fdjt_trace_dom) || (_fdjt_trace_domedits))
     fdjtLog("Inserting "+elts+" elements "
 	   +"into "+elt
 	   +" before "+before
