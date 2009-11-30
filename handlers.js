@@ -70,22 +70,22 @@ function fdjtShowHide_onclick(evt)
   fdjtCheshire_stop(evt);
   // fdjtLog('target='+target);
   while (target.parentNode) {
-    var tohide=fdjtCacheAttrib(target,"clicktohide",fdjtGetIds);
-    var toshow=fdjtCacheAttrib(target,"clicktoshow",fdjtGetIds);
-    var totoggle=fdjtCacheAttrib(target,"clicktotoggle",fdjtGetIds);
+    var tohide=fdjtCacheAttrib(target,"clicktohide",fdjtSemiSplit);
+    var toshow=fdjtCacheAttrib(target,"clicktoshow",fdjtSemiSplit);
+    var totoggle=fdjtCacheAttrib(target,"clicktotoggle",fdjtSemiSplit);
     if (tohide) {
       var i=0; while (i<tohide.length) {
-	var elt=tohide[i++]; 
+	var elt=document.getElementById(tohide[i++]); 
 	if (elt) elt.style.display='none';}}
     if (toshow) {
       var i=0; while (i<toshow.length) {
-	var elt=toshow[++i]; 
+	var elt=document.getElementById(toshow[++i]);
 	if (elt)
 	  if (fdjtIsBlockElt(elt)) elt.style.display='block';
 	  else elt.style.display='block';}}
     if (totoggle) {
       var i=0; while (i<totoggle.length) {
-	var elt=totoggle[i++];
+	var elt=document.getElementById(totoggle[i++]);
 	if (elt) {
 	  var display=elt.style.display;
 	  if ((display===null) || (display===''))
@@ -641,51 +641,57 @@ function fdjtMarkReduced(elt)
 
 /* Co-highlighting */
 
-var fdjt_cohi_classname="cohighlight";
+var fdjt_cohi_classname="cohi";
+var fdjt_trace_cohi=false;
+var _fdjt_cohi_name=false;
+
+function fdjtCoHi_highlight(namearg,classname_arg)
+{
+  var classname=((classname_arg) || (fdjt_cohi_classname));
+  var newname=((typeof namearg === 'string') ? (namearg) : (namearg.name));
+  if (_fdjt_cohi_name===newname) return;
+  if (fdjt_trace_cohi)
+    fdjtLog("[%fs] Changing '%s' highlight from %o to %o",
+	    fdjtElapsedTime(),classname,_fdjt_cohi_name,(newname||"false"));
+  if (_fdjt_cohi_name) {
+    var drop=document.getElementsByName(_fdjt_cohi_name);
+    var i=0, n=drop.length;
+    if (fdjt_trace_cohi)
+      fdjtLog("[%fs] Uncohighlighting %d elements named %s with '%s'",
+	      fdjtElapsedTime(),n,_fdjt_cohi_name,classname);
+    while (i<n) fdjtDropClass(drop[i++],classname);}
+  _fdjt_cohi_name=newname||false;
+  if (newname) {
+    var elts=document.getElementsByName(newname);
+    var n=elts.length, i=0;
+    if (fdjt_trace_cohi)
+      fdjtLog("[%fs] Cohlighting %d elements named %s with '%s'",
+	      fdjtElapsedTime(),n,newname,classname);
+    while (i<n) fdjtAddClass(elts[i++],classname);}
+}
+
 var fdjtCoHi_delay=100;
-var _fdjt_cohi_elt=false;
-var _fdjt_cohi_timer=false;
-
-function fdjtCoHi_highlight(target,classname_arg)
-{
-  var classname=((classname_arg) || (fdjt_cohi_classname));
-  if (_fdjt_cohi_elt) 
-    fdjtCoHi_unhighlight(_fdjt_cohi_elt,classname);
-  var cohi=((target.fdjt_cohi) || (target.getAttribute("cohi")) || (false));
-  _fdjt_cohi_elt=target;
-  fdjtAddClass(target,classname);
-  if (cohi) fdjtAddClass(cohi,classname);
-}
-
-function fdjtCoHi_unhighlight(elt_arg,classname_arg)
-{
-  var elt=((elt_arg) || (_fdjt_cohi_elt));
-  var classname=((classname_arg) || (fdjt_cohi_classname));
-  if (elt) {
-    var cohi=((elt.fdjt_cohi) || (elt.getAttribute("cohi")) || (null));
-    fdjtDropClass(elt,classname);
-    if (cohi) fdjtDropClass(cohi,classname);}
-}
+var _fdjt_cohi_timer={};
 
 function fdjtCoHi_onmouseover(evt,classname_arg)
 {
   var target=$T(evt);
   while (target)
-    if (target.fdjt_cohi) break;
-    else if (fdjtHasAttrib(target,"cohi")) break;  
+    if ((target.tagName==='INPUT') || (target.tagName==='TEXTAREA') ||
+	((target.tagName==='A') && (target.href)))
+      return;
+    else if (target.name) break;  
     else target=target.parentNode;
   if (!(target)) return;
-  fdjtDelayHandler
-    (fdjtCoHi_delay,fdjtCoHi_highlight,target,target,"cohi");
+  fdjtDelayHandler(fdjtCoHi_delay,fdjtCoHi_highlight,target.name,_fdjt_cohi_timer);
 }
 
 function fdjtCoHi_onmouseout(evt,classname_arg)
 {
   var target=$T(evt);
   while (target)
-    if (target===_fdjt_cohi_elt) {
-      fdjtDelayHandler
-	(fdjtCoHi_delay,fdjtCoHi_unhighlight,target,target,"cohi");
+    if ((target.name) && (target.name===_fdjt_cohi_name)) {
+      fdjtDelayHandler(fdjtCoHi_delay,fdjtCoHi_highlight,false,_fdjt_cohi_timer);
       break;}
     else target=target.parentNode;
 }

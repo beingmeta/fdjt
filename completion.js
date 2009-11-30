@@ -32,12 +32,14 @@ var FDJT_COMPLETE_OPTIONS=1;
 // Whether the completion element is a cloud (made of spans)
 var FDJT_COMPLETE_CLOUD=2;
 // Whether to require that completion match an initial segment
-var FDJT_COMPLETE_ANYWHERE=4;
+var FDJT_COMPLETE_ANYWORD=4;
 // Whether to match case in keys to completions
 var FDJT_COMPLETE_MATCHCASE=8;
+// Whether to an enter character always picks a completion
+var FDJT_COMPLETE_EAGER=16;
 // Whether the key fields may contain disjoins (e.g. (dog|friend))
 // to be accomodated in matching
-var FDJT_COMPLETE_DISJOINS=16;
+var FDJT_COMPLETE_DISJOINS=32;
 
 var fdjt_complete_options=FDJT_COMPLETE_OPTIONS;
 var fdjt_maxcomplete_default=50;
@@ -49,9 +51,11 @@ function _fdjt_get_complete_opts(arg)
   else if (typeof arg === "number") return arg;
   else if (typeof arg === "string") {
     var opt=
-      (((arg.search(/\banywhere\b/)<0)?(0):((FDJT_COMPLETE_ANYWHERE)))|
+      (((arg.search(/\banywhere\b/)<0)?(0):((FDJT_COMPLETE_ANYWORD)))|
        ((arg.search(/\bmatchcase\b/)<0)?(0):((FDJT_COMPLETE_MATCHCASE)))|
        ((arg.search(/\bcloud\b/)<0)?(0):((FDJT_COMPLETE_CLOUD)))|
+       ((arg.search(/\beager\b/)<0)?(0):((FDJT_COMPLETE_EAGER)))|
+       ((arg.search(/\bdisjoins\b/)<0)?(0):((FDJT_COMPLETE_DISJOINS)))|
        FDJT_COMPLETE_OPTIONS);
     // fdjtTrace("Getting complete options from %o=%o",arg,opt);
     return opt;}
@@ -71,36 +75,33 @@ function _fdjt_get_complete_opts(arg)
 // This gets the completions element for an input element
 // A completion element is a "cloud" if new completions are typically
 // spans rather than divs.
-function _fdjt_get_completions(input_elt,create)
+function fdjt_get_completions(input_elt,create)
 {
-  if (input_elt.completions_elt)
-    // For fast access, cache it or put it here
-    return input_elt.completions_elt;
-  else if (input_elt.getAttribute("COMPLETIONS")) {
-    // This is the case where the COMPLETIONS element is
-    // the ID of another element
-    var elt=$(input_elt.getAttribute("COMPLETIONS"));
-    if (!(elt))
-      if (create)
-	elt=fdjtCompletions
-	  (input_elt.getAttribute("COMPLETIONS"),[],
-	   _fdjt_get_complete_opts(input_elt));
-      else return false;
-    input_elt.completions_elt=elt;
-    elt.input_elt=input_elt;
-    return elt;}
-  else {
+  var completions_name=input_elt.getAttribute("COMPLETIONS");
+  if (!(completions_name)) {
     var id=input_elt.name+"_COMPLETIONS";
     var elt=$(id);
-    input_elt.setAttribute("COMPLETIONS",id);
-    // Creates an empty completions element
-    if (!(elt))
-      if (create)
-	elt=fdjtCompletions(id,[],_fdjt_get_complete_opts(input_elt));
-      else return false;
-    elt.input_elt=input_elt;
-    input_elt.completions_elt=elt;
-   return elt;}
+    input_elt.setAttribute("COMPLETIONS",id);}
+  // This is the case where the COMPLETIONS element is
+  // the ID of another element
+  var elt=$(input_elt.getAttribute("COMPLETIONS"));
+  if (!(elt))
+    if (create)
+      elt=fdjtCompletions
+	(input_elt.getAttribute("COMPLETIONS"),[],
+	 _fdjt_get_complete_opts(input_elt));
+    else return false;
+  if (!(elt.getAttribute('INPUTID'))) {
+    var input_id=fdjtForceId(input_elt);
+    elt.setAttribute('INPUTID',input_id);}
+  return elt;
+}
+
+function fdjt_get_completions_input(completions)
+{
+  if (completions.getAttribute('INPUTID'))
+    return document.getElementById(completions.getAttribute('INPUTID'));
+  else return false;
 }
 
 // Creates a completions DIV with a list of completions
@@ -168,7 +169,7 @@ function fdjtAddCompletion(div,completion,opts,init)
     if (!(fdjtHasParent(completion,div)))
       fdjtAppend(div,completion," ");
     fdjtAddKeys(completion,prefixtree,cmap,stdkey,
-		(opts&FDJT_COMPLETE_ANYWHERE));
+		(opts&FDJT_COMPLETE_ANYWORD));
     if (div.allcompletions)
       div.allcompletions.push(completion);
     else div.allcompletions=new Array(completion);
@@ -184,7 +185,7 @@ function fdjtAddCompletion(div,completion,opts,init)
       variation.value=value;
       if (!(opts&FDJT_COMPLETE_MATCHCASE)) stdkey=stdkey.toLowerCase();
       fdjtAddKeys(variation,prefixtree,cmap,stdkey,
-		  (opts&FDJT_COMPLETE_ANYWHERE));}}
+		  (opts&FDJT_COMPLETE_ANYWORD));}}
 }
 
 function fdjtAddKeys(value,ptree,cmap,keystring,anywhere)
@@ -247,7 +248,7 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
     maxcomplete=
       input_elt.maxcomplete||(fdjtCacheAttrib(input_elt,"maxcomplete"))||
       fdjt_maxcomplete_default;
-  var container=_fdjt_get_completions(input_elt);
+  var container=fdjt_get_completions(input_elt);
   var cmap=container.completionmap;
   if (!(container.allcompletions))
     fdjtInitCompletions(container,false,options);
@@ -455,10 +456,10 @@ function fdjtComplete_onclick(evt)
   if (!(target)) return;
   var completions=target;
   while (completions)
-    if (completions.input_elt) break;
+    if (completions.getAttribute("INPUTID")) break;
     else completions=completions.parentNode;
   if (!(completions)) return;
-  var input_elt=completions.input_elt;
+  var input_elt=fdjt_get_completions_input(completions);
   var value=((target.value) ||
 	     (target.getAttribute("value")) ||
 	     (target.key));
@@ -528,9 +529,10 @@ function fdjtComplete_onkey(evt)
     var results=fdjtComplete(target,false,options);
     // fdjtTrace("Escape complete on %o, results=%o",target,results);
     evt.preventDefault(); evt.cancelBubble=true;
-    if (results.length===1) {
+    if (results.length>0) {
+      var completions=fdjt_get_completions(target);
       fdjtHandleCompletion(target,results[0],results[0].value);
-      fdjtDropClass(target.completions_elt,"open");}
+      fdjtDropClass(completions,"open");}
     else {}}
   else {
     if (fdjt_trace_completion)
@@ -552,10 +554,6 @@ function fdjtSetCompletions(id,completions)
   if (!(current)) {
     fdjtWarn("Can't find current completions #%s",id);
     return;}
-  var text_input=current.input_elt;
-  text_input.completions_elt=completions;
-  completions.input_elt=text_input;
-  if (current!=completions) current.input_elt=false;
   fdjtReplace(current,completions);
   completions.id=id;
 }
