@@ -402,6 +402,11 @@ function fdjtAddClass(elt,classname,attrib)
     else elt.className=newinfo;
     return true;}
 }
+function fdjtClassAdder(elt,class)
+{
+  return function() {
+    if (elt) fdjtAddClass(elt,class);}
+}
 
 function fdjtDropClass(elt,classname,attrib,keep)
 {
@@ -447,6 +452,11 @@ function fdjtDropClass(elt,classname,attrib,keep)
 	elt.className=elt.className;}
       else {}
     else elt.className=newinfo;}
+}
+function fdjtClassDropper(elt,class)
+{
+  return function() {
+    if (elt) fdjtDropClass(elt,class);}
 }
 
 function fdjtToggleClass(elt,classname,attrib,keep)
