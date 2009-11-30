@@ -1632,6 +1632,18 @@ function fdjtGetAnchor(about)
   else return fdjtForceId(about);
 }
 
+var fdjtUnloaders=[];
+
+function fdjtOnUnload(evt)
+{
+  var i=0; var n=fdjtUnloaders.length;
+  while (i<n) {
+    if ((fdjtUnloaders[i])&&(fdjtUnloaders[i].call))
+      fdjtUnloaders[i].call(this,evt);
+    fdjtUnloaders[i]=false;
+    i++;}
+}
+
 /* Various set up things */
 
 var fdjt_domutils_setup=false;
@@ -1649,6 +1661,9 @@ function fdjtDomutils_setup()
       var sel=fdjtParseSelector(textless[i++]);
       fdjt_transplant_rules.push(sel);
       fdjt_notext_rules.push(sel);}}
+  if (document.onunload) 
+    fdjtUnloaders.push(document.onunload);
+  document.onunload=fdjtOnUnload;
   fdjt_domutils_setup=true;
 }
 
