@@ -208,6 +208,11 @@ function fdjtArguments(argobj,start)
 
 var _fdjt_idcounter=0;
 
+function fdjtObjID(elt)
+{
+  return (elt._fdjtid)||(elt._fdjtid=(++_fdjt_idcounter));
+}
+
 function _fdjt_set_sortfn(a,b)
 {
   if (a===b) return 0;
@@ -467,7 +472,7 @@ function fdjtLineSplit(string,escapes,mapfn)
 
 function fdjtStringTrim(string)
 {
-  var start=string.search(/\b/g); var end=string.search(/\B\$/g);
+  var start=string.search(/\S/); var end=string.search(/\s+$/g);
   if ((start===0) && (end<0)) return string;
   else return string.slice(start,end);
 }
@@ -804,12 +809,29 @@ function fdjtAddSetup(fcn,final)
   else {}
 }
 
+function _fdjtWindowId()
+{
+  if (window)
+    if (window.name)
+      if (window.location)
+	return "#"+window.name+"@"+window.location;
+      else return "#"+window.name;
+    else return "window@"+window.location;
+  else return "nowindow";
+}
+
 function fdjtSetup()
 {
   if (fdjt_setup_started) return;
   fdjt_setup_started=true;
+  if ((fdjt_buildhost)&&(fdjt_buildtime))
+    fdjtLog("[%fs] Starting fdjtSetup (built on %s on %s) for %s",
+	    fdjtElapsedTime(),fdjt_buildhost,fdjt_buildtime,_fdjtWindowId());
+  else fdjtLog("[%fs] Starting fdjtSetup for %o@%o",
+	       fdjtElapsedTime(),(((window)&&(window.name))||"anonymous"));
   var i=0; while (i<fdjt_setups.length) fdjt_setups[i++]();
   var i=0; while (i<fdjt_final_setups.length) fdjt_final_setups[i++]();
+  fdjtLog("[%fs] Finished fdjtSetup for %s",fdjtElapsedTime(),_fdjtWindowId());
   fdjt_setup_done=true;
 }
 
