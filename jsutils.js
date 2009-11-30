@@ -783,6 +783,13 @@ function fdjtElapsedTime(arg)
   return (arg.getTime()-fdjt_loaded)/1000;
 }
 
+function fdjtET()
+{
+  var arg=new Date();
+  return (arg.getTime()-fdjt_loaded)/1000;
+}
+
+
 /* Setups */
 
 var fdjt_setup_started=false;

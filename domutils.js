@@ -72,11 +72,16 @@ var fdjt_tag_display_styles={
   "SPAN": "inline","EM": "inline","STRONG": "inline",
   "TT": "inline","DEFN": "inline","A": "inline",
   "TD": "table-cell","TR": "table-row",
-  "TABLE": "table"};
+  "TABLE": "table", "PRE": "preformatted"};
+
+function fdjtGuessDisplayStyle(elt)
+{
+  return "inline";
+}
 
 function fdjtDisplayStyle(elt)
 {
-  return fdjt_tag_display_styles[elt.tagName]||"inline";
+  return fdjt_tag_display_styles[elt.tagName]||fdjtGuessDisplayStyle(elt);
 }
 
 function fdjtIsBlockElt(elt)
@@ -84,13 +89,29 @@ function fdjtIsBlockElt(elt)
   return (fdjtDisplayStyle(elt)==="block");
 }
 
+function fdjtIsPreformatted(elt)
+{
+  return (fdjtDisplayStyle(elt)==="preformatted");
+}
+
 function fdjtIsTextInput(target)
 {
   while (target)
     if ((target.tagName==="INPUT") ||
 	(target.tagName==="TEXTAREA") ||
-	(target.className==="sbooknokeys") ||
-	((target.onkeypress) && (target.onkeypress!=sbook_onkeypress)))
+	(target.className==="fdjttextinput"))
+      return true;
+    else target=target.parentNode;
+  return false;
+}
+
+function fdjtIsClickactive(target)
+{
+  while (target)
+    if ((target.tagName==="INPUT") ||
+	(target.tagName==="TEXTAREA") ||
+	(target.className==="fdjtclickactive") ||
+	((target.tagName==='A')&&(target.href)))
       return true;
     else target=target.parentNode;
   return false;
@@ -149,7 +170,8 @@ function fdjtTextify(arg,flat,inside)
       else if (display_type==="inline") {}
       else if (flat) suffix=" ";
       else if ((display_type==="block") ||
-	       (display_type==="table")) {
+	       (display_type==="table") ||
+	       (display_type==="preformatted")) {
 	string="\n"; suffix="\n";}
       else if (display_style==="table-row") suffix="\n";
       else if (display_style==="table-cell") string="\t";
@@ -1500,13 +1522,19 @@ function fdjtResolveHash(eltarg)
 
 function fdjtSelectedText()
 {
+  var sel;
   if (window.getSelection)
-    return window.getSelection();
+    sel=window.getSelection();
   else if (document.getSelection)
-    return document.getSelection();
+    sel=document.getSelection();
   else if (document.selection)
-    return document.selection.createRange().text;
-  else return null;
+    sel=document.selection.createRange().text;
+  else sel=false;
+  if ((sel)&&(sel.toString)) {
+    var string=sel.toString();
+    if (fdjtIsEmptyString(string)) return false;
+    else return string;}
+  else return false;
 }
 
 /* Accessing stylesheets */
