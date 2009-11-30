@@ -750,7 +750,7 @@ function fdjtRunTimes(pname,start)
     report=report+"; "+phase+": "+
       ((time.getTime()-point.getTime())/1000)+"s";
     point=time;}
-  return ((point.getTime()-start.getTime())/1000)+"s"+report;
+  return pname+" "+((point.getTime()-start.getTime())/1000)+"s"+report;
 }
 
 function fdjtDiffTime(time1,time2)
