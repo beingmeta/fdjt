@@ -203,6 +203,7 @@ function fdjtJSONPSubmit(form)
 
 function fdjtForm_onsubmit(evt)
 {
+  evt=evt||event||null;
   var form=$T(evt);
   fdjtAutoPrompt_cleanup(form);
   if (fdjtHasClass(form,"submitting")) {
@@ -212,9 +213,11 @@ function fdjtForm_onsubmit(evt)
   form.fdjtsubmit=true;
   fdjtAddClass(form,"submitting");
   if (fdjtAjaxSubmit(form)) {
-    evt.preventDefault(); return;}
+    if (evt.preventDefault) evt.preventDefault(); else evt.returnValue=false;
+    return;}
   else if (fdjtJSONPSubmit(form)) {
-    evt.preventDefault(); return;}
+    if (evt.preventDefault) evt.preventDefault(); else evt.returnValue=false;
+    return;}
   else return;
 }
 

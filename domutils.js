@@ -402,10 +402,10 @@ function fdjtAddClass(elt,classname,attrib)
     else elt.className=newinfo;
     return true;}
 }
-function fdjtClassAdder(elt,class)
+function fdjtClassAdder(elt,classname)
 {
   return function() {
-    if (elt) fdjtAddClass(elt,class);}
+    if (elt) fdjtAddClass(elt,classname);}
 }
 
 function fdjtDropClass(elt,classname,attrib,keep)
@@ -453,10 +453,10 @@ function fdjtDropClass(elt,classname,attrib,keep)
       else {}
     else elt.className=newinfo;}
 }
-function fdjtClassDropper(elt,class)
+function fdjtClassDropper(elt,classname)
 {
   return function() {
-    if (elt) fdjtDropClass(elt,class);}
+    if (elt) fdjtDropClass(elt,classname);}
 }
 
 function fdjtToggleClass(elt,classname,attrib,keep)
@@ -1674,6 +1674,7 @@ var fdjtUnloaders=[];
 
 function fdjtOnUnload(evt)
 {
+  evt=evt||event||null;
   var i=0; var n=fdjtUnloaders.length;
   while (i<n) {
     if ((fdjtUnloaders[i])&&(fdjtUnloaders[i].call))

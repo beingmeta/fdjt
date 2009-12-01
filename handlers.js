@@ -31,6 +31,7 @@ fdjtLoadMessage("Loading handlers.js");
 
 function fdjtShowHelp_onfocus(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   fdjtCheshire_stop(evt);
   while (target)
@@ -49,6 +50,7 @@ function fdjtShowHelp_onfocus(evt)
 
 function fdjtHideHelp_onblur(evt)
 {
+  evt=evt||event||false;
   var target=$T(evt);
   while (target)
     if ((target.nodeType==1) &&
@@ -66,6 +68,7 @@ function fdjtHideHelp_onblur(evt)
 
 function fdjtShowHide_onclick(evt)
 {
+  evt=evt||event||false;
   var target=$T(evt);
   fdjtCheshire_stop(evt);
   // fdjtLog('target='+target);
@@ -101,7 +104,8 @@ function fdjtShowHide_onclick(evt)
 	    elt.style.display='none';}
 	  target.setAttribute('displayed',elt.style.display);}}}
     if ((tohide) || (toshow) || (totoggle)) {
-      evt.preventDefault(); evt.cancelBubble=true;
+      if (evt.preventDefault) evt.preventDefault(); else evt.returnValue=false;
+      evt.cancelBubble=true;
       return false;}
     target=target.parentNode;}
 }
@@ -110,6 +114,7 @@ function fdjtShowHide_onclick(evt)
 
 function fdjtSetClear_onclick(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   fdjtCheshire_stop(evt);
   while (target.parentNode)
@@ -135,6 +140,7 @@ function fdjtSetClear_onclick(evt)
 
 function fdjtAutoPrompt_onfocus(evt)
 {
+  evt=evt||event||null;
   var elt=$T(evt);
   fdjtCheshire_stop(evt);
   if ((elt) && (fdjtHasAttrib(elt,'isempty'))) {
@@ -145,6 +151,7 @@ function fdjtAutoPrompt_onfocus(evt)
 
 function fdjtAutoPrompt_onblur(evt)
 {
+  evt=evt||event||null;
   var elt=$T(evt);
   if (elt.value==='') {
     elt.setAttribute('isempty','yes');
@@ -216,7 +223,8 @@ function fdjtTab_onclick(evt,shown)
     if (content===null) {
       fdjtLog("No content for "+content_id);
       return;}
-    // evt.preventDefault(); evt.cancelBubble=true;
+    // if (evt.preventDefault) evt.preventDefault(); else evt.returnValue=false; 
+    // evt.cancelBubble=true;
     // This lets forms pass tab information along
     if (select_elt) select_elt.value=content_id;
     var i=0; while (i<sibs.length) {
@@ -340,6 +348,7 @@ function fdjtCheckSpan_update(checkspan,checked)
 
 function fdjtCheckSpan_onclick(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt); var checkspan=$P(".checkspan",target);
   fdjtCheshire_stop(evt);
   while (target.parentNode) {
@@ -361,6 +370,7 @@ function fdjtCheckSpan_onclick(evt)
 
 function fdjtCheckSpan_onchange(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt); var checkspan=$P(".checkspan",target);
   fdjtCheckSpan_update(checkspan,target.checked);
   $T(evt).blur();
@@ -534,7 +544,8 @@ function fdjtMultiText_onkeypress(evt,tagname)
       fdjtAppend(new_elt,elt.value);}
     fdjtInsertAfter(elt," ",new_elt);
     elt.value="";
-    evt.preventDefault(); evt.cancelBubble=true;
+    if (evt.preventDefault) evt.preventDefault(); else evt.returnValue=false;
+    evt.cancelBubble=true;
     return false;}
   else return;
 }
@@ -946,6 +957,7 @@ function fdjtGradually(nsteps,interval,startval,endval,stepfn)
 
 function fdjtCheckControl_onevent(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   if (typeof evt.ctrlKey === 'undefined') return;
   if (evt.ctrlKey) target.setAttribute('controldown','yes');
@@ -954,6 +966,7 @@ function fdjtCheckControl_onevent(evt)
 
 function fdjtCheckShift_onevent(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   if (typeof evt.shiftKey === 'undefined') return;
   if (evt.shiftKey) target.setAttribute('shiftdown','yes');
@@ -962,10 +975,17 @@ function fdjtCheckShift_onevent(evt)
 
 function fdjtCheckAlt_onevent(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   if (typeof evt.altKey === 'undefined') return;
   if (evt.altKey) target.setAttribute('altdown','yes');
   else target.removeAttribute('altdown');
+}
+
+function fdjtCancelBubble(evt)
+{
+  evt=evt||event||null;
+  evt.cancelBubble=true;
 }
 
 /* Setup */

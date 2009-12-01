@@ -153,7 +153,10 @@ function fdjtAddCompletion(div,completion,opts,init)
   if (!(opts)) opts=_fdjt_get_complete_opts(div);
   if (!(div.allcompletions)) fdjtInitCompletions(div,false,opts);
   // fdjtTrace("add completion %o to %o",completion,div);
-  if ((init)||(div.allcompletions.indexOf(completion)<0)) {
+  var ac=div.allcompletions;
+  if ((init)||
+      (((ac.indexOf)?(ac.indexOf(completion)):
+	(fdjtIndexOf(ac,completion)))<0)) {
     var prefixtree=div.prefixtree;
     var cmap=div.completionmap;
     var smap=div.stringmap;
@@ -445,6 +448,7 @@ function fdjtHandleCompletion(input_elt,elt,value)
 
 function fdjtComplete_onclick(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   // fdjtTrace("complete onclick %o",target);
   while (target)
@@ -471,6 +475,7 @@ var _fdjt_completion_timer=false;
 
 function fdjtComplete_show(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   var keycode=evt.keyCode;
   var value=fdjtCompletionText(target);
@@ -485,6 +490,7 @@ function fdjtComplete_show(evt)
 
 function fdjtComplete_toggleshowall(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   var container=$P(".completions",target);
   if (fdjtHasClass(container,"maxcomplete"))
@@ -495,6 +501,7 @@ function fdjtComplete_toggleshowall(evt)
 
 function fdjtComplete_onfocus(evt)
 {
+  evt=evt||event||null;
   fdjtAutoPrompt_onfocus(evt);
   fdjtComplete($T(evt));
 }
@@ -513,6 +520,7 @@ function fdjtCheckComplete(target)
 
 function fdjtComplete_onkey(evt)
 {
+  evt=evt||event||null;
   var target=$T(evt);
   var keycode=evt.keyCode;
   var charcode=evt.charCode;
@@ -528,7 +536,8 @@ function fdjtComplete_onkey(evt)
     // These complete right away
     var results=fdjtComplete(target,false,options);
     // fdjtTrace("Escape complete on %o, results=%o",target,results);
-    evt.preventDefault(); evt.cancelBubble=true;
+    if (evt.preventDefault) evt.preventDefault(); else evt.returnValue=false;
+    evt.cancelBubble=true;
     if (results.length>0) {
       var completions=fdjt_get_completions(target);
       fdjtHandleCompletion(target,results[0],results[0].value);

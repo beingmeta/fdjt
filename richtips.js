@@ -100,6 +100,7 @@ function fdjtRichTip_display(elt)
 
 function fdjtRichTip_onmouseover(evt)
 {
+  evt=evt||event||null;
   var target=fdjtGetRichParent($T(evt));
   if ((!(target)) && (fdjt_live_richtip)) {
     fdjtDropClass(fdjt_live_richtip,"live");
@@ -122,6 +123,7 @@ function fdjtRichTip_onmouseover(evt)
 
 function fdjtRichTip_onclick(evt)
 {
+  evt=evt||event||null;
   var target=fdjtFindRichTip($T(evt));
   if (target) 
     if (fdjtHasClass(target,"static")) {
@@ -134,6 +136,7 @@ function fdjtRichTip_onclick(evt)
 
 function fdjtRichTip_onmouseout(evt)
 {
+  evt=evt||event||null;
   if (!(fdjt_display_richtips)) return;
   if (fdjt_live_richtip) {
     fdjtDropClass(fdjt_live_richtip,"live");
@@ -145,12 +148,15 @@ function fdjtRichTip_onmouseout(evt)
 }
 
 function fdjtRichTip_minimize(evt) {
+  evt=evt||event||null;
   fdjtAddClass($P(".richtip",$T(evt)),"minimized"); }
 
 function fdjtRichTip_maximize(evt) {
+  evt=evt||event||null;
   fdjtDropClass($P(".richtip",$T(evt)),"minimized");}
 
 function fdjtRichTip_hide(evt) {
+  evt=evt||event||null;
   fdjtDropClass($P(".richtip",$T(evt)),"static");}
 
 function fdjtRichTip_init(elt) {
