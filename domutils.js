@@ -151,7 +151,7 @@ function fdjtTextify(arg,flat,inside)
   if (arg.nodeType)
     if (arg.nodeType===3)
       if (flat)
-	return fdjtStdSpace(arg.nodeValue);
+	return fdjtFlatten(arg.nodeValue);
       else return arg.nodeValue;
     else if (arg.nodeType!==1) return false;
     else if ((arg.fdjtNoText) ||
@@ -180,7 +180,7 @@ function fdjtTextify(arg,flat,inside)
 	var child=children[i++];
 	if ((child.nodeType) && (child.nodeType===3))
 	  if (flat)
-	    string=string+fdjtStdSpace(child.nodeValue);
+	    string=string+fdjtFlatten(child.nodeValue);
 	  else string=string+child.nodeValue;
 	else {
 	  var stringval=fdjtTextify(child,flat,true);

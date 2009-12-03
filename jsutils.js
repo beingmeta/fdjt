@@ -483,6 +483,12 @@ function fdjtStdSpace(string)
   return trimmed.replace(/(\W)+/g," ");
 }
 
+function fdjtFlatten(string)
+{
+  var trimmed=string.replace(/(^([^\x0A\x0D\x2028\x2029])+)|(([^\x0A\x0D\x2028\x2029])+$)/g,"");
+  return trimmed.replace(/(\W)+/g," ");
+}
+
 function fdjtStripMarkup(string)
 {
   return string.replace(/<[^>]*>/g,"");
