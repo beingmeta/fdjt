@@ -479,14 +479,12 @@ function fdjtStringTrim(string)
 
 function fdjtStdSpace(string)
 {
-  var trimmed=string.replace(/(^(\W)+)|((\W)+$)/g,"");
-  return trimmed.replace(/(\W)+/g," ");
+  return string.replace(/\s+/," ").replace(/(^\s)|(\s$)/,"");
 }
 
 function fdjtFlatten(string)
 {
-  var trimmed=string.replace(/(^([^\x0A\x0D\x2028\x2029])+)|(([^\x0A\x0D\x2028\x2029])+$)/g,"");
-  return trimmed.replace(/(\W)+/g," ");
+  return string.replace(/\s+/," ");
 }
 
 function fdjtStripMarkup(string)

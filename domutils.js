@@ -876,6 +876,24 @@ function fdjtGetChildren(elt,selector,results)
     return results;}
 }
 
+function fdjtGetFirstChild(elt,selector)
+{
+  if (typeof selector === "string")
+    return fdjtGetFirstChild(elt,fdjtParseSelector(selector));
+  else if (elt.nodeType!==1) return false;
+  var children=elt.childNodes;
+  var i=0, n=children.length;
+  while (i<n) {
+    var child=children[i++];
+    if (child.nodeType!==1) continue;
+    if (fdjtElementMatchesSpec(child,selector))
+      return child;
+    else {
+      var grandchild=fdjtGetFirstChild(child,selector);
+      if (grandchild) return grandchild;}}
+  return false;
+}
+
 function $$(selector,cxt) 
 {
   var elt=((cxt) ? (cxt) : (document));
