@@ -37,6 +37,17 @@ function $(eltarg)
   else return eltarg;
 }
 
+// Returns a string describing an element
+function fdjtEltID(elt)
+{
+  var classname=elt.className;
+  var id=elt.id;
+  return "<"+elt.tagName+
+    ((classname)?("."+classname.replace(/\s+/g,".")):(""))+
+    ((id)?("#"+id):(""))+
+    ">";
+}
+
 /* Getting event targets */
 
 function $T(evt)
