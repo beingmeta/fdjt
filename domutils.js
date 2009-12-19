@@ -1070,7 +1070,7 @@ function fdjtReplace(cur_arg,newnode)
     return;}
 }
 
-function fdjtRemove(cur_arg)
+function fdjtDelete(cur_arg)
 {
   var cur=null;
   if (cur_arg===null) return null;
@@ -1464,10 +1464,10 @@ function fdjtTransplant(orig,transplant_rules,use_defaults)
   var node=orig.cloneNode(true);
   if (transplant_rules) {
     var toremove=fdjtGetChildren(node,transplant_rules);
-    var i=0; while (i<toremove.length) fdjtRemove(toremove[i++]);}
+    var i=0; while (i<toremove.length) fdjtDelete(toremove[i++]);}
   if ((!(transplant_rules)) || (use_defaults)) {
     var toremove=fdjtGetChildren(node,fdjt_transplant_rules);
-    var i=0; while (i<toremove.length) fdjtRemove(toremove[i++]);}
+    var i=0; while (i<toremove.length) fdjtDelete(toremove[i++]);}
   return node;
 }
 

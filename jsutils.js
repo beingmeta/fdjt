@@ -147,6 +147,18 @@ function fdjtIndexOf(array,elt,pos)
     return -1;}
 }
 
+function fdjtContains(array,elt)
+{
+  if (array.indexOf)
+    return (array.indexOf(elt)>=0);
+  else {
+    var i=0; var len=array.length;
+    while (i<len)
+      if (array[i]===elt) return true;
+      else i++;
+    return false;}
+}
+
 /*
 if (!(Array.indexOf))
   Array.indexOf=function(elt) {

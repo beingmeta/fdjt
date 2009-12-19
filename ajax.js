@@ -83,7 +83,7 @@ function fdjtJSONPFinish(id)
   var script_elt=$(id);
   if (!(script_elt)) return;
   if (script_elt.oncleanup) script_elt.oncleanup();
-  fdjtRemove(script_elt);
+  fdjtDelete(script_elt);
 }
 
 /* AJAX submit */
