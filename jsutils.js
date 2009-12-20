@@ -209,7 +209,7 @@ function fdjtIndexFind(index,rel,val)
 
 function fdjtArguments(argobj,start)
 {
-  var i=((start) ? (start) : (0));
+  var i=start||0;
   var result=new Array(argobj.length-i);
   while (i<argobj.length) {
     result[i]=argobj[i]; i++;}

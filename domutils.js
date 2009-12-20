@@ -918,12 +918,44 @@ function $P(selector,cxt)
 
 /* Adding/Inserting nodes */
 
-function fdjtAddElements(elt,elts,i)
+function fdjtAddElements(elt,elts,start,finish)
 {
+  var i=start||0;
+  var lim=(((finish)&&(finish<elts.length))?(finish):(elts.length));
   var curstring=false;
   if (elt===null) return null;
-  while (i<elts.length) {
+  while (i<lim) {
     var arg=elts[i++]; 
+    if (!(arg)) continue;
+    else if ((typeof arg === 'string') || (typeof arg === "number")) {
+      if (curstring) curstring=curstring+arg;
+      else if (typeof arg === 'string') curstring=arg;
+      else curstring=arg.toString();
+      continue;}
+    else {
+      if (curstring) {
+	elt.appendChild(document.createTextNode(curstring));
+	curstring=false;}
+      if (arg.nodeType) elt.appendChild(arg);
+      else if (arg instanceof Array)
+	fdjtAddElements(elt,arg,0);
+      else elt.appendChild(fdjtNodify(arg));}}
+  if (curstring)
+    elt.appendChild(document.createTextNode(curstring));
+  return elt;
+}
+
+function fdjtAddElementsTraced(elt,elts,start,finish)
+{
+  var curstring=false;
+  var i=start||0;
+  var lim=(((finish)&&(finish<elts.length))?(finish):(elts.length));
+  fdjtTrace("fdjtAddElementsTraced to %o from %o from %o to %o",
+	    elt,elts,i,lim);
+  if (elt===null) return null;
+  while (i<lim) {
+    var arg=elts[i++]; 
+    fdjtTrace("Adding %o to %o",arg,elt);
     if (!(arg)) continue;
     else if ((typeof arg === 'string') || (typeof arg === "number")) {
       if (curstring) curstring=curstring+arg;
@@ -1133,6 +1165,35 @@ function fdjtNewElt(eltspec)
   return elt;
 }
 
+function fdjtElt(eltspec)
+{
+  var hashpos=eltspec.indexOf('#'); var dotpos=eltspec.indexOf('.');
+  var tagend=(((hashpos>0) && (dotpos>0)&&((hashpos<dotpos)?hashpos:dotpos))
+	      ||((hashpos>0) ? (hashpos) : ((dotpos>0)&&(dotpos))));
+  var elt=((tagend)?
+	   (fdjtNewElement(eltspec.slice(0,tagend),eltspec.slice(tagend))) :
+	   (fdjtNewElement(eltspec)));
+  if (arguments.length>1)
+    fdjtAddElements(elt,arguments,1);
+  return elt;
+}
+
+function fdjtEltW(eltspec,attribs)
+{
+  var hashpos=eltspec.indexOf('#'); var dotpos=eltspec.indexOf('.');
+  var tagend=(((hashpos>0) && (dotpos>0)&&((hashpos<dotpos)?hashpos:dotpos))
+	      ||((hashpos>0) ? (hashpos) : ((dotpos>0)&&(dotpos))));
+  var elt=((tagend)?
+	   (fdjtNewElement(eltspec.slice(0,tagend),eltspec.slice(tagend))) :
+	   (fdjtNewElement(eltspec)));
+  if (attribs)
+    for (var key in attribs)
+      elt.setAttribute(key,attribs[key]);
+  if (arguments.length>1)
+    fdjtAddElements(elt,arguments,2);
+  return elt;
+}
+
 function fdjtWithId(elt,id)
 {
   elt.id=id;
@@ -1233,7 +1294,8 @@ function fdjtInput(type,name,value,classname)
 {
   var elt=fdjtNewElement('INPUT',classname);
   elt.type=type; elt.name=name;
-  if (typeof value === 'string') elt.value=value;
+  if (!(value)) elt.value=null;
+  else if (typeof value === 'string') elt.value=value;
   else if (value.toFormString)
     elt.value=value.toFormString()||value.toString();
   else elt.value=value.toString();
@@ -1247,6 +1309,87 @@ function fdjtCheckbox(name,value,checked)
   if (checked) elt.checked=true;
   else elt.checked=false;
   return elt;
+}
+
+function fdjtHR(attribs,classinfo) { return fdjtEltW(classinfo||"HR",attribs); }
+function fdjtBR(attribs,classinfo) { return fdjtEltW(classinfo||"BR",attribs); }
+
+/* Grid functions */
+
+function fdjtGrid()
+{
+  var table=document.createElement('table');
+  table.className='grid';
+  table.layout='auto'; table.rules='none';
+  table.cellspacing=0; table.cellpadding=0;
+  fdjtAddElements(table,fdjtArguments(arguments));
+  return table;
+}
+
+function fdjtParseGridSize(gridsize)
+{
+  if (!(gridsize)) return {ncols: false, nrows: false};
+  else if (typeof gridsize !== 'string')
+    return {ncols: false, nrows: false};
+  var break_at=gridsize.indexOf('x');
+  var parsed={nrows: false,ncols: false};
+  if (break_at<0) break_at=gridsize.indexOf(',');
+  if (break_at<0) return parsed;
+  var ncols=parseInt(gridsize.slice(0,break_at));
+  var nrows=parseInt(gridsize.slice(break_at+1));
+  if (ncols>1) parsed.ncols=ncols;
+  if (nrows>1) parsed.nrows=nrows;
+  return parsed;
+}
+
+function fdjtGridify(elt)
+{
+  if (!(elt)) return false;
+  else if (!(elt.tagName))
+    return fdjtElt("TD.gridelt",elt);
+  else if ((elt.tagName==='TH')||(elt.tagName==='TD'))
+    return elt;
+  else if ((elt.getAttribute)&&(elt.getAttribute("grid"))) {
+    var td=fdjtElt("TD.gridelt");
+    var gridsize=fdjtParseGridSize(elt.getAttribute("grid"));
+    if (gridsize.ncols) td.setAttribute('colspan',gridsize.ncols);
+    if (gridsize.nrows) td.setAttribute('rowspan',gridsize.nrows);
+    return td;}
+  else return fdjtElt("TD.gridelt",elt);
+}
+
+function fdjtGridRow()
+{
+  var row=fdjtElt("TR.gridrow");
+  var i=0; var lim=arguments.length;
+  while (i<lim) {
+    fdjtAppend(row,fdjtGridify(arguments[i++]));}
+  return row;
+}
+
+function ROW() { return fdjtGridRow.apply(this,arguments); }
+function GRID(size)
+{
+  var td=fdjtElt("TD.gridelt");
+  var gridsize=fdjtParseGridSize(size);
+  if (gridsize.ncols) td.setAttribute('colspan',gridsize.ncols);
+  if (gridsize.nrows) td.setAttribute('rowspan',gridsize.nrows);
+  fdjtAddElements(td,arguments,1);
+  return td;
+}
+
+function fdjtTR()
+{
+  var tr_elt=document.createElement('tr');
+  fdjtAddElements(tr_elt,arguments);
+  return tr_elt;
+}
+
+function fdjtTD()
+{
+  var td_elt=document.createElement('td');
+  fdjtAddElements(td_elt,arguments);
+  return td_elt;
 }
 
 /* Dealing with selections */
