@@ -1290,7 +1290,7 @@ function fdjtAnchorW(url,attribs)
   return elt;
 }
 
-function fdjtInput(type,name,value,classname)
+function fdjtInput(type,name,value,classname,title)
 {
   var elt=fdjtNewElement('INPUT',classname);
   elt.type=type; elt.name=name;
@@ -1299,6 +1299,7 @@ function fdjtInput(type,name,value,classname)
   else if (value.toFormString)
     elt.value=value.toFormString()||value.toString();
   else elt.value=value.toString();
+  if (title) elt.title=title;
   return elt;
 }
 

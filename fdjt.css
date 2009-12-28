@@ -34,6 +34,10 @@
   display: inline; vertical-align: bottom; margin: 1px;}
 .checkspan[ischecked] > img.unchecked { display: none;}
 .checkspan[ischecked] > img.checked { display: inline;}
+.checkspan > span.checked { display: none; }
+.checkspan > span.unchecked { display: inline; }
+.checkspan[ischecked] > span.checked { display: inline; }
+.checkspan[ischecked] > span.unchecked { display: none; }
 
 /* Autoprompt classes */
 
@@ -72,7 +76,10 @@ img.helpicon {
 
 div.tabbar { line-height: 200%;}
 
+a.tab:visited { color: inherit;}
+a.tab:hover { color: darkblue; text-decoration: underline;}
 a.tab, span.tab {
+  color: inherit;
   font-family: sans,sans-serif;
   margin-left: 2px; margin-right: 2px;
   border: outset black 2px;

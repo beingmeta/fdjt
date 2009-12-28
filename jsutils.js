@@ -553,6 +553,13 @@ function fdjtCommonSuffix(string1,string2,brk,foldcase)
   else return false;
 }
 
+function fdjtStripSuffix(string)
+{
+  var start=string.search(/\.\w+$/);
+  if (start>0) return string.slice(0,start);
+  else return string;
+}
+
 /* Prefix trees */
 
 function fdjtPrefixAdd(ptree,string,i)

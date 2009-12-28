@@ -180,7 +180,6 @@ function fdjtAutoPrompt_setup(elt)
 	  else continue;
 	if (prompt)
 	  if ((!(elt.value)) || (elt.value=='') || (elt.value===prompt)) {
-	    // fdjtLog('Marking empty');
 	    elt.value=prompt;
 	    elt.setAttribute('isempty','yes');
 	    fdjtRedisplay(elt);}
@@ -220,6 +219,14 @@ function fdjtTab_onclick(evt,shown)
     var select_elt=document.getElementById(select_var+'_INPUT');
     var parent=elt.parentNode;
     var sibs=parent.childNodes;
+    var tabdomain=false; var tabpath=false;
+    if (parent.getAttribute('tabcookies')) {
+      var tcinfo=parent.getAttribute('tabcookies');
+      var slashpos=tcinfo.indexOf('/');
+      if (slashpos) {
+	tabdomain=tcinfo.slice(0,slashpos);
+	tabpath=tcinfo.slice(0,slashpos);}
+      else tabdomain=tcinfo;}
     if (content===null) {
       fdjtLog("No content for "+content_id);
       return;}
@@ -249,11 +256,34 @@ function fdjtTab_onclick(evt,shown)
       var eqpos=tabcookie.indexOf('=');
       if (eqpos<0) fdjtSetCookie(tabcookie,cid);
       else fdjtSetCookie(tabcookie.slice(0,eqpos),
-			 tabcookie.slice(eqpos+1));}
+			 tabcookie.slice(eqpos+1),
+			 false,tabdomain,tabpath);}
     // Force a redisplay on CSS-challenged browsers
     fdjtRedisplay(elt,content);
     return false;}
 }
+
+function fdjtSelectTab(tabbar,contentid)
+{
+  var tabs=$$(".tab",tabbar);
+  var i=0; while (i<tabs.length) {
+    var tab=tabs[i++];
+    if (tab.getAttribute("contentid"))
+      if ((tab.getAttribute("contentid"))==contentid)
+	tab.setAttribute("shown","shown");
+      else if (tab.getAttribute("shown")) {
+	var cid=tab.getAttribute("contentid");
+	var content=$(cid);
+	if (!(content))
+	  fdjtWarn("No reference for tab content %o",cid);
+	else content.removeAttribute("shown");}
+      else tab.removeAttribute("shown");}
+  if ($(contentid))
+    $(contentid).setAttribute("shown","shown");
+  else fdjtWarn("No reference for tab content %o",contentid);
+}
+
+
 
 /* Adding search engines */
 
@@ -313,18 +343,28 @@ function _fdjt_close_window(event)
 
 /* checkspan handling */
 
-function fdjtCheckSpan(varname,value,checked)
+function fdjtCheckSpan(varname,value,checked,title)
 {
   var checkbox=fdjtInput("CHECKBOX",varname,value);
-  var checkspan=fdjtSpan("checkspan",checkbox);
+  var checkspan=fdjtSpan("checkspan");
   if (checked) {
     checkspan.setAttribute('ischecked','true');
     checkbox.checked=true;}
   else {
     checkbox.checked=false;}
-  if (arguments.length>3)
-    fdjtAddElements(checkspan,arguments,3);
+  checkspan.onclick=fdjtCheckSpan_onclick;
+  var elements=[]; var checkbox_added=false;
+  var i=4; while (i<arguments.length) {
+    var arg=arguments[i++];
+    if (arg===true) {
+      elements.push(checkbox);
+      checkbox_added=true;}
+    else elements.push(arg);}
+  if (!(checkbox_added)) fdjtAppend(checkspan,checkbox);
+  if (elements.length)
+    fdjtAddElements(checkspan,elements);
   else fdjtAppend(checkspan,value);
+  if (title) checkspan.title=title;
   return checkspan;
 }
 
@@ -426,6 +466,7 @@ function fdjtCheckSpan_setup(checkspan)
 		    (fdjtGetElementsByClassName('checkspan',checkspan)));
     var i=0; while (i<checkspans.length) {
       var checkspan=checkspans[i++];
+      if (!(checkspan.onclick)) checkspan.onclick=fdjtCheckSpan_onclick;
       var inputs=fdjtGetElementsByTagName("INPUT",checkspan);
       var j=0; while (j<inputs.length) {
 	var input=inputs[j++];
