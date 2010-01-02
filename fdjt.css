@@ -319,6 +319,7 @@ div.richtip .maximize { display: none; }
 /* Displaying deadlinks as red, Wikipedia style */
 
 a.deadlink { color: red;}
+span.underline { text-decoration: underline;}
 
 /* Emacs local variables
 ;;;  Local variables: ***
