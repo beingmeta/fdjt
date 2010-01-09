@@ -481,6 +481,20 @@ function fdjtCheckSpan_setup(checkspan)
 	  break;}}}}
 }
 
+/* Class toggling */
+
+function fdjtToggleClass_onclick(evt)
+{
+  evt=(evt)||(event);
+  if ((evt.target)&&(evt.target.getAttribute)&&
+      (evt.target.getAttribute("toggle"))) {
+    var toggle=evt.target.getAttribute("toggle");
+    var eqpos=toggle.indexOf('=');
+    var elt=$(toggle.slice(0,eqpos));
+    var class=toggle.slice(eqpos+1);
+    if ((elt)&&(class)) fdjtToggleClass(elt,class);}
+}
+
 /* Cheshire handling */
 
 var fdjt_cheshireelt=null;

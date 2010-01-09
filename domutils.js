@@ -1706,11 +1706,11 @@ function fdjtResolveHash(eltarg)
 function fdjtSelectedText()
 {
   var sel;
-  if (window.getSelection)
+  if (window.getSelection) 
     sel=window.getSelection();
   else if (document.getSelection)
     sel=document.getSelection();
-  else if (document.selection)
+  else if (document.selection) 
     sel=document.selection.createRange().text;
   else sel=false;
   if ((sel)&&(sel.toString)) {
