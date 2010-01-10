@@ -491,8 +491,8 @@ function fdjtToggleClass_onclick(evt)
     var toggle=evt.target.getAttribute("toggle");
     var eqpos=toggle.indexOf('=');
     var elt=$(toggle.slice(0,eqpos));
-    var class=toggle.slice(eqpos+1);
-    if ((elt)&&(class)) fdjtToggleClass(elt,class);}
+    var classname=toggle.slice(eqpos+1);
+    if ((elt)&&(classname)) fdjtToggleClass(elt,classname);}
 }
 
 /* Cheshire handling */
