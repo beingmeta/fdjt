@@ -23,6 +23,17 @@ var fdjt_jsutils_version=parseInt("$Revision$".slice(10,-1));
 
 */
 
+/* Handy characters to know */
+
+var fdjt_nbsp="\u00A0";
+var fdjt_middot="\u00B7";
+var fdjt_emdash="\u2013";
+var fdjt_endash="\u2014";
+var fdjt_lsq="\u2018";
+var fdjt_rsq="\u2019";
+var fdjt_ldq="\u201C";
+var fdjt_rdq="\u201D";
+
 /* Logging */
 
 var _fdjt_trace_load=false;

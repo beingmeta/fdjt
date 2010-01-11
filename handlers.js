@@ -495,6 +495,23 @@ function fdjtToggleClass_onclick(evt)
     if ((elt)&&(classname)) fdjtToggleClass(elt,classname);}
 }
 
+/* Flashing */
+
+/* This is intended for translucent entities which get rendered
+   temporarily opaque for a time, typically when they change. */
+
+function fdjtFlash(elt,milliseconds,opacity)
+{
+  elt=$(elt);
+  if (typeof opacity === 'string') {
+    fdjtAddClass(elt,opacity);
+    setTimeout(function() {fdjtDropClass(elt,opacity);},milliseconds);}
+  else {
+    var oldopacity=elt.style.opacity;
+    elt.style.opacity=opacity;
+    setTimeout(function() {elt.style.opacity=oldopacity;},milliseconds);}
+}
+
 /* Cheshire handling */
 
 var fdjt_cheshireelt=null;
