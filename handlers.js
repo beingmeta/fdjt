@@ -269,11 +269,12 @@ function fdjtSelectTab(tabbar,contentid)
   var i=0; while (i<tabs.length) {
     var tab=tabs[i++];
     if (tab.getAttribute("contentid"))
-      if ((tab.getAttribute("contentid"))==contentid)
+      if ((tab.getAttribute("contentid"))===contentid)
 	tab.setAttribute("shown","shown");
       else if (tab.getAttribute("shown")) {
 	var cid=tab.getAttribute("contentid");
 	var content=$(cid);
+	tab.removeAttribute("shown");
 	if (!(content))
 	  fdjtWarn("No reference for tab content %o",cid);
 	else content.removeAttribute("shown");}
@@ -283,7 +284,36 @@ function fdjtSelectTab(tabbar,contentid)
   else fdjtWarn("No reference for tab content %o",contentid);
 }
 
+function fdjtSelectedTab(tabbar)
+{
+  var tabs=$$(".tab",tabbar);
+  var i=0; while (i<tabs.length) {
+    var tab=tabs[i++];
+    if (tag.getAttribute("shown"))
+      return tag.getAttribute("contentid");}
+  return false;
+}
 
+/* Anchor submit buttons */
+
+function fdjtAnchorSubmit_onclick(evt)
+{
+  var target=evt.target;
+  var form=fdjtGetParentByTagName(target,'form');
+  if (target.getAttribute("NAME"))
+    form.appendChild
+      (fdjtInput("HIDDEN",target.getAttribute("NAME"),
+		 target.getAttribute("VALUE")));
+  return form.submit();
+}
+
+function fdjtAnchorSubmit_setup(root)
+{
+  root=root||document.body;
+  var asubmit=fdjtGetChildrenByClassName(root,"fdjtsubmit");
+  var i=0; while (i<asubmit.length)
+	     asubmit[i++].onclick=fdjtAnchorSubmit_onclick;
+}
 
 /* Adding search engines */
 
@@ -946,6 +976,7 @@ fdjtAddSetup(fdjtCheckSpan_setup);
 //fdjtAddSetup(fdjtAdjustFontSizes);
 fdjtAddSetup(fdjtMarkReduced);
 fdjtAddSetup(fdjtNodeSetup,true);
+fdjtAddSetup(fdjtAnchorSubmit_setup);
 
 fdjtLoadMessage("Loaded handlers.js");
 
