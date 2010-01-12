@@ -299,11 +299,15 @@ function fdjtSelectedTab(tabbar)
 function fdjtAnchorSubmit_onclick(evt)
 {
   var target=evt.target;
-  var form=fdjtGetParentByTagName(target,'form');
-  if (target.getAttribute("NAME"))
+  var anchor=fdjtGetParentByTagName(target,'a');
+  var form=fdjtGetParentByTagName(anchor,'form');
+  if (anchor.getAttribute("NAME"))
     form.appendChild
-      (fdjtInput("HIDDEN",target.getAttribute("NAME"),
-		 target.getAttribute("VALUE")));
+      (fdjtInput("HIDDEN",anchor.getAttribute("NAME"),
+		 anchor.getAttribute("VALUE")));
+  // This should really come up with some way to run the onsbumit
+  // handler
+  fdjtAutoPrompt_cleanup(form);
   return form.submit();
 }
 
