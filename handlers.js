@@ -402,7 +402,7 @@ function fdjtCheckSpan(varname,value,checked,title)
   return checkspan;
 }
 
-function fdjtCheckSpan_update(checkspan,checked)
+function fdjtCheckSpan_update(checkspan,checked,evt)
 {
   var inputs=fdjtGetChildrenByTagName(checkspan,'INPUT');
   var checkspans=fdjtGetChildrenByClassName(checkspan,"checkspan");
@@ -418,6 +418,10 @@ function fdjtCheckSpan_update(checkspan,checked)
       if (checked)
 	checkspans[i++].setAttribute('ischecked','true');
       else checkspans[i++].removeAttribute('ischecked');}}
+  if (checkspan.onchange) checkspan.onchange(evt);
+  else if (checkspan.getAttribute("onchange")) {
+    checkspan.onchange=new Function("event",checkspan.getAttribute("onchange"));
+    checkspan.onchange(evt);}
 }
 
 function fdjtCheckSpan_onclick(evt)
@@ -437,8 +441,8 @@ function fdjtCheckSpan_onclick(evt)
     var input=inputs[i++];
     if ((input.type==='radio') || (input.type==='checkbox'))
       if (input.checked)
-	return fdjtCheckSpan_update(checkspan,false);
-      else return fdjtCheckSpan_update(checkspan,true);
+	return fdjtCheckSpan_update(checkspan,false,evt);
+      else return fdjtCheckSpan_update(checkspan,true,evt);
     else i++;}
 }
 
@@ -446,45 +450,8 @@ function fdjtCheckSpan_onchange(evt)
 {
   evt=evt||event||null;
   var target=$T(evt); var checkspan=$P(".checkspan",target);
-  fdjtCheckSpan_update(checkspan,target.checked);
+  fdjtCheckSpan_update(checkspan,target.checked,evt);
   $T(evt).blur();
-}
-
-function fdjtCheckSpan_old_onclick(event)
-{
-  var target=event.target; var clickinput=null;
-  fdjtCheshire_stop(event);
-  while (target.parentNode) {
-    if (target.nodeType!=1) target=target.parentNode;
-    else if (fdjtHasClass(target,'checkspan')) break;
-    else if (target.tagName==='A') return;
-    else if (target.tagName==='INPUT') {
-      clickinput=target; target=target.parentNode;} /* return; */
-    else target=target.parentNode;}
-  if ((target) && (fdjtHasClass(target,'checkspan'))) {
-    var children=target.childNodes;
-    var i=0; while (i<children.length) {
-      var child=children[i++];
-      if ((child.nodeType===1) &&
-	  (child.tagName==='INPUT') &&
-	  ((child.type==='radio') ||
-	   (child.type==='checkbox'))) {
-	var checked=child.checked;
-	if (child==clickinput)
-	  if (typeof checked == null)
-	    target.removeAttribute('ischecked');
-	  else if (checked)
-	    target.setAttribute('ischecked','yes');
-	  else target.removeAttribute('ischecked');
-	else if (typeof(checked) === null) {
-	  child.checked=false;
-	  target.removeAttribute('ischecked');}
-	else if (checked) {
-	  child.checked=false;
-	  target.removeAttribute('ischecked');}
-	else {
-	  child.checked=true;
-	  target.setAttribute('ischecked','yes');}}}}
 }
 
 function fdjtCheckSpan_setup(checkspan)
