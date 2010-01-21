@@ -316,6 +316,16 @@ div.richtip.minimized .minimize { display: none; }
 div.richtip .minimize { display: inline; }
 div.richtip .maximize { display: none; }
 
+/* Some utility definitions */
+
+.fullwidth { width: 100%;}
+.abstopright { position: absolute; top: 2px; right: 2px;}
+.abstopleft { position: absolute; top: 2px; left: 2px;}
+.abstopleft img {border: 0px;}
+.abstopright img {border: 0px;}
+.floatleft { float: left;}
+.floatright { float: right;}
+
 /* Displaying deadlinks as red, Wikipedia style */
 
 a.deadlink { color: red;}

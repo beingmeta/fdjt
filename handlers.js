@@ -439,7 +439,8 @@ function fdjtCheckSpan_onclick(evt)
   var inputs=fdjtGetChildrenByTagName(target,'INPUT');
   var i=0; while (i<inputs.length) {
     var input=inputs[i++];
-    if ((input.type==='radio') || (input.type==='checkbox'))
+    if (input.disabled) {}
+    else if ((input.type==='radio') || (input.type==='checkbox'))
       if (input.checked)
 	return fdjtCheckSpan_update(checkspan,false,evt);
       else return fdjtCheckSpan_update(checkspan,true,evt);
