@@ -768,7 +768,8 @@ function fdjtCoHi_onmouseover(evt,classname_arg)
     else if (target.name) break;  
     else target=target.parentNode;
   if (!(target)) return;
-  fdjtDelayHandler(fdjtCoHi_delay,fdjtCoHi_highlight,target.name,_fdjt_cohi_timer);
+  fdjtDelayHandler
+    (fdjtCoHi_delay,fdjtCoHi_highlight,target.name,_fdjt_cohi_timer);
 }
 
 function fdjtCoHi_onmouseout(evt,classname_arg)
@@ -776,7 +777,8 @@ function fdjtCoHi_onmouseout(evt,classname_arg)
   var target=$T(evt);
   while (target)
     if ((target.name) && (target.name===_fdjt_cohi_name)) {
-      fdjtDelayHandler(fdjtCoHi_delay,fdjtCoHi_highlight,false,_fdjt_cohi_timer);
+      fdjtDelayHandler
+	(fdjtCoHi_delay,fdjtCoHi_highlight,false,_fdjt_cohi_timer);
       break;}
     else target=target.parentNode;
 }
@@ -926,6 +928,14 @@ function fdjtCheckAlt_onevent(evt)
 function fdjtCancelBubble(evt)
 {
   evt=evt||event||null;
+  evt.cancelBubble=true;
+}
+
+function fdjtCancelEvent(evt)
+{
+  evt=evt||event||null;
+  if (evt.preventDefault) evt.preventDefault();
+  else evt.returnValue=false;
   evt.cancelBubble=true;
 }
 
