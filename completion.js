@@ -310,7 +310,7 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
 	  var completion=completions[j++];
 	  var head=(completion.completehead)||(fdjtGetCompleteHead(completion));
 	  if (head===true) {
-	    if (heads.indexOf(head)<0) heads.push(completion);}
+	    if (heads.indexOf(completion)<0) heads.push(completion);}
 	  else if (heads.indexOf(head)<0) {
 	    variations.push(completion);
 	    heads.push(head);}}}

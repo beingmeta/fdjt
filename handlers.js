@@ -39,7 +39,23 @@ function fdjtShowHelp_onfocus(evt)
 	((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
 	((target.hasAttribute) ? (target.hasAttribute('HELPTEXT')) :
 	 (target.getAttribute('HELPTEXT')))) {
-      var helptext=document.getElementById(target.getAttribute('HELPTEXT'));
+      var helptext=$(target.getAttribute('HELPTEXT'));
+      if (helptext) {
+	if (fdjtIsBlockElt(helptext))
+	  helptext.style.display='block';
+	else helptext.style.display='inline';}
+      return;}
+    else target=target.parentNode;
+}
+
+function fdjtShowHelp_ontarget(target)
+{
+  while (target)
+    if ((target.nodeType==1) &&
+	((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
+	((target.hasAttribute) ? (target.hasAttribute('HELPTEXT')) :
+	 (target.getAttribute('HELPTEXT')))) {
+      var helptext=$(target.getAttribute('HELPTEXT'));
       if (helptext) {
 	if (fdjtIsBlockElt(helptext))
 	  helptext.style.display='block';
@@ -147,6 +163,14 @@ function fdjtAutoPrompt_onfocus(evt)
     elt.value='';
     elt.removeAttribute('isempty');}
   fdjtShowHelp_onfocus(evt);
+}
+
+function fdjtAutoPrompt_ontarget(elt)
+{
+  if ((elt) && (fdjtHasAttrib(elt,'isempty'))) {
+    elt.value='';
+    elt.removeAttribute('isempty');}
+  fdjtShowHelp_ontarget(elt);
 }
 
 function fdjtAutoPrompt_onblur(evt)

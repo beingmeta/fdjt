@@ -119,10 +119,12 @@ function fdjtIsTextInput(target)
 function fdjtIsClickactive(target)
 {
   while (target)
-    if ((target.tagName==="INPUT") ||
+    if (((target.tagName==='A')&&(target.href))||
+	(target.tagName==="INPUT") ||
 	(target.tagName==="TEXTAREA") ||
-	(target.className==="fdjtclickactive") ||
-	((target.tagName==='A')&&(target.href)))
+	(target.tagName==="SELECT") ||
+	(target.tagName==="OPTION") ||
+	(fdjtHasClass(target,"fdjtclickactive")))
       return true;
     else target=target.parentNode;
   return false;
