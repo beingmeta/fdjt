@@ -326,6 +326,17 @@ div.richtip .maximize { display: none; }
 .floatleft { float: left;}
 .floatright { float: right;}
 
+/* Twisties */
+
+div.twisties {}
+div.twisties span.twisty { 
+  vertical-align: top; cursor: pointer;}
+div.twisties span.twisty img { font-weight: bold;}
+div.twisties span.twisty img[alt='-'] { display: none;}
+div.twisties.expanded span.twisty img[alt='-'] { display: inline;}
+div.twisties.expanded span.twisty img[alt='+'] { display: none;}
+div.twisties.expanded span.twisty { font-weight: bold;}
+
 /* Displaying deadlinks as red, Wikipedia style */
 
 a.deadlink { color: red;}
