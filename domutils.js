@@ -1530,19 +1530,19 @@ var _fdjt_flat_width_fns={};
 function _fdjt_compute_flat_width(node,sofar)
 {
   if (node.nodeType===Node.ELEMENT_NODE) {
-    if (typeof _fdjt_flat_width_fns[node.tagName] == "function")
-      sofar=sofar+_fdjt_flat_width_fns[node.tagName](node);
-    else if (fdjtIndexOf(_fdjt_vertical_tags,node.tagName)>=0)
-      sofar=sofar+_fdjt_vertical_flat_width;
-    else if (note.getAttribute("flatwidth")) {
+    if (node.getAttribute("flatwidth")) {
       var fw=node.getAttribute("flatwidth");
-      if (typeof fw == "string") {
+      if (typeof fw === "string") {
 	if ((fw.length>0) && (fw[0]=='+'))
 	  sofar=sofar+parseInt(fw.slice(1));
 	else {
 	  var fwnum=parseInt(fw);
 	  if (typeof fwnum==="number") return sofar+fwnum;}}
-      else if (typeof fw == "number") return sofar+fw;}
+      else if (typeof fw === "number") return sofar+fw;}
+    else if (typeof _fdjt_flat_width_fns[node.tagName] === "function")
+      sofar=sofar+_fdjt_flat_width_fns[node.tagName](node);
+    else if (fdjtIndexOf(_fdjt_vertical_tags,node.tagName)>=0)
+      sofar=sofar+_fdjt_vertical_flat_width;
     if (node.hasChildNodes()) {
       var children=node.childNodes;
       var i=0; while (i<children.length) {
@@ -1554,12 +1554,6 @@ function _fdjt_compute_flat_width(node,sofar)
 	  sofar=_fdjt_compute_flat_width(child,sofar);
 	else {}}
       return sofar;}
-    else if (node.offsetWidth)
-      return sofar+Math.ceil(node.offsetWidth/10)+
-	Math.floor(node.offsetHeight/16)*_fdjt_vertical_flat_width;
-    else if (node.width)
-      return sofar+Math.ceil(node.width/10)+
-	Math.floor(node.height/16)*_fdjt_vertical_flat_width;
     else return sofar;}
   else if (node.nodeType===3)
     if (fdjtIsEmptyString(node.nodeValue))
@@ -1572,23 +1566,35 @@ var _fdjt_tag_widths=
   {"P": 8,"BR": 8,"UL": 8,"LI": 8,"BLOCKQUOTE": 8,
    "H1": 8,"H2": 8,"H3": 8,"H4": 8,"H5": 8,"H6": 8};
 
-function _fdjt_flat_width(node,sofar)
+function _fdjt_flat_width(node,sofar,childless)
 {
-  if (node.nodeType===1) {
-    var children=node.childNodes; var start=sofar;
-    sofar=sofar+_fdjt_tag_widths[node.tagName]||0;
-    if (children) {
-      var i=0; while (i<children.nodes) {
-	var child=children[i++];
-	if (child.nodeType===3)
-	  sofar=sofar+child.nodeValue.length;
-	else if (child.nodeType===1)
-	  sofar=_fdjt_flat_width(node,sofar);
-	else {}}}
-    return sofar;}
+  if (node.nodeType===1)
+    if (node.getAttribute("flatwidth")) {
+      var fwa=node.getAttribute("flatwidth");
+      var fw=parseInt(fwa);
+      if (fw) return sofar+fw;
+      else return sofar;}
+    else {
+      var children=node.childNodes; var start=sofar;
+      sofar=sofar+_fdjt_tag_widths[node.tagName]||0;
+      if (childless) return sofar;
+      else if (children) {
+	var i=0; while (i<children.nodes) {
+	  var child=children[i++];
+	  if (child.nodeType===3)
+	    sofar=sofar+child.nodeValue.length;
+	  else if (child.nodeType===1)
+	    sofar=_fdjt_flat_width(node,sofar);
+	  else {}}}
+      return sofar;}
   else if (child.nodeType===3)
     return sofar+child.nodeValue.length;
   else return sofar;
+}
+
+function fdjtTagWidth(node)
+{
+  return _fdjt_tag_widths[node.tagName]||0;
 }
 
 function fdjtFlatWidth(node)
