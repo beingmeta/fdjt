@@ -522,6 +522,28 @@ function fdjtUnEscape(string)
   else return string;
 }
 
+function fdjtPadNum(num,digits)
+{
+  var ndigits=
+    ((num<10)?(1):(num<100)?(2):(num<1000)?(3):(num<10000)?(4):
+     (num<100000)?(5):(num<1000000)?(6):(num<1000000)?(7):
+     (num<100000000)?(8):(num<1000000000)?(9):(num<10000000000)?(10):(11));
+  var nzeroes=digits-ndigits;
+  switch (nzeroes) {
+  case 0: return ""+num;
+  case 1: return "0"+num;
+  case 2: return "00"+num;
+  case 3: return "000"+num;
+  case 4: return "0000"+num;
+  case 5: return "00000"+num;
+  case 6: return "000000"+num;
+  case 7: return "0000000"+num;
+  case 8: return "00000000"+num;
+  case 9: return "000000000"+num;
+  case 10: return "0000000000"+num;
+  default: return ""+num;}
+}
+
 /* More string functions */
 
 function fdjtHasPrefix(string,prefix)
