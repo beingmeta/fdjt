@@ -384,7 +384,7 @@ function fdjtAddClass(elt,classname,attrib)
     else if (elt[0]==='#') {
       var elts=new Array();
       var ids=elt.split('#');
-      var i=1; while (i<ids.length) {
+      var i=0; while (i<ids.length) {
 	var e=document.getElementById(ids[i++]);
 	if (e) elts.push(e);}
       elt=elts;}
@@ -429,7 +429,7 @@ function fdjtDropClass(elt,classname,attrib,keep)
     else if (elt[0]==='#') {
       var elts=new Array();
       var ids=elt.split('#');
-      var i=1; while (i<ids.length) {
+      var i=0; while (i<ids.length) {
 	var e=document.getElementById(ids[i++]);
 	if (e) elts.push(e);}
       elt=elts;}
@@ -480,7 +480,7 @@ function fdjtToggleClass(elt,classname,attrib,keep)
     else if (elt[0]==='#') {
       var elts=new Array();
       var ids=elt.split('#');
-      var i=1; while (i<ids.length) {
+      var i=0; while (i<ids.length) {
 	var e=document.getElementById(ids[i++]);
 	if (e) elts.push(e);}
       elt=elts;}
@@ -524,7 +524,7 @@ function fdjtSwapClass(elt,classname,newclass,attrib)
     else if (elt[0]==='#') {
       var elts=new Array();
       var ids=elt.split('#');
-      var i=1; while (i<ids.length) {
+      var i=0; while (i<ids.length) {
 	var e=document.getElementById(ids[i++]);
 	if (e) elts.push(e);}
       elt=elts;}
