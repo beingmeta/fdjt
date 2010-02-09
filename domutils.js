@@ -1043,11 +1043,11 @@ function fdjtPrepend(elt_arg)
 
 function fdjtInsertBefore(before_arg)
 {
-  var parent=null, before=null;
+  var parent=null; var before=null;
   if (before_arg===null) return null;
   else if (typeof before_arg == 'string') {
-    before=document.getElementById(after_arg);
-    if (after==null) {
+    before=document.getElementById(before_arg);
+    if (before==null) {
       fdjtWarn("Invalid DOM before argument: "+before_arg);
       return;}}
   else before=before_arg;
