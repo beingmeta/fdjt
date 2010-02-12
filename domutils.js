@@ -1500,9 +1500,10 @@ function fdjtGetOffset(elt,withstack)
     top += elt.offsetTop;
     left += elt.offsetLeft;}
 
-  if (stack)
-    return new Array(left,top,stack);
-  else return new Array(left,top);
+  var result={}; result.left=left; result.top=top;
+  result.width=elt.offsetWidth; result.height=elt.offsetHeight;
+  if (stack) result.stack=stack;
+  return result;
 }
 
 function fdjtComputeOffsets(node,recache)
