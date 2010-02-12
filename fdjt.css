@@ -21,7 +21,9 @@
 
 /* New simplified display classes */
 
-.checkspan { white-space: nowrap; cursor: pointer;}
+.checkspan { cursor: pointer;}
+span.checkspan { white-space: nowrap; }
+a.checkspan { white-space: nowrap; }
 .checkspan[ischecked] { font-weight: bold; }
 /* This enables checkspans which have both left and right
    display values to control which side the text appears on */
