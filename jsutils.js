@@ -401,6 +401,25 @@ function fdjtOverlap(set1,set2)
   return overlap;
 }
 
+/* Getting element info */
+
+var fdjt_element_info={};
+
+function fdjtEltInfo(elt)
+{
+  return (((elt._fdjtid)&&(fdjt_element_info[elt._fdjtid]))||
+	  (_fdjt_newinfo(elt)));
+    
+}
+
+function _fdjt_newinfo(elt)
+{
+  var objid=fdjtObjID(elt);
+  var info=fdjt_element_info[objid];
+  if (info) return info;
+  return (fdjt_element_info[objid]={});
+}
+
 /* Converting numeric HTML entities */
 
 function fdjtUnEntify(string)
