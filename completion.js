@@ -554,7 +554,7 @@ function fdjtComplete_onkey(evt)
     if (fdjt_trace_completion)
       fdjtTrace("[%fs] Delaying handler fdjtComplete on %o",
 		fdjtElapsedTime(),target);
-    fdjtDelayHandler(200,fdjtComplete,target,target,"completedelay");}
+    fdjtDelay(200,fdjtComplete,target,target,"completedelay");}
   return true;
 }
 

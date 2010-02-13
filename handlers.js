@@ -792,7 +792,7 @@ function fdjtCoHi_onmouseover(evt,classname_arg)
     else if (target.name) break;  
     else target=target.parentNode;
   if (!(target)) return;
-  fdjtDelayHandler
+  fdjtDelay
     (fdjtCoHi_delay,fdjtCoHi_highlight,target.name,_fdjt_cohi_timer);
 }
 
@@ -801,7 +801,7 @@ function fdjtCoHi_onmouseout(evt,classname_arg)
   var target=$T(evt);
   while (target)
     if ((target.name) && (target.name===_fdjt_cohi_name)) {
-      fdjtDelayHandler
+      fdjtDelay
 	(fdjtCoHi_delay,fdjtCoHi_highlight,false,_fdjt_cohi_timer);
       break;}
     else target=target.parentNode;
@@ -851,7 +851,7 @@ function fdjtRadioToggle(elt,under,radioname,selname)
 var fdjt_trace_delays=false;
 var fdjt_global_delays=[];
 
-function fdjtDelayHandler(delay,handler,arg,context,delayname)
+function fdjtDelay(delay,handler,arg,context,delayname)
 {
   if (!(context)) context=arg;
   else if (context===true) context=fdjt_global_delays;
