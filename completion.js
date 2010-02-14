@@ -600,7 +600,6 @@ function fdjtSetCompletionCues(div,cues,onmissing)
     else if (fdjtHasClass(cue,"completion"))
       newcues.push(cue);
     else {}}
-  fdjtTrace("cur cues are %o new cues are %o",cur,newcues);
   var i=0; while (i<newcues.length) {
     var cue=newcues[i++];
     if (!(fdjtContains(cur,cue))) {fdjtAddClass(cue,"cue");}}
