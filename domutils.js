@@ -586,6 +586,52 @@ function fdjtPreviousElement(node)
     return scan;}
 }
 
+/* Going forward and backward */
+
+function fdjtForward(node,exclude)
+{
+  if ((node.childNodes)&&((node.childNodes.length)>0))
+    return node.childNodes[0];
+  else while (node)
+	 if (node.nextSibling)
+	   return node.nextSibling;
+	 else node=node.parentNode;
+  return false;
+}
+
+function fdjtNext(node,exclude)
+{
+  while (node)
+    if (node.nextSibling)
+      return node.nextSibling;
+    else node=node.parentNode;
+  return false;
+}
+
+function fdjtForwardNode(node,test)
+{
+  var scan=fdjtForward(node);
+  while (scan)
+    if (scan.nodeType===1)
+      if (!(test)) return scan;
+      else if (test(scan)) return scan;
+      else scan=fdjtForward(scan);
+    else scan=fdjtForward(scan);
+  return false;
+}
+
+function fdjtNextNode(node,test)
+{
+  var scan=fdjtNext(node);
+  while (scan)
+    if (scan.nodeType===1)
+      if (!(test)) return scan;
+      else if (test(scan)) return scan;
+      else scan=fdjtNext(scan);
+    else scan=fdjtNext(scan);
+  return false;
+}
+
 /* Searching by tag name */
 
 function fdjtGetParentByTagName(node,tagname)
@@ -1490,19 +1536,25 @@ function fdjtIsAtTop(elt,delta)
 
 function fdjtGetOffset(elt,withstack)
 {
+  var result={};
   var top = elt.offsetTop;
   var left = elt.offsetLeft;
   var stack = ((withstack) ? (new Array(elt)) : false);
-  
+  var width=elt.offsetWidth;
+  var height=elt.offsetHeight;
+
   while(elt.offsetParent) {
     elt = elt.offsetParent;
     if (withstack) withstack.push(elt);
     top += elt.offsetTop;
     left += elt.offsetLeft;}
 
-  var result={}; result.left=left; result.top=top;
-  result.width=elt.offsetWidth; result.height=elt.offsetHeight;
+  result.left=left; result.top=top;
+  result.right=left+width; result.bottom=top+height;
+  result.width=width; result.height=height;
+
   if (stack) result.stack=stack;
+
   return result;
 }
 
