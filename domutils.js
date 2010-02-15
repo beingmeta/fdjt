@@ -1495,6 +1495,14 @@ function fdjtIsVisible(elt,partial)
     top += elt.offsetTop;
     left += elt.offsetLeft;}
 
+  /*
+  fdjtTrace("fdjtIsVisible%s top=%o left=%o height=%o width=%o",
+	    ((partial)?("(partial)"):""),
+	    top,left,height,width);
+  fdjtTrace("fdjtIsVisible winx=%o winy=%o winxedge=%o winyedge=%o",
+	    winx,winy,winxedge,winyedge);
+  */
+
   if (partial)
     // There are three cases we check for:
     return (
