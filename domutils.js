@@ -78,8 +78,11 @@ function fdjtNeedElt(arg,name)
 /* Getting display style information */
 
 var fdjt_tag_display_styles={
-  "DIV": "block","P": "block","LI": "list-item",
-  "UL": "block","BLOCKQUOTE":"block","PRE":"block",
+  "DIV": "block","P": "block","BLOCKQUOTE":"block",
+  "H1": "block","H2": "block","H3": "block","H4": "block",
+  "H5": "block","H6": "block","H7": "block","H8": "block",
+  "UL": "block","LI": "list-item",
+  "DL": "block","DT": "list-item","DD": "list-item",
   "SPAN": "inline","EM": "inline","STRONG": "inline",
   "TT": "inline","DEFN": "inline","A": "inline",
   "TD": "table-cell","TR": "table-row",
@@ -222,6 +225,19 @@ function fdjtHasContent(node,recur)
 	else {}
       else if ((recur) && (child.nodeType===1))
 	if (fdjtHasContent(child)) return true;
+	else {}}
+    return false;}
+  else return false;
+}
+
+function fdjtHasText(node)
+{
+  if (node.childNodes) {
+    var children=node.childNodes;
+    var i=0; while (i<children.length) {
+      var child=children[i++];
+      if (child.nodeType===3)
+	if (child.nodeValue.search(/\w/g)>=0) return true;
 	else {}}
     return false;}
   else return false;
@@ -615,7 +631,7 @@ function fdjtForwardNode(node,test)
     if (scan.nodeType===1)
       if (!(test)) return scan;
       else if (test(scan)) return scan;
-      else scan=fdjtForward(scan);
+      else scan=fdjtNext(scan);
     else scan=fdjtForward(scan);
   return false;
 }

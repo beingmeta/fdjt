@@ -82,6 +82,15 @@ function fdjtLoadMessage(string)
     window.console.log.apply(window.console,arguments);
 }
 
+/* For monitoring return values */
+function fdjtWatch(x,message,data)
+{
+  if (data)
+    fdjtLog("[%f] %s returning %o given %o",fdjtET(),message,x,data);
+  else fdjtLog("[%f] %s returning %o",fdjtET(),message,x);
+  return x;
+}
+
 /* Object add/drop operations */
 
 
