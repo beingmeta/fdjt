@@ -1558,7 +1558,7 @@ function fdjtIsAtTop(elt,delta)
 
 /* Getting cumulative offsets */
 
-function fdjtGetOffset(elt,withstack)
+function fdjtGetOffset(elt,withstack,top)
 {
   var result={};
   var top = elt.offsetTop;
@@ -1567,7 +1567,8 @@ function fdjtGetOffset(elt,withstack)
   var width=elt.offsetWidth;
   var height=elt.offsetHeight;
 
-  while(elt.offsetParent) {
+  while (elt.offsetParent) {
+    if ((top)&&(elt===top)) break;
     elt = elt.offsetParent;
     if (withstack) withstack.push(elt);
     top += elt.offsetTop;
