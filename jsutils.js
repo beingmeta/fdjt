@@ -826,6 +826,21 @@ function fdjtIntervalString(interval)
     return _("%1 weeks, %2 days",weeks,days);}
 }
 
+function fdjtShortIntervalString(interval)
+{
+  // This is designed for short intervals
+  if (interval<0.001)
+    return Math.round(interval*1000000)+"us";
+  else if (interval<0.1)
+    return Math.round(interval*1000)+"ms";
+  else if (interval<120)
+    return (Math.round(interval*100)/100)+"s";
+  else {
+    var min=Math.round(interval/60);
+    var secs=Math.round(interval-min*6000)/100;
+    return min+"m"+secs+"s";}
+}
+
 function fdjtRunTimes(pname,start)
 {
   var point=start; var report="";
