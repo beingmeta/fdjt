@@ -442,7 +442,8 @@ function fdjtCheckSpan_update(checkspan,checked,evt)
       if (checked)
 	checkspans[i++].setAttribute('ischecked','true');
       else checkspans[i++].removeAttribute('ischecked');}}
-  if (checkspan.onchange) checkspan.onchange(evt);
+  if (!(evt)) {}
+  else if (checkspan.onchange) checkspan.onchange(evt);
   else if (checkspan.getAttribute("onchange")) {
     checkspan.onchange=new Function("event",checkspan.getAttribute("onchange"));
     checkspan.onchange(evt);}
@@ -632,20 +633,21 @@ function fdjtMultiText_onkeypress(evt,tagname)
     if ((typeof value === "object") && (value.nodeType))
       new_elt=value;
     else {
-      new_elt=fdjtNewElement(tagname,(elt.className||"multitext"));
+      new_elt=fdjtNewElement(tagname,(elt.className||"multitext"),
+			     fdjtCheckbox(elt.name,elt.value,true),
+			     elt.value);
       // Just in case we're combining these two functions, it doesn't
       // really make sense for the checkspan to have an autoprompt class
       fdjtDropClass(new_elt,"autoprompt");
       fdjtAddClass(new_elt,"checkspan");
-      new_elt.setAttribute("ischecked","yes");
-      fdjtAppend(new_elt,fdjtCheckbox(elt.name,elt.value,true));
-      fdjtAppend(new_elt,elt.value);}
+      fdjtCheckSpan_setup(new_elt);
+      new_elt.setAttribute("ischecked","yes");}
     fdjtInsertAfter(elt," ",new_elt);
     elt.value="";
     if (evt.preventDefault) evt.preventDefault(); else evt.returnValue=false;
     evt.cancelBubble=true;
     return false;}
-  else return;
+  else return true;
 }
 
 /* Text checking */

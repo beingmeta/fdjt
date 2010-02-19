@@ -328,6 +328,19 @@ div.richtip .maximize { display: none; }
 .floatleft { float: left;}
 .floatright { float: right;}
 
+/* Tables for form input */
+
+table.fdjtform { width: 100%;}
+table.fdjtform th { text-align: right; vertical-align: top;}
+table.fdjtform td { text-align: left; vertical-align: top;}
+table.fdjtform td { text-align: left; vertical-align: top;}
+
+table.fdjtform tbody tr.collapsible { display: none;}
+table.fdjtform tbody.expanded tr.collapsible { display: table-row;}
+table.fdjtform tbody .expanded { display: none;}
+table.fdjtform tbody.expanded span.expanded { display: inline;}
+table.fdjtform tbody.expanded .collapsed { display: none;}
+
 /* Twisties */
 
 div.twisties {}
