@@ -766,6 +766,11 @@ function _(string)
 
 /* Time functions */
 
+function fdjtTime()
+{
+  return (new Date()).getTime();
+}
+
 function fdjtTick()
 {
   return (new Date()).getTime()/1000;
