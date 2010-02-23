@@ -436,8 +436,7 @@ function fdjtCheckSpan_update(checkspan,checked,evt)
   {var i=0; while (i<inputs.length) {
       var input=inputs[i++];
       if ((input.type==='radio') || (input.type==='checkbox'))
-	input.checked=checked;
-      else i++;}}
+	input.checked=checked;}}
   {var i=0; while (i<checkspans.length) {
       if (checked)
 	checkspans[i++].setAttribute('ischecked','true');
