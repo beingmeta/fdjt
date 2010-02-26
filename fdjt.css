@@ -336,12 +336,14 @@ table.fdjtform th img { text-align: right; vertical-align: bottom;}
 table.fdjtform td { text-align: left; vertical-align: top;}
 table.fdjtform td { text-align: left; vertical-align: top;}
 
-table.fdjtform tbody tr.collapsible { display: none;}
-table.fdjtform tbody.expanded tr.collapsible { display: table-row;}
-table.fdjtform tbody .expanded { display: none;}
-table.fdjtform tbody.expanded span.expanded { display: inline;}
-table.fdjtform tbody.expanded img.expanded { display: inline;}
-table.fdjtform tbody.expanded .collapsed { display: none;}
+table.fdjtform tbody.collapsible tr.collapsible { display: none;}
+table.fdjtform tbody.collapsible div.collapsible { display: none;}
+table.fdjtform tbody.collapsible.expanded tr.collapsible { display: table-row;}
+table.fdjtform tbody.collapsible.expanded div.collapsible { display: block;}
+table.fdjtform tbody.collapsible .expanded { display: none;}
+table.fdjtform tbody.collapsible.expanded span.expanded { display: inline;}
+table.fdjtform tbody.collapsible.expanded img.expanded { display: inline;}
+table.fdjtform tbody.collapsible.expanded .collapsed { display: none;}
 
 /* Twisties */
 

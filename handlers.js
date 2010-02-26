@@ -224,6 +224,15 @@ function fdjtAutoPrompt_cleanup(form)
       if (fdjtHasAttrib(elt,'isempty')) elt.value="";}
 }
 
+// Removes autoprompt text from empty fields
+function fdjtAutoPrompt_onsubmit(evt)
+{
+  evt=evt||event;
+  if (evt) {
+    var target=$P("FORM",evt.target);
+    fdjtAutoprompt_cleanup(target);}
+}
+
 /* Tabs */
 
 function fdjtTab_onclick(evt,shown)
