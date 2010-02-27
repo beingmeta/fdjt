@@ -95,7 +95,10 @@ function fdjtGuessDisplayStyle(elt)
 
 function fdjtDisplayStyle(elt)
 {
-  return fdjt_tag_display_styles[elt.tagName]||fdjtGuessDisplayStyle(elt);
+  return (((window.getComputedStyle)&&(window.getComputedStyle(elt))&&
+	   (window.getComputedStyle(elt).display))||
+	  (fdjt_tag_display_styles[elt.tagName])||
+	  (fdjtGuessDisplayStyle(elt)));
 }
 
 function fdjtIsBlockElt(elt)
