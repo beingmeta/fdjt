@@ -95,8 +95,8 @@ function fdjtGuessDisplayStyle(elt)
 
 function fdjtDisplayStyle(elt)
 {
-  return (((window.getComputedStyle)&&(window.getComputedStyle(elt))&&
-	   (window.getComputedStyle(elt).display))||
+  return (((window.getComputedStyle)&&(window.getComputedStyle(elt,null))&&
+	   (window.getComputedStyle(elt,null).display))||
 	  (fdjt_tag_display_styles[elt.tagName])||
 	  (fdjtGuessDisplayStyle(elt)));
 }
