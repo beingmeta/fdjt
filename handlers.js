@@ -230,7 +230,7 @@ function fdjtAutoPrompt_onsubmit(evt)
   evt=evt||event;
   if (evt) {
     var target=$P("FORM",evt.target);
-    fdjtAutoprompt_cleanup(target);}
+    fdjtAutoPrompt_cleanup(target);}
 }
 
 /* Tabs */
