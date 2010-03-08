@@ -138,12 +138,6 @@ function fdjtIsClickactive(target)
 
 /* DOMish utils */
 
-// Not sure what is most portable to have as a final clause.
-//  IE seems to support Element but not Node.
-var fdjtNode=((typeof Node == "undefined") ?
-	      ((Element) ? (Element.prototype) : (false)) :
-	      (Node));
-
 function fdjtNodify(arg)
 {
   if (typeof arg === "string")
