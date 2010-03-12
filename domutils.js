@@ -1572,8 +1572,23 @@ function fdjtGetOffset(elt,withstack,top)
     left += elt.offsetLeft;}
 
   result.left=left; result.top=top;
+  result.width=width;
+  result.height=height;
+  
   result.right=left+width; result.bottom=top+height;
-  result.width=width; result.height=height;
+
+  /*
+  var styleinfo=((window.getComputedStyle)&&
+		 (window.getComputedStyle(elt,null)));
+  if (styleinfo) {
+    result.width=result.width+
+      parseInt(styleinfo.marginLeft)+
+      parseInt(styleinfo.marginRight);
+    result.height=result.height+
+      parseInt(styleinfo.marginTop)+
+      parseInt(styleinfo.marginBottom);}
+  result.right=left+result.width; result.bottom=top+result.height;
+  */
 
   if (stack) result.stack=stack;
 
