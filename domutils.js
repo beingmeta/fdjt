@@ -1861,59 +1861,68 @@ function fdjtSearchContent(node,spec,id,results)
 
 function fdjtGetCookie(name,parse)
 {
-  var cookies=document.cookie;
-  var namepat=new RegExp("(^|(; ))"+name+"=");
-  var pos=cookies.search(namepat);
-  var valuestring;
-  if (pos>=0) {
-    var start=cookies.indexOf('=',pos)+1;
-    var end=cookies.indexOf(';',start);
-    if (end>0) valuestring=cookies.slice(start,end);
-    else valuestring=cookies.slice(start);}
-  else return false;
-  if (parse)
-    return JSON.parse(decodeURIComponent(valuestring));
-  else return decodeURIComponent(valuestring);
+  try {
+    var cookies=document.cookie;
+    var namepat=new RegExp("(^|(; ))"+name+"=");
+    var pos=cookies.search(namepat);
+    var valuestring;
+    if (pos>=0) {
+      var start=cookies.indexOf('=',pos)+1;
+      var end=cookies.indexOf(';',start);
+      if (end>0) valuestring=cookies.slice(start,end);
+      else valuestring=cookies.slice(start);}
+    else return false;
+    if (parse)
+      return JSON.parse(decodeURIComponent(valuestring));
+    else return decodeURIComponent(valuestring);}
+  catch (ex) {
+    return false;}
 }
 
 function fdjtSetCookie(name,value,expires,path,domain)
 {
-  if (value) {
-    var valuestring=
-      ((typeof value === 'string') ? (value) :
-       (value.toJSON) ? (value.toJSON()) :
-       (value.toString) ? (value.toString()) : (value));
-    var cookietext=name+"="+encodeURIComponent(valuestring);
-    if (expires)
-      if (typeof(expires)==='string')
-	cookietext=cookietext+'; '+expires;
-      else if (expires.toGMTString)
-	cookietext=cookietext+"; expires="+expires.toGMTString();
-      else if (typeof(expires)==='number')
-	if (expires>0) {
-	  var now=new Date();
-	  now.setTime(now.getTime()+expires);
-	  cookietext=cookietext+"; expires="+now.toGMTString;}
-	else cookietext=cookietext+"; expires=Sun 1 Jan 2000 00:00:00 UTC";
-      else {}
-    if (path) cookietext=cookietext+"; path="+path;
-    // This certainly doesn't work generally and might not work ever
-    if (domain) cookietext=cookietext+"; domain="+domain;
-    // fdjtTrace("Setting cookie %o cookietext=%o",name,cookietext);
-    document.cookie=cookietext;}
-  else fdjtClearCookie(name,path,domain);
+  try {
+    if (value) {
+      var valuestring=
+	((typeof value === 'string') ? (value) :
+	 (value.toJSON) ? (value.toJSON()) :
+	 (value.toString) ? (value.toString()) : (value));
+      var cookietext=name+"="+encodeURIComponent(valuestring);
+      if (expires)
+	if (typeof(expires)==='string')
+	  cookietext=cookietext+'; '+expires;
+	else if (expires.toGMTString)
+	  cookietext=cookietext+"; expires="+expires.toGMTString();
+	else if (typeof(expires)==='number')
+	  if (expires>0) {
+	    var now=new Date();
+	    now.setTime(now.getTime()+expires);
+	    cookietext=cookietext+"; expires="+now.toGMTString;}
+	  else cookietext=cookietext+"; expires=Sun 1 Jan 2000 00:00:00 UTC";
+	else {}
+      if (path) cookietext=cookietext+"; path="+path;
+      // This certainly doesn't work generally and might not work ever
+      if (domain) cookietext=cookietext+"; domain="+domain;
+      // fdjtTrace("Setting cookie %o cookietext=%o",name,cookietext);
+      document.cookie=cookietext;}
+    else fdjtClearCookie(name,path,domain);}
+  catch (ex) {
+    fdjtWarn("Error setting cookie %s",name);}
 }
 
 function fdjtClearCookie(name,path,domain)
 {
-  var valuestring="ignoreme";
-  var cookietext=name+"="+encodeURIComponent(valuestring)+
-    "; expires=Sun 1 Jan 2000 00:00:00 UTC";
-  if (path) cookietext=cookietext+"; path="+path;
-  // This certainly doesn't work generally and might not work ever
-  if (domain) cookietext=cookietext+"; domain="+domain;
-  // fdjtTrace("Clearing cookie %o: text=%o",name,cookietext);
-  document.cookie=cookietext;
+  try {
+    var valuestring="ignoreme";
+    var cookietext=name+"="+encodeURIComponent(valuestring)+
+      "; expires=Sun 1 Jan 2000 00:00:00 UTC";
+    if (path) cookietext=cookietext+"; path="+path;
+    // This certainly doesn't work generally and might not work ever
+    if (domain) cookietext=cookietext+"; domain="+domain;
+    // fdjtTrace("Clearing cookie %o: text=%o",name,cookietext);
+    document.cookie=cookietext;}
+  catch (ex) {
+    fdjtWarn("Error clearing cookie %s",name);}
 }
 
 /* Getting anchors (making up IDs if neccessary) */
