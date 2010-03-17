@@ -460,19 +460,28 @@ function fdjtCheckSpan_update(checkspan,checked,evt)
 function fdjtCheckSpan_onclick(evt)
 {
   evt=evt||event||null;
-  var target=$T(evt); var checkspan=$P(".checkspan",target);
+  var clicked=false;
+  var target=$T(evt);
+  var checkspan=$P(".checkspan",target);
   fdjtCheshire_stop(evt);
+  if (!(checkspan)) return;
   while (target.parentNode) {
     if (target.nodeType!=1) target=target.parentNode;
     else if (fdjtHasClass(target,'checkspan')) break;
     else if (target.tagName==='A') return;
+    else if ((target.tagName==='INPUT')&&
+	     ((target.type==='checkbox')||(target.type==='radio'))) {
+      clicked=target; break;}
     else if (target.tagName==='INPUT') return;
     else target=target.parentNode;}
-  if (!((target) && (fdjtHasClass(target,'checkspan')))) return;
   var inputs=fdjtGetChildrenByTagName(target,'INPUT');
   var i=0; while (i<inputs.length) {
     var input=inputs[i++];
     if (input.disabled) {}
+    else if (input===clicked)
+      if (input.checked)
+	return fdjtCheckSpan_update(checkspan,true,evt);
+      else return fdjtCheckSpan_update(checkspan,false,evt);
     else if ((input.type==='radio') || (input.type==='checkbox'))
       if (input.checked)
 	return fdjtCheckSpan_update(checkspan,false,evt);
