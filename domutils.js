@@ -278,7 +278,7 @@ function fdjtCacheAttrib(elt,attribname,xform,dflt)
 function fdjtSetAttrib(elt,attribname,attribval)
 {
   if (typeof elt === 'string') elt=document.getElementById(elt);
-  if ((elt) || (typeof elt === 'string')) {
+  if ((!(elt)) || (typeof elt === 'string')) {
     fdjtWarn("Bad element %o for fdjtSetAttrib",elt);
     return;}
   else if (elt.setAttribute)
