@@ -232,7 +232,7 @@ function fdjtArguments(argobj,start)
   var i=start||0;
   var result=new Array(argobj.length-i);
   while (i<argobj.length) {
-    result[i]=argobj[i]; i++;}
+    result[i-start]=argobj[i]; i++;}
   return result;
 }
 
