@@ -186,8 +186,8 @@ function fdjtTextify(arg,flat,inside)
 	       (display_type==="table") ||
 	       (display_type==="preformatted")) {
 	string="\n"; suffix="\n";}
-      else if (display_style==="table-row") suffix="\n";
-      else if (display_style==="table-cell") string="\t";
+      else if (display_type==="table-row") suffix="\n";
+      else if (display_type==="table-cell") string="\t";
       else {}
       var i=0; while (i<children.length) {
 	var child=children[i++];
