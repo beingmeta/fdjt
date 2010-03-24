@@ -22,7 +22,7 @@
 /* New simplified display classes */
 
 .checkspan { cursor: pointer;}
-span.checkspan { white-space: nowrap; }
+span.checkspan { white-space: nowrap; cursor: pointer;}
 a.checkspan { white-space: nowrap; }
 .checkspan[ischecked] { font-weight: bold; }
 /* This enables checkspans which have both left and right

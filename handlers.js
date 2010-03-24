@@ -497,7 +497,7 @@ function fdjtCheckSpan_onchange(evt)
   $T(evt).blur();
 }
 
-function fdjtCheckSpan_setup(checkspan)
+function fdjtCheckSpan_setup(checkspan,nohandler)
 {
   if (!(checkspan)) {
     var elements=fdjtGetElementsByClassName('checkspan');
@@ -510,7 +510,12 @@ function fdjtCheckSpan_setup(checkspan)
 		    (fdjtGetElementsByClassName('checkspan',checkspan)));
     var i=0; while (i<checkspans.length) {
       var checkspan=checkspans[i++];
-      if (!(checkspan.onclick)) checkspan.onclick=fdjtCheckSpan_onclick;
+      if (!(nohandler)) {
+	var handled=checkspan;
+	while (handled)
+	  if (handled.onclick===fdjtCheckSpan_onclick) break;
+	  else handled=handled.parentNode;
+	if (!(handled)) checkspan.onclick=fdjtCheckSpan_onclick;}
       var inputs=fdjtGetElementsByTagName("INPUT",checkspan);
       var j=0; while (j<inputs.length) {
 	var input=inputs[j++];
