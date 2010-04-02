@@ -22,6 +22,8 @@
 /* New simplified display classes */
 
 .checkspan { cursor: pointer;}
+.checkspan .alt { font-size: inherit; font-weight: bold;}
+.checkspan[ischecked] .alt { font-size: 80%; font-weight: normal;}
 span.checkspan { white-space: nowrap; cursor: pointer;}
 a.checkspan { white-space: nowrap; }
 .checkspan[ischecked] { font-weight: bold; }

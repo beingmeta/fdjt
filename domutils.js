@@ -338,6 +338,29 @@ function fdjtGetLink(name,foldcase)
   return false;
 }
 
+var fdjt_query_foldcase=true;
+// This gets a META content field
+function fdjtGetQuery(name,foldcase)
+{
+  if (!(location.search)) return false;
+  if (typeof foldcase==='undefined') foldcase=fdjt_query_foldcase;
+  var namepat=new RegExp("(&|^|\\?)"+name+"(=|&|$)",((foldcase)?"gi":"g"));
+  var query=location.search;
+  var start=query.search(namepat);
+  if (start<0) return false;
+  else {
+    // Skip over separator if non-initial
+    if ((query[start]==='?')||(query[start]==='&')) start++;
+    // Skip over the name
+    var valstart=start+name.length;
+    if (query[valstart]==="=") {
+      var valstring=query.slice(valstart+1);
+      var end=valstring.search(/(&|$)/g);
+      if (end<=0) return query.slice(start,valstart);
+      else return valstring.slice(0,end);}
+    else return query.slice(start,end);}
+}
+
 /* This is a kludge to force a redisplay when the browser
    doesn't neccessarily do it automatically.  (you know who
    I'm talking about, IE!) */
@@ -1923,6 +1946,51 @@ function fdjtClearCookie(name,path,domain)
     document.cookie=cookietext;}
   catch (ex) {
     fdjtWarn("Error clearing cookie %s",name);}
+}
+
+/* Session storage */
+
+function fdjtSetSession(name,val)
+{
+  if (window.sessionStorage)
+    window.sessionStorage[name]=val;
+  else fdjtSetCookie(name,val);
+}
+
+function fdjtGetSession(name)
+{
+  if (window.sessionStorage)
+    return window.sessionStorage[name];
+  else fdjtGetCookie(name);
+}
+
+function fdjtDropSession(name)
+{
+  if (window.sessionStorage)
+    return window.sessionStorage.removeItem(name);
+  else fdjtClearCookie(name);
+}
+
+/* Local storage */
+
+function fdjtSetLocal(name,val)
+{
+  if (window.localStorage)
+    window.localStorage[name]=val;
+}
+
+function fdjtGetLocal(name)
+{
+  if (window.localStorage)
+    return window.localStorage[name];
+  else return false;
+}
+
+function fdjtDropLocal(name)
+{
+  if (window.localStorage)
+    return window.localStorage.removeItem(name);
+  else return false;
 }
 
 /* Getting anchors (making up IDs if neccessary) */
