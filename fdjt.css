@@ -105,6 +105,12 @@ div.tabcontent div.narrative {
 div.tabcontent p {
  margin: 2px; padding: 2px;}
 
+/* Lisp(ish) data */
+
+.lispish { font-family: fixed;}
+.lispexpr { font-family: fixed; font-style: italic;}
+.lispvalue { font-family: fixed;}
+
 /* DTerms (from knowlets) */
 
 span.dterm {
@@ -154,6 +160,11 @@ span.font_sizer {
 
 div.flexbox { max-height: 128px;}
 div.flexbox_expanded { max-height: inherit;}
+
+/* Formatted output */
+
+div.fdjtdata {
+  font-family: fixed; width: 100%; white-space: preserve;}
 
 /* Data tables */
 
@@ -344,6 +355,9 @@ table.fdjtform tbody.collapsible .expanded { display: none;}
 table.fdjtform tbody.collapsible.expanded span.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded img.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded .collapsed { display: none;}
+
+form.evalform input[name='EXPR'] {
+    font-family: fixed; width: 100%;}
 
 /* Twisties */
 
