@@ -38,40 +38,77 @@ var fdjt_rdq="\u201D";
 
 var _fdjt_trace_load=false;
 
+// Whether to use fdjtMkstring convert arguments to a string.
+var fdjt_format_console=false;
+var fdjt_console_fn=false;
+var fdjt_console_obj=false;
+
 /* This needs to be customized for non-DOM ECMAScript */
 
 function fdjtLog(string)
 {
-  if ((window.console) && (window.console.log) &&
-      (window.console.count))
-    window.console.log.apply(window.console,arguments);
+  var output=false;
+  if (fdjt_format_console)
+    output=fdjtMkstring.apply(fdjtMkstring,arguments);
+  if (fdjt_console_fn)
+    if (output) fdjt_console_fn(fdjt_console_obj,output);
+    else fdjt_console_fn.apply(fdjt_console_obj,arguments);
+  else if ((window.console) && (window.console.log) &&
+	   (window.console.count))
+    if (output)
+      window.console.log.call(window.console,output);
+    else window.console.log.apply(window.console,arguments);
 }
 
 // Insert these for temporary logging statements, which will be easier
 // to find
 function fdjtTrace(string)
 {
-  if ((window.console) && (window.console.log) &&
-      (window.console.count))
-    window.console.log.apply(window.console,arguments);
+  var output=false;
+  if (fdjt_format_console)
+    output=fdjtMkstring.apply(fdjtMkstring,arguments);
+  if (fdjt_console_fn)
+    if (output) fdjt_console_fn(fdjt_console_obj,output);
+    else fdjt_console_fn.apply(fdjt_console_obj,arguments);
+  else if ((window.console) && (window.console.log) &&
+	   (window.console.count))
+    if (output)
+      window.console.log.call(window.console,output);
+    else window.console.log.apply(window.console,arguments);
 }
 
 // Insert these for breakpoints you can set
 function fdjtBreak(string)
 {
-  if ((window.console) && (window.console.log) &&
-      (window.console.count))
-    window.console.log.apply(window.console,arguments);
+  var output=false;
+  if (fdjt_format_console)
+    output=fdjtMkstring.apply(fdjtMkstring,arguments);
+  if (fdjt_console_fn)
+    if (output) fdjt_console_fn(fdjt_console_obj,output);
+    else fdjt_console_fn.apply(fdjt_console_obj,arguments);
+  else if ((window.console) && (window.console.log) &&
+	   (window.console.count))
+    if (output)
+      window.console.log.call(window.console,output);
+    else window.console.log.apply(window.console,arguments);
   return false;
 }
 
 // This goes to an alert if it can't get to the console
 function fdjtWarn(string)
 {
-  if ((window.console) && (window.console.log) &&
-      (window.console.count))
-    window.console.log.apply(window.console,arguments);
-  else alert(string);
+  var output=false;
+  if (fdjt_format_console)
+    output=fdjtMkstring.apply(fdjtMkstring,arguments);
+  if (fdjt_console_fn)
+    if (output) fdjt_console_fn(fdjt_console_obj,output);
+    else fdjt_console_fn.apply(fdjt_console_obj,arguments);
+  else if ((window.console) && (window.console.log) &&
+	   (window.console.count))
+    if (output)
+      window.console.log.call(window.console,output);
+    else window.console.log.apply(window.console,arguments);
+  else alert(fdjtMkstring.apply(fdjtMkstring,arguments));
 }
 
 // Individually for file loading messages
@@ -91,8 +128,56 @@ function fdjtWatch(x,message,data)
   return x;
 }
 
-/* Object add/drop operations */
+/* Formatted strings */
 
+function fdjtMkstring(string)
+{
+  var output="";
+  var cmd=string.indexOf('%'); var i=1;
+  while (cmd>=0) {
+    if (cmd>0) output=output+string.slice(0,cmd);
+    if (string[cmd+1]==='%') output=output+'%';
+    else if (string[cmd+1]==='o') {
+      var arg=arguments[i++];
+      if (typeof arg === 'string')
+	output=output+"'"+arg+"'";
+      else if (typeof arg === 'number')
+	output=output+arg;
+      else output=output+fdjtObj2String(arg);}
+    else if (arguments[i])
+      output=output+arguments[i++];
+    else if (typeof arguments[i] === 'undefined') {
+      output=output+'?undef?'; i++;}
+    else output=output+arguments[i++];
+    string=string.slice(cmd+2);
+    cmd=string.indexOf('%');}
+  output=output+string;
+  return output;
+}
+
+
+function fdjtObj2String(arg)
+{
+  if (typeof arg === 'undefined') return '?undef?';
+  else if (!(arg)) return arg;
+  else if (arg.tagName) {
+    var output="<"+arg.tagName;
+    if (arg.className)
+      output=output+"."+arg.className.replace('\s','.');
+    if (arg.id) output=output+"#"+arg.id;
+    return output+">";}
+  else if (arg.nodeType)
+	if (arg.nodeType===3)
+	  return '<"'+arg.nodeValue+'">';
+	else return '<'+arg.nodeType+'>';
+  else if (arg.oid) return arg.oid;
+  else if (arg._fdjtid) return '#@'+arg._fdjtid;
+  else if ((arg.type)&&(arg.target)) 
+    return "["+arg.type+"@"+fdjtObj2String(arg.target)+"]";
+  else return arg;
+}
+
+/* Object add/drop operations */
 
 function fdjtAdd(obj,field,val,nodup)
 {
