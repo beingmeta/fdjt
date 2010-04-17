@@ -62,8 +62,10 @@ function fdjtOID(string,slots)
   if (slash<0) return false;
   if (fdjt_trace_oids) fdjtLog("Creating oid %s from %o",string,slots);
   var offstart=string.length-5;
-  var poolid=((slash<offstart)?(string.slice(0,offstart)):(string.slice(0,slash)));
-  var offid=parseInt(((slash<offstart)?(string.slice(offstart)):(string.slice(slash+1))),16);
+  var poolid=((slash<offstart)?(string.slice(0,offstart)):
+	      (string.slice(0,slash)));
+  var offid=parseInt(((slash<offstart)?(string.slice(offstart)):
+		      (string.slice(slash+1))),16);
   var pool=fdjtPools[poolid]||(new fdjtPool(poolid));
   if (!(slots)) slots=this;
   slots._fdjtid=pool.idbase+offid;
