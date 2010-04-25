@@ -39,7 +39,7 @@ function fdjtShowHelp_onfocus(evt)
 	((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
 	((target.hasAttribute) ? (target.hasAttribute('HELPTEXT')) :
 	 (target.getAttribute('HELPTEXT')))) {
-      var helptext=$(target.getAttribute('HELPTEXT'));
+      var helptext=$ID(target.getAttribute('HELPTEXT'));
       if (helptext) {
 	if (fdjtIsBlockElt(helptext))
 	  helptext.style.display='block';
@@ -55,7 +55,7 @@ function fdjtShowHelp_ontarget(target)
 	((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
 	((target.hasAttribute) ? (target.hasAttribute('HELPTEXT')) :
 	 (target.getAttribute('HELPTEXT')))) {
-      var helptext=$(target.getAttribute('HELPTEXT'));
+      var helptext=$ID(target.getAttribute('HELPTEXT'));
       if (helptext) {
 	if (fdjtIsBlockElt(helptext))
 	  helptext.style.display='block';
@@ -190,7 +190,7 @@ function fdjtAutoPrompt_onblur(evt)
 function fdjtAutoPrompt_setup(elt)
 {
   if (!(elt)) elt=document.body;
-  var elements=$$('INPUT',elt).concat($$('TEXTAREA',elt));
+  var elements=FDJT$('INPUT',elt).concat(FDJT$('TEXTAREA',elt));
   var i=0; if (elements) while (i<elements.length) {
       var elt=elements[i++];
       if (((elt.tagName==="TEXTAREA") ||
@@ -217,8 +217,8 @@ function fdjtAutoPrompt_setup(elt)
 function fdjtAutoPrompt_cleanup(form)
 {
   var elements=((form) ?
-		($$('INPUT',form).concat($$('TEXTAREA',form))) :
-		($$('INPUT').concat($$('TEXTAREA'))));
+		(FDJT$('INPUT',form).concat(FDJT$('TEXTAREA',form))) :
+		(FDJT$('INPUT').concat(FDJT$('TEXTAREA'))));
   var i=0; if (elements) while (i<elements.length) {
       var elt=elements[i++];
       if (fdjtHasAttrib(elt,'isempty')) elt.value="";}
@@ -229,7 +229,7 @@ function fdjtAutoPrompt_onsubmit(evt)
 {
   evt=evt||event;
   if (evt) {
-    var target=$P("FORM",evt.target);
+    var target=FDJT$P("FORM",evt.target);
     fdjtAutoPrompt_cleanup(target);}
 }
 
@@ -298,7 +298,7 @@ function fdjtTab_onclick(evt,shown)
 
 function fdjtSelectTab(tabbar,contentid)
 {
-  var tabs=$$(".tab",tabbar);
+  var tabs=FDJT$(".tab",tabbar);
   var i=0; while (i<tabs.length) {
     var tab=tabs[i++];
     if (tab.getAttribute("contentid"))
@@ -306,20 +306,20 @@ function fdjtSelectTab(tabbar,contentid)
 	tab.setAttribute("shown","shown");
       else if (tab.getAttribute("shown")) {
 	var cid=tab.getAttribute("contentid");
-	var content=$(cid);
+	var content=$ID(cid);
 	tab.removeAttribute("shown");
 	if (!(content))
 	  fdjtWarn("No reference for tab content %o",cid);
 	else content.removeAttribute("shown");}
       else tab.removeAttribute("shown");}
-  if ($(contentid))
-    $(contentid).setAttribute("shown","shown");
+  if ($ID(contentid))
+    $ID(contentid).setAttribute("shown","shown");
   else fdjtWarn("No reference for tab content %o",contentid);
 }
 
 function fdjtSelectedTab(tabbar)
 {
-  var tabs=$$(".tab",tabbar);
+  var tabs=FDJT$(".tab",tabbar);
   var i=0; while (i<tabs.length) {
     var tab=tabs[i++];
     if (tag.getAttribute("shown"))
@@ -448,7 +448,7 @@ function fdjtCheckSpan_onclick(evt)
   evt=evt||event||null;
   var clicked=false;
   var target=$T(evt);
-  var checkspan=$P(".checkspan",target);
+  var checkspan=FDJT$P(".checkspan",target);
   if (!(checkspan)) return;
   var checkbox=false;
   while (target.parentNode) {
@@ -488,7 +488,7 @@ function fdjtCheckSpan_onclick(evt)
 function fdjtCheckSpan_set(target,checked,nochange)
 {
   if (typeof checked==='undefined') checked=true;
-  var checkspan=$P(".checkspan",target);
+  var checkspan=FDJT$P(".checkspan",target);
   var checkbox=false;
   if ((target.tagName==='INPUT')&&
       ((target.type==='radio')||(target.type==='checkbox')))
@@ -554,7 +554,7 @@ function fdjtToggleClass_onclick(evt)
       (evt.target.getAttribute("toggle"))) {
     var toggle=evt.target.getAttribute("toggle");
     var eqpos=toggle.indexOf('=');
-    var elt=$(toggle.slice(0,eqpos));
+    var elt=$ID(toggle.slice(0,eqpos));
     var classname=toggle.slice(eqpos+1);
     if ((elt)&&(classname)) fdjtToggleClass(elt,classname);}
 }
@@ -566,7 +566,7 @@ function fdjtToggleClass_onclick(evt)
 
 function fdjtFlash(elt,milliseconds,opacity)
 {
-  elt=$(elt);
+  elt=$ID(elt);
   if (typeof opacity === 'string') {
     fdjtAddClass(elt,opacity);
     setTimeout(function() {fdjtDropClass(elt,opacity);},milliseconds);}

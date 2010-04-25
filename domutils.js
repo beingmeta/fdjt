@@ -30,7 +30,7 @@ var _fdjt_trace_classedits=false;
 
 /* Getting elements by ID */
 
-function $(eltarg)
+function $ID(eltarg)
 {
   if (typeof eltarg == 'string')
     return document.getElementById(eltarg);
@@ -370,7 +370,7 @@ function fdjtRedisplay(arg)
   else if (arguments.length>1) {
     var i=0; while (i<arguments.length) fdjtRedisplay(arguments[i++]);}
   else if (typeof arg === "string")
-    fdjtRedisplay($(arg));
+    fdjtRedisplay($ID(arg));
   else if (arg instanceof Array) {
     var i=0; while (i<arg.length) fdjtRedisplay(arg[i++]);}
   else if ((arg.nodeType) && (arg.nodeType===1)) {
@@ -989,13 +989,13 @@ function fdjtGetFirstChild(elt,selector)
   return false;
 }
 
-function $$(selector,cxt) 
+function FDJT$(selector,cxt) 
 {
   var elt=((cxt) ? (cxt) : (document));
   return fdjtGetChildren(elt,selector,new Array());
 }
 
-function $P(selector,cxt) 
+function FDJT$P(selector,cxt) 
 {
   return fdjtGetParent(cxt,selector);
 }

@@ -80,11 +80,11 @@ function fdjt_get_completions(input_elt,create)
   var completions_name=input_elt.getAttribute("COMPLETIONS");
   if (!(completions_name)) {
     var id=input_elt.name+"_COMPLETIONS";
-    var elt=$(id);
+    var elt=$ID(id);
     input_elt.setAttribute("COMPLETIONS",id);}
   // This is the case where the COMPLETIONS element is
   // the ID of another element
-  var elt=$(input_elt.getAttribute("COMPLETIONS"));
+  var elt=$ID(input_elt.getAttribute("COMPLETIONS"));
   if (!(elt))
     if (create)
       elt=fdjtCompletions
@@ -499,7 +499,7 @@ function fdjtComplete_toggleshowall(evt)
 {
   evt=evt||event||null;
   var target=$T(evt);
-  var container=$P(".completions",target);
+  var container=FDJT$P(".completions",target);
   if (fdjtHasClass(container,"maxcomplete"))
     fdjtSwapClass(container,"maxcomplete","showmaxcomplete");
   else if (fdjtHasClass(container,"showmaxcomplete"))
@@ -566,7 +566,7 @@ function fdjtSetCompletions(id,completions)
       fdjtLog("[%f] Completions for #%s are unchanged",fdjtElapsedTime(),id);
     else fdjtLog("[%f] Setting current completions #%s=%o to %o/%d",
 		 fdjtElapsedTime(),id,current,completions,
-		 $$(".completion",completions).length);
+		 FDJT$(".completion",completions).length);
   if (!(current)) {
     fdjtWarn("Can't find current completions #%s",id);
     return;}

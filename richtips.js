@@ -149,15 +149,15 @@ function fdjtRichTip_onmouseout(evt)
 
 function fdjtRichTip_minimize(evt) {
   evt=evt||event||null;
-  fdjtAddClass($P(".richtip",$T(evt)),"minimized"); }
+  fdjtAddClass(FDJT$P(".richtip",$T(evt)),"minimized"); }
 
 function fdjtRichTip_maximize(evt) {
   evt=evt||event||null;
-  fdjtDropClass($P(".richtip",$T(evt)),"minimized");}
+  fdjtDropClass(FDJT$P(".richtip",$T(evt)),"minimized");}
 
 function fdjtRichTip_hide(evt) {
   evt=evt||event||null;
-  fdjtDropClass($P(".richtip",$T(evt)),"static");}
+  fdjtDropClass(FDJT$P(".richtip",$T(evt)),"static");}
 
 function fdjtRichTip_init(elt) {
   var minbutton=fdjtImage(graphics_root+"minimize.png","minimize button","-");

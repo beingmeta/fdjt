@@ -69,7 +69,7 @@ function fdjtAjaxXMLCall(callback,base_uri)
 
 function fdjtJSONPCall(uri,id,cleanup)
 {
-  if ((id)&&($(id))) return false;
+  if ((id)&&($ID(id))) return false;
   var script_elt=fdjtNewElement("SCRIPT");
   if (id) script_elt.id=id;
   if (cleanup) script_elt.oncleanup=cleanup;
@@ -80,7 +80,7 @@ function fdjtJSONPCall(uri,id,cleanup)
 
 function fdjtJSONPFinish(id)
 {
-  var script_elt=$(id);
+  var script_elt=$ID(id);
   if (!(script_elt)) return;
   if (script_elt.oncleanup) script_elt.oncleanup();
   fdjtDelete(script_elt);
