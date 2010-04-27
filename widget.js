@@ -25,7 +25,7 @@ var fdjtWidget={cohi: {classname: "cohi",cur: false,delay: 100},
 
 /* Co-highlighting */
 
-fdjtWidget.cohi.onhighlight(namearg,name)=function(namearg,classname_arg){
+fdjtWidget.cohi.onhighlight=function(namearg,classname_arg){
   var classname=((classname_arg) || (fdjtWidget.cohi.classname));
   var newname=((typeof namearg === 'string') ? (namearg) : (namearg.name));
   var cur=fdjtWidget.cohi.cur;

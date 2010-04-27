@@ -153,7 +153,7 @@ fdjtDOM.hasParent=function(elt,parent,attrib){
       if (elt===parent) return parent;}
     return false;}};
 
-fdjtDOM.IsClickable.=function(target){
+fdjtDOM.isClickable=function(target){
   while (target)
     if (((target.tagName==='A')&&(target.href))||
 	(target.tagName==="INPUT") ||
