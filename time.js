@@ -24,8 +24,8 @@
 
 function fdjtTime() {
   return (new Date()).getTime();}
-fdjtTime.revid="$Id: jsutils.js 237 2010-04-11 20:16:15Z haase $";
-fdjtTime.version=parseInt("$Revision: 237 $".slice(10,-1));
+fdjtTime.revid="$Id$";
+fdjtTime.version=parseInt("$Revision$".slice(10,-1));
 
 fdjtTime.tick=function(){
   return (new Date()).getTime()/1000;};
@@ -116,3 +116,8 @@ fdjtTime.ET=function(arg){
 
 var fdjtET=fdjtTime.ET;
 
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+;;;  End: ***
+*/

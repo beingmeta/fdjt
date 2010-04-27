@@ -1,7 +1,7 @@
 /* -*- Mode: Javascript; -*- */
 
-var fdjt_oids_id="$Id: jsutils.js 190 2009-12-04 22:51:23Z haase $";
-var fdjt_oids_version=parseInt("$Revision: 190 $".slice(10,-1));
+var fdjt_oids_id="$Id$";
+var fdjt_oids_version=parseInt("$Revision$".slice(10,-1));
 
 /* Copyright (C) 2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)

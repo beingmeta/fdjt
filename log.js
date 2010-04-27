@@ -33,8 +33,8 @@ function fdjtLog(string){
       window.console.log.call(window.console,output);
     else window.console.log.apply(window.console,arguments);
 }
-fdjtLog.id="$Id: jsutils.js 237 2010-04-11 20:16:15Z haase $";
-fdjtLog.version=parseInt("$Revision: 237 $".slice(10,-1));
+fdjtLog.id="$Id$";
+fdjtLog.version=parseInt("$Revision$".slice(10,-1));
 
 fdjtLog.warn=function(string){
   var output=false;
@@ -57,7 +57,7 @@ fdjtLog.warn=function(string){
   else alert(string);
 };
 
-fdjtLog.break=function(string){
+fdjtLog.bkpt=function(string){
   var output=false;
   if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
     output=fdjtString.apply(null,arguments);
@@ -70,3 +70,9 @@ fdjtLog.break=function(string){
       window.console.log.call(window.console,output);
     else window.console.log.apply(window.console,arguments);
 };
+
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+;;;  End: ***
+*/

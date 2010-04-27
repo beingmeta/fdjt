@@ -1,7 +1,7 @@
 /* -*- Mode: Javascript; -*- */
 
-var fdjt_scrolling_id="$Id: handlers.js 188 2009-12-01 04:52:57Z haase $";
-var fdjt_scrolling_version=parseInt("$Revision: 188 $".slice(10,-1));
+var fdjt_scrolling_id="$Id$";
+var fdjt_scrolling_version=parseInt("$Revision$".slice(10,-1));
 
 /* Copyright (C) 2001-2009 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)

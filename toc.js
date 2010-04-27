@@ -1,7 +1,7 @@
 /* -*- Mode: Javascript; -*- */
 
-var toc_id="$Id: fdjt.js 4077 2009-06-26 14:10:31Z haase $";
-var toc_version=parseInt("$Revision: 4077 $".slice(10,-1));
+var toc_id="$Id$";
+var toc_version=parseInt("$Revision$".slice(10,-1));
 
 /* Copyright (C) 2009 beingmeta, inc.
    This file implements a Javascript/DHTML UI for reading

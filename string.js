@@ -44,8 +44,8 @@ function fdjtString(string){
   return output;
 }
 
-fdjtString.revid="$Id: jsutils.js 237 2010-04-11 20:16:15Z haase $";
-fdjtString.version=parseInt("$Revision: 237 $".slice(10,-1));
+fdjtString.revid="$Id$";
+fdjtString.version=parseInt("$Revision$".slice(10,-1));
 
 fdjtString.nbsp="\u00A0";
 fdjtString.middot="\u00B7";
@@ -308,3 +308,9 @@ fdjtString.prefixFind=function(ptree,prefix,i,plen){
     if (split) return fdjtPrefixFind(split,prefix,i+1,plen);
     else return false;}
 };
+
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+;;;  End: ***
+*/

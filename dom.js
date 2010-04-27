@@ -22,36 +22,39 @@
 
 function fdjtDOM(spec){
   var node;
-  if (typeof attribs==='string') {
-    var hashpos=attribs.indexOf('#');
-    var dotpos=attribs.indexOf('.');
-    var tagend=((dotpos>hashpos)?(hashpos):(dotpos));
+  if (typeof spec==='string') {
+    var hashpos=spec.indexOf('#');
+    var dotpos=spec.indexOf('.');
+    var tagend=((hashpos<0)?(dotpos):
+		(dotpos<0)?(hashpos):
+		(dotpos<hashpos)?(dotpos):(hashpos));
     if (tagend<0)
       node=document.createElement(spec);
     else node=document.createElement(spec.slice(0,tagend));
     if (hashpos>=0)
       if ((dotpos)&&(dotpos>hashpos)) {
-	node.id=attribs.slice(hashpos+1,dotpos);
-	attribs=attribs.slice(0,hashpos)+attribs.slice(dotpos);}
+	node.id=spec.slice(hashpos+1,dotpos);
+	spec=spec.slice(0,hashpos)+spec.slice(dotpos);}
       else {
-	node.id=attribs.slice(hashpos+1);
-	attribs=attribs.slice(0,hashpos);}
-    dotpos=attribs.indexOf('.');
+	node.id=spec.slice(hashpos+1);
+	spec=spec.slice(0,hashpos);}
+    dotpos=spec.indexOf('.');
     if (dotpos>=0)
-      node.className=attribs.slice(dotpos+1).replace('.',' ');
-    else node.className=attribs.replace('.',' ');}
+      node.className=spec.slice(dotpos+1).replace('.',' ');
+    else node.className=spec.replace('.',' ');}
   else {
     node=document.createElement(attrib.tagName);
-    for (attrib in attribs) {
+    for (attrib in spec) {
       if (attrib==="tagName") {}
-      else node.setAttribute(attrib,attribs[attrib]);}}
+      else node.setAttribute(attrib,spec[attrib]);}}
   var i=1; var len=arguments.length;
   while (i<len) {
     var arg=arguments[i++];
-    if (typeof arg === 'string')
+    if (!(arg)) {}
+    else if (typeof arg === 'string')
       node.appendChild(document.createTextNode(arg));
     else if (arg.nodeType)
-      node.appendChild(document.createTextNode(arg));
+      node.appendChild(arg);
     else if (arg.toString)
       node.appendChild(document.createTextNode(arg.toString()));
     else try {
@@ -59,14 +62,26 @@ function fdjtDOM(spec){
       catch (e) {
 	node.appendChild(document.createTextNode("??"));}}
   return node;}
-fdjtDOM.revid="$Id: jsutils.js 237 2010-04-11 20:16:15Z haase $";
-fdjtDOM.version=parseInt("$Revision: 237 $".slice(10,-1));
+fdjtDOM.revid="$Id$";
+fdjtDOM.version=parseInt("$Revision$".slice(10,-1));
 
 fdjtDOM.classpats={};
 fdjtDOM.classPat=function(name){
   var rx=new RegExp("\\b"+name+"\\b","g");
   fdjtDOM.classpats[name]=rx;
   return rx;};
+
+fdjtDOM.hasClass=function(elt,classname,attrib){
+  var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") : (elt.className));
+  if (!(classinfo)) return false;
+  else if (classinfo===classname) return true;
+  else if (typeof classname === 'string')
+    if (classinfo.indexOf(' ')<0) return false;
+    else classname=fdjtDOM.classpats[classname]||
+	   fdjtDOM.classPat(classname);
+  else {}
+  if (classinfo.search(classname)>=0) return true;
+  else return false;};
 
 fdjtDOM.addClass=function(elt,classname,attrib){
   var classinfo=
@@ -122,6 +137,34 @@ fdjtDOM.classDropper=function(elt,classname){
   return function() {
     if (elt) fdjtDOM.dropClass(elt,classname);}};
 
+fdjtDOM.hasParent=function(elt,parent,attrib){
+  if ((typeof parent === 'string')||(!(parent.nodeType))) {
+    var scan=elt;
+    var pat=((typeof parent === 'string')?
+	     (fdjtDOM.classpats[parent]||fdjtDOM.classPat(parent)):
+	     parent);
+    while (scan)
+      if ((scan.className)&&(scan.className.search(pat)>=0))
+	return scan;
+      else scan=scan.parentNode;
+    return false;}
+  else {
+    while (elt=elt.parentNode) {
+      if (elt===parent) return parent;}
+    return false;}};
+
+fdjtDOM.IsClickable.=function(target){
+  while (target)
+    if (((target.tagName==='A')&&(target.href))||
+	(target.tagName==="INPUT") ||
+	(target.tagName==="TEXTAREA") ||
+	(target.tagName==="SELECT") ||
+	(target.tagName==="OPTION") ||
+	(fdjtDOM.hasClass(target,"fdjtclickable")))
+      return true;
+    else target=target.parentNode;
+  return false;};
+
 fdjtDOM.display_styles={
   "DIV": "block","P": "block","BLOCKQUOTE":"block",
   "H1": "block","H2": "block","H3": "block","H4": "block",
@@ -174,3 +217,15 @@ fdjtDOM.textify=function(arg,flat,inside){
   else if (arg.toString)
     return arg.toString();
   else return arg.toString();};
+
+fdjtDOM.cancel=function(evt){
+  evt=evt||event;
+  if (evt.preventDefault) evt.preventDefault();
+  else evt.returnValue=false;
+  evt.cancelBubble=true;};
+
+/* Emacs local variables
+;;;  Local variables: ***
+;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+;;;  End: ***
+*/
