@@ -31,6 +31,9 @@ var fdjtDB=
   (function(){
     // This is the top level object/module 
     fdjtDB={};
+    fdjtDB.revid="$Id$";
+    fdjtDB.version=parseInt("$Revision$".slice(10,-1));
+
 
     // We allocate 16 million IDs for miscellaneous objects
     //  and use counter to track them.
@@ -102,14 +105,7 @@ var fdjtDB=
       oid.pool=this;
       return oid;};
     
-    function OID(pool,arg,arg2) {
-      if (this instanceof OID)
-	return pool.cons(this,arg);
-      else return pool.ref(arg,arg2);}
-    var oid_prototype=OID.prototype;
-    
-    /* Implementing fast sets */
-
+    /* Fast sets */
     function set_sortfn(a,b) {
       if (a===b) return 0;
       else if (typeof a === typeof b) {
@@ -252,24 +248,73 @@ var fdjtDB=
       results._sortlen=results.length;
       return results;};
 
-    /* Methods on OIDs */
+    /* Indices */
+
+    function Index() {
+      var scalar_indices={};
+      var object_indices={};
+      return function(item,prop,val,add){
+	var valkey; var indices=scalar_indices;
+	if ((typeof val === 'string')||(typeof val === 'number'))
+	  valkey=val;
+	else {
+	  valkey=val._fdjtid||register(val);
+	  indices=object_indices;}
+	if (!(item))
+	  return Set(indices[prop][valkey],true);
+	var index=indices[prop];
+	if (!(index)) indices[prop]=index={};
+	var curvals=index[valkey];
+	if (curvals) {
+	  var pos=set_position(curvals,val);
+	  if (pos<0)
+	    if (add) curvals.push(item);
+	    else {}
+	  else if (add) {}
+	  else {
+	    var sortlen=curvals._sortlen;
+	    curvals.splice(pos,1);
+	    if (pos<sortlen) curvals._sortlen--;}}
+	else if (add)
+	  index[valkey]=Set(item);
+	else {}};}
+    fdjtDB.Index=Index;
+
+    /* OIDs */
+
+    function OID(pool,arg,arg2) {
+      if (this instanceof OID)
+	return pool.cons(this,arg);
+      else return pool.ref(arg,arg2);}
+    var oid_prototype=OID.prototype;
 
     OID.prototype.get=function(prop){
       if (this.hasOwnProperty(prop)) return this[prop];
       else return undefined;};
+    OID.prototype.getArray=function(prop){
+      if (this.hasOwnProperty(prop)) {
+	var val=this[prop];
+	if (val instanceof Array) return val;
+	else return Set(val);}
+      else return [];};
     OID.prototype.add=function(prop,val){
       if (this.hasOwnProperty(prop)) {
 	var cur=this[prop];
 	if (cur===val) return;
 	else if (cur._sortlen)
-	  if (set_contains(cur,val)) {}
+	  if (set_contains(cur,val)) return;
 	  else cur.push(val);
-	else this[probe]=Set([cur,val]);}
+	else this[probe]=Set([cur,val]);
+	if (this.pool.index) this.pool.index(this,prop,val,true);}
       else this[prop]=val;};
     OID.prototype.drop=function(prop,val){
+      var vals=false;
       if (this.hasOwnProperty(prop)) {
 	if (typeof val === 'undefined') {
-	  delete this[prop]; return;}
+	  if (this.pool.index)
+	    this.pool.index(this,prop,this[prop],false);
+	  delete this[prop];
+	  return;}
 	var cur=this[prop];
 	if (cur===val)
 	  delete this[prop];
@@ -279,7 +324,10 @@ var fdjtDB=
 	  if (pos>=0) {
 	    cur.splice(pos,1);
 	    if (pos<sortlen) cur._sortlen--;}}
-	else this[probe]=Set([cur,val]);}};
+	else this[probe]=Set([cur,val]);}
+      else return;
+      if (this.pool.index)
+	this.pool.index(this,prop,val,false);};
     OID.prototype.test=function(prop,val){
       if (this.hasOwnProperty(prop)) {
 	if (typeof val === 'undefined') return true;

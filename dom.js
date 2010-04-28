@@ -45,7 +45,7 @@ var fdjtDOM=
       if (typeof spec==='string')
 	if (spec[0]==='<') {
 	  var container=document.createElement("DIV");
-	  container.innerHTML=string;
+	  container.innerHTML=spec;
 	  var children=container.childNodes;
 	  var i=0; var len=children.length;
 	  while (i<len)
@@ -83,6 +83,8 @@ var fdjtDOM=
     fdjtDOM.revid="$Id$";
     fdjtDOM.version=parseInt("$Revision$".slice(10,-1));
 
+    var whitespace_pat=/(\s)+/;
+    var trimspace_pat=/^(\s)+|(\s)+$/;
     var classpats={};
     function classPat(name){
       var rx=new RegExp("\\b"+name+"\\b","g");
@@ -139,8 +141,8 @@ var fdjtDOM=
       else return false;
       if (newinfo)
 	newinfo=newinfo.
-	  replace(_fdjt_whitespace_pat," ").
-	  replace(_fdjt_trimspace_pat,"");
+	  replace(whitespace_pat," ").
+	  replace(trimspace_pat,"");
       if (attrib)
 	if (newinfo) {
 	  elt.setAttribute(attrib,newinfo);
@@ -181,7 +183,7 @@ var fdjtDOM=
 	    (target.tagName==="TEXTAREA") ||
 	    (target.tagName==="SELECT") ||
 	    (target.tagName==="OPTION") ||
-	    (fdjtDOM.hasClass(target,"fdjtclickable")))
+	    (hasClass(target,"fdjtclickable")))
 	  return true;
 	else target=target.parentNode;
       return false;};
@@ -204,6 +206,8 @@ var fdjtDOM=
 	      "inline");}
     
     fdjtDOM.getDisplay=getDisplayStyle;
+
+    function flatten(string){return string.replace(/\s+/," ");};
 
     function textify(arg,flat,inside){
       if (arg.text) return arg.text;
@@ -230,7 +234,7 @@ var fdjtDOM=
 	    var child=children[i++];
 	    if ((child.nodeType) && (child.nodeType===3))
 	      if (flat)
-		string=string+fdjtString.flatten(child.nodeValue);
+		string=string+flatten(child.nodeValue);
 	      else string=string+child.nodeValue;
 	    else {
 	      var stringval=textify(child,flat,true);
