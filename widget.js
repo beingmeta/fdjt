@@ -20,50 +20,51 @@
 
 */
 
-var fdjtWidget={cohi: {classname: "cohi",cur: false,delay: 100},
-		checkspan: {}};
+var fdjtWidget=
+  {cohi: {classname: "cohi",cur: false,delay: 100},
+   checkspan: {}};
 
 /* Co-highlighting */
 
-fdjtWidget.cohi.onhighlight=function(namearg,classname_arg){
-  var classname=((classname_arg) || (fdjtWidget.cohi.classname));
-  var newname=((typeof namearg === 'string') ? (namearg) : (namearg.name));
-  var cur=fdjtWidget.cohi.cur;
-  if (cur===newname) return;
-  if (cur) {
-    var drop=document.getElementsByName(cur);
-    var i=0, n=drop.length;
-    while (i<n) fdjtDOM.dropClass(drop[i++],classname);}
-  fdjtWidget.cohi.cur=newname||false;
-  if (newname) {
-    var elts=document.getElementsByName(newname);
-    var n=elts.length, i=0;
-    while (i<n) fdjtDOM.addClass(elts[i++],classname);}};
-
-fdjtWidget.cohi.onmouseover=function(evt,classname_arg){
-  var target=$T(evt);
-  while (target)
-    if ((target.tagName==='INPUT') || (target.tagName==='TEXTAREA') ||
-	((target.tagName==='A') && (target.href)))
-      return;
-    else if (target.name) break;  
-    else target=target.parentNode;
-  if (!(target)) return;
-  if (fdjtWidget.cohi.timer) clearTimeout(fdjtWidget.cohi.timer);
-  fdjtWidget.cohi.timer=
-    setTimeout(fdjtWidget.cohi.onhighlight,fdjtWidget.cohi.delay,target.name);};
-
-fdjtWidget.cohi.onmouseout=function(evt,classname_arg){
-  var target=$T(evt);
-  var cur=fdjtWidget.cohi.cur;
-  while (target)
-    if ((target.name) && (target.name===cur)) {
-      if (fdjtWidget.cohi.timer) clearTimeout(fdjtWidget.cohi.timer);
-      fdjtWidget.cohi.timer=
-	setTimeout(fdjtWidget.cohi.onhighlight,fdjtWidget.cohi.delay,
-		   target.name);
+(function(){
+  var highlights={};
+  function highlight(namearg,classname_arg){
+    var classname=((classname_arg) || (fdjtWidget.cohi.classname));
+    var newname=((typeof namearg === 'string') ? (namearg) : (namearg.name));
+    var cur=highlights[classname];
+    if (cur===newname) return;
+    if (cur) {
+      var drop=document.getElementsByName(cur);
+      var i=0, n=drop.length;
+      while (i<n) fdjtDOM.dropClass(drop[i++],classname);}
+    highlights[classname]=newname||false;
+    if (newname) {
+      var elts=document.getElementsByName(newname);
+      var n=elts.length, i=0;
+      while (i<n) fdjtDOM.addClass(elts[i++],classname);}}
+  
+  fdjtWidget.cohi.onmouseover=function(evt,classname_arg){
+    var target=$T(evt);
+    while (target)
+      if ((target.tagName==='INPUT') || (target.tagName==='TEXTAREA') ||
+	  ((target.tagName==='A') && (target.href)))
+	return;
+      else if (target.name) break;  
+      else target=target.parentNode;
+    if (!(target)) return;
+    highlight(target.name,classname_arg);};
+  fdjtWidget.cohi.onmouseout=function(evt,classname_arg){
+    var target=$T(evt);
+    var cur=fdjtWidget.cohi.cur;
+    while (target)
+      if ((target.name) && (target.name===cur)) {
+	if (fdjtWidget.cohi.timer) clearTimeout(fdjtWidget.cohi.timer);
+	fdjtWidget.cohi.timer=
+	  setTimeout(fdjtWidget.cohi.onhighlight,fdjtWidget.cohi.delay,
+		     target.name);
       break;}
-    else target=target.parentNode;};
+      else target=target.parentNode;};
+ })();
 
 /* Emacs local variables
 ;;;  Local variables: ***
