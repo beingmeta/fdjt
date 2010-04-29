@@ -246,6 +246,73 @@ var fdjtDOM=
       else return arg.toString();}
     fdjtDOM.textify=textify;
 
+    fdjtDOM.getMeta=function(name,multiple,matchcase){
+      var results=[];
+      var matchname=((matchcase)&&(name.toUpperCase()));
+      var elts=document.getElementsByTagName("META");
+      var i=0; while (i<elts.length)
+		 if (elts[i])
+		   if (elts[i].name===name)
+		     if (multiple) results.push(elts[i++].content);
+		     else return elts[i].content;
+		   else if ((matchname)&&
+			    (elts[i].name.toUpperCase()===matchname))
+		     if (multiple) results.push(elts[i++].content);
+		     else return elts[i].content;
+		   else i++;
+      if (multiple) return results;
+      else return false;};
+
+    // This gets a LINK href field
+    fdjtDOM.getLink=function(name,multiple,matchcase){
+      var results=[];
+      var matchname=((matchcase)&&(name.toUpperCase()));
+      var elts=document.getElementsByTagName("LINK");
+      var i=0; while (i<elts.length)
+		 if (elts[i])
+		   if (elts[i].rel===name)
+		     if (multiple) results.push(elts[i++].href);
+		     else return elts[i].href;
+		   else if ((matchname)&&
+			    (elts[i].rel.toUpperCase()===matchname))
+		     if (multiple) results.push(elts[i++].href);
+		     else return elts[i].href;
+		   else i++;
+      if (multiple) return results;
+      else return false;};
+
+    fdjtDOM.getQuery=function(name,multiple,matchcase){
+      if (!(location.search))
+	if (multiple) return [];
+	else return false;
+      var results=[];
+      var namepat=new RegExp("(&|^|\\?)"+name+"(=|&|$)",((matchcase)?"g":"gi"));
+      var query=location.search;
+      var start=query.search(namepat);
+      while (start>=0) {
+	// Skip over separator if non-initial
+	if ((query[start]==='?')||(query[start]==='&')) start++;
+	// Skip over the name
+	var valstart=start+name.length; var end=false;
+	if (query[valstart]==="=") {
+	  var valstring=query.slice(valstart+1);
+	  end=valstring.search(/(&|$)/g);
+	  if (end<=0)
+	    if (multiple) {
+	      results.push(query.slice(start,valstart));
+	      return results;}
+	    else return query.slice(start,valstart);
+	  else if (multiple)
+	    results.push(valstring.slice(0,end));
+	  else return valstring.slice(0,end);}
+	else if (multiple)
+	  results.push(query.slice(start,end));
+	else return query.slice(start,end);
+	if (end>0) {
+	  query=query.slice(end);
+	  start=query.search(namepat);}}
+      if (multiple) return results; else return false;};
+
     fdjtDOM.cancel=function(evt){
       evt=evt||event;
       if (evt.preventDefault) evt.preventDefault();
