@@ -42,7 +42,7 @@ var fdjtDB=
       return (x._fdjtid)||(x._fdjtid=(++counter));}
     fdjtDB.register=register;
 
-    // Pools are ranges of numeric IDs which may track values
+    // Pools are ranges of numeric IDs and may map those IDs to objects
     var pools=[];
     var oid_origin=8192*8192;
     var oid_base=oid_base;
@@ -59,8 +59,9 @@ var fdjtDB=
 	     (pool.base===base)))
 	  return pools[name];
 	else throw {error: "pool conflict"};
-      this.name=name; this.load=0; this.cap=cap;
-      this.locked=false; this.oids=[];
+      this.name=name; this.load=0; this.cap=cap; this.locked=false;
+      // This is the array mapping offsets to OIDs
+      this.oids=[];
       if (!(base)) this.base=oid_base;
       else if ((base%quanta)!==0)
 	throw { error: "bad pool base"};
@@ -78,31 +79,27 @@ var fdjtDB=
       if (this.oids[off]) return (this.oids[off]);
       else return false;};
 
-    Pool.prototype.ref=function(off,init) {
+    Pool.prototype.ref=function(off,cons) {
       if (this.oids[off]) return this.oids[off];
       if ((this.load>=0)&&(off>=this.load))
 	throw { error: "OID reference out of range"};
-      var consed=(init)||{};
-      consed.prototype=(this.OID||OID).prototype;
+      var consed=((cons)?(new cons()):(new OID()));
       consed._fdjtid=this.base+off;
       this.oids[off]=consed;
       consed.pool=this;
       return consed;};
       
-    Pool.prototype.fetch=function(oid) {
-      if (typeof oid === 'number') oid=this.ref(oid);
-      if (oid._fdjtstamp) return oid;
-      else if (this.load) 
-	return this.load(oid);
-      else return oid;}
-
-    Pool.prototype.cons=function(oid,init) {
+    Pool.prototype.cons=function(val) {
       if (this.locked) throw { error: "locked pool"};
+      if (val._fdjtid) return init;
       var off=(this.load)++;
+      var oid=(((val)&&(val instanceof OID))?(val):(new OID()));
       oid._fdjtid=this.base+off;
       oid._fdjtstamp=new Date().getTime();
       this.oids[off]=oid;
       oid.pool=this;
+      // Copy fields if neccessary
+      if (oid!==val) for (key in val) oid[key]=val[key];
       return oid;};
     
     /* Fast sets */
@@ -135,45 +132,24 @@ var fdjtDB=
       else if (a.length<b.length) return -1;
       else return 1;}
 
-    function Set(arg,destructive){
-      if (!(arg)) return new Array();
-      else if (arg instanceof Array)
-	if (arg.length<2) return arg;
-	else if ((arg._sortlen) && ((arg._sortlen) === (arg.length)))
-	  return arg;
-	else {
-	  if (!(destructive)) arg=arg.slice(0);
-	  arg.sort(_fdjt_set_sortfn);
-	  var read=1; var write=1; var len=arg.length;
-	  var cur=arg[0];
-	  while (read<len) 
-	    if (arg[read]===cur) read++;
-	    else cur=arg[write++]=arg[read++];
-	  arg._sortlen=write;
-	  arg.length=write;
-	  return arg;}
-      else {
-	var array=new Array(arg);
-	if (typeof arg !== 'number') array._sortlen=1;
-	return array;}}
-    fdjtDB.Set=Set;
-	
-    /* These could be faster by doing a binary search
-       given sortlen */
-    function set_contains(set,val){
-      var i=0; var len=set.length;
+    // Array utility functions
+    function contains(arr,val,start){
+      if (arr.indexOf)
+	return (arr.indexOf(val,start)>=0);
+      var i=start||0; var len=arr.length;
       while (i<len)
-	if (set[i]===val) return true;
+	if (arr[i]===val) return true;
 	else i++;
       return false;}
-    function set_position(set,val){
-      var i=0; var len=set.length;
+    function position(arr,val,start){
+      if (arr.indexOf)
+	return arr.indexOf(val,start);
+      var i=start||0; var len=arr.length;
       while (i<len)
-	if (set[i]===val) return i;
+	if (arr[i]===val) return i;
 	else i++;
       return -1;}
-
-    function set_intersection(set1,set2){
+    function intersection(set1,set2){
       var results=new Array();
       var i=0; var j=0; var len1=set1.length; var len2=set2.length;
       while ((i<len1) && (j<len2))
@@ -183,8 +159,7 @@ var fdjtDB=
 	else j++;
       results._sortlen=results.length;
       return results;}
-    
-    function set_union(set1,set2){
+    function union(set1,set2){
       var results=new Array();
       var i=0; var j=0; var len1=set1.length; var len2=set2.length;
       while ((i<len1) && (j<len2))
@@ -198,56 +173,148 @@ var fdjtDB=
       results._sortlen=results.length;
       return results;}
 
-    Set.intersect=function(){
-      if (arguments.length===0) return new Array();
-      else if (arguments.length===1)
-	return fdjtSet(arguments[0],true);
-      else if (arguments.length===2)
-	return fdjt_intersect(fdjtSet(arguments[0],true),
-			      fdjtSet(arguments[1],true));
+    /* Sets */
+    function Set(arg,sorted){
+      this.members={}; this.objects={};
+      if (!(arg)) this.elements=new Array();
+      else if (arg instanceof Array) {
+	var unique=[];
+	var i=0; var len=arg.length;
+	while (i<len) {
+	  var elt=arg[i++];
+	  if (((typeof elt === 'string')||(typeof elt === 'number'))?
+	      (this.members.hasOwnProperty(elt)):
+	      (elt._fdjtid)?(this.objects.hasOwnProperty(elt._fdjtid)):
+	      (this.objects.hasOwnProperty(fdjtDB.register(elt)))) {}
+	  else {
+	    unique.push(elt);
+	    if ((typeof elt === 'string')||(typeof elt === 'number'))
+	      this.members[elt]=elt;
+	    else this.objects[elt._fdjtid]=true;}}
+	this.elements=unique;}
+      else this.elements=new Array(arg);
+      if (sorted) this.sortlen=this.elements.length;
+      else this.sortlen=0;
+      return this;}
+    fdjtDB.Set=Set;
+    
+    Set.prototype.contains=function(arg){
+      if (!(arg)) return false;
+      else if (arg instanceof Set) return false;
+      else if ((typeof arg === 'string')||(typeof arg === 'number'))
+	return (this.members.hasOwnProperty(arg));
+      else if (!(arg._fdjtid)) return false;
+      else return (this.objects.hasOwnProperty(arg._fdjtid));};
+    Set.prototype.add=function(arg){
+      if (!(arg)) return false;
+      else if (arg instanceof Set) {
+	var add=arg.sort(set_sortfn);
+	this.elements=union(this.sorted(),add);
+	if (this.elements.length===this.sortlen) return false;
+	else {
+	  var members=this.members; var objects=this.objects;
+	  var i=0; var len=add.length;
+	  while (i<len) {
+	    if ((typeof arg === 'string')||(typeof arg === 'number'))
+	      members[add[i++]]=true;
+	    else if (add[i]._fdjtid)
+	      members[add[i++]._fdjtid]=true;
+	    else objects[fdjtDB.register(add[i++])]=true;}
+	  return true;}}
+      else if (arg instanceof Array) {
+	var i=0; var len=arg.length;
+	while (i<len) this.add(arg[i++]);}
+      else if ((typeof arg === 'string')||(typeof arg === 'number'))
+	if (this.members.hasOwnProperty(arg)) return false;
+	else {
+	  this.members[arg]=true; this.elements.push(arg);
+	  return true;}
       else {
-	var i=0; while (i<arguments.length)
-		   if (!(arguments[i])) return new Array();
-		   else if ((typeof arguments[i] === "object") &&
-			    (arguments[i] instanceof Array) &&
-			    (arguments[i].length===0))
-		     return new Array();
-		   else i++;
-	var copied=arguments.slice(0);
-	copied.sort(len_sortfn);
-	var results=fdjtSet(copied[0],true);
-	i=1; while (i<copied.length) {
-	  results=fdjt_intersect(results,fdjtSet(copied[i++],true));
-	  if (results.length===0) return results;}
-	return results;}};
-
-    Set.union=function(){
-      if (arguments.length===0) return new Array();
-      else if (arguments.length===1) return fdjtSet(arguments[0]);
-      else if (arguments.length===2)
-	return fdjt_union(fdjtSet(arguments[0],true),
-			  fdjtSet(arguments[1],true));
+	var id=fdjtDB.register(arg);
+	if (this.objects.hasOwnProperty(id)) return false;
+	else {
+	  this.objects[id]=true;
+	  this.elements.push(arg);}}};
+    Set.prototype.drop=function(arg){
+      if (!(arg)) return false;
+      else if (arg instanceof Set) {
+	var curlen=this.elements.length;
+	var elts=arg.elements; var i=0; var len=elts.length;
+	while (i<len) this.drop(elts[i++]);
+	if (this.elements.length===curlen) return false;
+	else return true;}
+      else if (arg instanceof Array) {
+	var curlen=this.elements.length;
+	var elts=arg; var i=0; var len=elts.length;
+	while (i<len) this.drop(elts[i++]);
+	if (this.elements.length===curlen) return false;
+	else return true;}
+      else if ((typeof arg === 'string')||(typeof arg === 'number'))
+	if (!(this.members.hasOwnProperty(arg))) return false;
+	else {}
+      else if (!(arg._fdjtid)) return false;
+      else if (this.objects.hasOwnProperty(arg._fdjtid)) return false;
+      var pos=position(arg,this.elements);
+      if (pos<0) return false;
       else {
-	var result=fdjtSet(arguments[0],true);
-	var i=1; while (i<arguments.length) {
-	  result=fdjt_union(result,fdjtSet(arguments[i++],true));}
-	return result;}};
+	this.elements=this.elements.splice(pos,1);
+	if (pos<this.sortlen) this.sortlen--;
+	return true;}};
+    Set.prototype.sorted=function(arg){
+      if (this.sortlen===this.elements.length) return this.elements;
+      else if (this.sortlen===0) {
+	this.elements.sort(set_sortfn);
+	this.sortlen=elements.length;
+	return elements;}
+      else {
+	var added=this.elements.slice(sortlen);
+	added.sort(set_sortfn);
+	this.elements=union(this.elements,added);
+	this.sortlen=this.elements.length;
+	return this.elements;}};
+    
+    Set.prototype.union=function(){
+      var result=Set(this);
+      var i=0; var len=arguments.length;
+      while (i<len) result.add(arguments[i++]);
+      return result;}
+    Set.prototype.intersection=function(){
+      var arrays=[];
+      var i=0; var len=arguments.length;
+      while (i<len) {
+	var arrays=arguments[i++];
+	if (arg instanceof Set)
+	  if (arg.elements.length===0) return Set();
+	  else arrays.push(arg.sorted());
+	else if (arg instanceof Array)
+	  if (arg.length===0) return Set();
+	  else {
+	    var copy=[].join(arg);
+	    copy.sort(set_sortfn);
+	    arrays.push(copy);}
+	else arrays.push(new Array(arg));}
+      arrays.sort(length_sortfn);
+      var cur=arrays[0];
+      i=1; while ((i<arrays.length)&&(cur.length>0)) 
+	     cur=intersection(cur,arrays[i++]);
+      return Set(cur,true);};
+	
+    /* These could be faster by doing a binary search
+       given sortlen */
+    function set_contains(set,val){
+      var i=0; var len=set.elements.length;
+      while (i<len)
+	if (set[i]===val) return true;
+	else i++;
+      return false;}
+    function set_position(set,val){
+      var i=0; var len=set.elements.length;
+      while (i<len)
+	if (set[i]===val) return i;
+	else i++;
+      return -1;}
 
-    Set.difference=function(set1,set2){
-      var results=new Array();
-      var i=0; var j=0;
-      set1=fdjtSet(set1); set2=fdjtSet(set2);
-      var len1=set1.length; var len2=set2.length;
-      while ((i<len1) && (j<len2))
-	if (set1[i]===set2[j]) {
-	  i++; j++;}
-	else if (set_sortfn(set1[i],set2[j])<0)
-	  results.push(set1[i++]);
-	else j++;
-      while (i<len1) results.push(set1[i++]);
-      results._sortlen=results.length;
-      return results;};
-
+    
     /* Indices */
 
     function Index() {
@@ -283,93 +350,68 @@ var fdjtDB=
     /* OIDs */
 
     function OID(pool,arg,arg2) {
-      if (this instanceof OID)
+      if (!(pool)) return this;
+      else if (this instanceof OID)
 	return pool.cons(this,arg);
       else return pool.ref(arg,arg2);}
-    var oid_prototype=OID.prototype;
 
     OID.prototype.get=function(prop){
       if (this.hasOwnProperty(prop)) return this[prop];
       else return undefined;};
-    OID.prototype.getArray=function(prop){
+    OID.prototype.getSet=function(prop){
       if (this.hasOwnProperty(prop)) {
 	var val=this[prop];
-	if (val instanceof Array) return val;
+	if (val instanceof Set) return val;
 	else return Set(val);}
       else return [];};
     OID.prototype.add=function(prop,val){
       if (this.hasOwnProperty(prop)) {
 	var cur=this[prop];
-	if (cur===val) return;
-	else if (cur._sortlen)
-	  if (set_contains(cur,val)) return;
-	  else cur.push(val);
+	if (cur===val) return false;
+	else if (cur instanceof Set)
+	  if (!(cur.add(val))) return false;
+	  else {}
 	else this[probe]=Set([cur,val]);
 	if (this.pool.index) this.pool.index(this,prop,val,true);}
-      else this[prop]=val;};
+      else this[prop]=val;
+      return true;};
     OID.prototype.drop=function(prop,val){
       var vals=false;
       if (this.hasOwnProperty(prop)) {
-	if (typeof val === 'undefined') {
-	  if (this.pool.index)
-	    this.pool.index(this,prop,this[prop],false);
-	  delete this[prop];
-	  return;}
 	var cur=this[prop];
-	if (cur===val)
-	  delete this[prop];
-	else if (cur._sortlen) {
-	  var sortlen=cur._sortlen;
-	  var pos=set_position(cur,val);
-	  if (pos>=0) {
-	    cur.splice(pos,1);
-	    if (pos<sortlen) cur._sortlen--;}}
-	else this[probe]=Set([cur,val]);}
-      else return;
-      if (this.pool.index)
-	this.pool.index(this,prop,val,false);};
+	if (cur===val) delete this[prop];
+	else if (cur instanceof Set) {
+	  if (!(cur.drop(val))) return false;
+	  if (cur.elements.length===0) delete this[prop];}
+	else return false;
+	if (this.pool.index) this.pool.index(this,prop,val,false);
+	return true;}
+      else return false;};
     OID.prototype.test=function(prop,val){
       if (this.hasOwnProperty(prop)) {
 	if (typeof val === 'undefined') return true;
 	var cur=this[prop];
 	if (cur===val) return true;
-	else if (cur._sortlen)
-	  if (set_contains(cur,val)) return true;
+	else if (cur instanceof Set)
+	  if (cur.contains(val)) return true;
 	  else return false;
 	else return false;}
       else return false;};
 
     /* Miscellaneous array and table functions */
 
-    function array_contains(arr,val,start){
-      if (arr.indexOf)
-	return (arr.indexOf(val,start)>=0);
-      var i=start||0; var len=arr.length;
-      while (i<len)
-	if (arr[i]===val) return true;
-	else i++;
-      return false;}
-    function array_position(arr,val,start){
-      if (arr.indexOf)
-	return arr.indexOf(val,start);
-      var i=start||0; var len=arr.length;
-      while (i<len)
-	if (arr[i]===val) return i;
-	else i++;
-      return -1;}
-
     fdjtDB.add=function(obj,field,val,nodup){
       if (nodup) 
 	if (obj.hasOwnProperty(field)) {
 	  var vals=obj[field];
-	  if (array_contains(vals,val))  
+	  if (contains(vals,val))  
 	    obj[field].push(val);
 	  else {}}
 	else obj[field]=new Array(val);
       else if (obj.hasOwnProperty(field))
 	obj[field].push(val);
       else obj[field]=new Array(val);
-      if ((obj._all) && (!(array_contains(obj._all,field))))
+      if ((obj._all) && (!(contains(obj._all,field))))
 	obj._all.push(field);};
 
     fdjtDB.drop=function(obj,field,val){
@@ -378,7 +420,7 @@ var fdjtDB=
 	obj[field]=new Array();
       else if (obj.hasOwnProperty(field)) {
 	var vals=obj[field];
-	var pos=array_position(vals,val);
+	var pos=position(vals,val);
 	if (pos<0) return;
 	else vals.splice(pos,1);}
       else {}};
@@ -389,13 +431,13 @@ var fdjtDB=
 		 (obj.hasOwnProperty(field)) : (obj[field])) &&
 		((obj[field].length)>0));
       else if (obj.hasOwnProperty(field)) 
-	if (array_position(obj[field],val)<0)
+	if (position(obj[field],val)<0)
 	  return false;
 	else return true;
       else return false;};
 
     fdjtDB.insert=function(array,value){
-      if (array_position(array,value)<0) array.push(value);};
+      if (position(array,value)<0) array.push(value);};
 
     fdjtDB.remove=function(array,value,count){
       var pos=fdjtIndexOf(array,value);
@@ -404,7 +446,7 @@ var fdjtDB=
       if (count) {
 	count--;
 	while ((count>0) &&
-	       ((pos=array_position(array,value,pos))>=0)) {
+	       ((pos=position(array,value,pos))>=0)) {
 	  array.splice(pos,1); count--;}}
       return array;};
 
