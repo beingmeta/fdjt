@@ -362,8 +362,7 @@ function fdjtGetQuery(name,foldcase)
 }
 
 /* This is a kludge to force a redisplay when the browser
-   doesn't neccessarily do it automatically.  (you know who
-   I'm talking about, IE!) */
+   doesn't neccessarily do it automatically. */
 function fdjtRedisplay(arg)
 {
   if (!(arg)) return;
