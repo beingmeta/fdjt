@@ -34,7 +34,6 @@ var fdjtDB=
     fdjtDB.revid="$Id$";
     fdjtDB.version=parseInt("$Revision$".slice(10,-1));
 
-
     // We allocate 16 million IDs for miscellaneous objects
     //  and use counter to track them.
     var counter=0;
@@ -45,9 +44,10 @@ var fdjtDB=
     // Pools are ranges of numeric IDs and may map those IDs to objects
     var pools=[];
     var oid_origin=8192*8192;
-    var oid_base=oid_base;
+    var oid_base=oid_origin;
     var quanta=1024*1024;
     function Pool(name,cap,base,max) {
+      if (!(name)) return this;
       if (!(cap)) cap=1024*1024;
       else if ((cap%quanta)!==0) 
 	cap=((Math.floor(cap/quanta))+1)*quanta;
@@ -62,11 +62,13 @@ var fdjtDB=
       this.name=name; this.load=0; this.cap=cap; this.locked=false;
       // This is the array mapping offsets to OIDs
       this.oids=[];
-      if (!(base)) this.base=oid_base;
+      if (!(base)) {
+	this.base=oid_base;
+	oid_base=oid_base+cap;}
       else if ((base%quanta)!==0)
 	throw { error: "bad pool base"};
       else {
-	this.base=oid_base; oid_base=oid_base+cap;}
+	this.base=base;}
       var scan=base/quanta; var lim=scan+(cap/quanta);
       pools[name]=this;
       while (scan<lim) {
@@ -74,6 +76,8 @@ var fdjtDB=
 	scan++;}
       return this;}
     fdjtDB.Pool=Pool;
+
+    Pool.probe=function(id) {return pools[id]||false;};
 
     Pool.prototype.probe=function(off) {
       if (this.oids[off]) return (this.oids[off]);
@@ -198,6 +202,7 @@ var fdjtDB=
       return this;}
     fdjtDB.Set=Set;
     
+    Set.prototype.get=function(){return this.elements;};
     Set.prototype.contains=function(arg){
       if (!(arg)) return false;
       else if (arg instanceof Set) return false;
@@ -264,8 +269,8 @@ var fdjtDB=
       if (this.sortlen===this.elements.length) return this.elements;
       else if (this.sortlen===0) {
 	this.elements.sort(set_sortfn);
-	this.sortlen=elements.length;
-	return elements;}
+	this.sortlen=this.elements.length;
+	return this.elements;}
       else {
 	var added=this.elements.slice(sortlen);
 	added.sort(set_sortfn);
@@ -282,14 +287,14 @@ var fdjtDB=
       var arrays=[];
       var i=0; var len=arguments.length;
       while (i<len) {
-	var arrays=arguments[i++];
+	var arg=arguments[i++];
 	if (arg instanceof Set)
 	  if (arg.elements.length===0) return Set();
 	  else arrays.push(arg.sorted());
 	else if (arg instanceof Array)
 	  if (arg.length===0) return Set();
 	  else {
-	    var copy=[].join(arg);
+	    var copy=[].concat(arg);
 	    copy.sort(set_sortfn);
 	    arrays.push(copy);}
 	else arrays.push(new Array(arg));}
@@ -354,6 +359,7 @@ var fdjtDB=
       else if (this instanceof OID)
 	return pool.cons(this,arg);
       else return pool.ref(arg,arg2);}
+    fdjtDB.OID=OID;
 
     OID.prototype.get=function(prop){
       if (this.hasOwnProperty(prop)) return this[prop];
