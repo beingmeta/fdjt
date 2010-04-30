@@ -130,6 +130,8 @@ var fdjtKB=
       else return 1;}
 
     function intersection(set1,set2){
+      if ((!(set1))||(set1.length===0)) return [];
+      if ((!(set2))||(set2.length===0)) return [];
       var results=new Array();
       var i=0; var j=0; var len1=set1.length; var len2=set2.length;
       var allstrings=set1._allstrings&&set2._allstrings;
@@ -150,6 +152,8 @@ var fdjtKB=
     fdjtKB.intersection=intersection;
     
     function union(set1,set2){
+      if ((!(set1))||(set1.length===0)) return set2;
+      if ((!(set2))||(set2.length===0)) return set1;
       var results=new Array();
       var i=0; var j=0; var len1=set1.length; var len2=set2.length;
       var allstrings=set1._allstrings&&set2._allstrings;
@@ -169,6 +173,12 @@ var fdjtKB=
     fdjtKB.union=union;
 
     function merge(set1,set2){
+      if ((!(set1))||(set1.length===0)) {
+	set1.concat(set2);
+	set1._sortlen=set2._sortlen;
+	set1._allstrings=set2._allstrings;
+	return set1;}
+      if ((!(set2))||(set2.length===0)) return set1;
       var results=set1;
       set1=[].concat(results);
       var i=0; var j=0; var len1=set1.length; var len2=set2.length;
@@ -186,6 +196,7 @@ var fdjtKB=
       results._allstrings=allstrings;
       results._sortlen=results.length;
       return results;}
+    fdjtKB.merge=merge;
 
     /* Sets */
     /* sets are really arrays that are sorted to simplify set operations.
@@ -291,8 +302,8 @@ var fdjtKB=
 	  return Set(indices[prop][valkey]);
 	var index=indices[prop];
 	if (!(index))
-	  if (drop) return false;
-	  else indices[prop]=index={};
+	  if (add) indices[prop]=index={};
+	  else return false;
 	var curvals=index[valkey];
 	if (curvals) {
 	  var pos=position(curvals,val);
@@ -347,7 +358,7 @@ var fdjtKB=
 	else if (cur instanceof Array)
 	  if (!(set_add(cur,val))) return false;
 	  else {}
-	else this[probe]=Set([cur,val]);
+	else this[prop]=Set([cur,val]);
 	if (this.pool.index) this.pool.index(this,prop,val,true);}
       else this[prop]=val;
       return true;};
