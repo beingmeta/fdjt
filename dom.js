@@ -39,6 +39,24 @@ var fdjtDOM=
 	else if (elt.toString)
 	  node.appendChild(document.createTextNode(elt.toString()));
 	else node.appendChild(document.createTextNode(""+elt));}}
+    function dominsert(before,content,i) {
+      var node=before.parentNode;
+      if (typeof i === 'undefined') i=0;
+      var j=content.length-1;
+      while (j>=i) {
+	var elt=content[j--];
+	if (!(elt)) {}
+	else if (typeof elt === 'string')
+	  node.insertBefore(document.createTextNode(elt),before);
+	else if (elt.nodeType)
+	  node.insertBefore(elt,before);
+	else if (elt.length)
+	  dominsert(before,elt,0);
+	else if (elt.toDOM)
+	  dominsert(before,elt.toDOM());
+	else if (elt.toString)
+	  node.insertBefore(document.createTextNode(elt.toString()),before);
+	else node.insertBefore(document.createTextNode(""+elt),before);}}
 
     var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
 
@@ -87,6 +105,8 @@ var fdjtDOM=
 
     fdjtDOM.revid="$Id$";
     fdjtDOM.version=parseInt("$Revision$".slice(10,-1));
+
+    /* Various class functions and predicates */
 
     var whitespace_pat=/(\s)+/;
     var trimspace_pat=/^(\s)+|(\s)+$/;
@@ -164,6 +184,92 @@ var fdjtDOM=
       return function() {
 	if (elt) dropClass(elt,classname);}};
 
+    function swapClass(elt,drop,add,attrib) {
+      dropClass(elt,drop,attrib); addClass(elt,add,attrib);}
+    fdjtDOM.swapClass=swapClass;
+
+    function toggleClass(elt,classname,attrib){
+      var classinfo=
+      (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
+      if (!(classinfo)) {
+	if (attrib) elt.setAttribute(attrib,classname);
+	else elt.className=classname;
+	return true;}
+      var class_regex=
+      ((typeof classname === 'string')?
+       (classpats[classname]||classPat(classname)):
+       classname);
+      var newinfo=classinfo;
+      if (classinfo===classname) 
+	newinfo=null;
+      else if (classinfo.search(class_regex)>=0) 
+	newinfo=classinfo.replace(class_regex,"");
+      else {
+	if (attrib)
+	  elt.setAttribute(attrib,classinfo+' '+classname);
+	else elt.className=classinfo+' '+classname;
+	return true;}
+      if (newinfo)
+	newinfo=newinfo.
+	  replace(whitespace_pat," ").
+	  replace(trimspace_pat,"");
+      if (attrib)
+	if (newinfo) {
+	  elt.setAttribute(attrib,newinfo);
+	  elt.className=elt.className;}
+	else if (!(keep)) {
+	  elt.removeAttribute(attrib);
+	  elt.className=elt.className;}
+	else {}
+      else elt.className=newinfo;
+      return false;}
+    fdjtDOM.toggleClass=toggleClass;
+
+    fdjtDOM.isClickable=function(target){
+      while (target)
+	if (((target.tagName==='A')&&(target.href))||
+	    (target.tagName==="INPUT") ||
+	    (target.tagName==="TEXTAREA") ||
+	    (target.tagName==="SELECT") ||
+	    (target.tagName==="OPTION") ||
+	    (hasClass(target,"fdjtclickable")))
+	  return true;
+	else target=target.parentNode;
+      return false;};
+
+    /* Manipulating the DOM */
+
+    fdjtDOM.replace=function(existing,replacement){
+      var cur=existing;
+      if (typeof existing === 'string')
+	if (existing[0]==='#')
+	  cur=document.getElementById(existing.slice(1));
+	else cur=document.getElementById(existing);
+      if (cur) {
+	cur.parentNode.replaceChild(replacement,cur);
+	if ((cur.id)&&(!(replacement.id))) replacement.id=cur.id;}
+      else fdjtLog.warn("Can't find %o to replace it",existing);};
+
+    fdjtDOM.append=function (node) {
+      if (typeof node === 'string') node=document.getElementById(node);
+      domappend(node,arguments,1);};
+    fdjtDOM.prepend=function (node) {
+      if (typeof node === 'string') node=document.getElementById(node);
+      if (node.firstChild)
+	dominsert(node.firstChild,arguments,1);
+      else domappend(node,arguments,1);};
+
+    fdjtDOM.insertBefore=function (before) {
+      if (typeof before === 'string') before=document.getElementById(before);
+      dominsert(before,arguments,1);};
+    fdjtDOM.insertAfter=function (before) {
+      if (typeof before === 'string') before=document.getElementById(before);
+      if (before.nextSibling)
+	dominsert(before.nextSibling,arguments,1);
+      else domappend(before.parentNode,arguments,1);};
+      
+    /* Real simple DOM search */
+
     function hasParent(elt,parent,attrib){
       if ((typeof parent === 'string')||(!(parent.nodeType))) {
 	var scan=elt;
@@ -181,17 +287,32 @@ var fdjtDOM=
 	return false;}}
     fdjtDOM.hasParent=hasParent;
 
-    fdjtDOM.isClickable=function(target){
-      while (target)
-	if (((target.tagName==='A')&&(target.href))||
-	    (target.tagName==="INPUT") ||
-	    (target.tagName==="TEXTAREA") ||
-	    (target.tagName==="SELECT") ||
-	    (target.tagName==="OPTION") ||
-	    (hasClass(target,"fdjtclickable")))
-	  return true;
-	else target=target.parentNode;
-      return false;};
+    function getParent(elt,parent,attrib){
+      var scan=elt;
+      var pat=((typeof parent === 'string')?
+	       (classpats[parent]||classPat(parent)):
+	       parent);
+      while (scan)
+	if ((attrib)?
+	    ((scan.getAttribute(attrib))&&
+	     ((scan.getAttribute(attrib)).search(pat)>=0)):
+	    ((scan.className)&&(scan.className.search(pat)>=0)))
+	  return scan;
+	else scan=scan.parentNode;
+      return false;}
+    fdjtDOM.getParent=getParent;
+
+    /* Getting style information generally */
+
+    function getStyle(elt,prop){
+      var style=((window.getComputedStyle)&&
+		 (window.getComputedStyle(elt,null)));
+      if (!(style)) return false;
+      else if (prop) return style[prop];
+      else return style;}
+    fdjtDOM.getStyle=getStyle;
+
+    /* Getting display style */
 
     var display_styles={
       "DIV": "block","P": "block","BLOCKQUOTE":"block",
@@ -209,13 +330,14 @@ var fdjtDOM=
 	       (window.getComputedStyle(elt,null).display))||
 	      (display_styles[elt.tagName])||
 	      "inline");}
-    
     fdjtDOM.getDisplay=getDisplayStyle;
+
+    /* Generating text from the DOM */
 
     function flatten(string){return string.replace(/\s+/," ");};
 
     function textify(arg,flat,inside){
-      if (arg.text) return arg.text;
+      if (arg.text) return flatten(arg.text);
       else if (arg.nodeType)
 	if (arg.nodeType===3) return arg.nodeValue;
 	else if (arg.nodeType===1) {
@@ -251,6 +373,34 @@ var fdjtDOM=
       else return arg.toString();}
     fdjtDOM.textify=textify;
 
+    function getGeometry(elt,withstack,root){
+      var result={};
+      var top = elt.offsetTop;
+      var left = elt.offsetLeft;
+      var stack = ((withstack) ? (new Array(elt)) : false);
+      var width=elt.offsetWidth;
+      var height=elt.offsetHeight;
+
+      while (elt.offsetParent) {
+	if ((root)&&(elt===root)) break;
+	elt = elt.offsetParent;
+	if (withstack) withstack.push(elt);
+	top += elt.offsetTop;
+	left += elt.offsetLeft;}
+      
+      result.left=left; result.top=top;
+      result.width=width;
+      result.height=height;
+      
+      result.right=left+width; result.bottom=top+height;
+
+      if (stack) result.stack=stack;
+
+      return result;}
+    fdjtDOM.getGeometry=getGeometry;
+
+    /* Getting various kinds of metadata */
+
     fdjtDOM.getMeta=function(name,multiple,matchcase){
       var results=[];
       var matchname=((matchcase)&&(name.toUpperCase()));
@@ -285,38 +435,6 @@ var fdjtDOM=
 		   else i++;
       if (multiple) return results;
       else return false;};
-
-    fdjtDOM.getQuery=function(name,multiple,matchcase){
-      if (!(location.search))
-	if (multiple) return [];
-	else return false;
-      var results=[];
-      var namepat=new RegExp("(&|^|\\?)"+name+"(=|&|$)",((matchcase)?"g":"gi"));
-      var query=location.search;
-      var start=query.search(namepat);
-      while (start>=0) {
-	// Skip over separator if non-initial
-	if ((query[start]==='?')||(query[start]==='&')) start++;
-	// Skip over the name
-	var valstart=start+name.length; var end=false;
-	if (query[valstart]==="=") {
-	  var valstring=query.slice(valstart+1);
-	  end=valstring.search(/(&|$)/g);
-	  if (end<=0)
-	    if (multiple) {
-	      results.push(query.slice(start,valstart));
-	      return results;}
-	    else return query.slice(start,valstart);
-	  else if (multiple)
-	    results.push(valstring.slice(0,end));
-	  else return valstring.slice(0,end);}
-	else if (multiple)
-	  results.push(query.slice(start,end));
-	else return query.slice(start,end);
-	if (end>0) {
-	  query=query.slice(end);
-	  start=query.search(namepat);}}
-      if (multiple) return results; else return false;};
 
     fdjtDOM.cancel=function(evt){
       evt=evt||event;
