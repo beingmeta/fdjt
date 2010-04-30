@@ -20,7 +20,7 @@
 
 */
 
-var fdjtWidget=
+var fdjtUI=
   {cohi: {classname: "cohi",cur: false,delay: 100},
    checkspan: {}};
 
@@ -29,7 +29,7 @@ var fdjtWidget=
 (function(){
   var highlights={};
   function highlight(namearg,classname_arg){
-    var classname=((classname_arg) || (fdjtWidget.cohi.classname));
+    var classname=((classname_arg) || (fdjtUI.cohi.classname));
     var newname=((typeof namearg === 'string') ? (namearg) : (namearg.name));
     var cur=highlights[classname];
     if (cur===newname) return;
@@ -43,7 +43,7 @@ var fdjtWidget=
       var n=elts.length, i=0;
       while (i<n) fdjtDOM.addClass(elts[i++],classname);}}
   
-  fdjtWidget.cohi.onmouseover=function(evt,classname_arg){
+  fdjtUI.cohi.onmouseover=function(evt,classname_arg){
     var target=$T(evt);
     while (target)
       if ((target.tagName==='INPUT') || (target.tagName==='TEXTAREA') ||
@@ -53,14 +53,14 @@ var fdjtWidget=
       else target=target.parentNode;
     if (!(target)) return;
     highlight(target.name,classname_arg);};
-  fdjtWidget.cohi.onmouseout=function(evt,classname_arg){
+  fdjtUI.cohi.onmouseout=function(evt,classname_arg){
     var target=$T(evt);
-    var cur=fdjtWidget.cohi.cur;
+    var cur=fdjtUI.cohi.cur;
     while (target)
       if ((target.name) && (target.name===cur)) {
-	if (fdjtWidget.cohi.timer) clearTimeout(fdjtWidget.cohi.timer);
-	fdjtWidget.cohi.timer=
-	  setTimeout(fdjtWidget.cohi.onhighlight,fdjtWidget.cohi.delay,
+	if (fdjtUI.cohi.timer) clearTimeout(fdjtUI.cohi.timer);
+	fdjtUI.cohi.timer=
+	  setTimeout(fdjtUI.cohi.onhighlight,fdjtUI.cohi.delay,
 		     target.name);
       break;}
       else target=target.parentNode;};
