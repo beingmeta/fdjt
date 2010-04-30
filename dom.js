@@ -386,6 +386,8 @@ var fdjtDOM=
       else return arg.toString();}
     fdjtDOM.textify=textify;
 
+    /* Geometry functions */
+
     function getGeometry(elt,withstack,root){
       var result={};
       var top = elt.offsetTop;
@@ -411,6 +413,67 @@ var fdjtDOM=
 
       return result;}
     fdjtDOM.getGeometry=getGeometry;
+
+    function isVisible(elt,partial){
+      if (!(partial)) partial=false;
+      var top = elt.offsetTop;
+      var left = elt.offsetLeft;
+      var width = elt.offsetWidth;
+      var height = elt.offsetHeight;
+      var winx=window.pageXOffset;
+      var winy=window.pageYOffset;
+      var winxedge=winx+window.innerWidth;
+      var winyedge=winy+window.innerHeight;
+  
+      while(elt.offsetParent) {
+	if (elt===window) break;
+	elt = elt.offsetParent;
+	top += elt.offsetTop;
+	left += elt.offsetLeft;}
+
+      /*
+	fdjtTrace("fdjtIsVisible%s top=%o left=%o height=%o width=%o",
+	((partial)?("(partial)"):""),
+	top,left,height,width);
+	fdjtTrace("fdjtIsVisible winx=%o winy=%o winxedge=%o winyedge=%o",
+	winx,winy,winxedge,winyedge);
+      */
+
+      if (partial)
+	// There are three cases we check for:
+	return (
+		// top of element in window
+		((top > winy) && (top < winyedge) &&
+		 (left > winx) && (left < winxedge)) ||
+		// bottom of element in window
+		((top+height > winy) && (top+height < winyedge) &&
+		 (left+width > winx) && (left+width < winxedge)) ||
+		// top above/left of window, bottom below/right of window
+		(((top < winy) || (left < winx)) &&
+		 ((top+height > winyedge) && (left+width > winxedge))));
+      else return ((top > winy) && (left > winx) &&
+		   (top + height) <= (winyedge) &&
+		   (left + width) <= (winxedge));}
+    fdjtDOM.isVisible=isVisible;
+
+    function isAtTop(elt,delta){
+      if (!(delta)) delta=50;
+      var top = elt.offsetTop;
+      var left = elt.offsetLeft;
+      var width = elt.offsetWidth;
+      var height = elt.offsetHeight;
+      var winx=window.pageXOffset;
+      var winy=window.pageYOffset;
+      var winxedge=winx+window.innerWidth;
+      var winyedge=winy+window.innerHeight;
+  
+      while(elt.offsetParent) {
+	elt = elt.offsetParent;
+	top += elt.offsetTop;
+	left += elt.offsetLeft;}
+
+      return ((top>winx) && (top<winyedge) && (top<winx+delta));}
+    fdjtDOM.isAtTop=isAtTop;
 
     /* Getting various kinds of metadata */
 
