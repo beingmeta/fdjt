@@ -42,7 +42,8 @@ var fdjtDOM=
 
     function fdjtDOM(spec){
       var node;
-      if (typeof spec==='string')
+      if (spec.nodeType) node=spec;
+      else if (typeof spec==='string')
 	if (spec[0]==='<') {
 	  var container=document.createElement("DIV");
 	  container.innerHTML=spec;

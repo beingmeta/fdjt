@@ -24,7 +24,7 @@
   _fdjtid: unique integer assigned to objects
   fdjtDB.register (assigns unique ID)
   fdjtDB.Pool (creates a pool of unique numeric IDs starting at some base)
-  fdjtDB.OID (objects created within a pool)
+  fdjtDB.KNode (objects created within a pool)
  */
 
 var fdjtDB=
@@ -43,68 +43,43 @@ var fdjtDB=
 
     // Pools are ranges of numeric IDs and may map those IDs to objects
     var pools=[];
-    var oid_origin=8192*8192;
-    var oid_base=oid_origin;
-    var quanta=1024*1024;
-    function Pool(name,cap,base,max) {
+
+    function Pool(name) {
       if (!(name)) return this;
-      if (!(cap)) cap=1024*1024;
-      else if ((cap%quanta)!==0) 
-	cap=((Math.floor(cap/quanta))+1)*quanta;
-      else {}
-      if (pools[name])
-	if ((arguments.length==1)||
-	    ((arguments.length==2)&&(pool.cap===cap))||
-	    ((arguments.length==3)&&(pool.cap===cap)&&
-	     (pool.base===base)))
-	  return pools[name];
-	else throw {error: "pool conflict"};
-      this.name=name; this.load=0; this.cap=cap; this.locked=false;
-      // This is the array mapping offsets to OIDs
-      this.oids=[];
-      if (!(base)) {
-	this.base=oid_base;
-	oid_base=oid_base+cap;}
-      else if ((base%quanta)!==0)
-	throw { error: "bad pool base"};
-      else {
-	this.base=base;}
-      var scan=base/quanta; var lim=scan+(cap/quanta);
-      pools[name]=this;
-      while (scan<lim) {
-	pools[scan-oid_origin]=this;
-	scan++;}
+      if (pools[name]) return pools[name];
+      pools[name]=this; this.name=name; this.map={};
       return this;}
     fdjtDB.Pool=Pool;
 
     Pool.probe=function(id) {return pools[id]||false;};
 
-    Pool.prototype.probe=function(off) {
-      if (this.oids[off]) return (this.oids[off]);
+    Pool.prototype.probe=function(id) {
+      if (this.map[id]) return (this.map[id]);
       else return false;};
 
-    Pool.prototype.ref=function(off,cons) {
-      if (this.oids[off]) return this.oids[off];
-      if ((this.load>=0)&&(off>=this.load))
-	throw { error: "OID reference out of range"};
-      var consed=((cons)?(new cons()):(new OID()));
-      consed._fdjtid=this.base+off;
-      this.oids[off]=consed;
-      consed.pool=this;
-      return consed;};
+    Pool.prototype.ref=function(oid,cons) {
+      if (this.map[oid]) return this.map[oid];
+      if (!(cons)) cons=new this.cons(this,oid);
+      else if (cons instanceof KNode) {}
+      else cons=new cons(this,oid);
+      if (!(cons.oid)) cons.oid=oid;
+      this.map[oid]=cons; cons.pool=this;
+      return cons;};
       
-    Pool.prototype.cons=function(val) {
-      if (this.locked) throw { error: "locked pool"};
-      if (val._fdjtid) return init;
-      var off=(this.load)++;
-      var oid=(((val)&&(val instanceof OID))?(val):(new OID()));
-      oid._fdjtid=this.base+off;
-      oid._fdjtstamp=new Date().getTime();
-      this.oids[off]=oid;
-      oid.pool=this;
-      // Copy fields if neccessary
-      if (oid!==val) for (key in val) oid[key]=val[key];
-      return oid;};
+    Pool.prototype.import=function(data) {
+      if (data.oid) {
+	var oid=data.oid;
+	var obj=(this.map[oid])||(this.ref(oid));
+	fdjtLog("Loading %o into %o",obj,oid);
+	for (key in data)
+	  if (key!=='oid') {
+	    var value=data[key];
+	    if (value instanceof Array) {
+	      var i=0; var len=value.length;
+	      while (i<len) obj.add(key,value[i++]);}
+	    else obj.add(key,value);}
+	return obj;}
+      else return data;};
     
     /* Fast sets */
     function set_sortfn(a,b) {
@@ -279,20 +254,21 @@ var fdjtDB=
 	return this.elements;}};
     
     Set.prototype.union=function(){
-      var result=Set(this);
+      var result=new Set(this);
       var i=0; var len=arguments.length;
       while (i<len) result.add(arguments[i++]);
       return result;}
     Set.prototype.intersection=function(){
       var arrays=[];
       var i=0; var len=arguments.length;
+      arrays.push(this.sorted());
       while (i<len) {
 	var arg=arguments[i++];
 	if (arg instanceof Set)
-	  if (arg.elements.length===0) return Set();
+	  if (arg.elements.length===0) return new Set();
 	  else arrays.push(arg.sorted());
 	else if (arg instanceof Array)
-	  if (arg.length===0) return Set();
+	  if (arg.length===0) return new Set();
 	  else {
 	    var copy=[].concat(arg);
 	    copy.sort(set_sortfn);
@@ -300,9 +276,10 @@ var fdjtDB=
 	else arrays.push(new Array(arg));}
       arrays.sort(length_sortfn);
       var cur=arrays[0];
-      i=1; while ((i<arrays.length)&&(cur.length>0)) 
-	     cur=intersection(cur,arrays[i++]);
-      return Set(cur,true);};
+      i=1; len=arrays.length;
+      while ((i<len)&&(cur.length>0)) 
+	cur=intersection(cur,arrays[i++]);
+      return new Set(cur,true);};
 	
     /* These could be faster by doing a binary search
        given sortlen */
@@ -333,7 +310,7 @@ var fdjtDB=
 	  valkey=val._fdjtid||register(val);
 	  indices=object_indices;}
 	if (!(item))
-	  return Set(indices[prop][valkey],true);
+	  return new Set(indices[prop][valkey],true);
 	var index=indices[prop];
 	if (!(index)) indices[prop]=index={};
 	var curvals=index[valkey];
@@ -348,40 +325,40 @@ var fdjtDB=
 	    curvals.splice(pos,1);
 	    if (pos<sortlen) curvals._sortlen--;}}
 	else if (add)
-	  index[valkey]=Set(item);
+	  index[valkey]=new Set(item);
 	else {}};}
     fdjtDB.Index=Index;
 
-    /* OIDs */
+    /* KNodes */
 
-    function OID(pool,arg,arg2) {
-      if (!(pool)) return this;
-      else if (this instanceof OID)
-	return pool.cons(this,arg);
-      else return pool.ref(arg,arg2);}
-    fdjtDB.OID=OID;
+    function KNode(pool,oid) {
+      if (pool) this.pool=pool;
+      if (oid) this.oid=oid;
+      return this;}
+    fdjtDB.KNode=KNode;
+    Pool.prototype.cons=KNode;
 
-    OID.prototype.get=function(prop){
+    KNode.prototype.get=function(prop){
       if (this.hasOwnProperty(prop)) return this[prop];
       else return undefined;};
-    OID.prototype.getSet=function(prop){
+    KNode.prototype.getSet=function(prop){
       if (this.hasOwnProperty(prop)) {
 	var val=this[prop];
 	if (val instanceof Set) return val;
-	else return Set(val);}
+	else return new Set(val);}
       else return [];};
-    OID.prototype.add=function(prop,val){
+    KNode.prototype.add=function(prop,val){
       if (this.hasOwnProperty(prop)) {
 	var cur=this[prop];
 	if (cur===val) return false;
 	else if (cur instanceof Set)
 	  if (!(cur.add(val))) return false;
 	  else {}
-	else this[probe]=Set([cur,val]);
+	else this[probe]=new Set([cur,val]);
 	if (this.pool.index) this.pool.index(this,prop,val,true);}
       else this[prop]=val;
       return true;};
-    OID.prototype.drop=function(prop,val){
+    KNode.prototype.drop=function(prop,val){
       var vals=false;
       if (this.hasOwnProperty(prop)) {
 	var cur=this[prop];
@@ -393,7 +370,7 @@ var fdjtDB=
 	if (this.pool.index) this.pool.index(this,prop,val,false);
 	return true;}
       else return false;};
-    OID.prototype.test=function(prop,val){
+    KNode.prototype.test=function(prop,val){
       if (this.hasOwnProperty(prop)) {
 	if (typeof val === 'undefined') return true;
 	var cur=this[prop];
