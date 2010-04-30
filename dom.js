@@ -40,6 +40,8 @@ var fdjtDOM=
 	  node.appendChild(document.createTextNode(elt.toString()));
 	else node.appendChild(document.createTextNode(""+elt));}}
 
+    var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
+
     function fdjtDOM(spec){
       var node;
       if (spec.nodeType) node=spec;
@@ -54,25 +56,27 @@ var fdjtDOM=
 	    else i++;
 	  return false;}
 	else {
-	  var hashpos=spec.indexOf('#');
-	  var dotpos=spec.indexOf('.');
-	  var tagend=((hashpos<0)?(dotpos):
-		      (dotpos<0)?(hashpos):
-		      (dotpos<hashpos)?(dotpos):(hashpos));
-	  if (tagend<0)
-	    node=document.createElement(spec);
-	  else node=document.createElement(spec.slice(0,tagend));
-	  if (hashpos>=0)
-	    if ((dotpos)&&(dotpos>hashpos)) {
-	      node.id=spec.slice(hashpos+1,dotpos);
-	      spec=spec.slice(0,hashpos)+spec.slice(dotpos);}
-	    else {
-	      node.id=spec.slice(hashpos+1);
-	      spec=spec.slice(0,hashpos);}
-	  dotpos=spec.indexOf('.');
-	  if (dotpos>=0)
-	    node.className=spec.slice(dotpos+1).replace('.',' ');
-	  else node.className=spec.replace('.',' ');}
+	  var elts=spec.match(css_selector_regex);
+	  var classname=false;
+	  node=document.createElement(elts[0]);
+	  var i=1; var len=elts.length;
+	  while (i<len) {
+	    var sel=elts[i++];
+	    if (sel[0]==='#') node.id=sel.slice(1);
+	    else if (sel[0]==='.')
+	      if (classname) classname=classname+" "+sel.slice(1);
+	      else classname=sel.slice(1);
+	    else if (sel[0]==='[') {
+	      var eqpos=sel.indexOf('=');
+	      if (eqpos<0)
+		node.setAttribute
+		  (sel.slice(1,sel.length-1),
+		   sel.slice(1,sel.length-1));
+	      else node.setAttribute
+		     (sel.slice(1,eqpos),
+		      sel.slice(eqpos+1,sel.length-1));}
+	    else {}}
+	  if (classname) node.className=classname;}
       else {
 	node=document.createElement(attrib.tagName);
 	for (attrib in spec) {
