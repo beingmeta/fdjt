@@ -268,6 +268,19 @@ var fdjtDOM=
 	dominsert(before.nextSibling,arguments,1);
       else domappend(before.parentNode,arguments,1);};
       
+    /* DOM construction shortcuts */
+
+    fdjtDOM.Input=function(spec,name,value){
+      if (spec.search(/\w/)!==0) spec='INPUT'+spec;
+      var node=fdjtDOM(spec);
+      node.name=name; if (value) node.value=value;
+      return node;};
+    fdjtDOM.Anchor=function(spec,href){
+      if (spec.search(/\w/)!==0) spec='A'+spec;
+      var node=fdjtDOM(spec); node.href=href;
+      domappend(node,arguments,2);
+      return node;};
+
     /* Real simple DOM search */
 
     function hasParent(elt,parent,attrib){
