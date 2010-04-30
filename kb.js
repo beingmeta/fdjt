@@ -22,24 +22,24 @@
 
 /*
   _fdjtid: unique integer assigned to objects
-  fdjtDB.register (assigns unique ID)
-  fdjtDB.Pool (creates a pool of unique numeric IDs starting at some base)
-  fdjtDB.KNode (objects created within a pool)
+  fdjtKB.register (assigns unique ID)
+  fdjtKB.Pool (creates a pool of unique numeric IDs starting at some base)
+  fdjtKB.KNode (objects created within a pool)
  */
 
-var fdjtDB=
+var fdjtKB=
   (function(){
     // This is the top level object/module 
-    fdjtDB={};
-    fdjtDB.revid="$Id$";
-    fdjtDB.version=parseInt("$Revision$".slice(10,-1));
+    fdjtKB={};
+    fdjtKB.revid="$Id$";
+    fdjtKB.version=parseInt("$Revision$".slice(10,-1));
 
     // We allocate 16 million IDs for miscellaneous objects
     //  and use counter to track them.
     var counter=0;
     function register(x){
       return (x._fdjtid)||(x._fdjtid=(++counter));}
-    fdjtDB.register=register;
+    fdjtKB.register=register;
 
     // Pools are ranges of numeric IDs and may map those IDs to objects
     var pools=[];
@@ -49,7 +49,7 @@ var fdjtDB=
       if (pools[name]) return pools[name];
       pools[name]=this; this.name=name; this.map={};
       return this;}
-    fdjtDB.Pool=Pool;
+    fdjtKB.Pool=Pool;
 
     Pool.probe=function(id) {return pools[id]||false;};
 
@@ -164,7 +164,7 @@ var fdjtDB=
 	  if (((typeof elt === 'string')||(typeof elt === 'number'))?
 	      (this.members.hasOwnProperty(elt)):
 	      (elt._fdjtid)?(this.objects.hasOwnProperty(elt._fdjtid)):
-	      (this.objects.hasOwnProperty(fdjtDB.register(elt)))) {}
+	      (this.objects.hasOwnProperty(fdjtKB.register(elt)))) {}
 	  else {
 	    unique.push(elt);
 	    if ((typeof elt === 'string')||(typeof elt === 'number'))
@@ -175,7 +175,7 @@ var fdjtDB=
       if (sorted) this.sortlen=this.elements.length;
       else this.sortlen=0;
       return this;}
-    fdjtDB.Set=Set;
+    fdjtKB.Set=Set;
     
     Set.prototype.get=function(){return this.elements;};
     Set.prototype.contains=function(arg){
@@ -199,7 +199,7 @@ var fdjtDB=
 	      members[add[i++]]=true;
 	    else if (add[i]._fdjtid)
 	      members[add[i++]._fdjtid]=true;
-	    else objects[fdjtDB.register(add[i++])]=true;}
+	    else objects[fdjtKB.register(add[i++])]=true;}
 	  return true;}}
       else if (arg instanceof Array) {
 	var i=0; var len=arg.length;
@@ -210,7 +210,7 @@ var fdjtDB=
 	  this.members[arg]=true; this.elements.push(arg);
 	  return true;}
       else {
-	var id=fdjtDB.register(arg);
+	var id=fdjtKB.register(arg);
 	if (this.objects.hasOwnProperty(id)) return false;
 	else {
 	  this.objects[id]=true;
@@ -327,7 +327,7 @@ var fdjtDB=
 	else if (add)
 	  index[valkey]=new Set(item);
 	else {}};}
-    fdjtDB.Index=Index;
+    fdjtKB.Index=Index;
 
     /* KNodes */
 
@@ -335,7 +335,7 @@ var fdjtDB=
       if (pool) this.pool=pool;
       if (oid) this.oid=oid;
       return this;}
-    fdjtDB.KNode=KNode;
+    fdjtKB.KNode=KNode;
     Pool.prototype.cons=KNode;
 
     KNode.prototype.get=function(prop){
@@ -383,7 +383,7 @@ var fdjtDB=
 
     /* Miscellaneous array and table functions */
 
-    fdjtDB.add=function(obj,field,val,nodup){
+    fdjtKB.add=function(obj,field,val,nodup){
       if (nodup) 
 	if (obj.hasOwnProperty(field)) {
 	  var vals=obj[field];
@@ -397,7 +397,7 @@ var fdjtDB=
       if ((obj._all) && (!(contains(obj._all,field))))
 	obj._all.push(field);};
 
-    fdjtDB.drop=function(obj,field,val){
+    fdjtKB.drop=function(obj,field,val){
       if (!(val))
 	/* Drop all vals */
 	obj[field]=new Array();
@@ -408,7 +408,7 @@ var fdjtDB=
 	else vals.splice(pos,1);}
       else {}};
 
-    fdjtDB.test=function(obj,field,val){
+    fdjtKB.test=function(obj,field,val){
       if (typeof val === "undefined")
 	return (((obj.hasOwnProperty) ?
 		 (obj.hasOwnProperty(field)) : (obj[field])) &&
@@ -419,10 +419,10 @@ var fdjtDB=
 	else return true;
       else return false;};
 
-    fdjtDB.insert=function(array,value){
+    fdjtKB.insert=function(array,value){
       if (position(array,value)<0) array.push(value);};
 
-    fdjtDB.remove=function(array,value,count){
+    fdjtKB.remove=function(array,value,count){
       var pos=fdjtIndexOf(array,value);
       if (pos<0) return array;
       array.splice(pos,1);
@@ -433,7 +433,7 @@ var fdjtDB=
 	  array.splice(pos,1); count--;}}
       return array;};
 
-    fdjtDB.indexof=function(array,elt,pos){
+    fdjtKB.indexof=function(array,elt,pos){
       if (array.indexOf)
 	if (pos)
 	  return array.indexOf(elt,pos);
@@ -445,7 +445,7 @@ var fdjtDB=
 	  else i++;
 	return -1;}};
 
-    fdjtDB.contains=function(array,elt){
+    fdjtKB.contains=function(array,elt){
       if (array.indexOf)
 	return (array.indexOf(elt)>=0);
       else {
@@ -455,7 +455,7 @@ var fdjtDB=
 	  else i++;
 	return false;}};
     
-    return fdjtDB;})();
+    return fdjtKB;})();
 
 /* Emacs local variables
 ;;;  Local variables: ***
