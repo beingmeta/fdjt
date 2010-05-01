@@ -25,7 +25,8 @@ var fdjtUI=
    checkspan: {}};
 
 /* Co-highlighting */
-
+/* When the mouse moves over a named element, the 'cohi' class is added to
+   all elements with the same name. */
 (function(){
   var highlights={};
   function highlight(namearg,classname_arg){
@@ -65,6 +66,31 @@ var fdjtUI=
       break;}
       else target=target.parentNode;};
  })();
+
+/* Checkspans:
+   Text regions which include a checkbox where clicking toggles the checkbox. */
+fdjtUI.checkspan={};
+(function(){
+  function checkspan_onclick(evt) {
+    evt=evt||event;
+    target=evt.target||evt.srcTarget;
+    var checkspan=fdjtDOM.getParent(target,"checkspan");
+    if ((target.tagName==='INPUT')&&(target.type=='checkbox')) {
+      target.blur();
+      if (target.checked) fdjtDOM.addClass(checkspan,"checked");
+      else fdjtDOM.dropClass(checkspan,"checked");}
+    else {
+      var inputs=fdjtDOM.filterChildren(checkspan,function(evt){return (evt.tagName==='INPUT')&&(evt.type==='checkbox');});
+      var input=((inputs)&&(inputs.length)&&(inputs[0]));
+      if (input) 
+	if (input.checked) {
+	  fdjtDOM.dropClass(checkspan,"checked");
+	  input.checked=false; input.blur();}
+	else {
+	  fdjtDOM.addClass(checkspan,"checked");
+	  input.checked=true; input.blur();}
+      else fdjtDOM.toggleClass(checkspan,"checked");}}
+  fdjtUI.checkspan.onclick=checkspan_onclick;})();
 
 /* Emacs local variables
 ;;;  Local variables: ***

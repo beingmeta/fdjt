@@ -67,7 +67,7 @@ var fdjtKB=
       this.map[oid]=cons; cons.pool=this;
       return cons;};
       
-    Pool.prototype.import=function(data) {
+    Pool.prototype.Import=function(data) {
       if (data.oid) {
 	var oid=data.oid;
 	var obj=(this.map[oid])||(this.ref(oid));

@@ -315,6 +315,30 @@ var fdjtDOM=
       return false;}
     fdjtDOM.getParent=getParent;
 
+    function gather_children(node,pat,attrib,results){
+      if (node.nodeType===1) {
+	var val=((attrib)?(node.getAttribute(attrib)):(node.className));
+	if ((val)&&(val.search(pat)>=0)) results.push(node);
+	var children=node.childNodes;
+	if (children) {
+	  var i=0; var lim=children.length; var result;
+	  while (i<lim) gather_children(children[i++],pat,attrib,results);}}}
+    function filter_children(node,filter,results){
+      if (node.nodeType===1) {
+	if (filter(node)) results.push(node);
+	var children=node.childNodes;
+	if (children) {
+	  var i=0; var lim=children.length; var result;
+	  while (i<lim) filter_children(children[i++],filter,results);}}}
+    fdjtDOM.getChildren=function(node,classname,attrib){
+      var results=[]; 
+      if ((!(attrib))&&(typeof classname === 'function'))
+	filter_children(node,classname,results);
+      else {
+	var pat=(classpats[parent]||classPat(parent));
+	gather_children(node,classname,attrib||false);}
+      return results;};
+    
     /* Getting style information generally */
 
     function getStyle(elt,prop){
@@ -519,6 +543,8 @@ var fdjtDOM=
       evt.cancelBubble=true;};
     return fdjtDOM;
   })();
+
+function fdjtID(id) { return document.getElementById(id);}
 
 /* Emacs local variables
 ;;;  Local variables: ***
