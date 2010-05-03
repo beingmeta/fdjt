@@ -148,37 +148,41 @@ var fdjtString=
 	return results;}
       else return string.split('\n');};
 
-    fdjtString.trim=function(string){
+    function string_trim(string){
       var start=string.search(/\S/); var end=string.search(/\s+$/g);
       if ((start===0) && (end<0)) return string;
-      else return string.slice(start,end);};
+      else return string.slice(start,end);}
+    fdjtString.trim=string_trim;
 
-    fdjtString.stdspace=function(string){
-      return string.replace(/\s+/," ").replace(/(^\s)|(\s$)/,"");};
+    function stdspace(string){
+      return string.replace(/\s+/," ").replace(/(^\s)|(\s$)/,"");}
+    fdjtString.stdspace=stdspace;
 
-    fdjtString.flatten=function(string){
-      return string.replace(/\s+/," ");};
+    function flatten(string){
+      return string.replace(/\s+/," ");}
+    fdjtString.flatten=flatten;
 
-    fdjtString.stripMarkup=function(string){
-      return string.replace(/<[^>]*>/g,"");};
+    function stripMarkup(string){
+      return string.replace(/<[^>]*>/g,"");}
+    fdjtString.stripMarkup=stripMarkup;
 
-    fdjtString.unEscape=function(string){
+    function unEscape(string){
       if (string.indexOf('\\')>=0)
 	return string.replace(/\\(.)/g,"$1");
-      else return string;};
+      else return string;}
+    fdjtString.unEscape=unEscape;
 
-    fdjtString.unEntify=function(string) {
+    function unEntify(string) {
       return string.replace(/&#(\d+);/g,
 			    function(whole,paren) {
-			      return String.fromCharCode(+paren);});};
+			      return String.fromCharCode(+paren);});}
+    fdjtString.unEntify=unEntify;
 
-
-
-    fdjtString.padNum=function(num,digits){
+    function padNum(num,digits){
       var ndigits=
-      ((num<10)?(1):(num<100)?(2):(num<1000)?(3):(num<10000)?(4):
-       (num<100000)?(5):(num<1000000)?(6):(num<1000000)?(7):
-       (num<100000000)?(8):(num<1000000000)?(9):(num<10000000000)?(10):(11));
+	((num<10)?(1):(num<100)?(2):(num<1000)?(3):(num<10000)?(4):
+	 (num<100000)?(5):(num<1000000)?(6):(num<1000000)?(7):
+	 (num<100000000)?(8):(num<1000000000)?(9):(num<10000000000)?(10):(11));
       var nzeroes=digits-ndigits;
       switch (nzeroes) {
       case 0: return ""+num;
@@ -192,17 +196,20 @@ var fdjtString=
       case 8: return "00000000"+num;
       case 9: return "000000000"+num;
       case 10: return "0000000000"+num;
-      default: return ""+num;}};
+      default: return ""+num;}}
+    fdjtString.padNum=padNum;
 
     /* More string functions */
 
-    fdjtString.hasPrefix=function(string,prefix){
-      return ((string.indexOf(prefix))===0);};
+    function hasPrefix(string,prefix){
+      return ((string.indexOf(prefix))===0);}
+    fdjtString.hasPrefix=hasPrefix;
 
-    fdjtString.hasSuffix=function(string,suffix){
-      return ((string.lastIndexOf(suffix))===(string.length-suffix.length));};
+    function hasSuffix(string,suffix){
+      return ((string.lastIndexOf(suffix))===(string.length-suffix.length));}
+    fdjtString.hasSuffix=hasSuffix;
 
-    fdjtString.commonPrefix=function(string1,string2,brk,foldcase){
+    function commonPrefix(string1,string2,brk,foldcase){
       var i=0; var last=0;
       while ((i<string1.length) && (i<string2.length))
 	if ((string1[i]===string2[i])||
@@ -213,9 +220,10 @@ var fdjtString=
 	  else last=i++;
 	else break;
       if (last>0) return string1.slice(0,last+1);
-      else return false;};
+      else return false;}
+    fdjtString.commonPrefix=commonPrefix;
 
-    fdjtString.commonSuffix=function(string1,string2,brk,foldcase){
+    function commonSuffix(string1,string2,brk,foldcase){
       var i=string1.length, j=string2.length; var last=0;
       while ((i>=0) && (j>=0))
 	if ((string1[i]===string2[j])||
@@ -226,12 +234,14 @@ var fdjtString=
 	  else {last=i; i--; j--;}
 	else break;
       if (last>0) return string1.slice(last);
-      else return false;};
+      else return false;}
+    fdjtString.commonSuffix=commonSuffix;
 
-    fdjtString.stripSuffix=function(string){
+    function stripSuffix(string){
       var start=string.search(/\.\w+$/);
       if (start>0) return string.slice(0,start);
-      else return string;};
+      else return string;}
+    fdjtString.stripSuffix=stripSuffix;
 
     function arrayContains(array,element){
       if (array.indexOf)
@@ -243,66 +253,66 @@ var fdjtString=
 	  else i++;
 	return false;}}
 
-      function prefixAdd(ptree,string,i) {
+    function prefixAdd(ptree,string,i) {
+      var strings=ptree.strings;
+      if (i===string.length) 
+	if ((strings.indexOf) ?
+	    (strings.indexOf(string)>=0) :
+	    (arrayContains(strings,string)))
+	  return false;
+	else {
+	  strings.push(string);
+	  return true;}
+      else if (ptree.splits) {
+	var splitchar=string[i];
+	var split=ptree[splitchar];
+	if (!(split)) {
+	  // Create a new split
+	  split={};
+	  split.strings=[];
+	  // We don't really use this, but it might be handy for debugging
+	  split.splitchar=splitchar;
+	  ptree[splitchar]=split;
+	  ptree.splits.push(split);}
+	if (prefixAdd(split,string,i+1)) {
+	  strings.push(string);
+	  return true;}
+	else return false;}
+      else if (ptree.strings.length<5)
+	if ((strings.indexOf) ?
+	    (strings.indexOf(string)>=0) :
+	    (arrayContains(strings,string)))
+	  return false;
+	else {
+	  strings.push(string);
+	  return true;}
+      else {
+	// Subdivide
+	ptree.splits=[];
 	var strings=ptree.strings;
-	if (i===string.length) 
-	  if ((strings.indexOf) ?
-	      (strings.indexOf(string)>=0) :
-	      (arrayContains(strings,string)))
-	    return false;
-	  else {
-	    strings.push(string);
-	    return true;}
-	else if (ptree.splits) {
-	  var splitchar=string[i];
-	  var split=ptree[splitchar];
-	  if (!(split)) {
-	    // Create a new split
-	    split={};
-	    split.strings=[];
-	    // We don't really use this, but it might be handy for debugging
-	    split.splitchar=splitchar;
-	    ptree[splitchar]=split;
-	    ptree.splits.push(split);}
-	  if (prefixAdd(split,string,i+1)) {
-	    strings.push(string);
-	    return true;}
-	  else return false;}
-	else if (ptree.strings.length<5)
-	  if ((strings.indexOf) ?
-	      (strings.indexOf(string)>=0) :
-	      (arrayContains(strings,string)))
-	    return false;
-	  else {
-	    strings.push(string);
-	    return true;}
-	else {
-	  // Subdivide
-	  ptree.splits=[];
-	  var strings=ptree.strings;
-	  var j=0; while (j<strings.length) prefixAdd(ptree,strings[j++],i);
-	  return prefixAdd(ptree,string,i);}}
-      fdjtString.prefixAdd=prefixAdd;
+	var j=0; while (j<strings.length) prefixAdd(ptree,strings[j++],i);
+	return prefixAdd(ptree,string,i);}}
+    fdjtString.prefixAdd=prefixAdd;
 
-      function prefixFind(ptree,prefix,i,plen){
-	if (!(plen)) plen=prefix.length;
-	if (i===plen)
-	  return ptree.strings;
-	else if (ptree.strings.length<=5) {
-	  var strings=ptree.strings;
-	  var results=[];
-	  var j=0; while (j<strings.length) {
-	    var string=strings[j++];
-	    if (fdjtHasPrefix(string,prefix)) results.push(string);}
-	  if (results.length) return results;
-	  else return false;}
-	else {
-	  var split=ptree[prefix[i]];
-	  if (split) return fdjtPrefixFind(split,prefix,i+1,plen);
-	  else return false;}}
-      fdjtString.prefixFind=prefixFind;
+    function prefixFind(ptree,prefix,i,plen){
+      if (!(plen)) plen=prefix.length;
+      if (i===plen)
+	return ptree.strings;
+      else if (ptree.strings.length<=5) {
+	var strings=ptree.strings;
+	var results=[];
+	var j=0; while (j<strings.length) {
+	  var string=strings[j++];
+	  if (hasPrefix(string,prefix)) results.push(string);}
+	if (results.length) return results;
+	else return false;}
+      else {
+	var split=ptree[prefix[i]];
+	if (split) return prefixFind(split,prefix,i+1,plen);
+	else return false;}}
+    fdjtString.prefixFind=prefixFind;
 
-      return fdjtString;})();
+    return fdjtString;})();
 
 /* Emacs local variables
 ;;;  Local variables: ***

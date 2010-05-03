@@ -21,8 +21,8 @@
 */
 
 var fdjtUI=
-  {cohi: {classname: "cohi",cur: false,delay: 100},
-   checkspan: {}};
+  {CoHi: {classname: "cohi"},CheckSpan: {},
+   AutoPrompt: {}, InputHelp: {}};
 
 /* Co-highlighting */
 /* When the mouse moves over a named element, the 'cohi' class is added to
@@ -30,8 +30,8 @@ var fdjtUI=
 (function(){
   var highlights={};
   function highlight(namearg,classname_arg){
-    var classname=((classname_arg) || (fdjtUI.cohi.classname));
-    var newname=((typeof namearg === 'string') ? (namearg) : (namearg.name));
+    var classname=((classname_arg) || (fdjtUI.CoHi.classname));
+    var newname=(namearg.name)||(namearg);
     var cur=highlights[classname];
     if (cur===newname) return;
     if (cur) {
@@ -44,8 +44,8 @@ var fdjtUI=
       var n=elts.length, i=0;
       while (i<n) fdjtDOM.addClass(elts[i++],classname);}}
   
-  fdjtUI.cohi.onmouseover=function(evt,classname_arg){
-    var target=$T(evt);
+  fdjtUI.CoHi.onmouseover=function(evt,classname_arg){
+    var target=fdjtDOM.T(evt);
     while (target)
       if ((target.tagName==='INPUT') || (target.tagName==='TEXTAREA') ||
 	  ((target.tagName==='A') && (target.href)))
@@ -54,22 +54,13 @@ var fdjtUI=
       else target=target.parentNode;
     if (!(target)) return;
     highlight(target.name,classname_arg);};
-  fdjtUI.cohi.onmouseout=function(evt,classname_arg){
-    var target=$T(evt);
-    var cur=fdjtUI.cohi.cur;
-    while (target)
-      if ((target.name) && (target.name===cur)) {
-	if (fdjtUI.cohi.timer) clearTimeout(fdjtUI.cohi.timer);
-	fdjtUI.cohi.timer=
-	  setTimeout(fdjtUI.cohi.onhighlight,fdjtUI.cohi.delay,
-		     target.name);
-      break;}
-      else target=target.parentNode;};
+  fdjtUI.CoHi.onmouseout=function(evt,classname_arg){
+    var target=fdjtDOM.T(evt);
+    highlight(false,((classname_arg) || (fdjtUI.CoHi.classname)));};
  })();
 
-/* Checkspans:
+/* CheckSpans:
    Text regions which include a checkbox where clicking toggles the checkbox. */
-fdjtUI.checkspan={};
 (function(){
   function checkspan_onclick(evt) {
     evt=evt||event;
@@ -80,7 +71,9 @@ fdjtUI.checkspan={};
       if (target.checked) fdjtDOM.addClass(checkspan,"checked");
       else fdjtDOM.dropClass(checkspan,"checked");}
     else {
-      var inputs=fdjtDOM.filterChildren(checkspan,function(evt){return (evt.tagName==='INPUT')&&(evt.type==='checkbox');});
+      var inputs=fdjtDOM.filterChildren
+	(checkspan,function(evt){
+	  return (evt.tagName==='INPUT')&&(evt.type==='checkbox');});
       var input=((inputs)&&(inputs.length)&&(inputs[0]));
       if (input) 
 	if (input.checked) {
@@ -90,7 +83,87 @@ fdjtUI.checkspan={};
 	  fdjtDOM.addClass(checkspan,"checked");
 	  input.checked=true; input.blur();}
       else fdjtDOM.toggleClass(checkspan,"checked");}}
-  fdjtUI.checkspan.onclick=checkspan_onclick;})();
+  fdjtUI.CheckSpan.onclick=checkspan_onclick;
+
+  function checkspan_set(checkspan,checked){
+    var inputs=fdjtDOM.filterChildren
+      (checkspan,function(evt){
+	return (evt.tagName==='INPUT')&&(evt.type==='checkbox');});
+    var input=((inputs)&&(inputs.length)&&(inputs[0]));
+    if (checked) {
+      input.checked=true; fdjtDOM.addClass(checkspan,"ischecked");}
+    else {
+      input.checked=false; fdjtDOM.dropClass(checkspan,"ischecked");}}
+  fdjtUI.CheckSpan.set=checkspan_set;})();
+
+(function(){
+
+  function show_help_onfocus(evt){
+    var target=fdjtDOM.T(evt);
+    while (target)
+      if ((target.nodeType==1) &&
+	  ((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
+	  (target.getAttribute('HELPTEXT'))) {
+	var helptext=fdjtID(target.getAttribute('HELPTEXT'));
+	if (helptext) fdjtDOM.addClass(helptext,"showhelp");
+	return;}
+      else target=target.parentNode;}
+  function autoprompt_onfocus(evt){
+    evt=evt||event||null;
+    var elt=fdjtDOM.T(evt);
+    if ((elt) && (fdjtHasClass(elt,'isempty'))) {
+      elt.value='';
+      fdjtDOM.dropClass(elt,'isempty');}
+    show_help_onfocus(evt);}
+
+  function hide_help_onblur(evt){
+    var target=fdjtDOM.T(evt);
+    while (target)
+      if ((target.nodeType==1) &&
+	  ((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
+	  (target.getAttribute('HELPTEXT'))) {
+	var helptext=fdjtID(target.getAttribute('HELPTEXT'));
+	if (helptext) fdjtDOM.dropClass(helptext,"showhelp");
+	return;}
+      else target=target.parentNode;}
+  function autoprompt_onblur(evt){
+    var elt=fdjtDOM.T(evt);
+    if (elt.value==='') {
+      fdjtDOM.addClass(elt,'isempty');
+      var prompt=(elt.prompt)||(elt.getAttribute('prompt'))||(elt.title);
+      if (prompt) elt.value=prompt;}
+    else fdjtDOM.dropClass(elt,'isempty');
+    hide_help_onblur(evt);}
+  
+  // Removes autoprompt text from empty fields
+  function autoprompt_onsubmit(arg) {
+    var form=((arg.tagName==='FORM')?(arg):(fdjtDOM.T(arg||event)));
+    var elements=fdjtDOM.getChildren("isempty");
+    if (elements) {
+      var i=0; var lim=elements.length;
+      while (i<elements.length) elements[i++].value="";}}
+
+  // Adds autoprompt handlers to autoprompt classes
+  function autoprompt_setup(arg) {
+    var forms=fdjtDOM.$("FORM");
+    var i=0; var lim=forms.length;
+    while (i<lim) {
+      var form=forms[i++];
+      var inputs=fdjtDOM.getChildren(form,"INPUT.autoprompt");
+      if (inputs.length) {
+	var j=0; var jlim=inputs.length;
+	while (j<jlim) {
+	  var input=inputs[j++];
+	  input.addEventListener("focus",autoprompt_onfocus);
+	  input.addEventListener("blur",autoprompt_onblur);}
+	form.addEventListener("submit",autoprompt_onsubmit);}}}
+  
+  fdjtUI.AutoPrompt.onfocus=autoprompt_onfocus;
+  fdjtUI.AutoPrompt.onblur=autoprompt_onblur;
+  fdjtUI.AutoPrompt.onsubmit=autoprompt_onblur;
+  fdjtUI.InputHelp.onfocus=show_help_onfocus;
+  fdjtUI.InputHelp.onblur=hide_help_onblur;})();
+
 
 /* Emacs local variables
 ;;;  Local variables: ***

@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2009 beingmeta, inc.
+/* Copyright (C) 2001-2010 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    These are style declarations that work with the UI elements
     implemented in handlers.js and other files.
@@ -23,38 +23,37 @@
 
 .checkspan { cursor: pointer;}
 .checkspan .alt { font-size: inherit; font-weight: bold;}
-.checkspan[ischecked] .alt { font-size: 80%; font-weight: normal;}
-span.checkspan { white-space: nowrap; cursor: pointer;}
-a.checkspan { white-space: nowrap; }
-.checkspan[ischecked] { font-weight: bold; }
-/* This enables checkspans which have both left and right
-   display values to control which side the text appears on */
-.checkspan span.left { display: none;}
+span.checkspan, a.checkspan { white-space: nowrap; }
 
-.checkspan .checkspan input[type='CHECKBOX'] { display: none;}
-.checkspan > img.checked { 
-  display: none; vertical-align: bottom; margin: 1px;}
-.checkspan > img.unchecked { 
-  display: inline; vertical-align: bottom; margin: 1px;}
-.checkspan[ischecked] > img.unchecked { display: none;}
-.checkspan[ischecked] > img.checked { display: inline;}
-.checkspan > span.checked { display: none; }
-.checkspan > span.unchecked { display: inline; }
-.checkspan[ischecked] > span.checked { display: inline; }
-.checkspan[ischecked] > span.unchecked { display: none; }
+.checkspan.ischecked { font-weight: bold; }
+.checkspan.ischecked .alt { font-size: 80%; font-weight: normal;}
+.checkspan.ischecked { display: none;}
+.checkspan.ischecked .unchecked { display: none;}
+.checkspan.ischecked span.checked,
+.checkspan.ischecked a.checked,
+.checkspan.ischecked img.checked { display: inline;} 
+.checkspan.ischecked div.checked { display: block;}
+.checkspan.ischecked li.checked { display: list-item;}
+
+.checkspan[ischecked] { font-weight: bold; }
+.checkspan[ischecked] .alt { font-size: 80%; font-weight: normal;}
+.checkspan[ischecked] { display: none;}
+.checkspan[ischecked] .unchecked { display: none;}
+.checkspan[ischecked] span.checked,
+.checkspan[ischecked] a.checked,
+.checkspan[ischecked] img.checked { display: inline;} 
+.checkspan[ischecked] div.checked { display: block;}
+.checkspan[ischecked] li.checked { display: list-item;}
 
 /* Autoprompt classes */
 
-input.autoprompt {
-  font-family: sans,sans-serif; }
+input.autoprompt { font-family: sans,sans-serif; }
 input.autoprompt[isempty] { font-style: italic; color: gray;}
-input.autoprompt_empty {
-  font-family: sans,sans-serif; font-weight: normal; font-style: italic;
-  color: gray; height: 18px; }
+input.autoprompt.isempty { font-style: italic; color: gray;}
 
-textarea.autoprompt {
-  font-family: sans,sans-serif;}
+textarea.autoprompt { font-family: sans,sans-serif;}
 textarea.autoprompt[isempty] { font-style: italic; color: gray;}
+textarea.autoprompt.isempty { font-style: italic; color: gray;}
 
 /* Input help classes */
 
@@ -122,17 +121,6 @@ span.dterm span.disambig {
 span.dterm .langid {
   color: green; font-style:italic; font-family: fixed;}
 
-/*
-span.dterm { 
-  background-color: lightblue; 
-  padding: 4px; padding-top: 2px; padding-bottom: 2px;
-  -khtml-border-radius: 8px; 
-  -webkit-border-radius: 8px; 
-  -moz-border-radius: 8px;
-  border-radius: 8px;}
-*/
-/* :hover > .dterm { text-decoration: overline; } */
-
 /* Wordforms and langids */
 
 span.wordform {
@@ -199,6 +187,7 @@ span.completions.open { display: inline;}
 .completions .completion { display: none; }
 .completions .completion .variation { display: none; }
 .completions .completion[displayed] .variation { display: none; }
+.completions .completion.displayed .variation { display: none; }
 
 .completions.noinput span.completion.cue { display: inline; }
 .completions.noinput li.completion.cue { display: list-item; }
@@ -211,6 +200,7 @@ span.completions.open { display: inline;}
 .completions .noinputmsg { display: none;}
 
 .completions.maxcomplete .completion[displayed] { display: none;}
+.completions.maxcomplete .completion.displayed { display: none;}
 
 .completions .maxcompletemsg { display: none;}
 .completions.maxcomplete span.maxcompletemsg { display: inline;}
@@ -228,16 +218,12 @@ span.completions.open { display: inline;}
 .completions.maxcomplete .maxcompletemsg .hideall { display: none;}
 .completions.showmaxcomplete .maxcompletemsg .showall { display: none;}
 
-/*
-.completions.maxcomplete span.completion[displayed] { display: none;}
-.completions.maxcomplete li.completion[displayed] { display: none;}
-.completions.maxcomplete div.completion[displayed] { display: none;}
-*/
-
 .completions.noinput span.noinputmsg { display: inline;}
 .completions.noinput li.noinputmsg { display: list-item;}
 .completions.noinput div.noinputmsg { display: block;}
 .completions.noinput p.noinputmsg { display: block;}
+
+/* Display rules (with displayed attribute) */
 
 .completions span.completion[displayed] { display: inline;}
 .completions li.completion[displayed] { display: list-item;}
@@ -253,14 +239,23 @@ span.completions.open { display: inline;}
 .completions.maxcomplete .completion[displayed] .variation[displayed] { 
    display: none; }
 
-/*
-.completions.maxcomplete .completion[displayed] li.variation[displayed] { 
+/* Display rules (with displayed class) */
+
+.completions span.completion.displayed { display: inline;}
+.completions li.completion.displayed { display: list-item;}
+.completions div.completion.displayed { display: block;}
+
+.completions .completion.displayed span.variation.displayed { 
+   display: inline; }
+.completions .completion.displayed li.variation.displayed { 
+   display: list-item; }
+.completions .completion.displayed div.variation.displayed { 
+   display: block; }
+
+.completions.maxcomplete .completion.displayed .variation.displayed { 
    display: none; }
-.completions.maxcomplete .completion[displayed] li.variation[displayed] { 
-   display: none; }
-.completions.maxcomplete .completion[displayed] div.variation[displayed] { 
-   display: none; }
-*/
+
+/* Checkspan/completion display rles (attribute based) */
 
 .completions.checkspans span.completion.checkspan[ischecked] { 
   display: inline; }
@@ -283,6 +278,74 @@ span.completions.open { display: inline;}
 .completions.checkspans .
   completion.checkspan[ischecked]
      div.variation[displayed] { display: block; }
+
+.completions.checkspans span.completion.checkspan[ischecked] { 
+  display: inline; }
+.completions.checkspans li.completion.checkspan[ischecked] { 
+  display: list-item; }
+.completions.checkspans div.completion.checkspan[ischecked] { 
+  display: block; }
+.completions.checkspans p.completion.checkspan[ischecked] { 
+  display: block; }
+
+.completions.checkspans .
+  completion.checkspan[ischecked]
+     span.variation[displayed] { display: inline; }
+.completions.checkspans .
+  completion.checkspan[ischecked]
+     li.variation[displayed] { display: list-item; }
+.completions.checkspans .
+  completion.checkspan[ischecked]
+     div.variation[displayed] { display: block; }
+.completions.checkspans .
+  completion.checkspan[ischecked]
+     div.variation[displayed] { display: block; }
+
+/* Checkspan/completion display rles (class based) */
+
+.completions.checkspans span.completion.checkspan.ischecked { 
+  display: inline; }
+.completions.checkspans li.completion.checkspan.ischecked { 
+  display: list-item; }
+.completions.checkspans div.completion.checkspan.ischecked { 
+  display: block; }
+.completions.checkspans p.completion.checkspan.ischecked { 
+  display: block; }
+
+.completions.checkspans .
+  completion.checkspan.ischecked
+     span.variation.displayed { display: inline; }
+.completions.checkspans .
+  completion.checkspan.ischecked
+     li.variation.displayed { display: list-item; }
+.completions.checkspans .
+  completion.checkspan.ischecked
+     div.variation.displayed { display: block; }
+.completions.checkspans .
+  completion.checkspan.ischecked
+     div.variation.displayed { display: block; }
+
+.completions.checkspans span.completion.checkspan.ischecked { 
+  display: inline; }
+.completions.checkspans li.completion.checkspan.ischecked { 
+  display: list-item; }
+.completions.checkspans div.completion.checkspan.ischecked { 
+  display: block; }
+.completions.checkspans p.completion.checkspan.ischecked { 
+  display: block; }
+
+.completions.checkspans .
+  completion.checkspan.ischecked
+     span.variation.displayed { display: inline; }
+.completions.checkspans .
+  completion.checkspan.ischecked
+     li.variation.displayed { display: list-item; }
+.completions.checkspans .
+  completion.checkspan.ischecked
+     div.variation.displayed { display: block; }
+.completions.checkspans .
+  completion.checkspan.ischecked
+     div.variation.displayed { display: block; }
 
 /* Rich tips 
    Richtips are overlayed tooltips for metakeys, displayed

@@ -22,44 +22,6 @@
 
 var fdjtDOM=
   (function(){
-    function domappend(node,content,i) {
-      if (typeof i === 'undefined') i=0;
-      var len=content.length;
-      while (i<len) {
-	var elt=content[i++];
-	if (!(elt)) {}
-	else if (typeof elt === 'string')
-	  node.appendChild(document.createTextNode(elt));
-	else if (elt.nodeType)
-	  node.appendChild(elt);
-	else if (elt.length)
-	  domappend(node,elt,0);
-	else if (elt.toDOM)
-	  domappend(node,elt.toDOM());
-	else if (elt.toString)
-	  node.appendChild(document.createTextNode(elt.toString()));
-	else node.appendChild(document.createTextNode(""+elt));}}
-    function dominsert(before,content,i) {
-      var node=before.parentNode;
-      if (typeof i === 'undefined') i=0;
-      var j=content.length-1;
-      while (j>=i) {
-	var elt=content[j--];
-	if (!(elt)) {}
-	else if (typeof elt === 'string')
-	  node.insertBefore(document.createTextNode(elt),before);
-	else if (elt.nodeType)
-	  node.insertBefore(elt,before);
-	else if (elt.length)
-	  dominsert(before,elt,0);
-	else if (elt.toDOM)
-	  dominsert(before,elt.toDOM());
-	else if (elt.toString)
-	  node.insertBefore(document.createTextNode(elt.toString()),before);
-	else node.insertBefore(document.createTextNode(""+elt),before);}}
-
-    var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
-
     function fdjtDOM(spec){
       var node;
       if (spec.nodeType) node=spec;
@@ -106,7 +68,45 @@ var fdjtDOM=
     fdjtDOM.revid="$Id$";
     fdjtDOM.version=parseInt("$Revision$".slice(10,-1));
 
-    /* Various class functions and predicates */
+    function domappend(node,content,i) {
+      if (typeof i === 'undefined') i=0;
+      var len=content.length;
+      while (i<len) {
+	var elt=content[i++];
+	if (!(elt)) {}
+	else if (typeof elt === 'string')
+	  node.appendChild(document.createTextNode(elt));
+	else if (elt.nodeType)
+	  node.appendChild(elt);
+	else if (elt.length)
+	  domappend(node,elt,0);
+	else if (elt.toDOM)
+	  domappend(node,elt.toDOM());
+	else if (elt.toString)
+	  node.appendChild(document.createTextNode(elt.toString()));
+	else node.appendChild(document.createTextNode(""+elt));}}
+    function dominsert(before,content,i) {
+      var node=before.parentNode;
+      if (typeof i === 'undefined') i=0;
+      var j=content.length-1;
+      while (j>=i) {
+	var elt=content[j--];
+	if (!(elt)) {}
+	else if (typeof elt === 'string')
+	  node.insertBefore(document.createTextNode(elt),before);
+	else if (elt.nodeType)
+	  node.insertBefore(elt,before);
+	else if (elt.length)
+	  dominsert(before,elt,0);
+	else if (elt.toDOM)
+	  dominsert(before,elt.toDOM());
+	else if (elt.toString)
+	  node.insertBefore(document.createTextNode(elt.toString()),before);
+	else node.insertBefore(document.createTextNode(""+elt),before);}}
+
+    /* Utility patterns and functions */
+
+    var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
 
     var whitespace_pat=/(\s)+/;
     var trimspace_pat=/^(\s)+|(\s)+$/;
@@ -116,9 +116,17 @@ var fdjtDOM=
       classpats[name]=rx;
       return rx;};
 
+    function string_trim(string){
+      var start=string.search(/\S/); var end=string.search(/\s+$/g);
+      if ((start===0) && (end<0)) return string;
+      else return string.slice(start,end);}
+
+    /* Simple class/attrib manipulation functions */
+
     function hasClass(elt,classname,attrib){
       var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") : (elt.className));
       if (!(classinfo)) return false;
+      else if (classname===true) return true;
       else if (classinfo===classname) return true;
       else if (typeof classname === 'string')
 	if (classinfo.indexOf(' ')<0) return false;
@@ -237,6 +245,199 @@ var fdjtDOM=
 	else target=target.parentNode;
       return false;};
 
+    /* Simple CSS selectors */
+
+    var selectors={};
+
+    function Selector(spec,tagcs) {
+      if (!(spec)) return this; // just cons with type
+      else if (selectors[spec]) return selectors[spec]; // check cache
+      else if (!(this instanceof Selector))
+	// handle case of the forgotten 'new'
+	return Selector.call(new Selector(),spec);
+      if (spec.indexOf(',')>0) { // compound selectors
+	var specs=spec.split(','); var compound=[];
+	var i=0; var lim=specs.length;
+	while (i<lim) {
+	  var sub=string_trim(specs[i++]);
+	  compound.push(new Selector(sub));}
+	this.compound=compound;
+	selectors[spec]=this;
+	return this;}
+      // Otherwise, parse and set up this
+      var elts=spec.match(css_selector_regex);
+      var i=0; var lim=elts.length;
+      var classes=[]; var classnames=[]; var attribs=false;
+      if (!((elts[0][0]==='.')||(elts[0][0]==='#')||(elts[0][0]==='['))) {
+	this.tag=((tagcs)?(elts[0]):(elts[0].toUpperCase()));
+	i=1;}
+      while (i<lim)
+	if (elts[i][0]==='#') this.id=elts[i++].slice(1);
+	else if (elts[i][0]==='.') {
+	  classnames.push(elts[i].slice(1));
+	  classes.push(classPat(elts[i++].slice(1)));}
+	else if (elts[i][0]==='[') {
+	  var aelts=elts[i++]; var eltsend=aelts.length-1;
+	  if (!(attribs)) attribs={};
+	  var eqpos=aelts.indexOf('=');
+	  if (eqpos<0)
+	    attribs[aelts.slice(1,eltsend)]=true;
+	  else if (aelts[eqpos+1]==='~') 
+	    attribs[aelts.slice(1,eqpos)]=
+	      classPat(aelts.slice(eqpos+2,eltsend));
+	  else attribs[aelts.slice(1,eqpos)]=aelts.slice(eqpos+1,eltsend);}
+	else fdjtLog.uhoh("weird elts %o",elts[i++]);
+      if (classes.length) {
+	this.classes=classes; this.classnames=classnames;}
+      if (attribs) this.attribs=attribs;
+      selectors[spec]=this;
+      return this;}
+    Selector.prototype.match=function(elt){
+      if (this.compound) {
+	var compound=this.compound; var i=0; var lim=compound.length;
+	while (i<lim) if (compound[i++].match(elt)) return true;
+	return false;} 
+      if ((this.tag)&&(this.tag!==elt.tagName)) return false;
+      else if ((this.id)&&(this.id!==elt.id)) return false;
+      if (this.classes)
+	if (elt.className) {
+	  var classname=elt.className; var classes=this.classes;
+	  var i=0; var lim=classes.length;
+	  while (i<lim) if (classname.search(classes[i++])<0) return false;}
+	else return false;
+      if (this.attribs) {
+	var attribs=this.attribs;
+	for (var name in attribs) {
+	  var val=elt.getAttribute(name);
+	  if (!(val)) return false;
+	  var need=this[name];
+	  if (need===true) {}
+	  else if (typeof need === 'string') {
+	    if (need!==val) return false;}
+	  else if (val.search(need)<0) return false;}}
+      return true;};
+    Selector.prototype.find=function(elt,results){
+      if (!(results)) results=[];
+      if (this.compound) {
+	var compound=this.compound; var i=0; var lim=compound.length;
+	while (i<lim) compound[i++].find(elt,results);
+	return results;}
+      if (this.id) {
+	var elt=document.getElementById(this.id);
+	if (!(elt)) return results;
+	else if (this.match(elt)) {
+	  results.push(elt); return results;}
+	else return results;}
+      var results=[]; var candidates=false;
+      var classnames=this.classnames; var attribs=this.attribs;
+      if (this.classes) 
+	if (elt.getElementsByClassName)
+	  candidates=
+	    candidates=elt.getElementsByClassName(classnames[0]);
+	else gatherByClass(elt,this.classes[0],results);
+      else if ((this.tag)&&(elt.getElementsByTagName))
+	candidates=elt.getElementsByTagName(this.tag);
+      else if (this.attribs) {
+	var attribs=this.attribs;
+	for (var name in attribs) {
+	  candidates=[]; gatherByAttrib(elt,name,attribs[name],candidates);
+	  break;}}
+      else if (this.tag) {
+	candidates=[]; gatherByTag(elt,this.tag,candidates);}
+      else {}
+      if (((this.tag)&&(!(this.classes))&&(!(this.attribs)))||
+	  ((!(this.tag))&&(this.classes)&&(this.classes.length===1)&&
+	   (!(this.attribs))))
+	// When there's only one test, don't bother filtering
+	return candidates;
+      var i=0; var lim=candidates.length;
+      while (i<lim) {
+	var candidate=candidates[i++];
+	if (this.match(candidate)) results.push(candidate);}
+      return results;};
+    fdjtDOM.Selector=Selector;
+
+    function gatherByClass(node,pat,results){
+      if (node.nodeType===1) {
+	if ((node.className)&&(node.className.search(pat)>=0))
+	  results.push(node);
+	var children=node.childNodes;
+	if (children) {
+	  var i=0; var lim=children.length; var result;
+	  while (i<lim) gatherByClass(children[i++],pat,results);}}}
+    function gatherByTag(node,tag,results){
+      if (node.nodeType===1) {
+	if (node.tagName===tag) results.push(node);
+	var children=node.childNodes;
+	if (children) {
+	  var i=0; var lim=children.length; var result;
+	  while (i<lim) gatherByTag(children[i++],tag,results);}}}
+    function gatherByAttrib(node,attrib,val,results){
+      if (node.nodeType===1) {
+	if ((node.getAttribute(attrib))&&
+	    ((typeof val === 'string')?
+	     (node.getAttribute(attrib)===val):
+	     (node.getAttribute(attrib).search(val)>=0)))
+	  results.push(node);
+	var children=node.childNodes;
+	if (children) {
+	  var i=0; var lim=children.length; var result;
+	  while (i<lim) gatherByTag(children[i++],tag,results);}}}
+    
+    function gather_children(node,pat,attrib,results){
+      if (!(attrib)) gatherByClass(node,pat,results);
+      else if (attrib==='class') gatherByClass(node,pat,results);
+      else if (attrib==='tagName') gatherByTag(node,pat,results);
+      else gatherByAttrib(node,attrib,pat,results);}
+
+    /* Real simple DOM search */
+
+    function getParent(elt,parent,attrib){
+      if (parent.nodeType) {
+	while (elt) {
+	  if (elt===parent) return parent;
+	  else elt=elt.parentNode;}
+	return false;}
+      else if (typeof parent === 'function') {
+	while (elt) {
+	  if (parent(elt)) return elt;
+	  else elt=elt.parentNode;}
+	return false;}
+      else if (parent instanceof Selector) {
+	while (elt) {
+	  if (parent.match(elt)) return elt;
+	  else elt=elt.parentNode;}
+	return false;}
+      else if (typeof parent === 'string')
+	return getParent(elt,new Selector(parent));
+      else throw { error: 'invalid parent spec'};}
+    fdjtDOM.getParent=getParent;
+    fdjtDOM.hasParent=getParent;
+
+    function getChildren(node,classname,attrib,results){
+      if (!(results)) results=[]; 
+      if ((!(attrib))&&(typeof classname === 'function'))
+	filter_children(node,classname,results);
+      else if (attrib) {
+	var pat=(classpats[parent]||classPat(parent));
+	gather_children(node,classname,attrib||false,results);}
+      else if (classname instanceof Selector)
+	return classname.find(node,results);
+      else if (typeof classname === 'string')
+	return getChildren(node,new Selector(classname),false,results);
+      else throw { error: 'bad selector arg', selector: classname};
+      return results;}
+    fdjtDOM.getChildren=getChildren;
+    fdjtDOM.$=function(spec,root){return getChildren(root||document,spec);};
+    
+    function filter_children(node,filter,results){
+      if (node.nodeType===1) {
+	if (filter(node)) results.push(node);
+	var children=node.childNodes;
+	if (children) {
+	  var i=0; var lim=children.length; var result;
+	  while (i<lim) filter_children(children[i++],filter,results);}}}
+
     /* Manipulating the DOM */
 
     fdjtDOM.replace=function(existing,replacement){
@@ -248,7 +449,7 @@ var fdjtDOM=
       if (cur) {
 	cur.parentNode.replaceChild(replacement,cur);
 	if ((cur.id)&&(!(replacement.id))) replacement.id=cur.id;}
-      else fdjtLog.warn("Can't find %o to replace it",existing);};
+      else fdjtLog.uhoh("Can't find %o to replace it with %o",existing,replacement);};
 
     fdjtDOM.append=function (node) {
       if (typeof node === 'string') node=document.getElementById(node);
@@ -281,64 +482,6 @@ var fdjtDOM=
       domappend(node,arguments,2);
       return node;};
 
-    /* Real simple DOM search */
-
-    function hasParent(elt,parent,attrib){
-      if ((typeof parent === 'string')||(!(parent.nodeType))) {
-	var scan=elt;
-	var pat=((typeof parent === 'string')?
-		 (classpats[parent]||classPat(parent)):
-		 parent);
-	while (scan)
-	  if ((scan.className)&&(scan.className.search(pat)>=0))
-	    return scan;
-	  else scan=scan.parentNode;
-	return false;}
-      else {
-	while (elt=elt.parentNode) {
-	  if (elt===parent) return parent;}
-	return false;}}
-    fdjtDOM.hasParent=hasParent;
-
-    function getParent(elt,parent,attrib){
-      var scan=elt;
-      var pat=((typeof parent === 'string')?
-	       (classpats[parent]||classPat(parent)):
-	       parent);
-      while (scan)
-	if ((attrib)?
-	    ((scan.getAttribute(attrib))&&
-	     ((scan.getAttribute(attrib)).search(pat)>=0)):
-	    ((scan.className)&&(scan.className.search(pat)>=0)))
-	  return scan;
-	else scan=scan.parentNode;
-      return false;}
-    fdjtDOM.getParent=getParent;
-
-    function gather_children(node,pat,attrib,results){
-      if (node.nodeType===1) {
-	var val=((attrib)?(node.getAttribute(attrib)):(node.className));
-	if ((val)&&(val.search(pat)>=0)) results.push(node);
-	var children=node.childNodes;
-	if (children) {
-	  var i=0; var lim=children.length; var result;
-	  while (i<lim) gather_children(children[i++],pat,attrib,results);}}}
-    function filter_children(node,filter,results){
-      if (node.nodeType===1) {
-	if (filter(node)) results.push(node);
-	var children=node.childNodes;
-	if (children) {
-	  var i=0; var lim=children.length; var result;
-	  while (i<lim) filter_children(children[i++],filter,results);}}}
-    fdjtDOM.getChildren=function(node,classname,attrib){
-      var results=[]; 
-      if ((!(attrib))&&(typeof classname === 'function'))
-	filter_children(node,classname,results);
-      else {
-	var pat=(classpats[parent]||classPat(parent));
-	gather_children(node,classname,attrib||false);}
-      return results;};
-    
     /* Getting style information generally */
 
     function getStyle(elt,prop){
@@ -501,10 +644,37 @@ var fdjtDOM=
 
     /* Getting various kinds of metadata */
 
+    function getHTML(){
+      var children=document.childNodes;
+      var i=0; var lim=children.length;
+      while (i<lim)
+	if (children[i].tagName==='HTML') return children[i];
+	else i++;
+      return false;}
+    fdjtDOM.getHTML=getHTML;
+
+    function getHEAD(){
+      var children=document.childNodes;
+      var i=0; var lim=children.length;
+      while (i<lim)
+	if (children[i].tagName==='HTML') {
+	  var grandchildren=children[i].childNodes;
+	  i=0; lim=grandchildren.length;
+	  while (i<lim)
+	    if (grandchildren[i].tagName==='HEAD')
+	      return grandchildren[i];
+	    else i++;
+	  return false;}
+	else i++;
+      return false;}
+    fdjtDOM.getHEAD=getHEAD;
+
     fdjtDOM.getMeta=function(name,multiple,matchcase){
       var results=[];
       var matchname=((matchcase)&&(name.toUpperCase()));
-      var elts=document.getElementsByTagName("META");
+      var elts=((document.getElementsByTagName)?
+		(document.getElementsByTagName("META")):
+		(getChildren(document,"META")));
       var i=0; while (i<elts.length)
 		 if (elts[i])
 		   if (elts[i].name===name)
@@ -522,7 +692,8 @@ var fdjtDOM=
     fdjtDOM.getLink=function(name,multiple,matchcase){
       var results=[];
       var matchname=((matchcase)&&(name.toUpperCase()));
-      var elts=document.getElementsByTagName("LINK");
+      var elts=((document.getElementsByTagName)?(document.getElementsByTagName("META")):
+		(getChildren(document,"META")));
       var i=0; while (i<elts.length)
 		 if (elts[i])
 		   if (elts[i].rel===name)
@@ -535,6 +706,9 @@ var fdjtDOM=
 		   else i++;
       if (multiple) return results;
       else return false;};
+
+    fdjtDOM.T=function(evt) {
+      evt=evt||event; return (evt.target)||(evt.srcElement);};
 
     fdjtDOM.cancel=function(evt){
       evt=evt||event;

@@ -31,31 +31,19 @@ function fdjtLog(string){
 	   (window.console.count))
     if (output)
       window.console.log.call(window.console,output);
-    else window.console.log.apply(window.console,arguments);
-}
+    else window.console.log.apply(window.console,arguments);}
 fdjtLog.id="$Id$";
 fdjtLog.version=parseInt("$Revision$".slice(10,-1));
 
 fdjtLog.warn=function(string){
-  var output=false;
-  if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
-    output=fdjtString.apply(null,arguments);
-  if (fdjtLog.console_fn)
-    if (output) fdjtLog.console_fn(fdjt_console_obj,output);
-    else fdjtLog.console_fn.apply(fdjt_console_obj,arguments);
-  else if ((window.console) && (window.console.log) &&
-	   (window.console.count))
-    if (output)
-      window.console.log.call(window.console,output);
-    else window.console.log.apply(window.console,arguments);
-  else if (output)
-    alert(output);
-  else if (arguments.length>1) {
-    output=""; var i=0; var len=arguments.length;
-    while (i<len) output=output+arguments[i++];
+  if ((!(fdjtLog.console_fn))&&
+      (!(window.console)&&(window.console.log)&&(window.console.log.count))) {
+    var output=fdjtString.apply(null,arguments);
     alert(output);}
-  else alert(string);
-};
+  else fdjtLog.apply(null,arguments);};
+
+fdjtLog.uhoh=function(string){
+  if (fdjtLog.debugging) fdjtLog.warn.call(this,arguments);}
 
 fdjtLog.bkpt=function(string){
   var output=false;
