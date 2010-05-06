@@ -166,15 +166,10 @@ var fdjtUI=
 
 
 (function(){
-  var completions=new fdjtKB.Map();
-
   var serial=0;
 
-  function Completions(container,input,options) {
-    if (completions.get(container))
-      return (completions.get(container));
-    else completions.set(container,this);
-    this.container=container||false; this.input=input;
+  function Completions(dom,input,options) {
+    this.dom=dom||false; this.input=input||false;
     this.options=options||default_options;
     this.nodes=[]; this.values=[]; this.serial=++serial;
     this.cues=[]; this.displayed=[];
@@ -183,7 +178,13 @@ var fdjtUI=
     if (!(options&FDJT_COMPLETE_MATCHCASE)) this.stringmap={};
     this.initialized=false;
     return this;}
-  Completions.probe=function(container){return (completions.get(container));};
+  Completions.probe=function(arg){
+    if (arg.tagName==='INPUT') {
+      var cid=arg.getAttribute('COMPLETIONS');
+      arg=fdjtID(cid);
+      if (arg) completions.get(arg);
+      else return false;}
+    else return completions.get(arg);};
 
   function getKey(node){
     return node.key||(node.getAttribute("key"))||(node.value)||
@@ -246,8 +247,9 @@ var fdjtUI=
 	  if (fdjtDOM.hasClass(c,"completion")) {
 	    result.push(c); direct.push(c);}
 	  else {
-	    var head=fdjtDOM.getParent(variation,".completion");
-	    result.push(head); variations.push(c);}}}}
+	    var head=fdjtDOM.getParent(c,".completion");
+	    if (head) {
+	      result.push(head); variations.push(c);}}}}}
     result.prefix=prefix;
     result.matches=direct.concat(variations);
     return result;}
@@ -261,7 +263,7 @@ var fdjtUI=
       c.nodes.push(completion); c.values.push(value);}
     else return;
     var opts=c.options;
-    var container=c.container;
+    var container=c.dom;
     var ptree=c.prefixtree;
     var bykey=c.bykey;
     var smap=c.stringmap;
@@ -284,7 +286,7 @@ var fdjtUI=
       addNodeKey(variation,vkey,ptree,bykey,anyword);}}
 
   function initCompletions(c){
-    var completions=fdjtDOM.getChildren(c.container,".completion");
+    var completions=fdjtDOM.getChildren(c.dom,".completion");
     var i=0; var lim=completions.length;
     while (i<lim) addCompletion(c,completions[i++]);
     c.initialized=true;}
@@ -338,29 +340,31 @@ var fdjtUI=
 
   Completions.prototype.oncomplete=function(completion){
     var value=this.getValue(completion);
-    if (this.container.oncomplete)
-      this.container.oncomplete(completion,value);
+    if (this.dom.oncomplete)
+      this.dom.oncomplete(completion,value);
     else if (this.input.oncomplete)
       this.input.oncomplete(completion,value);
     else fdjtLog("Completion=%o, value=%o",completion,value);};
 
   Completions.prototype.complete=function(string){
-    if (!(string))
+    if (!(this.initialized)) initCompletions(this);
+    if ((!(string))&&(string!==""))
       string=((this.getText)?(this.getText(this.input)):(this.input.value));
     if (fdjtString.isEmpty(string)) {
       if (this.displayed) updateDisplay(this,false);
-      fdjtDOM.addClass(this.container,"noinput");
+      fdjtDOM.addClass(this.dom,"noinput");
+      fdjtDOM.dropClass(this.dom,"noresults");
       return [];}
     var result=this.getCompletions(string);
     if ((!(result))||(result.length===0)) {
       updateDisplay(this,false);
-      fdjtDOM.dropClass(this.container,"noinput");
-      fdjtDOM.addClass(this.container,"noresults");
+      fdjtDOM.dropClass(this.dom,"noinput");
+      fdjtDOM.addClass(this.dom,"noresults");
       return [];}
     else {
       updateDisplay(this,result.matches);
-      fdjtDOM.dropClass(this.container,"noinput");
-      fdjtDOM.dropClass(this.container,"noresults");}
+      fdjtDOM.dropClass(this.dom,"noinput");
+      fdjtDOM.dropClass(this.dom,"noresults");}
     return result;};
 
   Completions.prototype.action=function(action){
@@ -381,17 +385,17 @@ var fdjtUI=
       string=((this.getText)?(this.getText(this.input)):(this.input.value));
     if (fdjtString.isEmpty(string)) {
       if (this.displayed) updateDisplay(this,false);
-      fdjtDOM.addClass(this.container,"noinput");
+      fdjtDOM.addClass(this.dom,"noinput");
       return;}
-    else fdjtDOM.dropClass(this.container,"noinput");
+    else fdjtDOM.dropClass(this.dom,"noinput");
     var result=this.getCompletions(string);
     if ((!(result))||(result.length===0)) {
       updateDisplay(this,false);
-      fdjtDOM.addClass(this.container,"noresults");
+      fdjtDOM.addClass(this.dom,"noresults");
       return;}
     else {
       updateDisplay(this,result.matches);
-      fdjtDOM.dropClass(this.container,"noresults");
+      fdjtDOM.dropClass(this.dom,"noresults");
       if (result.length===1) {
 	if (result.prefix) this.input.value=result.prefix;
 	this.oncomplete(result[0]);}}};

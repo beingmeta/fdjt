@@ -413,6 +413,9 @@ var fdjtDOM=
       else throw { error: 'invalid parent spec'};}
     fdjtDOM.getParent=getParent;
     fdjtDOM.hasParent=getParent;
+    fdjtDOM.inherits=function(node,spec) {
+      var sel=new Selector(spec);
+      return ((sel.match(node))?(node):(getParent(node,sel)));};
 
     function getChildren(node,classname,attrib,results){
       if (!(results)) results=[]; 
