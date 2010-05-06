@@ -174,9 +174,6 @@ table.fdjt td input[type='TEXT'] { width: 100%;}
 
 div.completions {
   font-size: 12px; font-family: sans,sans-serif;}
-.completions { display: none;}
-div.completions.open { display: block;}
-span.completions.open { display: inline;}
 
 .completions .nocompletemsg { display: none;}
 .completions.noresults span.nocompletemsg { display: inline;}

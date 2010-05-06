@@ -286,6 +286,24 @@ var fdjtKB=
 	  else i++;
 	return false;}}
     
+    /* Maps */
+    function Map() {
+      this.scalar_map={}; this.object_map={};
+      return this;}
+    Map.prototype.get=function(key) {
+      if ((typeof key === 'string')||(typeof key === 'number'))
+	return this.scalar_map[key];
+      else return this.object_map[key._fdjtid||register(key)];};
+    Map.prototype.set=function(key,val) {
+      if ((typeof key === 'string')||(typeof key === 'number'))
+	return this.scalar_map[key]=val;
+      else this.object_map[key._fdjtid||register(key)]=val;};
+    Map.prototype.drop=function(key,val) {
+      if ((typeof key === 'string')||(typeof key === 'number'))
+	delete this.scalar_map[key];
+      else delete this.object_map[key._fdjtid||register(key)];};
+    fdjtKB.Map=Map;
+
     /* Indices */
 
     function Index() {
