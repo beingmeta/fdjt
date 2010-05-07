@@ -1016,8 +1016,8 @@ function fdjtNodeSetup()
 }
 
 fdjtAddSetup(fdjtDomutils_setup);
-fdjtAddSetup(fdjtAutoPrompt_setup);
-fdjtAddSetup(fdjtCheckSpan_setup);
+//fdjtAddSetup(fdjtAutoPrompt_setup);
+//fdjtAddSetup(fdjtCheckSpan_setup);
 //fdjtAddSetup(fdjtAdjustFontSizes);
 fdjtAddSetup(fdjtMarkReduced);
 fdjtAddSetup(fdjtNodeSetup,true);

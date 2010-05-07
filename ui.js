@@ -86,9 +86,9 @@ var fdjtUI=
   fdjtUI.CheckSpan.onclick=checkspan_onclick;
 
   function checkspan_set(checkspan,checked){
-    var inputs=fdjtDOM.filterChildren
-      (checkspan,function(evt){
-	return (evt.tagName==='INPUT')&&(evt.type==='checkbox');});
+    var inputs=fdjtDOM.getChildren
+      (checkspan,function(node){
+	return (node.tagName==='INPUT')&&(node.type==='checkbox');});
     var input=((inputs)&&(inputs.length)&&(inputs[0]));
     if (checked) {
       input.checked=true; fdjtDOM.addClass(checkspan,"ischecked");}
@@ -154,10 +154,16 @@ var fdjtUI=
 	var j=0; var jlim=inputs.length;
 	while (j<jlim) {
 	  var input=inputs[j++];
-	  input.addEventListener("focus",autoprompt_onfocus);
-	  input.addEventListener("blur",autoprompt_onblur);}
-	form.addEventListener("submit",autoprompt_onsubmit);}}}
+	  input.blur();
+	  if (fdjtString.isEmpty(input.value)) {
+	    var prompt=(input.prompt)||
+	      (input.getAttribute('prompt'))||(input.title);
+	    if (prompt) input.value=prompt;}
+	  input.addEventListener("focus",autoprompt_onfocus,false);
+	  input.addEventListener("blur",autoprompt_onblur,false);}
+	form.addEventListener("submit",autoprompt_onsubmit,false);}}}
   
+  fdjtUI.AutoPrompt.setup=autoprompt_setup;
   fdjtUI.AutoPrompt.onfocus=autoprompt_onfocus;
   fdjtUI.AutoPrompt.onblur=autoprompt_onblur;
   fdjtUI.AutoPrompt.onsubmit=autoprompt_onblur;
@@ -338,14 +344,6 @@ var fdjtUI=
     if (pos<0) return false;
     else return this.values[pos];};
 
-  Completions.prototype.oncomplete=function(completion){
-    var value=this.getValue(completion);
-    if (this.dom.oncomplete)
-      this.dom.oncomplete(completion,value);
-    else if (this.input.oncomplete)
-      this.input.oncomplete(completion,value);
-    else fdjtLog("Completion=%o, value=%o",completion,value);};
-
   Completions.prototype.complete=function(string){
     if (!(this.initialized)) initCompletions(this);
     if ((!(string))&&(string!==""))
@@ -367,81 +365,15 @@ var fdjtUI=
       fdjtDOM.dropClass(this.dom,"noresults");}
     return result;};
 
-  Completions.prototype.action=function(action){
-      var result=this.complete();
-      if (action==="enter")
-	if (result.length>0)
-	  this.oncomplete(result[0],this.getValue(result[0]));
-	else {}
-      else if (action==="complete")
-	if (this.setInput)
-	  this.setInput(this.input,result.prefix);
-	else this.input.value=result.prefix;
-      else {}
-      return result;};
-    
-  Completions.prototype.enter=function(string){
-    if (!(string))
-      string=((this.getText)?(this.getText(this.input)):(this.input.value));
-    if (fdjtString.isEmpty(string)) {
-      if (this.displayed) updateDisplay(this,false);
-      fdjtDOM.addClass(this.dom,"noinput");
-      return;}
-    else fdjtDOM.dropClass(this.dom,"noinput");
-    var result=this.getCompletions(string);
-    if ((!(result))||(result.length===0)) {
-      updateDisplay(this,false);
-      fdjtDOM.addClass(this.dom,"noresults");
-      return;}
-    else {
-      updateDisplay(this,result.matches);
-      fdjtDOM.dropClass(this.dom,"noresults");
-      if (result.length===1) {
-	if (result.prefix) this.input.value=result.prefix;
-	this.oncomplete(result[0]);}}};
-
-  Completions.onclick=function(evt){
-    if (this.timer) clearTimeout(this.timer);
-    var completion=fdjtDOM.getParent(fdjtDOM.T(evt),".completion");
-    if (completion) {
-      var container=fdjtDOM.getParent(completion,".completions");
-      var completions=new Completions(container);
-      completions.oncomplete(completion);}};
-  Completions.onkeydown=function(evt){
-    var kc=evt.keyCode;
-    if ((kc===8)||(kc===45)) {
-      Completions.update(evt); return;}
-    else if (!((kc===13)||(kc===7))) return;
-    var input=fdjtDOM.T(evt);
-    var compid=input.getAttribute('COMPLETIONS');
-    var compdiv=fdjtID(compid);
-    var completions=new Completions(compdiv,input);
-    if (completions.timer) {
-      clearTimeout(completions.timer); completions.timer=false;}
-    fdjtDOM.cancel(event);
-    completions.enter(input.value);};
-  Completions.update=function(evt){
-    var input=fdjtDOM.T(evt);
-    var compid=input.getAttribute('COMPLETIONS');
-    var compdiv=fdjtID(compid);
-    var completions=new Completions(compdiv,input);
-    if (completions.timer) clearTimeout(completions.timer);
-    completions.timer=
-    setTimeout(function() {
-	completions.complete();
-	completions.timer=false;},
-      500);};
-  Completions.action=function(evt,action){
-    var input=fdjtDOM.T(evt);
-    var compid=input.getAttribute('COMPLETIONS');
-    var compdiv=fdjtID(compid);
-    var completions=new Completions(compdiv,input);
-    if (completions.timer) clearTimeout(completions.timer);
-    completions.timer=
-    setTimeout(function() {
-	completions.action(action);
-	completions.timer=false;},
-      500);};
+  Completions.prototype.setCues=function(values){
+    var curcues=fdjtDOM.getChildren(this.dom,"cue");
+    var i=0; var lim=curcues.length;
+    while (i<lim) fdjtDOM.dropClass(curcues[i++],"cue");
+    var byval=this.byval;
+    i=0; lim=values.length;
+    while (i<lim) {
+      var cue=byval[values[i++]];
+      if (cue) fdjtDOM.addClass(cue,"cue");}};
   
   /* Constants */
   // Always set to distinguish no options from false
