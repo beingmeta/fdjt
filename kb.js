@@ -144,7 +144,7 @@ var fdjtKB=
 	  i++; j++;}
 	else if ((allstrings)?
 		 (set1[i]<set2[j]):
-		 (_fdjt_set_sortfn(set1[i],set2[j])<0)) i++;
+		 (set_sortfn(set1[i],set2[j])<0)) i++;
 	else j++;
       results._allstrings=new_allstrings;
       results._sortlen=results.length;
@@ -162,7 +162,7 @@ var fdjtKB=
 	  results.push(set1[i]); i++; j++;}
 	else if ((allstrings)?
 		 (set1[i]<set2[j]):
-		 (_fdjt_set_sortfn(set1[i],set2[j])<0))
+		 (set_sortfn(set1[i],set2[j])<0))
 	  results.push(set1[i++]);
 	else results.push(set2[j++]);
       while (i<len1) results.push(set1[i++]);
@@ -188,7 +188,7 @@ var fdjtKB=
 	  results.push(set1[i]); i++; j++;}
 	else if ((allstrings)?
 		 (set1[i]<set2[j]):
-		 (_fdjt_set_sortfn(set1[i],set2[j])<0))
+		 (set_sortfn(set1[i],set2[j])<0))
 	  results.push(set1[i++]);
 	else results.push(set2[j++]);
       while (i<len1) results.push(set1[i++]);
@@ -197,6 +197,22 @@ var fdjtKB=
       results._sortlen=results.length;
       return results;}
     fdjtKB.merge=merge;
+
+    function overlaps(set1,set2){
+      if ((!(set1))||(set1.length===0)) return [];
+      if ((!(set2))||(set2.length===0)) return [];
+      var results=new Array();
+      var i=0; var j=0; var len1=set1.length; var len2=set2.length;
+      var allstrings=set1._allstrings&&set2._allstrings;
+      var new_allstrings=true;
+      while ((i<len1) && (j<len2))
+	if (set1[i]===set2[j]) return true;
+	else if ((allstrings)?
+		 (set1[i]<set2[j]):
+		 (set_sortfn(set1[i],set2[j])<0)) i++;
+	else j++;
+      return false;}
+    fdjtKB.overlaps=overlaps;
 
     /* Sets */
     /* sets are really arrays that are sorted to simplify set operations.

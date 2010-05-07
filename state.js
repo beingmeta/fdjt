@@ -185,6 +185,49 @@ var fdjtState=
       if (multiple) return results; else return false;}
     fdjtState.getQuery=getQuery;
 
+    function test_opt(pos,neg){
+      var pospat=((pos)&&(new RegExp("\\b"+pos+"\\b")));
+      var negpat=((neg)&&negative_opt_pat(neg));
+      var i=2; while (i<arguments.length) {
+	var arg=arguments[i++];
+	if (!(arg)) continue;
+	else if (typeof arg === 'string')
+	  if ((pospat)&&(arg.search(pospat)>=0)) return true;
+	  else if ((negpat)&&(arg.search(negpat)>=0)) return false;
+	  else continue;
+	else if (arg.length) {
+	  var j=0; var len=arg.length;
+	  while (j<len)
+	    if ((pos)&&(arg[j]===pos)) return true;
+	    else if ((neg)&&(arg[j]===neg)) return false;
+	    else j++;
+	  return false;}
+	else continue;}
+      return false;}
+    fdjtState.testOption=test_opt;
+
+    function negative_opt_pat(neg){
+      if (!(neg)) return neg;
+      else if (typeof neg === 'string')
+	return (new RegExp("\\b"+neg+"\\b","gi"));
+      else if (neg.length) {
+	var rule="\\b(";
+	var i=0; while (i<neg.length) {
+	  var name=neg[i];
+	  if (i>0) rule=rule+"|";
+	  rule=rule+"("+name+")";
+	  i++;}
+	rule=rule+")\\b";
+	return new RegExp(rule,"gi");}
+      else return false;}
+
+    fdjtState.argVec=function(argobj,start){
+      var i=start||0;
+      var result=new Array(argobj.length-i);
+      while (i<argobj.length) {
+	result[i-start]=argobj[i]; i++;}
+      return result;};
+
     return fdjtState;})();
 
 /* Emacs local variables

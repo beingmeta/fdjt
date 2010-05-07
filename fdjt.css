@@ -437,6 +437,12 @@ div.twisties.expanded span.twisty { font-weight: bold;}
 a.deadlink { color: red;}
 span.underline { text-decoration: underline;}
 
+/* Expansion */
+
+.fdjtexpands.closed * { display: none;}
+.fdjtexpands.closed span.controller { display: inline;}
+.fdjtexpands.closed div.controller { display: block;}
+
 /* Emacs local variables
 ;;;  Local variables: ***
 ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***

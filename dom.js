@@ -245,6 +245,9 @@ var fdjtDOM=
 	else target=target.parentNode;
       return false;};
 
+    fdjtDOM.isTextInput=function(target){
+      return ((target.tagName==='INPUT')||(target.tagName==='TEXTAREA'));};
+
     /* Simple CSS selectors */
 
     var selectors={};
@@ -317,6 +320,7 @@ var fdjtDOM=
 	  else if (val.search(need)<0) return false;}}
       return true;};
     Selector.prototype.find=function(elt,results){
+      var pickfirst=false;
       if (!(results)) results=[];
       if (this.compound) {
 	var compound=this.compound; var i=0; var lim=compound.length;
@@ -328,23 +332,23 @@ var fdjtDOM=
 	else if (this.match(elt)) {
 	  results.push(elt); return results;}
 	else return results;}
-      var results=[]; var candidates=false;
+      var candidates=[];
       var classnames=this.classnames; var attribs=this.attribs;
       if (this.classes) 
 	if (elt.getElementsByClassName)
-	  candidates=
-	    candidates=elt.getElementsByClassName(classnames[0]);
-	else gatherByClass(elt,this.classes[0],results);
+	  candidates=elt.getElementsByClassName(classnames[0]);
+	else gatherByClass(elt,this.classes[0],candidates);
       else if ((this.tag)&&(elt.getElementsByTagName))
 	candidates=elt.getElementsByTagName(this.tag);
       else if (this.attribs) {
 	var attribs=this.attribs;
 	for (var name in attribs) {
-	  candidates=[]; gatherByAttrib(elt,name,attribs[name],candidates);
+	  gatherByAttrib(elt,name,attribs[name],candidates);
 	  break;}}
       else if (this.tag) {
-	candidates=[]; gatherByTag(elt,this.tag,candidates);}
+	gatherByTag(elt,this.tag,candidates);}
       else {}
+      if (candidates.length===0) return candidates;
       if (((this.tag)&&(!(this.classes))&&(!(this.attribs)))||
 	  ((!(this.tag))&&(this.classes)&&(this.classes.length===1)&&
 	   (!(this.attribs))))
@@ -432,6 +436,9 @@ var fdjtDOM=
       return results;}
     fdjtDOM.getChildren=getChildren;
     fdjtDOM.$=function(spec,root){return getChildren(root||document,spec);};
+    fdjtDOM.getFirstChild=function(elt,spec){
+      var children=getChildren(elt,spec);
+      if (children.length) return children[0]; else return false;};
     
     function filter_children(node,filter,results){
       if (node.nodeType===1) {
@@ -645,6 +652,21 @@ var fdjtDOM=
       return ((top>winx) && (top<winyedge) && (top<winx+delta));}
     fdjtDOM.isAtTop=isAtTop;
 
+    function textwidth(node){
+      if (node.nodeType===3) return node.nodeValue.length;
+      else if ((node.nodeType===1)&&(node.childNodes)) {
+	var children=node.childNodes;
+	var i=0; var lim=children.length; var width=0;
+	while (i<lim) {
+	  var child=children[i++];
+	  if (child.nodeType===3) width=width+child.nodeValue.length;
+	  else if (child.nodeType===1)
+	    width=width+textwidth(child);
+	  else {}}
+	return width;}
+      else return 0;}
+    fdjtDOM.textWidth=textwidth;
+
     /* Getting various kinds of metadata */
 
     function getHTML(){
@@ -695,8 +717,9 @@ var fdjtDOM=
     fdjtDOM.getLink=function(name,multiple,matchcase){
       var results=[];
       var matchname=((matchcase)&&(name.toUpperCase()));
-      var elts=((document.getElementsByTagName)?(document.getElementsByTagName("META")):
-		(getChildren(document,"META")));
+      var elts=((document.getElementsByTagName)?
+		(document.getElementsByTagName("LINK")):
+		(getChildren(document,"LINK")));
       var i=0; while (i<elts.length)
 		 if (elts[i])
 		   if (elts[i].rel===name)
@@ -710,6 +733,87 @@ var fdjtDOM=
       if (multiple) return results;
       else return false;};
 
+    /* DOM walking */
+
+    function next_node(node){
+      while (node)
+	if (node.nextSibling)
+	  return node.nextSibling;
+	else node=node.parentNode;
+      return false;}
+
+    function forward_node(node){
+      if ((node.childNodes)&&((node.childNodes.length)>0))
+	return node.childNodes[0];
+      else while (node)
+	     if (node.nextSibling)
+	       return node.nextSibling;
+	     else node=node.parentNode;
+      return false;}
+
+    function next_element(node){
+      if (node.nextElementSibling)
+	return node.nextElementSibling;
+      else {
+	var scan=node;
+	while (scan=scan.nextSibling) {
+	  if (!(scan)) return null;
+	  else if (scan.nodeType==1) break;
+	  else {}}
+	return scan;}}
+
+    function forward_element(node){
+      if ((node.childNodes)&&((node.childNodes.length)>0))
+	return node.childNodes[0];
+      else if (node.nextElementSibling)
+	return node.nextElementSibling;
+      else while (node)
+	     if (node.nextElementSibling)
+	       return node.nextSibling;
+	     else if (next_element(node))
+	       return next_element(node);
+	     else node=node.parentNode;
+      return false;}
+
+    function previous_element(node){
+      if (node.previousElementSibling)
+	return node.previousElementSibling;
+      else {
+	var scan=node;
+	while (scan=scan.previousSibling) 
+	  if (!(scan)) return null;
+	  else if (scan.nodeType==1) break;
+	  else {}
+	return scan;}}
+    fdjtDOM.prevElt=previous_element;
+
+    function scan_forward(node,test,justelts){
+      if (!(test))
+	if (justelts) return forward_element(node);
+	else return forward_node(node);
+      var scan=((justelts)?(forward_element(node)):(forward_node(node)));
+      while (scan)
+	if (test(scan)) return scan;
+	else if (justelts) scan=forward_element(scan);
+	else scan=forward_node(scan);
+      return false;}
+
+    function scan_next(node,test,justelts){
+      if (!(test))
+	if (justelts) return next_element(node);
+	else return next_node(node);
+      var scan=((justelts)?(next_element(node)):(next_node(node)));
+      while (scan)
+	if (test(scan)) return scan;
+	else if (justelts) scan=next_element(scan);
+	else scan=next_node(scan);
+      return false;}
+
+    fdjtDOM.nextElt=next_element;
+    fdjtDOM.forwardElt=forward_element;
+    fdjtDOM.forward=scan_forward;
+    fdjtDOM.next=scan_next;
+
     fdjtDOM.T=function(evt) {
       evt=evt||event; return (evt.target)||(evt.srcElement);};
 
@@ -722,6 +826,7 @@ var fdjtDOM=
   })();
 
 function fdjtID(id) { return document.getElementById(id);}
+function _(string) { return string;}
 
 /* Emacs local variables
 ;;;  Local variables: ***

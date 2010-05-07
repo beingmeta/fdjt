@@ -22,7 +22,7 @@
 
 var fdjtUI=
   {CoHi: {classname: "cohi"},CheckSpan: {},
-   AutoPrompt: {}, InputHelp: {}};
+   AutoPrompt: {}, InputHelp: {}, Expansion: {}};
 
 /* Co-highlighting */
 /* When the mouse moves over a named element, the 'cohi' class is added to
@@ -111,7 +111,7 @@ var fdjtUI=
   function autoprompt_onfocus(evt){
     evt=evt||event||null;
     var elt=fdjtDOM.T(evt);
-    if ((elt) && (fdjtHasClass(elt,'isempty'))) {
+    if ((elt) && (fdjtDOM.hasClass(elt,'isempty'))) {
       elt.value='';
       fdjtDOM.dropClass(elt,'isempty');}
     show_help_onfocus(evt);}
@@ -397,7 +397,128 @@ var fdjtUI=
   function stdspace(string){
     return string.replace(/\s+/," ").replace(/(^\s)|(\s$)/,"");}
 
-  fdjtUI.Completions=Completions;})();
+  fdjtUI.Completions=Completions;
+
+  var timeouts={};
+
+  fdjtUI.Delay=function(interval,name,fcn){
+    window.setTimeout(fcn,interval);};
+
+  fdjtUI.Expansion.onclick=function(evt){
+    var target=fdjtUI.T(evt);
+    var wrapper=fdjtDOM.getParent(target,".fdjtexpands");
+    if (wrapper) fdjtDOM.toggleClass(wrapper,"expanded");};
+
+  var saved_scroll=false;
+  var use_native_scroll=false;
+  var preview_elt=false;
+
+  function scroll_discard(ss){
+    if (ss) {
+      ss.scrollX=false; ss.scrollY=false;}
+    else saved_scroll=false;}
+
+  function scroll_save(ss){
+    if (ss) {
+      ss.scrollX=window.scrollX; ss.scrollY=window.scrollY;}
+    else {
+      if (!(saved_scroll)) saved_scroll={};
+      saved_scroll.scrollX=window.scrollX;
+      saved_scroll.scrollY=window.scrollY;}}
+  
+  function scroll_offset(wleft,eleft,eright,wright){
+    var result;
+    if ((eleft>wleft) && (eright<wright)) return wleft;
+    else if ((eright-eleft)<(wright-wleft)) 
+      return eleft-Math.floor(((wright-wleft)-(eright-eleft))/2);
+    else return eleft;}
+
+  function scroll_into_view(elt,topedge){
+    if ((topedge!==0) && (!topedge) && (fdjtDOM.isVisible(elt)))
+      return;
+    else if ((use_native_scroll) && (elt.scrollIntoView)) {
+      elt.scrollIntoView(top);
+      if ((topedge!==0) && (!topedge) && (fdjtDOM.isVisible(elt,true)))
+	return;}
+    else {
+      var top = elt.offsetTop;
+      var left = elt.offsetLeft;
+      var width = elt.offsetWidth;
+      var height = elt.offsetHeight;
+      var winx=window.pageXOffset;
+      var winy=window.pageYOffset;
+      var winxedge=winx+window.innerWidth;
+      var winyedge=winy+window.innerHeight;
+      
+      while(elt.offsetParent) {
+	elt = elt.offsetParent;
+	top += elt.offsetTop;
+	left += elt.offsetLeft;}
+      
+      var targetx=scroll_offset(winx,left,left+width,winxedge);
+      var targety=
+	(((topedge)||(topedge===0)) ?
+	 ((typeof topedge === "number") ? (top+topedge) : (top)) :
+	 (scroll_offset(winy,top,top+height,winyedge)));
+      
+      window.scrollTo(targetx,targety);}}
+
+  fdjtUI.scrollTo=function(target,id,context,discard,topedge){
+    scroll_discard(discard);
+    if (id) document.location.hash=id;
+    if (context) {
+      setTimeout(function() {
+	  scroll_into_view(context,topedge);
+	  if (!(fdjtDOM.isVisible(target))) {
+	    scroll_into_view(target,topedge);}},
+	100);}
+    else setTimeout(function() {scroll_into_view(target,topedge);},100);};
+
+  function scroll_preview(target,context,delta){
+    /* Stop the current preview */
+    if (!(target)) {
+      stop_preview(); return;}
+    /* Already previewing */
+    if (target===preview_elt) return;
+    if (!(saved_scroll)) scroll_save();
+    scroll_into_view(target,false,context,false,delta);
+    preview_elt=target;}
+
+  function scroll_restore(ss){
+    if (preview_elt) {
+      preview_elt=false;}
+    if ((ss) && (typeof ss.scrollX === "number")) {
+      // fdjtLog("Restoring scroll to %d,%d",ss.scrollX,ss.scrollY);    
+      window.scrollTo(ss.scrollX,ss.scrollY);
+      return true;}
+    else if ((saved_scroll) &&
+	     ((typeof saved_scroll.scrollY === "number") ||
+	      (typeof saved_scroll.scrollX === "number"))) {
+      // fdjtLog("Restoring scroll to %o",_fdjt_saved_scroll);
+      window.scrollTo(saved_scroll.scrollX,saved_scroll.scrollY);
+      saved_scroll=false;
+      return true;}
+    else return false;}
+
+  function stop_preview(){
+    fdjtDOM.dropClass(document.body,"preview");
+    if ((preview_elt) && (preview_elt.className))
+      fdjtDOM.dropClass(preview_elt,"previewing");
+    preview_elt=false;}
+
+  fdjtUI.scrollIntoView=scroll_into_view;
+  fdjtUI.scrollPreview=scroll_preview;
+  fdjtUI.scrollRestore=scroll_restore;
+  
+  fdjtUI.T=function(evt) {
+    evt=evt||event; return (evt.target)||(evt.srcElement);};
+
+  fdjtUI.cancel=function(evt){
+    evt=evt||event;
+    if (evt.preventDefault) evt.preventDefault();
+    else evt.returnValue=false;
+    evt.cancelBubble=true;};
+ })();
 
 /* Emacs local variables
 ;;;  Local variables: ***
