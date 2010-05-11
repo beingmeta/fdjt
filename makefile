@@ -2,8 +2,9 @@
 # from the individual fdjt files.
 
 FDJT_FILES=header.js jsutils.js oids.js json.js domutils.js \
-	    handlers.js scrolling.js richtips.js completion.js ajax.js
-FDJT2_FILES=header.js string.js time.js dom.js kb.js state.js log.js ui.js
+	    handlers.js scrolling.js richtips.js completion.js ajaxcall.js
+FDJT2_FILES=header.js string.js time.js dom.js kb.js state.js log.js ui.js \
+	    ajax.js
 
 all: fdjt.js v1.js v2.js
 
