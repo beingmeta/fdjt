@@ -145,7 +145,7 @@ var fdjtUI=
 
   // Adds autoprompt handlers to autoprompt classes
   function autoprompt_setup(arg) {
-    var forms=fdjtDOM.$("FORM");
+    var forms=fdjtDOM.getChildren(arg||document.body,"FORM");
     var i=0; var lim=forms.length;
     while (i<lim) {
       var form=forms[i++];
@@ -156,12 +156,13 @@ var fdjtUI=
 	  var input=inputs[j++];
 	  input.blur();
 	  if (fdjtString.isEmpty(input.value)) {
+	    fdjtDOM.addClass(input,"isempty");
 	    var prompt=(input.prompt)||
 	      (input.getAttribute('prompt'))||(input.title);
 	    if (prompt) input.value=prompt;}
-	  input.addEventListener("focus",autoprompt_onfocus,false);
-	  input.addEventListener("blur",autoprompt_onblur,false);}
-	form.addEventListener("submit",autoprompt_onsubmit,false);}}}
+	  fdjtDOM.addListener(input,"focus",autoprompt_onfocus);
+	  fdjtDOM.addListener(input,"blur",autoprompt_onblur);}
+	fdjtDOM.addListener(form,"submit",autoprompt_onsubmit);}}}
   
   fdjtUI.AutoPrompt.setup=autoprompt_setup;
   fdjtUI.AutoPrompt.onfocus=autoprompt_onfocus;
@@ -445,10 +446,10 @@ var fdjtUI=
       var left = elt.offsetLeft;
       var width = elt.offsetWidth;
       var height = elt.offsetHeight;
-      var winx=window.pageXOffset;
-      var winy=window.pageYOffset;
-      var winxedge=winx+window.innerWidth;
-      var winyedge=winy+window.innerHeight;
+      var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
+      var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
+      var winxedge=winx+(document.documentElement.clientWidth);
+      var winyedge=winy+(document.documentElement.clientHeight);
       
       while(elt.offsetParent) {
 	elt = elt.offsetParent;

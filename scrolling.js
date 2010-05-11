@@ -49,10 +49,10 @@ function fdjtScrollIntoView(elt,topedge)
     var left = elt.offsetLeft;
     var width = elt.offsetWidth;
     var height = elt.offsetHeight;
-    var winx=window.pageXOffset;
-    var winy=window.pageYOffset;
-    var winxedge=winx+window.innerWidth;
-    var winyedge=winy+window.innerHeight;
+    var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
+    var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
+    var winxedge=winx+(document.documentElement.clientWidth);
+    var winyedge=winy+(document.documentElement.clientHeight);
     
     while(elt.offsetParent) {
       elt = elt.offsetParent;
@@ -158,12 +158,12 @@ function fdjtClearPreview()
 function fdjtSetScroll(x,y,elt)
 {
   var targetx; var targety;
-  var winx=window.pageXOffset;
-  var winy=window.pageYOffset;
-  var winwidth=window.innerWidth;
-  var winheight=window.innerHeight;
-  var winxedge=winx+window.innerWidth;
-  var winyedge=winy+window.innerHeight;
+  var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
+  var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
+  var winwidth=(document.documentElement.clientWidth);
+  var winheight=(document.documentElement.clientHeight);
+  var winxedge=winx+(document.documentElement.clientWidth);
+  var winyedge=winy+(document.documentElement.clientHeight);
   if (!(elt)) {
     if (typeof x === 'number')
       if (x>0) targetx=x;

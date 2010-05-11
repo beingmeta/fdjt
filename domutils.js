@@ -374,7 +374,7 @@ function fdjtRedisplay(arg)
     var i=0; while (i<arg.length) fdjtRedisplay(arg[i++]);}
   else if ((arg.nodeType) && (arg.nodeType===1)) {
     var oldclass=arg.className;
-    arg.className=null;
+    arg.className='';
     arg.className=oldclass;}
   else return;
 }
@@ -1519,10 +1519,10 @@ function fdjtIsVisible(elt,partial)
   var left = elt.offsetLeft;
   var width = elt.offsetWidth;
   var height = elt.offsetHeight;
-  var winx=window.pageXOffset;
-  var winy=window.pageYOffset;
-  var winxedge=winx+window.innerWidth;
-  var winyedge=winy+window.innerHeight;
+  var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
+  var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
+  var winxedge=winx+(document.documentElement.clientWidth);
+  var winyedge=winy+(document.documentElement.clientHeight);
   
   while(elt.offsetParent) {
     if (elt===window) break;
@@ -1562,10 +1562,10 @@ function fdjtIsAtTop(elt,delta)
   var left = elt.offsetLeft;
   var width = elt.offsetWidth;
   var height = elt.offsetHeight;
-  var winx=window.pageXOffset;
-  var winy=window.pageYOffset;
-  var winxedge=winx+window.innerWidth;
-  var winyedge=winy+window.innerHeight;
+  var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
+  var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
+  var winxedge=winx+(document.documentElement.clientWidth);
+  var winyedge=winy+(document.documentElement.clientHeight);
   
   while(elt.offsetParent) {
     elt = elt.offsetParent;
@@ -1598,19 +1598,6 @@ function fdjtGetOffset(elt,withstack,top)
   result.height=height;
   
   result.right=left+width; result.bottom=top+height;
-
-  /*
-  var styleinfo=((window.getComputedStyle)&&
-		 (window.getComputedStyle(elt,null)));
-  if (styleinfo) {
-    result.width=result.width+
-      parseInt(styleinfo.marginLeft)+
-      parseInt(styleinfo.marginRight);
-    result.height=result.height+
-      parseInt(styleinfo.marginTop)+
-      parseInt(styleinfo.marginBottom);}
-  result.right=left+result.width; result.bottom=top+result.height;
-  */
 
   if (stack) result.stack=stack;
 

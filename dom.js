@@ -58,9 +58,9 @@ var fdjtDOM=
 	    else {}}
 	  if (classname) node.className=classname;}
       else {
-	node=document.createElement(attrib.tagName);
+	node=document.createElement(spec.tagName||"span");
 	for (attrib in spec) {
-	  if (attrib==="tagName") {}
+	  if (attrib==="tagName") continue;
 	  else node.setAttribute(attrib,spec[attrib]);}}
       domappend(node,arguments,1);
       return node;}
@@ -495,8 +495,9 @@ var fdjtDOM=
     /* Getting style information generally */
 
     function getStyle(elt,prop){
-      var style=((window.getComputedStyle)&&
-		 (window.getComputedStyle(elt,null)));
+      var style=
+	((window.getComputedStyle)&&(window.getComputedStyle(elt,null)))||
+	(elt.currentStyle);
       if (!(style)) return false;
       else if (prop) return style[prop];
       else return style;}
@@ -597,10 +598,10 @@ var fdjtDOM=
       var left = elt.offsetLeft;
       var width = elt.offsetWidth;
       var height = elt.offsetHeight;
-      var winx=window.pageXOffset;
-      var winy=window.pageYOffset;
-      var winxedge=winx+window.innerWidth;
-      var winyedge=winy+window.innerHeight;
+      var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
+      var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
+      var winxedge=winx+(document.documentElement.clientWidth);
+      var winyedge=winy+(document.documentElement.clientHeight);
   
       while(elt.offsetParent) {
 	if (elt===window) break;
@@ -639,10 +640,10 @@ var fdjtDOM=
       var left = elt.offsetLeft;
       var width = elt.offsetWidth;
       var height = elt.offsetHeight;
-      var winx=window.pageXOffset;
-      var winy=window.pageYOffset;
-      var winxedge=winx+window.innerWidth;
-      var winyedge=winy+window.innerHeight;
+      var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
+      var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
+      var winxedge=winx+(document.documentElement.clientWidth);
+      var winyedge=winy+(document.documentElement.clientHeight);
   
       while(elt.offsetParent) {
 	elt = elt.offsetParent;
@@ -813,6 +814,24 @@ var fdjtDOM=
     fdjtDOM.forwardElt=forward_element;
     fdjtDOM.forward=scan_forward;
     fdjtDOM.next=scan_next;
+
+    fdjtDOM.viewTop=function(win){
+      win=win||window;
+      return (win.scrollY||win.document.documentElement.scrollTop||0);};
+    fdjtDOM.viewLeft=function(win){
+      win=win||window;
+      return (win.scrollX||win.document.documentElement.scrollLeft||0);};
+    fdjtDOM.viewHeight=function(win){
+      return (win||window).document.documentElement.clientHeight;};
+    fdjtDOM.viewWidth=function(win){
+      return (win||window).document.documentElement.clientWidth;};
+
+    fdjtDOM.addListener=function(node,evtype,handler){
+      if (node.addEventListener)
+	return node.addEventListener(evtype,handler,false);
+      else if (node.attachEvent)
+	return node.attachEvent('on'+evtype,handler);
+      else fdjtLog.warn('This node never listens');};
 
     fdjtDOM.T=function(evt) {
       evt=evt||event; return (evt.target)||(evt.srcElement);};

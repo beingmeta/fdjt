@@ -91,8 +91,8 @@ function fdjtRichTip_display(elt)
   richtip.style.left=xoff+'px';
   richtip.style.top=yoff+'px';
   fdjtAddClass(richtip,"live");
-  if ((xoff+richtip.offsetWidth)>window.innerWidth)
-    xoff=xoff-((xoff+richtip.offsetWidth)-window.innerWidth);
+  if ((xoff+richtip.offsetWidth)>(document.documentElement.clientWidth))
+    xoff=xoff-((xoff+richtip.offsetWidth)-(document.documentElement.clientWidth));
   if (xoff<0) xoff=1;
   richtip.style.left=xoff+'px';
   richtip.style.top=yoff+'px';

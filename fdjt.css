@@ -309,17 +309,13 @@ div.completions {
 .completions.checkspans p.completion.checkspan.ischecked { 
   display: block; }
 
-.completions.checkspans .
-  completion.checkspan.ischecked
+.completions.checkspans .completion.checkspan.ischecked
      span.variation.displayed { display: inline; }
-.completions.checkspans .
-  completion.checkspan.ischecked
+.completions.checkspans .completion.checkspan.ischecked
      li.variation.displayed { display: list-item; }
-.completions.checkspans .
-  completion.checkspan.ischecked
+.completions.checkspans .completion.checkspan.ischecked
      div.variation.displayed { display: block; }
-.completions.checkspans .
-  completion.checkspan.ischecked
+.completions.checkspans .completion.checkspan.ischecked
      div.variation.displayed { display: block; }
 
 .completions.checkspans span.completion.checkspan.ischecked { 
