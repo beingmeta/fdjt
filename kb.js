@@ -60,9 +60,9 @@ var fdjtKB=
 
     Pool.prototype.ref=function(oid,cons) {
       if (this.map[oid]) return this.map[oid];
-      if (!(cons)) cons=new this.cons(this,oid);
+      if (!(cons)) cons=this.cons(oid);
       else if (cons instanceof KNode) {}
-      else cons=new cons(this,oid);
+      else cons=this.cons(oid);
       if (!(cons.oid)) cons.oid=oid;
       this.map[oid]=cons; cons.pool=this;
       return cons;};
@@ -365,10 +365,15 @@ var fdjtKB=
       if (oid) this.oid=oid;
       return this;}
     fdjtKB.KNode=KNode;
-    Pool.prototype.cons=KNode;
+    Pool.prototype.cons=function(oid){return new KNode(this,oid);};
 
     KNode.prototype.get=function(prop){
       if (this.hasOwnProperty(prop)) return this[prop];
+      else if (this.pool.storage) {
+	var fetched=this.pool.storage.get(this,prop);
+	if (typeof fetched !== 'undefined')
+	  this[prop]=fetched;
+	return fetched;}
       else return undefined;};
     KNode.prototype.getSet=function(prop){
       if (this.hasOwnProperty(prop)) {
@@ -377,13 +382,22 @@ var fdjtKB=
 	  if (val._sortlen===val.length) return val;
 	  else return setify(val);
 	else return [val];}
+      else if (this.pool.storage) {
+	var fetched=this.pool.storage.get(this,prop);
+	if (typeof fetched !== 'undefined')
+	  this[prop]=fetched;
+	return setify(fetched);}
       else return [];};
     KNode.prototype.getArray=function(prop){
       if (this.hasOwnProperty(prop)) {
 	var val=this[prop];
-	if (val instanceof Array)
-	  return val;
+	if (val instanceof Array) return val;
 	else return [val];}
+      else if (this.pool.storage) {
+	var fetched=this.pool.storage.get(this,prop);
+	if (typeof fetched !== 'undefined')
+	  this[prop]=fetched;
+	return [fetched];}
       else return [];};
     KNode.prototype.add=function(prop,val){
       if (this.hasOwnProperty(prop)) {
@@ -393,7 +407,10 @@ var fdjtKB=
 	  if (!(set_add(cur,val))) return false;
 	  else {}
 	else this[prop]=Set([cur,val]);
-	if (this.pool.index) this.pool.index(this,prop,val,true);}
+	if (this.pool.storage)
+	  this.pool.storage.add(this,prop,val);
+	if (this.pool.index)
+	  this.pool.index(this,prop,val,true);}
       else this[prop]=val;
       return true;};
     KNode.prototype.drop=function(prop,val){
@@ -405,7 +422,10 @@ var fdjtKB=
 	  if (!(set_drop(cur,val))) return false;
 	  if (cur.length===0) delete this[prop];}
 	else return false;
-	if (this.pool.index) this.pool.index(this,prop,val,false);
+	if (this.pool.storage)
+	  this.pool.storage.drop(this,prop,val);
+	if (this.pool.index)
+	  this.pool.index(this,prop,val,false);
 	return true;}
       else return false;};
     KNode.prototype.test=function(prop,val){
@@ -417,6 +437,13 @@ var fdjtKB=
 	  if (contains(cur,val)) return true;
 	  else return false;
 	else return false;}
+      else if (this.pool.storage) {
+	var fetched=this.pool.storage.get(this,prop);
+	if (typeof fetched !== 'undefined')
+	  this[prop]=fetched;
+	else return false;
+	if (typeof val === 'undefined') return true;
+	else return this.test(prop,val);}
       else return false;};
 
     /* Miscellaneous array and table functions */
