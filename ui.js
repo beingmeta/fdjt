@@ -136,12 +136,14 @@ var fdjtUI=
     hide_help_onblur(evt);}
   
   // Removes autoprompt text from empty fields
-  function autoprompt_onsubmit(arg) {
-    var form=((arg.tagName==='FORM')?(arg):(fdjtDOM.T(arg||event)));
-    var elements=fdjtDOM.getChildren("isempty");
+  function autoprompt_cleanup(form) {
+    var elements=fdjtDOM.getChildren(form,"isempty");
     if (elements) {
       var i=0; var lim=elements.length;
       while (i<elements.length) elements[i++].value="";}}
+  function autoprompt_onsubmit(evt) {
+    var form=fdjtDOM.T(evt);
+    autoprompt_cleanup(form);}
 
   // Adds autoprompt handlers to autoprompt classes
   function autoprompt_setup(arg) {
@@ -167,7 +169,8 @@ var fdjtUI=
   fdjtUI.AutoPrompt.setup=autoprompt_setup;
   fdjtUI.AutoPrompt.onfocus=autoprompt_onfocus;
   fdjtUI.AutoPrompt.onblur=autoprompt_onblur;
-  fdjtUI.AutoPrompt.onsubmit=autoprompt_onblur;
+  fdjtUI.AutoPrompt.onsubmit=autoprompt_onsubmit;
+  fdjtUI.AutoPrompt.cleanup=autoprompt_cleanup;
   fdjtUI.InputHelp.onfocus=show_help_onfocus;
   fdjtUI.InputHelp.onblur=hide_help_onblur;})();
 

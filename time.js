@@ -39,6 +39,13 @@ var fdjtTime=
     fdjtTime.tick2date=function(tick){
       return (new Date(tick*1000)).toDateString();};
 
+    fdjtTime.dateString=function(tstamp){
+      return tstamp.toDateString();};
+    fdjtTime.tick2string=function(tick){
+      return (new Date(tick*1000)).toString();};
+    fdjtTime.tick2date=function(tick){
+      return (new Date(tick*1000)).toDateString();};
+
     fdjtTime.secs2string=function(interval){
       if (interval===1)
 	return _("%1 second",interval);
@@ -80,8 +87,7 @@ var fdjtTime=
       else {
 	var weeks=Math.floor(interval/(7*24*3600));
 	var days=Math.round((interval-(days*7*24*3600))/(7*24*3600));
-	return _("%1 weeks, %2 days",weeks,days);}
-    };
+	return _("%1 weeks, %2 days",weeks,days);}};
 
     fdjtTime.secs2short=function(interval){
       // This is designed for short intervals

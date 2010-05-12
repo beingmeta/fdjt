@@ -69,40 +69,64 @@ var fdjtDOM=
     fdjtDOM.version=parseInt("$Revision$".slice(10,-1));
 
     function domappend(node,content,i) {
-      if (typeof i === 'undefined') i=0;
-      var len=content.length;
-      while (i<len) {
-	var elt=content[i++];
-	if (!(elt)) {}
-	else if (typeof elt === 'string')
-	  node.appendChild(document.createTextNode(elt));
-	else if (elt.nodeType)
-	  node.appendChild(elt);
-	else if (elt.length)
-	  domappend(node,elt,0);
-	else if (elt.toDOM)
-	  domappend(node,elt.toDOM());
-	else if (elt.toString)
-	  node.appendChild(document.createTextNode(elt.toString()));
-	else node.appendChild(document.createTextNode(""+elt));}}
+      if (content.nodeType)
+	node.appendChild(content);
+      else if (typeof content === 'string')
+	node.appendChild(document.createTextNode(content));
+      else if (content.toDOM)
+	domappend(node,content.toDOM());
+      else if (content.toHTML)
+	domappend(node,content.toHTML());
+      else if (content.length) {
+	if (typeof i === 'undefined') i=0;
+	var len=content.length;
+	while (i<len) {
+	  var elt=content[i++];
+	  if (!(elt)) {}
+	  else if (typeof elt === 'string')
+	    node.appendChild(document.createTextNode(elt));
+	  else if (elt.nodeType)
+	    node.appendChild(elt);
+	  else if (elt.length)
+	    domappend(node,elt,0);
+	  else if (elt.toDOM)
+	    domappend(node,elt.toDOM());
+	  else if (elt.toHTML)
+	    domappend(node,elt.toHTML());
+	  else if (elt.toString)
+	    node.appendChild(document.createTextNode(elt.toString()));
+	  else node.appendChild(document.createTextNode(""+elt));}}
+      else node.appendChild(document.createTextNode(""+content));}
     function dominsert(before,content,i) {
       var node=before.parentNode;
-      if (typeof i === 'undefined') i=0;
-      var j=content.length-1;
-      while (j>=i) {
-	var elt=content[j--];
-	if (!(elt)) {}
-	else if (typeof elt === 'string')
-	  node.insertBefore(document.createTextNode(elt),before);
-	else if (elt.nodeType)
-	  node.insertBefore(elt,before);
-	else if (elt.length)
-	  dominsert(before,elt,0);
-	else if (elt.toDOM)
-	  dominsert(before,elt.toDOM());
-	else if (elt.toString)
-	  node.insertBefore(document.createTextNode(elt.toString()),before);
-	else node.insertBefore(document.createTextNode(""+elt),before);}}
+      if (content.nodeType)
+	node.insertBefore(content,before);
+      else if (typeof content === 'string')
+	node.insertBefore(content,before);
+      else if (content.toDOM)
+	dominsert(before,content.toDOM());
+      else if (content.toHTML)
+	dominsert(before,content.toHTML());
+      else if (content.length) {
+	if (typeof i === 'undefined') i=0;
+	var j=content.length-1;
+	while (j>=i) {
+	  var elt=content[j--];
+	  if (!(elt)) {}
+	  else if (typeof elt === 'string')
+	    node.insertBefore(document.createTextNode(elt),before);
+	  else if (elt.nodeType)
+	    node.insertBefore(elt,before);
+	  else if (elt.length)
+	    dominsert(before,elt,0);
+	  else if (elt.toDOM)
+	    dominsert(before,elt.toDOM());
+	  else if (elt.toHTML)
+	    dominsert(before,elt.toHTML());
+	  else if (elt.toString)
+	    node.insertBefore(document.createTextNode(elt.toString()),before);
+	  else node.insertBefore(document.createTextNode(""+elt),before);}}
+      else node.insertBefore(document.createTextNode(""+elt),before);}
 
     /* Utility patterns and functions */
 
@@ -459,8 +483,17 @@ var fdjtDOM=
       if (cur) {
 	cur.parentNode.replaceChild(replacement,cur);
 	if ((cur.id)&&(!(replacement.id))) replacement.id=cur.id;}
-      else fdjtLog.uhoh("Can't find %o to replace it with %o",existing,replacement);};
-
+      else fdjtLog.uhoh("Can't find %o to replace it with %o",
+			existing,replacement);};
+    fdjtDOM.remove=function(node){
+      var cur=node;
+      if (typeof node === 'string')
+	if (node[0]==='#')
+	  cur=document.getElementById(node.slice(1));
+	else cur=document.getElementById(node);
+      if (cur) cur.parentNode.removeChild(cur);
+      else fdjtLog.uhoh("Can't find %o to remove it",node);};
+    
     fdjtDOM.append=function (node) {
       if (typeof node === 'string') node=document.getElementById(node);
       domappend(node,arguments,1);};
@@ -481,15 +514,37 @@ var fdjtDOM=
       
     /* DOM construction shortcuts */
 
-    fdjtDOM.Input=function(spec,name,value){
+    function tag_spec(spec,tag){
+      if (!(spec)) return tag;
+      else if (typeof spec === 'string') {
+	var wordstart=spec.search(/\w/g);
+	var puncstart=spec.search(/\W/g);
+	if (puncstart<0) return tag+"."+spec;
+	else if (wordstart!==0) return tag+spec;
+	return spec;}
+      else if (spec.tagName) return spec;
+      else {
+	spec.tagName=tag;
+	return spec;}}
+
+    fdjtDOM.Input=function(spec,name,value,title){
       if (spec.search(/\w/)!==0) spec='INPUT'+spec;
       var node=fdjtDOM(spec);
-      node.name=name; if (value) node.value=value;
+      node.name=name;
+      if (value) node.value=value;
+      if (title) node.title=title;
       return node;};
-    fdjtDOM.Anchor=function(spec,href){
-      if (spec.search(/\w/)!==0) spec='A'+spec;
+    fdjtDOM.Anchor=function(href,spec){
+      spec=tag_spec(spec,"A");
       var node=fdjtDOM(spec); node.href=href;
       domappend(node,arguments,2);
+      return node;};
+    fdjtDOM.Image=function(src,spec,alt,title){
+      spec=tag_spec(spec,"IMG");
+      var node=fdjtDOM(spec); node.src=src;
+      if (alt) node.alt=alt;
+      if (title) node.title=title;
+      domappend(node,arguments,4);
       return node;};
 
     /* Getting style information generally */
@@ -550,13 +605,15 @@ var fdjtDOM=
 	  else {}
 	  var i=0; while (i<children.length) {
 	    var child=children[i++];
-	    if ((child.nodeType) && (child.nodeType===3))
+	    if (!(child.nodeType)) continue;
+	    if (child.nodeType===3)
 	      if (flat)
 		string=string+flatten(child.nodeValue);
 	      else string=string+child.nodeValue;
-	    else {
+	    else if (child.nodeType===1) {
 	      var stringval=textify(child,flat,true);
-	      if (stringval) string=string+stringval;}}
+	      if (stringval) string=string+stringval;}
+	    else continue;}
 	  return string+suffix;}
 	else {}
       else if (arg.toString)
@@ -827,6 +884,7 @@ var fdjtDOM=
       return (win||window).document.documentElement.clientWidth;};
 
     fdjtDOM.addListener=function(node,evtype,handler){
+      if (!(node)) node=document;
       if (node.addEventListener)
 	return node.addEventListener(evtype,handler,false);
       else if (node.attachEvent)
