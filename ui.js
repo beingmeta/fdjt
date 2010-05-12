@@ -373,10 +373,10 @@ var fdjtUI=
     var curcues=fdjtDOM.getChildren(this.dom,"cue");
     var i=0; var lim=curcues.length;
     while (i<lim) fdjtDOM.dropClass(curcues[i++],"cue");
-    var byval=this.byval;
+    var byvalue=this.byvalue;
     i=0; lim=values.length;
     while (i<lim) {
-      var cue=byval[values[i++]];
+      var cue=byvalue[values[i++]];
       if (cue) fdjtDOM.addClass(cue,"cue");}};
   
   /* Constants */

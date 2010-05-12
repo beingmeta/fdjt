@@ -128,6 +128,11 @@ var fdjtDOM=
 	  else node.insertBefore(document.createTextNode(""+elt),before);}}
       else node.insertBefore(document.createTextNode(""+elt),before);}
 
+    function toArray(arg) {
+      var result=new Array(arg.length); var i=0; var lim=arg.length;
+      while (i<lim) {result[i]=arg[i]; i++;}
+      return result;}
+
     /* Utility patterns and functions */
 
     var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
@@ -161,6 +166,12 @@ var fdjtDOM=
     fdjtDOM.hasClass=hasClass;
 
     function addClass(elt,classname,attrib){
+      if (typeof elt === 'string') elt=document.getElementById(elt);
+      else if (elt.length) {
+	var elts=((elt instanceof Array)?(elt):(toArray(elt)));
+	var i=0; var lim=elts.length;
+	while (i<lim) addClass(elts[i++],classname,attrib||false);
+	return;}
       var classinfo=
       (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
       if (!(classinfo)) {
@@ -183,6 +194,12 @@ var fdjtDOM=
 	if (elt) addClass(elt,classname);}};
 
     function dropClass(elt,classname,attrib){
+      if (typeof elt === 'string') elt=document.getElementById(elt);
+      else if (elt.length) {
+	var elts=((elt instanceof Array)?(elt):(toArray(elt)));
+	var i=0; var lim=elts.length;
+	while (i<lim) dropClass(elts[i++],classname,attrib||false);
+	return;}
       var classinfo=
       (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
       if (!(classinfo)) return false;
@@ -221,6 +238,12 @@ var fdjtDOM=
     fdjtDOM.swapClass=swapClass;
 
     function toggleClass(elt,classname,attrib){
+      if (typeof elt === 'string') elt=document.getElementById(elt);
+      else if (elt.length) {
+	var elts=((elt instanceof Array)?(elt):(toArray(elt)));
+	var i=0; var lim=elts.length;
+	while (i<lim) toggleClass(elts[i++],classname,attrib||false);
+	return;}
       var classinfo=
       (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
       if (!(classinfo)) {
