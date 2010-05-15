@@ -22,6 +22,8 @@
 
 var fdjtDOM=
   (function(){
+    var usenative=true;
+
     function fdjtDOM(spec){
       var node;
       if (spec.nodeType) node=spec;
@@ -67,6 +69,9 @@ var fdjtDOM=
 
     fdjtDOM.revid="$Id$";
     fdjtDOM.version=parseInt("$Revision$".slice(10,-1));
+    fdjtDOM.useNative=function(flag) {
+      if (typeof flag === 'undefined') return usenative;
+      else usenative=flag;};
 
     function domappend(node,content,i) {
       if (content.nodeType)
@@ -129,8 +134,13 @@ var fdjtDOM=
       else node.insertBefore(document.createTextNode(""+elt),before);}
 
     function toArray(arg) {
-      var result=new Array(arg.length); var i=0; var lim=arg.length;
+      var result=new Array(arg.length);
+      var i=0; var lim=arg.length;
       while (i<lim) {result[i]=arg[i]; i++;}
+      return result;}
+    function extendArray(result,arg) {
+      var i=0; var lim=arg.length;
+      while (i<lim) {result.push(arg[i]); i++;}
       return result;}
 
     /* Utility patterns and functions */
@@ -400,7 +410,10 @@ var fdjtDOM=
 	  ((!(this.tag))&&(this.classes)&&(this.classes.length===1)&&
 	   (!(this.attribs))))
 	// When there's only one test, don't bother filtering
-	return candidates;
+	if (results.length) return extendArray(results,candidates);
+	else if (candidates instanceof Array)
+	  return candidates;
+	else return toArray(candidates);
       var i=0; var lim=candidates.length;
       while (i<lim) {
 	var candidate=candidates[i++];
@@ -472,14 +485,17 @@ var fdjtDOM=
       if (!(results)) results=[]; 
       if ((!(attrib))&&(typeof classname === 'function'))
 	filter_children(node,classname,results);
-      else if (attrib) {
+      else if (!(attrib))
+	if (classname instanceof Selector)
+	  return classname.find(node,results);
+	else if (typeof classname === 'string')
+	  if ((usenative) && (node.querySelectorAll))
+	    return node.querySelectorAll(classname);
+	  else return getChildren(node,new Selector(classname),false,results);
+	else throw { error: 'bad selector arg', selector: classname};
+      else {
 	var pat=(classpats[parent]||classPat(parent));
 	gather_children(node,classname,attrib||false,results);}
-      else if (classname instanceof Selector)
-	return classname.find(node,results);
-      else if (typeof classname === 'string')
-	return getChildren(node,new Selector(classname),false,results);
-      else throw { error: 'bad selector arg', selector: classname};
       return results;}
     fdjtDOM.getChildren=getChildren;
     fdjtDOM.$=function(spec,root){return getChildren(root||document,spec);};
