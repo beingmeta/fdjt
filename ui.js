@@ -485,7 +485,7 @@ var fdjtUI=
     /* Already previewing */
     if (target===preview_elt) return;
     if (!(saved_scroll)) scroll_save();
-    scroll_into_view(target,false,context,false,delta);
+    scroll_into_view(target,delta);
     preview_elt=target;}
 
   function scroll_restore(ss){
