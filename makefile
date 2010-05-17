@@ -4,7 +4,7 @@
 FDJT_FILES=header.js jsutils.js oids.js json.js domutils.js \
 	    handlers.js scrolling.js richtips.js completion.js ajaxcall.js
 FDJT2_FILES=header.js string.js time.js dom.js kb.js state.js log.js ui.js \
-	    ajax.js
+	    ajax.js json.js
 
 all: fdjt.js v1.js v2.js
 

@@ -228,6 +228,32 @@ var fdjtState=
 	result[i-start]=argobj[i]; i++;}
       return result;};
 
+    var nodeid=
+      (Math.floor(Math.random()*65536)).toString(16)+
+      (Math.floor(Math.random()*65536)).toString(16)+
+      (Math.floor(Math.random()*65536)).toString(16)+
+      (Math.floor(Math.random()*65536)|0x01).toString(16);
+    fdjtLog("nodeid=%o",nodeid);
+    var default_version=17; 
+    var clockid=Math.floor(Math.random()*16384); var msid=1;
+    var last_time=new Date().getTime();
+    var zeros="00000000000000000000000000000000000000000000000000";
+    
+    fdjtState.getNodeID=function(arg){nodeid=arg;};
+    fdjtState.setNodeID=function(arg){nodeid=arg;};
+    function getUUID(version){
+      var now=new Date().getTime();
+      if (now<last_time) {now=now*1000000; clockid++;}
+      else if (now===last_time)	now=now*1000000+(msid++);
+      else {now=now*1000000; msid=1;}
+      var timestamp=now.toString(16); var tlen=timestamp.length;
+      if (tlen<15) timestamp=zeros.slice(0,15-tlen)+timestamp;
+      return timestamp.slice(7)+"-"+timestamp.slice(3,7)+
+	"-1"+timestamp.slice(0,3)+
+	"-"+(32768+(clockid%16384)).toString(16)+
+	"-"+nodeid;}
+    fdjtState.getUUID=getUUID;
+    
     return fdjtState;})();
 
 /* Emacs local variables
