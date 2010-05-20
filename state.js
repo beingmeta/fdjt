@@ -228,30 +228,48 @@ var fdjtState=
 	result[i-start]=argobj[i]; i++;}
       return result;};
 
+    var zeros="00000000000000000000000000000000000000000000000000";
+    function zeropad(string,len){
+      if (string.length>=len) return string;
+      else return zeros.slice(0,len-string.length)+string;}
+
     var nodeid=
-      (Math.floor(Math.random()*65536)).toString(16)+
-      (Math.floor(Math.random()*65536)).toString(16)+
-      (Math.floor(Math.random()*65536)).toString(16)+
-      (Math.floor(Math.random()*65536)|0x01).toString(16);
-    fdjtLog("nodeid=%o",nodeid);
+      zeropad(((Math.floor(Math.random()*65536)).toString(16)+
+	       (Math.floor(Math.random()*65536)).toString(16)+
+	       (Math.floor(Math.random()*65536)).toString(16)+
+	       (Math.floor(Math.random()*65536)|0x01)).toString(16),
+	      12);
+    
     var default_version=17; 
     var clockid=Math.floor(Math.random()*16384); var msid=1;
     var last_time=new Date().getTime();
-    var zeros="00000000000000000000000000000000000000000000000000";
     
-    fdjtState.getNodeID=function(arg){nodeid=arg;};
-    fdjtState.setNodeID=function(arg){nodeid=arg;};
-    function getUUID(version){
+    fdjtState.getNodeID=function(){return nodeid;};
+    fdjtState.setNodeID=function(arg){
+      if (typeof arg==='number')
+	nodeid=zeropad(arg.toString(16),12);
+      else if (typeof arg === 'string')
+	if (arg.search(/[^0123456789abcdefABCDEF]/)<0)
+	  nodeid=zeropad(arg,12);
+	else throw {error: 'invalid node id',value: arg};
+      else throw {error: 'invalid node id',value: arg};};
+
+    function getUUID(node){
       var now=new Date().getTime();
-      if (now<last_time) {now=now*1000000; clockid++;}
-      else if (now===last_time)	now=now*1000000+(msid++);
-      else {now=now*1000000; msid=1;}
+      if (now<last_time) {now=now*10000; clockid++;}
+      else if (now===last_time)	now=now*10000+(msid++);
+      else {now=now*10000; msid=1;}
+      now=now+122192928000000000;
       var timestamp=now.toString(16); var tlen=timestamp.length;
       if (tlen<15) timestamp=zeros.slice(0,15-tlen)+timestamp;
       return timestamp.slice(7)+"-"+timestamp.slice(3,7)+
 	"-1"+timestamp.slice(0,3)+
 	"-"+(32768+(clockid%16384)).toString(16)+
-	"-"+nodeid;}
+	"-"+((node)?
+	     ((typeof node === 'number')?
+	      (zeropad(node.toString(16),12)):
+	      (zeropad(node,12))):
+	     (nodeid));}
     fdjtState.getUUID=getUUID;
     
     return fdjtState;})();
