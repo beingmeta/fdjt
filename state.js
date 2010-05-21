@@ -228,9 +228,10 @@ var fdjtState=
 	result[i-start]=argobj[i]; i++;}
       return result;};
 
-    var zeros="00000000000000000000000000000000000000000000000000";
+    var zeros="000000000000000000000000000000000000000000000000000000000000000";
     function zeropad(string,len){
-      if (string.length>=len) return string;
+      if (string.length===len) return string;
+      else if (string.length>len) return string.slice(0,len);
       else return zeros.slice(0,len-string.length)+string;}
 
     var nodeid=

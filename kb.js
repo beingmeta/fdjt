@@ -42,8 +42,12 @@ var fdjtKB=
       return (x._fdjtid)||(x._fdjtid=(++counter));}
     fdjtKB.register=register;
 
-    // Pools are ranges of numeric IDs and may map those IDs to objects
-    var pools=[];
+    // Pools are named id->object mappings
+    var pools={};
+    // This is a table mapping UUIDs to object references
+    var uuids={};
+    // This is a table mapping numeric pools
+    var numpools={};
 
     function Pool(name) {
       if (!(name)) return this;
@@ -51,8 +55,15 @@ var fdjtKB=
       pools[name]=this; this.name=name; this.map={};
       return this;}
     fdjtKB.Pool=Pool;
+    fdjtKB.PoolRef=Pool;
 
     Pool.probe=function(id) {return pools[id]||false;};
+
+    Pool.prototype.addAlias=function(name) {
+      if (pools[name])
+	if (pools[name]===this) return this;
+	else throw {error: "pool alias conflict"};
+      else pools[name]=this;};
 
     Pool.prototype.probe=function(id) {
       if (this.map[id]) return (this.map[id]);
@@ -70,7 +81,7 @@ var fdjtKB=
     Pool.prototype.Import=function(data) {
       if (data.oid) {
 	var oid=data.oid;
-	var obj=(this.map[oid])||(this.ref(oid));
+	var obj=(this.map[oid])||this.ref(oid);;
 	for (key in data)
 	  if (key!=='oid') {
 	    var value=data[key];
@@ -81,6 +92,51 @@ var fdjtKB=
 	return obj;}
       else return data;};
     
+    var uuid_pattern=
+      /[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
+    function getPool(arg){
+      var atpos; 
+      if (arg instanceof KNode) return arg.pool;
+      else if (typeof arg === 'number') return false;
+      else if (typeof arg === 'string') {
+	if (((arg[0]===':')&&(arg[0]==='@'))&&
+	    (((slash=arg.indexof('/',2))>=0))) 
+	  return fdjtKB.PoolRef(arg.slice(0,slash));
+	else if ((atpos=arg.indexOf('@'))>1) 
+	  return fdjtKB.poolRef(arg.slice(atpos+1));
+	else if (arg.search(uuid_pattern)===0) {
+	  var uuid_type=arg.slice(24,26);
+	  return fdjtKB.PoolRef("UUIDP"+uuid_pool);}
+	else return false;}
+      else return false;}
+    fdjtKB.getPool=getPool;
+
+    function getRef(arg){
+      var atpos; 
+      if (arg instanceof KNode) return arg;
+      else if (typeof arg === 'number') return false;
+      else if (typeof arg === 'string') {
+	if (((arg[0]===':')&&(arg[0]==='@'))&&
+	    (((slash=arg.indexof('/',2))>=0))) 
+	  return fdjtKB.PoolRef(arg.slice(0,slash)).ref(arg.slice(slash+1));
+	else if ((atpos=arg.indexOf('@'))>1) 
+	  return fdjtKB.poolRef(arg.slice(atpos+1)).ref(arg.slice(0,atpos));
+	else if (arg.search(uuid_pattern)===0) {
+	  var uuid_type=arg.slice(24,26);
+	  return fdjtKB.PoolRef("UUIDP"+uuid_pool).ref(arg);}
+	else return false;}
+      else return false;}
+    fdjtKB.getRef=getRef;
+
+    function import(data){
+      if (data.oid) {
+	var pool=getPool(data.oid);
+	if (pool)
+	  return pool.import(data);
+	else return data;}
+      else return data;}
+    fdjtKB.Import=import;
+
     // Array utility functions
     function contains(arr,val,start){
       if (arr.indexOf)
