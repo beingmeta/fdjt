@@ -34,6 +34,7 @@ var fdjtKB=
     fdjtKB={};
     fdjtKB.revid="$Id$";
     fdjtKB.version=parseInt("$Revision$".slice(10,-1));
+    fdjtKB.persist=((window.localStorage)?(true):(false));
 
     // We allocate 16 million IDs for miscellaneous objects
     //  and use counter to track them.
@@ -42,12 +43,10 @@ var fdjtKB=
       return (x._fdjtid)||(x._fdjtid=(++counter));}
     fdjtKB.register=register;
 
-    // Pools are named id->object mappings
+    // Pools are uniquely named id->object mappings
+    // This table maps those unique names to the objects themselves
+    // Pools can have aliases, so the name->pool mapping is many to one
     var pools={};
-    // This is a table mapping UUIDs to object references
-    var uuids={};
-    // This is a table mapping numeric pools
-    var numpools={};
 
     function Pool(name) {
       if (!(name)) return this;
@@ -57,6 +56,7 @@ var fdjtKB=
     fdjtKB.Pool=Pool;
     fdjtKB.PoolRef=Pool;
 
+    // Check if a named pool exists
     Pool.probe=function(id) {return pools[id]||false;};
 
     Pool.prototype.addAlias=function(name) {
@@ -69,44 +69,48 @@ var fdjtKB=
       if (this.map[id]) return (this.map[id]);
       else return false;};
 
-    Pool.prototype.ref=function(oid,cons) {
-      if (this.map[oid]) return this.map[oid];
-      if (!(cons)) cons=this.cons(oid);
+    Pool.prototype.ref=function(qid,cons) {
+      if (this.map[qid]) return this.map[qid];
+      if (!(cons)) cons=this.cons(qid);
       else if (cons instanceof KNode) {}
-      else cons=this.cons(oid);
-      if (!(cons.oid)) cons.oid=oid;
-      this.map[oid]=cons; cons.pool=this;
+      else cons=this.cons(qid);
+      if (!(cons.qid)) cons.qid=qid;
+      this.map[qid]=cons; cons.pool=this;
       return cons;};
       
     Pool.prototype.Import=function(data) {
-      if (data.oid) {
-	var oid=data.oid;
-	var obj=(this.map[oid])||this.ref(oid);;
-	for (key in data)
-	  if (key!=='oid') {
-	    var value=data[key];
-	    if (value instanceof Array) {
-	      var i=0; var len=value.length;
-	      while (i<len) obj.add(key,value[i++]);}
-	    else obj.add(key,value);}
+      var qid=data.qid||data.oid||data.uuid;
+      if (qid) {
+	var obj=(this.map[qid])||this.ref(qid);
+	obj.init(data);
 	return obj;}
       else return data;};
     
+    Pool.prototype.find=function(prop,val){
+      if (!(this.pool.index)) return [];
+      return this.pool.index(false,prop,val);};
+
     var uuid_pattern=
       /[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
+    var uuid_pattern_ext=
+      /:#U[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
+
     function getPool(arg){
       var atpos; 
       if (arg instanceof KNode) return arg.pool;
       else if (typeof arg === 'number') return false;
       else if (typeof arg === 'string') {
-	if (((arg[0]===':')&&(arg[0]==='@'))&&
-	    (((slash=arg.indexof('/',2))>=0))) 
-	  return fdjtKB.PoolRef(arg.slice(0,slash));
+	if (((arg[0]===':')&&(arg[1]==='@'))&&
+	    (((slash=arg.indexOf('/',2))>=0))) 
+	  return fdjtKB.PoolRef(arg.slice(0,slash+1));
 	else if ((atpos=arg.indexOf('@'))>1) 
 	  return fdjtKB.poolRef(arg.slice(atpos+1));
 	else if (arg.search(uuid_pattern)===0) {
 	  var uuid_type=arg.slice(24,26);
-	  return fdjtKB.PoolRef("UUIDP"+uuid_pool);}
+	  return fdjtKB.PoolRef("UUIDP"+uuid_type);}
+	else if (arg.search(uuid_pattern_ext)===0) {
+	  var uuid_type=arg.slice(27,29);
+	  return fdjtKB.PoolRef("UUIDP"+uuid_type).ref(arg.slice(3));}
 	else return false;}
       else return false;}
     fdjtKB.getPool=getPool;
@@ -116,26 +120,29 @@ var fdjtKB=
       if (arg instanceof KNode) return arg;
       else if (typeof arg === 'number') return false;
       else if (typeof arg === 'string') {
-	if (((arg[0]===':')&&(arg[0]==='@'))&&
-	    (((slash=arg.indexof('/',2))>=0))) 
+	if (((arg[0]===':')&&(arg[1]==='@'))&&
+	    (((slash=arg.indexOf('/',2))>=0))) 
 	  return fdjtKB.PoolRef(arg.slice(0,slash)).ref(arg.slice(slash+1));
 	else if ((atpos=arg.indexOf('@'))>1) 
 	  return fdjtKB.poolRef(arg.slice(atpos+1)).ref(arg.slice(0,atpos));
 	else if (arg.search(uuid_pattern)===0) {
 	  var uuid_type=arg.slice(24,26);
-	  return fdjtKB.PoolRef("UUIDP"+uuid_pool).ref(arg);}
+	  return fdjtKB.PoolRef("UUIDP"+uuid_type).ref(arg);}
+	else if (arg.search(uuid_pattern_ext)===0) {
+	  var uuid_type=arg.slice(27,29);
+	  return fdjtKB.PoolRef("UUIDP"+uuid_type).ref(arg.slice(3));}
 	else return false;}
       else return false;}
     fdjtKB.getRef=getRef;
 
-    function import(data){
-      if (data.oid) {
-	var pool=getPool(data.oid);
-	if (pool)
-	  return pool.import(data);
+    function doimport(data){
+      var qid=data.qid||data.uuid||data.oid;
+      if (qid) {
+	var pool=getPool(qid);
+	if (pool) return pool.Import(data);
 	else return data;}
       else return data;}
-    fdjtKB.Import=import;
+    fdjtKB.Import=doimport;
 
     // Array utility functions
     function contains(arr,val,start){
@@ -164,6 +171,13 @@ var fdjtKB=
 	else if (typeof a === "string")
 	  if (a<b) return -1;
 	  else return 1;
+	else if (a.qid)
+	  if (b.qid)
+	    if (a.qid<b.qid) return -1;
+	    else if (a.qid===b.qid) return 0;
+	    else return 1;
+	  else return 1;
+	else if (b.qid) return -1;
 	else if (a._fdjtid)
 	  if (b._fdjtid) return a._fdjtid-b._fdjtid;
 	  else {
@@ -365,15 +379,18 @@ var fdjtKB=
     Map.prototype.get=function(key) {
       if ((typeof key === 'string')||(typeof key === 'number'))
 	return this.scalar_map[key];
-      else return this.object_map[key._fdjtid||register(key)];};
+      else return this.object_map
+	     [key.qid||key.oid||key.uuid||key._fdjtid||register(key)];};
     Map.prototype.set=function(key,val) {
       if ((typeof key === 'string')||(typeof key === 'number'))
 	return this.scalar_map[key]=val;
-      else this.object_map[key._fdjtid||register(key)]=val;};
+      else this.object_map
+	     [key.qid||key.oid||key.uuid||key._fdjtid||register(key)]=val;};
     Map.prototype.drop=function(key,val) {
       if ((typeof key === 'string')||(typeof key === 'number'))
 	delete this.scalar_map[key];
-      else delete this.object_map[key._fdjtid||register(key)];};
+      else delete this.object_map
+	     [key.qid||key.oid||key.uuid||key._fdjtid||register(key)];};
     fdjtKB.Map=Map;
 
     /* Indices */
@@ -386,7 +403,7 @@ var fdjtKB=
 	if ((typeof val === 'string')||(typeof val === 'number'))
 	  valkey=val;
 	else {
-	  valkey=val._fdjtid||register(val);
+	  valkey=val.quid||val.uuid||val.oid||val._fdjtid||register(val);
 	  indices=object_indices;}
 	if (!(item))
 	  return Set(indices[prop][valkey]);
@@ -416,12 +433,12 @@ var fdjtKB=
 
     /* KNodes */
 
-    function KNode(pool,oid) {
+    function KNode(pool,qid) {
       if (pool) this.pool=pool;
-      if (oid) this.oid=oid;
+      if (qid) this.qid=qid;
       return this;}
     fdjtKB.KNode=KNode;
-    Pool.prototype.cons=function(oid){return new KNode(this,oid);};
+    Pool.prototype.cons=function(qid){return new KNode(this,qid);};
 
     KNode.prototype.get=function(prop){
       if (this.hasOwnProperty(prop)) return this[prop];
@@ -429,7 +446,9 @@ var fdjtKB=
 	var fetched=this.pool.storage.get(this,prop);
 	if (typeof fetched !== 'undefined')
 	  this[prop]=fetched;
-	return fetched;}
+	else if (this.hasOwnProperty(prop))
+	  return this[prop];
+	else return fetched;}
       else return undefined;};
     KNode.prototype.getSet=function(prop){
       if (this.hasOwnProperty(prop)) {
@@ -501,7 +520,44 @@ var fdjtKB=
 	if (typeof val === 'undefined') return true;
 	else return this.test(prop,val);}
       else return false;};
+    KNode.prototype.init=function(data){
+      var pool=this.pool; var map=pool.map;
+      for (key in data)
+	if (key!=='qid') {
+	  var value=data[key];
+	  // Add knode aliases when unique
+	  if ((key==='uuid')||(key==='oid'))
+	    if (!(map[value])) map[value]=this;
+	    else if (map[value]!==this)
+	      fdjtLog.warn("identifier conflict %o=%o for %o and %o",
+			   key,value,map[value],this);
+	    else {}
+	  if (value instanceof Array) {
+	    var i=0; var len=value.length;
+	    while (i<len) this.add(key,value[i++]);}
+	  else this.add(key,value);}
+      return this;};
 
+    /* Using offline storage to back up pools
+       In the simplest model, the QID is just used as a key
+       in local storage to store a JSON version of the object. */
+
+    function OfflineKB(pool){
+      this.pool=pool;
+      return this;}
+    function offline_get(obj,prop){
+      var qid=obj.qid||obj.uuid||obj.oid;
+      var data=fdjtState.getLocal(qid);
+      if (data) obj.init(data);
+      return obj[prop];}
+    OfflineKB.prototype.get=offline_get;
+    OfflineKB.prototype.add=function(obj){
+      var qid=obj.qid||obj.uuid||obj.oid;
+      fdjtState.setLocal(qid,JSON.stringify(obj));};
+    OfflineKB.prototype.drop=function(obj){
+      var qid=obj.qid||obj.uuid||obj.oid;
+      fdjtState.setLocal(qid,JSON.stringify(obj));};
+    
     /* Miscellaneous array and table functions */
 
     fdjtKB.add=function(obj,field,val,nodup){
