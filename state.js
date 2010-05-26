@@ -114,16 +114,20 @@ var fdjtState=
 
     /* Session storage */
 
-    function setSession(name,val){
+    function setSession(name,val,unparse){
+      if (unparse) val=JSON.stringify(val);
       if (window.sessionStorage)
 	window.sessionStorage[name]=val;
       else fdjtSetCookie(name,val);}
     fdjtState.setSession=setSession;
 
-    function getSession(name){
-      if (window.sessionStorage)
-	return window.sessionStorage[name];
-      else fdjtGetCookie(name);}
+    function getSession(name,parse){
+      var val=((window.sessionStorage)?
+	       (window.sessionStorage[name]):
+	       (fdjtGetCookie(name)));
+      if (val)
+	if (parse) return JSON.parse(val); else return val;
+      else return false;}
     fdjtState.getSession=getSession;
 
     function dropSession(name){
@@ -134,14 +138,18 @@ var fdjtState=
 
     /* Local storage (persists between sessions) */
 
-    function setLocal(name,val){
+    function setLocal(name,val,unparse){
+      if (unparse) val=JSON.stringify(val);
       if (window.localStorage)
 	window.localStorage[name]=val;}
     fdjtState.setLocal=setLocal;
 
-    function getLocal(name){
-      if (window.localStorage)
-	return window.localStorage[name];
+    function getLocal(name,parse){
+      if (window.localStorage) {
+	var val=window.localStorage[name];
+	if (val)
+	  if (parse) return JSON.parse(val); else return val;
+	else return false;}
       else return false;}
     fdjtState.getLocal=getLocal;
 

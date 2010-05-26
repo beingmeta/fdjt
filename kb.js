@@ -88,8 +88,8 @@ var fdjtKB=
       else return data;};
     
     Pool.prototype.find=function(prop,val){
-      if (!(this.pool.index)) return [];
-      return this.pool.index(false,prop,val);};
+      if (!(this.index)) return [];
+      return this.index(false,prop,val);};
 
     var uuid_pattern=
       /[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
@@ -121,7 +121,7 @@ var fdjtKB=
 	var pool=getPool(arg);
 	if (pool) return pool.ref(arg);
 	else return false;}}
-    fdjtKB.getRef=getRef;
+    fdjtKB.ref=fdjtKB.getRef=getRef;
 
     function doimport(data){
       var qid=data.qid||data.uuid||data.oid;
@@ -388,16 +388,24 @@ var fdjtKB=
       var object_indices={};
       return function(item,prop,val,add){
 	var valkey; var indices=scalar_indices;
-	if ((typeof val === 'string')||(typeof val === 'number'))
+	if (!(prop))
+	  return {scalars: scalar_indices, objects: object_indices};
+	else if (!(val))
+	  return {scalars: scalar_indices[prop], objects: object_indices[prop]};
+	else if ((typeof val === 'string')||(typeof val === 'number'))
 	  valkey=val;
 	else {
-	  valkey=val.quid||val.uuid||val.oid||val._fdjtid||register(val);
+	  valkey=val.qid||val.uuid||val.oid||val._fdjtid||register(val);
 	  indices=object_indices;}
-	if (!(item))
-	  return Set(indices[prop][valkey]);
 	var index=indices[prop];
+	if (!(item))
+	  if (!(index)) return [];
+	  else return Set(index[valkey]);
 	if (!(index))
-	  if (add) indices[prop]=index={};
+	  if (add) {
+	    indices[prop]=index={};
+	    index[valkey]=[item];
+	    return true;}
 	  else return false;
 	var curvals=index[valkey];
 	if (curvals) {
@@ -469,13 +477,12 @@ var fdjtKB=
 	else if (cur instanceof Array)
 	  if (!(set_add(cur,val))) return false;
 	  else {}
-	else this[prop]=Set([cur,val]);
-	if (this.pool.storage)
-	  this.pool.storage.add(this,prop,val);
-	if (this.pool.index)
-	  this.pool.index(this,prop,val,true);}
+	else this[prop]=Set([cur,val]);}
       else this[prop]=val;
-      return true;};
+      if (this.pool.storage)
+	this.pool.storage.add(this,prop,val);
+      if (this.pool.index)
+	this.pool.index(this,prop,val,true);};
     KNode.prototype.drop=function(prop,val){
       var vals=false;
       if (this.hasOwnProperty(prop)) {
