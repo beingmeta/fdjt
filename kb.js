@@ -52,6 +52,7 @@ var fdjtKB=
       if (!(name)) return this;
       if (pools[name]) return pools[name];
       pools[name]=this; this.name=name; this.map={};
+      this.absref=false; // Whether names in this pool are 'absolute'
       return this;}
     fdjtKB.Pool=Pool;
     fdjtKB.PoolRef=Pool;
@@ -92,9 +93,6 @@ var fdjtKB=
 
     var uuid_pattern=
       /[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
-    var uuid_pattern_ext=
-      /:#U[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
-
     function getPool(arg){
       var atpos; 
       if (arg instanceof KNode) return arg.pool;
@@ -106,33 +104,23 @@ var fdjtKB=
 	else if ((atpos=arg.indexOf('@'))>1) 
 	  return fdjtKB.poolRef(arg.slice(atpos+1));
 	else if (arg.search(uuid_pattern)===0) {
-	  var uuid_type=arg.slice(24,26);
+	  var uuid_type=arg.slice(34);
+	  return fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
+	else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[1]==='U')&&
+		 (arg.search(uuid_pattern)===3)) {
+	  var uuid_type=arg.slice(36);
 	  return fdjtKB.PoolRef("UUIDP"+uuid_type);}
-	else if (arg.search(uuid_pattern_ext)===0) {
-	  var uuid_type=arg.slice(27,29);
-	  return fdjtKB.PoolRef("UUIDP"+uuid_type).ref(arg.slice(3));}
 	else return false;}
       else return false;}
     fdjtKB.getPool=getPool;
 
     function getRef(arg){
-      var atpos; 
       if (arg instanceof KNode) return arg;
       else if (typeof arg === 'number') return false;
-      else if (typeof arg === 'string') {
-	if (((arg[0]===':')&&(arg[1]==='@'))&&
-	    (((slash=arg.indexOf('/',2))>=0))) 
-	  return fdjtKB.PoolRef(arg.slice(0,slash)).ref(arg.slice(slash+1));
-	else if ((atpos=arg.indexOf('@'))>1) 
-	  return fdjtKB.poolRef(arg.slice(atpos+1)).ref(arg.slice(0,atpos));
-	else if (arg.search(uuid_pattern)===0) {
-	  var uuid_type=arg.slice(24,26);
-	  return fdjtKB.PoolRef("UUIDP"+uuid_type).ref(arg);}
-	else if (arg.search(uuid_pattern_ext)===0) {
-	  var uuid_type=arg.slice(27,29);
-	  return fdjtKB.PoolRef("UUIDP"+uuid_type).ref(arg.slice(3));}
-	else return false;}
-      else return false;}
+      else {
+	var pool=getPool(arg);
+	if (pool) return pool.ref(arg);
+	else return false;}}
     fdjtKB.getRef=getRef;
 
     function doimport(data){
