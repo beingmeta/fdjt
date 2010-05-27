@@ -269,6 +269,7 @@ var fdjtState=
       else if (now===last_time)	now=now*10000+(msid++);
       else {now=now*10000; msid=1;}
       now=now+122192928000000000;
+      if (!(node)) node=nodeid;
       var timestamp=now.toString(16); var tlen=timestamp.length;
       if (tlen<15) timestamp=zeros.slice(0,15-tlen)+timestamp;
       return timestamp.slice(7)+"-"+timestamp.slice(3,7)+
