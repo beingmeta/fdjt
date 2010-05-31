@@ -52,6 +52,8 @@ var fdjtKB=
       if (!(name)) return this;
       if (pools[name]) return pools[name];
       pools[name]=this; this.name=name; this.map={};
+      this.index=false; this.storage=false;
+      this.effects=false; this.xforms={};
       this.absref=false; // Whether names in this pool are 'absolute'
       return this;}
     fdjtKB.Pool=Pool;
@@ -65,6 +67,10 @@ var fdjtKB=
 	if (pools[name]===this) return this;
 	else throw {error: "pool alias conflict"};
       else pools[name]=this;};
+
+    Pool.prototype.addEffect=function(prop,handler) {
+      if (!(this.effects)) this.effects={};
+      this.effects[prop]=handler;};
 
     Pool.prototype.probe=function(id) {
       if (this.map[id]) return (this.map[id]);
@@ -80,12 +86,18 @@ var fdjtKB=
       return cons;};
       
     Pool.prototype.Import=function(data) {
-      var qid=data.qid||data.oid||data.uuid;
-      if (qid) {
-	var obj=(this.map[qid])||this.ref(qid);
-	obj.init(data);
-	return obj;}
-      else return data;};
+      if (data instanceof Array) {
+	var i=0; var lim=data.length; var results=[];
+	while (i<lim) results.push(this.Import(data[i++]));
+	return;}
+      else {
+	var qid=data.qid||data.oid||data.uuid;
+	if (qid) {
+	  var obj=(this.map[qid])||this.ref(qid);
+	  // fdjtLog("Calling init (%o) on %o: %o",obj.init,obj,data);
+	  obj.init(data);
+	  return obj;}
+	else return data;}};
     
     Pool.prototype.find=function(prop,val){
       if (!(this.index)) return [];
@@ -106,10 +118,10 @@ var fdjtKB=
 	else if (arg.search(uuid_pattern)===0) {
 	  var uuid_type=arg.slice(34);
 	  return fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
-	else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[1]==='U')&&
+	else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[2]==='U')&&
 		 (arg.search(uuid_pattern)===3)) {
-	  var uuid_type=arg.slice(36);
-	  return fdjtKB.PoolRef("UUIDP"+uuid_type);}
+	  var uuid_type=arg.slice(37);
+	  return fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
 	else return false;}
       else return false;}
     fdjtKB.getPool=getPool;
@@ -124,12 +136,17 @@ var fdjtKB=
     fdjtKB.ref=fdjtKB.getRef=getRef;
 
     function doimport(data){
-      var qid=data.qid||data.uuid||data.oid;
-      if (qid) {
-	var pool=getPool(qid);
-	if (pool) return pool.Import(data);
-	else return data;}
-      else return data;}
+      if (data instanceof Array) {
+	var i=0; var lim=data.length; var results=[];
+	while (i<lim) results.push(doimport(data[i++]));
+	return results;}
+      else {
+	var qid=data.qid||data.uuid||data.oid;
+	if (qid) {
+	  var pool=getPool(qid);
+	  if (pool) return pool.Import(data);
+	  else return data;}
+	else return data;}}
     fdjtKB.Import=doimport;
 
     // Array utility functions
@@ -471,6 +488,8 @@ var fdjtKB=
 	return [fetched];}
       else return [];};
     KNode.prototype.add=function(prop,val){
+      if (this.pool.xforms[prop])
+	val=this.pool.xforms[prop](val)||val;
       if (this.hasOwnProperty(prop)) {
 	var cur=this[prop];
 	if (cur===val) return false;
@@ -481,9 +500,13 @@ var fdjtKB=
       else this[prop]=val;
       if (this.pool.storage)
 	this.pool.storage.add(this,prop,val);
+      if ((this.pool.effects)&&(this.pool.effects[prop]))
+	this.pool.effects[prop](this,prop,val);
       if (this.pool.index)
 	this.pool.index(this,prop,val,true);};
     KNode.prototype.drop=function(prop,val){
+      if (this.pool.xforms[prop])
+	val=this.pool.xforms[prop](val)||val;
       var vals=false;
       if (this.hasOwnProperty(prop)) {
 	var cur=this[prop];
@@ -499,6 +522,8 @@ var fdjtKB=
 	return true;}
       else return false;};
     KNode.prototype.test=function(prop,val){
+      if (this.pool.xforms[prop])
+	val=this.pool.xforms[prop](val)||val;
       if (this.hasOwnProperty(prop)) {
 	if (typeof val === 'undefined') return true;
 	var cur=this[prop];
@@ -517,6 +542,7 @@ var fdjtKB=
       else return false;};
     KNode.prototype.init=function(data){
       var pool=this.pool; var map=pool.map;
+      // fdjtLog("Doing init on %o, _init=%o",this,this._init);
       for (key in data)
 	if (key!=='qid') {
 	  var value=data[key];
@@ -531,7 +557,22 @@ var fdjtKB=
 	    var i=0; var len=value.length;
 	    while (i<len) this.add(key,value[i++]);}
 	  else this.add(key,value);}
+      if (!(this._init)) {
+	var inits=this._inits;
+	this._init=fdjtTime();
+	if (this.pool.oninit) this.pool.oninit(this);
+	if (inits) {
+	  delete this._inits;
+	  var i=0; var lim=inits.length;
+	  while (i<lim) inits[i++](this);}}
       return this;};
+    KNode.prototype.oninit=function(fcn){
+      if (this._init) {
+	fcn(this); return true;}
+      else if (this._inits)
+	this._inits.push(fcn);
+      else this._inits=[fcn];
+      return false;};
 
     /* Using offline storage to back up pools
        In the simplest model, the QID is just used as a key
