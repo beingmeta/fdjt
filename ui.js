@@ -137,7 +137,7 @@ var fdjtUI=
   
   // Removes autoprompt text from empty fields
   function autoprompt_cleanup(form) {
-    var elements=fdjtDOM.getChildren(form,"isempty");
+    var elements=fdjtDOM.getChildren(form,".isempty");
     if (elements) {
       var i=0; var lim=elements.length;
       while (i<elements.length) elements[i++].value="";}}
