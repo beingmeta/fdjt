@@ -113,9 +113,10 @@ var fdjtUI=
 	var target=fdjtDOM.T(evt);
 	while (target)
 	    if ((target.nodeType==1) &&
-		((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
-		(target.getAttribute('HELPTEXT'))) {
-		var helptext=fdjtID(target.getAttribute('HELPTEXT'));
+		((target.tagName === 'INPUT') ||
+		 (target.tagName === 'TEXTAREA')) &&
+		(target.getAttribute('helptext'))) {
+		var helptext=fdjtID(target.getAttribute('helptext'));
 		if (helptext) fdjtDOM.addClass(helptext,"showhelp");
 		return;}
 	else target=target.parentNode;}
@@ -254,10 +255,11 @@ var fdjtUI=
 	if (fdjtString.isEmpty(keystring)) return [];
 	if (!(matchcase)) keystring=string.toLowerCase();
 	var strings=fdjtString.prefixFind(ptree,keystring,0);
-	var prefix=false;
+	var prefix=false; var exact=[]; var exactheads=[];
 	var i=0; var lim=strings.length;
 	while (i<lim) {
 	    var string=strings[i++];
+	    var isexact=(string===keystring);
 	    if (prefix) prefix=fdjtString.commonPrefix(prefix,string);
 	    else prefix=string;
 	    var completions=bykey[string];
@@ -266,11 +268,15 @@ var fdjtUI=
 		while (j<jlim) {
 		    var c=completions[j++];
 		    if (fdjtDOM.hasClass(c,"completion")) {
+			if (isexact) {exactheads.push(c); exact.push(c);}
 			result.push(c); direct.push(c);}
 		    else {
 			var head=fdjtDOM.getParent(c,".completion");
 			if (head) {
+			    if (isexact) exact.push(head);
 			    result.push(head); variations.push(c);}}}}}
+	if (exact.length) result.exact=exact;
+	if (exactheads.length) result.exactheads=exactheads;
 	result.prefix=prefix;
 	result.matches=direct.concat(variations);
 	return result;}
