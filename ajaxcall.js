@@ -123,63 +123,64 @@ function fdjtFormParams(form)
 
 function fdjtAjaxSubmit(form)
 {
-  var bridge=form.ajaxbridge||false;
-  var ajax_uri=(form.ajaxuri)||fdjtCacheAttrib(form,"ajaxuri");
-  if (!(ajax_uri)) return false;
-  if ((bridge)&&(bridge!==window)) 
-    try {
-      if (fdjt_trace_ajax) fdjtLog("Bridge AJAX submit to %s for %o through %o",ajax_uri,form,bridge);
-      return bridge.fdjtAjaxSubmit(form);}
+    var bridge=form.ajaxbridge||false;
+    var ajax_uri=(form.ajaxuri)||fdjtCacheAttrib(form,"ajaxuri");
+    if (!(ajax_uri)) return false;
+    if ((bridge)&&(bridge!==window)) 
+	try {
+	    if (fdjt_trace_ajax) fdjtLog("Bridge AJAX submit to %s for %o through %o",ajax_uri,form,bridge);
+	    return bridge.fdjtAjaxSubmit(form);}
     catch (ex) {
-      fdjtLog("Bridge call yielded %o",ex);
-      return false;}
-  var callback=false;
-  // Whether to do AJAX synchronously or not.
-  var syncp=(form.synchronous)||fdjtCacheAttrib(form,"synchronous");
-  if (form.oncallback) callback=form.oncallback;
-  else if (form.getAttribute("ONCALLBACK")) {
-    callback=new Function
-      ("req","form",input_elt.getAttribute("ONCALLBACK"));
-    form.oncallback=callback;}
-  if (fdjt_trace_ajax)
-    fdjtLog("Direct %s AJAX submit to %s for %o with callback %o",
-	    ((syncp)?("synchronous"):("asynchronous")),
-	    ajax_uri,form,callback);
-  // Firefox doesn't run the callback on synchronous calls
-  var success=false; var callback_run=false;
-  var req=new XMLHttpRequest();
-  var params=fdjtFormParams(form);
-  fdjtAddClass(form,"submitting");
-  if (form.method==="GET")
-    req.open('GET',ajax_uri+"?"+params,(!(syncp)));
-  else req.open('POST',ajax_uri,(!(syncp)));
-  req.onreadystatechange=function () {
-    callback_run=true;
+	fdjtLog("Bridge call yielded %o",ex);
+	return false;}
+    var callback=false;
+    // Whether to do AJAX synchronously or not.
+    var syncp=(form.synchronous)||fdjtCacheAttrib(form,"synchronous");
+    if (form.oncallback) callback=form.oncallback;
+    else if (form.getAttribute("ONCALLBACK")) {
+	callback=new Function
+	("req","form",input_elt.getAttribute("ONCALLBACK"));
+	form.oncallback=callback;}
     if (fdjt_trace_ajax)
-      fdjtLog("Got callback (%d,%d) %o for %o through %o, calling %o",
-	      req.readyState,req.status,req,ajax_uri,bridge,callback);
-    if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
-      fdjtDropClass(form,"submitting");
-      success=true;
-      callback(req,form);}};
-  try {
-    if (form.method==="GET") req.send();
-    else {
-      req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-      // req.setRequestHeader("Content-length", params.length);
-      // req.setRequestHeader("Connection", "close");
-      req.send(params);}
-    success=true;}
-  catch (ex) {}
-  if ((syncp) && (!(callback_run))) {
-    if (fdjt_trace_ajax)
-      fdjtLog("Running callback (%d,%d) %o for %o through %o, calling %o",
-	      req.readyState,req.status,req,ajax_uri,bridge,callback);
-    if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
-      fdjtDropClass(form,"submitting");
-      success=true;
-      callback(req,form);}};
-  return success;
+	fdjtLog("Direct %s AJAX submit to %s for %o with callback %o",
+		((syncp)?("synchronous"):("asynchronous")),
+		ajax_uri,form,callback);
+    // Firefox doesn't run the callback on synchronous calls
+    var success=false; var callback_run=false;
+    var req=new XMLHttpRequest();
+    var params=fdjtFormParams(form);
+    fdjtAddClass(form,"submitting");
+    if (form.method==="GET")
+	req.open('GET',ajax_uri+"?"+params,(!(syncp)));
+    else req.open('POST',ajax_uri,(!(syncp)));
+    req.onreadystatechange=function () {
+	callback_run=true;
+	if (fdjt_trace_ajax)
+	    fdjtLog("Got callback (%d,%d) %o for %o through %o, calling %o",
+		    req.readyState,req.status,req,ajax_uri,bridge,callback);
+	if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
+	    fdjtDropClass(form,"submitting");
+	    success=true;
+	    callback(req,form);
+	    form.reset();}};
+    try {
+	if (form.method==="GET") req.send();
+	else {
+	    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	    // req.setRequestHeader("Content-length", params.length);
+	    // req.setRequestHeader("Connection", "close");
+	    req.send(params);}
+	success=true;}
+    catch (ex) {}
+    if ((syncp) && (!(callback_run))) {
+	if (fdjt_trace_ajax)
+	    fdjtLog("Running callback (%d,%d) %o for %o through %o, calling %o",
+		    req.readyState,req.status,req,ajax_uri,bridge,callback);
+	if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
+	    fdjtDropClass(form,"submitting");
+	    success=true;
+	    callback(req,form);}};
+    return success;
 }
 
 function fdjtJSONPSubmit(form)

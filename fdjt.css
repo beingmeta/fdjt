@@ -24,10 +24,10 @@
 .checkspan { cursor: pointer;}
 .checkspan .alt { font-size: inherit; font-weight: bold;}
 span.checkspan, a.checkspan { white-space: nowrap; }
+.checkspan .checked { display: none;}
 
 .checkspan.ischecked { font-weight: bold; }
 .checkspan.ischecked .alt { font-size: 80%; font-weight: normal;}
-.checkspan.ischecked { display: none;}
 .checkspan.ischecked .unchecked { display: none;}
 .checkspan.ischecked span.checked,
 .checkspan.ischecked a.checked,
