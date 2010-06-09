@@ -31,7 +31,7 @@ var fdjtAjax=
 	i=i+2;}
       return uri;}
 
-    var trace_ajax=false;
+    var trace_ajax=true;
     
     function fdjtAjax(callback,base_uri,args){
       var req=new XMLHttpRequest();
@@ -104,55 +104,55 @@ var fdjtAjax=
 	    parameters=add_query_param(parameters,name,option.value);}}
       return parameters;}
 
-    function ajaxSubmit(form){
-      var bridge=form.ajaxbridge||false;
-      var ajax_uri=form.getAttribute("ajaxaction");
-      if (!(ajax_uri)) return false;
-      var callback=false;
-      // Whether to do AJAX synchronously or not.
-      var syncp=form.getAttribute("synchronous");
-      if (form.oncallback) callback=form.oncallback;
-      else if (form.getAttribute("ONCALLBACK")) {
-	callback=new Function
-	  ("req","form",input_elt.getAttribute("ONCALLBACK"));
-	form.oncallback=callback;}
-      if (trace_ajax)
-	fdjtLog("Direct %s AJAX submit to %s for %o with callback %o",
-		((syncp)?("synchronous"):("asynchronous")),
-		ajax_uri,form,callback);
-      // Firefox doesn't run the callback on synchronous calls
-      var success=false; var callback_run=false;
-      var req=new XMLHttpRequest();
-      var params=formParams(form);
-      fdjtDOM.addClass(form,"submitting");
-      if (form.method==="GET")
-	req.open('GET',ajax_uri+"?"+params,(!(syncp)));
-      else req.open('POST',ajax_uri,(!(syncp)));
-      req.onreadystatechange=function () {
-	callback_run=true;
-	if (trace_ajax)
-	  fdjtLog("Got callback (%d,%d) %o for %o through %o, calling %o",
-		  req.readyState,req.status,req,ajax_uri,bridge,callback);
-	if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
-	  fdjtDOM.dropClass(form,"submitting");
-	  success=true;
-	  if (callback) callback(req,form);}};
-      try {
-	if (form.method==="GET") req.send();
-	else {
-	  req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	  req.send(params);}
-	success=true;}
-      catch (ex) {}
-      if ((syncp) && (!(callback_run))) {
-	if (trace_ajax)
-	  fdjtLog("Running callback (rs=%d,status=%d) %o for %o, calling %o",
-		  req.readyState,req.status,req,ajax_uri,callback);
-	if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
-	  fdjtDOM.dropClass(form,"submitting");
-	  success=true;
-	  if (callback) callback(req,form);}};
-      return success;}
+      function ajaxSubmit(form){
+	  var ajax_uri=form.getAttribute("ajaxaction");
+	  if (!(ajax_uri)) return false;
+	  var callback=false;
+	  // Whether to do AJAX synchronously or not.
+	  var syncp=form.getAttribute("synchronous");
+	  if (form.oncallback) callback=form.oncallback;
+	  else if (form.getAttribute("ONCALLBACK")) {
+	      callback=new Function
+	      ("req","form",input_elt.getAttribute("ONCALLBACK"));
+	      form.oncallback=callback;}
+	  if (trace_ajax)
+	      fdjtLog("Direct %s AJAX submit to %s for %o with callback %o",
+		      ((syncp)?("synchronous"):("asynchronous")),
+		      ajax_uri,form,callback);
+	  // Firefox doesn't run the callback on synchronous calls
+	  var success=false; var callback_run=false;
+	  var req=new XMLHttpRequest();
+	  var params=formParams(form);
+	  fdjtDOM.addClass(form,"submitting");
+	  if (form.method==="GET")
+	      req.open('GET',ajax_uri+"?"+params,(!(syncp)));
+	  else req.open('POST',ajax_uri,(!(syncp)));
+	  req.withCredentials='yes';
+	  req.onreadystatechange=function () {
+	      if (trace_ajax)
+		  fdjtLog("Got callback (%d,%d) %o for %o, calling %o",
+			  req.readyState,req.status,req,ajax_uri,callback);
+	      if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
+		  fdjtDOM.dropClass(form,"submitting");
+		  success=true; 
+		  if (callback) callback(req,form);
+	      	  callback_run=true;}};
+	  try {
+	      if (form.method==="GET") req.send();
+	      else {
+		  req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		  req.send(params);}
+	      success=true;}
+	  catch (ex) {}
+	  if ((syncp) && (!(callback_run))) {
+	      if (trace_ajax)
+		  fdjtLog("Running callback (rs=%d,status=%d) %o for %o, calling %o",
+			  req.readyState,req.status,req,ajax_uri,callback);
+	      if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
+		  fdjtDOM.dropClass(form,"submitting");
+		  success=true;
+		  if (callback) callback(req,form);}};
+	  return success;}
     fdjtAjax.formSubmit=ajaxSubmit;
 
     function jsonpSubmit(form){
@@ -182,9 +182,11 @@ var fdjtAjax=
       form.fdjtsubmit=true;
       fdjtDOM.addClass(form,"submitting");
       if (ajaxSubmit(form)) {
+	  // fdjtLog("Ajax commit worked");
 	fdjtUI.cancel(evt);
 	return false;}
       else if (jsonpSubmit(form)) {
+	  // fdjtLog("Json commit worked");
 	fdjtUI.cancel(evt);
 	return false;}
       else return;}
