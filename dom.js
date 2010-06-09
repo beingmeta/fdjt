@@ -178,7 +178,7 @@ var fdjtDOM=
 
 	function addClass(elt,classname,attrib){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
-	    else if (elt.length) {
+	    else if (elt instanceof Array) { // (elt instanceof NodeList)
 		var elts=((elt instanceof Array)?(elt):(toArray(elt)));
 		var i=0; var lim=elts.length;
 		while (i<lim) addClass(elts[i++],classname,attrib||false);
@@ -206,7 +206,7 @@ var fdjtDOM=
 
 	function dropClass(elt,classname,attrib){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
-	    else if (elt.length) {
+ 	    else if (elt instanceof Array) { // (elt instanceof NodeList)
 		var elts=((elt instanceof Array)?(elt):(toArray(elt)));
 		var i=0; var lim=elts.length;
 		while (i<lim) dropClass(elts[i++],classname,attrib||false);
@@ -250,7 +250,7 @@ var fdjtDOM=
 
 	function toggleClass(elt,classname,attrib){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
-	    else if (elt.length) {
+ 	    else if (elt instanceof Array) { // (elt instanceof NodeList)
 		var elts=((elt instanceof Array)?(elt):(toArray(elt)));
 		var i=0; var lim=elts.length;
 		while (i<lim) toggleClass(elts[i++],classname,attrib||false);
