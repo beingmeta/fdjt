@@ -349,13 +349,19 @@ var fdjtUI=
 	     (fdjtString.hasPrefix(this.maxstring,string))))
 	    return this.result;
 	else {
+	    var result;
 	    if (!(this.initialized)) initCompletions(this);
-	    var result=getNodes(string,this.prefixtree,this.bykey);
-	    updateDisplay(this,result.matches);
+	    if (fdjtString.isEmpty(string)) {
+		result=[]; result.prefix=""; result.matches=[];
+		if (this.dom) fdjtDOM.addClass(this.dom,"noinput");}
+	    else {
+		result=getNodes(string,this.prefixtree,this.bykey);
+		if (this.dom) fdjtDOM.dropClass(this.dom,"noinput");}
+		updateDisplay(this,result.matches);}
 	    this.curstring=string;
 	    this.maxstring=result.prefix||string;
 	    this.result=result;
-	    return result;}};
+	    return result;};
 
     Completions.prototype.getValue=function(completion) {
 	if (completion.value) return completion.value;
@@ -367,8 +373,11 @@ var fdjtUI=
 
     Completions.prototype.complete=function(string){
 	if (!(this.initialized)) initCompletions(this);
+	// fdjtLog("Completing on %o",string);
 	if ((!(string))&&(string!==""))
-	    string=((this.getText)?(this.getText(this.input)):(this.input.value));
+	    string=((this.getText)?(this.getText(this.input)):
+		    (fdjtDOM.hasClass(this.input,"isempty"))?(""):
+		    (this.input.value));
 	if (fdjtString.isEmpty(string)) {
 	    if (this.displayed) updateDisplay(this,false);
 	    fdjtDOM.addClass(this.dom,"noinput");
