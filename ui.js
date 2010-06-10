@@ -255,7 +255,8 @@ var fdjtUI=
 	if (fdjtString.isEmpty(keystring)) return [];
 	if (!(matchcase)) keystring=string.toLowerCase();
 	var strings=fdjtString.prefixFind(ptree,keystring,0);
-	var prefix=false; var exact=[]; var exactheads=[];
+	var prefix=false;
+	var exact=[]; var exactheads=[]; var keys=[];
 	var i=0; var lim=strings.length;
 	while (i<lim) {
 	    var string=strings[i++];
@@ -269,15 +270,17 @@ var fdjtUI=
 		    var c=completions[j++];
 		    if (fdjtDOM.hasClass(c,"completion")) {
 			if (isexact) {exactheads.push(c); exact.push(c);}
-			result.push(c); direct.push(c);}
+			result.push(c); keys.push(string); direct.push(c);}
 		    else {
 			var head=fdjtDOM.getParent(c,".completion");
 			if (head) {
 			    if (isexact) exact.push(head);
-			    result.push(head); variations.push(c);}}}}}
+			    result.push(head); keys.push(string);
+			    variations.push(c);}}}}}
 	if (exact.length) result.exact=exact;
 	if (exactheads.length) result.exactheads=exactheads;
 	result.prefix=prefix;
+	result.strings=strings;
 	result.matches=direct.concat(variations);
 	return result;}
 
@@ -328,16 +331,18 @@ var fdjtUI=
 	    var i=0; var lim=displayed.length;
 	    while (i<lim) fdjtDOM.dropClass(displayed[i++],"displayed");
 	    c.displayed=displayed=[];}
+	else c.displayed=displayed=[];
 	if (todisplay) {
-	    c.displayed=todisplay;
 	    var i=0; var lim=todisplay.length;
 	    while (i<lim) {
 		var node=todisplay[i++];
-		if (fdjtDOM.hasClass(node,"completion")) 
+		if (fdjtDOM.hasClass(node,"completion")) {
 		    fdjtDOM.addClass(node,"displayed");
+		    displayed.push(node);}
 		else {
 		    var head=fdjtDOM.getParent(node,".completion");
 		    if ((head)&&(!(fdjtDOM.hasClass(head,"displayed")))) {
+			displayed.push(node); displayed.push(head);
 			fdjtDOM.addClass(head,"displayed");
 			fdjtDOM.addClass(node,"displayed");}}}}}
 
@@ -356,17 +361,32 @@ var fdjtUI=
 		if (this.dom) fdjtDOM.addClass(this.dom,"noinput");}
 	    else {
 		result=getNodes(string,this.prefixtree,this.bykey);
-		if (this.dom) fdjtDOM.dropClass(this.dom,"noinput");}
+		if (this.dom) fdjtDOM.dropClass(this.dom,"noinput");
 		updateDisplay(this,result.matches);}
+	    if ((this.stringmap)&&(this.strings)) {
+		var stringmap=this.stringmap;
+		var strings=this.strings;
+		var i=0; var lim=strings.length;
+		while (i<lim) {
+		    var s=strings[i]; var m=stringmap[s];
+		    if (m) strings[i++]=m;
+		    else i++;}}
 	    this.curstring=string;
 	    this.maxstring=result.prefix||string;
 	    this.result=result;
-	    return result;};
+	    return result;}};
 
     Completions.prototype.getValue=function(completion) {
 	if (completion.value) return completion.value;
 	else if (completion.getAttribute("value"))
 	    return completion.getAttribute("value");
+	var pos=fdjtKB.position(this.nodes,completion);
+	if (pos<0) return false;
+	else return this.values[pos];};
+    Completions.prototype.getKey=function(completion) {
+	if (completion.key) return completion.value;
+	else if (completion.getAttribute("key"))
+	    return completion.getAttribute("key");
 	var pos=fdjtKB.position(this.nodes,completion);
 	if (pos<0) return false;
 	else return this.values[pos];};
