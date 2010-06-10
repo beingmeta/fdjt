@@ -256,43 +256,44 @@ var fdjtDOM=
 		while (i<lim) toggleClass(elts[i++],classname,attrib||false);
 		return;}
 	    var classinfo=
-		(((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
+	      (((attrib) ? (elt.getAttribute(attrib)||"") :
+		(elt.className))||null);
 	    if (!(classinfo)) {
-		if (attrib) elt.setAttribute(attrib,classname);
-		else elt.className=classname;
-		return true;}
+	      if (attrib) elt.setAttribute(attrib,classname);
+	      else elt.className=classname;
+	      return true;}
 	    var class_regex=
-		((typeof classname === 'string')?
-		 (classpats[classname]||classPat(classname)):
-		 classname);
+	      ((typeof classname === 'string')?
+	       (classpats[classname]||classPat(classname)):
+	       classname);
 	    var newinfo=classinfo;
 	    if (classinfo===classname) 
-		newinfo=null;
+	      newinfo=null;
 	    else if (classinfo.search(class_regex)>=0) 
-		newinfo=classinfo.replace(class_regex,"");
+	      newinfo=classinfo.replace(class_regex,"");
 	    else {
-		if (attrib)
-		    elt.setAttribute(attrib,classinfo+' '+classname);
-		else elt.className=classinfo+' '+classname;
-		return true;}
+	      if (attrib)
+		elt.setAttribute(attrib,classinfo+' '+classname);
+	      else elt.className=classinfo+' '+classname;
+	      return true;}
 	    if (newinfo)
-		newinfo=newinfo.
+	      newinfo=newinfo.
 		replace(whitespace_pat," ").
 		replace(trimspace_pat,"");
 	    if (attrib)
-		if (newinfo) {
-		    elt.setAttribute(attrib,newinfo);
-		    elt.className=elt.className;}
-	    else if (!(keep)) {
+	      if (newinfo) {
+		elt.setAttribute(attrib,newinfo);
+		elt.className=elt.className;}
+	      else if (!(keep)) {
 		elt.removeAttribute(attrib);
 		elt.className=elt.className;}
-	    else {}
+	      else {}
 	    else elt.className=newinfo;
 	    return false;}
 	fdjtDOM.toggleClass=toggleClass;
-
+	
 	fdjtDOM.isClickable=function(target){
-	    while (target)
+	  while (target)
 		if (((target.tagName==='A')&&(target.href))||
 		    (target.tagName==="INPUT") ||
 		    (target.tagName==="TEXTAREA") ||
