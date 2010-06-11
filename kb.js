@@ -297,18 +297,18 @@ var fdjtKB=
 	   the ._sortlen property tells how much of the array is sorted */
 	function Set(arg){
 	    if (arguments.length===0) return [];
-	    else if (arguments.length===1)
-		if (arg instanceof Array)
+	    else if (arguments.length===1) {
+		if (!(arg)) return [];
+		else if (arg instanceof Array) {
 		    if ((!(arg.length))||(arg._sortlen===arg.length))
 			return arg;
-	    else if (arg._sortlen) return setify(arg);
-	    else return setify([].concat(arg));
-	    else {
-		var result=[arg]; 
-		if (typeof arg === 'string')
-		    result._allstrings=true;
-		result._sortlen=1;
-		return result;}
+		    else if (arg._sortlen) return setify(arg);
+		    else return setify([].concat(arg));}
+		else {
+		    var result=[arg]; 
+		    if (typeof arg === 'string') result._allstrings=true;
+		    result._sortlen=1;
+		    return result;}}
 	    else {
 		var result=[];
 		for (arg in arguments)
