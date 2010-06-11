@@ -290,7 +290,8 @@ var fdjtUI=
 	    value=(completion.value)||(completion.getAttribute('value'))||key;
 	var pos=fdjtKB.position(c.nodes,completion);
 	if (pos<0) {
-	    c.nodes.push(completion); c.values.push(value);}
+	    c.nodes.push(completion); c.values.push(value);
+	    c.byvalue.add(value,completion);}
 	else return;
 	var opts=c.options;
 	var container=c.dom;
@@ -416,14 +417,20 @@ var fdjtUI=
 	return result;};
 
     Completions.prototype.setCues=function(values){
-	var curcues=fdjtDOM.getChildren(this.dom,"cue");
-	var i=0; var lim=curcues.length;
-	while (i<lim) fdjtDOM.dropClass(curcues[i++],"cue");
+	var cues=[];
 	var byvalue=this.byvalue;
-	i=0; lim=values.length;
+	var i=0; var lim=values.length;
 	while (i<lim) {
-	    var cue=byvalue[values[i++]];
-	    if (cue) fdjtDOM.addClass(cue,"cue");}};
+	    var value=values[i++];
+	    var completions=byvalue.get(value);
+	    if (completions) {
+		var j=0; var jlim=completions.length;
+		while (j<jlim) {
+		    var c=completions[j++];
+		    if (fdjtDOM.hasClass(c,"cue")) continue;
+		    fdjtDOM.addClass(c,"cue");
+		    cues.push(c);}}}
+	return cues;};
     
     /* Constants */
     // Always set to distinguish no options from false
