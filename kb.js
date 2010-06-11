@@ -394,11 +394,70 @@ var fdjtKB=
 		return this.scalar_map[key]=val;
 	    else this.object_map
 	    [key.qid||key.oid||key.uuid||key._fdjtid||register(key)]=val;};
+	Map.prototype.add=function(key,val) {
+	    if ((typeof key === 'string')||(typeof key === 'number')) {
+		var cur=this.scalar_map[key];
+		if (!(cur)) {
+		    this.scalar_map[key]=[val];
+		    return true;}
+		else if (!(cur instanceof Array)) {
+		    if (cur===val) return false;
+		    else {
+			this.scalar_map[key]=[cur,val];
+			return true;}}
+		else if (contains(cur,val)) return false;
+		else {
+		    cur.push(val); return true;}}
+	    else {
+		var objkey=key.qid||key.oid||key.uuid||key._fdjtid||
+		    register(key);
+		var cur=this.object_map[objkey];
+		if (!(cur)) {
+		    this.object_map[objkey]=[val];
+		    return true;}
+		else if (!(cur instanceof Array)) {
+		    if (cur===val) return false;
+		    else {
+			this.object_map[objkey]=[cur,val];
+			return true;}}
+		else if (contains(cur,val)) return false;
+		else {
+		    cur.push(val); return true;}}};
 	Map.prototype.drop=function(key,val) {
-	    if ((typeof key === 'string')||(typeof key === 'number'))
-		delete this.scalar_map[key];
-	    else delete this.object_map
-	    [key.qid||key.oid||key.uuid||key._fdjtid||register(key)];};
+	    if (!(val)) {
+		if ((typeof key === 'string')||(typeof key === 'number'))
+		    delete this.scalar_map[key];
+		else delete this.object_map[
+		    key.qid||key.oid||key.uuid||key._fdjtid||register(key)];}
+	    else if ((typeof key === 'string')||(typeof key === 'number')) {
+		var cur=this.scalar_map[key]; var pos=-1;
+		if (!(cur)) return false;
+		else if (!(cur instanceof Array)) {
+		    if (cur===val) {
+			delete this.scalar_map[key];
+			return true;}
+		    else return false;}
+		else if ((pos=position(val,cur))>=0) {
+		    if (cur.length===1)
+			delete this.scalar_map[key];
+		    else cur.splice(pos);
+		    return true;}
+		else return false;}
+	    else {
+		var objkey=key.qid||key.oid||key.uuid||key._fdjtid||
+		    register(key);
+		var cur=this.object_map[key];
+		if (!(cur)) return false;
+		else if (!(cur instanceof Array)) {
+		    if (cur===val) {
+			delete this.object_map[objkey];
+			return true;}
+		    else return false;}
+		else if ((pos=position(val,cur))>=0) {
+		    if (cur.length===1) delete this.object_map[objkey];
+		    else cur.splice(pos);
+		    return true;}
+		else return false;}};
 	fdjtKB.Map=Map;
 
 	/* Indices */
