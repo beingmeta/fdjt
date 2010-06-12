@@ -29,7 +29,7 @@ var fdjtTime=
     fdjtTime.revid="$Id$";
     fdjtTime.version=parseInt("$Revision$".slice(10,-1));
 
-    var fdjt_loaded=(new Date()).getTime();
+    var loaded=fdjtTime.loaded=(new Date()).getTime();
     fdjtTime.tick=function(){
       return (new Date()).getTime()/1000;};
 
@@ -117,11 +117,9 @@ var fdjtTime=
       if (diff>0) return diff/1000; else return -(diff/1000);
     };
 
-    fdjtTime.loaded=(new Date()).getTime();
-
     fdjtTime.ET=function(arg){
       if (!(arg)) arg=new Date();
-      return (arg.getTime()-fdjt_loaded)/1000;};
+      return (arg.getTime()-loaded)/1000;};
 
     return fdjtTime;})();
 
