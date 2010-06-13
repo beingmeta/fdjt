@@ -64,7 +64,7 @@ var fdjtString=
       else if (arg.tagName) {
 	var output="<"+arg.tagName;
 	if (arg.className)
-	  output=output+"."+arg.className.replace('\s','.');
+	  output=output+"."+arg.className.replace(/\s+/g,'.');
 	if (arg.id) output=output+"#"+arg.id;
 	return output+">";}
       else if (arg.nodeType)
