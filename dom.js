@@ -459,7 +459,8 @@ var fdjtDOM=
 	/* Real simple DOM search */
 
 	function getParent(elt,parent,attrib){
-	    if (parent.nodeType) {
+	    if (!(parent)) return false;
+	    else if (parent.nodeType) {
 		while (elt) {
 		    if (elt===parent) return parent;
 		    else elt=elt.parentNode;}
@@ -670,6 +671,8 @@ var fdjtDOM=
 	/* Geometry functions */
 
 	function getGeometry(elt,withstack,root){
+	    if (typeof elt === 'string')
+		elt=document.getElementById(elt);
 	    var result={};
 	    var top = elt.offsetTop;
 	    var left = elt.offsetLeft;
@@ -770,6 +773,34 @@ var fdjtDOM=
 		return width;}
 	    else return 0;}
 	fdjtDOM.textWidth=textwidth;
+
+	function hasContent(node,recur){
+	    if (node.childNodes) {
+		var children=node.childNodes;
+		var i=0; while (i<children.length) {
+		    var child=children[i++];
+		    if (child.nodeType===3)
+			if (child.nodeValue.search(/\w/g)>=0) return true;
+		    else {}
+		    else if ((recur) && (child.nodeType===1))
+			if (hasContent(child)) return true;
+		    else {}}
+		return false;}
+	    else return false;}
+	fdjtDOM.hasContent=hasContent;
+
+	function hasText(node){
+	    if (node.childNodes) {
+		var children=node.childNodes;
+		var i=0; while (i<children.length) {
+		    var child=children[i++];
+		    if (child.nodeType===3)
+			if (child.nodeValue.search(/\w/g)>=0) return true;
+		    else {}}
+		return false;}
+	    else return false;}
+	fdjtDOM.hasText=hasText;
+
 
 	/* Getting various kinds of metadata */
 
@@ -892,14 +923,14 @@ var fdjtDOM=
 	fdjtDOM.prevElt=previous_element;
 
 	function scan_forward(node,test,justelts){
-	    if (!(test))
+	    if (!(test)) {
 		if (justelts) return forward_element(node);
-	    else return forward_node(node);
+		else return forward_node(node);}
 	    var scan=((justelts)?(forward_element(node)):(forward_node(node)));
-	    while (scan)
+	    while (scan) {
 		if (test(scan)) return scan;
-	    else if (justelts) scan=forward_element(scan);
-	    else scan=forward_node(scan);
+		else if (justelts) scan=next_element(scan);
+		else scan=next_node(scan);}
 	    return false;}
 
 	function scan_next(node,test,justelts){
@@ -929,13 +960,19 @@ var fdjtDOM=
 	fdjtDOM.viewWidth=function(win){
 	    return (win||window).document.documentElement.clientWidth;};
 
-	fdjtDOM.addListener=function(node,evtype,handler){
+	function addListener(node,evtype,handler){
 	    if (!(node)) node=document;
+	    if (typeof node === 'string') node=fdjtID(node);
+	    else if (node instanceof Array) {
+		var i=0; var lim=node.length;
+		while (i<lim) addListener(node[i++],evtype,handler);
+		return;}
 	    if (node.addEventListener)
 		return node.addEventListener(evtype,handler,false);
 	    else if (node.attachEvent)
 		return node.attachEvent('on'+evtype,handler);
-	    else fdjtLog.warn('This node never listens');};
+	    else fdjtLog.warn('This node never listens');}
+	fdjtDOM.addListener=addListener;
 
 	fdjtDOM.T=function(evt) {
 	    evt=evt||event; return (evt.target)||(evt.srcElement);};
