@@ -112,7 +112,7 @@ div.tabcontent p {
 .lispexpr { font-family: fixed; font-style: italic;}
 .lispvalue { font-family: fixed;}
 
-/* DTerms (from knowlets) */
+/* KNodes (from knodules) */
 
 span.dterm {
   opacity: .95; color: blue; font-family: sans,sans-serif; white-space: nowrap;}

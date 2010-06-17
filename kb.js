@@ -25,7 +25,7 @@
   fdjtKB.register (assigns unique ID)
   fdjtKB.Pool (creates a pool of named objects)
   fdjtKB.Set (creates a sorted array for set operations)
-  fdjtKB.KNode (objects created within a pool)
+  fdjtKB.Ref (objects created within a pool)
  */
 
 var fdjtKB=
@@ -82,7 +82,7 @@ var fdjtKB=
 	Pool.prototype.ref=function(qid,cons) {
 	    if (this.map[qid]) return this.map[qid];
 	    if (!(cons)) cons=this.cons(qid);
-	    else if (cons instanceof KNode) {}
+	    else if (cons instanceof Ref) {}
 	    else cons=this.cons(qid);
 	    if (!(cons.qid)) cons.qid=qid;
 	    this.map[qid]=cons; cons.pool=this;
@@ -110,7 +110,7 @@ var fdjtKB=
 	    /[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
 	function getPool(arg){
 	    var atpos; 
-	    if (arg instanceof KNode) return arg.pool;
+	    if (arg instanceof Ref) return arg.pool;
 	    else if (typeof arg === 'number') return false;
 	    else if (typeof arg === 'string') {
 		if (((arg[0]===':')&&(arg[1]==='@'))&&
@@ -130,7 +130,7 @@ var fdjtKB=
 	fdjtKB.getPool=getPool;
 
 	function getRef(arg){
-	    if (arg instanceof KNode) return arg;
+	    if (arg instanceof Ref) return arg;
 	    else if (typeof arg === 'number') return false;
 	    else {
 		var pool=getPool(arg);
@@ -506,16 +506,16 @@ var fdjtKB=
 		else return false;};}
 	fdjtKB.Index=Index;
 
-	/* KNodes */
+	/* Refs */
 
-	function KNode(pool,qid) {
+	function Ref(pool,qid) {
 	    if (pool) this.pool=pool;
 	    if (qid) this.qid=qid;
 	    return this;}
-	fdjtKB.KNode=KNode;
-	Pool.prototype.cons=function(qid){return new KNode(this,qid);};
+	fdjtKB.Ref=Ref;
+	Pool.prototype.cons=function(qid){return new Ref(this,qid);};
 
-	KNode.prototype.get=function(prop){
+	Ref.prototype.get=function(prop){
 	    if (this.hasOwnProperty(prop)) return this[prop];
 	    else if (this.pool.storage) {
 		var fetched=this.pool.storage.get(this,prop);
@@ -525,7 +525,7 @@ var fdjtKB=
 		    return this[prop];
 		else return fetched;}
 	    else return undefined;};
-	KNode.prototype.getSet=function(prop){
+	Ref.prototype.getSet=function(prop){
 	    if (this.hasOwnProperty(prop)) {
 		var val=this[prop];
 		if (val instanceof Array)
@@ -538,7 +538,7 @@ var fdjtKB=
 		    this[prop]=fetched;
 		return setify(fetched);}
 	    else return [];};
-	KNode.prototype.getArray=function(prop){
+	Ref.prototype.getArray=function(prop){
 	    if (this.hasOwnProperty(prop)) {
 		var val=this[prop];
 		if (val instanceof Array) return val;
@@ -549,7 +549,7 @@ var fdjtKB=
 		    this[prop]=fetched;
 		return [fetched];}
 	    else return [];};
-	KNode.prototype.add=function(prop,val){
+	Ref.prototype.add=function(prop,val){
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
 	    if (this.hasOwnProperty(prop)) {
@@ -566,7 +566,7 @@ var fdjtKB=
 		this.pool.effects[prop](this,prop,val);
 	    if (this.pool.index)
 		this.pool.index(this,prop,val,true);};
-	KNode.prototype.drop=function(prop,val){
+	Ref.prototype.drop=function(prop,val){
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
 	    var vals=false;
@@ -583,7 +583,7 @@ var fdjtKB=
 		    this.pool.index(this,prop,val,false);
 		return true;}
 	    else return false;};
-	KNode.prototype.test=function(prop,val){
+	Ref.prototype.test=function(prop,val){
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
 	    if (this.hasOwnProperty(prop)) {
@@ -602,13 +602,13 @@ var fdjtKB=
 		if (typeof val === 'undefined') return true;
 		else return this.test(prop,val);}
 	    else return false;};
-	KNode.prototype.init=function(data){
+	Ref.prototype.init=function(data){
 	    var pool=this.pool; var map=pool.map;
 	    // fdjtLog("Doing init on %o, _init=%o",this,this._init);
 	    for (key in data)
 		if (key!=='qid') {
 		    var value=data[key];
-		    // Add knode aliases when unique
+		    // Add ref aliases when unique
 		    if ((key==='uuid')||(key==='oid'))
 			if (!(map[value])) map[value]=this;
 		    else if (map[value]!==this)
@@ -632,7 +632,7 @@ var fdjtKB=
 		    i=0; lim=inits.length;
 		    while (i<lim) inits[i++](this);}}
 	    return this;};
-	KNode.prototype.oninit=function(fcn){
+	Ref.prototype.oninit=function(fcn){
 	    if (this._init) {
 		fcn(this); return true;}
 	    else if (this._inits)
@@ -665,7 +665,7 @@ var fdjtKB=
 	fdjtKB.add=function(obj,field,val,nodup){
 	    if (arguments.length===2)
 		return set_add(obj,field);
-	    else if (obj instanceof KNode)
+	    else if (obj instanceof Ref)
 		return obj.add.apply(obj,arguments);
 	    else if (nodup) 
 		if (obj.hasOwnProperty(field)) {
@@ -683,7 +683,7 @@ var fdjtKB=
 	fdjtKB.drop=function(obj,field,val){
 	    if (arguments.length===2)
 		return set_drop(obj,field);
-	    else if (obj instanceof KNode)
+	    else if (obj instanceof Ref)
 		return obj.drop.apply(obj,arguments);
 	    else if (!(val))
 		/* Drop all vals */
@@ -698,7 +698,7 @@ var fdjtKB=
 	fdjtKB.test=function(obj,field,val){
 	    if (arguments.length===2)
 		return set_contains(obj,field);
-	    else if (obj instanceof KNode)
+	    else if (obj instanceof Ref)
 		return obj.test.apply(obj,arguments);
 	    else if (typeof val === "undefined")
 		return (((obj.hasOwnProperty) ?
