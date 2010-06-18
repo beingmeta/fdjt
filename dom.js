@@ -961,18 +961,31 @@ var fdjtDOM=
 	    return (win||window).document.documentElement.clientWidth;};
 
 	function addListener(node,evtype,handler){
-	    if (!(node)) node=document;
-	    if (typeof node === 'string') node=fdjtID(node);
-	    else if (node instanceof Array) {
-		var i=0; var lim=node.length;
-		while (i<lim) addListener(node[i++],evtype,handler);
-		return;}
-	    if (node.addEventListener)
-		return node.addEventListener(evtype,handler,false);
-	    else if (node.attachEvent)
-		return node.attachEvent('on'+evtype,handler);
-	    else fdjtLog.warn('This node never listens');}
+	  if (!(node)) node=document;
+	  if (typeof node === 'string') node=fdjtID(node);
+	  else if (node instanceof Array) {
+	    var i=0; var lim=node.length;
+	    while (i<lim) addListener(node[i++],evtype,handler);
+	    return;}
+	  if (evtype==='title') 
+	    // Not really a listener, but helpful
+	    if (typeof handler === 'string') 
+	      if (node.title)
+		node.title='('+handler+') '+node.title;
+	      else node.title=handler;
+	    else {}
+	  else if (node.addEventListener)
+	    return node.addEventListener(evtype,handler,false);
+	  else if (node.attachEvent)
+	    return node.attachEvent('on'+evtype,handler);
+	  else fdjtLog.warn('This node never listens: %o',node);}
 	fdjtDOM.addListener=addListener;
+
+	function addListeners(node,handlers){
+	  if (handlers) 
+	    for (evtype in handlers) {
+	      addListener(node,evtype,handlers[evtype]);}}
+	fdjtDOM.addListeners=addListeners;
 
 	fdjtDOM.T=function(evt) {
 	    evt=evt||event; return (evt.target)||(evt.srcElement);};
