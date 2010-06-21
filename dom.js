@@ -143,6 +143,13 @@ var fdjtDOM=
 	    var i=0; var lim=arg.length;
 	    while (i<lim) {result.push(arg[i]); i++;}
 	    return result;}
+	function TOA(arg) {
+	    if (arg instanceof Array) return arg;
+	    var result=new Array(arg.length);
+	    var i=0; var lim=arg.length;
+	    while (i<lim) {result[i]=arg[i]; i++;}
+	    return result;}
+
 
 	/* Utility patterns and functions */
 
@@ -871,19 +878,19 @@ var fdjtDOM=
 	/* DOM walking */
 
 	function next_node(node){
-	    while (node)
+	    while (node) {
 		if (node.nextSibling)
 		    return node.nextSibling;
-	    else node=node.parentNode;
+		else node=node.parentNode;}
 	    return false;}
 
 	function forward_node(node){
 	    if ((node.childNodes)&&((node.childNodes.length)>0))
 		return node.childNodes[0];
-	    else while (node)
+	    else while (node) {
 		if (node.nextSibling)
 		    return node.nextSibling;
-	    else node=node.parentNode;
+		else node=node.parentNode;}
 	    return false;}
 
 	function next_element(node){
@@ -893,7 +900,7 @@ var fdjtDOM=
 		var scan=node;
 		while (scan=scan.nextSibling) {
 		    if (!(scan)) return null;
-		    else if (scan.nodeType==1) break;
+		    else if (scan.nodeType===1) break;
 		    else {}}
 		return scan;}}
 
@@ -917,7 +924,7 @@ var fdjtDOM=
 		var scan=node;
 		while (scan=scan.previousSibling) 
 		    if (!(scan)) return null;
-		else if (scan.nodeType==1) break;
+		else if (scan.nodeType===1) break;
 		else {}
 		return scan;}}
 	fdjtDOM.prevElt=previous_element;
@@ -961,24 +968,28 @@ var fdjtDOM=
 	    return (win||window).document.documentElement.clientWidth;};
 
 	function addListener(node,evtype,handler){
-	  if (!(node)) node=document;
-	  if (typeof node === 'string') node=fdjtID(node);
-	  else if (node instanceof Array) {
-	    var i=0; var lim=node.length;
-	    while (i<lim) addListener(node[i++],evtype,handler);
-	    return;}
-	  if (evtype==='title') 
-	    // Not really a listener, but helpful
-	    if (typeof handler === 'string') 
-	      if (node.title)
-		node.title='('+handler+') '+node.title;
-	      else node.title=handler;
+	    if (!(node)) node=document;
+	    if (typeof node === 'string') node=fdjtID(node);
+	    else if (node instanceof Array) {
+		var i=0; var lim=node.length;
+		while (i<lim) addListener(node[i++],evtype,handler);
+		return;}
+	    else if (node.length)
+		return addListener(TOA(node),evtype,handler);
+	    // OK, actually do it
+	    if (evtype==='title') 
+		// Not really a listener, but helpful
+		if (typeof handler === 'string') 
+		    if (node.title)
+			node.title='('+handler+') '+node.title;
+	    else node.title=handler;
 	    else {}
-	  else if (node.addEventListener)
-	    return node.addEventListener(evtype,handler,false);
-	  else if (node.attachEvent)
-	    return node.attachEvent('on'+evtype,handler);
-	  else fdjtLog.warn('This node never listens: %o',node);}
+	    else if (node.addEventListener)  {
+		// fdjtLog("Adding listener %o for %o to %o",handler,evtype,node);
+		return node.addEventListener(evtype,handler,false);}
+	    else if (node.attachEvent)
+		return node.attachEvent('on'+evtype,handler);
+	    else fdjtLog.warn('This node never listens: %o',node);}
 	fdjtDOM.addListener=addListener;
 
 	function addListeners(node,handlers){
