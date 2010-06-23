@@ -581,6 +581,9 @@ var fdjtUI=
 	if (evt.preventDefault) evt.preventDefault();
 	else evt.returnValue=false;
 	evt.cancelBubble=true;};
+    fdjtUI.nobubble=function(evt){
+	evt=evt||event;
+	evt.cancelBubble=true;};
 })();
 
 /* Emacs local variables

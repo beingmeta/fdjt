@@ -1040,14 +1040,16 @@ var fdjtDOM=
 
 	fdjtDOM.viewTop=function(win){
 	    win=win||window;
-	    return (win.scrollY||win.document.documentElement.scrollTop||0);};
+	    return (win.pageYOffset||win.scrollY||win.document.documentElement.scrollTop||0);};
 	fdjtDOM.viewLeft=function(win){
 	    win=win||window;
-	    return (win.scrollX||win.document.documentElement.scrollLeft||0);};
+	    return (win.pageXOffset||win.scrollX||win.document.documentElement.scrollLeft||0);};
 	fdjtDOM.viewHeight=function(win){
-	    return (win||window).document.documentElement.clientHeight;};
+	    win=win||window;
+	    return win.innerHeight||windocument.documentElement.clientHeight;};
 	fdjtDOM.viewWidth=function(win){
-	    return (win||window).document.documentElement.clientWidth;};
+	    win=win||window;
+	    return win.innerWidth||win.document.documentElement.clientWidth;};
 
 	/* Listeners (should be in UI?) */
 
@@ -1061,13 +1063,14 @@ var fdjtDOM=
 	    else if (node.length)
 		return addListener(TOA(node),evtype,handler);
 	    // OK, actually do it
-	    if (evtype==='title') 
+	    if (evtype==='title') { 
 		// Not really a listener, but helpful
 		if (typeof handler === 'string') 
 		    if (node.title)
 			node.title='('+handler+') '+node.title;
-	    else node.title=handler;
-	    else {}
+		else node.title=handler;}
+	    else if (evtype[0]==='=')
+		node[evtype.slice(1)]=handler;
 	    else if (node.addEventListener)  {
 		// fdjtLog("Adding listener %o for %o to %o",handler,evtype,node);
 		return node.addEventListener(evtype,handler,false);}
