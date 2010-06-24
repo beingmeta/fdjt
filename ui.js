@@ -174,9 +174,9 @@ var fdjtUI=
 			var prompt=(input.prompt)||
 			    (input.getAttribute('prompt'))||(input.title);
 			if (prompt) input.value=prompt;}
-		    input.onfocus=autoprompt_onfocus;
-		    input.onblur=autoprompt_onblur;}
-		form.onsubmit=autoprompt_onsubmit;}}}
+		    fdjtDOM.addListener(input,"focus",autoprompt_onfocus);
+		    fdjtDOM.addListener(input,"blur",autoprompt_onblur);}
+		fdjtDOM.addListener(form,"submit",autoprompt_onsubmit);}}}
     
     fdjtUI.AutoPrompt.setup=autoprompt_setup;
     fdjtUI.AutoPrompt.onfocus=autoprompt_onfocus;

@@ -31,7 +31,7 @@ var fdjtAjax=
 	i=i+2;}
       return uri;}
 
-    var trace_ajax=true;
+    var trace_ajax=false;
     
     function fdjtAjax(callback,base_uri,args){
       var req=new XMLHttpRequest();
