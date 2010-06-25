@@ -138,10 +138,11 @@ var fdjtState=
 
     /* Local storage (persists between sessions) */
 
-    function setLocal(name,val,unparse){
-      if (unparse) val=JSON.stringify(val);
-      if (window.localStorage)
-	window.localStorage[name]=val;}
+      function setLocal(name,val,unparse){
+	  if (!(name)) throw { error: "bad name",name: name};
+	  if (unparse) val=JSON.stringify(val);
+	  if (window.localStorage)
+	      window.localStorage[name]=val;}
     fdjtState.setLocal=setLocal;
 
     function getLocal(name,parse){
@@ -159,6 +160,15 @@ var fdjtState=
       else return false;}
     fdjtState.dropLocal=dropLocal;
     
+      function clearLocal(){
+	  if (window.localStorage) {
+	      var storage=window.localStorage;
+	      var i=0; var lim=storage.length;
+	      var keys=[];
+	      while (i<lim) keys.push(storage.key(i++));
+	      i=0; while (i<lim) storage.removeItem(keys[i++]);}}
+      fdjtState.clearLocal=clearLocal;
+
     /* Gets arguments from the query string */
     function getQuery(name,multiple,matchcase){
       if (!(location.search))

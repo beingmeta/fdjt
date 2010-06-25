@@ -143,13 +143,16 @@ var fdjtDOM=
 	    var i=0; var lim=arg.length;
 	    while (i<lim) {result.push(arg[i]); i++;}
 	    return result;}
-	function TOA(arg) {
-	    if (arg instanceof Array) return arg;
-	    var result=new Array(arg.length);
-	    var i=0; var lim=arg.length;
-	    while (i<lim) {result[i]=arg[i]; i++;}
+	function TOA(arg,start) {
+	    if (arg instanceof Array) {
+		if (start) return arg.slice(start);
+		else return arg;}
+	    start=start||0;
+	    var i=0; var lim=arg.length-start;
+	    var result=new Array(lim);
+	    while (i<lim) {result[i]=arg[i+start]; i++;}
 	    return result;}
-
+	fdjtDOM.Array=TOA;
 
 	/* Utility patterns and functions */
 
@@ -306,7 +309,7 @@ var fdjtDOM=
 	fdjtDOM.toggleClass=toggleClass;
 	
 	fdjtDOM.isClickable=function(target){
-	  while (target)
+	    while (target) {
 		if (((target.tagName==='A')&&(target.href))||
 		    (target.tagName==="INPUT") ||
 		    (target.tagName==="TEXTAREA") ||
@@ -314,7 +317,8 @@ var fdjtDOM=
 		    (target.tagName==="OPTION") ||
 		    (hasClass(target,"fdjtclickable")))
 		    return true;
-	    else target=target.parentNode;
+		else if (target.onclick) return true;
+		else target=target.parentNode;}
 	    return false;};
 
 	fdjtDOM.isTextInput=function(target){

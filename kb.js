@@ -59,6 +59,8 @@ var fdjtKB=
 	fdjtKB.Pool=Pool;
 	fdjtKB.PoolRef=Pool;
 	
+	Pool.prototype.toJSON=function(){return "@@"+this.name;};
+	
 	// Check if a named pool exists
 	Pool.probe=function(id) {return pools[id]||false;};
 
@@ -87,6 +89,14 @@ var fdjtKB=
 	    if (!(cons.qid)) cons.qid=qid;
 	    this.map[qid]=cons; cons.pool=this;
 	    return cons;};
+	Pool.prototype.drop=function(qid) {
+	    var val=this.map[qid];
+	    if ((val)&&(val.ondrop)) val.ondrop();
+	    if (this.storage) this.storage.drop(val);
+	    if (!(val)) return;
+	    delete this.map[qid];
+	    if (val.uuid) delete this.map[val.uuid];
+	    if (val.oid) delete this.map[val.oid];}
 	
 	Pool.prototype.Import=function(data) {
 	    if (data instanceof Array) {
@@ -95,10 +105,14 @@ var fdjtKB=
 		return;}
 	    else {
 		var qid=data.qid||data.oid||data.uuid;
+		if (this.storage) this.storage.Import(data);
 		if (qid) {
-		    var obj=(this.map[qid])||this.ref(qid);
+		    var obj=(this.map[qid]);
 		    // fdjtLog("Calling init (%o) on %o: %o",obj.init,obj,data);
-		    obj.init(data);
+		    if (obj) obj.update(data);
+		    else {
+			obj=this.ref(qid);
+			obj.init(data);}
 		    return obj;}
 		else return data;}};
 	
@@ -567,6 +581,7 @@ var fdjtKB=
 	    if (this.pool.index)
 		this.pool.index(this,prop,val,true);};
 	Ref.prototype.drop=function(prop,val){
+	    if (typeof val === 'undefined') val=this[prop];
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
 	    var vals=false;
@@ -602,11 +617,15 @@ var fdjtKB=
 		if (typeof val === 'undefined') return true;
 		else return this.test(prop,val);}
 	    else return false;};
-	Ref.prototype.init=function(data){
+	Ref.prototype.ondrop=function(){
+	    for (var prop in this)
+		if ((prop!=='pool')&&(prop!=='qid'))
+		    this.drop(prop,this[prop]);};
+	function init_ref(data){
 	    var pool=this.pool; var map=pool.map;
 	    // fdjtLog("Doing init on %o, _init=%o",this,this._init);
 	    for (key in data)
-		if (key!=='qid') {
+		if (!((key==='qid')||(key==='pool'))) {
 		    var value=data[key];
 		    // Add ref aliases when unique
 		    if ((key==='uuid')||(key==='oid'))
@@ -631,7 +650,10 @@ var fdjtKB=
 		    delete this._inits;
 		    i=0; lim=inits.length;
 		    while (i<lim) inits[i++](this);}}
-	    return this;};
+	    return this;}
+	Ref.prototype.init=init_ref;
+	// This isn't right
+	Ref.prototype.update=init_ref;
 	Ref.prototype.oninit=function(fcn){
 	    if (this._init) {
 		fcn(this); return true;}
@@ -653,12 +675,18 @@ var fdjtKB=
 	    if (data) obj.init(data);
 	    return obj[prop];}
 	OfflineKB.prototype.get=offline_get;
-	OfflineKB.prototype.add=function(obj){
+	OfflineKB.prototype.add=function(obj,slotid,val){
 	    var qid=obj.qid||obj.uuid||obj.oid;
-	    fdjtState.setLocal(qid,JSON.stringify(obj));};
-	OfflineKB.prototype.drop=function(obj){
+	    if ((slotid)&&(val))
+		fdjtState.setLocal(qid,JSON.stringify(obj));};
+	OfflineKB.prototype.drop=function(obj,slotid,val){
 	    var qid=obj.qid||obj.uuid||obj.oid;
-	    fdjtState.setLocal(qid,JSON.stringify(obj));};
+	    if (!(slotid)) fdjtState.dropLocal(qid);
+	    else fdjtState.setLocal(qid,JSON.stringify(obj));};
+	OfflineKB.prototype.Import=function(obj){
+	    var qid=obj.qid||obj.uuid||obj.oid;
+	    fdjtState.setLocal(qid,obj,true);};
+	fdjtKB.OfflineKB=OfflineKB;
 	
 	/* Miscellaneous array and table functions */
 
@@ -714,7 +742,7 @@ var fdjtKB=
 	    if (position(array,value)<0) array.push(value);};
 
 	fdjtKB.remove=function(array,value,count){
-	    var pos=fdjtIndexOf(array,value);
+	    var pos=position(array,value);
 	    if (pos<0) return array;
 	    array.splice(pos,1);
 	    if (count) {
