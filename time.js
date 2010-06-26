@@ -33,18 +33,16 @@ var fdjtTime=
     fdjtTime.tick=function(){
       return (new Date()).getTime()/1000;};
 
-    fdjtTime.tick2string=function(tick){
-      return (new Date(tick*1000)).toString();};
-
-    fdjtTime.tick2date=function(tick){
-      return (new Date(tick*1000)).toDateString();};
-
     fdjtTime.dateString=function(tstamp){
       return tstamp.toDateString();};
     fdjtTime.tick2string=function(tick){
       return (new Date(tick*1000)).toString();};
     fdjtTime.tick2date=function(tick){
       return (new Date(tick*1000)).toDateString();};
+    fdjtTime.tick2locale=function(tick){
+      return (new Date(tick*1000)).toLocaleString();};
+    fdjtTime.tick2time=function(tick){
+      return (new Date(tick*1000)).toTimeString();};
 
     fdjtTime.secs2string=function(interval){
       if (interval===1)
