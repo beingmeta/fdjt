@@ -628,12 +628,12 @@ var fdjtKB=
 		if (!((key==='qid')||(key==='pool'))) {
 		    var value=data[key];
 		    // Add ref aliases when unique
-		    if ((key==='uuid')||(key==='oid'))
+		    if ((key==='uuid')||(key==='oid')) {
 			if (!(map[value])) map[value]=this;
-		    else if (map[value]!==this)
-			fdjtLog.warn("identifier conflict %o=%o for %o and %o",
-				     key,value,map[value],this);
-		    else {}
+			else if (map[value]!==this)
+			    fdjtLog.warn("identifier conflict %o=%o for %o and %o",
+					 key,value,map[value],this);
+			else {}}
 		    if (value instanceof Array) {
 			var i=0; var len=value.length;
 			while (i<len) this.add(key,value[i++]);}
