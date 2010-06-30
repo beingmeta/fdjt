@@ -149,14 +149,23 @@ var fdjtString=
       else return string.split('\n');};
 
     function string_trim(string){
-      var start=string.search(/\S/); var end=string.search(/\s+$/g);
-      if ((start===0) && (end<0)) return string;
-      else return string.slice(start,end);}
+	var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
+	var start=0; var len=string.length-1; var end=len;
+	while (spacechars.indexOf(string.charAt(start))>-1) start++;
+	while (spacechars.indexOf(string.charAt(end))>-1) end--;
+	if ((start>0)||(end<len)) return string.slice(start,end+1);
+	else return string;}
     fdjtString.trim=string_trim;
 
     function stdspace(string){
-      return string.replace(/\s+/," ").replace(/(^\s)|(\s$)/,"");}
-    fdjtString.stdspace=stdspace;
+	var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
+	string=string.replace(/\s+/," ");
+	var start=0; var len=string.length-1; var end=len;
+	while (spacechars.indexOf(string.charAt(start))>-1) start++;
+	while (spacechars.indexOf(string.charAt(end))>-1) end--;
+	if ((start>0)||(end<len)) return string.slice(start,end+1);
+	else return string;}
+      fdjtString.stdspace=stdspace;
 
     function flatten(string){
       return string.replace(/\s+/," ");}

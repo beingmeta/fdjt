@@ -72,7 +72,7 @@ var fdjtDOM=
 	fdjtDOM.useNative=function(flag) {
 	    if (typeof flag === 'undefined') return usenative;
 	    else usenative=flag;};
-
+	
 	function domappend(node,content,i) {
 	    if (content.nodeType)
 		node.appendChild(content);
@@ -155,6 +155,17 @@ var fdjtDOM=
 	fdjtDOM.Array=TOA;
 
 	/* Utility patterns and functions */
+
+	function parsePX(arg){
+	    if (arg===0) return 0;
+	    else if (!(arg)) return false;
+	    else if (typeof arg === 'number') return arg;
+	    else if (typeof arg === 'string') {
+		var len=arg.length;
+		if ((len>2)&&(arg[len-1]==='x')&&(arg[len-2]==='p'))
+		    return parseInt(arg.slice(0,-2));
+		else return parseInt(arg);}
+	    else return false;}
 
 	var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
 
@@ -816,8 +827,31 @@ var fdjtDOM=
 		    else {}}
 		return false;}
 	    else return false;}
-	fdjtDOM.hasText=hasText;
+	    fdjtDOM.hasText=hasText;
 
+	/* Sizing to fit */
+
+	    function getFit(elt){
+	    var style=getStyle(elt);
+	    var geom=getGeometry(elt);
+	    var maxheight=parsePX(style.maxHeight);
+	    if (maxheight)
+		return geom.height/maxheight;
+	    else return 1.0;}
+	    fdjtDOM.getFit=getFit;
+	/* Use Newton's method to get this right */
+	function sizeToFit(elt){
+	    var style=getStyle(elt);
+	    var geom=getGeometry(elt);
+	    var maxheight=parsePX(style.maxHeight);
+	    var fontsize=((maxheight)&&(100*(maxheight/geom.height)));
+	    //fdjtLog("sizeToFit maxh=%o maxheight=%o gh=%o fs=%o",
+	    // style.maxHeight,maxheight,geom.height,fontsize);
+	    if (fontsize) elt.style.fontSize=fontsize+"%";
+	    else elt.style.fontSize="";}
+	    fdjtDOM.sizeToFit=sizeToFit;
+	    
+	    
 
 	/* Getting various kinds of metadata */
 
@@ -887,6 +921,8 @@ var fdjtDOM=
 
 	/* Going forward */
 
+	var havechildren=((document.body.childNodes)&&(document.body.children));
+
 	// NEXT goes to the next sibling or the parent's next sibling
 	function next_node(node){
 	  while (node) {
@@ -906,17 +942,23 @@ var fdjtDOM=
 	    return scan;}}
 	function scan_next(node,test,justelts){
 	  if (!(test))
-	    if (justelts) return next_element(node);
+	      if (justelts) {
+		  if (havechildren) return node.nextElementSibling;
+		  else return next_element(node);}
 	    else return next_node(node);
-	  var scan=((justelts)?(next_element(node)):(next_node(node)));
-	  while (scan)
-	    if (test(scan)) return scan;
-	    else if (justelts) scan=next_element(scan);
-	    else scan=next_node(scan);
-	  return false;}
+	    var scan=((justelts)?
+		      ((havechildren)?
+		       (node.nextElementSibling):(next_element(node))):
+		       ((node.nextSibling)||(next_node(node))));
+	    while (scan)
+		if (test(scan)) return scan;
+	    else if (justelts)
+		scan=((scan.nextElementSibling)||(next_element(scan)));
+	    else scan=((scan.nextSibling)||(next_node(scan)));
+	    return false;}
 
 	// FORWARD goes to the first deepest child
-	function forward_node(node){
+	    function forward_node(node){
 	  if ((node.childNodes)&&((node.childNodes.length)>0))
 	    return node.childNodes[0];
 	  else while (node) {
@@ -962,7 +1004,7 @@ var fdjtDOM=
 	    else node=node.parentNode;}
 	  return false;}
 	function previous_element(node){
-	  if (node.previousElementSibling)
+	  if (havechildren)
 	    return node.previousElementSibling;
 	  else {
 	    var scan=node;
@@ -974,14 +1016,18 @@ var fdjtDOM=
 	    else return scan.parentNode;}}
 	function scan_previous(node,test,justelts){
 	  if (!(test))
-	    if (justelts) return previous_element(node);
+	      if (justelts) {
+		  if (havechildren) return node.previousElementSibling;
+		  else return previous_element(node);}
 	    else return previous_node(node);
 	  var scan=((justelts)?
-		    (previsous_element(node)):
+		    ((havechildren)?(node.previousElementSibling):
+		     (previous_element(node))):
 		    (previous_node(node)));
 	  while (scan)
 	    if (test(scan)) return scan;
-	    else if (justelts) scan=previous_element(scan);
+	    else if (justelts)
+		scan=((havechildren)?(scan.previousElementSibling):(previous_element(scan)));
 	    else scan=prev_node(scan);
 	  return false;}
 
@@ -1002,25 +1048,29 @@ var fdjtDOM=
 	  else return node.parentNode;}
 
 	function backward_element(node){
-	  if ((node.previousElementSibling)||(node.previousSibling)) {
-	    var start=(node.previousElementSibling)||(node.previousSibling);
-	    if (start.nodeType===1) 
-	      return get_final_child(start);
-	    else return start;}
-	  else return node.parentNode;}
+	    if (havechildren)
+		return ((node.previousElementSibling)?
+			(get_final_child((node.previousElementSibling))):
+			(node.parentNode));
+	    else if ((node.previousElementSibling)||(node.previousSibling)) {
+		var start=(node.previousElementSibling)||(node.previousSibling);
+		if (start.nodeType===1) 
+		    return get_final_child(start);
+		else return start;}
+	    else return node.parentNode;}
 	// We use a helper function because 
 	function get_final_child(node){
-	  if (node.nodeType===1) {
-	    if (node.childNodes) {
-	      var children=node.childNodes;
-	      if (!(children.length)) return node;
-	      var scan=children.length-1;
-	      while (scan>=0) {
-		var child=get_final_child(children[scan--]);
-		if (child) return child;}
-	      return node;}
-	    else return node;}
-	  else return false;}
+	    if (node.nodeType===1) {
+		if (node.childNodes) {
+		    var children=node.childNodes;
+		    if (!(children.length)) return node;
+		    var scan=children.length-1;
+		    while (scan>=0) {
+			var child=get_final_child(children[scan--]);
+			if (child) return child;}
+		    return node;}
+		else return node;}
+	    else return false;}
 	
 	function scan_backward(node,test,justelts){
 	  if (!(test)) {
