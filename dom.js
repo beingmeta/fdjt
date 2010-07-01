@@ -708,12 +708,13 @@ var fdjtDOM=
 	    var width=elt.offsetWidth;
 	    var height=elt.offsetHeight;
 
-	    while (elt.offsetParent) {
+	    elt=elt.offsetParent;
+	    while (elt) {
 		if ((root)&&(elt===root)) break;
-		elt = elt.offsetParent;
 		if (withstack) withstack.push(elt);
 		top += elt.offsetTop;
-		left += elt.offsetLeft;}
+		left += elt.offsetLeft;
+		elt=elt.offsetParent;}
 	    
 	    result.left=left; result.top=top;
 	    result.width=width;
@@ -721,7 +722,7 @@ var fdjtDOM=
 	    
 	    result.right=left+width; result.bottom=top+height;
 
-	    if (stack) result.stack=stack;
+	    if (withstack) result.stack=withstack;
 
 	    return result;}
 	fdjtDOM.getGeometry=getGeometry;

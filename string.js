@@ -77,13 +77,17 @@ var fdjtString=
 	return "["+arg.type+"@"+stringify(arg.target)+"]";
       else return arg;};
 
+      var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
+
     fdjtString.isEmpty=function(string){
-      if (typeof string === "string") 
-	if (string.length===0) return true;
-	else if (string.search(/\S/g)>=0)
-	  return false;
-	else return true;
-      else return false;};
+	if (typeof string === "string")  {
+	    var i=0; var lim=string.length;
+	    if (lim===0) return true;
+	    while (i<lim) {
+		if (spacechars.indexOf(string[i])) i++;
+		else return false;}
+	    return true;}
+	else return false;}
 
     fdjtString.findSplit=function(string,split,escape){
       var start=0;
@@ -148,8 +152,9 @@ var fdjtString=
 	return results;}
       else return string.split('\n');};
 
+      var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
+      
     function string_trim(string){
-	var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
 	var start=0; var len=string.length-1; var end=len;
 	while (spacechars.indexOf(string.charAt(start))>-1) start++;
 	while (spacechars.indexOf(string.charAt(end))>-1) end--;
