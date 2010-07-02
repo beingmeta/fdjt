@@ -922,7 +922,10 @@ var fdjtDOM=
 
 	/* Going forward */
 
-	var havechildren=((document.body.childNodes)&&(document.body.children));
+	var havechildren=((document)&&
+			  (document.body)&&
+			  (document.body.childNodes)&&
+			  (document.body.children));
 
 	// NEXT goes to the next sibling or the parent's next sibling
 	function next_node(node){
@@ -1148,6 +1151,13 @@ var fdjtDOM=
 	    if (evt.preventDefault) evt.preventDefault();
 	    else evt.returnValue=false;
 	    evt.cancelBubble=true;};
+
+	function fdjtDOM.init(){
+	  havechildren=((document)&&
+			(document.body)&&
+			(document.body.childNodes)&&
+			(document.body.children));}
+
 	return fdjtDOM;
     })();
 
