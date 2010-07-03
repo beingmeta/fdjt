@@ -283,38 +283,38 @@ var fdjtDOM=
 	    else if ((NodeList)&&(elt instanceof NodeList))
 		return toggleClass(TOA(elt),classname,attrib);
 	    var classinfo=
-	      (((attrib) ? (elt.getAttribute(attrib)||"") :
-		(elt.className))||null);
+		(((attrib) ? (elt.getAttribute(attrib)||"") :
+		  (elt.className))||null);
 	    if (!(classinfo)) {
-	      if (attrib) elt.setAttribute(attrib,classname);
-	      else elt.className=classname;
-	      return true;}
+		if (attrib) elt.setAttribute(attrib,classname);
+		else elt.className=classname;
+		return true;}
 	    var class_regex=
-	      ((typeof classname === 'string')?
-	       (classpats[classname]||classPat(classname)):
-	       classname);
+		((typeof classname === 'string')?
+		 (classpats[classname]||classPat(classname)):
+		 classname);
 	    var newinfo=classinfo;
 	    if (classinfo===classname) 
-	      newinfo=null;
+		newinfo=null;
 	    else if (classinfo.search(class_regex)>=0) 
-	      newinfo=classinfo.replace(class_regex,"");
+		newinfo=classinfo.replace(class_regex,"");
 	    else {
-	      if (attrib)
-		elt.setAttribute(attrib,classinfo+' '+classname);
-	      else elt.className=classinfo+' '+classname;
-	      return true;}
+		if (attrib)
+		    elt.setAttribute(attrib,classinfo+' '+classname);
+		else elt.className=classinfo+' '+classname;
+		return true;}
 	    if (newinfo)
-	      newinfo=newinfo.
+		newinfo=newinfo.
 		replace(whitespace_pat," ").
 		replace(trimspace_pat,"");
 	    if (attrib)
-	      if (newinfo) {
-		elt.setAttribute(attrib,newinfo);
-		elt.className=elt.className;}
-	      else if (!(keep)) {
+		if (newinfo) {
+		    elt.setAttribute(attrib,newinfo);
+		    elt.className=elt.className;}
+	    else if (!(keep)) {
 		elt.removeAttribute(attrib);
 		elt.className=elt.className;}
-	      else {}
+	    else {}
 	    else elt.className=newinfo;
 	    return false;}
 	fdjtDOM.toggleClass=toggleClass;
@@ -828,18 +828,18 @@ var fdjtDOM=
 		    else {}}
 		return false;}
 	    else return false;}
-	    fdjtDOM.hasText=hasText;
+	fdjtDOM.hasText=hasText;
 
 	/* Sizing to fit */
 
-	    function getFit(elt){
+	function getFit(elt){
 	    var style=getStyle(elt);
 	    var geom=getGeometry(elt);
 	    var maxheight=parsePX(style.maxHeight);
 	    if (maxheight)
 		return geom.height/maxheight;
 	    else return 1.0;}
-	    fdjtDOM.getFit=getFit;
+	fdjtDOM.getFit=getFit;
 	/* Use Newton's method to get this right */
 	function sizeToFit(elt){
 	    var style=getStyle(elt);
@@ -850,9 +850,9 @@ var fdjtDOM=
 	    // style.maxHeight,maxheight,geom.height,fontsize);
 	    if (fontsize) elt.style.fontSize=fontsize+"%";
 	    else elt.style.fontSize="";}
-	    fdjtDOM.sizeToFit=sizeToFit;
-	    
-	    
+	fdjtDOM.sizeToFit=sizeToFit;
+	
+	
 
 	/* Getting various kinds of metadata */
 
@@ -929,31 +929,31 @@ var fdjtDOM=
 
 	// NEXT goes to the next sibling or the parent's next sibling
 	function next_node(node){
-	  while (node) {
-	    if (node.nextSibling)
-	      return node.nextSibling;
-	    else node=node.parentNode;}
-	  return false;}
+	    while (node) {
+		if (node.nextSibling)
+		    return node.nextSibling;
+		else node=node.parentNode;}
+	    return false;}
 	function next_element(node){
-	  if (node.nextElementSibling)
-	    return node.nextElementSibling;
-	  else {
-	    var scan=node;
-	    while (scan=scan.nextSibling) {
-	      if (!(scan)) return null;
-	      else if (scan.nodeType===1) break;
-	      else {}}
-	    return scan;}}
+	    if (node.nextElementSibling)
+		return node.nextElementSibling;
+	    else {
+		var scan=node;
+		while (scan=scan.nextSibling) {
+		    if (!(scan)) return null;
+		    else if (scan.nodeType===1) break;
+		    else {}}
+		return scan;}}
 	function scan_next(node,test,justelts){
-	  if (!(test))
-	      if (justelts) {
-		  if (havechildren) return node.nextElementSibling;
-		  else return next_element(node);}
+	    if (!(test))
+		if (justelts) {
+		    if (havechildren) return node.nextElementSibling;
+		    else return next_element(node);}
 	    else return next_node(node);
 	    var scan=((justelts)?
 		      ((havechildren)?
 		       (node.nextElementSibling):(next_element(node))):
-		       ((node.nextSibling)||(next_node(node))));
+		      ((node.nextSibling)||(next_node(node))));
 	    while (scan)
 		if (test(scan)) return scan;
 	    else if (justelts)
@@ -962,36 +962,46 @@ var fdjtDOM=
 	    return false;}
 
 	// FORWARD goes to the first deepest child
-	    function forward_node(node){
-	  if ((node.childNodes)&&((node.childNodes.length)>0))
-	    return node.childNodes[0];
-	  else while (node) {
-	      if (node.nextSibling)
-		return node.nextSibling;
-	      else node=node.parentNode;}
-	  return false;}
-	function forward_element(node){
+	function forward_node(node){
 	    if ((node.childNodes)&&((node.childNodes.length)>0))
 		return node.childNodes[0];
-	    else if (node.nextElementSibling)
-		return node.nextElementSibling;
-	    else while (node)
-		if (node.nextElementSibling)
+	    else while (node) {
+		if (node.nextSibling)
 		    return node.nextSibling;
-	    else if (next_element(node))
-		return next_element(node);
-	    else node=node.parentNode;
+		else node=node.parentNode;}
 	    return false;}
+	function forward_element(node,n){
+	    var scan;
+	    if (n) {
+		var i=0; scan=node;
+		while (i<n) {scan=forward_element(scan); i++;}
+		return scan;}
+	    if (havechildren) {
+		if ((node.children)&&(node.children.length>0)) {
+		    return node.children[0];}
+		if (scan=node.nextElementSibling) return scan;
+		while (node=node.parentNode)
+		    if (scan=node.nextElementSibling) return scan;
+		return false;}
+	    else {
+		if (node.childNodes) {
+		    var children=node.childNodes; var i=0; var lim=children.length;
+		    while (i<lim)
+			if ((scan=children[i++])&&(scan.nodeType===1)) return scan;}
+		while (scan=node.nextSibling) if (scan.nodeType===1) return scan;
+		while (node=node.parentNode)
+		    if (scan=next_element(node)) return scan;
+		return false;}}
 	function scan_forward(node,test,justelts){
-	  if (!(test)) {
-	    if (justelts) return forward_element(node);
-	    else return forward_node(node);}
-	  var scan=((justelts)?(forward_element(node)):(forward_node(node)));
-	  while (scan) {
-	    if (test(scan)) return scan;
-	    else if (justelts) scan=next_element(scan);
-	    else scan=next_node(scan);}
-	  return false;}
+	    if (!(test)) {
+		if (justelts) return forward_element(node);
+		else return forward_node(node);}
+	    var scan=((justelts)?(forward_element(node)):(forward_node(node)));
+	    while (scan) {
+		if (test(scan)) return scan;
+		else if (justelts) scan=next_element(scan);
+		else scan=next_node(scan);}
+	    return false;}
 
 	fdjtDOM.nextElt=next_element;
 	fdjtDOM.forwardElt=forward_element;
@@ -1002,54 +1012,54 @@ var fdjtDOM=
 
 	// PREV goes the parent if there's no previous sibling
 	function prev_node(node){
-	  while (node) {
-	    if (node.previousSibling)
-	      return node.previousSibling;
-	    else node=node.parentNode;}
-	  return false;}
+	    while (node) {
+		if (node.previousSibling)
+		    return node.previousSibling;
+		else node=node.parentNode;}
+	    return false;}
 	function previous_element(node){
-	  if (havechildren)
-	    return node.previousElementSibling;
-	  else {
-	    var scan=node;
-	    while (scan=scan.previousSibling) 
-	      if (!(scan)) return null;
-	      else if (scan.nodeType===1) break;
-	      else {}
-	    if (scan) return scan;
-	    else return scan.parentNode;}}
+	    if (havechildren)
+		return node.previousElementSibling;
+	    else {
+		var scan=node;
+		while (scan=scan.previousSibling) 
+		    if (!(scan)) return null;
+		else if (scan.nodeType===1) break;
+		else {}
+		if (scan) return scan;
+		else return scan.parentNode;}}
 	function scan_previous(node,test,justelts){
-	  if (!(test))
-	      if (justelts) {
-		  if (havechildren) return node.previousElementSibling;
-		  else return previous_element(node);}
+	    if (!(test))
+		if (justelts) {
+		    if (havechildren) return node.previousElementSibling;
+		    else return previous_element(node);}
 	    else return previous_node(node);
-	  var scan=((justelts)?
-		    ((havechildren)?(node.previousElementSibling):
-		     (previous_element(node))):
-		    (previous_node(node)));
-	  while (scan)
-	    if (test(scan)) return scan;
+	    var scan=((justelts)?
+		      ((havechildren)?(node.previousElementSibling):
+		       (previous_element(node))):
+		      (previous_node(node)));
+	    while (scan)
+		if (test(scan)) return scan;
 	    else if (justelts)
 		scan=((havechildren)?(scan.previousElementSibling):(previous_element(scan)));
 	    else scan=prev_node(scan);
-	  return false;}
+	    return false;}
 
 	// BACKWARD goes to the final (deepest last) child
 	//  of the previous sibling
 	function backward_node(node){
-	  if (node.previousSibling) {
-	    var scan=node.previousSibling;
-	    // If it's not an element, just return it
-	    if (scan.nodeType!==1) return scan;
-	    // Otherwise, return the last and deepest child
-	    while (scan) {
-	      var children=scan.childNodes;
-	      if (!(children)) return scan;
-	      else if (children.length===0) return scan;
-	      else scan=children[children.length-1];}
-	    return scan;}
-	  else return node.parentNode;}
+	    if (node.previousSibling) {
+		var scan=node.previousSibling;
+		// If it's not an element, just return it
+		if (scan.nodeType!==1) return scan;
+		// Otherwise, return the last and deepest child
+		while (scan) {
+		    var children=scan.childNodes;
+		    if (!(children)) return scan;
+		    else if (children.length===0) return scan;
+		    else scan=children[children.length-1];}
+		return scan;}
+	    else return node.parentNode;}
 
 	function backward_element(node){
 	    if (havechildren)
@@ -1077,17 +1087,17 @@ var fdjtDOM=
 	    else return false;}
 	
 	function scan_backward(node,test,justelts){
-	  if (!(test)) {
-	    if (justelts) return backward_element(node);
-	    else return backward_node(node);}
-	  var scan=((justelts)?
-		    (backward_element(node)):
-		    (backward_node(node)));
-	  while (scan) {
-	    if (test(scan)) return scan;
-	    else if (justelts) scan=next_element(scan);
-	    else scan=next_node(scan);}
-	  return false;}
+	    if (!(test)) {
+		if (justelts) return backward_element(node);
+		else return backward_node(node);}
+	    var scan=((justelts)?
+		      (backward_element(node)):
+		      (backward_node(node)));
+	    while (scan) {
+		if (test(scan)) return scan;
+		else if (justelts) scan=next_element(scan);
+		else scan=next_node(scan);}
+	    return false;}
 	
 	fdjtDOM.prevElt=previous_element;
 	fdjtDOM.backwardElt=backward_element;
@@ -1104,10 +1114,12 @@ var fdjtDOM=
 	    return (win.pageXOffset||win.scrollX||win.document.documentElement.scrollLeft||0);};
 	fdjtDOM.viewHeight=function(win){
 	    win=win||window;
-	    return win.innerHeight||windocument.documentElement.clientHeight;};
+	    return win.innerHeight||
+		win.document.documentElement.clientHeight;};
 	fdjtDOM.viewWidth=function(win){
 	    win=win||window;
-	    return win.innerWidth||win.document.documentElement.clientWidth;};
+	    return win.innerWidth||
+		win.document.documentElement.clientWidth;};
 
 	/* Listeners (should be in UI?) */
 
@@ -1138,9 +1150,9 @@ var fdjtDOM=
 	fdjtDOM.addListener=addListener;
 
 	function addListeners(node,handlers){
-	  if (handlers) 
-	    for (evtype in handlers) {
-	      addListener(node,evtype,handlers[evtype]);}}
+	    if (handlers) 
+		for (evtype in handlers) {
+		    addListener(node,evtype,handlers[evtype]);}}
 	fdjtDOM.addListeners=addListeners;
 
 	fdjtDOM.T=function(evt) {
@@ -1152,11 +1164,11 @@ var fdjtDOM=
 	    else evt.returnValue=false;
 	    evt.cancelBubble=true;};
 
-	function fdjtDOM.init(){
-	  havechildren=((document)&&
-			(document.body)&&
-			(document.body.childNodes)&&
-			(document.body.children));}
+	fdjtDOM.init=function(){
+	    havechildren=((document)&&
+			  (document.body)&&
+			  (document.body.childNodes)&&
+			  (document.body.children));};
 
 	return fdjtDOM;
     })();
