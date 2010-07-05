@@ -728,6 +728,7 @@ var fdjtDOM=
 	fdjtDOM.getGeometry=getGeometry;
 
 	function isVisible(elt,partial){
+	    var start=elt;
 	    if (!(partial)) partial=false;
 	    var top = elt.offsetTop;
 	    var left = elt.offsetLeft;
@@ -744,14 +745,22 @@ var fdjtDOM=
 		top += elt.offsetTop;
 		left += elt.offsetLeft;}
 
-	    /*
-	      fdjtTrace("fdjtIsVisible%s top=%o left=%o height=%o width=%o",
-	      ((partial)?("(partial)"):""),
-	      top,left,height,width);
-	      fdjtTrace("fdjtIsVisible winx=%o winy=%o winxedge=%o winyedge=%o",
-	      winx,winy,winxedge,winyedge);
-	    */
+	    if ((elt)&&(!((elt===window)||(elt===document.body)))) {
+		// fdjtLog("%o l=%o t=%o",elt,elt.scrollLeft,elt.scrollTop);
+		if ((elt.scrollTop)||(elt.scrollLeft)) {
+		    fdjtLog("Adjusting for inner DIV");
+		    winx=elt.scrollLeft; winy=elt.scrollTop;
+		    winxedge=winx+elt.scrollWidth;
+		    winyedge=winy+elt.scrollHeight;}}
 
+	    /*
+	    fdjtLog("fdjtIsVisible%s %o top=%o left=%o height=%o width=%o",
+		    ((partial)?("(partial)"):""),start,
+		    top,left,height,width);
+	    fdjtLog("fdjtIsVisible %o winx=%o winy=%o winxedge=%o winyedge=%o",
+		    elt,winx,winy,winxedge,winyedge);
+	    */
+	    
 	    if (partial)
 		// There are three cases we check for:
 		return (

@@ -84,7 +84,7 @@ var fdjtString=
 	    var i=0; var lim=string.length;
 	    if (lim===0) return true;
 	    while (i<lim) {
-		if (spacechars.indexOf(string[i])) i++;
+		if (spacechars.indexOf(string[i])>=0) i++;
 		else return false;}
 	    return true;}
 	else return false;}
