@@ -326,7 +326,7 @@ var fdjtDOM=
 		    (target.tagName==="TEXTAREA") ||
 		    (target.tagName==="SELECT") ||
 		    (target.tagName==="OPTION") ||
-		    (hasClass(target,"fdjtclickable")))
+		    (hasClass(target,"isclickable")))
 		    return true;
 		else if (target.onclick) return true;
 		else target=target.parentNode;}
