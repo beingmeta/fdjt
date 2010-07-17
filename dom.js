@@ -166,6 +166,7 @@ var fdjtDOM=
 		    return parseInt(arg.slice(0,-2));
 		else return parseInt(arg);}
 	    else return false;}
+	fdjtDOM.parsePX=parsePX;
 
 	var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
 
@@ -625,6 +626,8 @@ var fdjtDOM=
 	/* Getting style information generally */
 
 	function getStyle(elt,prop){
+	    if (typeof elt === 'string') elt=document.getElementById(elt);
+	    if (!(elt)) return elt;
 	    var style=
 		((window.getComputedStyle)&&(window.getComputedStyle(elt,null)))||
 		(elt.currentStyle);

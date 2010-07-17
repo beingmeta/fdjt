@@ -75,7 +75,8 @@ var fdjtUI=
 	evt=evt||event;
 	target=evt.target||evt.srcTarget;
 	var checkspan=fdjtDOM.getParent(target,".checkspan");
-	if ((target.tagName==='INPUT')&&(target.type=='checkbox')) {
+	if ((target.tagName==='INPUT')&&
+	    ((target.type=='checkbox')||(target.type=='radio'))) {
 	    target.blur();
 	    if (target.checked) fdjtDOM.addClass(checkspan,"checked");
 	    else fdjtDOM.dropClass(checkspan,"checked");}
@@ -84,7 +85,7 @@ var fdjtUI=
 	    (checkspan,function(elt){
 		return (elt.nodeType===1)&&
 		    (elt.tagName==='INPUT')&&
-		    (elt.type==='checkbox');});
+		    ((elt.type=='checkbox')||(elt.type=='radio'));});
 	    var input=((inputs)&&(inputs.length)&&(inputs[0]));
 	    if (input) 
 		if (input.checked) {
@@ -99,7 +100,8 @@ var fdjtUI=
     function checkspan_set(checkspan,checked){
 	var inputs=fdjtDOM.getChildren
 	(checkspan,function(node){
-	    return (node.tagName==='INPUT')&&(node.type==='checkbox');});
+	    return (node.tagName==='INPUT')&&
+		((node.type=='checkbox')||(node.type=='radio'));});
 	var input=((inputs)&&(inputs.length)&&(inputs[0]));
 	if (checked) {
 	    input.checked=true; fdjtDOM.addClass(checkspan,"ischecked");}
@@ -163,7 +165,7 @@ var fdjtUI=
 	var i=0; var lim=forms.length;
 	while (i<lim) {
 	    var form=forms[i++];
-	    var inputs=fdjtDOM.getChildren(form,"INPUT.autoprompt");
+	    var inputs=fdjtDOM.getChildren(form,"INPUT.autoprompt,TEXTAREA.autoprompt");
 	    if (inputs.length) {
 		var j=0; var jlim=inputs.length;
 		while (j<jlim) {
