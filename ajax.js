@@ -105,6 +105,43 @@ var fdjtAjax=
 		    if (option.selected)
 			parameters=add_query_param(parameters,name,option.value);}}
 	    return parameters;}
+	fdjtAjax.formParams=formParams;
+
+	function add_field(result,name,value,multifields,downcase) {
+	    if (downcase) name=name.toLowerCase();
+	    if ((multifields)&&(fdjtKB.contains(multifields,name))) {
+		if (result[name]) result[name].push(value);
+		else result[name]=[value];}
+	    else {
+		var cur=result[name];
+		if (!cur) result[name]=value;
+		else if (cur instanceof Array) cur.push(value);
+		else result[name]=[cur,value];}}
+
+	function formJSON(form,multifields,downcase) {
+	    fdjtUI.AutoPrompt.cleanup(form);
+	    var result={};
+	    var inputs=fdjtDOM.getChildren(form,"INPUT");
+	    var i=0; while (i<inputs.length) {
+		var input=inputs[i++];
+		if ((!(input.disabled)) &&
+		    (((input.type==="radio") || (input.type==="checkbox")) ?
+		     (input.checked) : (true)))
+		    add_field(result,input.name,input.value,multifields,downcase||false);}
+	    var textareas=fdjtDOM.getChildren(form,"TEXTAREA");
+	    i=0; while (i<textareas.length) {
+		var textarea=textareas[i++];
+		if (!(textarea.disabled)) 
+		    add_field(result,textarea.name,textarea.value,multifields,downcase||false);}
+	    var selectboxes=fdjtDOM.getChildren(form,"SELECT");
+	    i=0; while (i<selectboxes.length) {
+		var selectbox=selectboxes[i++]; var name=selectbox.name;
+		var options=fdjtDOM.getChildren(selectbox,"OPTION");
+		var j=0; while (j<options.length) {
+		    var option=options[j++];
+		    if (option.selected) add_field(result,name,option.value,multifields,downcase||false);}}
+	    return result;}
+	fdjtAjax.formJSON=formJSON;
 
 	function ajaxSubmit(form){
 	    var ajax_uri=form.getAttribute("ajaxaction");
