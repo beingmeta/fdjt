@@ -863,8 +863,6 @@ var fdjtDOM=
 	    if (fontsize) elt.style.fontSize=fontsize+"%";
 	    else elt.style.fontSize="";}
 	fdjtDOM.sizeToFit=sizeToFit;
-	
-	
 
 	/* Getting various kinds of metadata */
 
