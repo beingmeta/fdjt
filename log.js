@@ -59,6 +59,10 @@ fdjtLog.bkpt=function(string){
     else window.console.log.apply(window.console,arguments);
 };
 
+// This is for temporary trace statements; we use a different name
+//  so that they're easy to find.
+var fdjtTrace=fdjtLog;
+
 /* Emacs local variables
 ;;;  Local variables: ***
 ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***

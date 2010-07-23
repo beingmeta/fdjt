@@ -36,12 +36,20 @@ var fdjtKB=
 	fdjtKB.version=parseInt("$Revision$".slice(10,-1));
 	fdjtKB.persist=((window.localStorage)?(true):(false));
 
+	// This turns on debugging, which is further controlled
+	//  by properties on pools
+	var debug=false;
+	fdjtKB.setDebug=function(flag){debug=flag;};
+
 	// We allocate 16 million IDs for miscellaneous objects
 	//  and use counter to track them.
 	var counter=0;
 	function register(x){
 	    return (x._fdjtid)||(x._fdjtid=(++counter));}
 	fdjtKB.register=register;
+
+	// This lets us figure out what inits were run in this session.
+	var init_start=fdjtTime();
 
 	// Pools are uniquely named id->object mappings
 	// This table maps those unique names to the objects themselves
@@ -105,10 +113,12 @@ var fdjtKB=
 		return;}
 	    else {
 		var qid=data.qid||data.oid||data.uuid;
+		if ((debug)&&(this.traceimport))
+		  fdjtLog("[%f] Import to %s %o <== %o",
+			  fdjtET(),this.name,obj,data);
 		if (this.storage) this.storage.Import(data);
 		if (qid) {
 		    var obj=(this.map[qid]);
-		    // fdjtLog("Calling init (%o) on %o: %o",obj.init,obj,data);
 		    if (obj) obj.update(data);
 		    else {
 			obj=this.ref(qid);
@@ -151,7 +161,12 @@ var fdjtKB=
 		if (pool) return pool.ref(arg);
 		else return false;}}
 	fdjtKB.ref=fdjtKB.getRef=getRef;
-
+	function loadRef(arg){
+	  var obj=getRef(arg);
+	  if (obj) return obj.load();
+	  else return undefined;}
+	fdjtKB.load=fdjtKB.loadRef=loadRef;
+	
 	function doimport(data){
 	    if (data instanceof Array) {
 		var i=0; var lim=data.length; var results=[];
@@ -529,6 +544,11 @@ var fdjtKB=
 	fdjtKB.Ref=Ref;
 	Pool.prototype.cons=function(qid){return new Ref(this,qid);};
 
+	Ref.prototype.load=function(){
+	  if (this._init) return this;
+	  else if (this.pool.storage) 
+	    return this.pool.storage.load(this);
+	  else return undefined;};
 	Ref.prototype.get=function(prop){
 	    if (this.hasOwnProperty(prop)) return this[prop];
 	    else if (this.pool.storage) {
@@ -622,45 +642,76 @@ var fdjtKB=
 		if ((prop!=='pool')&&(prop!=='qid'))
 		    this.drop(prop,this[prop]);};
 	function init_ref(data){
-	    var pool=this.pool; var map=pool.map;
-	    // fdjtLog("Doing init on %o, _init=%o",this,this._init);
-	    for (key in data)
-		if (!((key==='qid')||(key==='pool'))) {
-		    var value=data[key];
-		    // Add ref aliases when unique
-		    if ((key==='uuid')||(key==='oid')) {
-			if (!(map[value])) map[value]=this;
-			else if (map[value]!==this)
-			    fdjtLog.warn("identifier conflict %o=%o for %o and %o",
-					 key,value,map[value],this);
-			else {}}
-		    if (value instanceof Array) {
-			var i=0; var len=value.length;
-			while (i<len) this.add(key,value[i++]);}
-		    else this.add(key,value);}
-	    if (!(this._init)) {
-		var inits=this.pool.inits;
-		var i=0; var lim;
-		this._init=fdjtTime();
-		if (inits) {
-		    var lim=inits.length;
-		    while (i<lim) inits[i++](this);}
-		inits=this._inits;
-		if (inits) {
-		    delete this._inits;
-		    i=0; lim=inits.length;
-		    while (i<lim) inits[i++](this);}}
-	    return this;}
+	  var pool=this.pool; var map=pool.map;
+	  if ((this._init)&&(this._init>init_start)) return this;
+	  if ((debug)&&(pool.traceref))
+	    fdjtLog("Initial reference to %o <== %o",this,data);
+	  for (key in data)
+	    if (!((key==='qid')||(key==='pool'))) {
+	      var value=data[key];
+	      // Add ref aliases when unique
+	      if ((key==='uuid')||(key==='oid')) {
+		if (!(map[value])) map[value]=this;
+		else if (map[value]!==this)
+		  fdjtLog.warn("identifier conflict %o=%o for %o and %o",
+			       key,value,map[value],this);
+		else {}}
+	      if (value instanceof Array) {
+		var i=0; var len=value.length;
+		while (i<len) this.add(key,value[i++]);}
+	      else this.add(key,value);}
+	  var inits=pool.inits;
+	  if ((inits)&&(debug)&&(pool.traceinit))
+	    fdjtLog("Running pool inits for %o: %o",this,inits);
+	  var i=0; var lim;
+	  this._init=fdjtTime();
+	  if (inits) {
+	    var lim=inits.length;
+	    while (i<lim) inits[i++](this);}
+	  var inits=this._inits; delete this._inits;
+	  if ((inits)&&(debug)&&(pool.traceinit))
+	    fdjtLog("Running delayed inits for %o: %o",this,inits);
+	  if (inits) {
+	      delete this._inits;
+	      i=0; lim=inits.length;
+	      while (i<lim) inits[i++](this);}
+	  return this;}
 	Ref.prototype.init=init_ref;
 	// This isn't right
 	Ref.prototype.update=init_ref;
-	Ref.prototype.oninit=function(fcn){
+	Ref.prototype.oninit=function(fcn,name){
+	  var debugging=((debug)&&(this.pool.traceinit));
 	    if (this._init) {
-		fcn(this); return true;}
-	    else if (this._inits)
-		this._inits.push(fcn);
-	    else this._inits=[fcn];
-	    return false;};
+	      if (debugging) {
+		if (name)
+		  fdjtLog("Init (%s) %o on pre-existing %o",name,fcn,this);
+		else fdjtLog("Init %o on pre-existing %o",fcn,this);}
+	      fcn(this);
+	      return true;}
+	    else if (this._inits) {
+	      // Save up the init functions
+	      if (!(name)) {
+		if (!(contains(this._inits,fcn))) {
+		  if (debugging) fdjtLog("Delaying init on %o: %o",this,fcn);
+		  this._inits.push(fcn);}}
+	      // Don't do anything if the named init has already been added
+	      else if (this._inits[name]) {
+		/* Note that name can't be anything that an array object
+		   might inherit (like 'length'). */ }
+	      else {
+		if (debugging)
+		  fdjtLog("Delaying init %s on %o: %o",name,this,fcn);
+		this._inits[name]=fcn;
+		this._inits.push(fcn);}}
+	    else if (name) {
+	      if (debugging)
+		fdjtLog("Delaying init %s on %o: %o",name,this,fcn);
+	      this._inits=[fcn];
+	      this._inits[name]=fcn;}
+	    else {
+	      fdjtLog("Delaying init on %o: %o",this,fcn);
+	      this._inits=[fcn];}
+	  return false;};
 
 	/* Using offline storage to back up pools
 	   In the simplest model, the QID is just used as a key
@@ -674,6 +725,11 @@ var fdjtKB=
 	    var data=fdjtState.getLocal(qid);
 	    if (data) obj.init(data);
 	    return obj[prop];}
+	OfflineKB.prototype.load=function(obj){
+	  var qid=obj.qid||obj.uuid||obj.oid;
+	  var data=fdjtState.getLocal(qid,true);
+	  if (data) return obj.init(data);
+	  else return undefined;};
 	OfflineKB.prototype.get=offline_get;
 	OfflineKB.prototype.add=function(obj,slotid,val){
 	    var qid=obj.qid||obj.uuid||obj.oid;
