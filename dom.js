@@ -159,6 +159,7 @@ var fdjtDOM=
 	function parsePX(arg){
 	    if (arg===0) return 0;
 	    else if (!(arg)) return false;
+	    else if (arg==="none") return false;
 	    else if (typeof arg === 'number') return arg;
 	    else if (typeof arg === 'string') {
 		var len=arg.length;
@@ -844,6 +845,73 @@ var fdjtDOM=
 
 	/* Sizing to fit */
 
+	var trace_adjust=false;
+
+	function getInsideBounds(container){
+	  var left=false; var top=false;
+	  var right=false; var bottom=false;
+	  var children=container.childNodes;
+	  var i=0; var lim=children.length;
+	  while (i<lim) {
+	    var child=children[i++];
+	    if (!(child.offsetLeft)) continue;
+	    if (left===false) {
+	      left=child.offsetLeft; right=child.offsetLeft+child.offsetWidth;
+	      top=child.offsetTop; bottom=child.offsetTop+child.offsetHeight;}
+	    else {
+	      if (child.offsetLeft<left) left=child.offsetLeft;
+	      if ((child.offsetLeft+child.offsetWidth)>right) right=(child.offsetLeft+child.offsetWidth);
+	      if ((child.offsetTop+child.offsetHeight)>bottom) bottom=(child.offsetTop+child.offsetHeight);}}
+	  return {left: left,right: right,top: top, bottom: bottom,
+	      width: right-left,height:bottom-top};}
+	function adjustToFit(container,threshold){
+	  var style=getStyle(container);
+	  var geom=getGeometry(container);
+	  var maxheight=((style.maxHeight)&&(parsePX(style.maxHeight)))||(geom.height);
+	  var maxwidth=((style.maxWidth)&&(parsePX(style.maxWidth)))||(geom.width);
+	  var images=TOA(fdjtDOM.getChildren(container,"IMG"));
+	  var iscan=0; var ilim=images.length;
+	  var iwidths=new Array(ilim); var iheights=new Array(ilim);
+	  while (iscan<ilim) {
+	    var image=images[iscan];
+	    iwidths[iscan]=image.offsetWidth; iheights[iscan]=image.offsetHeight;
+	    if (fdjtDOM.hasClass(image,"nofdjtscale")) images[iscan]=false;
+	    iscan++;}
+	  var upper=1+((threshold||0.2)); var lower=1-((threshold||0.2));
+	  var iterations=0; var max_iterations=7; var scale=100.0;
+	  if (trace_adjust)
+	    fdjtLog("[%f] Adjusting %o, maxw=%o, maxh=%o",fdjtET(),container,maxwidth,maxheight);
+	  while (iterations<max_iterations) {
+	    var bounds=getInsideBounds(container);
+	    if (trace_adjust)
+	      fdjtLog("[%f] w=%o h=%o l=%o r=%o t=%o b=%o",
+		      fdjtET(),bounds.width,bounds.height,
+		      bounds.left,bounds.right,bounds.top,bounds.bottom);
+	    if (((((bounds.height/maxheight)<upper)&&((bounds.height/maxheight)>lower))||
+		 (((maxheight/bounds.height)<upper)&&((maxheight/bounds.height)>lower)))&&
+		((((bounds.width/maxwidth)<upper)&&((bounds.width/maxwidth)>lower))||
+		 (((maxwidth/bounds.width)<upper)&&((maxwidth/bounds.width)>lower))))
+	      return;
+	    iterations++;
+	    var dh=bounds.height-maxheight; var dw=bounds.width-maxwidth;
+	    var rh=maxheight/bounds.height; var rw=maxwidth/bounds.width;
+	    var adjust=((rh<rw)?(rh):(rw));
+	    if (trace_adjust)
+	      fdjtLog("[%f] rw=%o rh=%o newfs=%o=%o*%o",
+		      fdjtET(),rw,rh,scale*adjust,scale,adjust);
+	    scale=scale*adjust;
+	    container.style.fontSize=scale+'%';
+	    var rounded=10*Math.round(scale/10);
+	    fdjtDOM.addClass(container,"fdjtscaled");
+	    fdjtDOM.swapClass(container,/\bfdjtscale\d+\b/,"fdjtscale"+rounded);
+	    iscan=0; while (iscan<ilim) {
+	      var image=images[iscan];
+	      if (!(image)) {iscan++; continue;}
+	      image.style.width=Math.round(iwidths[iscan]*(scale/100))+"px";
+	      image.style.height=Math.round(iheights[iscan]*(scale/100))+"px";
+	      iscan++;}}}
+	fdjtDOM.adjustToFit=adjustToFit;
+	fdjtDOM.insideBounds=getInsideBounds;
 	function getFit(elt){
 	    var style=getStyle(elt);
 	    var geom=getGeometry(elt);
