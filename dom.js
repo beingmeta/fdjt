@@ -73,6 +73,9 @@ var fdjtDOM=
 	    if (typeof flag === 'undefined') return usenative;
 	    else usenative=flag;};
 	
+	fdjtDOM.clone=function(node){
+	  return node.cloneNode(true);}
+
 	function domappend(node,content,i) {
 	    if (content.nodeType)
 		node.appendChild(content);
