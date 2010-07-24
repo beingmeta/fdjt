@@ -89,6 +89,11 @@ var fdjtKB=
 	    if (this.map[id]) return (this.map[id]);
 	    else return false;};
 
+	Pool.prototype.load=function(ref) {
+	  if (typeof ref==='string')
+	    return this.ref(ref).load();
+	  else return ref.load();};
+
 	Pool.prototype.ref=function(qid,cons) {
 	    if (this.map[qid]) return this.map[qid];
 	    if (!(cons)) cons=this.cons(qid);
