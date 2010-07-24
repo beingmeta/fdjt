@@ -119,6 +119,25 @@ var fdjtTime=
       if (!(arg)) arg=new Date();
       return (arg.getTime()-loaded)/1000;};
 
+    function timeslice(fcns,slice,space){
+      if (typeof slice !== 'number') slice=0;
+      if (typeof space !== 'number') space=100;
+      var i=0; var lim=fcns.length;
+      var slicefn=function(){
+	var timelim=fdjtTime()+space;
+	var nextspace=false;
+	while (i<lim) {
+	  var fcn=fcns[i++];
+	  if (!(fcn)) continue;
+	  else if (typeof fcn === 'number') {
+	    nextspace=fcn; break;}
+	  else fcn();
+	  if (fdjtTime()>timelim) break;}
+	if (i<lim) setTimeout(slicefn,nextspace||space);};
+      return slicefn();}
+
+    fdjtTime.timeslice=timeslice;
+
     return fdjtTime;})();
 
 var fdjtET=fdjtTime.ET;

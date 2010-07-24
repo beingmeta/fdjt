@@ -586,6 +586,7 @@ var fdjtUI=
     fdjtUI.nobubble=function(evt){
 	evt=evt||event;
 	evt.cancelBubble=true;};
+
 })();
 
 /* Emacs local variables
