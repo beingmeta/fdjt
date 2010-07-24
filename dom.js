@@ -921,27 +921,19 @@ var fdjtDOM=
 	    if (trace_adjust)
 		fdjtLog("[%f] Adjusted rw=%o rh=%o newscale=%o",fdjtET(),rw,rh,newscale);
 	    applyScale(container,newscale);}
+	fdjtDOM.applyScale=applyScale;
 	fdjtDOM.adjustToFit=adjustToFit;
 	fdjtDOM.insideBounds=getInsideBounds;
-	function getFit(elt){
-	    var style=getStyle(elt);
-	    var geom=getGeometry(elt);
-	    var maxheight=parsePX(style.maxHeight);
-	    if (maxheight)
-		return geom.height/maxheight;
-	    else return 1.0;}
-	fdjtDOM.getFit=getFit;
-	/* Use Newton's method to get this right */
-	function sizeToFit(elt){
-	    var style=getStyle(elt);
-	    var geom=getGeometry(elt);
-	    var maxheight=parsePX(style.maxHeight);
-	    var fontsize=((maxheight)&&(100*(maxheight/geom.height)));
-	    //fdjtLog("sizeToFit maxh=%o maxheight=%o gh=%o fs=%o",
-	    // style.maxHeight,maxheight,geom.height,fontsize);
-	    if (fontsize) elt.style.fontSize=fontsize+"%";
-	    else elt.style.fontSize="";}
-	fdjtDOM.sizeToFit=sizeToFit;
+	fdjtDOM.finishScale=function(container){
+	    if (!(container.maxscale)) return;
+	    if (container.scale===container.maxscale) return;
+	    var style=getStyle(container);
+	    var geom=getGeometry(container);
+	    var maxheight=((style.maxHeight)&&(parsePX(style.maxHeight)))||(geom.height);
+	    var maxwidth=((style.maxWidth)&&(parsePX(style.maxWidth)))||(geom.width);
+	    var bounds=getInsideBounds(container);
+	    var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
+	    if (!(itfits)) applyScale(container,container.maxscale);}
 
 	/* Getting various kinds of metadata */
 
