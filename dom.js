@@ -881,7 +881,7 @@ var fdjtDOM=
 		if (fdjtDOM.hasClass(image,"nofdjtscale")) continue;
 		image.style.maxWidth=image.style.width=Math.round(image.offsetWidth*adjustment)+'px';
 		image.style.maxWidth=image.style.height=Math.round(image.offsetHeight*adjustment)+'px';}}
-	function adjustToFit(container,threshold){
+	function adjustToFit(container,threshold,padding){
 	    var trace_adjust=(container.traceadjust)||fdjtDOM.trace_adjust||default_trace_adjust;
 	    var style=getStyle(container);
 	    var geom=getGeometry(container);
@@ -891,6 +891,8 @@ var fdjtDOM=
 	    var scale=(container.scale)||100.0;
 	    var bounds=getInsideBounds(container);
 	    var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
+	    if (typeof padding === 'undefined') padding=12;
+	    maxheight=maxheight-padding; maxwidth=maxwidth-padding;
 	    if (trace_adjust) {
 		fdjtLog("[%f] Adjusting %o scale=%o maxscale=%o%s",
 			fdjtET(),container,scale,container.maxscale,((itfits)?" (fits)":""));
