@@ -891,8 +891,11 @@ var fdjtDOM=
 	    var scale=(container.scale)||100.0;
 	    var bounds=getInsideBounds(container);
 	    var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
-	    if (typeof padding === 'undefined') padding=12;
-	    maxheight=maxheight-padding; maxwidth=maxwidth-padding;
+	    var hpadding=fdjtDOM.parsePX(style.paddingLeft)||0+
+		fdjtDOM.parsePX(style.paddingRight)||0;
+	    var vpadding=fdjtDOM.parsePX(style.paddingTop)||0+
+		fdjtDOM.parsePX(style.paddingBottom)||0;
+	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
 	    if (trace_adjust) {
 		fdjtLog("[%f] Adjusting %o scale=%o maxscale=%o%s",
 			fdjtET(),container,scale,container.maxscale,((itfits)?" (fits)":""));
