@@ -912,9 +912,10 @@ var fdjtDOM=
 		    container.maxscale=scale;}
 	    var dh=bounds.height-maxheight; var dw=bounds.width-maxwidth;
 	    var rh=maxheight/bounds.height; var rw=maxwidth/bounds.width;
-	    var newscale=((itfits)?(scale*Math.sqrt((maxwidth*maxheight)/(bounds.width*bounds.height))):
-			  (container.maxscale)?(container.maxscale+((container.scale-container.maxscale)/2)):
-			  (rh<rw)?(scale*rh):(scale*rw));
+	    var newscale=
+		((itfits)?(scale*Math.sqrt((maxwidth*maxheight)/(bounds.width*bounds.height))):
+		 (container.maxscale)?(container.maxscale+((container.scale-container.maxscale)/2)):
+		 (rh<rw)?(scale*rh):(scale*rw));
 	    if (trace_adjust)
 		fdjtLog("[%f] Adjusted rw=%o rh=%o newscale=%o",fdjtET(),rw,rh,newscale);
 	    applyScale(container,newscale);}
