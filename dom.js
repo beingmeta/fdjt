@@ -627,6 +627,45 @@ var fdjtDOM=
 	    domappend(node,arguments,4);
 	    return node;};
 
+	function getInputs(root,name,type){
+	    var results=[];
+	    var inputs=root.getElementsByTagName('input');
+	    var i=0; var lim=inputs.length;
+	    while (i<lim) {
+		if (((!(name))||(inputs[i].name===name))||
+		    ((!(type))||(inputs[i].type===type)))
+		    results.push(inputs[i++]); 
+		else i++;}
+	    if ((!type)||(type==='textarea')||(type==='text')) {
+		var inputs=root.getElementsByTagName('textarea');
+		var i=0; var lim=inputs.length;
+		while (i<lim) {
+		    if (((!(name))||(inputs[i].name===name))||
+			((!(type))||(inputs[i].type===type)))
+			results.push(inputs[i++]); 
+		    else i++;}}
+	    if ((!type)||(type==='button')||(type==='submit')) {
+		var inputs=root.getElementsByTagName('button');
+		var i=0; var lim=inputs.length;
+		while (i<lim) {
+		    if (((!(name))||(inputs[i].name===name))||
+			((!(type))||(inputs[i].type===type)))
+			results.push(inputs[i++]); 
+		    else i++;}}
+	    return results;}
+
+	fdjtDOM.getInputs=getInputs;
+	fdjtDOM.getInput=function(root,name,type){
+	    var results=getInputs(root,name||false,type||false);
+	    if ((results)&&(results.length===1))
+		return results[0];
+	    else if ((results)&&(results.length)) {
+		fdjtLog.warn(
+		    "Ambiguous input reference name=%o type=%o under %o",
+		    name,type,root);
+		return results[0];}
+	    else return false;};
+	
 	/* Getting style information generally */
 
 	function getStyle(elt,prop){
