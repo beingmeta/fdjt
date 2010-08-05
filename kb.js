@@ -759,7 +759,7 @@ var fdjtKB=
 	    else if (nodup) 
 		if (obj.hasOwnProperty(field)) {
 		    var vals=obj[field];
-		    if (contains(vals,val))  
+		    if (!(contains(vals,val)))
 			obj[field].push(val);
 		    else {}}
 	    else obj[field]=new Array(val);
