@@ -173,6 +173,7 @@ table.fdjt td input[type='TEXT'] { width: 100%;}
 /* Auto completion */
 
 div.completions {font-family: sans,sans-serif;}
+.completions .label { float: right;}
 
 .completions .nocompletemsg { display: none;}
 .completions.noresults span.nocompletemsg { display: inline;}

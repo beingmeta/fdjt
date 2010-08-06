@@ -153,6 +153,13 @@ var fdjtKB=
 
 	var uuid_pattern=
 	    /[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
+	var refmaps=[];
+	fdjtKB.addRefMap=function(map){
+	  var i=0; var lim=refmaps.length;
+	  while (i<lim) if (refmaps[i++]===map) return false;
+	  refmaps.push(map);
+	  return refmaps.length;};
+
 	function getPool(arg){
 	    var atpos; 
 	    if (arg instanceof Ref) return arg.pool;
@@ -170,6 +177,14 @@ var fdjtKB=
 			 (arg.search(uuid_pattern)===3)) {
 		    var uuid_type=arg.slice(37);
 		    return fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
+		else if (refmaps.length) {
+		  var i=0; var lim=refmaps.length;
+		  while (i<lim) {
+		    var refmap=refmaps[i++];
+		    var ref=((typeof refmap === 'function')?
+			     (refmap(arg)):(refmap[arg]));
+		    if (ref) return ref;}
+		  return false;}
 		else return false;}
 	    else return false;}
 	fdjtKB.getPool=getPool;
