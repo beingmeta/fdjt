@@ -41,6 +41,22 @@ var fdjtKB=
 	var debug=false;
 	fdjtKB.setDebug=function(flag){debug=flag;};
 
+	// This checks if a reference is a 'real object'
+	// I.E., something which shouldn't be used as a key
+	//  or fast set member and not an array either
+	var arrayobjs=(typeof new Array(1,2,3) === 'object');
+	var stringobjs=(typeof new String() === 'object');
+	function isobject(x){
+	  return ((typeof x === 'object')&&
+		  (!((arrayobjs)&&(x instanceof Array))));}
+	function objectkey(x){
+	  if (typeof x !== 'object') return x;
+	  else if (x instanceof String) return x.toString();
+	  else return key.qid||key.oid||key.uuid||key._fdjtid||register(key);}
+	fdjtKB.objectkey=objectkey;
+	fdjtKB.isobject=isobject;
+	
+
 	// We allocate 16 million IDs for miscellaneous objects
 	//  and use counter to track them.
 	var counter=0;
@@ -419,79 +435,79 @@ var fdjtKB=
 	    this.scalar_map={}; this.object_map={};
 	    return this;}
 	Map.prototype.get=function(key) {
-	    if ((typeof key === 'string')||(typeof key === 'number'))
-		return this.scalar_map[key];
-	    else return this.object_map
-	    [key.qid||key.oid||key.uuid||key._fdjtid||register(key)];};
+	  if (isobject(key))
+	    return this.object_map
+	      [key.qid||key.oid||key.uuid||key._fdjtid||register(key)];
+	  else return this.scalar_map[key];};
 	Map.prototype.set=function(key,val) {
-	    if ((typeof key === 'string')||(typeof key === 'number'))
-		return this.scalar_map[key]=val;
-	    else this.object_map
-	    [key.qid||key.oid||key.uuid||key._fdjtid||register(key)]=val;};
+	  if (isobject(key))
+	    this.object_map
+	      [key.qid||key.oid||key.uuid||key._fdjtid||register(key)]=val;
+	  else this.scalar_map[key]=val;};
 	Map.prototype.add=function(key,val) {
-	    if ((typeof key === 'string')||(typeof key === 'number')) {
-		var cur=this.scalar_map[key];
-		if (!(cur)) {
-		    this.scalar_map[key]=[val];
-		    return true;}
-		else if (!(cur instanceof Array)) {
-		    if (cur===val) return false;
-		    else {
-			this.scalar_map[key]=[cur,val];
-			return true;}}
-		else if (contains(cur,val)) return false;
-		else {
-		    cur.push(val); return true;}}
+	  if (isobject(key)) {
+	    var objkey=key.qid||key.oid||key.uuid||key._fdjtid||
+	    register(key);
+	    var cur=this.object_map[objkey];
+	    if (!(cur)) {
+	      this.object_map[objkey]=[val];
+	      return true;}
+	    else if (!(cur instanceof Array)) {
+	      if (cur===val) return false;
+	      else {
+		this.object_map[objkey]=[cur,val];
+		return true;}}
+	    else if (contains(cur,val)) return false;
 	    else {
-		var objkey=key.qid||key.oid||key.uuid||key._fdjtid||
-		    register(key);
-		var cur=this.object_map[objkey];
-		if (!(cur)) {
-		    this.object_map[objkey]=[val];
-		    return true;}
-		else if (!(cur instanceof Array)) {
-		    if (cur===val) return false;
-		    else {
-			this.object_map[objkey]=[cur,val];
-			return true;}}
-		else if (contains(cur,val)) return false;
-		else {
-		    cur.push(val); return true;}}};
+	      cur.push(val); return true;}}
+	  else  {
+	    var cur=this.scalar_map[key];
+	    if (!(cur)) {
+	      this.scalar_map[key]=[val];
+	      return true;}
+	    else if (!(cur instanceof Array)) {
+	      if (cur===val) return false;
+	      else {
+		this.scalar_map[key]=[cur,val];
+		return true;}}
+	    else if (contains(cur,val)) return false;
+	    else {
+	      cur.push(val); return true;}}};
 	Map.prototype.drop=function(key,val) {
-	    if (!(val)) {
-		if ((typeof key === 'string')||(typeof key === 'number'))
-		    delete this.scalar_map[key];
-		else delete this.object_map[
-		    key.qid||key.oid||key.uuid||key._fdjtid||register(key)];}
-	    else if ((typeof key === 'string')||(typeof key === 'number')) {
-		var cur=this.scalar_map[key]; var pos=-1;
-		if (!(cur)) return false;
-		else if (!(cur instanceof Array)) {
-		    if (cur===val) {
-			delete this.scalar_map[key];
-			return true;}
-		    else return false;}
-		else if ((pos=position(val,cur))>=0) {
-		    if (cur.length===1)
-			delete this.scalar_map[key];
-		    else cur.splice(pos);
-		    return true;}
-		else return false;}
-	    else {
-		var objkey=key.qid||key.oid||key.uuid||key._fdjtid||
-		    register(key);
-		var cur=this.object_map[key];
-		if (!(cur)) return false;
-		else if (!(cur instanceof Array)) {
-		    if (cur===val) {
-			delete this.object_map[objkey];
-			return true;}
-		    else return false;}
-		else if ((pos=position(val,cur))>=0) {
-		    if (cur.length===1) delete this.object_map[objkey];
-		    else cur.splice(pos);
-		    return true;}
-		else return false;}};
+	  if (!(val)) {
+	    if (isobject(key))
+	      delete this.object_map
+		[key.qid||key.oid||key.uuid||key._fdjtid||register(key)];
+	    else delete this.scalar_map[key];}
+	  else if (isobject(key)) {
+	    var objkey=key.qid||key.oid||key.uuid||key._fdjtid||
+	    register(key);
+	    var cur=this.object_map[key];
+	    if (!(cur)) return false;
+	    else if (!(cur instanceof Array)) {
+	      if (cur===val) {
+		delete this.object_map[objkey];
+		return true;}
+	      else return false;}
+	    else if ((pos=position(val,cur))>=0) {
+	      if (cur.length===1) delete this.object_map[objkey];
+	      else cur.splice(pos);
+	      return true;}
+	    else return false;}
+	  else {
+	    var cur=this.scalar_map[key]; var pos=-1;
+	    if (!(cur)) return false;
+	    else if (!(cur instanceof Array)) {
+	      if (cur===val) {
+		delete this.scalar_map[key];
+		return true;}
+	      else return false;}
+	    else if ((pos=position(val,cur))>=0) {
+	      if (cur.length===1)
+		delete this.scalar_map[key];
+	      else cur.splice(pos);
+	      return true;}
+	    else return false;}};
 	fdjtKB.Map=Map;
 
 	/* Indices */
@@ -500,44 +516,49 @@ var fdjtKB=
 	    var scalar_indices={};
 	    var object_indices={};
 	    return function(item,prop,val,add){
-		var valkey; var indices=scalar_indices;
-		if (!(prop))
-		    return {scalars: scalar_indices, objects: object_indices};
-		else if (!(val))
-		    return {scalars: scalar_indices[prop], objects: object_indices[prop]};
-		else if ((typeof val === 'string')||(typeof val === 'number'))
-		    valkey=val;
-		else {
-		    valkey=val.qid||val.uuid||val.oid||val._fdjtid||register(val);
-		    indices=object_indices;}
-		var index=indices[prop];
-		if (!(item))
-		    if (!(index)) return [];
+	      var valkey; var indices=scalar_indices;
+	      if (!(prop))
+		return {scalars: scalar_indices, objects: object_indices};
+	      else if (!(val))
+		return {scalars: scalar_indices[prop],objects: object_indices[prop]};
+	      else if (isobject(val)) {
+		valkey=val.qid||val.uuid||val.oid||val._fdjtid||
+		  register(val);
+		indices=object_indices;}
+	      else valkey=val;
+	      var index=indices[prop];
+	      if (!(item))
+		if (!(index)) return [];
 		else return Set(index[valkey]);
-		if (!(index))
-		    if (add) {
-			indices[prop]=index={};
-			index[valkey]=[item];
-			return true;}
+ 	      var itemkey=
+		((isobject(item))?
+		 (item.qid||item.uuid||item.oid||
+		  item._fdjtid||register(item)):
+		 (item));
+	      if (!(index))
+		if (add) {
+		  indices[prop]=index={};
+		  index[valkey]=[itemkey];
+		  return true;}
 		else return false;
-		var curvals=index[valkey];
-		if (curvals) {
-		    var pos=position(curvals,val);
-		    if (pos<0)
-			if (add) {
-			    curvals.push(item);
-			    return true;}
-		    else return false;
-		    else if (add) return false;
-		    else {
-			var sortlen=curvals._sortlen;
-			curvals.splice(pos,1);
-			if (pos<sortlen) curvals._sortlen--;
-			return true;}}
-		else if (add) {
-		    index[valkey]=Set(item);
+	      var curvals=index[valkey];
+	      if (curvals) {
+		var pos=position(curvals,itemkey);
+		if (pos<0) {
+		  if (add) {
+		    curvals.push(itemkey);
 		    return true;}
-		else return false;};}
+		  else return false;}
+		else if (add) return false;
+		else {
+		  var sortlen=curvals._sortlen;
+		  curvals.splice(pos,1);
+		  if (pos<sortlen) curvals._sortlen--;
+		  return true;}}
+	      else if (add) {
+		index[valkey]=Set(itemkey);
+		return true;}
+	      else return false;};}
 	fdjtKB.Index=Index;
 
 	/* Refs */
