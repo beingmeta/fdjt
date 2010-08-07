@@ -534,7 +534,8 @@ var fdjtDOM=
 		gather_children(node,classname,attrib||false,results);}
 	    return results;}
 	fdjtDOM.getChildren=getChildren;
-	fdjtDOM.$=function(spec,root){return getChildren(root||document,spec);};
+	fdjtDOM.$=function(spec,root){
+	    return toArray(getChildren(root||document,spec));};
 	fdjtDOM.getFirstChild=function(elt,spec){
 	    var children=getChildren(elt,spec);
 	    if (children.length) return children[0]; else return false;};
@@ -632,7 +633,7 @@ var fdjtDOM=
 	    var inputs=root.getElementsByTagName('input');
 	    var i=0; var lim=inputs.length;
 	    while (i<lim) {
-		if (((!(name))||(inputs[i].name===name))||
+		if (((!(name))||(inputs[i].name===name))&&
 		    ((!(type))||(inputs[i].type===type)))
 		    results.push(inputs[i++]); 
 		else i++;}
@@ -640,7 +641,7 @@ var fdjtDOM=
 		var inputs=root.getElementsByTagName('textarea');
 		var i=0; var lim=inputs.length;
 		while (i<lim) {
-		    if (((!(name))||(inputs[i].name===name))||
+		    if (((!(name))||(inputs[i].name===name))&&
 			((!(type))||(inputs[i].type===type)))
 			results.push(inputs[i++]); 
 		    else i++;}}
@@ -648,7 +649,7 @@ var fdjtDOM=
 		var inputs=root.getElementsByTagName('button');
 		var i=0; var lim=inputs.length;
 		while (i<lim) {
-		    if (((!(name))||(inputs[i].name===name))||
+		    if (((!(name))||(inputs[i].name===name))&&
 			((!(type))||(inputs[i].type===type)))
 			results.push(inputs[i++]); 
 		    else i++;}}
