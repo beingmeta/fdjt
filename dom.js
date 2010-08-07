@@ -922,15 +922,19 @@ var fdjtDOM=
 		image.style.maxWidth=image.style.width=Math.round(image.offsetWidth*adjustment)+'px';
 		image.style.maxWidth=image.style.height=Math.round(image.offsetHeight*adjustment)+'px';}}
 	function adjustToFit(container,threshold,padding){
-	    var trace_adjust=(container.traceadjust)||fdjtDOM.trace_adjust||default_trace_adjust;
+	    var trace_adjust=(container.traceadjust)||
+		fdjtDOM.trace_adjust||default_trace_adjust;
 	    var style=getStyle(container);
 	    var geom=getGeometry(container);
-	    var maxheight=((style.maxHeight)&&(parsePX(style.maxHeight)))||(geom.height);
-	    var maxwidth=((style.maxWidth)&&(parsePX(style.maxWidth)))||(geom.width);
+	    var maxheight=((style.maxHeight)&&(parsePX(style.maxHeight)))||
+		(geom.height);
+	    var maxwidth=((style.maxWidth)&&(parsePX(style.maxWidth)))||
+		(geom.width);
 	    var goodenough=1-((threshold||0.2));
 	    var scale=(container.scale)||100.0;
 	    var bounds=getInsideBounds(container);
-	    var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
+	    var itfits=((bounds.height/maxheight)<=1)&&
+		((bounds.width/maxwidth)<=1);
 	    var hpadding=fdjtDOM.parsePX(style.paddingLeft)||0+
 		fdjtDOM.parsePX(style.paddingRight)||0;
 	    var vpadding=fdjtDOM.parsePX(style.paddingTop)||0+
