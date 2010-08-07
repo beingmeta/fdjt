@@ -87,10 +87,11 @@ var fdjtAjax=
 	    var inputs=fdjtDOM.getChildren(form,"INPUT");
 	    var i=0; while (i<inputs.length) {
 		var input=inputs[i++];
-		if ((!(input.disabled)) &&
-		    (((input.type==="radio") || (input.type==="checkbox")) ?
-		     (input.checked) : (true)))
-		    parameters=add_query_param(parameters,input.name,input.value);}
+		if (!(input.disabled)) {
+		    if (((input.type==="RADIO") || (input.type==="CHECKBOX")) ?
+			(input.checked) : (true))
+			parameters=add_query_param(parameters,input.name,input.value);
+		    else parameters=add_query_param(parameters,input.name,input.value);}}
 	    var textareas=fdjtDOM.getChildren(form,"TEXTAREA");
 	    i=0; while (i<textareas.length) {
 		var textarea=textareas[i++];
