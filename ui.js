@@ -160,7 +160,7 @@ var fdjtUI=
 	autoprompt_cleanup(form);}
 
     // Adds autoprompt handlers to autoprompt classes
-    function autoprompt_setup(arg) {
+    function autoprompt_setup(arg,nohandlers) {
 	var forms=fdjtDOM.getChildren(arg||document.body,"FORM");
 	var i=0; var lim=forms.length;
 	while (i<lim) {
@@ -176,9 +176,11 @@ var fdjtUI=
 			var prompt=(input.prompt)||
 			    (input.getAttribute('prompt'))||(input.title);
 			if (prompt) input.value=prompt;}
-		    fdjtDOM.addListener(input,"focus",autoprompt_onfocus);
-		    fdjtDOM.addListener(input,"blur",autoprompt_onblur);}
-		fdjtDOM.addListener(form,"submit",autoprompt_onsubmit);}}}
+		    if (!(nohandlers)) {
+			fdjtDOM.addListener(input,"focus",autoprompt_onfocus);
+			fdjtDOM.addListener(input,"blur",autoprompt_onblur);}}
+		if (!(nohandlers))
+		    fdjtDOM.addListener(form,"submit",autoprompt_onsubmit);}}}
     
     fdjtUI.AutoPrompt.setup=autoprompt_setup;
     fdjtUI.AutoPrompt.onfocus=autoprompt_onfocus;
@@ -416,6 +418,27 @@ var fdjtUI=
 	    updateDisplay(this,result.matches);
 	    fdjtDOM.dropClass(this.dom,"noinput");
 	    fdjtDOM.dropClass(this.dom,"noresults");}
+	return result;};
+
+    Completions.prototype.getByValue=function(values){
+	var result=[];
+	var byvalue=this.byvalue;
+	if (!(values instanceof Array)) values=[values];
+	var i=0; var lim=values.length;
+	while (i<lim) {
+	    var value=values[i++];
+	    var completions=byvalue.get(value);
+	    if (completions) result=result.concat(completions);}
+	return result;};
+    Completions.prototype.getByKey=function(keys){
+	var result=[];
+	var byvalue=this.bykey;
+	if (!(keys instanceof Array)) keys=[keys];
+	var i=0; var lim=keys.length;
+	while (i<lim) {
+	    var key=keys[i++];
+	    var completions=bykey.get(key);
+	    if (completions) result=result.concat(completions);}
 	return result;};
 
     Completions.prototype.setCues=function(values){
