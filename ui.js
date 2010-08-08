@@ -161,15 +161,19 @@ var fdjtUI=
 
     // Adds autoprompt handlers to autoprompt classes
     function autoprompt_setup(arg,nohandlers) {
-	var forms=fdjtDOM.getChildren(arg||document.body,"FORM");
+	var forms=
+	  ((arg.tagName==="FORM")?[arg]:
+	   (fdjtDOM.getChildren(arg||document.body,"FORM")));
 	var i=0; var lim=forms.length;
 	while (i<lim) {
 	    var form=forms[i++];
-	    var inputs=fdjtDOM.getChildren(form,"INPUT.autoprompt,TEXTAREA.autoprompt");
+	    var inputs=fdjtDOM.getChildren
+	      (form,"INPUT.autoprompt,TEXTAREA.autoprompt");
 	    if (inputs.length) {
 		var j=0; var jlim=inputs.length;
 		while (j<jlim) {
 		    var input=inputs[j++];
+		    fdjtLog("Initializing autoprompt for %o",input);
 		    input.blur();
 		    if (fdjtString.isEmpty(input.value)) {
 			fdjtDOM.addClass(input,"isempty");
