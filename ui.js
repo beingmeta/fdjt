@@ -173,7 +173,6 @@ var fdjtUI=
 		var j=0; var jlim=inputs.length;
 		while (j<jlim) {
 		    var input=inputs[j++];
-		    fdjtLog("Initializing autoprompt for %o",input);
 		    input.blur();
 		    if (fdjtString.isEmpty(input.value)) {
 			fdjtDOM.addClass(input,"isempty");
