@@ -313,7 +313,7 @@ var fdjtUI=
 	    smap[lower]=stdkey;
 	    stdkey=lower;}
 	if (!(fdjtDOM.hasParent(completion,container)))
-	    fdjtDOM.append(container,completion);
+	    fdjtDOM.append(container,completion," ");
 	addNodeKey(completion,stdkey,ptree,bykey,anyword);
 	if (fdjtDOM.hasClass(completion,"cue")) c.cues.push(completion);
 	var variations=fdjtDOM.getChildren(completion,".variation");
@@ -423,25 +423,41 @@ var fdjtUI=
 	    fdjtDOM.dropClass(this.dom,"noresults");}
 	return result;};
 
-    Completions.prototype.getByValue=function(values){
+    Completions.prototype.getByValue=function(values,spec){
 	var result=[];
 	var byvalue=this.byvalue;
+	if (spec) spec=new fdjtDOM.Selector(spec);
 	if (!(values instanceof Array)) values=[values];
 	var i=0; var lim=values.length;
 	while (i<lim) {
 	    var value=values[i++];
 	    var completions=byvalue.get(value);
-	    if (completions) result=result.concat(completions);}
+	    if (completions) {
+		if (spec) {
+		    var j=0; var jlim=completions.length;
+		    while (j<jlim) {
+			if (spec.match(completions[j]))
+			    result.push(completions[j++]);
+			else j++;}}
+		else result=result.concat(completions);}}
 	return result;};
-    Completions.prototype.getByKey=function(keys){
+    Completions.prototype.getByKey=function(keys,spec){
 	var result=[];
 	var byvalue=this.bykey;
+	if (spec) spec=new fdjtDOM.Selector(spec);
 	if (!(keys instanceof Array)) keys=[keys];
 	var i=0; var lim=keys.length;
 	while (i<lim) {
 	    var key=keys[i++];
 	    var completions=bykey.get(key);
-	    if (completions) result=result.concat(completions);}
+	    if (completions) {
+		if (spec) {
+		    var j=0; var jlim=completions.length;
+		    while (j<jlim) {
+			if (spec.match(completions[j]))
+			    result.push(completions[j++]);
+			else j++;}}
+		else result=result.concat(completions);}}
 	return result;};
 
     Completions.prototype.setCues=function(values){
