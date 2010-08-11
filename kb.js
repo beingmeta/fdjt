@@ -52,7 +52,7 @@ var fdjtKB=
 	function objectkey(x){
 	  if (typeof x !== 'object') return x;
 	  else if (x instanceof String) return x.toString();
-	  else return key.qid||key.oid||key.uuid||key._fdjtid||register(key);}
+	  else return x.qid||x.oid||x.uuid||x._fdjtid||register(x);}
 	fdjtKB.objectkey=objectkey;
 	fdjtKB.isobject=isobject;
 	
@@ -111,6 +111,7 @@ var fdjtKB=
 	  else return ref.load();};
 
 	Pool.prototype.ref=function(qid,cons) {
+	    if (qid instanceof Ref) return qid;
 	    if (this.map[qid]) return this.map[qid];
 	    if (!(cons)) cons=this.cons(qid);
 	    else if (cons instanceof Ref) {}
@@ -165,37 +166,51 @@ var fdjtKB=
 	    if (arg instanceof Ref) return arg.pool;
 	    else if (typeof arg === 'number') return false;
 	    else if (typeof arg === 'string') {
-		if (((arg[0]===':')&&(arg[1]==='@'))&&
-		    (((slash=arg.indexOf('/',2))>=0))) 
-		    return fdjtKB.PoolRef(arg.slice(0,slash+1));
-		else if ((atpos=arg.indexOf('@'))>1) 
-		    return fdjtKB.poolRef(arg.slice(atpos+1));
-		else if (arg.search(uuid_pattern)===0) {
-		    var uuid_type=arg.slice(34);
-		    return fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
-		else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[2]==='U')&&
-			 (arg.search(uuid_pattern)===3)) {
-		    var uuid_type=arg.slice(37);
-		    return fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
-		else if (refmaps.length) {
-		  var i=0; var lim=refmaps.length;
-		  while (i<lim) {
-		    var refmap=refmaps[i++];
-		    var ref=((typeof refmap === 'function')?
-			     (refmap(arg)):(refmap[arg]));
-		    if (ref) return ref;}
-		  return false;}
+		var ref=parseRef(arg);
+		if (ref) return ref.pool;
 		else return false;}
 	    else return false;}
 	fdjtKB.getPool=getPool;
 
-	function getRef(arg){
-	    if (arg instanceof Ref) return arg;
+	function parseRef(arg,kno){
+	    if (((arg[0]===':')&&(arg[1]==='@'))&&
+		(((slash=arg.indexOf('/',2))>=0)))  {
+		var pool=fdjtKB.PoolRef(arg.slice(1,slash+1));
+		return pool.ref(arg);}
+	    else if (((arg[0]==='@'))&&
+		     (((slash=arg.indexOf('/',2))>=0)))  {
+		var pool=fdjtKB.PoolRef(arg.slice(0,slash+1));
+		return pool.ref(arg);}
+	    else if ((atpos=arg.indexOf('@'))>1)  {
+		var pool=fdjtKB.PoolRef(arg.slice(atpos+1));
+		return pool.ref(arg.slice(0,atpos));}
+	    else if (arg.search(uuid_pattern)===0) {
+		var uuid_type=arg.slice(34);
+		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
+		return pool.ref(arg);}
+	    else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[2]==='U')&&
+		     (arg.search(uuid_pattern)===3)) {
+		var uuid_type=arg.slice(37);
+		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
+		return pool.ref(arg.slice(3));}
+	    else if (refmaps.length) {
+		var i=0; var lim=refmaps.length;
+		while (i<lim) {
+		    var refmap=refmaps[i++];
+		    var ref=((typeof refmap === 'function')?
+			     (refmap(arg)):(refmap[arg]));
+		    if (ref) return ref;}
+		return false;}
+	    else if (kno) return kno.ref(arg);
+	    else return false;}
+
+	function getRef(arg,kno){
+	    if (!(arg)) return false;
+	    else if (arg instanceof Ref) return arg;
 	    else if (typeof arg === 'number') return false;
-	    else {
-		var pool=getPool(arg);
-		if (pool) return pool.ref(arg);
-		else return false;}}
+	    else if (typeof arg === 'string')
+		return parseRef(arg,kno);
+	    else return false;}
 	fdjtKB.ref=fdjtKB.getRef=getRef;
 	function loadRef(arg){
 	  var obj=getRef(arg);
