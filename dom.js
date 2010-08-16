@@ -899,16 +899,21 @@ var fdjtDOM=
 		var child=children[i++];
 		if (!(child.offsetLeft)) continue;
 		if (left===false) {
-		    left=child.offsetLeft; right=child.offsetLeft+child.offsetWidth;
-		    top=child.offsetTop; bottom=child.offsetTop+child.offsetHeight;}
+		    left=child.offsetLeft;
+		    right=child.offsetLeft+child.offsetWidth;
+		    top=child.offsetTop;
+		    bottom=child.offsetTop+child.offsetHeight;}
 		else {
 		    if (child.offsetLeft<left) left=child.offsetLeft;
-		    if ((child.offsetLeft+child.offsetWidth)>right) right=(child.offsetLeft+child.offsetWidth);
-		    if ((child.offsetTop+child.offsetHeight)>bottom) bottom=(child.offsetTop+child.offsetHeight);}}
+		    if ((child.offsetLeft+child.offsetWidth)>right)
+		      right=(child.offsetLeft+child.offsetWidth);
+		    if ((child.offsetTop+child.offsetHeight)>bottom)
+		      bottom=(child.offsetTop+child.offsetHeight);}}
 	    return {left: left,right: right,top: top, bottom: bottom,
-		    width: right-left,height:bottom-top};}
+		width: right-left,height:bottom-top};}
 	function applyScale(container,scale){
-	    var images=fdjtDOM.getChildren(container,"IMG"); var ilim=images.length;
+	    var images=fdjtDOM.getChildren(container,"IMG");
+	    var ilim=images.length;
 	    var oldscale=container.scale||100;
 	    var adjustment=scale/oldscale;
 	    container.scale=scale;
@@ -919,8 +924,10 @@ var fdjtDOM=
 	    var iscan=0; while (iscan<ilim) {
 		var image=images[iscan++];
 		if (fdjtDOM.hasClass(image,"nofdjtscale")) continue;
-		image.style.maxWidth=image.style.width=Math.round(image.offsetWidth*adjustment)+'px';
-		image.style.maxWidth=image.style.height=Math.round(image.offsetHeight*adjustment)+'px';}}
+		image.style.maxWidth=image.style.width=
+		  Math.round(image.offsetWidth*adjustment)+'px';
+		image.style.maxWidth=image.style.height=
+		  Math.round(image.offsetHeight*adjustment)+'px';}}
 	function adjustToFit(container,threshold,padding){
 	    var trace_adjust=(container.traceadjust)||
 		fdjtDOM.trace_adjust||default_trace_adjust;
@@ -942,14 +949,17 @@ var fdjtDOM=
 	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
 	    if (trace_adjust) {
 		fdjtLog("[%f] Adjusting %o scale=%o maxscale=%o%s",
-			fdjtET(),container,scale,container.maxscale,((itfits)?" (fits)":""));
+			fdjtET(),container,scale,container.maxscale,
+			((itfits)?" (fits)":""));
 		fdjtLog("[%f] maxw=%o, maxh=%o maxa=%o w=%o h=%o a=%o l=%o r=%o t=%o b=%o",
 			fdjtET(),
 			maxwidth,maxheight,maxwidth*maxheight,
 			bounds.width,bounds.height,bounds.width*bounds.height,
 			bounds.left,bounds.right,bounds.top,bounds.bottom);}
 	    /* This is good enough, so we stop adjusting */
-	    if ((itfits)&&(((bounds.height*bounds.width)/(maxheight*maxwidth))>goodenough))
+	    if ((itfits)&&
+		(((bounds.height*bounds.width)/
+		  (maxheight*maxwidth))>goodenough))
 		return;
 	    if (itfits) {
 		if ((!(container.maxscale))||(scale>container.maxscale))
@@ -961,7 +971,8 @@ var fdjtDOM=
 		 (container.maxscale)?(container.maxscale+((container.scale-container.maxscale)/2)):
 		 (rh<rw)?(scale*rh):(scale*rw));
 	    if (trace_adjust)
-		fdjtLog("[%f] Adjusted rw=%o rh=%o newscale=%o",fdjtET(),rw,rh,newscale);
+		fdjtLog("[%f] Adjusted rw=%o rh=%o newscale=%o",
+			fdjtET(),rw,rh,newscale);
 	    applyScale(container,newscale);}
 	fdjtDOM.applyScale=applyScale;
 	fdjtDOM.adjustToFit=adjustToFit;
@@ -1237,12 +1248,12 @@ var fdjtDOM=
 	    return (win.pageXOffset||win.scrollX||win.document.documentElement.scrollLeft||0);};
 	fdjtDOM.viewHeight=function(win){
 	    win=win||window;
-	    return win.innerHeight||
-		win.document.documentElement.clientHeight;};
+	    var docelt=((win.document)&&(win.document.documentElement));
+	    return ((docelt)&&(docelt.clientHeight))||win.innerHeight;};
 	fdjtDOM.viewWidth=function(win){
 	    win=win||window;
-	    return win.innerWidth||
-		win.document.documentElement.clientWidth;};
+	    var docelt=((win.document)&&(win.document.documentElement));
+	    return ((docelt)&&(docelt.clientWidth))||win.innerWidth;};
 
 	/* Listeners (should be in UI?) */
 
