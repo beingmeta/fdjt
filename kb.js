@@ -136,7 +136,7 @@ var fdjtKB=
 	    else {
 		var qid=data.qid||data.oid||data.uuid;
 		if ((debug)&&(this.traceimport))
-		  fdjtLog("[%f] Import to %s %o <== %o",
+		  fdjtLog("[%fs] Import to %s %o <== %o",
 			  fdjtET(),this.name,obj,data);
 		if (this.storage) this.storage.Import(data);
 		if (qid) {

@@ -226,7 +226,7 @@ function fdjtInitCompletions(div,completions,opts)
   var i=0; while (i<completions.length)
 	     fdjtAddCompletion(div,completions[i++],opts,true);
   if (fdjt_trace_completion_setup)
-    fdjtTrace("[%fs][%fs] Initialized %d completions, %d strings, %d items for %o",
+    fdjtTrace("[%fs][+%fs] Initialized %d completions, %d strings, %d items for %o",
 	      fdjtElapsedTime(),fdjtDiffTime(start),
 	      completions.length,divinfo.prefixtree.strings.length,
 	      divinfo.completionmap._count,
@@ -262,7 +262,7 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
   if (!(cinfo.allcompletions))
     fdjtInitCompletions(container,false,options);
   if (fdjt_trace_completion)
-    fdjtLog("[%f] Complete on '%o' in %o against %o, cs=%o",
+    fdjtLog("[%fs] Complete on '%o' in %o against %o, cs=%o",
 	    fdjtElapsedTime(),string,input_elt,container,
 	    cinfo._curstring);
   var start=new Date();
@@ -280,14 +280,14 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
 	var node=displayed[i++];
 	node.removeAttribute('displayed');}}
     if ((fdjt_trace_completion)&&(displayed))
-      fdjtLog("[%f] Hiding %d displayed items in %o",
+      fdjtLog("[%fs] Hiding %d displayed items in %o",
 	      fdjtElapsedTime(),displayed.length,container);
     cinfo._displayed=[];
     return empty;}
   else if ((cinfo._curstring) && (string===cinfo._curstring)) {
     fdjtDropClass(container,"noinput");
     if (fdjt_trace_completion)
-      fdjtLog("[%f] Using %d cached results for %s against %o",
+      fdjtLog("[%fs] Using %d cached results for %s against %o",
 	      fdjtElapsedTime(),container._results.length,string,container);
     heads=cinfo._results;
     variations=heads.variations;
@@ -299,7 +299,7 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
     var prefixtree=cinfo.prefixtree;
     strings=fdjtPrefixFind(prefixtree,qstring,0);
     if (fdjt_detail_completion)
-      fdjtLog("[%f][%fs] Found %d strings from %s/%s",
+      fdjtLog("[%fs][+%fs] Found %d strings from %s/%s",
 	      fdjtElapsedTime(),fdjtDeltaTime(timer),
 	      strings.length,qstring,string);
     if ((!(strings))||(strings.length===0)) {
@@ -332,7 +332,7 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
 	heads.strings=norms;}
       else heads.strings=strings;
       if (fdjt_trace_completion)
-	fdjtLog("[%f][%fs] Got %d(%d) matches from %d strings matching %s/%s",
+	fdjtLog("[%fs][+%fs] Got %d(%d) matches from %d strings matching %s/%s",
 		fdjtElapsedTime(),fdjtDeltaTime(timer),
 		heads.length,variations.length,
 		strings.length,string,qstring);}}
@@ -344,7 +344,7 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
     if ((overload)||((heads.indexOf(node)<0)&&(variations.indexOf(node)<0))) {
       node.removeAttribute("displayed"); hidden++;}}
   if (fdjt_detail_completion)
-    fdjtLog("[%f][%fs] Hid %d of %d displayed items",
+    fdjtLog("[%fs][+%fs] Hid %d of %d displayed items",
 	    fdjtElapsedTime(),fdjtDeltaTime(timer),hidden,displayed.length);
   i=0; while (i<counts.length) {
     counts[i++].innerHTML=""+heads.length;}
@@ -361,16 +361,16 @@ function fdjtComplete(input_elt,string,options,maxcomplete)
       var node=variations[i++]; 
       node.setAttribute('displayed','yes');}
     if (fdjt_detail_completion)
-      fdjtLog("[%f][%fs] Revealed %d heads and %d variations",
+      fdjtLog("[%fs][+%fs] Revealed %d heads and %d variations",
 	      fdjtElapsedTime(),fdjtDeltaTime(timer),
 	      heads.length,variations.length);
     cinfo._displayed=heads.concat(variations);}
   if (fdjt_trace_completion)
     if (heads.length>10)
-      fdjtTrace("[%f][%fs] Completing on %o over %o yields %d results",
+      fdjtTrace("[%fs][+%fs] Completing on %o over %o yields %d results",
 		fdjtElapsedTime(),fdjtDiffTime(start),
 		string,input_elt,heads.length);
-    else fdjtTrace("[%f][%fs] Completing over %o on %o yields %d results: %o",
+    else fdjtTrace("[%fs][+%fs] Completing over %o on %o yields %d results: %o",
 		   fdjtElapsedTime(),fdjtDiffTime(start),input_elt,
 		   string,heads.length,heads.values);
   input_elt.completeString=string;
@@ -563,8 +563,8 @@ function fdjtSetCompletions(id,completions)
   var current=document.getElementById(id);
   if (fdjt_trace_completion)
     if (current===completions)
-      fdjtLog("[%f] Completions for #%s are unchanged",fdjtElapsedTime(),id);
-    else fdjtLog("[%f] Setting current completions #%s=%o to %o/%d",
+      fdjtLog("[%fs] Completions for #%s are unchanged",fdjtElapsedTime(),id);
+    else fdjtLog("[%fs] Setting current completions #%s=%o to %o/%d",
 		 fdjtElapsedTime(),id,current,completions,
 		 FDJT$(".completion",completions).length);
   if (!(current)) {

@@ -123,8 +123,8 @@ function fdjtLoadMessage(string)
 function fdjtWatch(x,message,data)
 {
   if (data)
-    fdjtLog("[%f] %s returning %o given %o",fdjtET(),message,x,data);
-  else fdjtLog("[%f] %s returning %o",fdjtET(),message,x);
+    fdjtLog("[%fs] %s returning %o given %o",fdjtET(),message,x,data);
+  else fdjtLog("[%fs] %s returning %o",fdjtET(),message,x);
   return x;
 }
 
