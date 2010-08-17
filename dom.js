@@ -745,7 +745,7 @@ var fdjtDOM=
 
 	/* Geometry functions */
 
-	function getGeometry(elt,withstack,root){
+	function getGeometry(elt,root,withstack){
 	    if (typeof elt === 'string')
 		elt=document.getElementById(elt);
 	    var result={};
@@ -948,10 +948,10 @@ var fdjtDOM=
 		fdjtDOM.parsePX(style.paddingBottom)||0;
 	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
 	    if (trace_adjust) {
-		fdjtLog("[%f] Adjusting %o scale=%o maxscale=%o%s",
+		fdjtLog("[%fs] Adjusting %o scale=%o maxscale=%o%s",
 			fdjtET(),container,scale,container.maxscale,
 			((itfits)?" (fits)":""));
-		fdjtLog("[%f] maxw=%o, maxh=%o maxa=%o w=%o h=%o a=%o l=%o r=%o t=%o b=%o",
+		fdjtLog("[%fs] maxw=%o, maxh=%o maxa=%o w=%o h=%o a=%o l=%o r=%o t=%o b=%o",
 			fdjtET(),
 			maxwidth,maxheight,maxwidth*maxheight,
 			bounds.width,bounds.height,bounds.width*bounds.height,
@@ -971,7 +971,7 @@ var fdjtDOM=
 		 (container.maxscale)?(container.maxscale+((container.scale-container.maxscale)/2)):
 		 (rh<rw)?(scale*rh):(scale*rw));
 	    if (trace_adjust)
-		fdjtLog("[%f] Adjusted rw=%o rh=%o newscale=%o",
+		fdjtLog("[%fs] Adjusted rw=%o rh=%o newscale=%o",
 			fdjtET(),rw,rh,newscale);
 	    applyScale(container,newscale);}
 	fdjtDOM.applyScale=applyScale;
@@ -1242,18 +1242,20 @@ var fdjtDOM=
 
 	fdjtDOM.viewTop=function(win){
 	    win=win||window;
-	    return (win.pageYOffset||win.scrollY||win.document.documentElement.scrollTop||0);};
+	    return (win.pageYOffset||win.scrollY||
+		    win.document.documentElement.scrollTop||0);};
 	fdjtDOM.viewLeft=function(win){
 	    win=win||window;
-	    return (win.pageXOffset||win.scrollX||win.document.documentElement.scrollLeft||0);};
+	    return (win.pageXOffset||win.scrollX||
+		    win.document.documentElement.scrollLeft||0);};
 	fdjtDOM.viewHeight=function(win){
 	    win=win||window;
 	    var docelt=((win.document)&&(win.document.documentElement));
-	    return ((docelt)&&(docelt.clientHeight))||win.innerHeight;};
+	    return (win.innerHeight)||((docelt)&&(docelt.clientHeight));};
 	fdjtDOM.viewWidth=function(win){
 	    win=win||window;
 	    var docelt=((win.document)&&(win.document.documentElement));
-	    return ((docelt)&&(docelt.clientWidth))||win.innerWidth;};
+	    return ((win.innerWidth)||((docelt)&&(docelt.clientWidth)));};
 
 	/* Listeners (should be in UI?) */
 
