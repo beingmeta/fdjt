@@ -1015,44 +1015,46 @@ var fdjtDOM=
 	    return false;}
 	fdjtDOM.getHEAD=getHEAD;
 
-	fdjtDOM.getMeta=function(name,multiple,matchcase){
+	function getMeta(name,multiple,matchcase,dom){
 	    var results=[];
 	    var matchname=((matchcase)&&(name.toUpperCase()));
 	    var elts=((document.getElementsByTagName)?
 		      (document.getElementsByTagName("META")):
 		      (getChildren(document,"META")));
-	    var i=0; while (i<elts.length)
-		if (elts[i])
-		    if (elts[i].name===name)
-			if (multiple) results.push(elts[i++].content);
-	    else return elts[i].content;
-	    else if ((matchname)&&
-		     (elts[i].name.toUpperCase()===matchname))
-		if (multiple) results.push(elts[i++].content);
-	    else return elts[i].content;
-	    else i++;
+	    var i=0; while (i<elts.length) {
+	      if (elts[i])
+		if ((elts[i].name===name)||
+		    ((matchname)&&(elts[i].name)&&
+		     (elts[i].name.toUpperCase()===matchname))) {
+		  if (multiple)
+		    results.push(((dom)?(elts[i++]):(elts[i++].content)));
+		  else if (dom) return elts[i];
+		  else return elts[i].content;}
+		else i++;}
 	    if (multiple) return results;
-	    else return false;};
+	    else return false;}
+	fdjtDOM.getMeta=getMeta;
 
 	// This gets a LINK href field
-	fdjtDOM.getLink=function(name,multiple,matchcase){
+	function getLink(name,multiple,matchcase,dom){
 	    var results=[];
 	    var matchname=((matchcase)&&(name.toUpperCase()));
 	    var elts=((document.getElementsByTagName)?
 		      (document.getElementsByTagName("LINK")):
 		      (getChildren(document,"LINK")));
-	    var i=0; while (i<elts.length)
-		if (elts[i])
-		    if (elts[i].rel===name)
-			if (multiple) results.push(elts[i++].href);
-	    else return elts[i].href;
-	    else if ((matchname)&&
-		     (elts[i].rel.toUpperCase()===matchname))
-		if (multiple) results.push(elts[i++].href);
-	    else return elts[i].href;
-	    else i++;
+	    var i=0; while (i<elts.length) {
+	      if (elts[i])
+		if ((elts[i].name===name)||
+		    ((matchname)&&(elts[i].name)&&
+		     (elts[i].name.toUpperCase()===matchname))) {
+		  if (multiple)
+		    results.push(((dom)?(elts[i++]):(elts[i++].href)));
+		  else if (dom) return elts[i];
+		  else return elts[i].href;}
+		else i++;}
 	    if (multiple) return results;
-	    else return false;};
+	    else return false;}
+	fdjtDOM.getLink=getLink;
 
 	/* Going forward */
 
