@@ -911,6 +911,7 @@ var fdjtDOM=
 		      bottom=(child.offsetTop+child.offsetHeight);}}
 	    return {left: left,right: right,top: top, bottom: bottom,
 		width: right-left,height:bottom-top};}
+	fdjtDOM.getInsideBounds=getInsideBounds;
 	function applyScale(container,scale){
 	    var images=fdjtDOM.getChildren(container,"IMG");
 	    var ilim=images.length;
