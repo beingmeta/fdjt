@@ -1046,8 +1046,8 @@ var fdjtDOM=
 	    var i=0; while (i<elts.length) {
 	      if (elts[i])
 		if ((elts[i].name===name)||
-		    ((matchname)&&(elts[i].name)&&
-		     (elts[i].name.toUpperCase()===matchname))) {
+		    ((matchname)&&(elts[i].rel)&&
+		     (elts[i].rel.toUpperCase()===matchname))) {
 		  if (multiple)
 		    results.push(((dom)?(elts[i++]):(elts[i++].href)));
 		  else if (dom) return elts[i];
