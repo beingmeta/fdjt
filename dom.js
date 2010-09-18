@@ -924,11 +924,17 @@ var fdjtDOM=
 	    fdjtDOM.swapClass(container,/\bfdjtscale\d+\b/,"fdjtscale"+rounded);
 	    var iscan=0; while (iscan<ilim) {
 		var image=images[iscan++];
-		if (fdjtDOM.hasClass(image,"nofdjtscale")) continue;
 		image.style.maxWidth=image.style.width=
-		  Math.round(image.offsetWidth*adjustment)+'px';
-		image.style.maxWidth=image.style.height=
-		  Math.round(image.offsetHeight*adjustment)+'px';}}
+		    image.style.maxHeight=image.style.height='';
+		var width=image.offsetWidth;
+		var height=image.offsetHeight;
+		if ((fdjtDOM.hasClass(image,"nofdjtscale"))||
+		    (fdjtDOM.hasClass(image,"noautoscale")))
+		    continue;
+		image.style.maxWidth=image.style.width=
+		    Math.round(width*adjustment)+'px';
+		image.style.maxHeight=image.style.height=
+		    Math.round(height*adjustment)+'px';}}
 	function adjustToFit(container,threshold,padding){
 	    var trace_adjust=(container.traceadjust)||
 		fdjtDOM.trace_adjust||default_trace_adjust;
