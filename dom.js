@@ -956,7 +956,7 @@ var fdjtDOM=
 	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
 	    if (trace_adjust) {
 		fdjtLog("[%fs] Adjusting %o scale=%o maxscale=%o%s",
-			fdjtET(),container,scale,container.maxscale,
+			fdjtET(),container,scale,container.maxscale||false,
 			((itfits)?" (fits)":""));
 		fdjtLog("[%fs] maxw=%o, maxh=%o maxa=%o w=%o h=%o a=%o l=%o r=%o t=%o b=%o",
 			fdjtET(),
