@@ -912,11 +912,10 @@ var fdjtDOM=
 	    return {left: left,right: right,top: top, bottom: bottom,
 		width: right-left,height:bottom-top};}
 	fdjtDOM.getInsideBounds=getInsideBounds;
-	function applyScale(container,scale){
+	function applyScale(container,scale,traced){
 	    var images=fdjtDOM.getChildren(container,"IMG");
 	    var ilim=images.length;
 	    var oldscale=container.scale||100;
-	    var adjustment=scale/oldscale;
 	    container.scale=scale;
 	    container.style.fontSize=scale+'%';
 	    var rounded=10*Math.round(scale/10);
@@ -931,10 +930,14 @@ var fdjtDOM=
 		if ((fdjtDOM.hasClass(image,"nofdjtscale"))||
 		    (fdjtDOM.hasClass(image,"noautoscale")))
 		    continue;
+		if (traced)
+		    fdjtLog("For %o, adj=%o dim=%o,%o, ndim=%o,%o",
+			    image,scale,width,height,
+			    width*(scale/100),height*(scale/100));
 		image.style.maxWidth=image.style.width=
-		    Math.round(width*adjustment)+'px';
+		    Math.round(width*(scale/100))+'px';
 		image.style.maxHeight=image.style.height=
-		    Math.round(height*adjustment)+'px';}}
+		    Math.round(height*(scale/100))+'px';}}
 	function adjustToFit(container,threshold,padding){
 	    var trace_adjust=(container.traceadjust)||
 		fdjtDOM.trace_adjust||default_trace_adjust;
@@ -974,26 +977,34 @@ var fdjtDOM=
 	    var dh=bounds.height-maxheight; var dw=bounds.width-maxwidth;
 	    var rh=maxheight/bounds.height; var rw=maxwidth/bounds.width;
 	    var newscale=
-		((itfits)?(scale*Math.sqrt((maxwidth*maxheight)/(bounds.width*bounds.height))):
-		 (container.maxscale)?(container.maxscale+((container.scale-container.maxscale)/2)):
+		((itfits)?
+		 (scale*Math.sqrt
+		  ((maxwidth*maxheight)/(bounds.width*bounds.height))):
+		 (container.maxscale)?
+		 (container.maxscale+((container.scale-container.maxscale)/2)):
 		 (rh<rw)?(scale*rh):(scale*rw));
 	    if (trace_adjust)
 		fdjtLog("[%fs] Adjusted rw=%o rh=%o newscale=%o",
 			fdjtET(),rw,rh,newscale);
-	    applyScale(container,newscale);}
+	    applyScale(container,newscale,trace_adjust);}
 	fdjtDOM.applyScale=applyScale;
 	fdjtDOM.adjustToFit=adjustToFit;
 	fdjtDOM.insideBounds=getInsideBounds;
 	fdjtDOM.finishScale=function(container){
+	    var traced=(container.traceadjust)||
+		fdjtDOM.trace_adjust||default_trace_adjust;
 	    if (!(container.maxscale)) return;
 	    if (container.scale===container.maxscale) return;
 	    var style=getStyle(container);
 	    var geom=getGeometry(container);
-	    var maxheight=((style.maxHeight)&&(parsePX(style.maxHeight)))||(geom.height);
-	    var maxwidth=((style.maxWidth)&&(parsePX(style.maxWidth)))||(geom.width);
+	    var maxheight=
+		((style.maxHeight)&&(parsePX(style.maxHeight)))||(geom.height);
+	    var maxwidth=
+		((style.maxWidth)&&(parsePX(style.maxWidth)))||(geom.width);
 	    var bounds=getInsideBounds(container);
-	    var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
-	    if (!(itfits)) applyScale(container,container.maxscale);}
+	    var itfits=
+		((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
+	    if (!(itfits)) applyScale(container,container.maxscale,traced);}
 
 	/* Getting various kinds of metadata */
 
