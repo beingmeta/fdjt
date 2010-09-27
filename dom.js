@@ -455,6 +455,16 @@ var fdjtDOM=
 		if (this.match(candidate)) results.push(candidate);}
 	    return results;};
 	fdjtDOM.Selector=Selector;
+	fdjtDOM.sel=function(spec){
+	  if (!(spec)) return false;
+	  else if (spec instanceof Selector) return spec;
+	  else if (spec instanceof Array)
+	    return new Selector(spec.join(","));
+	  else if (typeof spec === 'string')
+	    return new Selector(spec);
+	  else {
+	    fdjtLog.warn("Non selector spec: %o",spec);
+	    return false;}};
 
 	function gatherByClass(node,pat,results){
 	    if (node.nodeType===1) {
