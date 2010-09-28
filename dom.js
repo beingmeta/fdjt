@@ -3,20 +3,20 @@
 /* Copyright (C) 2009-2010 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended Javascript utility functions
-    of various kinds.
+   of various kinds.
 
    This program comes with absolutely NO WARRANTY, including implied
    warranties of merchantability or fitness for any particular
    purpose.
 
-    Use, modification, and redistribution of this program is permitted
-    under either the GNU General Public License (GPL) Version 2 (or
-    any later version) or under the GNU Lesser General Public License
-    (version 3 or later).
+   Use, modification, and redistribution of this program is permitted
+   under either the GNU General Public License (GPL) Version 2 (or
+   any later version) or under the GNU Lesser General Public License
+   (version 3 or later).
 
-    These licenses may be found at www.gnu.org, particularly:
-      http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-      http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+   These licenses may be found at www.gnu.org, particularly:
+   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+   http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
 
@@ -74,7 +74,7 @@ var fdjtDOM=
 	    else usenative=flag;};
 	
 	fdjtDOM.clone=function(node){
-	  return node.cloneNode(true);}
+	    return node.cloneNode(true);}
 
 	function domappend(node,content,i) {
 	    if (content.nodeType)
@@ -456,15 +456,17 @@ var fdjtDOM=
 	    return results;};
 	fdjtDOM.Selector=Selector;
 	fdjtDOM.sel=function(spec){
-	  if (!(spec)) return false;
-	  else if (spec instanceof Selector) return spec;
-	  else if (spec instanceof Array)
-	    return new Selector(spec.join(","));
-	  else if (typeof spec === 'string')
-	    return new Selector(spec);
-	  else {
-	    fdjtLog.warn("Non selector spec: %o",spec);
-	    return false;}};
+	    if (!(spec)) return false;
+	    else if (spec instanceof Selector) return spec;
+	    else if (spec instanceof Array) {
+		if (spec.length)
+		    return new Selector(spec.join(","));
+		else return false;}
+	    else if (typeof spec === 'string')
+		return new Selector(spec);
+	    else {
+		fdjtLog.warn("Non selector spec: %o",spec);
+		return false;}};
 
 	function gatherByClass(node,pat,results){
 	    if (node.nodeType===1) {
@@ -811,11 +813,11 @@ var fdjtDOM=
 		    winyedge=winy+elt.scrollHeight;}}
 
 	    /*
-	    fdjtLog("fdjtIsVisible%s %o top=%o left=%o height=%o width=%o",
-		    ((partial)?("(partial)"):""),start,
-		    top,left,height,width);
-	    fdjtLog("fdjtIsVisible %o winx=%o winy=%o winxedge=%o winyedge=%o",
-		    elt,winx,winy,winxedge,winyedge);
+	      fdjtLog("fdjtIsVisible%s %o top=%o left=%o height=%o width=%o",
+	      ((partial)?("(partial)"):""),start,
+	      top,left,height,width);
+	      fdjtLog("fdjtIsVisible %o winx=%o winy=%o winxedge=%o winyedge=%o",
+	      elt,winx,winy,winxedge,winyedge);
 	    */
 	    
 	    if (partial)
@@ -916,11 +918,11 @@ var fdjtDOM=
 		else {
 		    if (child.offsetLeft<left) left=child.offsetLeft;
 		    if ((child.offsetLeft+child.offsetWidth)>right)
-		      right=(child.offsetLeft+child.offsetWidth);
+			right=(child.offsetLeft+child.offsetWidth);
 		    if ((child.offsetTop+child.offsetHeight)>bottom)
-		      bottom=(child.offsetTop+child.offsetHeight);}}
+			bottom=(child.offsetTop+child.offsetHeight);}}
 	    return {left: left,right: right,top: top, bottom: bottom,
-		width: right-left,height:bottom-top};}
+		    width: right-left,height:bottom-top};}
 	fdjtDOM.getInsideBounds=getInsideBounds;
 	function applyScale(container,scale,traced){
 	    var images=fdjtDOM.getChildren(container,"IMG");
@@ -1050,14 +1052,14 @@ var fdjtDOM=
 		      (document.getElementsByTagName("META")):
 		      (getChildren(document,"META")));
 	    var i=0; while (i<elts.length) {
-	      if (elts[i])
-		if ((elts[i].name===name)||
-		    ((matchname)&&(elts[i].name)&&
-		     (elts[i].name.toUpperCase()===matchname))) {
-		  if (multiple)
-		    results.push(((dom)?(elts[i++]):(elts[i++].content)));
-		  else if (dom) return elts[i];
-		  else return elts[i].content;}
+		if (elts[i])
+		    if ((elts[i].name===name)||
+			((matchname)&&(elts[i].name)&&
+			 (elts[i].name.toUpperCase()===matchname))) {
+			if (multiple)
+			    results.push(((dom)?(elts[i++]):(elts[i++].content)));
+			else if (dom) return elts[i];
+			else return elts[i].content;}
 		else i++;}
 	    if (multiple) return results;
 	    else return false;}
@@ -1071,14 +1073,14 @@ var fdjtDOM=
 		      (document.getElementsByTagName("LINK")):
 		      (getChildren(document,"LINK")));
 	    var i=0; while (i<elts.length) {
-	      if (elts[i])
-		if ((elts[i].name===name)||
-		    ((matchname)&&(elts[i].rel)&&
-		     (elts[i].rel.toUpperCase()===matchname))) {
-		  if (multiple)
-		    results.push(((dom)?(elts[i++]):(elts[i++].href)));
-		  else if (dom) return elts[i];
-		  else return elts[i].href;}
+		if (elts[i])
+		    if ((elts[i].name===name)||
+			((matchname)&&(elts[i].rel)&&
+			 (elts[i].rel.toUpperCase()===matchname))) {
+			if (multiple)
+			    results.push(((dom)?(elts[i++]):(elts[i++].href)));
+			else if (dom) return elts[i];
+			else return elts[i].href;}
 		else i++;}
 	    if (multiple) return results;
 	    else return false;}
@@ -1343,7 +1345,7 @@ function fdjtID(id) { return document.getElementById(id);}
 function _(string) { return string;}
 
 /* Emacs local variables
-;;;  Local variables: ***
-;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
-;;;  End: ***
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  End: ***
 */
