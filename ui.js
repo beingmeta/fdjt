@@ -453,6 +453,7 @@ var fdjtUI=
 	return result;};
 
     Completions.prototype.getByValue=function(values,spec){
+	if (!(this.initialized)) initCompletions(this);
 	var result=[];
 	var byvalue=this.byvalue;
 	if (spec) spec=new fdjtDOM.Selector(spec);
@@ -471,6 +472,7 @@ var fdjtUI=
 		else result=result.concat(completions);}}
 	return result;};
     Completions.prototype.getByKey=function(keys,spec){
+	if (!(this.initialized)) initCompletions(this);
 	var result=[];
 	var byvalue=this.bykey;
 	if (spec) spec=new fdjtDOM.Selector(spec);
@@ -490,6 +492,7 @@ var fdjtUI=
 	return result;};
 
     Completions.prototype.setCues=function(values){
+	if (!(this.initialized)) initCompletions(this);
 	var cues=[];
 	var byvalue=this.byvalue;
 	var i=0; var lim=values.length;
@@ -506,6 +509,7 @@ var fdjtUI=
 	return cues;};
     
     Completions.prototype.docomplete=function(input,callback){
+	if (!(this.initialized)) initCompletions(this);
 	var delay=this.complete_delay||complete_delay;
 	var that=this;
 	if (!(input)) input=this.input;
