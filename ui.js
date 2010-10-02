@@ -199,6 +199,33 @@ var fdjtUI=
 (function(){
     var serial=0;
 
+    /* Constants */
+    // Always set to distinguish no options from false
+    var FDJT_COMPLETE_OPTIONS=1;
+    // Whether the completion element is a cloud (made of spans)
+    var FDJT_COMPLETE_CLOUD=2;
+    // Whether to require that completion match an initial segment
+    var FDJT_COMPLETE_ANYWORD=4;
+    // Whether to match case in keys to completions
+    var FDJT_COMPLETE_MATCHCASE=8;
+    // Whether to an enter character always picks a completion
+    var FDJT_COMPLETE_EAGER=16;
+    // Whether the key fields may contain disjoins (e.g. (dog|friend))
+    // to be accomodated in matching
+    var FDJT_COMPLETE_DISJOINS=32;
+    // Default options
+    var default_options=FDJT_COMPLETE_OPTIONS;
+    // Max number of completions to show
+    var maxcomplete=50;
+    // Milliseconds to wait for auto complete
+    var complete_delay=500;
+
+    fdjtUI.FDJT_COMPLETE_OPTIONS=FDJT_COMPLETE_OPTIONS;
+    fdjtUI.FDJT_COMPLETE_CLOUD=FDJT_COMPLETE_CLOUD;
+    fdjtUI.FDJT_COMPLETE_ANYWORD=FDJT_COMPLETE_ANYWORD;
+    fdjtUI.FDJT_COMPLETE_MATCHCASE=FDJT_COMPLETE_MATCHCASE;
+    fdjtUI.FDJT_COMPLETE_EAGER=FDJT_COMPLETE_EAGER;
+
     function Completions(dom,input,options) {
 	this.dom=dom||false; this.input=input||false;
 	this.options=options||default_options;
@@ -478,30 +505,18 @@ var fdjtUI=
 		    cues.push(c);}}}
 	return cues;};
     
-    /* Constants */
-    // Always set to distinguish no options from false
-    var FDJT_COMPLETE_OPTIONS=1;
-    // Whether the completion element is a cloud (made of spans)
-    var FDJT_COMPLETE_CLOUD=2;
-    // Whether to require that completion match an initial segment
-    var FDJT_COMPLETE_ANYWORD=4;
-    // Whether to match case in keys to completions
-    var FDJT_COMPLETE_MATCHCASE=8;
-    // Whether to an enter character always picks a completion
-    var FDJT_COMPLETE_EAGER=16;
-    // Whether the key fields may contain disjoins (e.g. (dog|friend))
-    // to be accomodated in matching
-    var FDJT_COMPLETE_DISJOINS=32;
-    // Default options
-    var default_options=FDJT_COMPLETE_OPTIONS;
-    // Max number of completions to show
-    var maxcomplete=50;
-    
-    fdjtUI.FDJT_COMPLETE_OPTIONS=FDJT_COMPLETE_OPTIONS;
-    fdjtUI.FDJT_COMPLETE_CLOUD=FDJT_COMPLETE_CLOUD;
-    fdjtUI.FDJT_COMPLETE_ANYWORD=FDJT_COMPLETE_ANYWORD;
-    fdjtUI.FDJT_COMPLETE_MATCHCASE=FDJT_COMPLETE_MATCHCASE;
-    fdjtUI.FDJT_COMPLETE_EAGER=FDJT_COMPLETE_EAGER;
+    Completions.prototype.docomplete=function(input,callback){
+	var delay=this.complete_delay||complete_delay;
+	var that=this;
+	if (!(input)) input=this.input;
+	if (this.timer) {
+	    clearTimeout(this.timer);
+	    this.timer=false;}
+	this.timer=setTimeout(
+	    function(){
+		var completions=that.complete(input.value);
+		if (callback) callback(completions);},
+	    delay);}
 
     function stdspace(string){
 	return string.replace(/\s+/," ").replace(/(^\s)|(\s$)/,"");}
