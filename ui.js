@@ -218,7 +218,7 @@ var fdjtUI=
     // Max number of completions to show
     var maxcomplete=50;
     // Milliseconds to wait for auto complete
-    var complete_delay=500;
+    var complete_delay=100;
 
     fdjtUI.FDJT_COMPLETE_OPTIONS=FDJT_COMPLETE_OPTIONS;
     fdjtUI.FDJT_COMPLETE_CLOUD=FDJT_COMPLETE_CLOUD;

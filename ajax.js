@@ -240,7 +240,7 @@ var fdjtAjax=
 	/* Synchronous calls */
 	function sync_get(callback,base_uri,args){
 	    var req=new XMLHttpRequest();
-	    var uri=ajax_uri(base_uri,args);
+	    var uri=compose_uri(base_uri,args);
 	    req.open("GET",uri,false);
 	    req.send(null);
 	    if (callback) return callback(req);
