@@ -561,6 +561,13 @@ var fdjtDOM=
 		    var i=0; var lim=children.length; var result;
 		    while (i<lim) filter_children(children[i++],filter,results);}}}
 
+	fdjtDOM.findAttrib=function(scan,attrib){
+	    while (scan) {
+		if ((scan.getAttribute)&&(scan.getAttribute(attrib)))
+		    return scan.getAttribute(attrib);
+		else scan=scan.parentNode;}
+	    return false;};
+	    
 	/* Manipulating the DOM */
 
 	fdjtDOM.replace=function(existing,replacement){
