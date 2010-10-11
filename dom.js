@@ -1063,8 +1063,9 @@ var fdjtDOM=
 		    if ((elts[i].name===name)||
 			((matchname)&&(elts[i].name)&&
 			 (elts[i].name.toUpperCase()===matchname))) {
-			if (multiple)
-			    results.push(((dom)?(elts[i++]):(elts[i++].content)));
+			if (multiple) {
+			    if (dom) results.push(elts[i++]);
+			    else results.push(elts[i++].content);}
 			else if (dom) return elts[i];
 			else return elts[i].content;}
 		else i++;}
@@ -1081,11 +1082,12 @@ var fdjtDOM=
 		      (getChildren(document,"LINK")));
 	    var i=0; while (i<elts.length) {
 		if (elts[i])
-		    if ((elts[i].name===name)||
+		    if ((elts[i].rel===name)||
 			((matchname)&&(elts[i].rel)&&
 			 (elts[i].rel.toUpperCase()===matchname))) {
-			if (multiple)
-			    results.push(((dom)?(elts[i++]):(elts[i++].href)));
+			if (multiple) {
+			    if (dom) results.push(elts[i++]);
+			    else results.push(elts[i++].href);}
 			else if (dom) return elts[i];
 			else return elts[i].href;}
 		else i++;}
