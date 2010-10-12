@@ -641,6 +641,12 @@ var fdjtUI=
     fdjtUI.T=function(evt) {
 	evt=evt||event; return (evt.target)||(evt.srcElement);};
 
+    fdjtUI.nodefault=function(evt){
+	evt=evt||event;
+	if (evt.preventDefault) evt.preventDefault();
+	else evt.returnValue=false;
+	return false;};
+
     fdjtUI.cancel=function(evt){
 	evt=evt||event;
 	if (evt.preventDefault) evt.preventDefault();
