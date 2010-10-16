@@ -150,8 +150,18 @@ var fdjtTime=
 		    if (fdjtTime()>timelim) break;}
 		if (i<lim) setTimeout(slicefn,nextspace||space);};
 	    return slicefn();}
-
 	fdjtTime.timeslice=timeslice;
+
+	function slowmap(fn,vec,done,slice){
+	    var i=0; var lim=vec.length;
+	    if (!(slice)) slice=100;
+	    var stepfn=function(){
+		var stopat=fdjtTime()+slice;
+		while ((i<lim)||(fdjtTime()<stopat)) fn(vec[i++]);
+		if (i<lim) setTimeout(stepfn,slice);
+		else if (done) done();};
+	    setTimeout(stepfn,slice);}
+	fdjtTime.slowmap=slowmap;
 
 	return fdjtTime;})();
 
