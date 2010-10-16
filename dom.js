@@ -50,13 +50,14 @@ var fdjtDOM=
 		    else classname=sel.slice(1);
 		    else if (sel[0]==='[') {
 			var eqpos=sel.indexOf('=');
-			if (eqpos<0)
-			    node.setAttribute
-			(sel.slice(1,sel.length-1),
-			 sel.slice(1,sel.length-1));
-			else node.setAttribute
-			(sel.slice(1,eqpos),
-			 sel.slice(eqpos+1,sel.length-1));}
+			if (eqpos<0) {
+			    node.setAttribute(
+				sel.slice(1,sel.length-1),
+				sel.slice(1,sel.length-1));}
+			else {
+			    node.setAttribute(
+				sel.slice(1,eqpos),
+				sel.slice(eqpos+1,sel.length-1));}}
 		    else {}}
 		if (classname) node.className=classname;}
 	    else {
@@ -971,10 +972,14 @@ var fdjtDOM=
 	    var bounds=getInsideBounds(container);
 	    var itfits=((bounds.height/maxheight)<=1)&&
 		((bounds.width/maxwidth)<=1);
-	    var hpadding=fdjtDOM.parsePX(style.paddingLeft)||0+
-		fdjtDOM.parsePX(style.paddingRight)||0;
-	    var vpadding=fdjtDOM.parsePX(style.paddingTop)||0+
-		fdjtDOM.parsePX(style.paddingBottom)||0;
+	    var hpadding=(fdjtDOM.parsePX(style.paddingLeft)||0)+
+		(fdjtDOM.parsePX(style.paddingRight)||0)+
+		(fdjtDOM.parsePX(style.borderLeftWidth)||0)+
+		(fdjtDOM.parsePX(style.borderRightWidth)||0);
+	    var vpadding=(fdjtDOM.parsePX(style.paddingTop)||0)+
+		(fdjtDOM.parsePX(style.paddingBottom)||0)+
+		(fdjtDOM.parsePX(style.borderTopWidth)||0)+
+		(fdjtDOM.parsePX(style.borderBottomWidth)||0);
 	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
 	    if (trace_adjust) {
 		fdjtLog("[%fs] Adjusting %o scale=%o maxscale=%o%s",
@@ -988,11 +993,24 @@ var fdjtDOM=
 	    /* This is good enough, so we stop adjusting */
 	    if ((itfits)&&
 		(((bounds.height*bounds.width)/
-		  (maxheight*maxwidth))>goodenough))
-		return;
+		  (maxheight*maxwidth))>goodenough)) {
+		if (trace_adjust)
+		    fdjtLog("[%fs] Good enough (%o*%o)=%o/%o(%o*%o)=%o ms=%o %s",
+			    bounds.width,bounds.height,(bounds.width*bounds.height),
+			    maxwidth,maxheight,(maxheight*maxwidth),
+			    ((bounds.height*bounds.width)/(maxheight*maxwidth)),
+			    container.maxscale,((itfits)?("(fits)"):("")));
+		return;}
 	    if (itfits) {
-		if ((!(container.maxscale))||(scale>container.maxscale))
-		    container.maxscale=scale;}
+		if ((!(container.maxscale))||(scale>container.maxscale)) {
+		    if (trace_adjust)
+			fdjtLog("[%fs] Setting maxscale %o (%o*%o)=%o/%o=(%o*%o)=%o ms=%o %s",
+				fdjtET(),scale,
+				bounds.width,bounds.height,(bounds.width*bounds.height),
+				(maxheight*maxwidth),maxwidth,maxheight,
+				((bounds.height*bounds.width)/(maxheight*maxwidth)),
+				container.maxscale,((itfits)?("(fits)"):("")));
+		    container.maxscale=scale;}}
 	    var dh=bounds.height-maxheight; var dw=bounds.width-maxwidth;
 	    var rh=maxheight/bounds.height; var rw=maxwidth/bounds.width;
 	    var newscale=
@@ -1020,6 +1038,15 @@ var fdjtDOM=
 		((style.maxHeight)&&(parsePX(style.maxHeight)))||(geom.height);
 	    var maxwidth=
 		((style.maxWidth)&&(parsePX(style.maxWidth)))||(geom.width);
+	    var hpadding=(fdjtDOM.parsePX(style.paddingLeft)||0)+
+		(fdjtDOM.parsePX(style.paddingRight)||0)+
+		(fdjtDOM.parsePX(style.borderLeftWidth)||0)+
+		(fdjtDOM.parsePX(style.borderRightWidth)||0);
+	    var vpadding=(fdjtDOM.parsePX(style.paddingTop)||0)+
+		(fdjtDOM.parsePX(style.paddingBottom)||0)+
+		(fdjtDOM.parsePX(style.borderTopWidth)||0)+
+		(fdjtDOM.parsePX(style.borderBottomWidth)||0);
+	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
 	    var bounds=getInsideBounds(container);
 	    var itfits=
 		((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
