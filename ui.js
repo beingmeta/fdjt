@@ -609,7 +609,9 @@ var fdjtUI=
 	/* Already previewing */
 	if (target===preview_elt) return;
 	if (!(saved_scroll)) scroll_save();
-	scroll_into_view(target,delta);
+	if (typeof target === 'number')
+	    window.scrollTo(((typeof context === 'number')&&(context))||0,target);
+	else scroll_into_view(target,delta);
 	preview_elt=target;}
 
     function scroll_restore(ss){
