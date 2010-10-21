@@ -21,7 +21,8 @@
 */
 
 var fdjtUI=
-  {CoHi: {classname: "cohi"},AutoPrompt: {}, InputHelp: {}, Expansion: {}};
+  {CoHi: {classname: "cohi"},AutoPrompt: {}, InputHelp: {}, Expansion: {},
+   Tabs: {}};
 
 /* Co-highlighting */
 /* When the mouse moves over a named element, the 'cohi' class is added to
@@ -527,15 +528,32 @@ var fdjtUI=
 
     fdjtUI.Completions=Completions;
 
+    function tab_onclick(evt){
+      var target=fdjtUI.T(evt); var tab=target;
+      while (tab) 
+	if ((tab.getAttribute("TABCONTENT"))||
+	    (fdjtDOM.hasClass(tab,"tab")))
+	  break;
+      var tabname=fdjtDOM.findAttrib(tab,"DOMAIN");
+      var tabbar=fdjtDOM.findParent(tab,"tabbar");
+      if (tabbar) {
+	var tabs=fdjtDOM.getChildren(tabbar,".tab");}}
+    
+    /* Delays */
+
     var timeouts={};
 
     fdjtUI.Delay=function(interval,name,fcn){
 	window.setTimeout(fcn,interval);};
 
+    /* Expansion */
+
     fdjtUI.Expansion.onclick=function(evt){
 	var target=fdjtUI.T(evt);
 	var wrapper=fdjtDOM.getParent(target,".fdjtexpands");
 	if (wrapper) fdjtDOM.toggleClass(wrapper,"expanded");};
+
+    /* Temporary Scrolling */
 
     var saved_scroll=false;
     var use_native_scroll=false;
