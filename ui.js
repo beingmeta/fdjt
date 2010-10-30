@@ -22,7 +22,7 @@
 
 var fdjtUI=
   {CoHi: {classname: "cohi"},AutoPrompt: {}, InputHelp: {}, Expansion: {},
-   Tabs: {}};
+   Tabs: {}, MultiText: {}};
 
 /* Co-highlighting */
 /* When the mouse moves over a named element, the 'cohi' class is added to
@@ -196,6 +196,21 @@ var fdjtUI=
   fdjtUI.InputHelp.onfocus=show_help_onfocus;
   fdjtUI.InputHelp.onblur=hide_help_onblur;})();
 
+
+(function(){
+    function multitext_keypress(evt){
+	evt=(evt)||(event);
+	var ch=evt.charCode;
+	var target=fdjtUI.T(evt);
+	if (ch!==13) return;
+	fdjtUI.cancel(evt);
+	var checkbox=
+	    fdjtDOM.Input("[type=checkbox]",target.name,target.value);
+	var div=fdjtDOM("div.checkspan",checkbox,target.value);
+	checkbox.checked=true;
+	fdjtDOM(target.parentNode,div);
+	target.value='';}
+    fdjtUI.MultiText.keypress=multitext_keypress;})();
 
 (function(){
   var serial=0;
