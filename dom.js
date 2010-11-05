@@ -1374,6 +1374,17 @@ var fdjtDOM=
 			  (document.body.childNodes)&&
 			  (document.body.children));};
 
+	if (navigator.userAgent.search("WebKit")>=0) {
+	    fdjtDOM.transition='-webkit-transition';
+	    fdjtDOM.transform='-webkit-transform';}
+	else if (navigator.userAgent.search("Mozilla")>=0) {
+	    fdjtDOM.transition='-moz-transition';
+	    fdjtDOM.transform='-moz-transform';}
+	else {
+	    fdjtDOM.transition='transition';
+	    fdjtDOM.transform='transform';}
+	
+
 	return fdjtDOM;
     })();
 
