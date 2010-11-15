@@ -407,8 +407,10 @@ table.fdjtform td { text-align: left; vertical-align: top;}
 
 table.fdjtform tbody.collapsible tr.collapsible { display: none;}
 table.fdjtform tbody.collapsible div.collapsible { display: none;}
+table.fdjtform tbody.collapsible span.collapsible { display: none;}
 table.fdjtform tbody.collapsible.expanded tr.collapsible { display: table-row;}
 table.fdjtform tbody.collapsible.expanded div.collapsible { display: block;}
+table.fdjtform tbody.collapsible.expanded span.collapsible { display: inline;}
 table.fdjtform tbody.collapsible .expanded { display: none;}
 table.fdjtform tbody.collapsible.expanded span.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded img.expanded { display: inline;}
