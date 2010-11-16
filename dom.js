@@ -635,6 +635,14 @@ var fdjtDOM=
 	    if (value) node.value=value;
 	    if (title) node.title=title;
 	    return node;};
+	fdjtDOM.Checkbox=function(name,value,checked){
+	    var node=fdjtDOM("INPUT");
+	    node.type="checkbox"
+	    node.name=name;
+	    if (value) node.value=value;
+	    if (checked) node.checked=true;
+	    else node.checked=false;
+	    return node;};
 	fdjtDOM.Anchor=function(href,spec){
 	    spec=tag_spec(spec,"A");
 	    var node=fdjtDOM(spec); node.href=href;
