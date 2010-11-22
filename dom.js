@@ -1384,11 +1384,14 @@ var fdjtDOM=
 
 	if (navigator.userAgent.search("WebKit")>=0) {
 	    fdjtDOM.transition='-webkit-transition';
+	    fdjtDOM.transitionProperty='-webkit-transition-property';
 	    fdjtDOM.transform='-webkit-transform';}
 	else if (navigator.userAgent.search("Mozilla")>=0) {
+	    fdjtDOM.transitionProperty='-moz-transition-property';
 	    fdjtDOM.transition='-moz-transition';
 	    fdjtDOM.transform='-moz-transform';}
 	else {
+	    fdjtDOM.transitionProperty='transition-property';
 	    fdjtDOM.transition='transition';
 	    fdjtDOM.transform='transform';}
 	
