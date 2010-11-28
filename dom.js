@@ -926,6 +926,7 @@ var fdjtDOM=
 	    while (i<lim) {
 		var child=children[i++];
 		if (!(child.offsetLeft)) continue;
+		if (getStyle(child).position!=='static') continue;
 		if (left===false) {
 		    left=child.offsetLeft;
 		    right=child.offsetLeft+child.offsetWidth;
@@ -980,11 +981,15 @@ var fdjtDOM=
 	    var bounds=getInsideBounds(container);
 	    var itfits=((bounds.height/maxheight)<=1)&&
 		((bounds.width/maxwidth)<=1);
-	    var hpadding=(fdjtDOM.parsePX(style.paddingLeft)||0)+
+	    var itfits=((bounds.height/maxheight)<=1)&&
+		((bounds.width/maxwidth)<=1);
+	    var hpadding=
+		(fdjtDOM.parsePX(style.paddingLeft)||0)+
 		(fdjtDOM.parsePX(style.paddingRight)||0)+
 		(fdjtDOM.parsePX(style.borderLeftWidth)||0)+
 		(fdjtDOM.parsePX(style.borderRightWidth)||0);
-	    var vpadding=(fdjtDOM.parsePX(style.paddingTop)||0)+
+	    var vpadding=
+		(fdjtDOM.parsePX(style.paddingTop)||0)+
 		(fdjtDOM.parsePX(style.paddingBottom)||0)+
 		(fdjtDOM.parsePX(style.borderTopWidth)||0)+
 		(fdjtDOM.parsePX(style.borderBottomWidth)||0);
