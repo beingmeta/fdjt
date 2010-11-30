@@ -95,7 +95,7 @@ var fdjtState=
 	  document.cookie=cookietext;}
 	else fdjtClearCookie(name,path,domain);}
       catch (ex) {
-	fdjtWarn("Error setting cookie %s",name);}}
+	fdjtLog.warn("Error setting cookie %s",name);}}
     fdjtState.setCookie=setCookie;
 
     function clearCookie(name,path,domain){
@@ -109,7 +109,7 @@ var fdjtState=
 	// fdjtTrace("Clearing cookie %o: text=%o",name,cookietext);
 	document.cookie=cookietext;}
       catch (ex) {
-	fdjtWarn("Error clearing cookie %s",name);}}
+	fdjtLog.warn("Error clearing cookie %s",name);}}
     fdjtState.clearCookie=clearCookie;
 
     /* Session storage */
