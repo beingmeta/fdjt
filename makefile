@@ -2,6 +2,7 @@
 # from the individual fdjt files.
 
 ECHO=/bin/echo
+CLEAN=/bin/rm
 FDJT1_FILES=header.js jsutils.js oids.js json.js domutils.js \
             handlers.js scrolling.js richtips.js completion.js ajaxcall.js
 FDJT2_FILES=header.js string.js time.js dom.js kb.js state.js log.js ui.js \
@@ -26,3 +27,5 @@ v2.js: $(FDJT2_FILES) buildstamp2.js
 	cat buildstamp2.js $(FDJT2_FILES) > $@
 
 
+clean: 
+	$(CLEAN) fdjt.js v1.js v2.js buildstamp1.js buildstamp2.js
