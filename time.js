@@ -31,7 +31,7 @@ var fdjtTime=
 
 	var loaded=fdjtTime.loaded=(new Date()).getTime();
 	fdjtTime.tick=function(){
-	    return (new Date()).getTime()/1000;};
+	    return Math.floor((new Date()).getTime()/1000);};
 
 	fdjtTime.dateString=function(tstamp){
 	    return tstamp.toDateString();};
