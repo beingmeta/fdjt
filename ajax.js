@@ -27,6 +27,7 @@ var fdjtAjax=
 	    else if (base_uri.indexOf('?')>=0) need_amp=true;
 	    else uri=base_uri+"?";
 	    var i=0; while (i<args.length) {
+		if (!(args[i])) {i=i+2; continue;}
 		uri=uri+((need_amp) ? ("&") : (""))+args[i]+"="+args[i+1];
 		need_amp=true;
 		i=i+2;}
