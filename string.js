@@ -159,7 +159,7 @@ var fdjtString=
 
 	var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
 	
-	function string_trim(string){
+	function trim(string){
 	    var start=0; var len=string.length; 
 	    if (len<=0) return string;
 	    while ((start<len)&&
@@ -171,7 +171,7 @@ var fdjtString=
 		end--;
 	    if ((start>0)||(end<len)) return string.slice(start,end+1);
 	    else return string;}
-	fdjtString.trim=string_trim;
+	fdjtString.trim=trim;
 
 	function stdspace(string){
 	    var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
@@ -192,6 +192,14 @@ var fdjtString=
 	function flatten(string){
 	    return string.replace(/\s+/," ");}
 	fdjtString.flatten=flatten;
+
+	function oneline(string){
+	    string=trim(string);
+	    var flat=string.replace(/\s*[\f\n\r]+\s+/gm," //\u00B7 ").
+		replace(/\s*[\f\n\r]+\s*/gm," // ");
+	    var tight=flat.replace(/\s\s+/g,"");
+	    return tight;}
+	fdjtString.oneline=oneline;
 
 	function stripMarkup(string){
 	    return string.replace(/<[^>]*>/g,"");}
