@@ -783,6 +783,10 @@ var fdjtDOM=
 	    var width=elt.offsetWidth;
 	    var height=elt.offsetHeight;
 
+	    if (elt===root) {
+		result.left=0; result.top=0;
+		result.width=width; result.height=height;
+		return result;}
 	    elt=elt.offsetParent;
 	    while (elt) {
 		if ((root)&&(elt===root)) break;
