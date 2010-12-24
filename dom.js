@@ -160,16 +160,22 @@ var fdjtDOM=
 
 	/* Utility patterns and functions */
 
-	function parsePX(arg){
+	function parsePX(arg,dflt){
+	    if (typeof dflt === 'undefined') dflt=0;
 	    if (arg===0) return 0;
-	    else if (!(arg)) return false;
-	    else if (arg==="none") return false;
+	    else if (!(arg)) return dflt;
+	    else if (arg==="none") return dflt;
+	    else if (arg==="auto") return dflt;
 	    else if (typeof arg === 'number') return arg;
 	    else if (typeof arg === 'string') {
-		var len=arg.length;
+		var len=arg.length; var num=false;
 		if ((len>2)&&(arg[len-1]==='x')&&(arg[len-2]==='p'))
-		    return parseInt(arg.slice(0,-2));
-		else return parseInt(arg);}
+		    num=parseInt(arg.slice(0,-2));
+		else num=parseInt(arg);
+		if (num===0) return 0;
+		else if (isNaN(num)) return dflt;
+		else if (typeof num === 'number') return num;
+		else return dflt;}
 	    else return false;}
 	fdjtDOM.parsePX=parsePX;
 
