@@ -21,17 +21,18 @@
 */
 
 function fdjtLog(string){
-  var output=false;
-  if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
-    output=fdjtString.apply(null,arguments);
-  if (fdjtLog.console_fn)
-    if (output) fdjtLog.console_fn(fdjt_console_obj,output);
-    else fdjtLog.console_fn.apply(fdjt_console_obj,arguments);
-  else if ((window.console) && (window.console.log) &&
-	   (window.console.count))
-    if (output)
-      window.console.log.call(window.console,output);
-    else window.console.log.apply(window.console,arguments);}
+    var output=false;
+    if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
+	output=fdjtString.apply(null,arguments);
+    if (fdjtLog.console_fn) {
+	if (output) fdjtLog.console_fn.call(fdjtLog.console,output);
+	else fdjtLog.console_fn.apply(fdjtLog.console,arguments);}
+    if ((!(fdjtLog.console_fn))||(fdjtLog.consoletoo))
+	if ((window.console) && (window.console.log) &&
+	    (window.console.count)) {
+	    if (output) window.console.log.call(window.console,output);
+	    else window.console.log.apply(window.console,arguments);}}
+fdjtLog.console=null;
 fdjtLog.id="$Id$";
 fdjtLog.version=parseInt("$Revision$".slice(10,-1));
 
@@ -50,8 +51,8 @@ fdjtLog.bkpt=function(string){
   if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
     output=fdjtString.apply(null,arguments);
   if (fdjtLog.console_fn)
-    if (output) fdjtLog.console_fn(fdjt_console_obj,output);
-    else fdjtLog.console_fn.apply(fdjt_console_obj,arguments);
+    if (output) fdjtLog.console_fn(fdjtLog.console,output);
+    else fdjtLog.console_fn.apply(fdjtLog.console,arguments);
   else if ((window.console) && (window.console.log) &&
 	   (window.console.count))
     if (output)
