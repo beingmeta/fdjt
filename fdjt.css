@@ -87,19 +87,19 @@ a.tab, span.tab {
   margin-left: 2px; margin-right: 2px;
   border: outset black 2px;
   padding: 3px;}
-a.tab[shown], span.tab[shown] {
+a.tab[shown], span.tab[shown],a.tab.fdjtshown, span.tab.fdjtshown {
   /* font-weight: bold; */
   border: inset black 2px;
   border-bottom: hidden;}
-div.tabbar.vertical[shown] {
+div.tabbar.vertical[shown],div.tabbar.vertical.fdjtshown {
   border-bottom: inset;}
 div.tabcontent {
  margin-left: 9px; margin-top: 6px; margin-right: 9px;
  text-align: left;
  display: none;}
-div.tabcontent[shown] { display: block; }
-div.tabcontent div.tabcontent[shown] { display: none; }
-div.tabcontent[shown] div.tabcontent[shown] { display: block; }
+div.tabcontent[shown],div.tabcontent.fdjtshown { display: block; }
+div.tabcontent div.tabcontent[shown],div.tabcontent div.tabcontent.fdjtshown { display: none; }
+div.tabcontent[shown] div.tabcontent[shown],div.tabcontent.fdjtshown div.tabcontent.fdjtshown { display: block; }
 
 div.tabcontent div.narrative {
  color: purple; font-family: sans; font-style: italic;}
@@ -412,6 +412,7 @@ table.fdjtform tbody.collapsible.expanded tr.collapsible { display: table-row;}
 table.fdjtform tbody.collapsible.expanded div.collapsible { display: block;}
 table.fdjtform tbody.collapsible.expanded span.collapsible { display: inline;}
 table.fdjtform tbody.collapsible .expanded { display: none;}
+table.fdjtform tbody.collapsible.expanded div.expanded { display: block;}
 table.fdjtform tbody.collapsible.expanded span.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded img.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded .collapsed { display: none;}

@@ -93,11 +93,11 @@ var fdjtState=
 	  if (domain) cookietext=cookietext+"; domain="+domain;
 	  // fdjtTrace("Setting cookie %o cookietext=%o",name,cookietext);
 	  document.cookie=cookietext;}
-	else fdjtClearCookie(name,path,domain);}
+	else clearCookie(name,path,domain);}
       catch (ex) {
 	fdjtLog.warn("Error setting cookie %s",name);}}
     fdjtState.setCookie=setCookie;
-
+    
     function clearCookie(name,path,domain){
       try {
 	var valuestring="ignoreme";
@@ -118,7 +118,7 @@ var fdjtState=
       if (unparse) val=JSON.stringify(val);
       if (window.sessionStorage)
 	window.sessionStorage[name]=val;
-      else fdjtSetCookie(name,val);}
+      else setCookie(name,val);}
     fdjtState.setSession=setSession;
 
     function getSession(name,parse){
@@ -133,7 +133,7 @@ var fdjtState=
     function dropSession(name){
       if (window.sessionStorage)
 	return window.sessionStorage.removeItem(name);
-      else fdjtClearCookie(name);}
+      else clearCookie(name);}
     fdjtState.dropSession=dropSession;
 
     /* Local storage (persists between sessions) */

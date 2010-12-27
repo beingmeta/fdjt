@@ -924,6 +924,21 @@ var fdjtDOM=
 	    else return false;}
 	fdjtDOM.hasText=hasText;
 
+	/* A 'refresh method' does a className eigenop to force IE redisplay */
+
+	fdjtDOM.refresh=function(elt){
+	  elt.className=elt.className;};
+	fdjtDOM.setAttrib=function(elt,attrib,val){
+	  if ((typeof elt === 'string')&&(fdjtID(elt)))
+	    elt=fdjtID(elt);
+	  elt.setAttribute(attrib,val);
+	  elt.className=elt.className;};
+	fdjtDOM.dropAttrib=function(elt,attrib){
+	  if ((typeof elt === 'string')&&(fdjtID(elt)))
+	    elt=fdjtID(elt);
+	  elt.removeAttribute(attrib);
+	  elt.className=elt.className;};
+
 	/* Sizing to fit */
 
 	var default_trace_adjust=false;
