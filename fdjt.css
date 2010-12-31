@@ -186,10 +186,12 @@ div.completions {font-family: sans,sans-serif;}
 .completions .completion[displayed] .variation { display: none; }
 .completions .completion.displayed .variation { display: none; }
 
+.completions.noinput a.completion.cue { display: inline; }
 .completions.noinput span.completion.cue { display: inline; }
 .completions.noinput li.completion.cue { display: list-item; }
 .completions.noinput div.completion.cue { display: block; }
 
+.completions.showempty.noinput a.completion { display: inline; }
 .completions.showempty.noinput span.completion { display: inline; }
 .completions.showempty.noinput li.completion { display: list-item; }
 .completions.showempty.noinput div.completion { display: block; }
@@ -222,6 +224,7 @@ div.completions {font-family: sans,sans-serif;}
 
 /* Display rules (with displayed attribute) */
 
+.completions a.completion[displayed] { display: inline;}
 .completions span.completion[displayed] { display: inline;}
 .completions li.completion[displayed] { display: list-item;}
 .completions div.completion[displayed] { display: block;}
@@ -238,10 +241,13 @@ div.completions {font-family: sans,sans-serif;}
 
 /* Display rules (with displayed class) */
 
+.completions a.completion.displayed { display: inline;}
 .completions span.completion.displayed { display: inline;}
 .completions li.completion.displayed { display: list-item;}
 .completions div.completion.displayed { display: block;}
 
+.completions a.completion.displayed span.variation.displayed { 
+   display: inline; }
 .completions .completion.displayed span.variation.displayed { 
    display: inline; }
 .completions .completion.displayed li.variation.displayed { 
@@ -252,7 +258,7 @@ div.completions {font-family: sans,sans-serif;}
 .completions.maxcomplete .completion.displayed .variation.displayed { 
    display: none; }
 
-/* Checkspan/completion display rles (attribute based) */
+/* Checkspan/completion display rules (attribute based) */
 
 .completions.checkspans span.completion.checkspan[ischecked] { 
   display: inline; }
