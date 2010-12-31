@@ -568,10 +568,26 @@ var fdjtDOM=
 		    var i=0; var lim=children.length; var result;
 		    while (i<lim) filter_children(children[i++],filter,results);}}}
 
-	fdjtDOM.findAttrib=function(scan,attrib){
+	fdjtDOM.getAttrib=function(elt,attrib,ns){
+	    var probe;
+	    if ((ns)&&(elt.getAttributeByNS))
+		probe=elt.getAttributeNS(attrib,ns);
+	    if (probe) return probe;
+	    else return elt.getAttribute(attrib)||
+		elt.getAttribute("data-"+attrib);};
+
+	fdjtDOM.findAttrib=function(scan,attrib,ns){
+	    var dattrib="data-"+attrib;
 	    while (scan) {
-		if ((scan.getAttribute)&&(scan.getAttribute(attrib)))
-		    return scan.getAttribute(attrib);
+		if ((ns)&&(scan.getAttributeNS)&&
+		    (scan.getAttributeNS(attrib,ns)))
+		    return scan.getAttributeNS(attrib,ns);
+		else if (scan.getAttribute) {
+		    if (scan.getAttribute(attrib))
+			return scan.getAttribute(attrib);
+		    else if (scan.getAttribute(dattrib))
+			return scan.getAttribute(dattrib);
+		    else scan=scan.parentNode;}
 		else scan=scan.parentNode;}
 	    return false;};
 	    
