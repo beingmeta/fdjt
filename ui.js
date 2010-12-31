@@ -570,6 +570,11 @@ var fdjtUI=
 
     var cached_completions={};
 
+    var default_options=
+	FDJT_COMPLETE_OPTIONS|
+	FDJT_COMPLETE_CLOUD|
+	FDJT_COMPLETE_ANYWORD;
+
     function onkey(evt){
 	evt=evt||event;
 	var target=fdjtUI.T(evt);
@@ -579,7 +584,7 @@ var fdjtUI=
 	var dom=((compid)&&(fdjtID(compid)));
 	if (!(dom)) return;
 	if (!((completions)&&(completions.dom===dom))) {
-	    completions=new Completions(dom,target);
+	    completions=new Completions(dom,target,default_options);
 	    cached_completions[name]=completions;}
 	if (!(completions)) return;
 	completions.docomplete();}
