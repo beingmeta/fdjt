@@ -27,11 +27,25 @@ function fdjtLog(string){
     if (fdjtLog.console_fn) {
 	if (output) fdjtLog.console_fn.call(fdjtLog.console,output);
 	else fdjtLog.console_fn.apply(fdjtLog.console,arguments);}
-    if ((!(fdjtLog.console_fn))||(fdjtLog.consoletoo))
+    if ((fdjtLog.console)&&(fdjtLog.console.nodeType)) {
+	var entry=fdjtDOM("div.fdjtlog",fdjtDOM("span.time",fdjtET()));
+	if (output) fdjtDOM(entry,output);
+	else fdjtDOM(entry,fdjtString.apply(null,arguments));
+	fdjtDOM.append(fdjtLog.console,entry);}
+    if ((fdjtLog.useconsole)||
+	((!(fdjtLog.console))&&(!(fdjtLog.console_fn))))
 	if ((window.console) && (window.console.log) &&
 	    (window.console.count)) {
-	    if (output) window.console.log.call(window.console,output);
-	    else window.console.log.apply(window.console,arguments);}}
+	    if (output)
+		window.console.log.call(
+		    window.console,"["+fdjtET()+"s] "+output);
+	    else {
+		var newargs=new Array(arguments.length+1);
+		newargs[0]="[%fs] "+string;
+		newargs[1]=fdjtET();
+		var i=1; var lim=arguments.length;
+		while (i<lim) {newargs[i+1]=arguments[i]; i++;}
+		window.console.log.apply(window.console,newargs);}}}
 fdjtLog.console=null;
 fdjtLog.id="$Id$";
 fdjtLog.version=parseInt("$Revision$".slice(10,-1));

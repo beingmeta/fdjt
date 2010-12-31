@@ -436,6 +436,13 @@ div.twisties.expanded span.twisty { font-weight: bold;}
 a.deadlink { color: red;}
 span.underline { text-decoration: underline;}
 
+/* Log entries */
+
+div.fdjtlog { text-align: left;}
+div.fdjtlog span.time {
+    float: left; width: 6em; color: green;}
+
+
 /* Expansion */
 
 .fdjtexpands.closed * { display: none;}
