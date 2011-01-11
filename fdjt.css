@@ -167,8 +167,8 @@ table.fdjtdata td {
 table.fdjt {width: 100%; font-family: sans,sans-serif;}
 table.fdjt th { vertical-align: top; text-align: right;}
 table.fdjt td { vertical-align: top; text-align: left;}
-table.fdjt td input[type='TEXT'] { width: 100%;}
-
+table.fdjt td input.fullwidth[type='TEXT'] { width: 100%;}
+table.fdjt td textarea.fullwidth { width: 100%;}
 
 /* Auto completion */
 
@@ -410,6 +410,8 @@ table.fdjtform th { text-align: right; vertical-align: top;}
 table.fdjtform th img { text-align: right; vertical-align: bottom;}
 table.fdjtform td { text-align: left; vertical-align: top;}
 table.fdjtform td { text-align: left; vertical-align: top;}
+table.fdjtform td input[TYPE='TEXT'] {
+    width: 100%;}
 
 table.fdjtform tbody.collapsible tr.collapsible { display: none;}
 table.fdjtform tbody.collapsible div.collapsible { display: none;}
