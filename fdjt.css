@@ -407,7 +407,9 @@ div.richtip .maximize { display: none; }
 
 table.fdjtform { width: 100%;}
 table.fdjtform th, table.fdjtform td { vertical-align: top;}
-table.fdjtform th img { text-align: right; vertical-align: bottom;}
+
+table.fdjtform th { text-align: right;}
+
 table.fdjtform td { text-align: left;}
 table.fdjtform td.rightalign { text-align: right;}
 
