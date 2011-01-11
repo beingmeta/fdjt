@@ -406,12 +406,19 @@ div.richtip .maximize { display: none; }
 /* Tables for form input */
 
 table.fdjtform { width: 100%;}
-table.fdjtform th { text-align: right; vertical-align: top;}
+table.fdjtform th, table.fdjtform td { vertical-align: top;}
 table.fdjtform th img { text-align: right; vertical-align: bottom;}
-table.fdjtform td { text-align: left; vertical-align: top;}
-table.fdjtform td { text-align: left; vertical-align: top;}
-table.fdjtform td input[TYPE='TEXT'] {
-    width: 100%;}
+table.fdjtform td { text-align: left;}
+table.fdjtform td.rightalign { text-align: right;}
+
+table.fdjtform td input[TYPE='TEXT'] {width: 100%;}
+table.fdjtform td textarea { width: 100%;}
+
+table.fdjtform td.messages {
+    text-align: center; font-style: italic;}
+table.fdjtform td.messages div.message {
+    text-align: max-width: 35em; margin-left: auto; margin-right: auto;
+    color: red;}
 
 table.fdjtform tbody.collapsible tr.collapsible { display: none;}
 table.fdjtform tbody.collapsible div.collapsible { display: none;}
