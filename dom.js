@@ -331,19 +331,6 @@ var fdjtDOM=
 	    return false;}
 	fdjtDOM.toggleClass=toggleClass;
 	
-	fdjtDOM.isClickable=function(target){
-	    while (target) {
-		if (((target.tagName==='A')&&(target.href))||
-		    (target.tagName==="INPUT") ||
-		    (target.tagName==="TEXTAREA") ||
-		    (target.tagName==="SELECT") ||
-		    (target.tagName==="OPTION") ||
-		    (hasClass(target,"isclickable")))
-		    return true;
-		else if (target.onclick) return true;
-		else target=target.parentNode;}
-	    return false;};
-
 	fdjtDOM.isTextInput=function(target){
 	    return ((target.tagName==='INPUT')||(target.tagName==='TEXTAREA'));};
 

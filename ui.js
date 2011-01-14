@@ -843,6 +843,20 @@ fdjtUI.Expansion.onclick=function(evt){
 	else evt.returnValue=false;
 	return false;};
 
+    fdjtUI.isClickable=function(target){
+	if (target instanceof Event) target=fdjtUI.T(target);
+	while (target) {
+	    if (((target.tagName==='A')&&(target.href))||
+		(target.tagName==="INPUT") ||
+		(target.tagName==="TEXTAREA") ||
+		(target.tagName==="SELECT") ||
+		(target.tagName==="OPTION") ||
+		(hasClass(target,"isclickable")))
+		return true;
+	    else if (target.onclick) return true;
+	    else target=target.parentNode;}
+	return false;};
+
     fdjtUI.cancel=function(evt){
 	evt=evt||event;
 	if (evt.preventDefault) evt.preventDefault();
