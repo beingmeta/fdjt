@@ -834,6 +834,8 @@ fdjtUI.Expansion.onclick=function(evt){
     fdjtUI.scrollRestore=scroll_restore;}());
 
 (function(){
+    var hasClass=fdjtDOM.hasClass;
+    
     fdjtUI.T=function(evt) {
 	evt=evt||event; return (evt.target)||(evt.srcElement);};
 
