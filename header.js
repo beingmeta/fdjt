@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; -*- */
 
-/* Copyright (C) 2009 beingmeta, inc.
+/* Copyright (C) 2009-2011 beingmeta, inc.
    This file was created from several component files and is
     part of the FDJT web toolkit (www.fdjt.org)
 
@@ -22,3 +22,6 @@
 
 */
 
+var fdjt_versions=((fdjt_versions)||(new Array()));
+fdjt_versions.decl=function(name,num){
+    if ((!(fdjt_versions[name]))||(fdjt_versions[name]<num)) fdjt_versions[name]=num;};

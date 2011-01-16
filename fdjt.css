@@ -455,7 +455,7 @@ span.underline { text-decoration: underline;}
 
 /* Log entries */
 
-div.fdjtlog { text-align: left;}
+div.fdjtlog { text-align: left; margin-left: 2em;}
 div.fdjtlog span.time {
     float: left; width: 6em; color: green;}
 
