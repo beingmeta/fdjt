@@ -942,6 +942,13 @@ var fdjtDOM=
 	  elt.removeAttribute(attrib);
 	  elt.className=elt.className;};
 
+	/* Determining if something has overflowed */
+
+	fdjtDOM.overflowing=function(node){
+	    // I haven't really tried this cross-browser, but I read it worked and
+	    //  have been in situations where it would be handy
+	    return (node.clientHeight!==node.scrollHeight);}
+
 	/* Sizing to fit */
 
 	var default_trace_adjust=false;
