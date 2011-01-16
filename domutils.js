@@ -3,7 +3,7 @@
 var fdjt_domutils_id="$Id$";
 var fdjt_domutils_version=parseInt("$Revision$".slice(10,-1));
 
-/* Copyright (C) 2001-2009 beingmeta, inc.
+/* Copyright (C) 2001-2011 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended functionality for web applications,
    especially for manipulating the DOM in various ways. 
