@@ -94,6 +94,8 @@ var fdjtLog=(function(){
 	else window.console.log.apply(window.console,arguments);
     };
 
+    fdjtLog.useconsole=true;
+
     return fdjtLog;})();
 
 // This is for temporary trace statements; we use a different name
