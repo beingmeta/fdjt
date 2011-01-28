@@ -1409,7 +1409,8 @@ var fdjtDOM=
 	function addListeners(node,handlers){
 	    if (handlers) 
 		for (evtype in handlers) {
-		    addListener(node,evtype,handlers[evtype]);}}
+		    if (handlers[evtype])
+			addListener(node,evtype,handlers[evtype]);}}
 	fdjtDOM.addListeners=addListeners;
 
 	fdjtDOM.T=function(evt) {
