@@ -150,17 +150,17 @@ var fdjtAjax=
 	    return result;}
 	fdjtAjax.formJSON=formJSON;
 
-	function ajaxSubmit(form){
+	function ajaxSubmit(form,callback){
 	    var ajax_uri=form.getAttribute("ajaxaction");
 	    if (!(ajax_uri)) return false;
-	    var callback=false;
 	    // Whether to do AJAX synchronously or not.
 	    var syncp=form.getAttribute("synchronous");
-	    if (form.oncallback) callback=form.oncallback;
-	    else if (form.getAttribute("ONCALLBACK")) {
-		callback=new Function
-		("req","form",input_elt.getAttribute("ONCALLBACK"));
-		form.oncallback=callback;}
+	    if (!(callback)) {
+		if (form.oncallback) callback=form.oncallback;
+		else if (form.getAttribute("ONCALLBACK")) {
+		    callback=new Function
+		    ("req","form",input_elt.getAttribute("ONCALLBACK"));
+		    form.oncallback=callback;}}
 	    if (trace_ajax)
 		fdjtLog("Direct %s AJAX submit to %s for %o with callback %o",
 			((syncp)?("synchronous"):("asynchronous")),
@@ -173,7 +173,7 @@ var fdjtAjax=
 	    if (form.method==="GET")
 		req.open('GET',ajax_uri+"?"+params,(!(syncp)));
 	    else req.open('POST',ajax_uri,(!(syncp)));
-	    req.withCredentials='yes';
+	    req.withCredentials='true';
 	    req.onreadystatechange=function () {
 		if (trace_ajax)
 		    fdjtLog("Got callback (%d,%d) %o for %o, calling %o",
@@ -182,11 +182,19 @@ var fdjtAjax=
 		    fdjtDOM.dropClass(form,"submitting");
 		    success=true; 
 		    if (callback) callback(req,form);
-	      	    callback_run=true;}};
+	      	    callback_run=true;}
+		else {
+		    if (trace_ajax)
+			fdjtLog("Got callback (%d,%d) %o for %o, not calling %o",
+				req.readyState,req.status,req,ajax_uri,callback);
+		    callback_run=false;}};
 	    try {
 		if (form.method==="GET") req.send();
 		else {
-		    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		    // Setting the content type will force some browsers into preflight,
+		    //  which gets us stuck.
+		    if (!(fdjtAjax.noctype))
+			req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		    req.send(params);}
 		success=true;}
 	    catch (ex) {}
@@ -217,7 +225,7 @@ var fdjtAjax=
 		return false;}
 	    return true;}
 
-	function form_submit(evt){
+	function form_submit(evt,callback){
 	    evt=evt||event||null;
 	    var form=fdjtUI.T(evt);
 	    fdjtUI.AutoPrompt.cleanup(form);
@@ -227,7 +235,7 @@ var fdjtAjax=
 	    // if (form.fdjtlaunchfailed) return;
 	    form.fdjtsubmit=true;
 	    fdjtDOM.addClass(form,"submitting");
-	    if (ajaxSubmit(form)) {
+	    if (ajaxSubmit(form,callback)) {
 		// fdjtLog("Ajax commit worked");
 		fdjtUI.cancel(evt);
 		return false;}
@@ -264,6 +272,7 @@ var fdjtAjax=
 			       base_uri,fdjtDOM.Array(arguments,1));};
 
 	fdjtAjax.onsubmit=form_submit;
+	fdjtAjax.noctype=true;
 
 	return fdjtAjax;})();
 
