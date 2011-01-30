@@ -558,12 +558,12 @@ var fdjtUI=
 	if (!(input)) input=this.input;
 	var delay=this.complete_delay||complete_delay;
 	var that=this;
-	if (!(input)) input=this.input;
 	if (this.timer) {
-	    clearTimeout(this.timer);
-	    this.timer=false;}
+	    clearTimeout(that.timer);
+	    that.timer=false;}
 	this.timer=setTimeout(
 	    function(){
+		if (!(input)) input=that.input;
 		var completions=that.complete(input.value);
 		if (callback) callback(completions);},
 	    delay);}
