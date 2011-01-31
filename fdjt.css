@@ -419,7 +419,7 @@ table.fdjtform td textarea { width: 100%;}
 table.fdjtform td.messages {
     text-align: center; font-style: italic;}
 table.fdjtform td.messages div.message {
-    text-align: max-width: 35em; margin-left: auto; margin-right: auto;
+    text-align: left; max-width: 35em; margin-left: auto; margin-right: auto;
     color: red;}
 
 table.fdjtform tbody.collapsible tr.collapsible { display: none;}
