@@ -1134,7 +1134,7 @@ var fdjtDOM=
 
 	function getMeta(name,multiple,matchcase,dom){
 	    var results=[];
-	    var matchname=((matchcase)&&(name.toUpperCase()));
+	    var matchname=((!(matchcase))&&(name.toUpperCase()));
 	    var elts=((document.getElementsByTagName)?
 		      (document.getElementsByTagName("META")):
 		      (getChildren(document,"META")));
@@ -1156,7 +1156,7 @@ var fdjtDOM=
 	// This gets a LINK href field
 	function getLink(name,multiple,matchcase,dom){
 	    var results=[];
-	    var matchname=((matchcase)&&(name.toUpperCase()));
+	    var matchname=((!((matchcase)))&&(name.toUpperCase()));
 	    var elts=((document.getElementsByTagName)?
 		      (document.getElementsByTagName("LINK")):
 		      (getChildren(document,"LINK")));
