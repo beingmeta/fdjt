@@ -214,11 +214,12 @@ var fdjtUI=
 
 
 (function(){
-    function multitext_keypress(evt){
+  function multitext_keypress(evt,sepch){
 	evt=(evt)||(event);
 	var ch=evt.charCode;
 	var target=fdjtUI.T(evt);
-	if (ch!==13) return;
+	if (typeof sepch === 'string') sepch=sepch.charCodeAt(0);
+	if ((ch!==13)&&(sepch)&&(sepch!=ch)) return;
 	fdjtUI.cancel(evt);
 	var checkbox=
 	    fdjtDOM.Input("[type=checkbox]",target.name,target.value);
