@@ -717,10 +717,11 @@ var fdjtUI=
 
 /* Expansion */
 
-fdjtUI.Expansion.onclick=function(evt){
+fdjtUI.Expansion.toggle=function(evt,spec,exspec){
     var target=fdjtUI.T(evt);
-    var wrapper=fdjtDOM.getParent(target,".fdjtexpands");
-    if (wrapper) fdjtDOM.toggleClass(wrapper,"expanded");};
+    var wrapper=fdjtDOM.getParent(target,spec||".fdjtexpands");
+    if (wrapper) fdjtDOM.toggleClass(wrapper,exspec||"fdjtexpanded");};
+fdjtUI.Expansion.onclick=fdjtUI.Expansion.toggle;
 
 /* Temporary Scrolling */
 

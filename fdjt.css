@@ -471,3 +471,20 @@ div.fdjtlog span.time {
 ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
 ;;;  End: ***
 */
+
+.fdjtexpands .whenexpanded { display: none;}
+.fdjtexpands.fdjtexpanded .whencollapsed { display: none;}
+
+.fdjtexpands.fdjtexpanded span.whenexpanded,
+.fdjtexpands.fdjtexpanded a.whenexpanded,
+.fdjtexpands.fdjtexpanded em.whenexpanded,
+.fdjtexpands.fdjtexpanded strong.whenexpanded,
+.fdjtexpands.fdjtexpanded cite.whenexpanded  {
+    display: inline;}
+.fdjtexpands.fdjtexpanded p.whenexpanded,
+.fdjtexpands.fdjtexpanded blockquote.whenexpanded,
+.fdjtexpands.fdjtexpanded div.whenexpanded {
+    display: block;}
+.fdjtexpands.fdjtexpanded li.whenexpanded {
+    display: list-item;}
+
