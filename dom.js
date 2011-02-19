@@ -199,6 +199,27 @@ var fdjtDOM=
 	    if ((start===0) && (end<0)) return string;
 	    else return string.slice(start,end);}
 
+	function nodeString(node){
+	    if (node.nodeType===3) 
+		return "<'"+node.value+"'>";
+	    else if (node.nodeType===1) {
+		var output="<"+node.tagName;
+		if (node.className)
+		    output=output+"."+node.className.replace(/\s+/g,'.');
+		if (node.id) output=output+"#"+node.id;
+		if (node.tagName==='input') {
+		    output+"[type="+node.type+"]";
+		    output+"[name="+node.name+"]";}
+		else if (node.tagName==='textarea')
+		    output+"[name="+node.name+"]";
+		else if (node.tagName==='img') {
+		    if (node.alt) output=output+"[alt="+node.alt+"]";
+		    else if (node.src) output=output+"[src="+node.src+"]";}
+		else {}
+		return output+">";}
+	    else return node.toString();}
+	fdjtDOM.nodeString=nodeString;
+	
 	/* Simple class/attrib manipulation functions */
 
 	function hasClass(elt,classname,attrib){
@@ -722,6 +743,20 @@ var fdjtDOM=
 	    else return style;}
 	fdjtDOM.getStyle=getStyle;
 
+	function styleString(elt){
+	    var style=elt.style; var result;
+	    if (!(style)) return false;
+	    var i=0; var lim=style.length;
+	    if (lim===0) return false;
+	    while (i<lim) {
+		var p=style[i];
+		var v=style[p];
+		if (i===0) result=fdjtString("%s: %o",p,v);
+		else result=result+"; "+fdjtString("%s: %o",p,v);
+		i++;}
+	    return result;}
+	fdjtDOM.styleString=styleString;
+
 	/* Getting display style */
 
 	var display_styles={
@@ -985,28 +1020,38 @@ var fdjtDOM=
 	    var images=fdjtDOM.getChildren(container,"IMG");
 	    var ilim=images.length;
 	    var oldscale=container.scale||100;
-	    container.scale=scale;
-	    container.style.fontSize=scale+'%';
-	    var rounded=10*Math.round(scale/10);
-	    fdjtDOM.addClass(container,"fdjtscaled");
-	    fdjtDOM.swapClass(container,/\bfdjtscale\d+\b/,"fdjtscale"+rounded);
+	    if (scale) {
+		container.scale=scale;
+		container.style.fontSize=scale+'%';
+		var rounded=10*Math.round(scale/10);
+		fdjtDOM.addClass(container,"fdjtscaled");
+		fdjtDOM.swapClass(container,/\bfdjtscale\d+\b/,"fdjtscale"+rounded);}
+	    else if (!(container.scale)) return;
+	    else {
+		delete container.scale;
+		container.style.fontSize="";
+		fdjtDOM.dropClass(container,"fdjtscaled");
+		fdjtDOM.dropClass(container,/\bfdjtscale\d+\b/);}
 	    var iscan=0; while (iscan<ilim) {
 		var image=images[iscan++];
-		image.style.maxWidth=image.style.width=
-		    image.style.maxHeight=image.style.height='';
-		var width=image.offsetWidth;
-		var height=image.offsetHeight;
 		if ((fdjtDOM.hasClass(image,"nofdjtscale"))||
 		    (fdjtDOM.hasClass(image,"noautoscale")))
 		    continue;
-		if (traced)
-		    fdjtLog("For %o, adj=%o dim=%o,%o, ndim=%o,%o",
-			    image,scale,width,height,
-			    width*(scale/100),height*(scale/100));
+		// Reset dimensions to get real info
 		image.style.maxWidth=image.style.width=
-		    Math.round(width*(scale/100))+'px';
-		image.style.maxHeight=image.style.height=
-		    Math.round(height*(scale/100))+'px';}}
+		    image.style.maxHeight=image.style.height='';
+		if (scale) {
+		    var width=image.offsetWidth;
+		    var height=image.offsetHeight;
+		    if (traced)
+			fdjtLog("For %o, adj=%o dim=%o,%o, ndim=%o,%o",
+				image,scale,width,height,
+				width*(scale/100),height*(scale/100));
+		    image.style.maxWidth=image.style.width=
+			Math.round(width*(scale/100))+'px';
+		    image.style.maxHeight=image.style.height=
+			Math.round(height*(scale/100))+'px';}}}
+	
 	function adjustToFit(container,threshold,padding){
 	    var trace_adjust=(container.traceadjust)||
 		fdjtDOM.trace_adjust||default_trace_adjust;
@@ -1016,13 +1061,9 @@ var fdjtDOM=
 		(geom.height);
 	    var maxwidth=((style.maxWidth)&&(parsePX(style.maxWidth)))||
 		(geom.width);
-	    var goodenough=1-((threshold||0.2));
+	    var goodenough=threshold||0.1;
 	    var scale=(container.scale)||100.0;
 	    var bounds=getInsideBounds(container);
-	    var itfits=((bounds.height/maxheight)<=1)&&
-		((bounds.width/maxwidth)<=1);
-	    var itfits=((bounds.height/maxheight)<=1)&&
-		((bounds.width/maxwidth)<=1);
 	    var hpadding=
 		(fdjtDOM.parsePX(style.paddingLeft)||0)+
 		(fdjtDOM.parsePX(style.paddingRight)||0)+
@@ -1034,44 +1075,36 @@ var fdjtDOM=
 		(fdjtDOM.parsePX(style.borderTopWidth)||0)+
 		(fdjtDOM.parsePX(style.borderBottomWidth)||0);
 	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
-	    if (trace_adjust) {
-		fdjtLog("[%fs] Adjusting %o scale=%o maxscale=%o%s",
-			fdjtET(),container,scale,container.maxscale||false,
-			((itfits)?" (fits)":""));
-		fdjtLog("[%fs] maxw=%o, maxh=%o maxa=%o w=%o h=%o a=%o l=%o r=%o t=%o b=%o",
-			fdjtET(),
+	    var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
+	    if (trace_adjust) 
+		fdjtLog("Adjusting %s to %o scale=%o%s, best=%o~%o, max=%ox%o=%o, box=%ox%o=%o, style=%s",
+			fdjtDOM.nodeString(container),scale,goodenough,((itfits)?" (fits)":""),
+			container.bestscale||-1,container.bestfit||-1,
 			maxwidth,maxheight,maxwidth*maxheight,
 			bounds.width,bounds.height,bounds.width*bounds.height,
-			bounds.left,bounds.right,bounds.top,bounds.bottom);}
-	    /* This is good enough, so we stop adjusting */
-	    if ((itfits)&&
-		(((bounds.height*bounds.width)/
-		  (maxheight*maxwidth))>goodenough)) {
-		if (trace_adjust)
-		    fdjtLog("[%fs] Good enough (%o*%o)=%o/%o(%o*%o)=%o ms=%o %s",
-			    bounds.width,bounds.height,(bounds.width*bounds.height),
-			    maxwidth,maxheight,(maxheight*maxwidth),
-			    ((bounds.height*bounds.width)/(maxheight*maxwidth)),
-			    container.maxscale,((itfits)?("(fits)"):("")));
-		return;}
+			styleString(container));
 	    if (itfits) {
-		if ((!(container.maxscale))||(scale>container.maxscale)) {
-		    if (trace_adjust)
-			fdjtLog("[%fs] Setting maxscale %o (%o*%o)=%o/%o=(%o*%o)=%o ms=%o %s",
-				fdjtET(),scale,
-				bounds.width,bounds.height,(bounds.width*bounds.height),
-				(maxheight*maxwidth),maxwidth,maxheight,
-				((bounds.height*bounds.width)/(maxheight*maxwidth)),
-				container.maxscale,((itfits)?("(fits)"):("")));
-		    container.maxscale=scale;}}
+		/* Figure out how well it fits */
+		var fit=Math.max((1-(bounds.width/maxwidth)),(1-(bounds.height/maxheight)));
+		var bestfit=container.bestfit||1.5;
+		if (!(trace_adjust)) {}
+		else if (container.bestscale) 
+		    fdjtLog("%s %o~%o vs. %o~%o",
+			    ((fit<goodenough)?"Good enough!":((fit<bestfit)?"Better!":"Worse!")),
+			    scale,fit,container.bestscale,container.bestfit);
+		else fdjtLog("First fit %o~%o",scale,fit);
+		if (fit<bestfit) {
+		    container.bestscale=scale; container.bestfit=fit;}
+		// If it's good enough, just return
+		if (fit<goodenough) {
+		    container.goodscale=scale; return;}}
+	    // Figure out the next scale factor to try
 	    var dh=bounds.height-maxheight; var dw=bounds.width-maxwidth;
 	    var rh=maxheight/bounds.height; var rw=maxwidth/bounds.width;
 	    var newscale=
 		((itfits)?
 		 (scale*Math.sqrt
 		  ((maxwidth*maxheight)/(bounds.width*bounds.height))):
-		 (container.maxscale)?
-		 (container.maxscale+((container.scale-container.maxscale)/2)):
 		 (rh<rw)?(scale*rh):(scale*rw));
 	    if (trace_adjust)
 		fdjtLog("[%fs] Adjusted rw=%o rh=%o newscale=%o",
@@ -1083,28 +1116,12 @@ var fdjtDOM=
 	fdjtDOM.finishScale=function(container){
 	    var traced=(container.traceadjust)||
 		fdjtDOM.trace_adjust||default_trace_adjust;
-	    if (!(container.maxscale)) return;
-	    if (container.scale===container.maxscale) return;
-	    var style=getStyle(container);
-	    var geom=getGeometry(container);
-	    var maxheight=
-		((style.maxHeight)&&(parsePX(style.maxHeight)))||(geom.height);
-	    var maxwidth=
-		((style.maxWidth)&&(parsePX(style.maxWidth)))||(geom.width);
-	    var hpadding=(fdjtDOM.parsePX(style.paddingLeft)||0)+
-		(fdjtDOM.parsePX(style.paddingRight)||0)+
-		(fdjtDOM.parsePX(style.borderLeftWidth)||0)+
-		(fdjtDOM.parsePX(style.borderRightWidth)||0);
-	    var vpadding=(fdjtDOM.parsePX(style.paddingTop)||0)+
-		(fdjtDOM.parsePX(style.paddingBottom)||0)+
-		(fdjtDOM.parsePX(style.borderTopWidth)||0)+
-		(fdjtDOM.parsePX(style.borderBottomWidth)||0);
-	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
-	    var bounds=getInsideBounds(container);
-	    var itfits=
-		((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
-	    if (!(itfits)) applyScale(container,container.maxscale,traced);}
-
+	    if (!(container.bestscale)) {
+		applyScale(container,false,traced);
+		return;}
+	    if (container.scale===container.bestscale) return;
+	    applyScale(container,container.bestscale,traced);};
+	
 	/* Getting various kinds of metadata */
 
 	function getHTML(){
@@ -1431,11 +1448,15 @@ var fdjtDOM=
 	if (navigator.userAgent.search("WebKit")>=0) {
 	    fdjtDOM.transition='-webkit-transition';
 	    fdjtDOM.transitionProperty='-webkit-transition-property';
-	    fdjtDOM.transform='-webkit-transform';}
+	    fdjtDOM.transform='-webkit-transform';
+	    fdjtDOM.columnWidth='-webkit-column-width';
+	    fdjtDOM.columnGap='-webkit-column-gap';}
 	else if (navigator.userAgent.search("Mozilla")>=0) {
 	    fdjtDOM.transitionProperty='-moz-transition-property';
 	    fdjtDOM.transition='-moz-transition';
-	    fdjtDOM.transform='-moz-transform';}
+	    fdjtDOM.transform='-moz-transform';
+	    fdjtDOM.columnWidth='MozColumnWidth';
+	    fdjtDOM.columnGap='MozColumnGap';}
 	else {
 	    fdjtDOM.transitionProperty='transition-property';
 	    fdjtDOM.transition='transition';
