@@ -1117,10 +1117,12 @@ var fdjtDOM=
 	    var traced=(container.traceadjust)||
 		fdjtDOM.trace_adjust||default_trace_adjust;
 	    if (!(container.bestscale)) {
-		applyScale(container,false,traced);
-		return;}
-	    if (container.scale===container.bestscale) return;
-	    applyScale(container,container.bestscale,traced);};
+		applyScale(container,false,traced);}
+	    else if (container.scale===container.bestscale) {}
+	    else applyScale(container,container.bestscale,traced);
+	    delete container.bestscale;
+	    delete container.bestfit;
+	    delete container.goodscale;};
 	
 	/* Getting various kinds of metadata */
 
