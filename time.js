@@ -139,12 +139,12 @@ var fdjtTime=
 	    if (!(arg)) arg=new Date();
 	    return (arg.getTime()-loaded)/1000;};
 
-	function timeslice(fcns,slice,space){
-	    if (typeof slice !== 'number') slice=0;
+	function timeslice(fcns,slice,space,done){
+	    if (typeof slice !== 'number') slice=100;
 	    if (typeof space !== 'number') space=100;
 	    var i=0; var lim=fcns.length;
 	    var slicefn=function(){
-		var timelim=fdjtTime()+space;
+		var timelim=fdjtTime()+slice;
 		var nextspace=false;
 		while (i<lim) {
 		    var fcn=fcns[i++];
@@ -153,7 +153,8 @@ var fdjtTime=
 			nextspace=fcn; break;}
 		    else fcn();
 		    if (fdjtTime()>timelim) break;}
-		if (i<lim) setTimeout(slicefn,nextspace||space);};
+		if ((i<lim)&&((!(done))||(!(done()))))
+		    setTimeout(slicefn,nextspace||space);};
 	    return slicefn();}
 	fdjtTime.timeslice=timeslice;
 
