@@ -1025,7 +1025,8 @@ var fdjtDOM=
 		container.style.fontSize=scale+'%';
 		var rounded=10*Math.round(scale/10);
 		fdjtDOM.addClass(container,"fdjtscaled");
-		fdjtDOM.swapClass(container,/\bfdjtscale\d+\b/,"fdjtscale"+rounded);}
+		fdjtDOM.swapClass(
+		    container,/\bfdjtscale\d+\b/,"fdjtscale"+rounded);}
 	    else if (!(container.scale)) return;
 	    else {
 		delete container.scale;
@@ -1043,10 +1044,6 @@ var fdjtDOM=
 		if (scale) {
 		    var width=image.offsetWidth;
 		    var height=image.offsetHeight;
-		    if (traced)
-			fdjtLog("For %o, adj=%o dim=%o,%o, ndim=%o,%o",
-				image,scale,width,height,
-				width*(scale/100),height*(scale/100));
 		    image.style.maxWidth=image.style.width=
 			Math.round(width*(scale/100))+'px';
 		    image.style.maxHeight=image.style.height=
@@ -1117,9 +1114,18 @@ var fdjtDOM=
 	    var traced=(container.traceadjust)||
 		fdjtDOM.trace_adjust||default_trace_adjust;
 	    if (!(container.bestscale)) {
-		applyScale(container,false,traced);}
+		applyScale(container,false,traced);
+		fdjtLog("No good scaling for %o style=%s",
+			fdjtDOM.nodeString(container),
+			fdjtDOM.styleString(container));
+		return;}
 	    else if (container.scale===container.bestscale) {}
 	    else applyScale(container,container.bestscale,traced);
+	    if (traced)
+		fdjtLog("Final scale %o~%o for %o style=%s",
+			container.bestscale,container.bestfit,
+			fdjtDOM.nodeString(container),
+			fdjtDOM.styleString(container));
 	    delete container.bestscale;
 	    delete container.bestfit;
 	    delete container.goodscale;};
