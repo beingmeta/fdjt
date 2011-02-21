@@ -297,6 +297,23 @@ var fdjtState=
 	     (nodeid));}
     fdjtState.getUUID=getUUID;
     
+    // Getting version information
+    function versionInfo(){
+      var s=navigator.appVersion; var result={};
+      var start;
+      while ((start=s.search(/\w+\/\d\d/g))>=0) {
+	var slash=s.indexOf('/',start);
+	var afterslash=s.slice(slash+1);
+	var num_end=afterslash.search(/\W/);
+	var numstring=afterslash.slice(0,num_end);
+	try {
+	  result[s.slice(start,slash)]=parseInt(numstring);}
+	catch (ex) {
+	  result[s.slice(start,slash)]=numstring;}
+	s=afterslash.slice(num_end);}
+      return result;}
+    fdjtState.versionInfo=versionInfo;
+
     return fdjtState;})();
 
 /* Emacs local variables
