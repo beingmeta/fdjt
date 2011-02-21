@@ -301,7 +301,7 @@ var fdjtState=
     function versionInfo(){
       var s=navigator.appVersion; var result={};
       var start;
-      while ((start=s.search(/\w+\/\d\d/g))>=0) {
+      while ((start=s.search(/\w+\/\d/g))>=0) {
 	var slash=s.indexOf('/',start);
 	var afterslash=s.slice(slash+1);
 	var num_end=afterslash.search(/\W/);
