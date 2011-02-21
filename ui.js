@@ -841,6 +841,17 @@ fdjtUI.Expansion.onclick=fdjtUI.Expansion.toggle;
     fdjtUI.scrollRestore=scroll_restore;}());
 
 (function(){
+    function dosubmit(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	var form=fdjtDOM.getParent(target,"FORM");
+	var submit_event = document.createEvent("HTMLEvents");
+	submit_event.initEvent('submit',false,true);
+	form.dispatchEvent(submit_event);
+	form.submit();}
+    fdjtUI.dosubmit=dosubmit;}());
+
+(function(){
     var hasClass=fdjtDOM.hasClass;
     
     fdjtUI.T=function(evt) {
