@@ -204,8 +204,6 @@ var fdjtDOM=
 		return "<'"+node.value+"'>";
 	    else if (node.nodeType===1) {
 		var output="<"+node.tagName;
-		if (node.className)
-		    output=output+"."+node.className.replace(/\s+/g,'.');
 		if (node.id) output=output+"#"+node.id;
 		if (node.tagName==='input') {
 		    output+"[type="+node.type+"]";
@@ -216,6 +214,8 @@ var fdjtDOM=
 		    if (node.alt) output=output+"[alt="+node.alt+"]";
 		    else if (node.src) output=output+"[src="+node.src+"]";}
 		else {}
+		if (node.className)
+		    output=output+"."+node.className.replace(/\s+/g,'.');
 		return output+">";}
 	    else return node.toString();}
 	fdjtDOM.nodeString=nodeString;
@@ -1000,7 +1000,7 @@ var fdjtDOM=
 	    var i=0; var lim=children.length;
 	    while (i<lim) {
 		var child=children[i++];
-		if (!(child.offsetLeft)) continue;
+		if (typeof child.offsetLeft !== 'number') continue;
 		if (getStyle(child).position!=='static') continue;
 		if (left===false) {
 		    left=child.offsetLeft;
@@ -1072,22 +1072,26 @@ var fdjtDOM=
 		(fdjtDOM.parsePX(style.borderTopWidth)||0)+
 		(fdjtDOM.parsePX(style.borderBottomWidth)||0);
 	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
-	    var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
+	    var itfits=((bounds.height/maxheight)<=1)&&
+		((bounds.width/maxwidth)<=1);
 	    if (trace_adjust) 
-		fdjtLog("Adjusting %s to %o scale=%o%s, best=%o~%o, max=%ox%o=%o, box=%ox%o=%o, style=%s",
-			fdjtDOM.nodeString(container),scale,goodenough,((itfits)?" (fits)":""),
+		fdjtLog("Adjust (%o) %s cur=%o%s, best=%o~%o, limit=%ox%o=%o, box=%ox%o=%o, style=%s",
+			goodenough,fdjtDOM.nodeString(container),
+			scale,((itfits)?" (fits)":""),
 			container.bestscale||-1,container.bestfit||-1,
 			maxwidth,maxheight,maxwidth*maxheight,
 			bounds.width,bounds.height,bounds.width*bounds.height,
 			styleString(container));
 	    if (itfits) {
 		/* Figure out how well it fits */
-		var fit=Math.max((1-(bounds.width/maxwidth)),(1-(bounds.height/maxheight)));
+		var fit=Math.max((1-(bounds.width/maxwidth)),
+				 (1-(bounds.height/maxheight)));
 		var bestfit=container.bestfit||1.5;
 		if (!(trace_adjust)) {}
 		else if (container.bestscale) 
 		    fdjtLog("%s %o~%o vs. %o~%o",
-			    ((fit<goodenough)?"Good enough!":((fit<bestfit)?"Better!":"Worse!")),
+			    ((fit<goodenough)?"Good enough!":
+			     ((fit<bestfit)?"Better!":"Worse!")),
 			    scale,fit,container.bestscale,container.bestfit);
 		else fdjtLog("First fit %o~%o",scale,fit);
 		if (fit<bestfit) {
@@ -1104,8 +1108,8 @@ var fdjtDOM=
 		  ((maxwidth*maxheight)/(bounds.width*bounds.height))):
 		 (rh<rw)?(scale*rh):(scale*rw));
 	    if (trace_adjust)
-		fdjtLog("[%fs] Adjusted rw=%o rh=%o newscale=%o",
-			fdjtET(),rw,rh,newscale);
+		fdjtLog("[%fs] Trying newscale=%o, rw=%o rh=%o",
+			fdjtET(),newscale,rw,rh);
 	    applyScale(container,newscale,trace_adjust);}
 	fdjtDOM.applyScale=applyScale;
 	fdjtDOM.adjustToFit=adjustToFit;
