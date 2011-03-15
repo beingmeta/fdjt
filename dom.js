@@ -260,6 +260,7 @@ var fdjtDOM=
 	    else elt.className=newinfo;
 	    return true;}
 	fdjtDOM.addClass=addClass;
+	fdjtDOM.aC=addClass;
 
 	fdjtDOM.classAdder=function(elt,classname){
 	    return function() {
@@ -302,6 +303,7 @@ var fdjtDOM=
 	    else elt.className=newinfo;
 	    return true;}
 	fdjtDOM.dropClass=dropClass;
+	fdjtDOM.dC=dropClass;
 
 	fdjtDOM.classDropper=function(elt,classname){
 	    return function() {
@@ -356,6 +358,7 @@ var fdjtDOM=
 	    else elt.className=newinfo;
 	    return false;}
 	fdjtDOM.toggleClass=toggleClass;
+	fdjtDOM.tC=toggleClass;
 	
 	fdjtDOM.isTextInput=function(target){
 	    return ((target.tagName==='INPUT')||(target.tagName==='TEXTAREA'));};
@@ -545,6 +548,7 @@ var fdjtDOM=
 	    else throw { error: 'invalid parent spec'};}
 	fdjtDOM.getParent=getParent;
 	fdjtDOM.hasParent=getParent;
+	fdjtDOM.$P=getParent;
 	fdjtDOM.inherits=function(node,spec) {
 	    var sel=new Selector(spec);
 	    return ((sel.match(node))?(node):(getParent(node,sel)));};
