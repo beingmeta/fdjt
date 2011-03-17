@@ -1485,7 +1485,11 @@ var fdjtDOM=
     return fdjtDOM;
   })();
 
-function fdjtID(id) { return document.getElementById(id);}
+function fdjtID(id) {
+    return ((id)&&
+	    ((document.getElementById(id))||
+	     ((id[0]==='#')&&
+	      (document.getElementById(id.slice(1))))));}
 function _(string) { return string;}
 
 /* Emacs local variables
