@@ -835,6 +835,7 @@ var fdjtDOM=
       var stack = ((withstack) ? (new Array(elt)) : false);
       var width=elt.offsetWidth;
       var height=elt.offsetHeight;
+	var rootp=((root)&&(root.offsetParent));
 
       if (elt===root) {
 	result.left=0; result.top=0;
@@ -842,7 +843,7 @@ var fdjtDOM=
 	return result;}
       elt=elt.offsetParent;
       while (elt) {
-	if ((root)&&(elt===root)) break;
+	  if ((root)&&((elt===root)||(elt===rootp))) break;
 	if (withstack) withstack.push(elt);
 	top += elt.offsetTop;
 	left += elt.offsetLeft;
