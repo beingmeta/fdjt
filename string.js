@@ -40,6 +40,9 @@ var fdjtString=
 		    else if (typeof arg === 'number')
 			output=output+arg;
 		    else output=output+stringify(arg);}
+		else if (string[cmd+1]==='j') {
+		    var arg=arguments[i++];
+		    output=output+JSON.stringify(arg);}
 		else if (arguments[i])
 		    output=output+arguments[i++];
 		else if (typeof arguments[i] === 'undefined') {
