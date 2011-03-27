@@ -734,6 +734,19 @@ var fdjtDOM=
 	return results[0];}
       else return false;};
 	
+    function getInputValues(root,name){
+      var results=[];
+      var inputs=root.getElementsByTagName('input');
+      var i=0; var lim=inputs.length;
+      while (i<lim) {
+	var input=inputs[i++];
+	if (input.name!==name) continue;
+	if ((input.type==='checkbox')||(input.type==='radio')) {
+	  if (!(input.checked)) continue;}
+	results.push(input.value);}
+      return results;}
+    fdjtDOM.getInputValues=getInputValues;
+
     /* Getting style information generally */
 
     function getStyle(elt,prop){
