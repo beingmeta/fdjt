@@ -432,6 +432,8 @@ table.fdjtform tbody.collapsible .expanded { display: none;}
 table.fdjtform tbody.collapsible.expanded div.expanded { display: block;}
 table.fdjtform tbody.collapsible.expanded span.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded img.expanded { display: inline;}
+table.fdjtform tbody.collapsible.expanded button.expanded { display: inline;}
+table.fdjtform tbody.collapsible.expanded input.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded .collapsed { display: none;}
 
 form.evalform input[name='EXPR'] {
@@ -458,7 +460,6 @@ span.underline { text-decoration: underline;}
 div.fdjtlog { text-align: left; margin-left: 2em;}
 div.fdjtlog span.time {
     float: left; width: 6em; color: green;}
-
 
 /* Expansion */
 

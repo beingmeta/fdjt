@@ -8,20 +8,20 @@ fdjt_versions.decl("fdjt",fdjt_state_version);
 /* Copyright (C) 2009-2011 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended Javascript utility functions
-    of various kinds.
+   of various kinds.
 
    This program comes with absolutely NO WARRANTY, including implied
    warranties of merchantability or fitness for any particular
    purpose.
 
-    Use, modification, and redistribution of this program is permitted
-    under either the GNU General Public License (GPL) Version 2 (or
-    any later version) or under the GNU Lesser General Public License
-    (version 3 or later).
+   Use, modification, and redistribution of this program is permitted
+   under either the GNU General Public License (GPL) Version 2 (or
+   any later version) or under the GNU Lesser General Public License
+   (version 3 or later).
 
-    These licenses may be found at www.gnu.org, particularly:
-      http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-      http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+   These licenses may be found at www.gnu.org, particularly:
+   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+   http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
 
@@ -143,11 +143,11 @@ var fdjtState=
 
     /* Local storage (persists between sessions) */
 
-      function setLocal(name,val,unparse){
-	  if (!(name)) throw { error: "bad name",name: name};
-	  if (unparse) val=JSON.stringify(val);
-	  if (window.localStorage)
-	      window.localStorage[name]=val;}
+    function setLocal(name,val,unparse){
+      if (!(name)) throw { error: "bad name",name: name};
+      if (unparse) val=JSON.stringify(val);
+      if (window.localStorage)
+	window.localStorage[name]=val;}
     fdjtState.setLocal=setLocal;
 
     function getLocal(name,parse){
@@ -165,48 +165,69 @@ var fdjtState=
       else return false;}
     fdjtState.dropLocal=dropLocal;
     
-      function clearLocal(){
-	  if (window.localStorage) {
-	      var storage=window.localStorage;
-	      var i=0; var lim=storage.length;
-	      var keys=[];
-	      while (i<lim) keys.push(storage.key(i++));
-	      i=0; while (i<lim) storage.removeItem(keys[i++]);}}
-      fdjtState.clearLocal=clearLocal;
+    function clearLocal(){
+      if (window.localStorage) {
+	var storage=window.localStorage;
+	var i=0; var lim=storage.length;
+	var keys=[];
+	while (i<lim) keys.push(storage.key(i++));
+	i=0; while (i<lim) storage.removeItem(keys[i++]);}}
+    fdjtState.clearLocal=clearLocal;
 
     /* Gets arguments from the query string */
-    function getQuery(name,multiple,matchcase){
+    function getQuery(name,multiple,matchcase,verbatim){
       if (!(location.search))
 	if (multiple) return [];
 	else return false;
       var results=[];
-      var namepat=new RegExp("(&|^|\\?)"+name+"(=|&|$)",((matchcase)?"g":"gi"));
+      var ename=encodeURIComponent(name);
+      var namepat=new RegExp
+	("(&|^|\\?)"+ename+"(=|&|$)",((matchcase)?"g":"gi"));
       var query=location.search;
       var start=query.search(namepat);
       while (start>=0) {
 	// Skip over separator if non-initial
 	if ((query[start]==='?')||(query[start]==='&')) start++;
 	// Skip over the name
-	var valstart=start+name.length; var end=false;
+	var valstart=start+ename.length; var end=false;
 	if (query[valstart]==="=") {
 	  var valstring=query.slice(valstart+1);
 	  end=valstring.search(/(&|$)/g);
-	  if (end<=0)
-	    if (multiple) {
-	      results.push(query.slice(start,valstart));
-	      return results;}
-	    else return query.slice(start,valstart);
-	  else if (multiple)
+	  if (end<=0) {
+	    results.push("");
+	    if (!(multiple)) break;}
+	  else {
 	    results.push(valstring.slice(0,end));
-	  else return valstring.slice(0,end);}
+	    if (!(multiple)) break;}}
 	else if (multiple)
 	  results.push(query.slice(start,end));
-	else return query.slice(start,end);
+	else if (verbatim)
+	  return query.slice(start,end);
+	else return querydecode(query.slice(start,end));
 	if (end>0) {
 	  query=query.slice(end);
 	  start=query.search(namepat);}}
-      if (multiple) return results; else return false;}
+      if (!(verbatim)) {
+	var i=0; var lim=results.length;
+	while (i<lim) {results[i]=querydecode(results[i]); i++;}}
+      if (multiple) return results;
+      else if (results.length)
+	return results[0];
+      else return false;}
     fdjtState.getQuery=getQuery;
+    
+    function querydecode(string){
+      if (decodeURIComponent)
+	return decodeURIComponent(string);
+      else return 
+	     string.replace
+	     (/%3A/gi,":").replace
+	     (/%2F/gi,"/").replace
+	     (/%3F/gi,"?").replace
+	     (/%3D/gi,"=").replace
+	     (/%20/gi," ").replace
+	     (/%40/gi,"@").replace
+	     (/%23/gi,"#");}
 
     function test_opt(pos,neg){
       var pospat=((pos)&&(new RegExp("\\b"+pos+"\\b")));
@@ -317,7 +338,7 @@ var fdjtState=
     return fdjtState;})();
 
 /* Emacs local variables
-;;;  Local variables: ***
-;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
-;;;  End: ***
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  End: ***
 */

@@ -26,7 +26,8 @@ fdjt_versions.decl("fdjt",fdjt_ui_version);
 */
 
 var fdjtUI=
-    {CoHi: {classname: "cohi"},AutoPrompt: {}, InputHelp: {}, Expansion: {},
+    {CoHi: {classname: "cohi"},AutoPrompt: {}, InputHelp: {},
+     Expansion: {},Collapsible: {},
      Tabs: {}, MultiText: {}};
 
 /* Co-highlighting */
@@ -718,10 +719,27 @@ var fdjtUI=
 /* Expansion */
 
 fdjtUI.Expansion.toggle=function(evt,spec,exspec){
+  evt=evt||event;
     var target=fdjtUI.T(evt);
     var wrapper=fdjtDOM.getParent(target,spec||".fdjtexpands");
     if (wrapper) fdjtDOM.toggleClass(wrapper,exspec||"fdjtexpanded");};
 fdjtUI.Expansion.onclick=fdjtUI.Expansion.toggle;
+
+fdjtUI.Collapsible.click=function(evt){
+  evt=evt||event;
+  var target=fdjtUI.T(evt);
+  if (fdjtUI.isDefaultClickable(target)) return;
+  var wrapper=fdjtDOM.getParent(target,".collapsible");
+  if (wrapper) {
+    fdjtUI.cancel(evt);
+    fdjtDOM.toggleClass(wrapper,"expanded");};};
+
+fdjtUI.Collapsible.focus=function(evt){
+  evt=evt||event;
+  var target=fdjtUI.T(evt);
+  var wrapper=fdjtDOM.getParent(target,".collapsible");
+  if (wrapper) {
+    fdjtDOM.toggleClass(wrapper,"expanded");};};
 
 /* Temporary Scrolling */
 
@@ -873,7 +891,21 @@ fdjtUI.Expansion.onclick=fdjtUI.Expansion.toggle;
 		(target.tagName==="OPTION") ||
 		(hasClass(target,"isclickable")))
 		return true;
-	    else if (target.onclick) return true;
+	    else if (target.onclick)
+	      return true;
+	    else target=target.parentNode;}
+	return false;};
+
+    fdjtUI.isDefaultClickable=function(target){
+	if (target instanceof Event) target=fdjtUI.T(target);
+	while (target) {
+	    if (((target.tagName==='A')&&(target.href))||
+		(target.tagName==="INPUT") ||
+		(target.tagName==="TEXTAREA") ||
+		(target.tagName==="SELECT") ||
+		(target.tagName==="OPTION") ||
+		(hasClass(target,"isclickable")))
+		return true;
 	    else target=target.parentNode;}
 	return false;};
 
