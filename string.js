@@ -246,6 +246,18 @@ var fdjtString=
 	    default: return ""+num;}}
 	fdjtString.padNum=padNum;
 
+	/* Getting initials */
+
+	function getInitials(string){
+	  var words=string.split(/\W/); var initials="";
+	  var i=0; var lim=words.length;
+	  while (i<lim) {
+	    var word=words[i++];
+	    if (word.length)
+	      initials=initials+word.slice(0,1);}
+	  return initials;}
+	fdjtString.getInitials=getInitials;
+
 	/* More string functions */
 
 	function hasPrefix(string,prefix){
