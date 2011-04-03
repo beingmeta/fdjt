@@ -14,5 +14,7 @@ buildstamp.js: $(FDJT_FILES)
 	$(ECHO) "var fdjt_buildtime='"`date`"';" >> buildstamp.js 
 fdjt.js: $(FDJT_FILES) buildstamp.js
 	cat buildstamp.js $(FDJT_FILES) > $@
+TAGS: $(FDJT_FILES)
+	etags -o $@ $^
 clean: 
 	$(CLEAN) fdjt.js buildstamp.js
