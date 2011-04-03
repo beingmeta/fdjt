@@ -1,10 +1,5 @@
 /* -*- Mode: Javascript; -*- */
 
-var fdjt_ajax_id="$Id$";
-var fdjt_ajax_version=parseInt("$Revision$".slice(10,-1));
-fdjt_versions.decl("fdjt/ajax",fdjt_ajax_version);
-fdjt_versions.decl("fdjt",fdjt_ajax_version);
-
 /* Copyright (C) 2007-2011 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides an abstraction layer for Ajax calls

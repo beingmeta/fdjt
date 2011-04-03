@@ -1,8 +1,5 @@
 /* -*- Mode: Javascript; -*- */
 
-var fdjt_richtips_id="$Id$";
-var fdjt_richtips_version=parseInt("$Revision$".slice(10,-1));
-
 /* Copyright (C) 2007-2011 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides for mouseover tooltips with rich content

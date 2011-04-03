@@ -1,10 +1,5 @@
 /* -*- Mode: Javascript; -*- */
 
-var fdjt_state_id="$Id$";
-var fdjt_state_version=parseInt("$Revision$".slice(10,-1));
-fdjt_versions.decl("fdjt/state",fdjt_state_version);
-fdjt_versions.decl("fdjt",fdjt_state_version);
-
 /* Copyright (C) 2009-2011 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended Javascript utility functions
