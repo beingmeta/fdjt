@@ -38,6 +38,16 @@ var fdjtString=
 		else if (string[cmd+1]==='j') {
 		    var arg=arguments[i++];
 		    output=output+JSON.stringify(arg);}
+		else if (string[cmd+1]==='D') {
+		    // Use local stringify to output elements
+		    var arg=arguments[i++];
+		    output=output+stringify(arg);}
+		else if ((string[cmd+1]==='x')&&
+			 (typeof arguments[i] === 'number')&&
+			 (arguments[i]>=0)&&
+			 ((arguments[i]%1)>=0)) {
+		    var arg=arguments[i++];
+		    output=output+arg.toString(16);}
 		else if (arguments[i])
 		    output=output+arguments[i++];
 		else if (typeof arguments[i] === 'undefined') {
@@ -46,8 +56,7 @@ var fdjtString=
 		string=string.slice(cmd+2);
 		cmd=string.indexOf('%');}
 	    output=output+string;
-	    return output;
-	}
+	    return output;}
 
 	fdjtString.revid="$Id$";
 	fdjtString.version=parseInt("$Revision$".slice(10,-1));
