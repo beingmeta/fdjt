@@ -1064,6 +1064,48 @@ var fdjtDOM=
 	  image.style.maxHeight=image.style.height=
 	    Math.round(height*(scale/100))+'px';}}}
 	
+    function adjustInside(elt,container,step,min,pad){
+      var trace_adjust=(elt.traceadjust)||
+	(container.traceadjust)||fdjtDOM.trace_adjust||
+	((elt.className)&&(elt.className.search(/\btraceadjust\b/)>=0))||
+	((container.className)&&
+	 (container.className.search(/\btraceadjust\b/)>=0))||
+	default_trace_adjust;
+      if (!(step)) step=5;
+      if (!(min)) min=50;
+      if (!(pad)) pad=1;
+      var scale=100;
+      function adjust(){
+	var outside=getGeometry(container);
+	var inside=getGeometry(elt,container);
+	var style=getStyle(container);
+	var maxwidth=
+	  outside.width-
+	  (parsePX(style.paddingLeft,0)+
+	   parsePX(style.borderLeft,0)+
+	   parsePX(style.paddingRight,0)+
+	   parsePX(style.borderRight,0));
+	var maxheight=
+	  outside.height-
+	  (parsePX(style.paddingTop,0)+
+	   parsePX(style.borderTop,0)+
+	   parsePX(style.paddingBottom,0)+
+	   parsePX(style.borderBottom,0));
+	if (trace_adjust)
+	  fdjtLog("adjustInside scale=%o step=%o min=%o pad=%o [l%o,t%o,r%o,b%o] << %ox%o < %ox%o",
+		  scale,step,min,pad,
+		  inside.left,inside.top,inside.right,inside.bottom,
+		  maxwidth*pad,maxheight*pad,
+		  maxwidth,maxheight);
+	if ((inside.top>=0)&&(inside.bottom<=(pad*maxheight))&&
+	    (inside.left>=0)&&(inside.right<=(pad*maxwidth)))
+	  return;
+	else if (scale<=min) return;
+	else {
+	  scale=scale-step;
+	  applyScale(elt,scale,trace_adjust);
+	  setTimeout(adjust,10);}}
+      setTimeout(adjust,10);}
     function adjustToFit(container,threshold,padding){
       var trace_adjust=(container.traceadjust)||
 	fdjtDOM.trace_adjust||
@@ -1082,12 +1124,14 @@ var fdjtDOM=
 	(fdjtDOM.parsePX(style.paddingLeft)||0)+
 	(fdjtDOM.parsePX(style.paddingRight)||0)+
 	(fdjtDOM.parsePX(style.borderLeftWidth)||0)+
-	(fdjtDOM.parsePX(style.borderRightWidth)||0);
+	(fdjtDOM.parsePX(style.borderRightWidth)||0)+
+	padding;
       var vpadding=
 	(fdjtDOM.parsePX(style.paddingTop)||0)+
 	(fdjtDOM.parsePX(style.paddingBottom)||0)+
 	(fdjtDOM.parsePX(style.borderTopWidth)||0)+
-	(fdjtDOM.parsePX(style.borderBottomWidth)||0);
+	(fdjtDOM.parsePX(style.borderBottomWidth)||0)+
+	padding;
       maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
       var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
       if (trace_adjust) 
@@ -1129,6 +1173,7 @@ var fdjtDOM=
       applyScale(container,newscale,trace_adjust);}
     fdjtDOM.applyScale=applyScale;
     fdjtDOM.adjustToFit=adjustToFit;
+    fdjtDOM.adjustInside=adjustInside;
     fdjtDOM.insideBounds=getInsideBounds;
     fdjtDOM.finishScale=function(container){
       var traced=(container.traceadjust)||
