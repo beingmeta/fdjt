@@ -23,6 +23,9 @@
 var fdjtString=
     (function(){
 	function fdjtString(string){
+	    if ((typeof string !== 'string')&&
+		(!(string instanceof String)))
+		return stringify(string);
 	    var output="";
 	    var cmd=string.indexOf('%'); var i=1;
 	    while (cmd>=0) {
@@ -38,10 +41,6 @@ var fdjtString=
 		else if (string[cmd+1]==='j') {
 		    var arg=arguments[i++];
 		    output=output+JSON.stringify(arg);}
-		else if (string[cmd+1]==='D') {
-		    // Use local stringify to output elements
-		    var arg=arguments[i++];
-		    output=output+stringify(arg);}
 		else if ((string[cmd+1]==='x')&&
 			 (typeof arguments[i] === 'number')&&
 			 (arguments[i]>=0)&&
