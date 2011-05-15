@@ -953,6 +953,26 @@ var fdjtDOM=
       else return 0;}
     fdjtDOM.textWidth=textwidth;
 
+      function countBreaks(arg){
+	  if (typeof arg === 'string') {
+	      return arg.match(/\W*\s+\W*/g).length;}
+	  else if (!(arg.nodeType)) return 0;
+	  else if (arg.nodeType===1) {}
+	  else if (arg.nodeType===3)
+	      return arg.nodeValue.match(/\W*\s+\W*/g).length;
+	  else return 0;}
+      fdjtDOM.countBreaks=countBreaks;
+
+      function wordOffset(arg){
+	  var scan=arg; var count=0;
+	  while (scan=(scan.previousSibling||scan.parentNode)) {
+	      if (scan.nodeType===3)
+		  count=count+(scan.nodeValue.match(/\W*\s+\W*/g).length);
+	      else if (scan.nodeType===1)
+		  count=count+countBreaks(scan);
+	      else {}}
+	  return count;}
+
     function hasContent(node,recur){
       if (node.childNodes) {
 	var children=node.childNodes;
@@ -996,7 +1016,6 @@ var fdjtDOM=
       elt.className=elt.className;};
 
     /* Determining if something has overflowed */
-
     fdjtDOM.overflowing=function(node){
       // I haven't really tried this cross-browser, but I read it worked and
       //  have been in situations where it would be handy
@@ -1535,6 +1554,59 @@ var fdjtDOM=
       fdjtDOM.transition='transition';
       fdjtDOM.transform='transform';}
 	
+
+      var docuri=false; var docbase=false;
+      function init_docuri(){
+	  if (docuri) return;
+	  docuri=getLink("refuri")||getLink("canonical")||
+	      document.location.href;
+	  docbase=getMeta("baseid");}
+	  
+
+      function getAssignedIDs(node){
+	  var refuris=[];
+	  var baseids=[];
+	  var scan=node;
+	  var refuri=false;
+	  while (scan) {
+	      if ((scan)&&(scan.getAttribute)&&
+		  ((refuri=scan.getAttribute("data-refuri"))||
+		   (refuri=scan.getAttribute("refuri")))) {
+		  var baseid=scan.getAttribute("data-baseid")||
+		      scan.getAttribute("baseid")||
+		      false;
+		  refuris.push(refuri); baseids.push(baseid);
+		  scan=scan.parentNode;}
+	      else scan=scan.parentNode;}
+	  var link=getLink("refuri")||getLink("canonical");
+	  var base=getLink("baseid");
+	  if (docuri) init_docuri();
+	  refuris.push(docuri);
+	  baseids.push(docbase);
+	  var ids=[];
+	  if (node.id) ids.push(node.id);
+	  if (node.childNodes) {
+	      var children=node.childNodes, child;
+	      var i=0; var lim=children.length;
+	      while (i<lim) {
+		  if (((child=children[i++]).nodeType===1)&&
+		      (child.tagName==='A')) {
+		      if (child.name) ids.push(child.name);
+		      else if (child.id) ids.push(child.id);}}}
+	  var refs=[];
+	  var i=0; var lim=ids.length;
+	  while (i<lim) {
+	      var id=ids[i++];
+	      var j=0; var jlim=refuris.length;
+	      while (j<jlim) {
+		  if ((!(baseids[j]))||
+		      (id.search(baseids[j])===0))
+		      refs.push(refuris[j]+"#"+id);
+		  j++;}}
+	  return refs;}
+
+      fdjtDOM.getParaHash=function(node){
+	  return paraHash(textify(node));}
 
     return fdjtDOM;
   })();
