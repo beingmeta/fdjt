@@ -21,316 +21,318 @@
 */
 
 var fdjtState=
-  (function(){
+    (function(){
 
-    function fdjtState(name,val,persist){
-      if (arguments.length===1)
-	return ((window.sessionStorage)&&(getSession(name)))||
-	  ((window.sessionStorage)&&(getLocal(name)))||
-	  getCookie(name);
-      else if (persist)
-	if (window.localStorage)
-	  if (val) setLocal(name,val);
-	  else dropLocal(name);
-	else {
-	  var domain=fdjtState.domain||location.hostname;
-	  var path=fdjtState.path||"/";
-	  var duration=fdjtState.duration||(3600*24*365*7);
-	  if (val) setCookie(name,val,duration,path,domain);
-	  else clearCookie(name,path,domain);}
-      else if (val)
-	if (window.sessionStorage) setSession(name,val);
-	else setCookie(name,val);
-      else if (window.sessionStorage) dropSession(name);
-      else clearCookie(name);};
-    fdjtState.domain=false;
-    fdjtState.path=false;
-    fdjtState.duration=false;
+	function fdjtState(name,val,persist){
+	    if (arguments.length===1)
+		return ((window.sessionStorage)&&(getSession(name)))||
+		((window.sessionStorage)&&(getLocal(name)))||
+		getCookie(name);
+	    else if (persist)
+		if (window.localStorage)
+		    if (val) setLocal(name,val);
+	    else dropLocal(name);
+	    else {
+		var domain=fdjtState.domain||location.hostname;
+		var path=fdjtState.path||"/";
+		var duration=fdjtState.duration||(3600*24*365*7);
+		if (val) setCookie(name,val,duration,path,domain);
+		else clearCookie(name,path,domain);}
+	    else if (val)
+		if (window.sessionStorage) setSession(name,val);
+	    else setCookie(name,val);
+	    else if (window.sessionStorage) dropSession(name);
+	    else clearCookie(name);};
+	fdjtState.domain=false;
+	fdjtState.path=false;
+	fdjtState.duration=false;
 
-    /* Old-school cookies */
+	/* Old-school cookies */
 
-    function getCookie(name,parse){
-      try {
-	var cookies=document.cookie;
-	var namepat=new RegExp("(^|(; ))"+name+"=");
-	var pos=cookies.search(namepat);
-	var valuestring;
-	if (pos>=0) {
-	  var start=cookies.indexOf('=',pos)+1;
-	  var end=cookies.indexOf(';',start);
-	  if (end>0) valuestring=cookies.slice(start,end);
-	  else valuestring=cookies.slice(start);}
-	else return false;
-	if (parse)
-	  return JSON.parse(decodeURIComponent(valuestring));
-	else return decodeURIComponent(valuestring);}
-      catch (ex) {
-	return false;}}
-    fdjtState.getCookie=getCookie;
+	function getCookie(name,parse){
+	    try {
+		var cookies=document.cookie;
+		var namepat=new RegExp("(^|(; ))"+name+"=");
+		var pos=cookies.search(namepat);
+		var valuestring;
+		if (pos>=0) {
+		    var start=cookies.indexOf('=',pos)+1;
+		    var end=cookies.indexOf(';',start);
+		    if (end>0) valuestring=cookies.slice(start,end);
+		    else valuestring=cookies.slice(start);}
+		else return false;
+		if (parse)
+		    return JSON.parse(decodeURIComponent(valuestring));
+		else return decodeURIComponent(valuestring);}
+	    catch (ex) {
+		return false;}}
+	fdjtState.getCookie=getCookie;
 
-    function setCookie(name,value,expires,path,domain){
-      try {
-	if (value) {
-	  var valuestring=
-	    ((typeof value === 'string') ? (value) :
-	     (value.toJSON) ? (value.toJSON()) :
-	     (value.toString) ? (value.toString()) : (value));
-	  var cookietext=name+"="+encodeURIComponent(valuestring);
-	  if (expires)
-	    if (typeof(expires)==='string')
-	      cookietext=cookietext+'; '+expires;
-	    else if (expires.toGMTString)
-	      cookietext=cookietext+"; expires="+expires.toGMTString();
-	    else if (typeof(expires)==='number')
-	      if (expires>0) {
-		var now=new Date();
-		now.setTime(now.getTime()+expires);
-		cookietext=cookietext+"; expires="+now.toGMTString;}
-	      else cookietext=cookietext+"; expires=Sun 1 Jan 2000 00:00:00 UTC";
-	    else {}
-	  if (path) cookietext=cookietext+"; path="+path;
-	  // This certainly doesn't work generally and might not work ever
-	  if (domain) cookietext=cookietext+"; domain="+domain;
-	  // fdjtTrace("Setting cookie %o cookietext=%o",name,cookietext);
-	  document.cookie=cookietext;}
-	else clearCookie(name,path,domain);}
-      catch (ex) {
-	fdjtLog.warn("Error setting cookie %s",name);}}
-    fdjtState.setCookie=setCookie;
-    
-    function clearCookie(name,path,domain){
-      try {
-	var valuestring="ignoreme";
-	var cookietext=name+"="+encodeURIComponent(valuestring)+
-	  "; expires=Sun 1 Jan 2000 00:00:00 UTC";
-	if (path) cookietext=cookietext+"; path="+path;
-	// This certainly doesn't work generally and might not work ever
-	if (domain) cookietext=cookietext+"; domain="+domain;
-	// fdjtTrace("Clearing cookie %o: text=%o",name,cookietext);
-	document.cookie=cookietext;}
-      catch (ex) {
-	fdjtLog.warn("Error clearing cookie %s",name);}}
-    fdjtState.clearCookie=clearCookie;
+	function setCookie(name,value,expires,path,domain){
+	    try {
+		if (value) {
+		    var valuestring=
+			((typeof value === 'string') ? (value) :
+			 (value.toJSON) ? (value.toJSON()) :
+			 (value.toString) ? (value.toString()) : (value));
+		    var cookietext=name+"="+encodeURIComponent(valuestring);
+		    if (expires)
+			if (typeof(expires)==='string')
+			    cookietext=cookietext+'; '+expires;
+		    else if (expires.toGMTString)
+			cookietext=cookietext+"; expires="+expires.toGMTString();
+		    else if (typeof(expires)==='number')
+			if (expires>0) {
+			    var now=new Date();
+			    now.setTime(now.getTime()+expires);
+			    cookietext=cookietext+"; expires="+now.toGMTString;}
+		    else cookietext=cookietext+"; expires=Sun 1 Jan 2000 00:00:00 UTC";
+		    else {}
+		    if (path) cookietext=cookietext+"; path="+path;
+		    // This certainly doesn't work generally and might not work ever
+		    if (domain) cookietext=cookietext+"; domain="+domain;
+		    // fdjtTrace("Setting cookie %o cookietext=%o",name,cookietext);
+		    document.cookie=cookietext;}
+		else clearCookie(name,path,domain);}
+	    catch (ex) {
+		fdjtLog.warn("Error setting cookie %s",name);}}
+	fdjtState.setCookie=setCookie;
+	
+	function clearCookie(name,path,domain){
+	    try {
+		var valuestring="ignoreme";
+		var cookietext=name+"="+encodeURIComponent(valuestring)+
+		    "; expires=Sun 1 Jan 2000 00:00:00 UTC";
+		if (path) cookietext=cookietext+"; path="+path;
+		// This certainly doesn't work generally and might not work ever
+		if (domain) cookietext=cookietext+"; domain="+domain;
+		// fdjtTrace("Clearing cookie %o: text=%o",name,cookietext);
+		document.cookie=cookietext;}
+	    catch (ex) {
+		fdjtLog.warn("Error clearing cookie %s",name);}}
+	fdjtState.clearCookie=clearCookie;
 
-    /* Session storage */
+	/* Session storage */
 
-    function setSession(name,val,unparse){
-      if (unparse) val=JSON.stringify(val);
-      if (window.sessionStorage)
-	window.sessionStorage[name]=val;
-      else setCookie(name,val);}
-    fdjtState.setSession=setSession;
+	function setSession(name,val,unparse){
+	    if (unparse) val=JSON.stringify(val);
+	    if (window.sessionStorage)
+		window.sessionStorage[name]=val;
+	    else setCookie(name,val);}
+	fdjtState.setSession=setSession;
 
-    function getSession(name,parse){
-      var val=((window.sessionStorage)?
-	       (window.sessionStorage[name]):
-	       (fdjtGetCookie(name)));
-      if (val)
-	if (parse) return JSON.parse(val); else return val;
-      else return false;}
-    fdjtState.getSession=getSession;
+	function getSession(name,parse){
+	    var val=((window.sessionStorage)?
+		     (window.sessionStorage[name]):
+		     (fdjtGetCookie(name)));
+	    if (val)
+		if (parse) return JSON.parse(val); else return val;
+	    else return false;}
+	fdjtState.getSession=getSession;
 
-    function dropSession(name){
-      if (window.sessionStorage)
-	return window.sessionStorage.removeItem(name);
-      else clearCookie(name);}
-    fdjtState.dropSession=dropSession;
+	function dropSession(name){
+	    if (window.sessionStorage)
+		return window.sessionStorage.removeItem(name);
+	    else clearCookie(name);}
+	fdjtState.dropSession=dropSession;
 
-    /* Local storage (persists between sessions) */
+	/* Local storage (persists between sessions) */
 
-    function setLocal(name,val,unparse){
-      if (!(name)) throw { error: "bad name",name: name};
-      if (unparse) val=JSON.stringify(val);
-      if (window.localStorage)
-	window.localStorage[name]=val;}
-    fdjtState.setLocal=setLocal;
+	function setLocal(name,val,unparse){
+	    if (!(name)) throw { error: "bad name",name: name};
+	    if (unparse) val=JSON.stringify(val);
+	    if (window.localStorage)
+		window.localStorage[name]=val;}
+	fdjtState.setLocal=setLocal;
 
-    function getLocal(name,parse){
-      if (window.localStorage) {
-	var val=window.localStorage[name];
-	if (val)
-	  if (parse) return JSON.parse(val); else return val;
-	else return false;}
-      else return false;}
-    fdjtState.getLocal=getLocal;
+	function getLocal(name,parse){
+	    if (window.localStorage) {
+		var val=window.localStorage[name];
+		if (val)
+		    if (parse) return JSON.parse(val); else return val;
+		else return false;}
+	    else return false;}
+	fdjtState.getLocal=getLocal;
 
-    function dropLocal(name){
-      if (window.localStorage)
-	return window.localStorage.removeItem(name);
-      else return false;}
-    fdjtState.dropLocal=dropLocal;
-    
-    function clearLocal(){
-      if (window.localStorage) {
-	var storage=window.localStorage;
-	var i=0; var lim=storage.length;
-	var keys=[];
-	while (i<lim) keys.push(storage.key(i++));
-	i=0; while (i<lim) storage.removeItem(keys[i++]);}}
-    fdjtState.clearLocal=clearLocal;
+	function dropLocal(name){
+	    if (window.localStorage)
+		return window.localStorage.removeItem(name);
+	    else return false;}
+	fdjtState.dropLocal=dropLocal;
+	
+	function clearLocal(){
+	    if (window.localStorage) {
+		var storage=window.localStorage;
+		var i=0; var lim=storage.length;
+		var keys=[];
+		while (i<lim) keys.push(storage.key(i++));
+		i=0; while (i<lim) storage.removeItem(keys[i++]);}}
+	fdjtState.clearLocal=clearLocal;
 
-    /* Gets arguments from the query string */
-    function getQuery(name,multiple,matchcase,verbatim){
-      if (!(location.search))
-	if (multiple) return [];
-	else return false;
-      var results=[];
-      var ename=encodeURIComponent(name);
-      var namepat=new RegExp
-	("(&|^|\\?)"+ename+"(=|&|$)",((matchcase)?"g":"gi"));
-      var query=location.search;
-      var start=query.search(namepat);
-      while (start>=0) {
-	// Skip over separator if non-initial
-	if ((query[start]==='?')||(query[start]==='&')) start++;
-	// Skip over the name
-	var valstart=start+ename.length; var end=false;
-	if (query[valstart]==="=") {
-	  var valstring=query.slice(valstart+1);
-	  end=valstring.search(/(&|$)/g);
-	  if (end<=0) {
-	    results.push("");
-	    if (!(multiple)) break;}
-	  else {
-	    results.push(valstring.slice(0,end));
-	    if (!(multiple)) break;}}
-	else if (multiple)
-	  results.push(query.slice(start,end));
-	else if (verbatim)
-	  return query.slice(start,end);
-	else return querydecode(query.slice(start,end));
-	if (end>0) {
-	  query=query.slice(end);
-	  start=query.search(namepat);}}
-      if (!(verbatim)) {
-	var i=0; var lim=results.length;
-	while (i<lim) {results[i]=querydecode(results[i]); i++;}}
-      if (multiple) return results;
-      else if (results.length)
-	return results[0];
-      else return false;}
-    fdjtState.getQuery=getQuery;
-    
-    function querydecode(string){
-      if (decodeURIComponent)
-	return decodeURIComponent(string);
-      else return 
-	     string.replace
-	     (/%3A/gi,":").replace
-	     (/%2F/gi,"/").replace
-	     (/%3F/gi,"?").replace
-	     (/%3D/gi,"=").replace
-	     (/%20/gi," ").replace
-	     (/%40/gi,"@").replace
-	     (/%23/gi,"#");}
+	/* Gets arguments from the query string */
+	function getQuery(name,multiple,matchcase,verbatim){
+	    if (!(location.search))
+		if (multiple) return [];
+	    else return false;
+	    var results=[];
+	    var ename=encodeURIComponent(name);
+	    var namepat=new RegExp
+	    ("(&|^|\\?)"+ename+"(=|&|$)",((matchcase)?"g":"gi"));
+	    var query=location.search;
+	    var start=query.search(namepat);
+	    while (start>=0) {
+		// Skip over separator if non-initial
+		if ((query[start]==='?')||(query[start]==='&')) start++;
+		// Skip over the name
+		var valstart=start+ename.length; var end=false;
+		if (query[valstart]==="=") {
+		    var valstring=query.slice(valstart+1);
+		    end=valstring.search(/(&|$)/g);
+		    if (end<=0) {
+			results.push("");
+			if (!(multiple)) break;}
+		    else {
+			results.push(valstring.slice(0,end));
+			if (!(multiple)) break;}}
+		else if (multiple)
+		    results.push(query.slice(start,end));
+		else if (verbatim)
+		    return query.slice(start,end);
+		else return querydecode(query.slice(start,end));
+		if (end>0) {
+		    query=query.slice(end);
+		    start=query.search(namepat);}}
+	    if (!(verbatim)) {
+		var i=0; var lim=results.length;
+		while (i<lim) {results[i]=querydecode(results[i]); i++;}}
+	    if (multiple) return results;
+	    else if (results.length)
+		return results[0];
+	    else return false;}
+	fdjtState.getQuery=getQuery;
+	
+	function querydecode(string){
+	    if (decodeURIComponent)
+		return decodeURIComponent(string);
+	    else return 
+	    string.replace
+	    (/%3A/gi,":").replace
+	    (/%2F/gi,"/").replace
+	    (/%3F/gi,"?").replace
+	    (/%3D/gi,"=").replace
+	    (/%20/gi," ").replace
+	    (/%40/gi,"@").replace
+	    (/%23/gi,"#");}
 
-    function test_opt(pos,neg){
-      var pospat=((pos)&&(new RegExp("\\b"+pos+"\\b")));
-      var negpat=((neg)&&negative_opt_pat(neg));
-      var i=2; while (i<arguments.length) {
-	var arg=arguments[i++];
-	if (!(arg)) continue;
-	else if (typeof arg === 'string')
-	  if ((pospat)&&(arg.search(pospat)>=0)) return true;
-	  else if ((negpat)&&(arg.search(negpat)>=0)) return false;
-	  else continue;
-	else if (arg.length) {
-	  var j=0; var len=arg.length;
-	  while (j<len)
-	    if ((pos)&&(arg[j]===pos)) return true;
-	    else if ((neg)&&(arg[j]===neg)) return false;
-	    else j++;
-	  return false;}
-	else continue;}
-      return false;}
-    fdjtState.testOption=test_opt;
+	function test_opt(pos,neg){
+	    var pospat=((pos)&&(new RegExp("\\b"+pos+"\\b")));
+	    var negpat=((neg)&&negative_opt_pat(neg));
+	    var i=2; while (i<arguments.length) {
+		var arg=arguments[i++];
+		if (!(arg)) continue;
+		else if (typeof arg === 'string')
+		    if ((pospat)&&(arg.search(pospat)>=0)) return true;
+		else if ((negpat)&&(arg.search(negpat)>=0)) return false;
+		else continue;
+		else if (arg.length) {
+		    var j=0; var len=arg.length;
+		    while (j<len)
+			if ((pos)&&(arg[j]===pos)) return true;
+		    else if ((neg)&&(arg[j]===neg)) return false;
+		    else j++;
+		    return false;}
+		else continue;}
+	    return false;}
+	fdjtState.testOption=test_opt;
 
-    function negative_opt_pat(neg){
-      if (!(neg)) return neg;
-      else if (typeof neg === 'string')
-	return (new RegExp("\\b"+neg+"\\b","gi"));
-      else if (neg.length) {
-	var rule="\\b(";
-	var i=0; while (i<neg.length) {
-	  var name=neg[i];
-	  if (i>0) rule=rule+"|";
-	  rule=rule+"("+name+")";
-	  i++;}
-	rule=rule+")\\b";
-	return new RegExp(rule,"gi");}
-      else return false;}
+	function negative_opt_pat(neg){
+	    if (!(neg)) return neg;
+	    else if (typeof neg === 'string')
+		return (new RegExp("\\b"+neg+"\\b","gi"));
+	    else if (neg.length) {
+		var rule="\\b(";
+		var i=0; while (i<neg.length) {
+		    var name=neg[i];
+		    if (i>0) rule=rule+"|";
+		    rule=rule+"("+name+")";
+		    i++;}
+		rule=rule+")\\b";
+		return new RegExp(rule,"gi");}
+	    else return false;}
 
-    fdjtState.argVec=function(argobj,start){
-      var i=start||0;
-      var result=new Array(argobj.length-i);
-      while (i<argobj.length) {
-	result[i-start]=argobj[i]; i++;}
-      return result;};
+	fdjtState.argVec=function(argobj,start){
+	    var i=start||0;
+	    var result=new Array(argobj.length-i);
+	    while (i<argobj.length) {
+		result[i-start]=argobj[i]; i++;}
+	    return result;};
 
-    var zeros="000000000000000000000000000000000000000000000000000000000000000";
-    function zeropad(string,len){
-      if (string.length===len) return string;
-      else if (string.length>len) return string.slice(0,len);
-      else return zeros.slice(0,len-string.length)+string;}
+	var zeros="000000000000000000000000000000000000000000000000000000000000000";
+	function zeropad(string,len){
+	    if (string.length===len) return string;
+	    else if (string.length>len) return string.slice(0,len);
+	    else return zeros.slice(0,len-string.length)+string;}
+	
+	// This is a random nodeid used to generate UUIDs
+	//  We use it because we can't access the MAC address
+	var nodeid=
+	    zeropad(((Math.floor(Math.random()*65536)).toString(16)+
+		     (Math.floor(Math.random()*65536)).toString(16)+
+		     (Math.floor(Math.random()*65536)).toString(16)+
+		     (Math.floor(Math.random()*65536)|0x01)).toString(16),
+		    12);
+	
+	var default_version=17; 
+	var clockid=Math.floor(Math.random()*16384); var msid=1;
+	var last_time=new Date().getTime();
+	
+	fdjtState.getNodeID=function(){return nodeid;};
+	fdjtState.setNodeID=function(arg){
+	    if (typeof arg==='number')
+		nodeid=zeropad(arg.toString(16),12);
+	    else if (typeof arg === 'string')
+		if (arg.search(/[^0123456789abcdefABCDEF]/)<0)
+		    nodeid=zeropad(arg,12);
+	    else throw {error: 'invalid node id',value: arg};
+	    else throw {error: 'invalid node id',value: arg};};
 
-    var nodeid=
-      zeropad(((Math.floor(Math.random()*65536)).toString(16)+
-	       (Math.floor(Math.random()*65536)).toString(16)+
-	       (Math.floor(Math.random()*65536)).toString(16)+
-	       (Math.floor(Math.random()*65536)|0x01)).toString(16),
-	      12);
-    
-    var default_version=17; 
-    var clockid=Math.floor(Math.random()*16384); var msid=1;
-    var last_time=new Date().getTime();
-    
-    fdjtState.getNodeID=function(){return nodeid;};
-    fdjtState.setNodeID=function(arg){
-      if (typeof arg==='number')
-	nodeid=zeropad(arg.toString(16),12);
-      else if (typeof arg === 'string')
-	if (arg.search(/[^0123456789abcdefABCDEF]/)<0)
-	  nodeid=zeropad(arg,12);
-	else throw {error: 'invalid node id',value: arg};
-      else throw {error: 'invalid node id',value: arg};};
+	function getUUID(node){
+	    var now=new Date().getTime();
+	    if (now<last_time) {now=now*10000; clockid++;}
+	    else if (now===last_time)	now=now*10000+(msid++);
+	    else {now=now*10000; msid=1;}
+	    now=now+122192928000000000;
+	    if (!(node)) node=nodeid;
+	    var timestamp=now.toString(16); var tlen=timestamp.length;
+	    if (tlen<15) timestamp=zeros.slice(0,15-tlen)+timestamp;
+	    return timestamp.slice(7)+"-"+timestamp.slice(3,7)+
+		"-1"+timestamp.slice(0,3)+
+		"-"+(32768+(clockid%16384)).toString(16)+
+		"-"+((node)?
+		     ((typeof node === 'number')?
+		      (zeropad(node.toString(16),12)):
+		      (zeropad(node,12))):
+		     (nodeid));}
+	fdjtState.getUUID=getUUID;
+	
+	// Getting version information
+	function versionInfo(){
+	    var s=navigator.appVersion; var result={};
+	    var start;
+	    while ((start=s.search(/\w+\/\d/g))>=0) {
+		var slash=s.indexOf('/',start);
+		var afterslash=s.slice(slash+1);
+		var num_end=afterslash.search(/\W/);
+		var numstring=afterslash.slice(0,num_end);
+		try {
+		    result[s.slice(start,slash)]=parseInt(numstring);}
+		catch (ex) {
+		    result[s.slice(start,slash)]=numstring;}
+		s=afterslash.slice(num_end);}
+	    return result;}
+	fdjtState.versionInfo=versionInfo;
 
-    function getUUID(node){
-      var now=new Date().getTime();
-      if (now<last_time) {now=now*10000; clockid++;}
-      else if (now===last_time)	now=now*10000+(msid++);
-      else {now=now*10000; msid=1;}
-      now=now+122192928000000000;
-      if (!(node)) node=nodeid;
-      var timestamp=now.toString(16); var tlen=timestamp.length;
-      if (tlen<15) timestamp=zeros.slice(0,15-tlen)+timestamp;
-      return timestamp.slice(7)+"-"+timestamp.slice(3,7)+
-	"-1"+timestamp.slice(0,3)+
-	"-"+(32768+(clockid%16384)).toString(16)+
-	"-"+((node)?
-	     ((typeof node === 'number')?
-	      (zeropad(node.toString(16),12)):
-	      (zeropad(node,12))):
-	     (nodeid));}
-    fdjtState.getUUID=getUUID;
-    
-    // Getting version information
-    function versionInfo(){
-      var s=navigator.appVersion; var result={};
-      var start;
-      while ((start=s.search(/\w+\/\d/g))>=0) {
-	var slash=s.indexOf('/',start);
-	var afterslash=s.slice(slash+1);
-	var num_end=afterslash.search(/\W/);
-	var numstring=afterslash.slice(0,num_end);
-	try {
-	  result[s.slice(start,slash)]=parseInt(numstring);}
-	catch (ex) {
-	  result[s.slice(start,slash)]=numstring;}
-	s=afterslash.slice(num_end);}
-      return result;}
-    fdjtState.versionInfo=versionInfo;
-
-    return fdjtState;})();
+	return fdjtState;})();
 
 /* Emacs local variables
    ;;;  Local variables: ***
