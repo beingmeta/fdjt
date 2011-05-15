@@ -222,6 +222,10 @@ var fdjtString=
 	    else return string;}
 	fdjtString.unEscape=unEscape;
 
+	function normstring(string){
+	    return string.replace(/\W*\s\W*/g," ").downcase();}
+	fdjtString.normString=normstring;
+
 	function unEntify(string) {
 	    return string.replace(/&#(\d+);/g,
 				  function(whole,paren) {
@@ -252,13 +256,13 @@ var fdjtString=
 	/* Getting initials */
 
 	function getInitials(string){
-	  var words=string.split(/\W/); var initials="";
-	  var i=0; var lim=words.length;
-	  while (i<lim) {
-	    var word=words[i++];
-	    if (word.length)
-	      initials=initials+word.slice(0,1);}
-	  return initials;}
+	    var words=string.split(/\W/); var initials="";
+	    var i=0; var lim=words.length;
+	    while (i<lim) {
+		var word=words[i++];
+		if (word.length)
+		    initials=initials+word.slice(0,1);}
+	    return initials;}
 	fdjtString.getInitials=getInitials;
 
 	/* More string functions */
@@ -373,6 +377,21 @@ var fdjtString=
 		if (split) return prefixFind(split,prefix,i+1,plen);
 		else return false;}}
 	fdjtString.prefixFind=prefixFind;
+
+	function paraHash(node){
+	    var text=node.innerText;
+	    var words=text.split(/\W*\S+\W*/g);
+	    var len=words.length;
+	    return "_H"+
+		((len>0)?(words[0][0]):".")+
+		((len>1)?(words[1][0]):".")+
+		((len>2)?(words[2][0]):".")+
+		((len>3)?(words[3][0]):".")+
+		((len>0)?(words[len-1][0]):".")+
+		((len>1)?(words[len-2][0]):".")+
+		((len>2)?(words[len-3][0]):".")+
+		((len>3)?(words[len-4][0]):".");}
+	fdjtString.paraHash=paraHash;
 
 	return fdjtString;})();
 
