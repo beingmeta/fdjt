@@ -154,7 +154,7 @@ div.flexbox_expanded { max-height: inherit;}
 /* Formatted output */
 
 div.fdjtdata {
-  font-family: fixed; width: 100%; white-space: preserve;}
+  font-family: fixed; width: 100%; white-space: pre;}
 
 /* Data tables */
 
@@ -269,17 +269,13 @@ div.completions {font-family: sans,sans-serif;}
 .completions.checkspans p.completion.checkspan[ischecked] { 
   display: block; }
 
-.completions.checkspans .
-  completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[ischecked]
      span.variation[displayed] { display: inline; }
-.completions.checkspans .
-  completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[ischecked]
      li.variation[displayed] { display: list-item; }
-.completions.checkspans .
-  completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[ischecked]
      div.variation[displayed] { display: block; }
-.completions.checkspans .
-  completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[ischecked]
      div.variation[displayed] { display: block; }
 
 .completions.checkspans span.completion.checkspan[ischecked] { 
@@ -291,17 +287,13 @@ div.completions {font-family: sans,sans-serif;}
 .completions.checkspans p.completion.checkspan[ischecked] { 
   display: block; }
 
-.completions.checkspans .
-  completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[ischecked]
      span.variation[displayed] { display: inline; }
-.completions.checkspans .
-  completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[ischecked]
      li.variation[displayed] { display: list-item; }
-.completions.checkspans .
-  completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[ischecked]
      div.variation[displayed] { display: block; }
-.completions.checkspans .
-  completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[ischecked]
      div.variation[displayed] { display: block; }
 
 /* Checkspan/completion display rles (class based) */
@@ -333,17 +325,13 @@ div.completions {font-family: sans,sans-serif;}
 .completions.checkspans p.completion.checkspan.ischecked { 
   display: block; }
 
-.completions.checkspans .
-  completion.checkspan.ischecked
+.completions.checkspans .completion.checkspan.ischecked
      span.variation.displayed { display: inline; }
-.completions.checkspans .
-  completion.checkspan.ischecked
+.completions.checkspans .completion.checkspan.ischecked
      li.variation.displayed { display: list-item; }
-.completions.checkspans .
-  completion.checkspan.ischecked
+.completions.checkspans .completion.checkspan.ischecked
      div.variation.displayed { display: block; }
-.completions.checkspans .
-  completion.checkspan.ischecked
+.completions.checkspans .completion.checkspan.ischecked
      div.variation.displayed { display: block; }
 
 /* Rich tips 
