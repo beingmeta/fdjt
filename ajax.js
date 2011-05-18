@@ -170,7 +170,7 @@ var fdjtAjax=
 	    else if (form.method==="PUT")
 		req.open('PUT',ajax_uri,(!(syncp)));
 	    else req.open('POST',ajax_uri,(!(syncp)));
-	    req.setHeader("Accept","text/json");
+	    req.setRequestHeader("Accept","text/json");
 	    req.withCredentials='true';
 	    req.onreadystatechange=function () {
 		if (trace_ajax)
