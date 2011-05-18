@@ -52,7 +52,7 @@ var fdjtKB=
 	function objectkey(x){
 	  if (typeof x !== 'object') return x;
 	  else if (x instanceof String) return x.toString();
-	  else return x.qid||x.oid||x.uuid||x._fdjtid||register(x);}
+	  else return x._id||x.qid||x.oid||x.uuid||x._fdjtid||register(x);}
 	fdjtKB.objectkey=objectkey;
 	fdjtKB.isobject=isobject;
 	
@@ -116,7 +116,7 @@ var fdjtKB=
 	    if (!(cons)) cons=this.cons(qid);
 	    else if (cons instanceof Ref) {}
 	    else cons=this.cons(qid);
-	    if (!(cons.qid)) cons.qid=qid;
+	    if (!(cons._id)) cons._id=qid;
 	    this.map[qid]=cons; cons.pool=this;
 	    return cons;};
 	Pool.prototype.drop=function(qid) {
@@ -134,7 +134,7 @@ var fdjtKB=
 		while (i<lim) results.push(this.Import(data[i++]));
 		return;}
 	    else {
-		var qid=data.qid||data.oid||data.uuid;
+		var qid=data._id||data.oid||data.uuid;
 		if ((debug)&&(this.traceimport))
 		  fdjtLog("[%fs] Import to %s %o <== %o",
 			  fdjtET(),this.name,obj,data);
@@ -224,7 +224,7 @@ var fdjtKB=
 		while (i<lim) results.push(doimport(data[i++]));
 		return results;}
 	    else {
-		var qid=data.qid||data.uuid||data.oid;
+		var qid=data._id||data.uuid||data.oid;
 		if (qid) {
 		    var pool=getPool(qid);
 		    if (pool) return pool.Import(data);
@@ -259,13 +259,13 @@ var fdjtKB=
 		else if (typeof a === "string")
 		    if (a<b) return -1;
 		else return 1;
-		else if (a.qid)
-		    if (b.qid)
-			if (a.qid<b.qid) return -1;
-		else if (a.qid===b.qid) return 0;
+		else if (a._id)
+		    if (b._id)
+			if (a._id<b._id) return -1;
+		else if (a._id===b._id) return 0;
 		else return 1;
 		else return 1;
-		else if (b.qid) return -1;
+		else if (b._id) return -1;
 		else if (a._fdjtid)
 		    if (b._fdjtid) return a._fdjtid-b._fdjtid;
 		else {
@@ -467,16 +467,16 @@ var fdjtKB=
 	Map.prototype.get=function(key) {
 	  if (isobject(key))
 	    return this.object_map
-	      [key.qid||key.oid||key.uuid||key._fdjtid||register(key)];
+	      [key._id||key.oid||key.uuid||key._fdjtid||register(key)];
 	  else return this.scalar_map[key];};
 	Map.prototype.set=function(key,val) {
 	  if (isobject(key))
 	    this.object_map
-	      [key.qid||key.oid||key.uuid||key._fdjtid||register(key)]=val;
+	      [key._id||key.oid||key.uuid||key._fdjtid||register(key)]=val;
 	  else this.scalar_map[key]=val;};
 	Map.prototype.add=function(key,val) {
 	  if (isobject(key)) {
-	    var objkey=key.qid||key.oid||key.uuid||key._fdjtid||
+	    var objkey=key._id||key.oid||key.uuid||key._fdjtid||
 	    register(key);
 	    var cur=this.object_map[objkey];
 	    if (!(cur)) {
@@ -507,10 +507,10 @@ var fdjtKB=
 	  if (!(val)) {
 	    if (isobject(key))
 	      delete this.object_map
-		[key.qid||key.oid||key.uuid||key._fdjtid||register(key)];
+		[key._id||key.oid||key.uuid||key._fdjtid||register(key)];
 	    else delete this.scalar_map[key];}
 	  else if (isobject(key)) {
-	    var objkey=key.qid||key.oid||key.uuid||key._fdjtid||
+	    var objkey=key._id||key.oid||key.uuid||key._fdjtid||
 	    register(key);
 	    var cur=this.object_map[key];
 	    if (!(cur)) return false;
@@ -552,7 +552,7 @@ var fdjtKB=
 	      else if (!(val))
 		return {scalars: scalar_indices[prop],objects: object_indices[prop]};
 	      else if (isobject(val)) {
-		valkey=val.qid||val.uuid||val.oid||val._fdjtid||
+		valkey=val._id||val.uuid||val.oid||val._fdjtid||
 		  register(val);
 		indices=object_indices;}
 	      else valkey=val;
@@ -562,7 +562,7 @@ var fdjtKB=
 		else return Set(index[valkey]);
  	      var itemkey=
 		((isobject(item))?
-		 (item.qid||item.uuid||item.oid||
+		 (item._id||item.uuid||item.oid||
 		  item._fdjtid||register(item)):
 		 (item));
 	      if (!(index))
@@ -595,7 +595,7 @@ var fdjtKB=
 
 	function Ref(pool,qid) {
 	    if (pool) this.pool=pool;
-	    if (qid) this.qid=qid;
+	    if (qid) this._id=qid;
 	    return this;}
 	fdjtKB.Ref=Ref;
 	Pool.prototype.cons=function(qid){return new Ref(this,qid);};
@@ -777,26 +777,26 @@ var fdjtKB=
 	    this.pool=pool;
 	    return this;}
 	function offline_get(obj,prop){
-	    var qid=obj.qid||obj.uuid||obj.oid;
+	    var qid=obj._id||obj.uuid||obj.oid;
 	    var data=fdjtState.getLocal(qid);
 	    if (data) obj.init(data);
 	    return obj[prop];}
 	OfflineKB.prototype.load=function(obj){
-	  var qid=obj.qid||obj.uuid||obj.oid;
+	  var qid=obj._id||obj.uuid||obj.oid;
 	  var data=fdjtState.getLocal(qid,true);
 	  if (data) return obj.init(data);
 	  else return undefined;};
 	OfflineKB.prototype.get=offline_get;
 	OfflineKB.prototype.add=function(obj,slotid,val){
-	    var qid=obj.qid||obj.uuid||obj.oid;
+	    var qid=obj._id||obj.uuid||obj.oid;
 	    if ((slotid)&&(val))
 		fdjtState.setLocal(qid,JSON.stringify(obj));};
 	OfflineKB.prototype.drop=function(obj,slotid,val){
-	    var qid=obj.qid||obj.uuid||obj.oid;
+	    var qid=obj._id||obj.uuid||obj.oid;
 	    if (!(slotid)) fdjtState.dropLocal(qid);
 	    else fdjtState.setLocal(qid,JSON.stringify(obj));};
 	OfflineKB.prototype.Import=function(obj){
-	    var qid=obj.qid||obj.uuid||obj.oid;
+	    var qid=obj._id||obj.uuid||obj.oid;
 	    fdjtState.setLocal(qid,obj,true);};
 	fdjtKB.OfflineKB=OfflineKB;
 	
