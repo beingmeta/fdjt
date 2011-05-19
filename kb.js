@@ -52,7 +52,7 @@ var fdjtKB=
 	function objectkey(x){
 	  if (typeof x !== 'object') return x;
 	  else if (x instanceof String) return x.toString();
-	  else return x._id||x.qid||x.oid||x.uuid||x._fdjtid||register(x);}
+	  else return x._id||x._fdjtid||register(x);}
 	fdjtKB.objectkey=objectkey;
 	fdjtKB.isobject=isobject;
 	
