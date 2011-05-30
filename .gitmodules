@@ -1,0 +1,18 @@
+[submodule "ext/augment"]
+	path = ext/augment
+	url = https://github.com/olivernn/augment.js.git
+[submodule "ext/sizzle"]
+	path = ext/sizzle
+	url = https://github.com/jquery/sizzle.git
+[submodule "ext/underscore"]
+	path = ext/underscore
+	url = https://github.com/documentcloud/underscore.git
+[submodule "ext/humane"]
+	path = ext/humane
+	url = https://github.com/wavded/humane-js.git
+[submodule "ext/Modernizr"]
+	path = ext/Modernizr
+	url = https://github.com/Modernizr/Modernizr.git
+[submodule "ext/backbone"]
+	path = ext/backbone
+	url = https://github.com/documentcloud/backbone.git
