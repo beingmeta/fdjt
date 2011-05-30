@@ -3,20 +3,20 @@
 /* Copyright (C) 2009-2011 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended Javascript utility functions
-    of various kinds.
+   of various kinds.
 
    This program comes with absolutely NO WARRANTY, including implied
    warranties of merchantability or fitness for any particular
    purpose.
 
-    Use, modification, and redistribution of this program is permitted
-    under either the GNU General Public License (GPL) Version 2 (or
-    any later version) or under the GNU Lesser General Public License
-    (version 3 or later).
+   Use, modification, and redistribution of this program is permitted
+   under either the GNU General Public License (GPL) Version 2 (or
+   any later version) or under the GNU Lesser General Public License
+   (version 3 or later).
 
-    These licenses may be found at www.gnu.org, particularly:
-      http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-      http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+   These licenses may be found at www.gnu.org, particularly:
+   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+   http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
 
@@ -26,7 +26,7 @@
   fdjtKB.Pool (creates a pool of named objects)
   fdjtKB.Set (creates a sorted array for set operations)
   fdjtKB.Ref (objects created within a pool)
- */
+*/
 
 var fdjtKB=
     (function(){
@@ -47,12 +47,12 @@ var fdjtKB=
 	var arrayobjs=(typeof new Array(1,2,3) === 'object');
 	var stringobjs=(typeof new String() === 'object');
 	function isobject(x){
-	  return ((typeof x === 'object')&&
-		  (!((arrayobjs)&&(x instanceof Array))));}
+	    return ((typeof x === 'object')&&
+		    (!((arrayobjs)&&(x instanceof Array))));}
 	function objectkey(x){
-	  if (typeof x !== 'object') return x;
-	  else if (x instanceof String) return x.toString();
-	  else return x._id||x._fdjtid||register(x);}
+	    if (typeof x !== 'object') return x;
+	    else if (x instanceof String) return x.toString();
+	    else return x._id||x._fdjtid||register(x);}
 	fdjtKB.objectkey=objectkey;
 	fdjtKB.isobject=isobject;
 	
@@ -61,24 +61,25 @@ var fdjtKB=
 	//  and use counter to track them.
 	var counter=0;
 	function register(x){
-	    return (x._fdjtid)||(x._fdjtid=(++counter));}
+	    return (x._id)||(x._fdjtid)||(x._fdjtid=(++counter));}
 	fdjtKB.register=register;
-
+	
 	// This lets us figure out what inits were run in this session.
 	var init_start=fdjtTime();
-
+	
 	// Pools are uniquely named id->object mappings
 	// This table maps those unique names to the objects themselves
 	// Pools can have aliases, so the name->pool mapping is many to one
 	var pools={};
-
+	
 	function Pool(name) {
 	    if (!(name)) return this;
 	    if (pools[name]) return pools[name];
 	    pools[name]=this; this.name=name; this.map={};
 	    this.index=false; this.storage=false;
 	    this.inits=false; this.effects=false; this.xforms={};
-	    this.absref=false; // Whether names in this pool are 'absolute'
+	    // Whether _id fields in this pool are 'absolute' (globally unique)
+	    this.absref=false; 
 	    return this;}
 	fdjtKB.Pool=Pool;
 	fdjtKB.PoolRef=Pool;
@@ -106,9 +107,9 @@ var fdjtKB=
 	    else return false;};
 
 	Pool.prototype.load=function(ref) {
-	  if (typeof ref==='string')
-	    return this.ref(ref).load();
-	  else return ref.load();};
+	    if (typeof ref==='string')
+		return this.ref(ref).load();
+	    else return ref.load();};
 
 	Pool.prototype.ref=function(qid,cons) {
 	    if (qid instanceof Ref) return qid;
@@ -130,14 +131,14 @@ var fdjtKB=
 	
 	Pool.prototype.Import=function(data) {
 	    if (data instanceof Array) {
-		var i=0; var lim=data.length; var results=[];
-		while (i<lim) results.push(this.Import(data[i++]));
+		var i=0; var lim=data.length;
+		while (i<lim) this.Import(data[i++]);
 		return;}
 	    else {
 		var qid=data._id||data.oid||data.uuid;
 		if ((debug)&&(this.traceimport))
-		  fdjtLog("[%fs] Import to %s %o <== %o",
-			  fdjtET(),this.name,obj,data);
+		    fdjtLog("[%fs] Import to %s %o <== %o",
+			    fdjtET(),this.name,obj,data);
 		if (this.storage) this.storage.Import(data);
 		if (qid) {
 		    var obj=(this.map[qid]);
@@ -156,10 +157,10 @@ var fdjtKB=
 	    /[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
 	var refmaps=[];
 	fdjtKB.addRefMap=function(map){
-	  var i=0; var lim=refmaps.length;
-	  while (i<lim) if (refmaps[i++]===map) return false;
-	  refmaps.push(map);
-	  return refmaps.length;};
+	    var i=0; var lim=refmaps.length;
+	    while (i<lim) if (refmaps[i++]===map) return false;
+	    refmaps.push(map);
+	    return refmaps.length;};
 
 	function getPool(arg){
 	    var atpos; 
@@ -172,7 +173,7 @@ var fdjtKB=
 	    else return false;}
 	fdjtKB.getPool=getPool;
 
-	function parseRef(arg,kno){
+	function parseRef(arg,pool){
 	    if (((arg[0]===':')&&(arg[1]==='@'))&&
 		(((slash=arg.indexOf('/',2))>=0)))  {
 		var pool=fdjtKB.PoolRef(arg.slice(1,slash+1));
@@ -201,21 +202,21 @@ var fdjtKB=
 			     (refmap(arg)):(refmap[arg]));
 		    if (ref) return ref;}
 		return false;}
-	    else if (kno) return kno.ref(arg);
+	    else if (pool) return pool.ref(arg);
 	    else return false;}
 
-	function getRef(arg,kno){
+	function getRef(arg,pool){
 	    if (!(arg)) return false;
 	    else if (arg instanceof Ref) return arg;
 	    else if (typeof arg === 'number') return false;
 	    else if (typeof arg === 'string')
-		return parseRef(arg,kno);
+		return parseRef(arg,pool);
 	    else return false;}
 	fdjtKB.ref=fdjtKB.getRef=getRef;
 	function loadRef(arg){
-	  var obj=getRef(arg);
-	  if (obj) return obj.load();
-	  else return undefined;}
+	    var obj=getRef(arg);
+	    if (obj) return obj.load();
+	    else return undefined;}
 	fdjtKB.load=fdjtKB.loadRef=loadRef;
 	
 	function doimport(data){
@@ -233,22 +234,10 @@ var fdjtKB=
 	fdjtKB.Import=doimport;
 
 	// Array utility functions
-	function contains(arr,val,start){
-	    if (arr.indexOf)
-		return (arr.indexOf(val,start)>=0);
-	    var i=start||0; var len=arr.length;
-	    while (i<len)
-		if (arr[i]===val) return true;
-	    else i++;
-	    return false;}
-	function position(arr,val,start){
-	    if (arr.indexOf)
-		return arr.indexOf(val,start);
-	    var i=start||0; var len=arr.length;
-	    while (i<len)
-		if (arr[i]===val) return i;
-	    else i++;
-	    return -1;}
+	function arr_contains(arr,val,start){
+	    return (arr.indexOf(val,start||0)>=0);}
+	function arr_position(arr,val,start){
+	    return arr.indexOf(val,start||0);}
 
 	/* Fast sets */
 	function set_sortfn(a,b) {
@@ -418,9 +407,6 @@ var fdjtKB=
 		array._sortlen=array.length=write;
 		return array;}}
 	
-	fdjtKB.contains=contains;
-	fdjtKB.position=position;
-	
 	function set_add(set,val) {
 	    if (val instanceof Array) {
 		var changed=false;
@@ -465,79 +451,79 @@ var fdjtKB=
 	    this.scalar_map={}; this.object_map={};
 	    return this;}
 	Map.prototype.get=function(key) {
-	  if (isobject(key))
-	    return this.object_map
-	      [key._id||key.oid||key.uuid||key._fdjtid||register(key)];
-	  else return this.scalar_map[key];};
-	Map.prototype.set=function(key,val) {
-	  if (isobject(key))
-	    this.object_map
-	      [key._id||key.oid||key.uuid||key._fdjtid||register(key)]=val;
-	  else this.scalar_map[key]=val;};
-	Map.prototype.add=function(key,val) {
-	  if (isobject(key)) {
-	    var objkey=key._id||key.oid||key.uuid||key._fdjtid||
-	    register(key);
-	    var cur=this.object_map[objkey];
-	    if (!(cur)) {
-	      this.object_map[objkey]=[val];
-	      return true;}
-	    else if (!(cur instanceof Array)) {
-	      if (cur===val) return false;
-	      else {
-		this.object_map[objkey]=[cur,val];
-		return true;}}
-	    else if (contains(cur,val)) return false;
-	    else {
-	      cur.push(val); return true;}}
-	  else  {
-	    var cur=this.scalar_map[key];
-	    if (!(cur)) {
-	      this.scalar_map[key]=[val];
-	      return true;}
-	    else if (!(cur instanceof Array)) {
-	      if (cur===val) return false;
-	      else {
-		this.scalar_map[key]=[cur,val];
-		return true;}}
-	    else if (contains(cur,val)) return false;
-	    else {
-	      cur.push(val); return true;}}};
-	Map.prototype.drop=function(key,val) {
-	  if (!(val)) {
 	    if (isobject(key))
-	      delete this.object_map
+		return this.object_map
+	    [key._id||key.oid||key.uuid||key._fdjtid||register(key)];
+	    else return this.scalar_map[key];};
+	Map.prototype.set=function(key,val) {
+	    if (isobject(key))
+		this.object_map
+	    [key._id||key.oid||key.uuid||key._fdjtid||register(key)]=val;
+	    else this.scalar_map[key]=val;};
+	Map.prototype.add=function(key,val) {
+	    if (isobject(key)) {
+		var objkey=key._id||key.oid||key.uuid||key._fdjtid||
+		    register(key);
+		var cur=this.object_map[objkey];
+		if (!(cur)) {
+		    this.object_map[objkey]=[val];
+		    return true;}
+		else if (!(cur instanceof Array)) {
+		    if (cur===val) return false;
+		    else {
+			this.object_map[objkey]=[cur,val];
+			return true;}}
+		else if (arr_contains(cur,val)) return false;
+		else {
+		    cur.push(val); return true;}}
+	    else  {
+		var cur=this.scalar_map[key];
+		if (!(cur)) {
+		    this.scalar_map[key]=[val];
+		    return true;}
+		else if (!(cur instanceof Array)) {
+		    if (cur===val) return false;
+		    else {
+			this.scalar_map[key]=[cur,val];
+			return true;}}
+		else if (arr_contains(cur,val)) return false;
+		else {
+		    cur.push(val); return true;}}};
+	Map.prototype.drop=function(key,val) {
+	    if (!(val)) {
+		if (isobject(key))
+		    delete this.object_map
 		[key._id||key.oid||key.uuid||key._fdjtid||register(key)];
-	    else delete this.scalar_map[key];}
-	  else if (isobject(key)) {
-	    var objkey=key._id||key.oid||key.uuid||key._fdjtid||
-	    register(key);
-	    var cur=this.object_map[key];
-	    if (!(cur)) return false;
-	    else if (!(cur instanceof Array)) {
-	      if (cur===val) {
-		delete this.object_map[objkey];
-		return true;}
-	      else return false;}
-	    else if ((pos=position(val,cur))>=0) {
-	      if (cur.length===1) delete this.object_map[objkey];
-	      else cur.splice(pos);
-	      return true;}
-	    else return false;}
-	  else {
-	    var cur=this.scalar_map[key]; var pos=-1;
-	    if (!(cur)) return false;
-	    else if (!(cur instanceof Array)) {
-	      if (cur===val) {
-		delete this.scalar_map[key];
-		return true;}
-	      else return false;}
-	    else if ((pos=position(val,cur))>=0) {
-	      if (cur.length===1)
-		delete this.scalar_map[key];
-	      else cur.splice(pos);
-	      return true;}
-	    else return false;}};
+		else delete this.scalar_map[key];}
+	    else if (isobject(key)) {
+		var objkey=key._id||key.oid||key.uuid||key._fdjtid||
+		    register(key);
+		var cur=this.object_map[key];
+		if (!(cur)) return false;
+		else if (!(cur instanceof Array)) {
+		    if (cur===val) {
+			delete this.object_map[objkey];
+			return true;}
+		    else return false;}
+		else if ((pos=position(val,cur))>=0) {
+		    if (cur.length===1) delete this.object_map[objkey];
+		    else cur.splice(pos);
+		    return true;}
+		else return false;}
+	    else {
+		var cur=this.scalar_map[key]; var pos=-1;
+		if (!(cur)) return false;
+		else if (!(cur instanceof Array)) {
+		    if (cur===val) {
+			delete this.scalar_map[key];
+			return true;}
+		    else return false;}
+		else if ((pos=position(val,cur))>=0) {
+		    if (cur.length===1)
+			delete this.scalar_map[key];
+		    else cur.splice(pos);
+		    return true;}
+		else return false;}};
 	fdjtKB.Map=Map;
 
 	/* Indices */
@@ -546,49 +532,49 @@ var fdjtKB=
 	    var scalar_indices={};
 	    var object_indices={};
 	    return function(item,prop,val,add){
-	      var valkey; var indices=scalar_indices;
-	      if (!(prop))
-		return {scalars: scalar_indices, objects: object_indices};
-	      else if (!(val))
-		return {scalars: scalar_indices[prop],objects: object_indices[prop]};
-	      else if (isobject(val)) {
-		valkey=val._id||val.uuid||val.oid||val._fdjtid||
-		  register(val);
-		indices=object_indices;}
-	      else valkey=val;
-	      var index=indices[prop];
-	      if (!(item))
-		if (!(index)) return [];
+		var valkey; var indices=scalar_indices;
+		if (!(prop))
+		    return {scalars: scalar_indices, objects: object_indices};
+		else if (!(val))
+		    return {scalars: scalar_indices[prop],objects: object_indices[prop]};
+		else if (isobject(val)) {
+		    valkey=val._id||val.uuid||val.oid||val._fdjtid||
+			register(val);
+		    indices=object_indices;}
+		else valkey=val;
+		var index=indices[prop];
+		if (!(item))
+		    if (!(index)) return [];
 		else return Set(index[valkey]);
- 	      var itemkey=
-		((isobject(item))?
-		 (item._id||item.uuid||item.oid||
-		  item._fdjtid||register(item)):
-		 (item));
-	      if (!(index))
-		if (add) {
-		  indices[prop]=index={};
-		  index[valkey]=[itemkey];
-		  return true;}
+ 		var itemkey=
+		    ((isobject(item))?
+		     (item._id||item.uuid||item.oid||
+		      item._fdjtid||register(item)):
+		     (item));
+		if (!(index))
+		    if (add) {
+			indices[prop]=index={};
+			index[valkey]=[itemkey];
+			return true;}
 		else return false;
-	      var curvals=index[valkey];
-	      if (curvals) {
-		var pos=position(curvals,itemkey);
-		if (pos<0) {
-		  if (add) {
-		    curvals.push(itemkey);
+		var curvals=index[valkey];
+		if (curvals) {
+		    var pos=position(curvals,itemkey);
+		    if (pos<0) {
+			if (add) {
+			    curvals.push(itemkey);
+			    return true;}
+			else return false;}
+		    else if (add) return false;
+		    else {
+			var sortlen=curvals._sortlen;
+			curvals.splice(pos,1);
+			if (pos<sortlen) curvals._sortlen--;
+			return true;}}
+		else if (add) {
+		    index[valkey]=Set(itemkey);
 		    return true;}
-		  else return false;}
-		else if (add) return false;
-		else {
-		  var sortlen=curvals._sortlen;
-		  curvals.splice(pos,1);
-		  if (pos<sortlen) curvals._sortlen--;
-		  return true;}}
-	      else if (add) {
-		index[valkey]=Set(itemkey);
-		return true;}
-	      else return false;};}
+		else return false;};}
 	fdjtKB.Index=Index;
 
 	/* Refs */
@@ -601,10 +587,10 @@ var fdjtKB=
 	Pool.prototype.cons=function(qid){return new Ref(this,qid);};
 
 	Ref.prototype.load=function(){
-	  if (this._init) return this;
-	  else if (this.pool.storage) 
-	    return this.pool.storage.load(this);
-	  else return undefined;};
+	    if (this._init) return this;
+	    else if (this.pool.storage) 
+		return this.pool.storage.load(this);
+	    else return undefined;};
 	Ref.prototype.get=function(prop){
 	    if (this.hasOwnProperty(prop)) return this[prop];
 	    else if (this.pool.storage) {
@@ -682,7 +668,7 @@ var fdjtKB=
 		var cur=this[prop];
 		if (cur===val) return true;
 		else if (cur instanceof Array)
-		    if (contains(cur,val)) return true;
+		    if (arr_contains(cur,val)) return true;
 		else return false;
 		else return false;}
 	    else if (this.pool.storage) {
@@ -698,76 +684,76 @@ var fdjtKB=
 		if ((prop!=='pool')&&(prop!=='qid'))
 		    this.drop(prop,this[prop]);};
 	function init_ref(data){
-	  var pool=this.pool; var map=pool.map;
-	  if ((this._init)&&(this._init>init_start)) return this;
-	  if ((debug)&&(pool.traceref))
-	    fdjtLog("Initial reference to %o <== %o",this,data);
-	  for (key in data)
-	    if (!((key==='qid')||(key==='pool'))) {
-	      var value=data[key];
-	      // Add ref aliases when unique
-	      if ((key==='uuid')||(key==='oid')) {
-		if (!(map[value])) map[value]=this;
-		else if (map[value]!==this)
-		  fdjtLog.warn("identifier conflict %o=%o for %o and %o",
-			       key,value,map[value],this);
-		else {}}
-	      if (value instanceof Array) {
-		var i=0; var len=value.length;
-		while (i<len) this.add(key,value[i++]);}
-	      else this.add(key,value);}
-	  var inits=pool.inits;
-	  if ((inits)&&(debug)&&(pool.traceinit))
-	    fdjtLog("Running pool inits for %o: %o",this,inits);
-	  var i=0; var lim;
-	  this._init=fdjtTime();
-	  if (inits) {
-	    var lim=inits.length;
-	    while (i<lim) inits[i++](this);}
-	  var inits=this._inits; delete this._inits;
-	  if ((inits)&&(debug)&&(pool.traceinit))
-	    fdjtLog("Running delayed inits for %o: %o",this,inits);
-	  if (inits) {
-	      delete this._inits;
-	      i=0; lim=inits.length;
-	      while (i<lim) inits[i++](this);}
-	  return this;}
+	    var pool=this.pool; var map=pool.map;
+	    if ((this._init)&&(this._init>init_start)) return this;
+	    if ((debug)&&(pool.traceref))
+		fdjtLog("Initial reference to %o <== %o",this,data);
+	    for (key in data)
+		if (!((key==='qid')||(key==='pool'))) {
+		    var value=data[key];
+		    // Add ref aliases when unique
+		    if ((key==='uuid')||(key==='oid')) {
+			if (!(map[value])) map[value]=this;
+			else if (map[value]!==this)
+			    fdjtLog.warn("identifier conflict %o=%o for %o and %o",
+					 key,value,map[value],this);
+			else {}}
+		    if (value instanceof Array) {
+			var i=0; var len=value.length;
+			while (i<len) this.add(key,value[i++]);}
+		    else this.add(key,value);}
+	    var inits=pool.inits;
+	    if ((inits)&&(debug)&&(pool.traceinit))
+		fdjtLog("Running pool inits for %o: %o",this,inits);
+	    var i=0; var lim;
+	    this._init=fdjtTime();
+	    if (inits) {
+		var lim=inits.length;
+		while (i<lim) inits[i++](this);}
+	    var inits=this._inits; delete this._inits;
+	    if ((inits)&&(debug)&&(pool.traceinit))
+		fdjtLog("Running delayed inits for %o: %o",this,inits);
+	    if (inits) {
+		delete this._inits;
+		i=0; lim=inits.length;
+		while (i<lim) inits[i++](this);}
+	    return this;}
 	Ref.prototype.init=init_ref;
 	// This isn't right
 	Ref.prototype.update=init_ref;
 	Ref.prototype.oninit=function(fcn,name){
-	  var debugging=((debug)&&(this.pool.traceinit));
+	    var debugging=((debug)&&(this.pool.traceinit));
 	    if (this._init) {
-	      if (debugging) {
-		if (name)
-		  fdjtLog("Init (%s) %o on pre-existing %o",name,fcn,this);
-		else fdjtLog("Init %o on pre-existing %o",fcn,this);}
-	      fcn(this);
-	      return true;}
+		if (debugging) {
+		    if (name)
+			fdjtLog("Init (%s) %o on pre-existing %o",name,fcn,this);
+		    else fdjtLog("Init %o on pre-existing %o",fcn,this);}
+		fcn(this);
+		return true;}
 	    else if (this._inits) {
-	      // Save up the init functions
-	      if (!(name)) {
-		if (!(contains(this._inits,fcn))) {
-		  if (debugging) fdjtLog("Delaying init on %o: %o",this,fcn);
-		  this._inits.push(fcn);}}
-	      // Don't do anything if the named init has already been added
-	      else if (this._inits[name]) {
-		/* Note that name can't be anything that an array object
-		   might inherit (like 'length'). */ }
-	      else {
-		if (debugging)
-		  fdjtLog("Delaying init %s on %o: %o",name,this,fcn);
-		this._inits[name]=fcn;
-		this._inits.push(fcn);}}
+		// Save up the init functions
+		if (!(name)) {
+		    if (this._inits.indexOf(fcn)<0) {
+			if (debugging) fdjtLog("Delaying init on %o: %o",this,fcn);
+			this._inits.push(fcn);}}
+		// Don't do anything if the named init has already been added
+		else if (this._inits[name]) {
+		    /* Note that name can't be anything that an array object
+		       might inherit (like 'length'). */ }
+		else {
+		    if (debugging)
+			fdjtLog("Delaying init %s on %o: %o",name,this,fcn);
+		    this._inits[name]=fcn;
+		    this._inits.push(fcn);}}
 	    else if (name) {
-	      if (debugging)
-		fdjtLog("Delaying init %s on %o: %o",name,this,fcn);
-	      this._inits=[fcn];
-	      this._inits[name]=fcn;}
+		if (debugging)
+		    fdjtLog("Delaying init %s on %o: %o",name,this,fcn);
+		this._inits=[fcn];
+		this._inits[name]=fcn;}
 	    else {
-	      fdjtLog("Delaying init on %o: %o",this,fcn);
-	      this._inits=[fcn];}
-	  return false;};
+		fdjtLog("Delaying init on %o: %o",this,fcn);
+		this._inits=[fcn];}
+	    return false;};
 
 	/* Using offline storage to back up pools
 	   In the simplest model, the QID is just used as a key
@@ -782,10 +768,10 @@ var fdjtKB=
 	    if (data) obj.init(data);
 	    return obj[prop];}
 	OfflineKB.prototype.load=function(obj){
-	  var qid=obj._id||obj.uuid||obj.oid;
-	  var data=fdjtState.getLocal(qid,true);
-	  if (data) return obj.init(data);
-	  else return undefined;};
+	    var qid=obj._id||obj.uuid||obj.oid;
+	    var data=fdjtState.getLocal(qid,true);
+	    if (data) return obj.init(data);
+	    else return undefined;};
 	OfflineKB.prototype.get=offline_get;
 	OfflineKB.prototype.add=function(obj,slotid,val){
 	    var qid=obj._id||obj.uuid||obj.oid;
@@ -810,14 +796,13 @@ var fdjtKB=
 	    else if (nodup) 
 		if (obj.hasOwnProperty(field)) {
 		    var vals=obj[field];
-		    if (!(contains(vals,val)))
-			obj[field].push(val);
+		    if (!(arr_contains(vals,val))) obj[field].push(val);
 		    else {}}
 	    else obj[field]=new Array(val);
 	    else if (obj.hasOwnProperty(field))
 		obj[field].push(val);
 	    else obj[field]=new Array(val);
-	    if ((obj._all) && (!(contains(obj._all,field))))
+	    if ((obj._all) && (!(arr_contains(obj._all,field))))
 		obj._all.push(field);};
 
 	fdjtKB.drop=function(obj,field,val){
@@ -844,14 +829,14 @@ var fdjtKB=
 		return (((obj.hasOwnProperty) ?
 			 (obj.hasOwnProperty(field)) : (obj[field])) &&
 			((obj[field].length)>0));
-	    else if (obj.hasOwnProperty(field)) 
-		if (position(obj[field],val)<0)
+	    else if (obj.hasOwnProperty(field)) { 
+		if (arr_position(obj[field],val)<0)
 		    return false;
-	    else return true;
+		else return true;}
 	    else return false;};
 
 	fdjtKB.insert=function(array,value){
-	    if (position(array,value)<0) array.push(value);};
+	    if (arr_position(array,value)<0) array.push(value);};
 
 	fdjtKB.remove=function(array,value,count){
 	    var pos=position(array,value);
@@ -864,32 +849,17 @@ var fdjtKB=
 		    array.splice(pos,1); count--;}}
 	    return array;};
 
-	fdjtKB.indexof=function(array,elt,pos){
-	    if (array.indexOf)
-		if (pos)
-		    return array.indexOf(elt,pos);
-	    else return array.indexOf(elt);
-	    else {
-		var i=pos||0;
-		while (i<array.length)
-		    if (array[i]===elt) return i;
-		else i++;
-		return -1;}};
+	fdjtKB.indexOf=function(array,elt,pos){
+	    if (pos) return array.indexOf(elt,pos);
+	    else return array.indexOf(elt);};
 
-	fdjtKB.contains=function(array,elt){
-	    if (array.indexOf)
-		return (array.indexOf(elt)>=0);
-	    else {
-		var i=0; var len=array.length;
-		while (i<len)
-		    if (array[i]===elt) return true;
-		else i++;
-		return false;}};
+	fdjtKB.contains=arr_contains;
+	fdjtKB.position=arr_position;
 	
 	return fdjtKB;})();
 
 /* Emacs local variables
-;;;  Local variables: ***
-;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
-;;;  End: ***
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  End: ***
 */
