@@ -4,7 +4,7 @@
 ECHO=/bin/echo
 CLEAN=/bin/rm -f
 FDJT_FILES=header.js string.js time.js dom.js kb.js state.js log.js ui.js \
-	    ajax.js json.js hash.js
+	ajax.js json.js hash.js
 
 all: fdjt.js
 
@@ -16,5 +16,13 @@ fdjt.js: $(FDJT_FILES) buildstamp.js
 	cat buildstamp.js $(FDJT_FILES) > $@
 TAGS: $(FDJT_FILES)
 	etags -o $@ $^
+ext/underscore.js: ext/underscore/underscore.js
+	cp -p ext/underscore/underscore.js ext/underscore.js
+ext/sizzle.js: ext/sizzle/sizzle.js
+	cp -p ext/sizzle/sizzle.js ext/sizzle.js
+ext/augment/dist/augment-0.2.1.js ext/underscore/underscore.js ext/sizzle/sizzle.js:
+	git submodule init
+	git submodule update
+
 clean: 
 	$(CLEAN) fdjt.js buildstamp.js
