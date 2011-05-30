@@ -5,14 +5,14 @@
 <script language='javascript' src='fdjt.js'></script>
 <script>
   function doit(event){
-  fdjtLog("checked=%o",fdjtID("CHECKBOX").checked);}
+  fdjtLog.notify("change is good, check=%o",fdjtID("CHECKBOX").checked);}
 </script>
 </head>
 <body>
-<div onclick='fdjtUI.checkspan.onclick(event);' id='THEDIV'>
+<div onclick='fdjtUI.CheckSpan.onclick(event);' id='THEDIV'>
   <span class='checkspan'>
     <input type='checkbox' name='test' value='yes' id='CHECKBOX'
-	   onchange="fdjtLog('change is good');"/>
+	   onchange="doit();"/>
     Check me</span>
 </div>
 <div>
