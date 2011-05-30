@@ -80,45 +80,39 @@ var fdjtUI=
 	return span;}
     fdjtUI.CheckSpan=CheckSpan;
 
+    function checkable(elt){
+	return (elt.nodeType===1)&&
+	    (elt.tagName==='INPUT')&&
+	    ((elt.type=='checkbox')||(elt.type=='radio'));}
+
+    function checkspan_set(target,checked) {
+	var checkspan=((hasClass(target,"checkspan"))?(target):
+		       (getParent(target,".checkspan")));
+	if (!(checkspan)) return false;
+	var inputs=getChildren(checkspan,checkable);
+	if (inputs.length===0) return false;
+	if (typeof checked === 'undefined') checked=(!(inputs[0].checked));
+	if (checked) addClass(checkspan,"ischecked");
+	else dropClass(checkspan,"ischecked");
+	var i=0; var lim=inputs.length;
+	while (i<lim) {
+	    var cb=inputs[i++];
+	    if ((cb.checked)&&(!(checked))) cb.checked=false;
+	    else if ((!(cb.checked))&&(checked)) cb.checked=true;
+	    else continue;
+	    var evt=document.createEvent("HTMLEvents");
+	    evt.initEvent("change",false,true);
+	    cb.dispatchEvent(evt);}
+	return true;}
+    fdjtUI.CheckSpan.set=checkspan_set;
+
     function checkspan_onclick(evt) {
 	evt=evt||event;
 	target=evt.target||evt.srcTarget;
-	var checkspan=getParent(target,".checkspan");
-	if ((target.tagName==='INPUT')&&
-	    ((target.type=='checkbox')||(target.type=='radio'))) {
-	    target.blur();
-	    if (target.checked) addClass(checkspan,"checked");
-	    else dropClass(checkspan,"checked");}
-	else {
-	    var inputs=getChildren
-	    (checkspan,function(elt){
-		return (elt.nodeType===1)&&
-		    (elt.tagName==='INPUT')&&
-		    ((elt.type=='checkbox')||(elt.type=='radio'));});
-	    var input=((inputs)&&(inputs.length)&&(inputs[0]));
-	    if (input) 
-		if (input.checked) {
-		    dropClass(checkspan,"ischecked");
-		    input.checked=false; input.blur();}
-	    else {
-		addClass(checkspan,"ischecked");
-		input.checked=true; input.blur();}
-	    else toggleClass(checkspan,"ischecked");}}
-    fdjtUI.CheckSpan.onclick=checkspan_onclick;
-
-    function checkspan_set(checkspan,checked){
-	if (!(hasClass(checkspan,".checkspan")))
-	    checkspan=getParent(checkspan,".checkspan")||checkspan;
-	var inputs=getChildren
-	(checkspan,function(node){
-	    return (node.tagName==='INPUT')&&
-		((node.type=='checkbox')||(node.type=='radio'));});
-	var input=((inputs)&&(inputs.length)&&(inputs[0]));
-	if (checked) {
-	    input.checked=true; addClass(checkspan,"ischecked");}
-	else {
-	    input.checked=false; dropClass(checkspan,"ischecked");}}
-    fdjtUI.CheckSpan.set=checkspan_set;})();
+	if (checkspan_set(target)) fdjtUI.cancel(evt);
+	return false;}
+    fdjtUI.CheckSpan.onclick=checkspan_onclick;    
+    })();
 
 (function(){
 
