@@ -747,8 +747,10 @@ var fdjtDOM=
 	function getStyle(elt,prop){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
 	    if (!(elt)) return elt;
+	    if (!(elt.nodeType)) throw "Not a node";
 	    var style=
-		((window.getComputedStyle)&&(window.getComputedStyle(elt,null)))||
+		((window.getComputedStyle)&&
+		 (window.getComputedStyle(elt,null)))||
 		(elt.currentStyle);
 	    if (!(style)) return false;
 	    else if (prop) return style[prop];
@@ -783,7 +785,8 @@ var fdjtDOM=
 	    "TABLE": "table", "PRE": "preformatted"};
 
 	function getDisplayStyle(elt){
-	    return (((window.getComputedStyle)&&(window.getComputedStyle(elt,null))&&
+	    return (((window.getComputedStyle)&&
+		     (window.getComputedStyle(elt,null))&&
 		     (window.getComputedStyle(elt,null).display))||
 		    (display_styles[elt.tagName])||
 		    "inline");}
