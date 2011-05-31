@@ -505,7 +505,7 @@ var fdjtKB=
 			delete this.object_map[objkey];
 			return true;}
 		    else return false;}
-		else if ((pos=position(val,cur))>=0) {
+		else if ((pos=arr_position(val,cur))>=0) {
 		    if (cur.length===1) delete this.object_map[objkey];
 		    else cur.splice(pos);
 		    return true;}
@@ -518,7 +518,7 @@ var fdjtKB=
 			delete this.scalar_map[key];
 			return true;}
 		    else return false;}
-		else if ((pos=position(val,cur))>=0) {
+		else if ((pos=arr_position(val,cur))>=0) {
 		    if (cur.length===1)
 			delete this.scalar_map[key];
 		    else cur.splice(pos);
@@ -559,7 +559,7 @@ var fdjtKB=
 		else return false;
 		var curvals=index[valkey];
 		if (curvals) {
-		    var pos=position(curvals,itemkey);
+		    var pos=arr_position(curvals,itemkey);
 		    if (pos<0) {
 			if (add) {
 			    curvals.push(itemkey);
@@ -815,7 +815,7 @@ var fdjtKB=
 		obj[field]=new Array();
 	    else if (obj.hasOwnProperty(field)) {
 		var vals=obj[field];
-		var pos=position(vals,val);
+		var pos=arr_position(vals,val);
 		if (pos<0) return;
 		else vals.splice(pos,1);}
 	    else {}};
@@ -839,13 +839,13 @@ var fdjtKB=
 	    if (arr_position(array,value)<0) array.push(value);};
 
 	fdjtKB.remove=function(array,value,count){
-	    var pos=position(array,value);
+	    var pos=arr_position(array,value);
 	    if (pos<0) return array;
 	    array.splice(pos,1);
 	    if (count) {
 		count--;
 		while ((count>0) &&
-		       ((pos=position(array,value,pos))>=0)) {
+		       ((pos=arr_position(array,value,pos))>=0)) {
 		    array.splice(pos,1); count--;}}
 	    return array;};
 
