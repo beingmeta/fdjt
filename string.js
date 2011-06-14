@@ -223,7 +223,7 @@ var fdjtString=
 	fdjtString.unEscape=unEscape;
 
 	function normstring(string){
-	    return string.replace(/\W*\s\W*/g," ").downcase();}
+	    return string.replace(/\W*\s\W*/g," ").toLowerCase();}
 	fdjtString.normString=normstring;
 
 	function unEntify(string) {
