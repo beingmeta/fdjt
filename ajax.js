@@ -146,7 +146,7 @@ var fdjtAjax=
 	fdjtAjax.formJSON=formJSON;
 
 	function ajaxSubmit(form,callback){
-	    var ajax_uri=form.getAttribute("ajaxaction");
+	    var ajax_uri=form.getAttribute("ajaxaction")||form.action;
 	    if (!(ajax_uri)) return false;
 	    // Whether to do AJAX synchronously or not.
 	    var syncp=form.getAttribute("synchronous");
