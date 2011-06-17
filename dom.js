@@ -871,6 +871,15 @@ var fdjtDOM=
 	    return result;}
 	fdjtDOM.getGeometry=getGeometry;
 
+	function geomString(geom){
+	    return +((typeof geom.width == 'number')?(geom.width):"?")+
+		"x"+((typeof geom.height == 'number')?(geom.height):"?")+
+		"@l:"+((typeof geom.left == 'number')?(geom.left):"?")+
+		",t:"+((typeof geom.top == 'number')?(geom.top):"?")+
+		"/r:"+((typeof geom.right == 'number')?(geom.right):"?")+
+		",b:"+((typeof geom.bottom == 'number')?(geom.bottom):"?");}
+	fdjtDOM.geomString=geomString;
+
 	function isVisible(elt,partial){
 	    var start=elt;
 	    if (!(partial)) partial=false;
