@@ -36,7 +36,7 @@ var fdjtLog=(function(){
 	    var entry=fdjtDOM("div.fdjtlog");
 	    if (output) entry.innerHTML=output;
 	    else entry.innerHTML=fdjtString.apply(null,arguments);
-	    fdjtDOM.prepend(timespan);
+	    fdjtDOM.prepend(entry,timespan);
 	    if (typeof domconsole === 'string') {
 		var found=document.getElementById(domconsole);
 		if (found) {
