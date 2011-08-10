@@ -112,8 +112,9 @@ var fdjtUI=
 
     function checkspan_onclick(evt) {
 	evt=evt||event;
-	target=evt.target||evt.srcTarget;
+	var target=evt.target||evt.srcTarget;
 	checkspan_set(target);
+	fdjtUI.cancel(evt);
 	return false;}
     fdjtUI.CheckSpan.onclick=checkspan_onclick;    
     })();
