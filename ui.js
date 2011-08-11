@@ -69,6 +69,7 @@ var fdjtUI=
     var toggleClass=fdjtDOM.toggleClass;
     var getParent=fdjtDOM.getParent;
     var getChildren=fdjtDOM.getChildren;
+    var getChild=fdjtDOM.getChild;
 
     function CheckSpan(spec,varname,val,checked){
 	var input=fdjtDOM.Input('input[type=checkbox]',varname,val);
@@ -87,12 +88,13 @@ var fdjtUI=
 	    (elt.tagName==='INPUT')&&
 	    ((elt.type=='checkbox')||(elt.type=='radio'));}
 
-    function checkspan_set(target,checked) {
+    function checkspan_set(target,checked,multiple) {
 	var checkspan=((hasClass(target,"checkspan"))?(target):
 		       (getParent(target,".checkspan")));
 	var input=getParent(target,"input");
 	if (!(checkspan)) return false;
-	var inputs=getChildren(checkspan,checkable);
+	var inputs=((multiple)?(getChildren(checkspan,checkable)):
+		    (getChild(checkspan,checkable)));
 	if (inputs.length===0) return false;
 	if (typeof checked === 'undefined') {
 	    if (inputs[0]===input) checked=input.checked;
