@@ -122,6 +122,7 @@ var fdjtTrace=fdjtLog;
     var eventing = false,
         animationInProgress = false,
         humaneEl = null,
+        humaneBase = null,
         timeout = null,
         useFilter = /msie [678]/i.test(navigator.userAgent), // ua sniff for filter support
         isSetup = false,
@@ -142,10 +143,13 @@ var fdjtTrace=fdjtLog;
     });
 
     function setup() {
-        humaneEl = doc.createElement('div');
-        humaneEl.id = 'humane';
-        humaneEl.className = 'humane';
-        doc.body.appendChild(humaneEl);
+	var probe=doc.getElementById('HUMANE');
+	if (probe) humaneEl=humaneBase=probe;
+	else {
+            humaneEl = humaneBase = doc.createElement('div');
+            humaneEl.id = 'HUMANE';
+            humaneEl.className = 'humane';
+            doc.body.appendChild(humaneEl);}
         if(useFilter) humaneEl.filters.item('DXImageTransform.Microsoft.Alpha').Opacity = 0; // reset value so hover states work
         isSetup = true;
     }
@@ -184,7 +188,11 @@ var fdjtTrace=fdjtLog;
             }
         }, fdjtLog.notify.timeout);
 
-        humaneEl.innerHTML = queue.shift();
+	var msg=queue.shift();
+	if (msg.nodeType) {
+	    humaneEl.innerHTML = "";
+	    humaneEl.appendChild(msg);}
+	else humaneEl.innerHTML = msg;
         animate(1);
     }
 
@@ -256,13 +264,20 @@ var fdjtTrace=fdjtLog;
 	if (arguments.length>1)
 	    message=fdjtString.apply(null,arguments);
         queue.push(message);
-        if(isSetup) run();
-    }
+        if(isSetup) run();}
+
+    function msg(message){
+	if (arguments.length>1)
+	    message=fdjtString.apply(null,arguments);
+        queue.push(message);
+        if(isSetup) run();}
 
     fdjtLog.notify = notify;
     fdjtLog.notify.timeout = 2000;
     fdjtLog.notify.waitForMove = true;
     fdjtLog.notify.forceNew = false;
+
+	fdjtLog.Humane=msg;
 
 }(window,document));
 
