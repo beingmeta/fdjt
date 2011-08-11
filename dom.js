@@ -137,6 +137,8 @@ var fdjtDOM=
 		    else node.insertBefore(document.createTextNode(""+elt),before);}}
 	    else node.insertBefore(document.createTextNode(""+elt),before);}
 
+	fdjtDOM.appendArray=domappend;
+	
 	function toArray(arg) {
 	    var result=new Array(arg.length);
 	    var i=0; var lim=arg.length;

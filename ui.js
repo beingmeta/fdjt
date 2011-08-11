@@ -77,6 +77,8 @@ var fdjtUI=
 	    input.checked=true;
 	    fdjtDOM.addClass(span,"ischecked");}
 	else input.checked=false;
+	if (arguments.length>4)
+	    fdjtDOM.appendArray(span,arguments,4);
 	return span;}
     fdjtUI.CheckSpan=CheckSpan;
 
