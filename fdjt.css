@@ -548,9 +548,10 @@ div.backtrace div.last_entry {
   -ms-transition        : all .5s;
   transition            : all .5s;
   visibility            : hidden;
-  z-index               : 100000;
+  z-index               : -100;
 }
-.humane.humane-show { visibility : visible; }
+.humane.humane-show { visibility : visible;
+		      z-index    : 100000;}
 /* ie hover state, recommended */
 .humane:hover {
   filter                : progid:DXImageTransform.Microsoft.alpha(opacity=20);
@@ -564,8 +565,8 @@ div.humane.humane-show:hover { opacity: 0.2; }
   font-family           : Verdana, sans-serif;
   font-size             : 15px;
   letter-spacing        : -1px;
-  top                   : 10px;
-  right                 : 10px;
+  bottom                : 10px;
+  right                 : 30px;
   opacity               : 0;
   width                 : 150px;
   color                 : #fff;
