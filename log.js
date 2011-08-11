@@ -119,14 +119,16 @@ var fdjtTrace=fdjtLog;
        eventOff = function(obj,type,fn){obj.detachEvent('on'+type,fn)};
     }
 
-    var eventing = false,
-        animationInProgress = false,
-        humaneEl = null,
-        humaneBase = null,
-        timeout = null,
-        useFilter = /msie [678]/i.test(navigator.userAgent), // ua sniff for filter support
-        isSetup = false,
-        queue = [];
+    var eventing = false;
+    var animationInProgress = false;
+    var humaneEl = null;
+    // Table mapping msg node IDs into the nodes themselves
+    var msgnodes={};
+    var timeout = null;
+    // ua sniff for filter support
+    var useFilter = /msie [678]/i.test(navigator.userAgent);
+    var isSetup = false;
+    var queue = [];
 
     eventOn(win,'load',function(){
         var transitionSupported = (function(style){
@@ -144,9 +146,9 @@ var fdjtTrace=fdjtLog;
 
     function setup() {
 	var probe=doc.getElementById('HUMANE');
-	if (probe) humaneEl=humaneBase=probe;
+	if (probe) humaneEl=probe;
 	else {
-            humaneEl = humaneBase = doc.createElement('div');
+            humaneEl = doc.createElement('div');
             humaneEl.id = 'HUMANE';
             humaneEl.className = 'humane';
             doc.body.appendChild(humaneEl);}
@@ -192,6 +194,17 @@ var fdjtTrace=fdjtLog;
 	if (msg.nodeType) {
 	    humaneEl.innerHTML = "";
 	    humaneEl.appendChild(msg);}
+	else if (typeof msg !== 'string')
+	    throw new Exception("Bad arg to Humane");
+	else if ((msg.length>1)&&(msg[0]==='#')) {
+	    var nodeid=msg.slice(1);
+	    node=msgnodes[nodeid];
+	    if ((!(node))&&(node=document.getElementById(nodeid)))
+		msgnodes[nodeid]=node;
+	    if (node) {
+		humaneEl.innerHTML = "";
+		humaneEl.appendChild(node);}
+	    else humaneEl.innerHTML = msg;}
 	else humaneEl.innerHTML = msg;
         animate(1);
     }
