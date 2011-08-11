@@ -1497,7 +1497,7 @@ var fdjtDOM=
 	// Adapted from 
 	// http://www.hunlock.com/blogs/Totally_Pwn_CSS_with_Javascript
 
-        // Return requested style obejct
+        // Return requested style object
 	function getCSSRule(ruleName, deleteFlag) {
 	    ruleName=ruleName.toLowerCase();
             // If browser can play with stylesheets
@@ -1505,14 +1505,12 @@ var fdjtDOM=
 		// For each stylesheet
 		for (var i=0; i<document.styleSheets.length; i++) {
 		    var styleSheet=document.styleSheets[i];
-		    var ii=0;
 		    var cssRule=false;
-                    // For each rule in stylesheet
-		    do {
-			if (styleSheet.cssRules) {
-			    cssRule = styleSheet.cssRules[ii];}
-			else {cssRule = styleSheet.rules[ii];}
-			if (cssRule)  {
+		    var cssRules=styleSheet.cssRules||styleSheet.rules;
+		    var n_rules=((cssRules)&&(cssRules.length));
+		    var ii=0; while (ii<n_rules) {
+			if (cssRules[ii])  {
+			    var cssRule=cssRules[ii];
 			    if (cssRule.selectorText.toLowerCase()==ruleName) {
 				if (deleteFlag=='delete') {
 				    if (styleSheet.cssRules) {
@@ -1523,8 +1521,9 @@ var fdjtDOM=
 				else {return cssRule;}
                                 // end found cssRule
 			    }}   
-			ii++;} while (cssRule)}
-		/* end for stylesheets */ }
+			ii++;}
+		    /* end for stylesheets */ }
+		return false;}
 	    return false;}
 	fdjtDOM.getCSSRule=getCSSRule;
 
