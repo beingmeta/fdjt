@@ -280,6 +280,16 @@ var fdjtTrace=fdjtLog;
         if(isSetup) run();}
 
     function msg(message){
+	if (!(message)) {
+            if(!eventing){
+                eventOn(doc.body,'mousemove',remove);
+                eventOn(doc.body,'click',remove);
+                eventOn(doc.body,'keypress',remove);
+                eventOn(doc.body,'touchstart',remove);
+                eventing = true;}
+	    animationInProgress=true;
+	    animate(1);
+	    return;}
 	if (arguments.length>1)
 	    message=fdjtString.apply(null,arguments);
         queue.push(message);
