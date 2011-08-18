@@ -95,9 +95,10 @@ var fdjtUI=
 	if (!(checkspan)) return false;
 	var inputs=(getChildren(checkspan,checkable));
 	if (inputs.length===0) return false;
-	if (!(input)) input=inputs[0];
-	if (typeof checked === 'undefined') checked=input.checked;
-	else input.checked=checked;
+	if (typeof checked === 'undefined') {
+	    if (input) checked=input.checked;
+	    else checked=(!((inputs[0]).checked));}
+	if (input) input.checked=checked;
 	if (checked) addClass(checkspan,"ischecked");
 	else dropClass(checkspan,"ischecked");
 	var i=0; var lim=inputs.length;
@@ -116,8 +117,11 @@ var fdjtUI=
     function checkspan_onclick(evt) {
 	evt=evt||event;
 	var target=evt.target||evt.srcTarget;
-	checkspan_set(target);
-	fdjtUI.cancel(evt);
+	if (getParent(target,"input"))
+	    setTimeout(function(){checkspan_set(target);},100);
+	else {
+	    checkspan_set(target);
+	    fdjtUI.cancel(evt);}
 	return false;}
     fdjtUI.CheckSpan.onclick=checkspan_onclick;    
     })();
