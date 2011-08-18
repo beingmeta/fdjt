@@ -317,7 +317,7 @@ var fdjtState=
 	
 	// Getting version information
 	function versionInfo(){
-	    var s=navigator.appVersion; var result={};
+	    var s=navigator.userAgent; var result={};
 	    var start;
 	    while ((start=s.search(/\w+\/\d/g))>=0) {
 		var slash=s.indexOf('/',start);
@@ -329,6 +329,18 @@ var fdjtState=
 		catch (ex) {
 		    result[s.slice(start,slash)]=numstring;}
 		s=afterslash.slice(num_end);}
+	    if (result['Chrome']) result.browser='Chrome';
+	    else if (result['Opera']) result.browser='Opera';
+	    else if (result['Safari']) result.browser='Safari';
+	    else if ((result['Safari'])&&(result['Mobile']))
+		result.browser='MobileSafari';
+	    else if (result['Firefox']) result.browser='Firefox';
+	    else if ((result['Explorer'])||(result['IE'])||
+		     (result['InternetExplorer'])||(result['MSIE']))
+		result.browser='IE';
+	    else if (result['Mozilla']) result.browser='Mozilla';
+	    else result.browser='Browser';
+	    result.platform=navigator.platform||"Turing";
 	    return result;}
 	fdjtState.versionInfo=versionInfo;
 
