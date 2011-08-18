@@ -88,17 +88,16 @@ var fdjtUI=
 	    (elt.tagName==='INPUT')&&
 	    ((elt.type=='checkbox')||(elt.type=='radio'));}
 
-    function checkspan_set(target,checked,multiple) {
+    function checkspan_set(target,checked) {
 	var checkspan=((hasClass(target,"checkspan"))?(target):
 		       (getParent(target,".checkspan")));
 	var input=getParent(target,"input");
 	if (!(checkspan)) return false;
-	var inputs=((multiple)?(getChildren(checkspan,checkable)):
-		    (getChild(checkspan,checkable)));
+	var inputs=(getChildren(checkspan,checkable));
 	if (inputs.length===0) return false;
-	if (typeof checked === 'undefined') {
-	    if (inputs[0]===input) checked=input.checked;
-	    else checked=(!(inputs[0].checked));}
+	if (!(input)) input=inputs[0];
+	if (typeof checked === 'undefined') checked=input.checked;
+	else input.checked=checked;
 	if (checked) addClass(checkspan,"ischecked");
 	else dropClass(checkspan,"ischecked");
 	var i=0; var lim=inputs.length;
