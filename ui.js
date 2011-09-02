@@ -69,6 +69,7 @@ var fdjtUI=
     var toggleClass=fdjtDOM.toggleClass;
     var getParent=fdjtDOM.getParent;
     var getChildren=fdjtDOM.getChildren;
+    var getChild=fdjtDOM.getChild;
 
     function CheckSpan(spec,varname,val,checked){
 	var input=fdjtDOM.Input('input[type=checkbox]',varname,val);
@@ -77,6 +78,8 @@ var fdjtUI=
 	    input.checked=true;
 	    fdjtDOM.addClass(span,"ischecked");}
 	else input.checked=false;
+	if (arguments.length>4)
+	    fdjtDOM.appendArray(span,arguments,4);
 	return span;}
     fdjtUI.CheckSpan=CheckSpan;
 
@@ -88,15 +91,20 @@ var fdjtUI=
     function checkspan_set(target,checked) {
 	var checkspan=((hasClass(target,"checkspan"))?(target):
 		       (getParent(target,".checkspan")));
+	var input=getParent(target,"input");
 	if (!(checkspan)) return false;
-	var inputs=getChildren(checkspan,checkable);
+	var inputs=(getChildren(checkspan,checkable));
 	if (inputs.length===0) return false;
-	if (typeof checked === 'undefined') checked=(!(inputs[0].checked));
+	if (typeof checked === 'undefined') {
+	    if (input) checked=input.checked;
+	    else checked=(!((inputs[0]).checked));}
+	if (input) input.checked=checked;
 	if (checked) addClass(checkspan,"ischecked");
 	else dropClass(checkspan,"ischecked");
 	var i=0; var lim=inputs.length;
 	while (i<lim) {
 	    var cb=inputs[i++];
+	    if (cb===input) continue;
 	    if ((cb.checked)&&(!(checked))) cb.checked=false;
 	    else if ((!(cb.checked))&&(checked)) cb.checked=true;
 	    else continue;
@@ -108,8 +116,12 @@ var fdjtUI=
 
     function checkspan_onclick(evt) {
 	evt=evt||event;
-	target=evt.target||evt.srcTarget;
-	if (checkspan_set(target)) fdjtUI.cancel(evt);
+	var target=evt.target||evt.srcTarget;
+	if (getParent(target,"input"))
+	    setTimeout(function(){checkspan_set(target);},100);
+	else {
+	    checkspan_set(target);
+	    fdjtUI.cancel(evt);}
 	return false;}
     fdjtUI.CheckSpan.onclick=checkspan_onclick;    
     })();

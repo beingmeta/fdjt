@@ -477,6 +477,63 @@ div.fdjtlog span.time {
 .fdjtexpands.fdjtexpanded li.whenexpanded {
     display: list-item;}
 
+/* FramerD error display */
+
+/* Error pages */
+
+body#ERRORPAGE {
+  margin: 22px; margin-right: 40px;
+  background-color: black; color: ivory;}
+
+div.server_sorry {
+  font-family: sans; font-size: 120%; color: silver;}
+div.server_sorry div.error {
+  font-weight: bold; font-size: 140%; color: white;}
+
+div.error {
+  margin-left: 8em; text-indent: -8em; font-family: sans; }
+div.error span.ex { font-weight: bold;}
+div.error span.cxt { font-weight: normal; }
+div.error span.details { font-weight: normal; font-style: italic; }
+div.error span.irritant {
+  margin-left: 6px; white-space: nowrap;
+  color: red;}
+div.error div.irritant {
+  margin-left: 6px; font-family: fixed; white-space: pre;
+  color: red;}
+
+
+div.backtrace { margin-top: 18px; font-size: 120%;}
+
+div.backtrace_indent {
+  margin-left: 8px; font-size: 98%;}
+
+div.backtrace div.expr {
+  font-family: courier,fixed; white-space: pre; text-align: left;
+  padding-top: 3px; padding-bottom: 3px;}
+div.backtrace div.expr span.focus {
+  font-weight: bold; color: yellow; font-size: 120%;}
+
+div.backtrace div.bindings {
+  background-color: ivory;  color: black;
+  padding-left: 64px; text-indent: -64px;
+  padding-top: 4px; padding-bottom: 4px;}
+div.backtrace div.bindings span.binding {
+  font-family: fixed; font-weight: bold; color: red; white-space: nowrap; }
+div.backtrace div.bindings span.head {
+  padding-right: 12px; color: brown; font-weight: bold;}
+
+div.backtrace div.rail {
+  background-color: green;}
+div.backtrace div.rail span.name {
+  color: yellow; font-family: sans; font-weight: bold; padding-right: 8px;}
+div.backtrace div.rail span.arg {
+  color: white; font-family: fixed; font-weight: bold;
+  padding-right: 6px; padding-left: 6px;}
+
+div.backtrace div.last_entry {
+  font-size: 160%;}
+
 /* Human libnotify CSS */
 
 /* recommended base settings */
@@ -491,9 +548,10 @@ div.fdjtlog span.time {
   -ms-transition        : all .5s;
   transition            : all .5s;
   visibility            : hidden;
-  z-index               : 100000;
+  z-index               : -100;
 }
-.humane.humane-show { visibility : visible; }
+.humane.humane-show { visibility : visible;
+		      z-index    : 100000;}
 /* ie hover state, recommended */
 .humane:hover {
   filter                : progid:DXImageTransform.Microsoft.alpha(opacity=20);
@@ -507,8 +565,8 @@ div.humane.humane-show:hover { opacity: 0.2; }
   font-family           : Verdana, sans-serif;
   font-size             : 15px;
   letter-spacing        : -1px;
-  top                   : 10px;
-  right                 : 10px;
+  bottom                : 10px;
+  right                 : 30px;
   opacity               : 0;
   width                 : 150px;
   color                 : #fff;

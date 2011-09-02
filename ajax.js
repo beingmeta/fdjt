@@ -37,12 +37,12 @@ var fdjtAjax=
 	
 	function fdjtAjax(callback,base_uri,args){
 	    var req=new XMLHttpRequest();
+	    var uri=compose_uri(base_uri,args);
+	    req.open("GET",uri,true);
+	    req.withCredentials=true;
 	    req.onreadystatechange=function () {
 		if ((req.readyState == 4) && (req.status == 200)) {
 		    callback(req);}};
-	    var uri=compose_uri(base_uri,args);
-	    req.open("GET",uri,true);
-	    req.withCredentials='yes';
 	    req.send(null);
 	    return req;}
 	fdjtAjax.revid="$Id$";
@@ -171,7 +171,7 @@ var fdjtAjax=
 		req.open('PUT',ajax_uri,(!(syncp)));
 	    else req.open('POST',ajax_uri,(!(syncp)));
 	    req.setRequestHeader("Accept","text/json");
-	    req.withCredentials='true';
+	    req.withCredentials=true;
 	    req.onreadystatechange=function () {
 		if (trace_ajax)
 		    fdjtLog("Got callback (%d,%d) %o for %o, calling %o",
