@@ -190,11 +190,15 @@ div.completions {font-family: sans,sans-serif;}
 .completions.noinput span.completion.cue { display: inline; }
 .completions.noinput li.completion.cue { display: list-item; }
 .completions.noinput div.completion.cue { display: block; }
+/* Override these */
+.completions.noinput .completion.cue.hidden { display: none; }
 
 .completions.showempty.noinput a.completion { display: inline; }
 .completions.showempty.noinput span.completion { display: inline; }
 .completions.showempty.noinput li.completion { display: list-item; }
 .completions.showempty.noinput div.completion { display: block; }
+/* Override these */
+.completions.showempty.noinput .completion.hidden { display: none; }
 
 .completions .noinputmsg { display: none;}
 
