@@ -352,12 +352,14 @@ var fdjtUI=
 		var j=0; var jlim=completions.length;
 		while (j<jlim) {
 		    var c=completions[j++];
-		    if (hasClass(c,"completion")) {
+		    if (hasClass(c,"hidden")) {}
+		    else if (hasClass(c,"completion")) {
 			if (isexact) {exactheads.push(c); exact.push(c);}
 			result.push(c); keys.push(string); direct.push(c);}
 		    else {
 			var head=getParent(c,".completion");
-			if (head) {
+			if ((head)&&(hasClass(head,"hidden"))) {}
+			else if (head) {
 			    if (isexact) exact.push(head);
 			    result.push(head); keys.push(string);
 			    variations.push(c);}}}}}
@@ -539,8 +541,9 @@ var fdjtUI=
 		else result=result.concat(completions);}}
 	return result;};
 
-    Completions.prototype.setCues=function(values){
+    Completions.prototype.setCues=function(values,cueclass){
 	if (!(this.initialized)) initCompletions(this);
+	if (!(cueclass)) cueclass="cue";
 	var cues=[];
 	var byvalue=this.byvalue;
 	var i=0; var lim=values.length;
@@ -551,11 +554,52 @@ var fdjtUI=
 		var j=0; var jlim=completions.length;
 		while (j<jlim) {
 		    var c=completions[j++];
-		    if (hasClass(c,"cue")) continue;
-		    addClass(c,"cue");
+		    if (hasClass(c,cueclass)) continue;
+		    addClass(c,cueclass);
 		    cues.push(c);}}}
 	return cues;};
+
+    Completions.prototype.setClass=function(values,classname){
+	if (!(this.initialized)) initCompletions(this);
+	var drop=fdjtDOM.getChildren(this.dom,".completion."+classname);
+	if ((drop)&&(drop.length))
+	    dropClass(fdjtDOM.Array(drop),"hidden");
+	var changed=[];
+	var byvalue=this.byvalue;
+	var i=0; var lim=values.length;
+	while (i<lim) {
+	    var value=values[i++];
+	    var completions=byvalue.get(value);
+	    if (completions) {
+		var j=0; var jlim=completions.length;
+		while (j<jlim) {
+		    var c=completions[j++];
+		    if (hasClass(c,classname)) continue;
+		    addClass(c,classname);
+		    changed.push(c);}}}
+	return changed;}
+    Completions.prototype.extendClass=function(values,classname){
+	if (!(this.initialized)) initCompletions(this);
+	var changed=[];
+	var byvalue=this.byvalue;
+	var i=0; var lim=values.length;
+	while (i<lim) {
+	    var value=values[i++];
+	    var completions=byvalue.get(value);
+	    if (completions) {
+		var j=0; var jlim=completions.length;
+		while (j<jlim) {
+		    var c=completions[j++];
+		    if (hasClass(c,classname)) continue;
+		    addClass(c,classname);
+		    changed.push(c);}}}
+	return changed;};
     
+    Completions.prototype.dropClass=function(classname){
+	var drop=fdjtDOM.getChildren(this.dom,".completion."+classname);
+	if ((drop)&&(drop.length))
+	    dropClass(fdjtDOM.Array(drop),classname);};
+
     Completions.prototype.docomplete=function(input,callback){
 	if (!(this.initialized)) initCompletions(this);
 	if (!(input)) input=this.input;

@@ -551,6 +551,7 @@ var fdjtDOM=
 	    return ((sel.match(node))?(node):(getParent(node,sel)));};
 
 	function getChildren(node,classname,attrib,results){
+	    if (!(node)) return [];
 	    if (!(results)) results=[]; 
 	    if ((!(attrib))&&(typeof classname === 'function'))
 		filter_children(node,classname,results);

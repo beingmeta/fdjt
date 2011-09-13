@@ -34,9 +34,24 @@ var fdjtTime=
 	    return Math.floor((new Date()).getTime()/1000);};
 
 	fdjtTime.dateString=function(tstamp){
+	    if (typeof tstamp === 'number') {
+		if (tstamp<131592918600)
+		    tstamp=new Date(tstamp*1000);
+		else tstamp=new Date(tstamp);}
 	    return tstamp.toDateString();};
+	fdjtTime.timeString=function(tstamp){
+	    if (typeof tstamp === 'number') {
+		if (tstamp<131592918600)
+		    tstamp=new Date(tstamp*1000);
+		else tstamp=new Date(tstamp);}
+	    return tstamp.toString();};
+
 	function shortString(tstamp){
 	    var now=new Date();
+	    if (typeof tstamp === 'number') {
+		if (tstamp<131592918600)
+		    tstamp=new Date(tstamp*1000);
+		else tstamp=new Date(tstamp);}
 	    var diff=(now.getTime()-tstamp.getTime())/1000;
 	    if (diff>(12*3600))
 		return tstamp.toDateString();
