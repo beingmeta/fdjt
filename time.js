@@ -168,15 +168,36 @@ var fdjtTime=
 	    return slicefn();}
 	fdjtTime.timeslice=timeslice;
 
-	function slowmap(fn,vec,done,slice){
-	    var i=0; var lim=vec.length;
+	function slowmap(fn,vec,watch,done,slice,space){
+	    var i=0; var lim=vec.length; var chunks=0;
+	    var elapsed=0; var zerostart=fdjtTime();
 	    if (!(slice)) slice=100;
+	    if (!(space)) space=slice;
 	    var stepfn=function(){
-		var stopat=fdjtTime()+slice;
-		while ((i<lim)||(fdjtTime()<stopat)) fn(vec[i++]);
-		if (i<lim) setTimeout(stepfn,slice);
-		else if (done) done();};
-	    setTimeout(stepfn,slice);}
+		var started=fdjtTime(); var now=started;
+		var stopat=started+slice;
+		if (watch) watch(((i==0)?'start':'resume'),i,lim,chunks,elapsed,zerostart);
+		while ((i<lim)&&((now=fdjtTime())<stopat)) {
+		    var elt=vec[i];
+		    if (watch) watch('element',i,lim,elt,elapsed,now-zerostart);
+		    fn(elt);
+		    if (watch)
+			watch('after',i,lim,elt,elapsed+(fdjtTime()-started),
+			      zerostart,fdjtTime()-now);
+		    i++;}
+		chunks=chunks+1;
+		if (i<lim) {
+		    elapsed=elapsed+(now-started);
+		    if (watch) watch('suspend',i,lim,chunks,elapsed,zerostart);
+		    setTimeout(stepfn,space);}
+		else {
+		    now=fdjtTime(); elapsed=elapsed+(now-started);
+		    if (done) {
+			if (watch) watch('finishing',i,lim,chunks,elapsed,zerostart);
+			done();}
+		    now=fdjtTime(); elapsed=elapsed+(now-started);
+		    if (watch) watch('done',i,lim,chunks,elapsed,zerostart);}};
+	    setTimeout(stepfn,space);}
 	fdjtTime.slowmap=slowmap;
 
 	return fdjtTime;})();
