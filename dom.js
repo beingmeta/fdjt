@@ -1541,14 +1541,23 @@ var fdjtDOM=
 	    return getCSSRule(ruleName,'delete');}
 	fdjtDOM.dropCSSRule=dropCSSRule;
 
-	function addCSSRule(ruleName) {// Create a new css rule
+	function addCSSRule(ruleName,text) {// Create a new css rule
 	    if (document.styleSheets) {
 		if (!getCSSRule(ruleName)) {
-                    // if rule doesn't exist...
-		    if (document.styleSheets[0].addRule)  // For IE
-			document.styleSheets[0].addRule(ruleName, null,0);
-		    else document.styleSheets[0].
-			insertRule(ruleName+' { }', 0);}
+		    var sheet=false;
+		    if (document.fdjtSheet) sheet=document.fdjtSheet;
+		    else {
+			var sheets=document.styleSheets;
+			var i=0; var lim=sheets.length;
+			while (i<lim) {
+			    if (sheets[i].cssRules) {
+				document.fdjtSheet=sheet=sheets[i];
+				break;}
+			    else i++;}}
+		    if (!(sheet)) return false;
+		    else if (sheet.insertRule)
+			sheet.insertRule(ruleName+' {'+text+'}', 0);
+		    else return false;}
 		return getCSSRule(ruleName);}}
 	fdjtDOM.addCSSRule=addCSSRule;
 
