@@ -25,7 +25,8 @@ var fdjtLog=(function(){
 
     function fdjtLog(string){
 	var output=false;
-	if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
+	if (((fdjtLog.doformat)||(string.search("%j")))&&
+	    (typeof fdjtString !== 'undefined'))
 	    output=fdjtString.apply(null,arguments);
 	if (fdjtLog.console_fn) {
 	    if (output) fdjtLog.console_fn.call(fdjtLog.console,output);
