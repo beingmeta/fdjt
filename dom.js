@@ -1542,23 +1542,16 @@ var fdjtDOM=
 	fdjtDOM.dropCSSRule=dropCSSRule;
 
 	function addCSSRule(ruleName,text) {// Create a new css rule
-	    if (document.styleSheets) {
-		if (!getCSSRule(ruleName)) {
-		    var sheet=false;
-		    if (document.fdjtSheet) sheet=document.fdjtSheet;
-		    else {
-			var sheets=document.styleSheets;
-			var i=0; var lim=sheets.length;
-			while (i<lim) {
-			    if (sheets[i].cssRules) {
-				document.fdjtSheet=sheet=sheets[i];
-				break;}
-			    else i++;}}
-		    if (!(sheet)) return false;
-		    else if (sheet.insertRule)
-			sheet.insertRule(ruleName+' {'+text+'}', 0);
-		    else return false;}
-		return getCSSRule(ruleName);}}
+	    var styles=fdjtID("FDJTSTYLES");
+	    if (!(styles)) {
+		var head=document.getElementsByTagName("HEAD");
+		if (head.length===0) return; else head=head[0];
+		styles=fdjtDOM("style#FDJTSTYLES");
+		head.appendChild(styles);}
+	    var sheet=styles.sheet;
+	    if (sheet.insertRule) 
+		return sheet.insertRule(ruleName+' {'+text+'}', 0);
+	    else return false;}
 	fdjtDOM.addCSSRule=addCSSRule;
 
 	/* Listeners (should be in UI?) */
