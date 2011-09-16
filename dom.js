@@ -993,11 +993,11 @@ var fdjtDOM=
 		var children=node.childNodes;
 		var i=0; while (i<children.length) {
 		    var child=children[i++];
-		    if (child.nodeType===3)
+		    if (child.nodeType===3) {
 			if (child.nodeValue.search(/\w/g)>=0) return true;
-		    else {}
+			else {}}
 		    else if ((recur) && (child.nodeType===1))
-			if (hasContent(child)) return true;
+			if (hasContent(child,recur)) return true;
 		    else {}}
 		return false;}
 	    else return false;}
