@@ -73,15 +73,15 @@ var fdjtString=
 	    if (typeof arg === 'undefined') return '?undef?';
 	    else if (!(arg)) return arg;
 	    else if (arg.tagName) {
-		var output="<"+arg.tagName;
+		var output="["+arg.tagName;
 		if (arg.className)
 		    output=output+"."+arg.className.replace(/\s+/g,'.');
 		if (arg.id) output=output+"#"+arg.id;
-		return output+">";}
-	    else if (arg.nodeType)
+		return output+"]";}
+	    else if (arg.nodeType) {
 		if (arg.nodeType===3)
-		    return '<"'+arg.nodeValue+'">';
-	    else return '<'+arg.nodeType+'>';
+		    return '["'+arg.nodeValue+'"]';
+		else return '<'+arg.nodeType+'>';}
 	    else if (arg.oid) return arg.oid;
 	    else if (arg._fdjtid) return '#@'+arg._fdjtid;
 	    else if ((arg.type)&&(arg.target)) 
