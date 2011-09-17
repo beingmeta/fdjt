@@ -843,7 +843,6 @@ var fdjtDOM=
 	function getGeometry(elt,root,withstack){
 	    if (typeof elt === 'string')
 		elt=document.getElementById(elt);
-	    var result={};
 	    var top = elt.offsetTop;
 	    var left = elt.offsetLeft;
 	    var stack = ((withstack) ? (new Array(elt)) : false);
@@ -851,10 +850,8 @@ var fdjtDOM=
 	    var height=elt.offsetHeight;
 	    var rootp=((root)&&(root.offsetParent));
 
-	    if (elt===root) {
-		result.left=0; result.top=0;
-		result.width=width; result.height=height;
-		return result;}
+	    if (elt===root) 
+		return {left: 0,top: 0,width:width,height: height};
 	    elt=elt.offsetParent;
 	    while (elt) {
 		if ((root)&&((elt===root)||(elt===rootp))) break;
@@ -863,15 +860,9 @@ var fdjtDOM=
 		left += elt.offsetLeft;
 		elt=elt.offsetParent;}
 	    
-	    result.left=left; result.top=top;
-	    result.width=width;
-	    result.height=height;
-	    
-	    result.right=left+width; result.bottom=top+height;
-
-	    if (withstack) result.stack=withstack;
-
-	    return result;}
+	    return {left: left, top: top, width: width,height: height,
+		    right:left+width,bottom:top+height,
+		    stack:withstack};}
 	fdjtDOM.getGeometry=getGeometry;
 
 	function geomString(geom){
