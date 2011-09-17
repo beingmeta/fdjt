@@ -170,33 +170,34 @@ var fdjtTime=
 
 	function slowmap(fn,vec,watch,done,slice,space){
 	    var i=0; var lim=vec.length; var chunks=0;
-	    var elapsed=0; var zerostart=fdjtTime();
+	    var used=0; var zerostart=fdjtTime();
 	    if (!(slice)) slice=100;
 	    if (!(space)) space=slice;
 	    var stepfn=function(){
 		var started=fdjtTime(); var now=started;
 		var stopat=started+slice;
-		if (watch) watch(((i==0)?'start':'resume'),i,lim,chunks,elapsed,zerostart);
+		if (watch) watch(((i==0)?'start':'resume'),i,lim,chunks,used,zerostart);
 		while ((i<lim)&&((now=fdjtTime())<stopat)) {
 		    var elt=vec[i];
-		    if (watch) watch('element',i,lim,elt,elapsed,now-zerostart);
+		    if (watch) watch('element',i,lim,elt,used,now-zerostart);
 		    fn(elt);
 		    if (watch)
-			watch('after',i,lim,elt,elapsed+(fdjtTime()-started),
+			watch('after',i,lim,elt,used+(fdjtTime()-started),
 			      zerostart,fdjtTime()-now);
 		    i++;}
 		chunks=chunks+1;
 		if (i<lim) {
-		    elapsed=elapsed+(now-started);
-		    if (watch) watch('suspend',i,lim,chunks,elapsed,zerostart);
+		    used=used+(now-started);
+		    if (watch) watch('suspend',i,lim,chunks,used,zerostart);
 		    setTimeout(stepfn,space);}
 		else {
-		    now=fdjtTime(); elapsed=elapsed+(now-started);
+		    now=fdjtTime(); used=used+(now-started);
 		    if (done) {
-			if (watch) watch('finishing',i,lim,chunks,elapsed,zerostart);
+			if (watch) watch('finishing',i,lim,chunks,used,zerostart);
 			done();}
-		    now=fdjtTime(); elapsed=elapsed+(now-started);
-		    if (watch) watch('done',i,lim,chunks,elapsed,zerostart);}};
+		    var donetime=((done)&&(fdjtTime()-now));
+		    now=fdjtTime(); used=used+(now-started);
+		    if (watch) watch('done',i,lim,chunks,used,zerostart,donetime);}};
 	    setTimeout(stepfn,space);}
 	fdjtTime.slowmap=slowmap;
 
