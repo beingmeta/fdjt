@@ -1532,7 +1532,7 @@ var fdjtDOM=
 	    return getCSSRule(ruleName,'delete');}
 	fdjtDOM.dropCSSRule=dropCSSRule;
 
-	function addCSSRule(ruleName,text) {// Create a new css rule
+	function addCSSRule(selector,text) {// Create a new css rule
 	    var styles=fdjtID("FDJTSTYLES");
 	    if (!(styles)) {
 		var head=document.getElementsByTagName("HEAD");
@@ -1540,8 +1540,25 @@ var fdjtDOM=
 		styles=fdjtDOM("style#FDJTSTYLES");
 		head.appendChild(styles);}
 	    var sheet=styles.sheet;
-	    if (sheet.insertRule) 
-		return sheet.insertRule(ruleName+' {'+text+'}', 0);
+	    if (sheet.insertRule) {
+		var rules=sheet.cssRules||sheet.rules;
+		var i=0; var lim=rules.length;
+		while (i<lim) {
+		    var rule=rules[i];
+		    if (rule.selectorText===selector) break;
+		    else i++;}
+		if (i<lim) {
+		    if (sheet.deleteRule) sheet.deleteRule(i);
+		    else if (sheet.removeRule) sheet.removeRule(i);
+		    else {}}
+		var rules=sheet.cssRules||sheet.rules;
+		var ruletext=selector+' {'+text+'}';
+		if (sheet.insertRule)
+		    sheet.insertRule(ruletext, rules.length);
+		else if (sheet.addRule)
+		    sheet.addRule(selector,text);
+		else return false;
+		return ruletext;}
 	    else return false;}
 	fdjtDOM.addCSSRule=addCSSRule;
 
