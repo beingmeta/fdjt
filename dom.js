@@ -642,13 +642,15 @@ var fdjtDOM=
 	    else domappend(node,arguments,1);};
 
 	fdjtDOM.insertBefore=function (before) {
-	    if (typeof before === 'string') before=document.getElementById(before);
+	    if (typeof before === 'string')
+		before=document.getElementById(before);
 	    dominsert(before,arguments,1);};
-	fdjtDOM.insertAfter=function (before) {
-	    if (typeof before === 'string') before=document.getElementById(before);
-	    if (before.nextSibling)
-		dominsert(before.nextSibling,arguments,1);
-	    else domappend(before.parentNode,arguments,1);};
+	fdjtDOM.insertAfter=function (after) {
+	    if (typeof after === 'string')
+		after=document.getElementById(after);
+	    if (after.nextSibling)
+		dominsert(after.nextSibling,arguments,1);
+	    else domappend(after.parentNode,arguments,1);};
 	
 	/* DOM construction shortcuts */
 
