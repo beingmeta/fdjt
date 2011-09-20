@@ -790,6 +790,8 @@ var fdjtDOM=
 	    "TABLE": "table", "PRE": "preformatted"};
 
 	function getDisplayStyle(elt){
+	    if ((!(elt))||(!(elt.nodeType))||(elt.nodeType!==1))
+		return false;
 	    return (((window.getComputedStyle)&&
 		     (window.getComputedStyle(elt,null))&&
 		     (window.getComputedStyle(elt,null).display))||
