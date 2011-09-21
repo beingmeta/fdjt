@@ -844,7 +844,8 @@ var fdjtDOM=
 
 	/* Geometry functions */
 
-	function getGeometry(elt,root,withstack){
+	function getGeometry(elt,root,outer,withstack){
+	    if (!(withstack)) withstack=false;
 	    if (typeof elt === 'string')
 		elt=document.getElementById(elt);
 	    var top = elt.offsetTop;
@@ -864,9 +865,24 @@ var fdjtDOM=
 		left += elt.offsetLeft;
 		elt=elt.offsetParent;}
 	    
-	    return {left: left, top: top, width: width,height: height,
-		    right:left+width,bottom:top+height,
-		    stack:withstack};}
+	    if (outer) {
+		var outer_width, outer_height;
+		var style=getStyle(elt);
+		var t_margin=parsePX(style.marginTop);
+		var r_margin=parsePX(style.marginRight);
+		var b_margin=parsePX(style.marginBottom);
+		var l_margin=parsePX(style.marginLeft);
+		outer_width=width+l_margin+r_margin;
+		outer_height=height+t_margin+b_margin;
+		return {left: left, top: top, width: width,height: height,
+			right:left+width,bottom:top+height,
+			top_margin: t_margin, bottom_margin: b_margin,
+			left_margin: l_margin, right_margin: r_margin,
+			outer_height: outer_height,outer_width: outer_width,
+			stack:withstack};}
+	    else return {left: left, top: top, width: width,height: height,
+			 right:left+width,bottom:top+height,
+			 stack:withstack};}
 	fdjtDOM.getGeometry=getGeometry;
 
 	function geomString(geom){
