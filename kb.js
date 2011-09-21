@@ -346,9 +346,8 @@ var fdjtKB=
 	fdjtKB.merge=merge;
 
 	function overlaps(set1,set2){
-	    if ((!(set1))||(set1.length===0)) return [];
-	    if ((!(set2))||(set2.length===0)) return [];
-	    var results=new Array();
+	    if ((!(set1))||(set1.length===0)) return false;
+	    if ((!(set2))||(set2.length===0)) return false;
 	    var i=0; var j=0; var len1=set1.length; var len2=set2.length;
 	    var allstrings=set1._allstrings&&set2._allstrings;
 	    var new_allstrings=true;
