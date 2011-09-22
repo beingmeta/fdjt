@@ -639,7 +639,7 @@ var fdjtUI=
 	    completions=new Completions(dom,target,default_options);
 	    cached_completions[name]=completions;}
 	if (!(completions)) return;
-	completions.docomplete();}
+	completions.docomplete(target);}
     fdjtUI.Completions.onkey=onkey;}());
 
 /* Tabs */
