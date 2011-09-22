@@ -84,29 +84,22 @@ var fdjtString=
 		else return '<'+arg.nodeType+'>';}
 	    else if (arg.oid) return arg.oid;
 	    else if (arg._fdjtid) return '#@'+arg._fdjtid;
-	    else if ((arg.type)&&((arg.target)||arg.srcElement)&&
-		     (arg.offsetX)) {
-		var target=arg.target||arg.srcElement;
-		var ox=arg.offsetX, oy=arg.offsetY;
-		return "["+arg.type+"@"+stringify(target)+
-		    "("+ox+","+oy+",m="+
-		    (((arg.shiftKey===true)?"s":"")+
-		     ((arg.ctrlKey===true)?"c":"")+
-		     ((arg.altKey===true)?"a":"")+evt.button)+
-		    ")]";}
-	    else if ((arg.type)&&((arg.target)||arg.srcElement)&&
-		     ((arg.keyCode)||(arg.charCode))) {
-		var target=arg.target||arg.srcElement;
-		return "["+arg.type+"@"+stringify(target)+
-		    "(kc="+arg.keyCode+",cc="+arg.charCode+",m="+
-		    (((arg.shiftKey===true)?"s":"")+
-		     ((arg.ctrlKey===true)?"c":"")+
-		     ((arg.altKey===true)?"a":""))+
-		    ")]";}
 	    else if ((arg.type)&&((arg.target)||arg.srcElement)) {
 		var target=arg.target||arg.srcElement;
-		return "["+arg.type+"@"+stringify(target)+"]";}
-	    else return arg;};
+		var ox=arg.offsetX, oy=arg.offsetY;
+		var result="["+arg.type+"@"+stringify(target)+"(m="+
+		    (((arg.shiftKey===true)?"s":"")+
+		     ((arg.ctrlKey===true)?"c":"")+
+		     ((arg.altKey===true)?"a":"")+
+		     (arg.button||0));
+		if (ox) result=result+",x="+ox+",y="+oy;
+		else if (arg.touches) {
+		    var i=0; var n=arg.touches.length;
+		    result=result+",touches="+n;}
+		else if ((arg.keyCode)||(arg.charCode))
+		    result=result+",kc="+arg.keyCode+",cc="+arg.charCode;
+		return result+")]";}
+	    else return arg;}
 
 	var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
 
