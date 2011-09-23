@@ -999,17 +999,30 @@ var fdjtDOM=
 		else {}}
 	    return count;}
 
-	function hasContent(node,recur){
-	    if (node.childNodes) {
+	function hasContent(node,recur,test){
+	    if (node===recur) return false;
+	    else if (node.nodeType===3)
+		return (child.nodeValue.search(/\w/g)>=0);
+	    else if (node.nodeType!==1) return false;
+	    else if ((test)&&(test.match)&&(test.match(node)))
+		return true;
+	    else if ((test===true)&&
+		     ((node.tagName==='IMG')||
+		      (node.tagName==='OBJECT')))
+		return true;
+	    else if (node.childNodes) {
 		var children=node.childNodes;
 		var i=0; while (i<children.length) {
 		    var child=children[i++];
-		    if (child.nodeType===3) {
+		    if (child===recur) return false;
+		    else if (child.nodeType===3) {
 			if (child.nodeValue.search(/\w/g)>=0) return true;
-			else {}}
-		    else if ((recur) && (child.nodeType===1))
-			if (hasContent(child,recur)) return true;
-		    else {}}
+			else continue;}
+		    else if (child.nodeType!==1) continue;
+		    else if (recur) {
+			if (hasContent(child,recur,test)) return true;
+			else continue;}
+		    else continue;}
 		return false;}
 	    else return false;}
 	fdjtDOM.hasContent=hasContent;
