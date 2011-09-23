@@ -20,6 +20,8 @@
 
 */
 
+var fdjt$=false;
+
 var fdjtDOM=
     (function(){
 	var usenative=true;
@@ -88,6 +90,7 @@ var fdjtDOM=
 		domappend(node,content.toHTML());
 	    else if (content.length) {
 		if (typeof i === 'undefined') i=0;
+		if ((NodeList)&&(content instanceof NodeList)) content=TOA(content);
 		var len=content.length;
 		while (i<len) {
 		    var elt=content[i++];
@@ -118,6 +121,7 @@ var fdjtDOM=
 		dominsert(before,content.toHTML());
 	    else if (content.length) {
 		if (typeof i === 'undefined') i=0;
+		if ((NodeList)&&(content instanceof NodeList)) content=TOA(content);
 		var j=content.length-1;
 		while (j>=i) {
 		    var elt=content[j--];
@@ -568,9 +572,9 @@ var fdjtDOM=
 		gather_children(node,classname,attrib||false,results);}
 	    return results;}
 	fdjtDOM.getChildren=getChildren;
-	fdjtDOM.$=function(spec,root){
+	fdjt$=fdjtDOM.$=function(spec,root){
 	    return toArray(getChildren(root||document,spec));};
-	fdjtDOM.getFirstChild=function(elt,spec){
+	fdjt$1=fdjtDOM.getFirstChild=function(elt,spec){
 	    var children=getChildren(elt,spec);
 	    if (children.length) return children[0]; else return false;};
 	fdjtDOM.getChild=fdjtDOM.getFirstChild;
