@@ -756,14 +756,18 @@ var fdjtDOM=
 	function getStyle(elt,prop){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
 	    if (!(elt)) return elt;
-	    if (!(elt.nodeType)) throw "Not a node";
-	    var style=
-		((window.getComputedStyle)&&
-		 (window.getComputedStyle(elt,null)))||
-		(elt.currentStyle);
-	    if (!(style)) return false;
-	    else if (prop) return style[prop];
-	    else return style;}
+	    if (elt.nodeType!==1) throw "Not an element";
+	    try {
+		var style=
+		    ((window.getComputedStyle)&&
+		     (window.getComputedStyle(elt,null)))||
+		    (elt.currentStyle);
+		if (!(style)) return false;
+		else if (prop) return style[prop];
+		else return style;}
+	    catch (ex) {
+		fdjtLog("Unexpected style error %o",ex);
+		return false;}}
 	fdjtDOM.getStyle=getStyle;
 
 	function styleString(elt){
