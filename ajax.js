@@ -270,7 +270,7 @@ var fdjtAjax=
 			       base_uri,fdjtDOM.Array(arguments,1));};
 
 	fdjtAjax.onsubmit=form_submit;
-	fdjtAjax.noctype=true;
+	fdjtAjax.noctype=false;
 
 	return fdjtAjax;})();
 
