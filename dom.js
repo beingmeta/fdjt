@@ -724,6 +724,13 @@ var fdjtDOM=
 			((!(type))||(inputs[i].type===type)))
 			results.push(inputs[i++]); 
 		    else i++;}}
+	    if ((!type)||(type==='select')) {
+		var inputs=root.getElementsByTagName('select');
+		var i=0; var lim=inputs.length;
+		while (i<lim) {
+		    if ((!(name))||(inputs[i].name===name))
+			results.push(inputs[i++]); 
+		    else i++;}}
 	    return results;}
 
 	fdjtDOM.getInputs=getInputs;
