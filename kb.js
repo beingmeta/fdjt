@@ -82,7 +82,11 @@ var fdjtKB=
 	    this.absref=false; 
 	    return this;}
 	fdjtKB.Pool=Pool;
-	fdjtKB.PoolRef=Pool;
+	fdjtKB.PoolRef=function(name,create){
+	    if (!(name)) return this;
+	    if (pools[name]) return pools[name];
+	    else if (!(create)) return false;
+	    else return new Pool(name);};
 	
 	Pool.prototype.toJSON=function(){return "@@"+this.name;};
 	
@@ -185,15 +189,20 @@ var fdjtKB=
 	    else if ((atpos=arg.indexOf('@'))>1)  {
 		var pool=fdjtKB.PoolRef(arg.slice(atpos+1));
 		return pool.ref(arg.slice(0,atpos));}
+	    else if (pool)
+		return pool.ref(arg);
 	    else if (arg.search(uuid_pattern)===0) {
 		var uuid_type=arg.slice(34);
 		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
-		return pool.ref(arg);}
+		if (pool) return pool.ref(arg);
+		else return false;}
 	    else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[2]==='U')&&
 		     (arg.search(uuid_pattern)===3)) {
-		var uuid_type=arg.slice(37);
+		var uuid_type=arg.slice(37); var uuid=arg.slice(3);
+		if ((pool)&&(pool.ref(uuid))) return pool.ref(uuid);
 		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
-		return pool.ref(arg.slice(3));}
+		if (pool) return pool.ref(uuid);
+		return false;}
 	    else if (refmaps.length) {
 		var i=0; var lim=refmaps.length;
 		while (i<lim) {
@@ -204,7 +213,7 @@ var fdjtKB=
 		return false;}
 	    else if (pool) return pool.ref(arg);
 	    else return false;}
-
+	
 	function getRef(arg,pool){
 	    if (!(arg)) return false;
 	    else if (arg instanceof Ref) return arg;
