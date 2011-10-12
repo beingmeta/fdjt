@@ -180,7 +180,8 @@ var fdjtTrace=fdjtLog;
             timeout = null;
         }
 
-        timeout = setTimeout(function(){ // allow notification to stay alive for timeout
+        timeout = setTimeout(function(){
+	    // allow notification to stay alive for timeout
             if(!eventing){
                 eventOn(doc.body,'mousemove',remove);
                 eventOn(doc.body,'click',remove);
