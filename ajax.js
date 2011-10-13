@@ -88,16 +88,17 @@ var fdjtAjax=
 	    var inputs=fdjtDOM.getChildren(form,"INPUT");
 	    var i=0; while (i<inputs.length) {
 		var input=inputs[i++];
-		if (!(input.disabled)) {
-		    if (((input.type==="RADIO") || (input.type==="CHECKBOX")) ?
-			(input.checked) : (true))
-			parameters=add_query_param(parameters,input.name,input.value);
-		    else parameters=add_query_param(parameters,input.name,input.value);}}
+		if ((!(input.disabled))&&
+		    (((/(radio)|(checkbox)/i).exec(input.type))?
+		     (input.checked):(true)))
+		    parameters=add_query_param(
+			parameters,input.name,input.value);}
 	    var textareas=fdjtDOM.getChildren(form,"TEXTAREA");
 	    i=0; while (i<textareas.length) {
 		var textarea=textareas[i++];
 		if (!(textarea.disabled)) {
-		    parameters=add_query_param(parameters,textarea.name,textarea.value);}}
+		    parameters=add_query_param(
+			parameters,textarea.name,textarea.value);}}
 	    var selectboxes=fdjtDOM.getChildren(form,"SELECT");
 	    i=0; while (i<selectboxes.length) {
 		var selectbox=selectboxes[i++]; var name=selectbox.name;
@@ -105,7 +106,8 @@ var fdjtAjax=
 		var j=0; while (j<options.length) {
 		    var option=options[j++];
 		    if (option.selected)
-			parameters=add_query_param(parameters,name,option.value);}}
+			parameters=add_query_param(
+			    parameters,name,option.value);}}
 	    return parameters;}
 	fdjtAjax.formParams=formParams;
 
