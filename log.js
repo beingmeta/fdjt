@@ -113,11 +113,11 @@ var fdjtTrace=fdjtLog;
 ;(function(win,doc){
     var eventOn, eventOff;
     if (win.addEventListener) {
-       eventOn = function(obj,type,fn){obj.addEventListener(type,fn,false)};
-       eventOff = function(obj,type,fn){obj.removeEventListener(type,fn,false)};
+	eventOn = function(obj,type,fn){obj.addEventListener(type,fn,false)};
+	eventOff = function(obj,type,fn){obj.removeEventListener(type,fn,false)};
     } else {
-       eventOn = function(obj,type,fn){obj.attachEvent('on'+type,fn)};
-       eventOff = function(obj,type,fn){obj.detachEvent('on'+type,fn)};
+	eventOn = function(obj,type,fn){obj.attachEvent('on'+type,fn)};
+	eventOff = function(obj,type,fn){obj.detachEvent('on'+type,fn)};
     }
 
     var eventing = false;
@@ -302,7 +302,8 @@ var fdjtTrace=fdjtLog;
     fdjtLog.notify.waitForMove = true;
     fdjtLog.notify.forceNew = false;
 
-	fdjtLog.Humane=msg;
+    fdjtLog.Humane=msg;
+    fdjtLog.HumaneHide=remove;
 
 }(window,document));
 
