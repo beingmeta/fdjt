@@ -785,8 +785,8 @@ var fdjtDOM=
 	    while (i<lim) {
 		var p=style[i];
 		var v=style[p];
-		if (i===0) result=fdjtString("%s: %o",p,v);
-		else result=result+"; "+fdjtString("%s: %o",p,v);
+		if (i===0) result=p+": "+v;
+		else result=result+"; "+p+": "+v;
 		i++;}
 	    return result;}
 	fdjtDOM.styleString=styleString;
