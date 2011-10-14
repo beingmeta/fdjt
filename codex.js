@@ -6,16 +6,25 @@
    across multiple pages, attempting to honor page break constraints,
    etc.
 
-   For now, read the code or check out the 'mini manual' at the bottom
-   of the file.
+   Check out the 'mini manual' at the bottom of the file or read the
+   code itself.
 
    This program comes with absolutely NO WARRANTY, including implied
    warranties of merchantability or fitness for any particular
    purpose.
 
-   Use and redistribution (especially embedding in other
-   CC licensed content) is permitted under the terms of the
-   Creative Commons "Attribution-NonCommercial" license:
+   Use, modification, and redistribution of this program is permitted
+   under either the GNU General Public License (GPL) Version 2 (or any
+   later version) or under the GNU Lesser General Public License
+   (version 3 or later).
+
+   These licenses may be found at www.gnu.org, particularly:
+   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+   http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+
+   Use and redistribution (especially embedding in other CC licensed
+   content) is also permitted under the terms of the Creative Commons
+   "Attribution-NonCommercial" license:
 
    http://creativecommons.org/licenses/by-nc/3.0/ 
 
@@ -888,7 +897,9 @@ layout.Revert();
 
 var layout=new CodexLayout({
     page_width: 500, page_height: 500, // Dimensions
-    container: document.getElementByID("MYPAGES"), // Where to add new pages
+    // Where to add new pages; by default this creates a
+    //  new div#CODEXPAGES.codexpages at the bottom of the BODY
+    container: document.getElementByID("MYPAGES"),
     // Prefix for page element IDs, e.g. page 42 would have id MYCODEXPAGE42
     pageprefix: "MYCODEXPAGE",
     logfn: console.log, // how to log notable events
@@ -907,7 +918,7 @@ var layout=new CodexLayout({
     codexfullpage: "div.titlepage",
     // Put this element on a page by itself, but don't interrupt the
     // narrative flow
-    codexfloatpage: "div.illustration"}
+    codexfloatpage: "div.illustration"});
 */
 
 /* Emacs local variables
