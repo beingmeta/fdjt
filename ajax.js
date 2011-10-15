@@ -176,9 +176,12 @@ var fdjtAjax=
 	    req.withCredentials=true;
 	    req.onreadystatechange=function () {
 		if (trace_ajax)
-		    fdjtLog("Got callback (%d,%d) %o for %o, calling %o",
+		    fdjtLog("Got callback (%d,%d) %o for %o, callback=%o",
 			    req.readyState,req.status,req,ajax_uri,callback);
 		if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
+		    if ((callback)&&(trace_ajax))
+			fdjtLog("Got callback (%d,%d) %o for %o, calling %o",
+				req.readyState,req.status,req,ajax_uri,callback);
 		    fdjtDOM.dropClass(form,"submitting");
 		    success=true; 
 		    if (callback) callback(req,form);
@@ -191,10 +194,7 @@ var fdjtAjax=
 	    try {
 		if (form.method==="GET") req.send();
 		else {
-		    // Setting the content type will force some browsers into preflight,
-		    //  which gets us stuck.
-		    if (!(fdjtAjax.noctype))
-			req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		    req.send(params);}
 		success=true;}
 	    catch (ex) {}
@@ -272,7 +272,6 @@ var fdjtAjax=
 			       base_uri,fdjtDOM.Array(arguments,1));};
 
 	fdjtAjax.onsubmit=form_submit;
-	fdjtAjax.noctype=false;
 
 	return fdjtAjax;})();
 
