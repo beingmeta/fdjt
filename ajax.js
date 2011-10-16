@@ -194,7 +194,8 @@ var fdjtAjax=
 	    try {
 		if (form.method==="GET") req.send();
 		else {
-		    req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		    req.setRequestHeader(
+			"Content-type", "application/x-www-form-urlencoded");
 		    req.send(params);}
 		success=true;}
 	    catch (ex) {}
