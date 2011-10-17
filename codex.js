@@ -280,6 +280,8 @@ var CodexLayout=
 	function CodexLayout(init){
 	    if (!(init)) init={};
 
+	    var layout=this;
+
 	    // Layout rules
 	    var forcebreakbefore=this.forcebreakbefore=init.forcebreakbefore||false;
 	    var forcebreakafter=this.forcebreakafter=init.forcebreakafter||false;
@@ -293,7 +295,7 @@ var CodexLayout=
 
 	    // Layout Dimensions
 	    var page_height=this.height=init.page_height||fdjtDOM.viewHeight();
-	    var page_width=this.width=init.page_height||fdjtDOM.viewWidth();
+	    var page_width=this.width=init.page_width||fdjtDOM.viewWidth();
 	    
 	    // This is the node DOM container where we place new pages
 	    var container=this.container=init.container||fdjtDOM("div.codexpages");
@@ -346,9 +348,9 @@ var CodexLayout=
 
 		if (!(page)) newPage();
 
-		if (typeof trace === 'undefined') trace=this.tracelevel;
-		if (!(this.started)) this.started=fdjtTime();
-		this.root_count++;
+		if (typeof trace === 'undefined') trace=layout.tracelevel;
+		if (!(layout.started)) layout.started=fdjtTime();
+		layout.root_count++;
 
 		function loop(node){
 		    var blocks=[], terminals=[];
@@ -377,7 +379,7 @@ var CodexLayout=
 			else if ((block)&&(terminal))
 			    // Otherwise, we don't have to worry about
 			    // what we're dragging along
-			    this.drag=drag=[];
+			    layout.drag=drag=[];
 			else {}
 			// If a block is false, continue
 			if (!(block)) {i++; continue;}
@@ -388,7 +390,7 @@ var CodexLayout=
 			else if ((hasClass(block,/\bcodexfullpage\b/))||
 				 ((fullpages)&&(testNode(block.fullpages)))) {
 			    // Full pages automatically get their own page
-			    prev=false; this.drag=drag=[];
+			    prev=false; layout.drag=drag=[];
 			    fullPage(block);
 			    i++; continue;}
 			else if ((page.childNodes.length)&&
@@ -396,7 +398,7 @@ var CodexLayout=
 			    // This is the easy case.  Note that we
 			    // don't force a page break if the current
 			    // page is empty.
-			    prev=false; this.drag=drag=[];
+			    prev=false; layout.drag=drag=[];
 		    	    newPage(block);}
 			else moveNodeToPage(block,page,dups);
 			// Finally, we check if everything fits We're
@@ -442,7 +444,7 @@ var CodexLayout=
 			// We fit on the page, so we'll look at the next block.
 			else i++;
 			// Update the prev pointer for terminals
-			if (terminal) {this.prev=prev=block;}}}
+			if (terminal) {layout.prev=prev=block;}}}
 
 		// Gather all the block-level elements inside a node,
 		// recording which ones are terminals (don't have any
@@ -491,11 +493,11 @@ var CodexLayout=
 		    if (needNewPage(node)) {
 			// If we really need to create a new page, do so
 			if (page) dropClass(page,"curpage");
-			this.page=page=fdjtDOM("div.codexpage.curpage");
+			layout.page=page=fdjtDOM("div.codexpage.curpage");
 			if (!(pagerule)) {
 			    page.style.height=page_height+'px';
 			    page.style.width=page_width+'px';}
-			pagenum++; this.pagenum=pagenum;
+			pagenum++; layout.pagenum=pagenum;
 			page.id=pageprefix+(pagenum);
 			page.setAttribute("data-pagenum",pagenum);
 			fdjtDOM(container,page);
@@ -511,11 +513,11 @@ var CodexLayout=
 		    if ((drag)&&(drag.length)) {
 			var i=0; var lim=drag.length;
 			while (i<lim) moveNodeToPage(drag[i++],page,dups);
-			this.drag=drag=[];}
+			layout.drag=drag=[];}
 		    // Finally, move the node to the page
 		    if (node) moveNodeToPage(node,page,dups);
 
-		    this.prev=prev=false;
+		    layout.prev=prev=false;
 		    return page;}
 
 		// Could this just be the following?
@@ -532,11 +534,11 @@ var CodexLayout=
 			 (hasContent(page,node,true)):
 			 (hasContent(page,true,true)))) {
 			if (page) dropClass(page,"curpage");
-			this.page=page=fdjtDOM("div.codexpage.curpage");
+			layout.page=page=fdjtDOM("div.codexpage.curpage");
 			if (!(pagerule)) {
 			    page.style.height=page_height+'px';
 			    page.style.width=page_width+'px';}
-			pagenum++; this.pagenum=pagenum;
+			pagenum++; layout.pagenum=pagenum;
 			page.id=pageprefix+(pagenum);
 			page.setAttribute("data-pagenum",pagenum);
 			fdjtDOM(container,page);
@@ -554,8 +556,8 @@ var CodexLayout=
 		    // Now we make a new page for whatever comes next
 		    newPage();
 
-		    this.prev=prev=false;
-		    this.prevstyle=prevstyle=false;
+		    layout.prev=prev=false;
+		    layout.prevstyle=prevstyle=false;
 		    return page;}
 
 		// This gets a little complicated
@@ -759,7 +761,6 @@ var CodexLayout=
 	    /* Finishing the page */
 
 	    function finishPage(completed) {
-		var page_width=this.width; var page_height=this.height;
 		var bounds=insideBounds(completed);
 		if (!((page_width)&&(page_height))) {
 		    var geom=getGeometry(completed);
@@ -792,7 +793,7 @@ var CodexLayout=
 		dropClass(page,"curpage");
 		var i=0; var lim= pages.length;
 		while (i<lim) finishPage(pages[i++]);
-		this.done=fdjtTime();}
+		layout.done=fdjtTime();}
 	    this.Finish=Finish;
 
 	    /* page break predicates */
