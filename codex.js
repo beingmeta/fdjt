@@ -316,7 +316,8 @@ var CodexLayout=
 
 	    var page=this.page=init.page; // Contains the currently open page
 
-	    var prev=this.prev=[]; // The last terminal block we processed
+	    var prev=this.prev=false; // The last terminal block we processed
+	    var prevstyle=this.prevstyle=false;
 
 	    // this.drag[] contains nodes which will go on the next
 	    // page when we get there.  The nodes in this.drag[] have
@@ -338,9 +339,11 @@ var CodexLayout=
 	    // Startup
 
 	    this.started=false; // When we started
-	    this.tracelevel=init.tracelevel||CodexLayout.tracelevel; // How much to trace
+	    var trace=this.tracelevel=  // How much to trace
+		init.tracelevel||CodexLayout.tracelevel;
 	    this.roots=init.roots||false; // Where all roots can be bracked
 	    this.root_count=0; // Number of root nodes added
+	    this.block_count=0;
 	    
 	    var pagerule=this.pagerule=init.pagerule||false;
 	    
@@ -353,11 +356,12 @@ var CodexLayout=
 		layout.root_count++;
 
 		function loop(node){
-		    var blocks=[], terminals=[];
+		    var blocks=[], terminals=[], styles=[];
 		    // gather all of the block-level elements
 		    // (recursively) in the node, noting which ones
 		    // are terminals
-		    gatherBlocks(node,blocks,terminals);
+		    gatherBlocks(node,blocks,terminals,styles);
+		    this.block_count=this.block_count+blocks.length;
 		    // Then move the node onto the current page; we
 		    // set node, because it might be transformed in
 		    // some way when moved (if, for example, it is a
@@ -365,7 +369,7 @@ var CodexLayout=
 		    node=moveNodeToPage(node,page,dups);
 		    // Iterate over all of the blocks
 		    var i=0, n=blocks.length; while (i<n) {
-			var block=blocks[i];
+			var block=blocks[i]; var style=styles[i];
 			var terminal=terminals[i]||false;
 			// FIRST, HANDLE DRAGGING
 			// If this block is terminal and we don't want
@@ -373,8 +377,8 @@ var CodexLayout=
 			//  preceding block, drag along the previous block.
 			//  NOTE that dragged blocks have already been placed.
 			if ((block)&&(terminal)&&(prev)&&
-			    ((avoidBreakBefore(block))||
-			     (avoidBreakAfter(prev))))
+			    ((avoidBreakBefore(block,style))||
+			     (avoidBreakAfter(prev,prevstyle))))
 			    drag.push(prev);
 			else if ((block)&&(terminal))
 			    // Otherwise, we don't have to worry about
@@ -394,7 +398,7 @@ var CodexLayout=
 			    fullPage(block);
 			    i++; continue;}
 			else if ((page.childNodes.length)&&
-				 (forcedBreakBefore(block))) {
+				 (forcedBreakBefore(block,style))) {
 			    // This is the easy case.  Note that we
 			    // don't force a page break if the current
 			    // page is empty.
@@ -449,19 +453,25 @@ var CodexLayout=
 		// Gather all the block-level elements inside a node,
 		// recording which ones are terminals (don't have any
 		// blocks within them)
-		function gatherBlocks(node,blocks,terminals){
+		function gatherBlocks(node,blocks,terminals,styles){
 		    if (node.nodeType!==1) return;
 		    if (node.codexui) return;
 		    var style=getStyle(node); var disp=style.display;
 		    if ((style.position==='static')&&(disp!=='inline')) {
-			var loc=blocks.length; blocks.push(node); 
-			if (avoidBreakInside(node)) terminals[loc]=true;
+			var loc=blocks.length;
+			blocks.push(node);
+			styles.push(style);
+			if (avoidBreakInside(node,style))
+			    terminals[loc]=true;
 			else if ((disp==='block')||(disp==='table')) {
 			    var children=node.childNodes;
 			    var total_blocks=blocks.length;
 			    var i=0; var len=children.length;
-			    while (i<len) {gatherBlocks(children[i++],blocks,terminals);}
-			    if (blocks.length==total_blocks) terminals[loc]=true;}
+			    while (i<len) {
+				gatherBlocks(children[i++],
+					     blocks,terminals,styles);}
+			    if (blocks.length==total_blocks)
+				terminals[loc]=true;}
 			else terminals[loc]=true;}}
 
 		// Whether we need to create a new page to have 'node'
@@ -891,35 +901,35 @@ var CodexLayout=
 
 /* Mini Manual */
 /*
-var layout=new CodexLayout();
-layout.addContent(node);
-layout.Finish();
-layout.Revert();
+  var layout=new CodexLayout();
+  layout.addContent(node);
+  layout.Finish();
+  layout.Revert();
 
-var layout=new CodexLayout({
-    page_width: 500, page_height: 500, // Dimensions
-    // Where to add new pages; by default this creates a
-    //  new div#CODEXPAGES.codexpages at the bottom of the BODY
-    container: document.getElementByID("MYPAGES"),
-    // Prefix for page element IDs, e.g. page 42 would have id MYCODEXPAGE42
-    pageprefix: "MYCODEXPAGE",
-    logfn: console.log, // how to log notable events
-    // Layout rules:
-    // Always put H1 elements on a new page
-    forcebreakbefore: "H1",
-    // Always follow div.signature with a page break
-    forcebreakafter: "div.signature",
-    // Avoid breaking inside
-    avoidbreakinside: "div.code",
-    // Avoid breaking before these elements
-    avoidbreakbefore: "div.signature,div.attribution",
-    // Avoid breaking after these elements
-    avoidbreakafter: "h1,h2,h3,h4,h5,h6,h7",
-    // Put this element on a page by itself
-    codexfullpage: "div.titlepage",
-    // Put this element on a page by itself, but don't interrupt the
-    // narrative flow
-    codexfloatpage: "div.illustration"});
+  var layout=new CodexLayout({
+  page_width: 500, page_height: 500, // Dimensions
+  // Where to add new pages; by default this creates a
+  //  new div#CODEXPAGES.codexpages at the bottom of the BODY
+  container: document.getElementByID("MYPAGES"),
+  // Prefix for page element IDs, e.g. page 42 would have id MYCODEXPAGE42
+  pageprefix: "MYCODEXPAGE",
+  logfn: console.log, // how to log notable events
+  // Layout rules:
+  // Always put H1 elements on a new page
+  forcebreakbefore: "H1",
+  // Always follow div.signature with a page break
+  forcebreakafter: "div.signature",
+  // Avoid breaking inside
+  avoidbreakinside: "div.code",
+  // Avoid breaking before these elements
+  avoidbreakbefore: "div.signature,div.attribution",
+  // Avoid breaking after these elements
+  avoidbreakafter: "h1,h2,h3,h4,h5,h6,h7",
+  // Put this element on a page by itself
+  codexfullpage: "div.titlepage",
+  // Put this element on a page by itself, but don't interrupt the
+  // narrative flow
+  codexfloatpage: "div.illustration"});
 */
 
 /* Emacs local variables
