@@ -361,7 +361,7 @@ var CodexLayout=
 		    // (recursively) in the node, noting which ones
 		    // are terminals
 		    gatherBlocks(node,blocks,terminals,styles);
-		    this.block_count=this.block_count+blocks.length;
+		    layout.block_count=layout.block_count+blocks.length;
 		    // Then move the node onto the current page; we
 		    // set node, because it might be transformed in
 		    // some way when moved (if, for example, it is a
