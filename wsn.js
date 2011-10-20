@@ -65,17 +65,43 @@ var WSN=(function(){
 	    if (nwords>1)
 		words[nwords-1]=words[nwords-1].replace(/\W+$/,"");
 	    if (wordfn) {
-		var nwords=[];
-		var i=0; var lim=words.length;
-		while (i<lim) {
-		    var nword=wordfn(words[i++]);
-		    if (nword) nwords.push(nword);
-		    i++;}
-		words=nwords;}
+		if (typeof wordfn === 'number') {
+		    var nwords=[];
+		    var i=0; var lim=words.length;
+		    while (i<lim) {
+			var word=words[i++];
+			if (word.length>wordfn) nwords.push(word);}
+		    if (nwords.length) words=nwords;}
+		else if (wordfn.call) {
+		    var nwords=[];
+		    var i=0; var lim=words.length;
+		    while (i<lim) {
+			var nword=wordfn(words[i++]);
+			if (nword) nwords.push(nword);
+			i++;}
+		    if (nwords.length) words=nwords;}
+		else  {
+		    var nwords=[];
+		    var i=0; var lim=words.length;
+		    while (i<lim) {
+			var word=words[i++];
+			var nword=wordfn[word];
+			if (nword==="") {}
+			else if ((!(nword))||(typeof nword !== 'string'))
+			    nwords.push(word);
+			else nwords.push(nword);}
+		    if (nwords.length) words=nwords;}}
+	    var sorter=sortfn;
+	    // By default, use lensort
+	    // But if you're passed nativesort, just
+	    //  pass false to sort()
+	    if (sortfn===true) sorter=lensort;
+	    else if (sortfn===nativesort) sorter=false;
+	    else {}
 	    if ((sortfn)&&(keepdup))
-		return words.sort(sortfn).join(" ");
+		return words.sort(sorter).join(" ");
 	    else if (sortfn)
-		return dedupfn(words.sort(sortfn)).join(" ");
+		return dedupfn(words.sort(sorter)).join(" ");
 	    else return words.join(" ");}
 	else if (!(arg.nodeType))
 	    throw new Exception("bad arg to WSN");
@@ -90,7 +116,7 @@ var WSN=(function(){
 	if (lim<2) return arr;
 	else while (i<lim) {
 	    if ((last)&&(arr[i]===last)) return dodedup(arr);
-	    else last=arr[i];}
+	    else last=arr[i++];}
 	return arr;}
     function dodedup(arr){
 	var last=arr[0]; var result=[last];
@@ -109,6 +135,11 @@ var WSN=(function(){
 	else if (xl>yl) return -1;
 	else return 1;}
     WSN.lensort=lensort;
+    function nativesort(x,y){
+	if (x>y) return -1;
+	else if (x<y) return 1;
+	else return 0;}
+    WSN.nativesort=nativesort;
 
     function textify(arg,text){
 	if (!(arg.nodeType)) return text||"";
@@ -162,10 +193,10 @@ var WSN=(function(){
 	return ((hashfn)?(hashfn(wsn)):(wsn));}
     WSN.Hash=Hash;
     WSN.prototype.Hash=function(arg){
-	Hash(arg,this.hashfn||WSN.hashfn||false,
-	     this.sortfn||WSN.sortfn||false,
-	     this.wordfn||WSN.wordfn||false,
-	     this.keepdup||WSN.keepdup||false);}
+	return Hash(arg,this.hashfn||WSN.hashfn||false,
+		    this.sortfn||WSN.sortfn||false,
+		    this.wordfn||WSN.wordfn||false,
+		    this.keepdup||WSN.keepdup||false);}
 
     function Map(nodes,hashfn,sortfn,wordfn,keepdups){
 	if (typeof hashfn === 'undefined') hashfn=WSN.hashfn||false;
@@ -182,10 +213,10 @@ var WSN=(function(){
 	return map;}
     WSN.Map=Map;
     WSN.prototype.Map=function(arg){
-	Map(arg,this.hashfn||WSN.hashfn||false,
-	    this.sortfn||WSN.sortfn||false,
-	    this.wordfn||WSN.wordfn||false,
-	    this.keepdup||WSN.keepdup||false);}
+	return Map(arg,this.hashfn||WSN.hashfn||false,
+		   this.sortfn||WSN.sortfn||false,
+		   this.wordfn||WSN.wordfn||false,
+		   this.keepdup||WSN.keepdup||false);}
     
     function MapMD5(nodes,sortfn,wordfn,keepdups){
 	var hashfn=WSN.md5||((fdjtHash)&&(fdjtHash.hex_md5));
