@@ -4,7 +4,7 @@
 ECHO=/bin/echo
 CLEAN=/bin/rm -f
 FDJT_FILES=header.js string.js time.js dom.js kb.js state.js log.js ui.js \
-	ajax.js json.js hash.js
+	ajax.js json.js hash.js wsn.js
 
 all: fdjt.js
 
