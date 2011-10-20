@@ -41,22 +41,41 @@ var WSN=(function(){
 
     var unicode_regex=/(\p{Mark})/g;
     
-    function WSN(arg,sortfn,dedup){
+    function WSN(arg,sortfn,wordfn,keepdup){
+	if (!(arg)) {
+	    // Assume we're being used as a constructor.
+	    if (sortfn) this.sortfn=sortfn;
+	    if (wordfn) this.wordfn=wordfn;
+	    if (keepdup) this.keepdup=keepdup;
+	    return this;}
+	if (typeof sortfn === 'undefined') sortfn=WSN.sortfn||false;
+	if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
+	if (typeof keepdup === 'undefined') keepdup=WSN.keepdup||false;
 	if (typeof arg === 'string') {
 	    var norm=
 		((unicode_regex)?
 		 (arg.toLowerCase().replace(unicode_regex,"")):
 		 (arg.toLowerCase()));
+	    if (norm.search(/\S/)>0)
+		norm=norm.slice(norm.search(/\S/));
 	    var words=norm.split(/\W*\s+\W*/g);
 	    var nwords=words.length;
 	    if (nwords===0) return "";
 	    else words[0]=words[0].replace(/^\W+/,"");
 	    if (nwords>1)
 		words[nwords-1]=words[nwords-1].replace(/\W+$/,"");
-	    if ((sortfn)&&(dedup))
-		return dedupfn(words.sort(sortfn)).join(" ");
-	    else if (sortfn)
+	    if (wordfn) {
+		var nwords=[];
+		var i=0; var lim=words.length;
+		while (i<lim) {
+		    var nword=wordfn(words[i++]);
+		    if (nword) nwords.push(nword);
+		    i++;}
+		words=nwords;}
+	    if ((sortfn)&&(keepdup))
 		return words.sort(sortfn).join(" ");
+	    else if (sortfn)
+		return dedupfn(words.sort(sortfn)).join(" ");
 	    else return words.join(" ");}
 	else if (!(arg.nodeType))
 	    throw new Exception("bad arg to WSN");
@@ -65,7 +84,7 @@ var WSN=(function(){
 	else if (arg.nodeType===1)
 	    return WSN(textify(arg));
 	else throw new Exception("bad arg to WSN");}
-
+    
     function dedupfn(arr){
 	var i=0; var lim=arr.length; var last=false;
 	if (lim<2) return arr;
@@ -97,38 +116,86 @@ var WSN=(function(){
 	    if (text) return text+arg.nodeValue; else return arg.nodeValue;
 	else if (arg.nodeType===1) {
 	    var children=arg.childNodes;
-	    var style=window.getComputedStyle(node);
-	    var display=style.display;
-	    if (!(text)) text="";
-	    if (display!=='inline') text=text+"\n";
+	    var style=((window.getComputedStyle)?
+		       (window.getComputedStyle(arg)):
+		       {position: 'static',display: 'block'});
+	    if (style.position!=='static') return text||"";
+	    if (style.display!=='inline')
+		text="\n"+(text||"");
+	    else if (!(text)) text="";
 	    var i=0; var lim=children.length;
 	    while (i<lim) {
 		var child=children[i++];
 		if (child.nodeType===3) text=text+child.nodeValue;
 		else if (child.nodeType===1) text=textify(child,text);
-		else {}}}
+		else {}}
+	    return text;}
 	else if (text) return text;
 	else return "";}
-    WSN.textify=textify;
+    WSN.prototype.textify=WSN.textify=textify;
 
     function fuddle(arg,sortfn){return WSN(arg,sortfn||lensort);}
     WSN.fuddle=fuddle;
 
-    function md5id(arg){
-	var wsn=WSN(arg);
+    function md5ID(arg){
+	var wsn=WSN.apply(null,arguments);
 	if (WSN.md5) return WSN.md5(wsn);
 	else if ((fdjtHash)&&(fdjtHash.hex_md5))
 	    return fdjtHash.hex_md5(wsn);
 	else throw new Exception("No MD5 implementation");}
-    WSN.md5id=md5id;
+    WSN.md5ID=md5ID;
     
-    function sha1id(arg){
-	var wsn=WSN(arg);
+    function sha1ID(arg){
+	var wsn=WSN.apply(null,arguments);
 	if (WSN.sha1) return WSN.md5(wsn);
 	else if ((fdjtHash)&&(fdjtHash.hex_sha1))
 	    return fdjtHash.hex_sha1(wsn);
 	else throw new Exception("No MD5 implementation");}
-    WSN.sha1id=sha1id;
+    WSN.sha1ID=sha1ID;
+
+    function Hash(arg,hashfn,sortfn,wordfn,keepdups){
+	if (typeof hashfn === 'undefined') hashfn=WSN.hashfn||false;
+	if (typeof sortfn === 'undefined') sortfn=WSN.sortfn||false;
+	if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
+	if (typeof keepdup === 'undefined') keepdup=WSN.keepdup||false;
+	var wsn=WSN(arg,sortfn,wordfn,keepdups);
+	return ((hashfn)?(hashfn(wsn)):(wsn));}
+    WSN.Hash=Hash;
+    WSN.prototype.Hash=function(arg){
+	Hash(arg,this.hashfn||WSN.hashfn||false,
+	     this.sortfn||WSN.sortfn||false,
+	     this.wordfn||WSN.wordfn||false,
+	     this.keepdup||WSN.keepdup||false);}
+
+    function Map(nodes,hashfn,sortfn,wordfn,keepdups){
+	if (typeof hashfn === 'undefined') hashfn=WSN.hashfn||false;
+	if (typeof sortfn === 'undefined') sortfn=WSN.sortfn||false;
+	if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
+	if (typeof keepdup === 'undefined') keepdup=WSN.keepdup||false;
+	var map={};
+	var i=0; var lim=nodes.length;
+	while (i<lim) {
+	    var node=nodes[i++];
+	    var wsn=WSN(node,sortfn,wordfn,keepdups);
+	    var id=((hashfn)?(hashfn(wsn)):(wsn));
+	    map[id]=node;}
+	return map;}
+    WSN.Map=Map;
+    WSN.prototype.Map=function(arg){
+	Map(arg,this.hashfn||WSN.hashfn||false,
+	    this.sortfn||WSN.sortfn||false,
+	    this.wordfn||WSN.wordfn||false,
+	    this.keepdup||WSN.keepdup||false);}
+    
+    function MapMD5(nodes,sortfn,wordfn,keepdups){
+	var hashfn=WSN.md5||((fdjtHash)&&(fdjtHash.hex_md5));
+	return Map(nodes,hashfn,sortfn,wordfn,keepdups);}
+    function MapSHA1(nodes,sortfn,wordfn,keepdups){
+	var hashfn=WSN.sha1||((fdjtHash)&&(fdjtHash.hex_sha1));
+	return Map(nodes,hashfn,sortfn,wordfn,keepdups);}
+
+    WSN.md5=((fdjtHash)&&(fdjtHash.hex_md5));
+    WSN.sha1=((fdjtHash)&&(fdjtHash.hex_sha1));
 
     try {
 	if (("A\u0300".search(unicode_regex))<0)
