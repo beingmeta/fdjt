@@ -288,6 +288,8 @@ var fdjtKB=
 	function intersection(set1,set2){
 	    if ((!(set1))||(set1.length===0)) return [];
 	    if ((!(set2))||(set2.length===0)) return [];
+	    if (set1._sortlen!==set1.length) set1=Set(set1);
+	    if (set2._sortlen!==set2.length) set1=Set(set2);
 	    var results=new Array();
 	    var i=0; var j=0; var len1=set1.length; var len2=set2.length;
 	    var allstrings=set1._allstrings&&set2._allstrings;
@@ -306,10 +308,37 @@ var fdjtKB=
 	    results._sortlen=results.length;
 	    return results;}
 	fdjtKB.intersection=intersection;
+
+	function difference(set1,set2){
+	    if ((!(set1))||(set1.length===0)) return [];
+	    if ((!(set2))||(set2.length===0)) return set1;
+	    if (set1._sortlen!==set1.length) set1=Set(set1);
+	    if (set2._sortlen!==set2.length) set2=Set(set2);
+	    var results=new Array();
+	    var i=0; var j=0; var len1=set1.length; var len2=set2.length;
+	    var allstrings=set1._allstrings&&set2._allstrings;
+	    var new_allstrings=true;
+	    while ((i<len1) && (j<len2)) {
+		if (set1[i]===set2[j]) {
+		    i++; j++;}
+		else if ((allstrings)?
+			 (set1[i]<set2[j]):
+			 (set_sortfn(set1[i],set2[j])<0)) {
+		    if ((new_allstrings)&&(typeof set1[i] !== 'string'))
+			new_allstrings=false;
+		    results.push(set1[i]);
+		    i++;}
+		else j++;}
+	    results._allstrings=new_allstrings;
+	    results._sortlen=results.length;
+	    return results;}
+	fdjtKB.difference=difference;
 	
 	function union(set1,set2){
 	    if ((!(set1))||(set1.length===0)) return set2;
 	    if ((!(set2))||(set2.length===0)) return set1;
+	    if (set1._sortlen!==set1.length) set1=Set(set1);
+	    if (set2._sortlen!==set2.length) set2=Set(set2);
 	    var results=new Array();
 	    var i=0; var j=0; var len1=set1.length; var len2=set2.length;
 	    var allstrings=set1._allstrings&&set2._allstrings;
@@ -693,7 +722,9 @@ var fdjtKB=
 		    this.drop(prop,this[prop]);};
 	function init_ref(data){
 	    var pool=this.pool; var map=pool.map;
-	    if ((this._init)&&(this._init>init_start)) return this;
+	    if ((this._init)&&(this._init>init_start)) {
+		this.update_ref(data);
+		return;}
 	    if ((debug)&&(pool.traceref))
 		fdjtLog("Initial reference to %o <== %o",this,data);
 	    for (key in data)
@@ -728,7 +759,29 @@ var fdjtKB=
 	    return this;}
 	Ref.prototype.init=init_ref;
 	// This isn't right
-	Ref.prototype.update=init_ref;
+	function update_ref(data){
+	    var pool=this.pool; var map=pool.map;
+	    for (var key in data) {
+		var val=data[key], cur=this[key];
+		if (val===cur) continue;
+		else if (!(cur)) {
+		    if (val instanceof Array) {
+			var i=0, lim=val.length;
+			while (i<lim) this.add(key,val[i++]);}
+		    else this.add(key,val);}
+		else if ((val instanceof Array)||
+			 (cur instanceof Array)) {
+		    var toadd=difference(val,cur);
+		    var todrop=difference(cur,val);
+		    var i=0; var lim=todrop.length;
+		    while (i<lim) this.drop(key,todrop[i++]);
+		    var i=0; var lim=toadd.length;
+		    while (i<lim) this.add(key,toadd[i++]);}
+		else {
+		    this.drop(key,cur);
+		    this.add(key,val);}}
+	    return this;}
+	Ref.prototype.update=update_ref;
 	Ref.prototype.oninit=function(fcn,name){
 	    var debugging=((debug)&&(this.pool.traceinit));
 	    if (this._init) {
