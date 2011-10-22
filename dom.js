@@ -224,7 +224,8 @@ var fdjtDOM=
 	/* Simple class/attrib manipulation functions */
 
 	function hasClass(elt,classname,attrib){
-	    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") : (elt.className));
+	    var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :
+			   (elt.className));
 	    if (!(classinfo)) return false;
 	    else if (classname===true) return true;
 	    else if (classinfo===classname) return true;
