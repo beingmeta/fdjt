@@ -89,6 +89,12 @@ var fdjtUI=
 	    ((elt.type=='checkbox')||(elt.type=='radio'));}
 
     function checkspan_set(target,checked) {
+	if (typeof target === 'string') target=fdjtID(target);
+	else if (target.length) {
+	    var i=0, lim=target.length;
+	    while (i<lim) checkspan_set(target[i++],checked);
+	    return;}
+	if ((!(target))||(!(target.nodeType))) return;
 	var checkspan=((hasClass(target,"checkspan"))?(target):
 		       (getParent(target,".checkspan")));
 	var input=getParent(target,"input");
