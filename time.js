@@ -60,7 +60,7 @@ var fdjtTime=
 		var minutes=tstamp.getMinutes();
 		return tstamp.toDateString()+" ("+
 		    ((hours<10)?"0":"")+hours+":"+
-		    ((minutes<10)?"0":"");}}
+		    ((minutes===0)?"00":(((minutes<10)?"0":"")+minutes));}}
 	fdjtTime.shortString=shortString;
 	fdjtTime.tick2shortstring=function(tick){
 	    return shortString(new Date(tick*1000));};

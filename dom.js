@@ -1678,6 +1678,51 @@ var fdjtDOM=
 	    fdjtDOM.transition='transition';
 	    fdjtDOM.transform='transform';}
 	
+	function node2text(node,accum){
+	    if (!(accum)) accum="";
+	    if (node.nodeType===3) {
+		var stringval=node.nodeValue;
+		if (stringval) accum=accum+stringval;
+		return accum;}
+	    else if (node.nodeType===1) {
+		var children=node.childNodes;
+		var i=0, lim=children.length;
+		while (i<lim) {
+		    accum=node2text(children[i++],accum);}
+		return accum;}
+	    else return accum;}
+	fdjtDOM.node2text=node2text;
+	
+	function get_text_pos(node,pos,cur){
+	    if (cur>pos) return false;
+	    else if (node.nodeType===3) {
+		var stringval=node.nodeValue;
+		if (pos<(cur+stringval.length))
+		    return { node: node, off: pos-cur};
+		else return pos+stringval.length;}
+	    else if (node.nodeType===1) {
+		var children=node.childNodes;
+		var i=0, lim=children.length;
+		while (i<lim) {
+		    cur=get_text_pos(children[i++],pos,cur);
+		    if (!(typeof cur === 'number')) return cur;}
+		return cur;}
+	    else return cur;}
+	fdjtDOM.textPos=function(node,pos){
+	    return get_text_pos(node,pos,0);};
+
+	function findExcerpt(node,string,count){
+	    if (!(count)) count=1;
+	    var fulltext=node2text(node); var loc=-1, cur=0;
+	    while ((loc=fulltext.indexOf(string,cur))>=0) {
+		if (count===1) {
+		    var start=get_text_pos(node,loc,0);
+		    var end=get_text_pos(node,loc+string.length,0);
+		    return { start_node: start.node, start_off: start.off,
+			     end_node: end.node, end_off: end.off};}
+		else {count--; cur=loc+string.length;}}
+	    return false;}
+	fdjtDOM.findExcerpt=findExcerpt;
 
 	var docuri=false; var docbase=false;
 	function init_docuri(){
