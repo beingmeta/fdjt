@@ -172,7 +172,7 @@ var fdjtAjax=
 	    else if (form.method==="PUT")
 		req.open('PUT',ajax_uri,(!(syncp)));
 	    else req.open('POST',ajax_uri,(!(syncp)));
-	    if (cbtype) req.setRequestHeader("Accept",cbctype);
+	    if (cbctype) req.setRequestHeader("Accept",cbctype);
 	    req.withCredentials=true;
 	    req.onreadystatechange=function () {
 		if (trace_ajax)
