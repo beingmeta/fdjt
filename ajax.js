@@ -147,7 +147,7 @@ var fdjtAjax=
 	    return result;}
 	fdjtAjax.formJSON=formJSON;
 
-	function ajaxSubmit(form,callback){
+	function ajaxSubmit(form,callback,cbctype){
 	    var ajax_uri=form.getAttribute("ajaxaction")||form.action;
 	    if (!(ajax_uri)) return false;
 	    // Whether to do AJAX synchronously or not.
@@ -172,7 +172,7 @@ var fdjtAjax=
 	    else if (form.method==="PUT")
 		req.open('PUT',ajax_uri,(!(syncp)));
 	    else req.open('POST',ajax_uri,(!(syncp)));
-	    req.setRequestHeader("Accept","text/json");
+	    if (cbtype) req.setRequestHeader("Accept",cbctype);
 	    req.withCredentials=true;
 	    req.onreadystatechange=function () {
 		if (trace_ajax)
