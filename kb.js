@@ -286,6 +286,8 @@ var fdjtKB=
 	    else return 1;}
 
 	function intersection(set1,set2){
+	    if (typeof set1 === 'string') set1=[set1];
+	    if (typeof set2 === 'string') set2=[set2];
 	    if ((!(set1))||(set1.length===0)) return [];
 	    if ((!(set2))||(set2.length===0)) return [];
 	    if (set1._sortlen!==set1.length) set1=Set(set1);
@@ -310,6 +312,8 @@ var fdjtKB=
 	fdjtKB.intersection=intersection;
 
 	function difference(set1,set2){
+	    if (typeof set1 === 'string') set1=[set1];
+	    if (typeof set2 === 'string') set2=[set2];
 	    if ((!(set1))||(set1.length===0)) return [];
 	    if ((!(set2))||(set2.length===0)) return set1;
 	    if (set1._sortlen!==set1.length) set1=Set(set1);
@@ -335,6 +339,8 @@ var fdjtKB=
 	fdjtKB.difference=difference;
 	
 	function union(set1,set2){
+	    if (typeof set1 === 'string') set1=[set1];
+	    if (typeof set2 === 'string') set2=[set2];
 	    if ((!(set1))||(set1.length===0)) return set2;
 	    if ((!(set2))||(set2.length===0)) return set1;
 	    if (set1._sortlen!==set1.length) set1=Set(set1);
@@ -358,6 +364,8 @@ var fdjtKB=
 	fdjtKB.union=union;
 
 	function merge(set1,set2){
+	    if (typeof set1 === 'string') set1=[set1];
+	    if (typeof set2 === 'string') set2=[set2];
 	    if ((!(set1))||(set1.length===0)) {
 		set1.concat(set2);
 		set1._sortlen=set2._sortlen;
@@ -384,8 +392,12 @@ var fdjtKB=
 	fdjtKB.merge=merge;
 
 	function overlaps(set1,set2){
+	    if (typeof set1 === 'string') set1=[set1];
+	    if (typeof set2 === 'string') set2=[set2];
 	    if ((!(set1))||(set1.length===0)) return false;
 	    if ((!(set2))||(set2.length===0)) return false;
+	    if (set1._sortlen!==set1.length) set1=Set(set1);
+	    if (set2._sortlen!==set2.length) set2=Set(set2);
 	    var i=0; var j=0; var len1=set1.length; var len2=set2.length;
 	    var allstrings=set1._allstrings&&set2._allstrings;
 	    var new_allstrings=true;
