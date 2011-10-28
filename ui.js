@@ -940,6 +940,7 @@ fdjtUI.Collapsible.focus=function(evt){
 		(target.tagName==="TEXTAREA") ||
 		(target.tagName==="SELECT") ||
 		(target.tagName==="OPTION") ||
+		(hasClass(target,"clickable"))||
 		(hasClass(target,"isclickable")))
 		return true;
 	    else if (target.onclick)
@@ -969,6 +970,18 @@ fdjtUI.Collapsible.focus=function(evt){
     fdjtUI.nobubble=function(evt){
 	evt=evt||event;
 	evt.cancelBubble=true;};
+
+    function submitEvent(arg){
+	var form=((arg.nodeType)?(arg):(fdjtUI.T(arg)));
+	while (form) {
+	    if (form.tagName==='FORM') break;
+	    else form=form.parentNode;}
+	if (!(form)) return;
+	var submit_evt = document.createEvent("HTMLEvents");
+	submit_evt.initEvent("submit", true, true);
+	form.dispatchEvent(submit_evt);
+	return;}
+    fdjtUI.submitEvent=submitEvent;
 
 }());
 
