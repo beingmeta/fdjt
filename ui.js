@@ -983,6 +983,15 @@ fdjtUI.Collapsible.focus=function(evt){
 	return;}
     fdjtUI.submitEvent=submitEvent;
 
+    function focusEvent(arg){
+	var elt=((arg.nodeType)?(arg):(fdjtUI.T(arg)));
+	var focus_evt = document.createEvent("HTMLEvents");
+	focus_evt.initEvent("focus", true, true);
+	elt.dispatchEvent(focus_evt);
+	return;}
+    fdjtUI.focusEvent=focusEvent;
+
+
 }());
 
 /* Emacs local variables
