@@ -580,12 +580,19 @@ var fdjtKB=
 	function Index() {
 	    var scalar_indices={};
 	    var object_indices={};
-	    return function(item,prop,val,add){
+	    var dontindex=false;
+	    var index=function(item,prop,val,add){
 		var valkey; var indices=scalar_indices;
 		if (!(prop))
-		    return {scalars: scalar_indices, objects: object_indices};
+		    return {
+			scalars: scalar_indices,
+			objects: object_indices};
+		else if ((dontindex)?(dontindex[prop]):(prop[0]==='_'))
+		    return false;
 		else if (!(val))
-		    return {scalars: scalar_indices[prop],objects: object_indices[prop]};
+		    return {
+			scalars: scalar_indices[prop],
+			objects: object_indices[prop]};
 		else if (isobject(val)) {
 		    valkey=val._id||val.uuid||val.oid||val._fdjtid||
 			register(val);
@@ -623,7 +630,8 @@ var fdjtKB=
 		else if (add) {
 		    index[valkey]=Set(itemkey);
 		    return true;}
-		else return false;};}
+		else return false;};
+	    return index;}
 	fdjtKB.Index=Index;
 
 	/* Refs */
