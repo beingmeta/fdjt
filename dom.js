@@ -559,18 +559,20 @@ var fdjtDOM=
 	    if (typeof node === "string") node=fdjtID(node);
 	    if (!(node)) return [];
 	    if (!(results)) results=[]; 
-	    if ((!(attrib))&&(typeof classname === 'function'))
-		filter_children(node,classname,results);
-	    else if (!(attrib))
-		if (classname instanceof Selector)
+	    if (!(attrib)) {
+		if (typeof classname === 'function')
+		    filter_children(node,classname,results);
+		else if (classname instanceof Selector)
 		    return classname.find(node,results);
-	    else if (typeof classname === 'string')
-		if ((usenative) && (node.querySelectorAll))
-		    return node.querySelectorAll(classname);
-	    else return getChildren(node,new Selector(classname),false,results);
-	    else throw { error: 'bad selector arg', selector: classname};
+		else if (typeof classname === 'string') {
+		    if ((usenative) && (node.querySelectorAll))
+			return node.querySelectorAll(classname);
+		    else return getChildren(
+			node,new Selector(classname),false,results);}}
+	    else if (!(typeof attrib === 'string'))
+		throw { error: 'bad selector arg', selector: classname};
 	    else {
-		var pat=(classpats[parent]||classPat(parent));
+		var pat=(classpats[classname]||classPat(classname));
 		gather_children(node,classname,attrib||false,results);}
 	    return results;}
 	fdjtDOM.getChildren=getChildren;

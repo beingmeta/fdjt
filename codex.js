@@ -869,6 +869,21 @@ var CodexLayout=
 		    return false;}}
 	    this.getPage=getPage;
 
+	    function getDup(node,page){
+		if (typeof node === 'string')
+		    node=document.getElementById(node);
+		if (!(node)) return false;
+		if (hasParent(node,page)) return node;
+		var nodeid=node.id;
+		var duptable=Codex.paginated.dups;
+		var dups=duptable[nodeid];
+		var i=0; var lim=dups.length;
+		while (i<lim) {
+		    if (hasParent(dups[i]),page) return dups[i];
+		    else i++;}
+		return false;}
+	    this.getDup=getDup;
+
 	    function gotoPage(spec) {
 		var newpage=false;
 		if (!(spec)) return false;
