@@ -175,7 +175,7 @@ var CodexLayout=
 		node.className=nodeclass+" codexdupstart";
 	    // If the original had an ID, save it in various ways
 	    if (node.id) {
-		copy.codexid=node.id;
+		copy.codexdupid=node.id;
 		copy.setAttribute("data-baseid",node.id);
 		copy.id=null;}
 	    // Record the copy you've made (to avoid recreation)
@@ -790,6 +790,7 @@ var CodexLayout=
 			boxed.style[fdjtDOM.transform]=transform;
 			boxed.style[fdjtDOM.transform+"-origin"]='top';
 			completed.appendChild(boxed);}}
+		if (this.pagedone) this.pagedone(completed);
 		dropClass(completed,"curpage");}
 	    this.finishPage=finishPage;
 
