@@ -291,7 +291,7 @@ var fdjtKB=
 	    if ((!(set1))||(set1.length===0)) return [];
 	    if ((!(set2))||(set2.length===0)) return [];
 	    if (set1._sortlen!==set1.length) set1=Set(set1);
-	    if (set2._sortlen!==set2.length) set1=Set(set2);
+	    if (set2._sortlen!==set2.length) set2=Set(set2);
 	    var results=new Array();
 	    var i=0; var j=0; var len1=set1.length; var len2=set2.length;
 	    var allstrings=set1._allstrings&&set2._allstrings;
