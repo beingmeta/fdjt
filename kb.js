@@ -782,6 +782,7 @@ var fdjtKB=
 	function update_ref(data){
 	    var pool=this.pool; var map=pool.map;
 	    for (var key in data) {
+		if (key==="pool") continue;
 		var val=data[key], cur=this[key];
 		if (val===cur) continue;
 		else if (!(cur)) {
