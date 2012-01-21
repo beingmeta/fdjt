@@ -20,10 +20,14 @@
 
 */
 
-var fdjtUI=
-    {CoHi: {classname: "cohi"},AutoPrompt: {}, InputHelp: {},
-     Expansion: {},Collapsible: {},
-     Tabs: {}, MultiText: {}};
+var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
+fdjtUI.CoHi=(fdjtUI.CoHi)||{classname: "cohi"};
+fdjtUI.AutoPrompt=(fdjtUI.AutoPrompt)||{};
+fdjtUI.InputHelp=(fdjtUI.InputHelp)||{};
+fdjtUI.Expansion=(fdjtUI.Expansion)||{};
+fdjtUI.Collapsible=(fdjtUI.Collapsible)||{};
+fdjtUI.Tabs=(fdjtUI.Tabs)||{};
+fdjtUI.MultiText=(fdjtUI.MultiText)||{};
 
 /* Co-highlighting */
 /* When the mouse moves over a named element, the 'cohi' class is added to
