@@ -111,7 +111,7 @@ fdjtUI.TapHold=(function(){
 	    pressed=th_target;
 	    held(th_target,evt);
 	    th_timer=false;
-	    touched=false;}),TapHold.interval||500);}
+	    touched=false;}),TapHold.interval||300);}
     function endpress(evt){
 	if (th_timer) {
 	    clearTimeout(th_timer); th_timer=false;
@@ -152,6 +152,7 @@ fdjtUI.TapHold=(function(){
 	th_target=fdjtUI.T(evt);
 	touch_x=evt.clientX||getClientX(evt);
 	touch_y=evt.clientY||getClientY(evt);
+	if (evt.ctrlKey) return;
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
 	    return;
