@@ -239,13 +239,13 @@ var fdjtDOM=
 
 	function addClass(elt,classname,attrib){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
-	    else if (elt instanceof Array) { // (elt instanceof NodeList)
-		var elts=((elt instanceof Array)?(elt):(toArray(elt)));
+	    else if ((NodeList)&&(elt instanceof NodeList))
+		return addClass(TOA(elt),classname,attrib);
+	    else if (elt.length) { // (assume array)
+		var elts=TOA(elt);
 		var i=0; var lim=elts.length;
 		while (i<lim) addClass(elts[i++],classname,attrib||false);
 		return;}
-	    else if ((NodeList)&&(elt instanceof NodeList))
-		return addClass(TOA(elt),classname,attrib);
 	    var classinfo=
 		(((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
 	    if (!(classinfo)) {
@@ -270,13 +270,13 @@ var fdjtDOM=
 
 	function dropClass(elt,classname,attrib){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
-	    else if (elt instanceof Array) {
-		var elts=((elt instanceof Array)?(elt):(toArray(elt)));
+	    else if ((NodeList)&&(elt instanceof NodeList))
+		return dropClass(TOA(elt),classname,attrib);
+	    else if (elt.length) {
+		var elts=TOA(elt);
 		var i=0; var lim=elts.length;
 		while (i<lim) dropClass(elts[i++],classname,attrib||false);
 		return;}
-	    else if ((NodeList)&&(elt instanceof NodeList))
-		return dropClass(TOA(elt),classname,attrib);
 	    var classinfo=
 		(((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
 	    if (!(classinfo)) return false;
@@ -317,13 +317,13 @@ var fdjtDOM=
 
 	function toggleClass(elt,classname,attrib){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
-	    else if (elt instanceof Array) { // (elt instanceof NodeList)
-		var elts=((elt instanceof Array)?(elt):(toArray(elt)));
+	    else if ((NodeList)&&(elt instanceof NodeList))
+		return toggleClass(TOA(elt),classname,attrib);
+	    else if (elt.length) { // (elt instanceof NodeList)
+		var elts=TOA(elt);
 		var i=0; var lim=elts.length;
 		while (i<lim) toggleClass(elts[i++],classname,attrib||false);
 		return;}
-	    else if ((NodeList)&&(elt instanceof NodeList))
-		return toggleClass(TOA(elt),classname,attrib);
 	    var classinfo=
 		(((attrib) ? (elt.getAttribute(attrib)||"") :
 		  (elt.className))||null);
