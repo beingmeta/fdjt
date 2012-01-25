@@ -55,9 +55,13 @@ fdjtUI.TapHold=(function(){
     function fakeEvent(target,etype,orig){
 	var evt = document.createEvent("UIEvent");
 	if (trace_taps)
-	    fdjtLog("Synthesizing %s on %o",etype,target);
+	    fdjtLog("Synthesizing %s on %o @%d,%d",etype,target,
+		    touch_x,touch_y);
 	evt.initEvent(etype, true, true);
 	evt.clientX=touch_x; evt.clientY=touch_y;
+	// If the target no longer has a parent, it's been removed
+	//  from the DOM, so we use the event target if there is one
+	if ((orig)&&(!(target.parentNode))) target=fdjtUI.T(orig);
 	// Does dispatchEvent set this?
 	// evt.target=target;
 	if (orig) fdjtUI.cancel(orig);
@@ -79,10 +83,10 @@ fdjtUI.TapHold=(function(){
 	if (msgelt) msgelt.innerHTML=fdjtString("Released %o",target);
 	fdjtLog("Released %o",target);}
 
-    function tapped(target,evt){return fakeEvent(target,"tap");}
-    function held(target,evt){return fakeEvent(target,"hold");}
-    function released(target,evt){return fakeEvent(target,"release");}
-    function slipped(target,evt){return fakeEvent(target,"slip");}
+    function tapped(target,evt){return fakeEvent(target,"tap",evt);}
+    function held(target,evt){return fakeEvent(target,"hold",evt);}
+    function released(target,evt){return fakeEvent(target,"release",evt);}
+    function slipped(target,evt){return fakeEvent(target,"slip",evt);}
 
     function TapHold(elt){
 	elt=elt||window;
@@ -176,8 +180,11 @@ fdjtUI.TapHold=(function(){
 	touch_x=evt.clientX||getClientX(evt);
 	touch_y=evt.clientY||getClientY(evt);
 	if (fdjtUI.isClickable(evt)) return;
-	if ((!(shift_down))&&(!(mouse_down))) endpress();}
+	if ((!(shift_down))&&(!(mouse_down))) endpress(evt);}
     TapHold.mouseup=mouseup;
+
+    TapHold.ispressed=function(){
+	return (pressed);}
 
     return TapHold;})();
 
