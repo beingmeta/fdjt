@@ -514,6 +514,18 @@ fdjtUI.Collapsible.focus=function(evt){
     fdjtUI.dosubmit=dosubmit;}());
 
 (function(){
+    var addClass=fdjtDOM.addClass;
+    var dropClass=fdjtDOM.dropClass;
+    var getGeometry=fdjtDOM.getGeometry;
+    var getInsideBounds=fdjtDOM.getInsideBounds;
+    function checkOverflow(node){
+	var geom=getGeometry(node);
+	var inside=getInsideBounds(node);
+	if (inside.bottom>geom.bottom) addClass(node,"overflow");
+	else dropClass(node,"overflow");}
+    fdjtUI.Overflow=checkOverflow;}());
+
+(function(){
     var hasClass=fdjtDOM.hasClass;
     
     fdjtUI.T=function(evt) {
