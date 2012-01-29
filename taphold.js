@@ -111,13 +111,16 @@ fdjtUI.TapHold=(function(){
 	if (pressed) return;
 	if (th_timer) return;
 	touched=th_target; pressed=false
+	if (trace_taps) fdjtLog("startpress %o",evt);
 	th_timer=setTimeout((function(evt){
+	    if (trace_taps) fdjtLog("startpress/timeout %o",evt);
 	    pressed=th_target;
 	    held(th_target,evt);
 	    th_timer=false;
 	    touched=false;}),TapHold.interval||300);}
     function endpress(evt){
 	if (th_timer) {
+	    if (trace_taps) fdjtLog("endpress %o t=%o p=%o",evt,th_target,pressed);
 	    clearTimeout(th_timer); th_timer=false;
 	    if (th_target===touched) tapped(th_target,evt);}
 	else if (pressed) {released(pressed,evt);}
@@ -153,6 +156,7 @@ fdjtUI.TapHold=(function(){
     function mousedown(evt){
 	evt=evt||event;
 	mouse_down=true;
+	if (trace_taps) fdjtLog("down %o",evt);
 	th_target=fdjtUI.T(evt);
 	touch_x=evt.clientX||getClientX(evt);
 	touch_y=evt.clientY||getClientY(evt);
@@ -174,6 +178,7 @@ fdjtUI.TapHold=(function(){
     function mouseup(evt){
 	evt=evt||event;
 	mouse_down=false;
+	if (trace_taps) fdjtLog("up %o",evt);
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
 	    return;
