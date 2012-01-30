@@ -37,6 +37,11 @@ fdjtUI.TapHold=(function(){
     
     var getGeometry=fdjtDOM.getGeometry;
 
+    function getTarget(evt){
+	if ((evt.changedTouches)&&((evt.changedTouches.length)))
+	    return evt.changedTouches[evt.changedTouches.length-1].target;
+	else return fdjtUI.T(evt);}
+
     function getClientX(evt){
 	if (typeof evt.offsetX === "number") return evt.offsetX;
 	else if ((evt.touches)&&(evt.touches.length)) {
@@ -138,10 +143,14 @@ fdjtUI.TapHold=(function(){
 	th_target=target;
 	touch_x=evt.clientX||getClientX(evt);
 	touch_y=evt.clientY||getClientY(evt);
+	if (evt.touches) th_target=document.elementFromPoint(touch_x,touch_y);
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
 	    return;
+	// else fdjtUI.cancel(evt);
 	if ((pressed)&&(th_target!==pressed)) {
+	    if (trace_taps)
+		fdjtLog("move %o %o %d,%d",th_target,th_target.name,touch_x,touch_y);
 	    slipped(pressed);
 	    pressed=th_target;
 	    held(pressed);}}
