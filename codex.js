@@ -500,6 +500,9 @@ var CodexLayout=
 			while (i<lim) fullPage(float_pages[i++]);
 			float_pages=[];}
 		    var newpage="pagetop";
+		    if ((node)&&(node.nodeType===3)&&
+			(node.parentNode.childNodes.length===1))
+			node=node.parentNode;
 		    if (needNewPage(node)) {
 			// If we really need to create a new page, do so
 			if (page) dropClass(page,"curpage");
@@ -843,7 +846,7 @@ var CodexLayout=
 		if (!(style)) style=getStyle(elt);
 		var info=((elt.id)&&(Codex.docinfo[elt.id]));
 		return ((style.pageBreakBefore==='avoid')||
-			(hasClass(elt,"abovebreakbefore"))||
+			(hasClass(elt,"avoidbreakbefore"))||
 			((avoidbreakbefore)&&(testNode(elt,avoidbreakbefore))));}
 	    this.avoidBreakBefore=avoidBreakBefore;
 
