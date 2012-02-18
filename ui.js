@@ -64,6 +64,84 @@ fdjtUI.MultiText=(fdjtUI.MultiText)||{};
 	highlight(false,((classname_arg) || (fdjtUI.CoHi.classname)));};
 })();
 
+/* Text highlighting */
+fdjtUI.Highlight=(function(){
+    var highlight_class="fdjthighlight";
+    var hasClass=fdjtDOM.hasClass;
+    var hasParent=fdjtDOM.getParent;
+
+    function textnode(s){
+	return document.createTextNode(s);}
+
+    function clear_highlights(node,hclass){
+	var h=fdjtDOM.getChildren(
+	    node||document.body,"."+(hclass||highlight_class));
+	h=fdjtDOM.toArray(h);
+	var i=0 , lim=h.length;
+	while (i<lim) {
+	    var hnode=h[i++];
+	    if (hnode.firstChild)
+		fdjtDOM.replace(hnode,hnode.firstChild);}}
+    function highlight_node(node,hclass){
+	if (!(hclass)) hclass=highlight_class;
+	if (hasClass(node,hclass)) return node;
+	var hispan=fdjtDOM("span."+hclass);
+	fdjtDOM.replace(node,hispan);
+	hispan.appendChild(node);}
+    function highlight_text(text,hclass){
+	return fdjtDOM("span."+(hclass||highlight_class),
+		       text);}
+    function highlight_node_range(node,start,end,hclass){
+	var stringval=node.nodeValue;
+	var parent=node.parentNode;
+	if (!(end)) end=stringval.length;
+	if (start===end) return;
+	var beginning=((start>0)&&(textnode(stringval.slice(0,start))));
+	var middle=highlight_text(stringval.slice(start,end));
+	var ending=((end<stringval.length)&&
+		    (textnode(stringval.slice(end))));
+	if ((beginning)&&(ending)) {
+	    parent.replaceChild(ending,node);
+	    parent.insertBefore(middle,ending);
+	    parent.insertBefore(beginning,middle);}
+	else if (beginning) {
+	    parent.replaceChild(middle,node);
+	    parent.insertBefore(beginning,middle);}
+	else if (ending) {
+	    parent.replaceChild(ending,node);
+	    parent.insertBefore(middle,ending);}
+	else parent.replaceChild(middle,node);}
+    function highlight_range(range,hclass){
+	range=fdjtDOM.refineRange(range);
+	var starts_in=range.startContainer;
+	var ends_in=range.endContainer;
+	if (starts_in===ends_in)
+	    return highlight_node_range(
+		starts_in,range.startOffset,range.endOffset,
+		hclass);
+	else {
+	    var scan=starts_in;
+	    while ((scan)&&(!(scan.nextSibling)))
+		scan=scan.parentNode;
+	    scan=scan.nextSibling;
+	    while (scan) {
+		if (scan===ends_in) break;
+		else if (hasParent(ends_in,scan))
+		    scan=scan.firstChild;
+		else {
+		    highlight_node(scan);
+		    while ((scan)&&(!(scan.nextSibling)))
+			scan=scan.parentNode;
+		    scan=scan.nextSibling;}}
+	    // Do the ends
+	    highlight_node_range(
+		starts_in,range.startOffset,false,hclass);
+	    highlight_node_range(ends_in,0,range.endOffset,hclass);}}
+
+    highlight_range.clear=clear_highlights;
+    highlight_range.highlight=highlight_range;
+    return highlight_range;})();
+
 /* CheckSpans:
    Text regions which include a checkbox where clicking toggles the checkbox. */
 (function(){
