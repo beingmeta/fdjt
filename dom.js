@@ -1584,14 +1584,15 @@ var fdjtDOM=
 	    return getCSSRule(ruleName,'delete');}
 	fdjtDOM.dropCSSRule=dropCSSRule;
 
-	function addCSSRule(selector,text) {// Create a new css rule
-	    var styles=fdjtID("FDJTSTYLES");
-	    if (!(styles)) {
-		var head=document.getElementsByTagName("HEAD");
-		if (head.length===0) return; else head=head[0];
-		styles=fdjtDOM("style#FDJTSTYLES");
-		head.appendChild(styles);}
-	    var sheet=styles.sheet;
+	function addCSSRule(selector,text,sheet) {// Create a new css rule
+	    if (!(sheet)) {
+		var styles=fdjtID("FDJTSTYLES");
+		if (!(styles)) {
+		    var head=document.getElementsByTagName("HEAD");
+		    if (head.length===0) return; else head=head[0];
+		    styles=fdjtDOM("style#FDJTSTYLES");
+		    head.appendChild(styles);}
+		sheet=styles.sheet;}
 	    if (sheet.insertRule) {
 		var rules=sheet.cssRules||sheet.rules;
 		var i=0; var lim=rules.length;
