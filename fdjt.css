@@ -538,6 +538,10 @@ div.backtrace div.rail span.arg {
 div.backtrace div.last_entry {
   font-size: 160%;}
 
+/* Highlighting */
+
+span.fdjthighlight { background-color: yellow;}
+
 /* Human libnotify CSS */
 
 /* recommended base settings */
