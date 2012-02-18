@@ -238,7 +238,10 @@ var fdjtDOM=
 	fdjtDOM.hasClass=hasClass;
 
 	function addClass(elt,classname,attrib){
-	    if (typeof elt === 'string') elt=document.getElementById(elt);
+	    if (!(elt)) return;
+	    else if (typeof elt === 'string') {
+		if (!(elt=document.getElementById(elt)))
+		    return;}
 	    else if ((NodeList)&&(elt instanceof NodeList))
 		return addClass(TOA(elt),classname,attrib);
 	    else if ((elt.length)&&(!(elt.nodeType))) { // (assume array)
@@ -269,7 +272,10 @@ var fdjtDOM=
 		if (elt) addClass(elt,classname);}};
 
 	function dropClass(elt,classname,attrib){
-	    if (typeof elt === 'string') elt=document.getElementById(elt);
+	    if (!(elt)) return;
+	    else if (typeof elt === 'string') {
+		if (!(elt=document.getElementById(elt)))
+		    return;}
 	    else if ((NodeList)&&(elt instanceof NodeList))
 		return dropClass(TOA(elt),classname,attrib);
 	    else if ((elt.length)&&(!(elt.nodeType))) {
@@ -1726,7 +1732,7 @@ var fdjtDOM=
 		var stringval=node.nodeValue;
 		if (pos<(cur+stringval.length))
 		    return { node: node, off: pos-cur};
-		else return pos+stringval.length;}
+		else return cur+stringval.length;}
 	    else if (node.nodeType===1) {
 		var children=node.childNodes;
 		var i=0, lim=children.length;
@@ -1791,18 +1797,21 @@ var fdjtDOM=
 		    starts_in: within.id,ends_in: ends_in.id,
 		    end: end_edge+range.endOffset};}
 
-	function findExcerpt(node,string,count){
+	function findString(node,string,count){
 	    if (!(count)) count=1;
 	    var fulltext=node2text(node); var loc=-1, cur=0;
 	    while ((loc=fulltext.indexOf(string,cur))>=0) {
 		if (count===1) {
 		    var start=get_text_pos(node,loc,0);
 		    var end=get_text_pos(node,loc+string.length,0);
-		    return { start_node: start.node, start_off: start.off,
-			     end_node: end.node, end_off: end.off};}
+		    if ((!start)||(!end)) return false;
+		    var range=document.createRange();
+		    range.setStart(start.node,start.off);
+		    range.setEnd(end.node,end.off);
+		    return range;}
 		else {count--; cur=loc+string.length;}}
 	    return false;}
-	fdjtDOM.findExcerpt=findExcerpt;
+	fdjtDOM.findString=findString;
 
 	var docuri=false; var docbase=false;
 	function init_docuri(){
