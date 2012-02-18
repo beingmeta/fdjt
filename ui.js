@@ -94,7 +94,8 @@ fdjtUI.Highlight=(function(){
     function highlight_node_range(node,start,end,hclass){
 	var stringval=node.nodeValue;
 	var parent=node.parentNode;
-	if (!(end)) end=stringval.length;
+	if ((end===false)||(typeof end === 'undefined'))
+	    end=stringval.length;
 	if (start===end) return;
 	var beginning=((start>0)&&(textnode(stringval.slice(0,start))));
 	var middle=highlight_text(stringval.slice(start,end));
