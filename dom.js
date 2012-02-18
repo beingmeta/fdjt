@@ -1075,9 +1075,11 @@ var fdjtDOM=
 
 	/* Determining if something has overflowed */
 	fdjtDOM.overflowing=function(node){
-	    // I haven't really tried this cross-browser, but I read it worked and
-	    //  have been in situations where it would be handy
-	    return (node.clientHeight!==node.scrollHeight);}
+	    return (node.scrollHeight>node.clientHeight);}
+	fdjtDOM.voverflow=function(node){
+	    return (node.scrollHeight/node.clientHeight);}
+	fdjtDOM.hoverflow=function(node){
+	    return (node.scrollWidth/node.clientWidth);}
 
 	/* Sizing to fit */
 
@@ -1682,6 +1684,27 @@ var fdjtDOM=
 	    fdjtDOM.transition='transition';
 	    fdjtDOM.transform='transform';}
 	
+	/* Selection-y functions */
+
+	fdjtDOM.getSelectedRange=function(){
+	    var sel;
+	    if (window.getSelection)
+		sel=window.getSelection();
+	    else if (document.selection)
+		sel=document.selection.createRange();
+	    else return false;
+	    if (!(sel)) return false;
+	    if (sel.getRangeAt)
+		return sel.getRangeAt(0);
+	    else if (document.createRange) {
+		var range=document.createRange();
+		range.setStart(
+		    selectionObject.anchorNode,selectionObject.anchorOffset);
+		range.setEnd(
+		    selectionObject.focusNode,selectionObject.focusOffset);
+		return range;}
+	    else return false;}
+
 	function node2text(node,accum){
 	    if (!(accum)) accum="";
 	    if (node.nodeType===3) {
@@ -1712,8 +1735,61 @@ var fdjtDOM=
 		    if (!(typeof cur === 'number')) return cur;}
 		return cur;}
 	    else return cur;}
+
 	fdjtDOM.textPos=function(node,pos){
 	    return get_text_pos(node,pos,0);};
+
+	fdjtDOM.refineRange=function(range){
+	    if ((range.startContainer.nodeType===3)&&
+		(range.endContainer.nodeType===3))
+		return range;
+	    var start_info=get_text_pos(
+		range.startContainer,range.startOffset,0);
+	    var end_info=get_text_pos(
+		range.endContainer,range.endOffset,0);
+	    var newrange=document.createRange();
+	    newrange.setStart(start_info.node,start_info.off);
+	    newrange.setEnd(end_info.node,end_info.off);
+	    return newrange;}
+	
+	function get_text_off(scan,upto,sofar){
+	    if (!(sofar)) sofar=0;
+	    if (scan===upto) return [sofar];
+	    else if (scan.nodeType===3)
+		return sofar+scan.nodeValue.length;
+	    else if (scan.nodeType===1) {
+		var children=scan.childNodes;
+		var i=0, lim=children.length;
+		while (i<lim) {
+		    var child=children[i++];
+		    sofar=get_text_off(child,upto,sofar);
+		    if (typeof sofar !== 'number') return sofar;}
+		return sofar;}
+	    else return sofar;}
+	function textOff(node,pos){
+	    var off=get_text_off(node,pos,0);
+	    if (off) return off[0]; else return false;}
+	fdjtDOM.textOff=textOff;
+	
+	function getIDParent(scan) {
+	    while (scan) {
+		if (scan.id) break;
+		else scan=scan.parentNode;}
+	    return scan;}
+
+	fdjtDOM.getRangeInfo=function(range,within){
+	    var start=range.startContainer;
+	    if (!(within)) within=getIDParent(start);
+	    var start_edge=textOff(within,start,0);
+	    var end=range.endContainer;
+	    var ends_in=((start===end)?(within):
+			 (getParent(end,within))?(within):
+			 (getIDParent(end)));
+	    var end_edge=((start===end)?(start_edge):
+			  textOff(ends_in,end,0));
+	    return {start: start_edge+range.startOffset,
+		    starts_in: within.id,ends_in: ends_in.id,
+		    end: end_edge+range.endOffset};}
 
 	function findExcerpt(node,string,count){
 	    if (!(count)) count=1;
