@@ -199,7 +199,7 @@ var fdjtString=
 
 	function stdspace(string){
 	    var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
-	    string=string.replace(/\s+/," ");
+	    string=string.replace(/\s+/g," ");
 	    var start=0; var len=string.length; 
 	    if (len<=0) return string;
 	    while ((start<len)&&
@@ -214,7 +214,7 @@ var fdjtString=
 	fdjtString.stdspace=stdspace;
 
 	function flatten(string){
-	    return string.replace(/\s+/," ");}
+	    return string.replace(/\s+/g," ");}
 	fdjtString.flatten=flatten;
 
 	function oneline(string){
