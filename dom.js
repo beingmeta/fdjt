@@ -1742,17 +1742,18 @@ var fdjtDOM=
 		return cur;}
 	    else return cur;}
 
-	fdjtDOM.textPos=function(node,pos){
-	    return get_text_pos(node,pos,0);};
+	function textPos(node,pos,sofar){
+	    var result=get_text_pos(node,pos,sofar||0);
+	    if (typeof result !== 'number') return result;
+	    else return {node: node,off: pos};}
+	fdjtDOM.textPos=textPos;
 
 	fdjtDOM.refineRange=function(range){
 	    if ((range.startContainer.nodeType===3)&&
 		(range.endContainer.nodeType===3))
 		return range;
-	    var start_info=get_text_pos(
-		range.startContainer,range.startOffset,0);
-	    var end_info=get_text_pos(
-		range.endContainer,range.endOffset,0);
+	    var start_info=textPos(range.startContainer,range.startOffset);
+	    var end_info=textPos(range.endContainer,range.endOffset);
 	    var newrange=document.createRange();
 	    newrange.setStart(start_info.node,start_info.off);
 	    newrange.setEnd(end_info.node,end_info.off);
