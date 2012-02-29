@@ -1814,6 +1814,23 @@ var fdjtDOM=
 	    return false;}
 	fdjtDOM.findString=findString;
 
+	function findMatches(node,rx){
+	    var rx=((typeof rx==='string')?(new RegExp(rx,"gm")):(new RegExp(rx)));
+	    var fulltext=node2text(node);
+	    var match=rx.exec(fulltext), results=[];
+	    if (!(match)) return results;
+	    while (match) {
+		var end=get_text_pos(node,rx.lastIndex,0);
+		var start=get_text_pos(node,rx.lastIndex-match[0].length,0);
+		if ((!start)||(!end)) return results;
+		var range=document.createRange();
+		range.setStart(start.node,start.off);
+		range.setEnd(end.node,end.off);
+		results.push(range);
+		match=rx.exec(fulltext);}
+	    return results;}
+	fdjtDOM.findMatches=findMatches;
+
 	var docuri=false; var docbase=false;
 	function init_docuri(){
 	    if (docuri) return;
