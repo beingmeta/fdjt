@@ -82,23 +82,25 @@ fdjtUI.Highlight=(function(){
 	    var hnode=h[i++];
 	    if (hnode.firstChild)
 		fdjtDOM.replace(hnode,hnode.firstChild);}}
-    function highlight_node(node,hclass){
+    function highlight_node(node,hclass,htitle){
 	if (!(hclass)) hclass=highlight_class;
 	if (hasClass(node,hclass)) return node;
 	var hispan=fdjtDOM("span."+hclass);
+	if (htitle) hispan.title=htitle;
 	fdjtDOM.replace(node,hispan);
 	hispan.appendChild(node);}
-    function highlight_text(text,hclass){
-	return fdjtDOM("span."+(hclass||highlight_class),
-		       text);}
-    function highlight_node_range(node,start,end,hclass){
+    function highlight_text(text,hclass,htitle){
+	var tnode=fdjtDOM("span."+(hclass||highlight_class),text);
+	if (htitle) tnode.title=htitle;
+	return tnode;}
+    function highlight_node_range(node,start,end,hclass,htitle){
 	var stringval=node.nodeValue;
 	var parent=node.parentNode;
 	if ((end===false)||(typeof end === 'undefined'))
 	    end=stringval.length;
 	if (start===end) return;
 	var beginning=((start>0)&&(textnode(stringval.slice(0,start))));
-	var middle=highlight_text(stringval.slice(start,end),hclass);
+	var middle=highlight_text(stringval.slice(start,end),hclass,htitle);
 	var ending=((end<stringval.length)&&
 		    (textnode(stringval.slice(end))));
 	if ((beginning)&&(ending)) {
@@ -112,14 +114,14 @@ fdjtUI.Highlight=(function(){
 	    parent.replaceChild(ending,node);
 	    parent.insertBefore(middle,ending);}
 	else parent.replaceChild(middle,node);}
-    function highlight_range(range,hclass){
+    function highlight_range(range,hclass,htitle){
 	range=fdjtDOM.refineRange(range);
 	var starts_in=range.startContainer;
 	var ends_in=range.endContainer;
 	if (starts_in===ends_in)
 	    return highlight_node_range(
 		starts_in,range.startOffset,range.endOffset,
-		hclass);
+		hclass,htitle);
 	else {
 	    var scan=starts_in;
 	    while ((scan)&&(!(scan.nextSibling)))
@@ -136,8 +138,8 @@ fdjtUI.Highlight=(function(){
 		    scan=scan.nextSibling;}}
 	    // Do the ends
 	    highlight_node_range(
-		starts_in,range.startOffset,false,hclass);
-	    highlight_node_range(ends_in,0,range.endOffset,hclass);}}
+		starts_in,range.startOffset,false,hclass,htitle);
+	    highlight_node_range(ends_in,0,range.endOffset,hclass,htitle);}}
 
     highlight_range.clear=clear_highlights;
     highlight_range.highlight=highlight_range;
