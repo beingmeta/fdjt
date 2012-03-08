@@ -698,7 +698,8 @@ var fdjtKB=
 	    if ((this.pool.effects)&&(this.pool.effects[prop]))
 		this.pool.effects[prop](this,prop,val);
 	    if (this.pool.index)
-		this.pool.index(this,prop,val,true);};
+		this.pool.index(this,prop,val,true);
+	    return true;};
 	Ref.prototype.drop=function(prop,val){
 	    if (typeof val === 'undefined') val=this[prop];
 	    if (this.pool.xforms[prop])
