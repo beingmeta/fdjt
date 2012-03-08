@@ -1730,7 +1730,7 @@ var fdjtDOM=
 	    if (cur>pos) return false;
 	    else if (node.nodeType===3) {
 		var stringval=node.nodeValue;
-		if (pos<(cur+stringval.length))
+		if (pos<=(cur+stringval.length))
 		    return { node: node, off: pos-cur};
 		else return cur+stringval.length;}
 	    else if (node.nodeType===1) {
@@ -1815,13 +1815,15 @@ var fdjtDOM=
 	fdjtDOM.findString=findString;
 
 	function findMatches(node,rx){
-	    var rx=((typeof rx==='string')?(new RegExp(rx,"gm")):(new RegExp(rx)));
+	    var rx=((typeof rx==='string')?
+		    (new RegExp(rx,"gm")):
+		    (new RegExp(rx)));
 	    var fulltext=node2text(node);
 	    var match=rx.exec(fulltext), results=[];
 	    if (!(match)) return results;
 	    while (match) {
-		var end=get_text_pos(node,rx.lastIndex,0);
-		var start=get_text_pos(node,rx.lastIndex-match[0].length,0);
+		var end=textPos(node,rx.lastIndex,0);
+		var start=textPos(node,rx.lastIndex-match[0].length,0);
 		if ((!start)||(!end)) return results;
 		var range=document.createRange();
 		range.setStart(start.node,start.off);
