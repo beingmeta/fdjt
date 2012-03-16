@@ -29,9 +29,12 @@ fdjtUI.Collapsible=(fdjtUI.Collapsible)||{};
 fdjtUI.Tabs=(fdjtUI.Tabs)||{};
 fdjtUI.MultiText=(fdjtUI.MultiText)||{};
 
+
 /* Co-highlighting */
+
 /* When the mouse moves over a named element, the 'cohi' class is added to
    all elements with the same name. */
+
 (function(){
     var highlights={};
     function highlight(namearg,classname_arg){
@@ -64,7 +67,9 @@ fdjtUI.MultiText=(fdjtUI.MultiText)||{};
 	highlight(false,((classname_arg) || (fdjtUI.CoHi.classname)));};
 })();
 
+
 /* Text highlighting */
+
 fdjtUI.Highlight=(function(){
     var highlight_class="fdjthighlight";
     var hasClass=fdjtDOM.hasClass;
@@ -145,8 +150,11 @@ fdjtUI.Highlight=(function(){
     highlight_range.highlight=highlight_range;
     return highlight_range;})();
 
+
+
 /* CheckSpans:
    Text regions which include a checkbox where clicking toggles the checkbox. */
+
 (function(){
     var hasClass=fdjtDOM.hasClass;
     var addClass=fdjtDOM.addClass;
@@ -216,6 +224,53 @@ fdjtUI.Highlight=(function(){
 	return false;}
     fdjtUI.CheckSpan.onclick=checkspan_onclick;    
     })();
+
+
+/* Progress boxes */
+
+(function(){
+    function ProgressBar(arg){
+	if (typeof arg==='undefined')
+	    arg=fdjtDOM("div.fdjtprogress",
+			fdjtDOM("HR"),fdjtDOM("div.message"));
+	else if (typeof arg==='string')
+	    arg=fdjtDOM("div.fdjtprogress",
+			fdjtDOM("HR"),fdjtDOM("div.message",arg));
+	this.dom=arg;
+	return this;}
+
+    function setProgress(pb,progress,total){
+	if (typeof pb==='string')
+	    pb=document.getElementById(pb);
+	if (typeof total==='number')
+	    progress=100*(progress/total);
+	var dom=((pb.dom)||(pb));
+	var rule=fdjtDOM.getChildren(dom,"div.needle")[0];
+	rule.style.width=progress+"%";}
+    function setMessage(pb){
+	if (typeof pb==='string')
+	    pb=document.getElementById(pb);
+	var dom=((pb.dom)||(pb));
+	var oldmsg=fdjtDOM.getChildren(dom,".message")[0];
+	var newmsg=fdjtDOM("div.message");
+	fdjtDOM.appendArray(newmsg,fdjtDOM.Array(arguments,1));
+	dom.replaceChild(newmsg,oldmsg);}
+	
+    ProgressBar.setProgress=setProgress;
+    ProgressBar.setMessage=setMessage;
+    ProgressBar.prototype.setProgress=function(progress,total){
+	setProgress(this.dom,progress,total);};
+    ProgressBar.prototype.setMessage=function(val){
+	var dom=this.dom;
+	var oldmsg=fdjtDOM.getChildren(dom,".message")[0];
+	var newmsg=fdjtDOM("div.message");
+	fdjtDOM.appendArray(newmsg,fdjtDOM.Array(arguments));
+	dom.replaceChild(newmsg,oldmsg);};
+
+    fdjtUI.ProgressBar=ProgressBar;})();
+
+
+/* Automatic help display on focus */
 
 (function(){
 
@@ -306,22 +361,28 @@ fdjtUI.Highlight=(function(){
     fdjtUI.InputHelp.onblur=hide_help_onblur;})();
 
 
+
+/* Text input boxes which create checkspans on enter. */
+
 (function(){
-  function multitext_keypress(evt,sepch){
+    function multitext_keypress(evt,sepch){
 	evt=(evt)||(event);
 	var ch=evt.charCode;
 	var target=fdjtUI.T(evt);
 	if (typeof sepch === 'string') sepch=sepch.charCodeAt(0);
-	if ((ch!==13)&&(sepch)&&(sepch!=ch)) return;
+	if ((ch!==13)||((sepch)&&(sepch!=ch))) return;
 	fdjtUI.cancel(evt);
+	var checkspec=target.getAttribute("data-checkspec")||"div.checkspan";
 	var checkbox=
 	    fdjtDOM.Input("[type=checkbox]",target.name,target.value);
-	var div=fdjtDOM("div.checkspan",checkbox,target.value);
+	var checkelt=fdjtDOM(checkspec,checkbox,target.value);
 	checkbox.checked=true;
-	fdjtDOM(target.parentNode,div);
+	fdjtDOM.addClass(checkelt,"ischecked");
+	fdjtDOM(target.parentNode," ",checkelt);
 	target.value='';}
     fdjtUI.MultiText.keypress=multitext_keypress;})();
 
+
 /* Tabs */
 
 (function(){
@@ -433,15 +494,8 @@ fdjtUI.Highlight=(function(){
     fdjtUI.Tabs.getSelected=selected_tab;}());
 
 
-/* Delays */
-
-(function(){
-    var timeouts={};
-    
-    fdjtUI.Delay=function(interval,name,fcn){
-	window.setTimeout(fcn,interval);};}());
-
-/* Expansion */
+
+/* Collapse/Expand */
 
 fdjtUI.Expansion.toggle=function(evt,spec,exspec){
   evt=evt||event;
@@ -466,6 +520,7 @@ fdjtUI.Collapsible.focus=function(evt){
   if (wrapper) {
     fdjtDOM.toggleClass(wrapper,"expanded");};};
 
+
 /* Temporary Scrolling */
 
 (function(){
@@ -583,6 +638,17 @@ fdjtUI.Collapsible.focus=function(evt){
     fdjtUI.scrollPreview=scroll_preview;
     fdjtUI.scrollRestore=scroll_restore;}());
 
+
+/* Delays */
+
+(function(){
+    var timeouts={};
+    
+    fdjtUI.Delay=function(interval,name,fcn){
+	window.setTimeout(fcn,interval);};}());
+
+/* Triggering submit events */
+
 (function(){
     function dosubmit(evt){
 	evt=evt||event;
@@ -593,6 +659,8 @@ fdjtUI.Collapsible.focus=function(evt){
 	form.dispatchEvent(submit_event);
 	form.submit();}
     fdjtUI.dosubmit=dosubmit;}());
+
+/* Looking for vertical box overflow */
 
 (function(){
     var addClass=fdjtDOM.addClass;
@@ -605,6 +673,9 @@ fdjtUI.Collapsible.focus=function(evt){
 	if (inside.bottom>geom.bottom) addClass(node,"overflow");
 	else dropClass(node,"overflow");}
     fdjtUI.Overflow=checkOverflow;}());
+
+
+/* Miscellaneous event-related functions */
 
 (function(){
     var hasClass=fdjtDOM.hasClass;
