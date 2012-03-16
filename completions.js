@@ -430,5 +430,22 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	    cached_completions[name]=completions;}
 	if (!(completions)) return;
 	completions.docomplete(target);}
-    fdjtUI.Completions.onkey=onkey;}());
+    fdjtUI.Completions.onkey=onkey;
+    
+    function update(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	var name=target.name;
+	var completions=cached_completions[name];
+	var compid=fdjtDOM.getAttrib(target,"completions");
+	var dom=((compid)&&(fdjtID(compid)));
+	if (!(dom)) return;
+	if (!((completions)&&(completions.dom===dom))) {
+	    completions=new Completions(dom,target,default_options);
+	    cached_completions[name]=completions;}
+	if (!(completions)) return;
+	completions.docomplete(target);}
+    fdjtUI.Completions.update=update;
+
+}());
 
