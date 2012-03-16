@@ -5,8 +5,24 @@
 <script language='javascript' src='fdjt.js'></script>
 <script>
   function doit(event){
-  fdjtLog.notify("change is good, check=%o",fdjtID("CHECKBOX").checked);}
+    fdjtLog.notify("change is good, check=%o",fdjtID("CHECKBOX").checked);}
+function runProgressTest(){
+    var pbar=new fdjtUI.ProgressBar(fdjtID("PROGRESSTEST"));
+    pbar.setProgress(0);
+    var count=0; var timer;
+    timer=setInterval(function(){
+			  if (count>=100) {
+			      pbar.setMessage("Now, that's progress!");
+			      clearInterval(timer);
+			      return;}
+			  count=count+5;
+			  pbar.setProgress(count);
+			  pbar.setMessage("progress=",count);},
+		      500);}
 </script>
+<style>
+div#PROGRESSTEST { height: 3ex;} 
+</style>
 </head>
 <body>
 <div onclick='fdjtUI.CheckSpan.onclick(event);' id='THEDIV'>
@@ -15,11 +31,29 @@
 	   onchange="doit();"/>
     Check me</span>
 </div>
+<div onclick='fdjtUI.CheckSpan.onclick(event);'>
+  <form>
+    <div><input type='TEXT' NAME='bar' value=''
+		placeholder="add lines"
+		onkeypress='fdjtUI.MultiText.keypress(event);'/>
+      </div>
+    </form>
+</div>
+<div onclick='fdjtUI.CheckSpan.onclick(event);'>
+  <form>
+    <div>
+      <input type='TEXT' NAME='baz' value=''
+	     placeholder="add strings" data-checkspec="span.checkspan"
+	     onkeypress='fdjtUI.MultiText.keypress(event);'/>
+    </div>
+  </form>
+</div>
 <div>
   <form>
     <div><input type='TEXT' NAME='foo' value=''
 		completions='FOOCOMPLETIONS' autocomplete="off"
-		onkeydown='fdjtUI.Completions.onkeydown(event);'
+		placeholder="abgd..."
+		onkeydown='fdjtUI.Completions.onkey(event);'
 		onkeypress='fdjtUI.Completions.update(event);'
 		onfocus='fdjtUI.Completions.update(event);'/>
     </div>
@@ -35,5 +69,10 @@
       </div>
   </form>
 </div>
+<div class="fdjtprogress" id="PROGRESSTEST">
+  <div class="needle"></div>
+  <div class="message">This is progress?</div>
+</div>
+<p><a href="javascript:runProgressTest();">Show me some progress</a></p>
 </body>
 </html>
