@@ -344,6 +344,7 @@ var CodexLayout=
 	    this.roots=init.roots||false; // Where all roots can be bracked
 	    this.root_count=0; // Number of root nodes added
 	    this.block_count=0;
+	    this.lastid=false;
 	    
 	    var pagerule=this.pagerule=init.pagerule||false;
 	    
@@ -371,6 +372,7 @@ var CodexLayout=
 		    var i=0, n=blocks.length; while (i<n) {
 			var block=blocks[i]; var style=styles[i];
 			var terminal=terminals[i]||false;
+			if (block.id) this.lastid=block.id;
 			// FIRST, HANDLE DRAGGING
 			// If this block is terminal and we don't want
 			//  to break before this block or after the
