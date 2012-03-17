@@ -366,8 +366,6 @@ var CodexLayout=
 				trace,progressfn,donefn) {
 
 		var start=fdjtTime();
-		var loop_start=start;
-
 		if (!(page)) newPage();
 
 		if (typeof trace === 'undefined') trace=layout.tracelevel;
@@ -793,11 +791,12 @@ var CodexLayout=
 		    addClass(node,"codextweaked");}
 
 		function loop(){
-		    var now=fdjtTime();
-		    while ((i<n)&&((now-loop_start)<timeslice)) step();
+		    var loop_start=fdjtTime();
+		    while ((i<n)&&((fdjtTime()-loop_start)<timeslice))
+			step();
 		    if (progressfn) progressfn(layout);
-		    if (i<n)
-			layout.timer=setTimeout(loop,timeskip||timeslice);
+		    if (i<n) layout.timer=
+			setTimeout(loop,timeskip||timeslice);
 		    else if (donefn) {
 			layout.timer=false;
 			donefn(layout);}
