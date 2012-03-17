@@ -232,7 +232,7 @@ fdjtUI.Highlight=(function(){
     function ProgressBar(arg){
 	if (typeof arg==='undefined')
 	    arg=fdjtDOM("div.fdjtprogress",
-			fdjtDOM("HR"),fdjtDOM("div.message"));
+			fdjtDOM("div.indicator"),fdjtDOM("div.message"));
 	else if (typeof arg==='string')
 	    arg=fdjtDOM("div.fdjtprogress",
 			fdjtDOM("HR"),fdjtDOM("div.message",arg));
@@ -245,7 +245,7 @@ fdjtUI.Highlight=(function(){
 	if (typeof total==='number')
 	    progress=100*(progress/total);
 	var dom=((pb.dom)||(pb));
-	var rule=fdjtDOM.getChildren(dom,"div.needle")[0];
+	var rule=fdjtDOM.getChildren(dom,"div.indicator")[0];
 	rule.style.width=progress+"%";}
     function setMessage(pb){
 	if (typeof pb==='string')
