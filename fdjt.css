@@ -550,7 +550,8 @@ div.fdjtprogress {
 div.fdjtprogress div.indicator {
     position: absolute; left: 0px; top: 0px; z-index: 50;
     background-color: lightblue; height: 100%; width: 0%;
-    margin: 0px; padding: 0px; border: 0px;}
+    margin: 0px; padding: 0px; border: 0px;
+    border-right: solid darkblue 2px;}
 div.fdjtprogress div.message {
     position: absolute; left: 0px; top: 0px; z-index: 100;
     width: 100%; height: 100%;
