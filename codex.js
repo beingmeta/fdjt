@@ -56,6 +56,44 @@ var CodexLayout=
 	var forward=fdjtDOM.forward;
 	var TOA=fdjtDOM.toArray;
 	
+	function getGeom(elt,root){
+	    var top = elt.offsetTop;
+	    var left = elt.offsetLeft;
+	    var width=elt.offsetWidth;
+	    var height=elt.offsetHeight;
+	    var rootp=((root)&&(root.offsetParent));
+
+	    if (elt===root) 
+		return {left: 0,top: 0,width:width,height: height};
+	    elt=elt.offsetParent;
+	    while (elt) {
+		if ((root)&&((elt===root)||(elt===rootp))) break;
+		top += elt.offsetTop;
+		left += elt.offsetLeft;
+		elt=elt.offsetParent;}
+	    
+	    return {left: left, top: top, width: width,height: height,
+		    right:left+width,bottom:top+height};}
+
+	function getGeomX(elt,root){
+	    var top = elt.offsetTop;
+	    var left = elt.offsetLeft;
+	    var width=elt.offsetWidth;
+	    var height=elt.offsetHeight;
+	    var rootp=((root)&&(root.offsetParent));
+
+	    if (elt===root) 
+		return {left: 0,top: 0,width:width,height: height};
+	    elt=elt.offsetParent;
+	    while (elt) {
+		if ((root)&&((elt===root)||(elt===rootp))) break;
+		top += elt.offsetTop;
+		left += elt.offsetLeft;
+		elt=elt.offsetParent;}
+	    
+	    return {left: left, top: top, width: width,height: height,
+		    right:left+width,bottom:top+height};}
+
 	var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
 	
 	function isEmpty(string){
@@ -95,7 +133,7 @@ var CodexLayout=
 		var style=getStyle(node); var children;
 		if ((style.position==='static')&&
 		    ((node.tagName==='img')||(style.display!=='inline'))) {
-		    var geom=getGeometry(node,box);
+		    var geom=getGeom(node,box);
 		    if ((left===false)||(geom.left<left)) left=geom.left;
 		    if ((top===false)||(geom.top<top)) top=geom.top;
 		    if ((right===false)||(geom.right>right)) right=geom.right;
@@ -119,7 +157,7 @@ var CodexLayout=
 	/* Scaling things */
 	
 	function scaleImage(image,scale,geom){
-	    if (!(geom)) geom=getGeometry(image);
+	    if (!(geom)) geom=getGeom(image);
 	    // Set image width/height explicitly rather than
 	    // scaling because that's more portable
 	    var w=Math.round(geom.width*scale);
@@ -436,7 +474,7 @@ var CodexLayout=
 		    // split or tweaked Note that we may process
 		    // an element [i] more than once if we split
 		    // the node and part of the split landed back in [i].
-		    var geom=getGeometry(block,page);
+		    var geom=getGeom(block,page);
 		    if (trace>2) logfn("Layout/loop %o %j",block,geom);
 		    if ((terminal)&&(geom.bottom>page_height)) {
 			// We're a terminal node and we extend
@@ -464,7 +502,7 @@ var CodexLayout=
 			    // If the block couldn't be split, try to tweak it
 			    // Could this be removed entirely?
 			    if (hasClass(block,"codexcantsplit")) {
-				var geom=getGeometry(block,page);
+				var geom=getGeom(block,page);
 				if (geom.bottom>page_height) {
 				    // Still over the edge, so tweak it
 				    if (!(hasClass(block,"codexavoidtweak")))
@@ -610,7 +648,7 @@ var CodexLayout=
 		    var children=TOA(node.childNodes);
 		    var i=children.length-1;
 		    while (i>=0) node.removeChild(children[i--]);
-		    var geom=getGeometry(node);
+		    var geom=getGeom(node);
 		    if (geom.bottom>page_height) {
 			// If the version without any children is
 			// already over the edge, just start a new
@@ -631,7 +669,7 @@ var CodexLayout=
 		    while (i<n) {
 			var child=children[i++]; var nodetype=child.nodeType;
 			// Add the child back and get the geometry
-			node.appendChild(child); geom=getGeometry(node);
+			node.appendChild(child); geom=getGeom(node);
 			if (geom.bottom>page_height) { // Over the edge
 			    if ((nodetype!==3)&&(!((hasContent(node,child,true)))))
 				// If there's no content before the
@@ -682,7 +720,7 @@ var CodexLayout=
 					words.slice(0,w).join(""));
 				    node.replaceChild(newprobe,probenode);
 				    probenode=newprobe;
-				    geom=getGeometry(node);
+				    geom=getGeomX(node);
 				    // If the probe node put us over, break;
 				    if (geom.bottom>page_height) break;}
 				// We're done searching for the word break
@@ -775,7 +813,7 @@ var CodexLayout=
 					     (img.getAttribute('height'))) {
 					addClass(img,'codexavoidtweak');
 					continue;}
-				    var igeom=getGeometry(img,page);
+				    var igeom=getGeom(img,page);
 				    // If the node doesn't have any
 				    //  dimensions, it hasn't been loaded,
 				    //  so don't try tweaking the page
@@ -785,7 +823,7 @@ var CodexLayout=
 					igeom.width/geom.width,
 					igeom.height/geom.height);
 				    scaleImage(img,scale*relscale,igeom);}}}
-			ngeom=getGeometry(node,page,true);
+			ngeom=getGeom(node,page,true);
 			if (ngeom.height===geom.height)
 			    addClass(node,"codexuntweakable");}
 		    addClass(node,"codextweaked");}
@@ -816,7 +854,7 @@ var CodexLayout=
 	    function finishPage(completed) {
 		var bounds=insideBounds(completed);
 		if (!((page_width)&&(page_height))) {
-		    var geom=getGeometry(completed);
+		    var geom=getGeom(completed);
 		    if (!(page_width)) page_width=geom.width;
 		    if (!(page_height)) page_height=geom.height;}
 		if ((bounds.width>page_width)||(bounds.height>page_height)) {
