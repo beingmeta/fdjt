@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; Character-encoding: utf-8; -*- */
 
-/* Copyright (C) 2009-2011 beingmeta, inc.
+/* Copyright (C) 2009-2012 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    It implements a method for breaking narrative HTML content
    across multiple pages, attempting to honor page break constraints,
@@ -348,109 +348,134 @@ var CodexLayout=
 	    
 	    var pagerule=this.pagerule=init.pagerule||false;
 	    
-	    function addContent(root,trace) {
+	    // Notes on new sliced design:
+
+	    //  addContent current calls loop() exactly once, so it's
+	    //  not really a loop.  We move the work of loop() before
+	    //  the iteration (the while iteration over blocks) out of
+	    //  loop() and make loop() the inner block of the while
+	    //  loop.  We then have loop() check a timeslice and use
+	    //  setTimeout to postpone it's continuation.  addContent
+	    //  takes an optional timeslice arg (in msecs) and an
+	    //  optional whendone function and progress reporting
+	    //  function.  If root is an array, we should probably
+	    //  iterate over it, which means moving most of the
+	    //  layout.js code back into here.
+
+	    function addContent(root,timeslice,timeskip,
+				trace,progressfn,donefn) {
+
+		var start=fdjtTime();
+		var loop_start=start;
 
 		if (!(page)) newPage();
 
 		if (typeof trace === 'undefined') trace=layout.tracelevel;
-		if (!(layout.started)) layout.started=fdjtTime();
+		if (typeof progressfn === 'undefined')
+		    progressfn=layout.progressfn||false;
+		if (!(layout.started)) layout.started=start;
 		layout.root_count++;
 
-		function loop(node){
-		    var blocks=[], terminals=[], styles=[];
-		    // gather all of the block-level elements
-		    // (recursively) in the node, noting which ones
-		    // are terminals
-		    gatherBlocks(node,blocks,terminals,styles);
-		    layout.block_count=layout.block_count+blocks.length;
-		    // Then move the node onto the current page; we
-		    // set node, because it might be transformed in
-		    // some way when moved (if, for example, it is a
-		    // text node, it will be wrapped).
-		    node=moveNodeToPage(node,page,dups);
-		    // Iterate over all of the blocks
-		    var i=0, n=blocks.length; while (i<n) {
-			var block=blocks[i]; var style=styles[i];
-			var terminal=terminals[i]||false;
-			if (block.id) this.lastid=block.id;
-			// FIRST, HANDLE DRAGGING
-			// If this block is terminal and we don't want
-			//  to break before this block or after the
-			//  preceding block, drag along the previous block.
-			//  NOTE that dragged blocks have already been placed.
-			if ((block)&&(terminal)&&(prev)&&
-			    ((avoidBreakBefore(block,style))||
-			     (avoidBreakAfter(prev,prevstyle))))
-			    drag.push(prev);
-			else if ((block)&&(terminal))
-			    // Otherwise, we don't have to worry about
-			    // what we're dragging along
-			    layout.drag=drag=[];
-			else {}
-			// If a block is false, continue
-			if (!(block)) {i++; continue;}
-			else if ((hasClass(block,/\bcodexfloatpage\b/))||
-				 ((floatpages)&&(testNode(block.floatpages)))) {
-			    // Float pages just get pushed (until newPage bfelow)
-			    float_pages.push[block]; i++; continue;}
-			else if ((hasClass(block,/\bcodexfullpage\b/))||
-				 ((fullpages)&&(testNode(block.fullpages)))) {
-			    // Full pages automatically get their own page
-			    prev=false; layout.drag=drag=[];
-			    fullPage(block);
-			    i++; continue;}
-			else if ((page.childNodes.length)&&
-				 (forcedBreakBefore(block,style))) {
-			    // This is the easy case.  Note that we
-			    // don't force a page break if the current
-			    // page is empty.
-			    prev=false; layout.drag=drag=[];
-		    	    newPage(block);}
-			else moveNodeToPage(block,page,dups);
-			// Finally, we check if everything fits We're
-			// walking through the blocks[] but only
-			// advance when an element fits or can't be
-			// split or tweaked Note that we may process
-			// an element [i] more than once if we split
-			// the node and part of the split landed back in [i].
-			var geom=getGeometry(block,page);
-			if (trace>2) logfn("Layout/loop %o %j",block,geom);
-			if ((terminal)&&(geom.bottom>page_height)) {
-			    // We're a terminal node and we extend
-			    // below the bottom of the page
-			    if (geom.top>page_height)
-				// If our top is also over the bottom of the page,
-				//  we just start a new page
-				newPage(block);
-			    else if (hasClass(block,"codexcantsplit")) {
-				// If we can't split this block (this
-				// class might be added by previous
-				// processing), we try to tweak it
-				// (which means using CSS magic for
-				// scaling, etc).
-				if (!((hasClass(block,"codextweaked"))||
-				      (hasClass(block,"codexavoidtweak"))))
-				    tweakBlock(block);
-				i++;}
-			    else {
-				// Now we try to split the block, we
-				// store the 'split block' back in the
-				// blocks variable because we might
-				// need to split it again.
-				blocks[i]=splitBlock(block);
-				// If the block couldn't be split, try to tweak it
-				// Could this be removed entirely?
-				if (hasClass(block,"codexcantsplit")) {
-				    var geom=getGeometry(block,page);
-				    if (geom.bottom>page_height) {
-					// Still over the edge, so tweak it
-					if (!(hasClass(block,"codexavoidtweak")))
-					    tweakBlock(block);}
-				    i++;}}}
-			// We fit on the page, so we'll look at the next block.
-			else i++;
-			// Update the prev pointer for terminals
-			if (terminal) {layout.prev=prev=block;}}}
+		var blocks=[], terminals=[], styles=[];
+		// gather all of the block-level elements
+		// (recursively) in the node, noting which ones
+		// are terminals
+		gatherBlocks(root,blocks,terminals,styles);
+		layout.block_count=layout.block_count+blocks.length;
+
+		// Then move the node onto the current page; we
+		// set node to the result of the move, because the
+		// node might be transformed in some way when
+		// moved (if, for example, it is a text node, it
+		// might be split).
+		node=moveNodeToPage(root,page,dups);
+		
+		var i=0, n=blocks.length; 
+		    
+		function step(){
+		    var block=blocks[i]; var style=styles[i];
+		    var terminal=terminals[i]||false;
+		    if (block.id) layout.lastid=block.id;
+		    // FIRST, HANDLE DRAGGING If this block is
+		    // terminal and we don't want to break before
+		    // this block or after the preceding block,
+		    // drag along the previous block to the new
+		    // page.  NOTE that dragged blocks have
+		    // already been placed, so the previous page
+		    // will end up short.  Them's the breaks.
+		    if ((block)&&(terminal)&&(prev)&&
+			((avoidBreakBefore(block,style))||
+			 (avoidBreakAfter(prev,prevstyle))))
+			drag.push(prev);
+		    else if ((block)&&(terminal))
+			// Otherwise, we don't have to worry about
+			// what we're dragging along
+			layout.drag=drag=[];
+		    else {}
+		    // If a block is false, continue
+		    if (!(block)) {i++; return;}
+		    else if ((hasClass(block,/\bcodexfloatpage\b/))||
+			     ((floatpages)&&(testNode(block.floatpages)))) {
+			// Float pages just get pushed (until newPage bfelow)
+			float_pages.push[block]; i++; return;}
+		    else if ((hasClass(block,/\bcodexfullpage\b/))||
+			     ((fullpages)&&(testNode(block.fullpages)))) {
+			// Full pages automatically get their own page
+			prev=false; layout.drag=drag=[];
+			fullPage(block);
+			i++; return;}
+		    else if ((page.childNodes.length)&&
+			     (forcedBreakBefore(block,style))) {
+			// This is the easy case.  Note that we
+			// don't force a page break if the current
+			// page is empty.
+			prev=false; layout.drag=drag=[];
+		    	newPage(block);}
+		    else moveNodeToPage(block,page,dups);
+		    // Finally, we check if everything fits We're
+		    // walking through the blocks[] but only
+		    // advance when an element fits or can't be
+		    // split or tweaked Note that we may process
+		    // an element [i] more than once if we split
+		    // the node and part of the split landed back in [i].
+		    var geom=getGeometry(block,page);
+		    if (trace>2) logfn("Layout/loop %o %j",block,geom);
+		    if ((terminal)&&(geom.bottom>page_height)) {
+			// We're a terminal node and we extend
+			// below the bottom of the page
+			if (geom.top>page_height)
+			    // If our top is also over the bottom of the page,
+			    //  we just start a new page
+			    newPage(block);
+			else if (hasClass(block,"codexcantsplit")) {
+			    // If we can't split this block (this
+			    // class might be added by previous
+			    // processing), we try to tweak it
+			    // (which means using CSS magic for
+			    // scaling, etc).
+			    if (!((hasClass(block,"codextweaked"))||
+				  (hasClass(block,"codexavoidtweak"))))
+				tweakBlock(block);
+			    i++;}
+			else {
+			    // Now we try to split the block, we
+			    // store the 'split block' back in the
+			    // blocks variable because we might
+			    // need to split it again.
+			    blocks[i]=splitBlock(block);
+			    // If the block couldn't be split, try to tweak it
+			    // Could this be removed entirely?
+			    if (hasClass(block,"codexcantsplit")) {
+				var geom=getGeometry(block,page);
+				if (geom.bottom>page_height) {
+				    // Still over the edge, so tweak it
+				    if (!(hasClass(block,"codexavoidtweak")))
+					tweakBlock(block);}
+				i++;}}}
+		    // We fit on the page, so we'll look at the next block.
+		    else i++;
+		    // Update the prev pointer for terminals
+		    if (terminal) {layout.prev=prev=block;}}
 
 		// Gather all the block-level elements inside a node,
 		// recording which ones are terminals (don't have any
@@ -767,8 +792,22 @@ var CodexLayout=
 			    addClass(node,"codexuntweakable");}
 		    addClass(node,"codextweaked");}
 
-		
-		loop(root);
+		function loop(){
+		    var now=fdjtTime();
+		    while ((i<n)&&((now-loop_start)<timeslice)) step();
+		    if (progressfn) progressfn(layout);
+		    if (i<n)
+			layout.timer=setTimeout(loop,timeskip||timeslice);
+		    else if (donefn) {
+			layout.timer=false;
+			donefn(layout);}
+		    else layout.timer=false;}
+
+		// This is the inner loop
+		if (!(timeslice)) {
+		    while (i<n) step();
+		    if (donefn) donefn(layout);}
+		else loop();
 		
 		return this;}
 	    this.addContent=addContent;
