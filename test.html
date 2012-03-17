@@ -17,8 +17,8 @@ function runProgressTest(){
 			      return;}
 			  count=count+5;
 			  pbar.setProgress(count);
-			  pbar.setMessage("progress=",count);},
-		      500);}
+                          pbar.setMessage("progress=",count);},
+		      1000);}
 </script>
 <style>
 div#PROGRESSTEST { height: 3ex;} 
@@ -70,7 +70,7 @@ div#PROGRESSTEST { height: 3ex;}
   </form>
 </div>
 <div class="fdjtprogress" id="PROGRESSTEST">
-  <div class="needle"></div>
+  <div class="indicator"></div>
   <div class="message">This is progress?</div>
 </div>
 <p><a href="javascript:runProgressTest();">Show me some progress</a></p>
