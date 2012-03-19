@@ -426,11 +426,11 @@ var CodexLayout=
 		// might be split).
 		node=moveNodeToPage(root,page,dups);
 		
-		var i=0, n=blocks.length; 
+		var ni=0, nblocks=blocks.length; 
 		    
 		function step(){
-		    var block=blocks[i]; var style=styles[i];
-		    var terminal=terminals[i]||false;
+		    var block=blocks[ni]; var style=styles[ni];
+		    var terminal=terminals[ni]||false;
 		    if (block.id) layout.lastid=block.id;
 		    // FIRST, HANDLE DRAGGING If this block is
 		    // terminal and we don't want to break before
@@ -449,11 +449,11 @@ var CodexLayout=
 			layout.drag=drag=[];
 		    else {}
 		    // If a block is false, continue
-		    if (!(block)) {i++; return;}
+		    if (!(block)) {ni++; return;}
 		    else if ((hasClass(block,/\bcodexfloatpage\b/))||
 			     ((floatpages)&&(testNode(block.floatpages)))) {
 			// Float pages just get pushed (until newPage bfelow)
-			float_pages.push[block]; i++; return;}
+			float_pages.push[block]; ni++; return;}
 		    else if ((hasClass(block,/\bcodexfullpage\b/))||
 			     ((fullpages)&&(testNode(block.fullpages)))) {
 			// Full pages automatically get their own page
@@ -492,13 +492,13 @@ var CodexLayout=
 			    if (!((hasClass(block,"codextweaked"))||
 				  (hasClass(block,"codexavoidtweak"))))
 				tweakBlock(block);
-			    i++;}
+			    ni++;}
 			else {
 			    // Now we try to split the block, we
 			    // store the 'split block' back in the
 			    // blocks variable because we might
 			    // need to split it again.
-			    blocks[i]=splitBlock(block);
+			    blocks[ni]=splitBlock(block);
 			    // If the block couldn't be split, try to tweak it
 			    // Could this be removed entirely?
 			    if (hasClass(block,"codexcantsplit")) {
@@ -507,9 +507,9 @@ var CodexLayout=
 				    // Still over the edge, so tweak it
 				    if (!(hasClass(block,"codexavoidtweak")))
 					tweakBlock(block);}
-				i++;}}}
+				ni++;}}}
 		    // We fit on the page, so we'll look at the next block.
-		    else i++;
+		    else ni++;
 		    // Update the prev pointer for terminals
 		    if (terminal) {layout.prev=prev=block;}}
 
@@ -699,32 +699,40 @@ var CodexLayout=
 				// want to avoid ragged lines
 				var text=((nodetype===3)?(child.nodeValue):
 					  (child.firstChild.nodeValue));
-				var words=text.split(/\b/g);
+				var words=text.split(/\s+/g);
 				var probenode=child;
 				// If there's only one word, no splitting today,
 				//  just push the node itself onto the next page
 				if (words.length<2) {page_break=child; break;}
-				// Try to find where the page should
-				// break by advancing via words and
-				// replacing the content of the text
-				// node.
-				var w=0; var wlen=words.length; var wordstart;
-				// We consider all the breaks that
-				// don't start with non-word
-				// characters (e.g. punctuation, etc).
-				while (w<wlen) {
-				    wordstart=w++;
-				    while ((w<wlen)&&(words[w].search(/\w/)<0)) w++;
-				    // The newprobe is a try at a break point of w
+				var w=0; var wlen=words.length;
+				var wbreak=Math.floor(wlen/2);
+				var foundbreak=false;
+				var wtop=wlen; var wbot=0;
+				while ((wbreak>=wbot)&&(wbreak<wtop)) {
 				    var newprobe=document.createTextNode(
-					words.slice(0,w).join(""));
+					words.slice(0,wbreak).join(" "));
 				    node.replaceChild(newprobe,probenode);
 				    probenode=newprobe;
 				    geom=getGeomX(node);
-				    // If the probe node put us over, break;
-				    if (geom.bottom>page_height) break;}
+				    if (geom.bottom>page_height) {
+					wtop=wbreak;
+					wbreak=wbot+
+					    Math.floor((wbreak-wbot)/2);}
+				    else {
+					var nextw=document.createTextNode(
+					    words[wbreak+1]);
+					node.appendChild(nextw);
+					var ngeom=getGeomX(node);
+					node.removeChild(nextw);
+					if (ngeom.bottom>page_height) {
+					    foundbreak=true; break;}
+					else {
+					    wbot=wbreak+1;
+					    wbreak=wbreak+
+						Math.floor((wtop-wbreak)/2);}}}
+				if (wbreak+1===wtop) foundbreak=true;
 				// We're done searching for the word break
-				if ((wordstart===0)||(wordstart===wlen)) {
+				if ((wbreak===0)||(wbreak===wlen-1)) {
 				    // If we didn't find anything, put
 				    // the child back and make it into
 				    // the page break
@@ -734,9 +742,9 @@ var CodexLayout=
 				else { // Do the split
 				    page_break=document.createTextNode(
 					// This is the text pushed onto the new page
-					words.slice(wordstart).join(""));
+					words.slice(wbreak).join(" "));
 				    var keep=document.createTextNode(
-					words.slice(0,wordstart).join(""));
+					words.slice(0,wbreak).join(" "));
 				    // We replace the probe node with 'keep'
 				    node.replaceChild(keep,probenode);
 				    // And insert the page break after 'keep'
@@ -830,10 +838,11 @@ var CodexLayout=
 
 		function loop(){
 		    var loop_start=fdjtTime();
-		    while ((i<n)&&((fdjtTime()-loop_start)<timeslice))
+		    while ((ni<nblocks)&&
+			   ((fdjtTime()-loop_start)<timeslice))
 			step();
 		    if (progressfn) progressfn(layout);
-		    if (i<n) layout.timer=
+		    if (ni<nblocks) layout.timer=
 			setTimeout(loop,timeskip||timeslice);
 		    else if (donefn) {
 			layout.timer=false;
@@ -842,7 +851,7 @@ var CodexLayout=
 
 		// This is the inner loop
 		if (!(timeslice)) {
-		    while (i<n) step();
+		    while (ni<nblocks) step();
 		    if (donefn) donefn(layout);}
 		else loop();
 		
