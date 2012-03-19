@@ -56,6 +56,8 @@ var CodexLayout=
 	var forward=fdjtDOM.forward;
 	var TOA=fdjtDOM.toArray;
 	
+	var floor=Math.floor;
+
 	function getGeom(elt,root){
 	    var top = elt.offsetTop;
 	    var left = elt.offsetLeft;
@@ -699,25 +701,35 @@ var CodexLayout=
 				// want to avoid ragged lines
 				var text=((nodetype===3)?(child.nodeValue):
 					  (child.firstChild.nodeValue));
-				var words=text.split(/\s+/g);
-				var probenode=child;
+				var breaks=text.split(/\b/g), words=[];
+				var word=false; var probenode=child;
+				var bi=0, blen=breaks.length;
+				if (blen<2) {page_break=child; break;}
+				while (bi<blen) {
+				    var s=breaks[bi++];
+				    if (!(word)) word=s;
+				    else if (s.search(/\s/)===0) {
+					words.push(word);
+					if (bi<blen) word=s+breaks[bi++];}
+				    else word=word+s;}
+				if (word) words.push(word);
 				// If there's only one word, no splitting today,
 				//  just push the node itself onto the next page
 				if (words.length<2) {page_break=child; break;}
 				var w=0; var wlen=words.length;
-				var wbreak=Math.floor(wlen/2);
+				var wbreak=floor(wlen/2);
 				var foundbreak=false;
 				var wtop=wlen; var wbot=0;
 				while ((wbreak>=wbot)&&(wbreak<wtop)) {
 				    var newprobe=document.createTextNode(
-					words.slice(0,wbreak).join(" "));
+					words.slice(0,wbreak).join(""));
 				    node.replaceChild(newprobe,probenode);
 				    probenode=newprobe;
 				    geom=getGeomX(node);
 				    if (geom.bottom>page_height) {
 					wtop=wbreak;
 					wbreak=wbot+
-					    Math.floor((wbreak-wbot)/2);}
+					    floor((wbreak-wbot)/2);}
 				    else {
 					var nextw=document.createTextNode(
 					    words[wbreak+1]);
@@ -729,7 +741,7 @@ var CodexLayout=
 					else {
 					    wbot=wbreak+1;
 					    wbreak=wbreak+
-						Math.floor((wtop-wbreak)/2);}}}
+						floor((wtop-wbreak)/2);}}}
 				if (wbreak+1===wtop) foundbreak=true;
 				// We're done searching for the word break
 				if ((wbreak===0)||(wbreak===wlen-1)) {
@@ -742,9 +754,9 @@ var CodexLayout=
 				else { // Do the split
 				    page_break=document.createTextNode(
 					// This is the text pushed onto the new page
-					words.slice(wbreak).join(" "));
+					words.slice(wbreak).join(""));
 				    var keep=document.createTextNode(
-					words.slice(0,wbreak).join(" "));
+					words.slice(0,wbreak).join(""));
 				    // We replace the probe node with 'keep'
 				    node.replaceChild(keep,probenode);
 				    // And insert the page break after 'keep'
