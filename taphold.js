@@ -22,8 +22,8 @@
 
 var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 fdjtUI.TapHold=(function(){
-    var trace_taps=false;
-    var debug_taps=false;
+    var trace_taps=true;
+    var debug_taps=true;
     var window_setup=false;
     
     var touched=false;
@@ -36,6 +36,9 @@ fdjtUI.TapHold=(function(){
     var touch_y=false;
     
     var getGeometry=fdjtDOM.getGeometry;
+    var addClass=fdjtDOM.addClass;
+    var hasClass=fdjtDOM.hasClass;
+    var hasParent=fdjtDOM.hasParent;
 
     function getTarget(evt){
 	if ((evt.changedTouches)&&((evt.changedTouches.length)))
@@ -95,6 +98,7 @@ fdjtUI.TapHold=(function(){
 
     function TapHold(elt){
 	elt=elt||window;
+	addClass(elt,"fdjtaphold");
 	fdjtDOM.addListener(elt,"mousemove",mousemove);
 	fdjtDOM.addListener(elt,"touchmove",mousemove);
 	fdjtDOM.addListener(elt,"touchstart",mousedown);
@@ -102,6 +106,8 @@ fdjtUI.TapHold=(function(){
 	fdjtDOM.addListener(elt,"mouseup",mouseup);
     	fdjtDOM.addListener(elt,"touchend",mouseup);
 	if (!(window_setup)) {
+	    fdjtDOM.addListener(document,"mousemove",outer_mousemove);
+	    fdjtDOM.addListener(document,"touchmove",outer_mousemove);
 	    fdjtDOM.addListener(document,"keydown",keydown);
 	    fdjtDOM.addListener(document,"keyup",keyup);
 	    window_setup=window;}
@@ -136,6 +142,14 @@ fdjtUI.TapHold=(function(){
 	else if (pressed) {released(pressed,evt);}
 	touched=false; pressed=false;}
 
+    function outer_mousemove(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	if (!(hasParent(target,".fdjtaphold"))) {
+	    if (pressed) released(pressed);
+	    pressed=th_target=false;
+	    return;}}
+
     function mousemove(evt){
 	evt=evt||event;
 	var target=fdjtUI.T(evt);
@@ -147,14 +161,16 @@ fdjtUI.TapHold=(function(){
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
 	    return;
-	// else fdjtUI.cancel(evt);
-	if ((pressed)&&(th_target!==pressed)) {
+	else fdjtUI.cancel(evt);
+	if ((pressed)&&
+	    (th_target!==pressed)) {
 	    if (trace_taps)
-		fdjtLog("move %o %o %d,%d",th_target,th_target.name,touch_x,touch_y);
+		fdjtLog("move %o %o %d,%d",
+			th_target,th_target.name,touch_x,touch_y);
 	    slipped(pressed);
 	    pressed=th_target;
 	    held(pressed);}}
-
+    
     function keydown(evt){
 	evt=evt||event;
 	if (evt.keyCode===16) {
