@@ -23,6 +23,9 @@
 var fdjtLog=(function(){
     var backlog=[];
 
+    var logreq=false;
+    var logreqs=[];
+
     function fdjtLog(string){
 	var output=false;
 	if (((fdjtLog.doformat)||(string.search("%j")))&&
@@ -31,6 +34,10 @@ var fdjtLog=(function(){
 	if (fdjtLog.console_fn) {
 	    if (output) fdjtLog.console_fn.call(fdjtLog.console,output);
 	    else fdjtLog.console_fn.apply(fdjtLog.console,arguments);}
+	if (fdjtLog.logurl) {
+	    var msg="["+fdjtET()+"s] "+fdjtString.apply(null,arguments);
+	    console.log("remote logging %s",msg);
+	    remote_log(msg);}
 	if (fdjtLog.console) {
 	    var domconsole=fdjtLog.console;
 	    var timespan=fdjtDOM("span.time",fdjtET());
@@ -67,6 +74,13 @@ var fdjtLog=(function(){
     fdjtLog.console=null;
     fdjtLog.id="$Id$";
     fdjtLog.version=parseInt("$Revision$".slice(10,-1));
+
+    function remote_log(msg){
+	var req=new XMLHttpRequest();
+	req.open('POST',fdjtLog.logurl,true);
+	req.setRequestHeader("Content-type","text; charset=utf-8");
+	req.send(msg);
+	return req;}
 
     fdjtLog.warn=function(string){
 	if ((!(fdjtLog.console_fn))&&
