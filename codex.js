@@ -461,7 +461,7 @@ var CodexLayout=
 			// Full pages automatically get their own page
 			prev=false; layout.drag=drag=[];
 			fullPage(block);
-			i++; return;}
+			ni++; return;}
 		    else if ((page.childNodes.length)&&
 			     (forcedBreakBefore(block,style))) {
 			// This is the easy case.  Note that we
