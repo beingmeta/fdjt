@@ -77,7 +77,7 @@ var fdjtLog=(function(){
 
     function remote_log(msg){
 	var req=new XMLHttpRequest();
-	req.open('POST',fdjtLog.logurl,true);
+	req.open('POST',fdjtLog.logurl,(!(fdjtLog.logsync)));
 	req.setRequestHeader("Content-type","text; charset=utf-8");
 	req.send(msg);
 	return req;}
