@@ -35,24 +35,24 @@ span.checkspan, a.checkspan { white-space: nowrap; }
 .checkspan.ischecked div.checked { display: block;}
 .checkspan.ischecked li.checked { display: list-item;}
 
-.checkspan[ischecked] { font-weight: bold; }
-.checkspan[ischecked] .alt { font-size: 80%; font-weight: normal;}
-.checkspan[ischecked] { display: none;}
-.checkspan[ischecked] .unchecked { display: none;}
-.checkspan[ischecked] span.checked,
-.checkspan[ischecked] a.checked,
-.checkspan[ischecked] img.checked { display: inline;} 
-.checkspan[ischecked] div.checked { display: block;}
-.checkspan[ischecked] li.checked { display: list-item;}
+.checkspan[checked] { font-weight: bold; }
+.checkspan[checked] .alt { font-size: 80%; font-weight: normal;}
+.checkspan[checked] { display: none;}
+.checkspan[checked] .unchecked { display: none;}
+.checkspan[checked] span.checked,
+.checkspan[checked] a.checked,
+.checkspan[checked] img.checked { display: inline;} 
+.checkspan[checked] div.checked { display: block;}
+.checkspan[checked] li.checked { display: list-item;}
 
 /* Autoprompt classes */
 
 input.autoprompt { font-family: sans,sans-serif; }
-input.autoprompt[isempty] { font-style: italic; color: gray;}
+input.autoprompt { font-style: italic; color: gray;}
 input.autoprompt.isempty { font-style: italic; color: gray;}
 
 textarea.autoprompt { font-family: sans,sans-serif;}
-textarea.autoprompt[isempty] { font-style: italic; color: gray;}
+textarea.autoprompt { font-style: italic; color: gray;}
 textarea.autoprompt.isempty { font-style: italic; color: gray;}
 
 /* Input help classes */
@@ -264,40 +264,40 @@ div.completions {font-family: sans,sans-serif;}
 
 /* Checkspan/completion display rules (attribute based) */
 
-.completions.checkspans span.completion.checkspan[ischecked] { 
+.completions.checkspans span.completion.checkspan[checked] { 
   display: inline; }
-.completions.checkspans li.completion.checkspan[ischecked] { 
+.completions.checkspans li.completion.checkspan[checked] { 
   display: list-item; }
-.completions.checkspans div.completion.checkspan[ischecked] { 
+.completions.checkspans div.completion.checkspan[checked] { 
   display: block; }
-.completions.checkspans p.completion.checkspan[ischecked] { 
+.completions.checkspans p.completion.checkspan[checked] { 
   display: block; }
 
-.completions.checkspans .completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[checked]
      span.variation[displayed] { display: inline; }
-.completions.checkspans .completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[checked]
      li.variation[displayed] { display: list-item; }
-.completions.checkspans .completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[checked]
      div.variation[displayed] { display: block; }
-.completions.checkspans .completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[checked]
      div.variation[displayed] { display: block; }
 
-.completions.checkspans span.completion.checkspan[ischecked] { 
+.completions.checkspans span.completion.checkspan[checked] { 
   display: inline; }
-.completions.checkspans li.completion.checkspan[ischecked] { 
+.completions.checkspans li.completion.checkspan[checked] { 
   display: list-item; }
-.completions.checkspans div.completion.checkspan[ischecked] { 
+.completions.checkspans div.completion.checkspan[checked] { 
   display: block; }
-.completions.checkspans p.completion.checkspan[ischecked] { 
+.completions.checkspans p.completion.checkspan[checked] { 
   display: block; }
 
-.completions.checkspans .completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[checked]
      span.variation[displayed] { display: inline; }
-.completions.checkspans .completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[checked]
      li.variation[displayed] { display: list-item; }
-.completions.checkspans .completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[checked]
      div.variation[displayed] { display: block; }
-.completions.checkspans .completion.checkspan[ischecked]
+.completions.checkspans .completion.checkspan[checked]
      div.variation[displayed] { display: block; }
 
 /* Checkspan/completion display rles (class based) */
