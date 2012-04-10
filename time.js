@@ -154,6 +154,7 @@ var fdjtTime=
 	    return (arg.getTime()-loaded)/1000;};
 
 	function timeslice(fcns,slice,space,done){
+	    var timer=false;
 	    if (typeof slice !== 'number') slice=100;
 	    if (typeof space !== 'number') space=100;
 	    var i=0; var lim=fcns.length;
@@ -168,19 +169,23 @@ var fdjtTime=
 		    else fcn();
 		    if (fdjtTime()>timelim) break;}
 		if ((i<lim)&&((!(done))||(!(done()))))
-		    setTimeout(slicefn,nextspace||space);};
+		    timer=setTimeout(slicefn,nextspace||space);
+		else {
+		    clearTimeout(timer); timer=false;};}
 	    return slicefn();}
 	fdjtTime.timeslice=timeslice;
 
 	function slowmap(fn,vec,watch,done,slice,space){
 	    var i=0; var lim=vec.length; var chunks=0;
 	    var used=0; var zerostart=fdjtTime();
+	    var timer=false;
 	    if (!(slice)) slice=100;
 	    if (!(space)) space=slice;
 	    var stepfn=function(){
 		var started=fdjtTime(); var now=started;
 		var stopat=started+slice;
-		if (watch) watch(((i==0)?'start':'resume'),i,lim,chunks,used,zerostart);
+		if (watch) watch(((i==0)?'start':'resume'),i,lim,chunks,used,
+				 zerostart);
 		while ((i<lim)&&((now=fdjtTime())<stopat)) {
 		    var elt=vec[i];
 		    if (watch) watch('element',i,lim,elt,used,now-zerostart);
@@ -192,17 +197,21 @@ var fdjtTime=
 		chunks=chunks+1;
 		if (i<lim) {
 		    used=used+(now-started);
-		    if (watch) watch('suspend',i,lim,chunks,used,zerostart);
-		    setTimeout(stepfn,space);}
+		    if (watch) watch('suspend',i,lim,chunks,used,
+				     zerostart);
+		    timer=setTimeout(stepfn,space);}
 		else {
 		    now=fdjtTime(); used=used+(now-started);
+		    clearTimeout(timer); timer=false;
 		    if (done) {
-			if (watch) watch('finishing',i,lim,chunks,used,zerostart);
+			if (watch) watch('finishing',i,lim,chunks,used,
+					 zerostart);
 			done();}
 		    var donetime=((done)&&(fdjtTime()-now));
 		    now=fdjtTime(); used=used+(now-started);
-		    if (watch) watch('done',i,lim,chunks,used,zerostart,donetime);}};
-	    setTimeout(stepfn,space);}
+		    if (watch) watch('done',i,lim,chunks,used,
+				     zerostart,donetime);}};
+	    timer=setTimeout(stepfn,space);}
 	fdjtTime.slowmap=slowmap;
 
 	return fdjtTime;})();

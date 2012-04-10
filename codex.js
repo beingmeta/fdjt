@@ -857,9 +857,12 @@ var CodexLayout=
 		    if (ni<nblocks) layout.timer=
 			setTimeout(loop,timeskip||timeslice);
 		    else if (donefn) {
+			if (layout.timer) clearTimeout(layout.timer);
 			layout.timer=false;
 			donefn(layout);}
-		    else layout.timer=false;}
+		    else {
+			if (layout.timer) clearTimeout(layout.timer);
+			layout.timer=false;}}
 
 		// This is the inner loop
 		if (!(timeslice)) {
