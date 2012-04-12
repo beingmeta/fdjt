@@ -639,6 +639,47 @@ fdjtUI.Collapsible.focus=function(evt){
     fdjtUI.scrollRestore=scroll_restore;}());
 
 
+/* Smart (DOM-aware) scrolling */
+
+(function(){
+    var getGeometry=fdjtDOM.getGeometry;
+    var getDisplay=fdjtDOM.getDisplay;
+    var getStyle=fdjtDOM.getStyle;
+
+    function smartScroll(win,off,content){
+	if (typeof content==='undefined') content=win;
+	if (off<=0) {win.scrollTop=0; return;}
+	else {
+	    var block=findBreak(content,off,content);
+	    if (!(block)) {win.scrollTop=off; return;}
+	    var geom=getGeometry(block,content||win);
+	    if ((geom-top-off)<(win.offsetTop/4))
+		win.scrollTop=geom.top;
+	    else win.scrollTop=off;}}
+    function findBreak(node,off,container){
+	var style=getStyle(node);
+	var display=style.display;
+	if ((display==='block')||(display==='table-row')||
+	    (display==='list-item')||(display==='preformatted')) {
+	    var geom=getGeometry(node,container);
+	    if (geom.top>off) return node;
+	    else if (geom.bottom>off) {
+		if (style.pageBreakInside==='avoid')
+		    return node;
+		var children=node.childNodes;
+		var i=0, lim=children.length;
+		while (i<lim)  {
+		    var child=children[i++];
+		    var bk=((child.nodeType===1)&&
+			    (findBreak(child,off,container)));
+		    if (bk) return bk;}
+		return node;}
+	    else return false;}
+	else return false;}
+
+    fdjtUI.smartScroll=smartScroll;})();
+
+
 /* Delays */
 
 (function(){
