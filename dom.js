@@ -881,7 +881,8 @@ var fdjtDOM=
 	    var rootp=((root)&&(root.offsetParent));
 
 	    if (elt===root) 
-		return {left: 0,top: 0,width:width,height: height};
+		return {left: 0,top: 0,width:width,height: height,
+		        bottom: height,right: width};
 	    elt=elt.offsetParent;
 	    while (elt) {
 		if ((root)&&((elt===root)||(elt===rootp))) break;
