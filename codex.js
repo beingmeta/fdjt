@@ -752,6 +752,7 @@ var CodexLayout=
 				    page_break=child;
 				    break;}
 				else { // Do the split
+				    drag=[];
 				    page_break=document.createTextNode(
 					// This is the text pushed onto the new page
 					words.slice(wbreak).join(""));
