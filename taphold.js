@@ -101,6 +101,7 @@ fdjtUI.TapHold=(function(){
 	if (touched) return;
 	if (pressed) return;
 	if (th_timer) return;
+	if (!(th_target)) return;
 	touched=th_target; pressed=false
 	if (trace_taps) fdjtLog("startpress %o",evt);
 	fdjtUI.cancel(evt);
@@ -160,7 +161,13 @@ fdjtUI.TapHold=(function(){
 	if (evt.keyCode===16) {
 	    shift_down=true;
 	    if ((evt.ctrlKey)||(evt.altKey)) return;
-	    if (!(touched)) startpress(th_target);}}
+	    var target=fdjtUI.T(evt);
+	    if ((target)&&(target.tagName)&&
+		((target.tagName==='INPUT')||
+		 (target.tagName==='TEXTAREA')||
+		 (hasParent(target,"input,textarea"))))
+		return;
+	    else if (!(touched)) startpress(evt);}}
     function mousedown(evt){
 	evt=evt||event;
 	mouse_down=true;
