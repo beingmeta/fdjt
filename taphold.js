@@ -170,6 +170,10 @@ fdjtUI.TapHold=(function(){
 	    else if (!(touched)) startpress(evt);}}
     function mousedown(evt){
 	evt=evt||event;
+	if ((evt.shiftKey)||(evt.ctrlKey)||
+	    (evt.altKey)||(evt.metaKey)||
+	    (evt.button))
+	    return;
 	mouse_down=true;
 	if (trace_taps) fdjtLog("down %o",evt);
 	th_target=fdjtUI.T(evt);
@@ -191,6 +195,7 @@ fdjtUI.TapHold=(function(){
     TapHold.keyup=keyup;
     function mouseup(evt){
 	evt=evt||event;
+	if (!(mouse_down)) return;
 	mouse_down=false;
 	if (trace_taps)
 	    fdjtLog("up %o etl=%o",evt,
