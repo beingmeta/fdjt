@@ -403,7 +403,7 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 		if (!(input)) input=that.input;
 		var completions=that.complete(input.value);
 		if (callback) callback(completions);},
-	    delay);}
+	    delay);};
 
     function stdspace(string){
 	return string.replace(/\s+/," ").replace(/(^\s)|(\s$)/,"");}
