@@ -32,14 +32,27 @@ var fdjtKB=
     (function(){
 	// This is the top level object/module 
 	fdjtKB={};
-	fdjtKB.revid="$Id$";
-	fdjtKB.version=parseInt("$Revision$".slice(10,-1));
+	// These are typically set by subversion, but now we have
+	//   git and haven't come up with a good replacement.
+	// fdjtKB.revid="$Id$";
+	// fdjtKB.version=parseInt("$Revision$".slice(10,-1));
+
+	// Whether we can support local storage
+	//  We'll shift this to indexedDB or a shim when we get a chance
 	fdjtKB.persist=((window.localStorage)?(true):(false));
 
-	// This turns on debugging, which is further controlled
+	// This turns on debugging, which may be further controlled
 	//  by properties on pools
-	var debug=false;
-	fdjtKB.setDebug=function(flag){debug=flag;};
+	var debug=0;
+	fdjtKB.setDebug=function(flag){
+	    if (!(flag)) debug=0;
+	    else if (typeof flag === 'number')
+		debug=flag;
+	    else debug=1;};
+
+	// Various imports
+	var warn=fdjtLog.warn;
+	var log=fdjtLog;
 
 	// This checks if a reference is a 'real object'
 	// I.E., something which shouldn't be used as a key
@@ -140,9 +153,9 @@ var fdjtKB=
 		return;}
 	    else {
 		var qid=data._id||data.oid||data.uuid;
-		if ((debug)&&(this.traceimport))
-		    fdjtLog("[%fs] Import to %s %o <== %o",
-			    fdjtET(),this.name,obj,data);
+		if (((debug)&&(this.traceimport))||(debug>1))
+		    log("[%fs] Import to %s %o <== %o",
+			fdjtET(),this.name,obj,data);
 		if (this.storage) this.storage.Import(data);
 		if (qid) {
 		    var obj=(this.map[qid]);
@@ -177,30 +190,25 @@ var fdjtKB=
 	    else return false;}
 	fdjtKB.getPool=getPool;
 
-	function parseRef(arg,pool){
+	function parseRef(arg,pool,probe){
+	    var pool=false, term=arg;
 	    if (((arg[0]===':')&&(arg[1]==='@'))&&
 		(((slash=arg.indexOf('/',2))>=0)))  {
-		var pool=fdjtKB.PoolRef(arg.slice(1,slash+1));
-		return pool.ref(arg);}
+		pool=fdjtKB.PoolRef(arg.slice(1,slash+1));}
 	    else if (((arg[0]==='@'))&&
 		     (((slash=arg.indexOf('/',2))>=0)))  {
-		var pool=fdjtKB.PoolRef(arg.slice(0,slash+1));
-		return pool.ref(arg);}
+		pool=fdjtKB.PoolRef(arg.slice(0,slash+1));}
 	    else if ((atpos=arg.indexOf('@'))>1)  {
-		var pool=fdjtKB.PoolRef(arg.slice(atpos+1));
-		return pool.ref(arg.slice(0,atpos));}
-	    else if (pool)
-		return pool.ref(arg);
+		pool=fdjtKB.PoolRef(arg.slice(atpos+1));
+		term=arg.slice(0,atpos);}
 	    else if (arg.search(uuid_pattern)===0) {
 		var uuid_type=arg.slice(34);
-		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
-		if (pool) return pool.ref(arg);
-		else return false;}
+		pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
 	    else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[2]==='U')&&
 		     (arg.search(uuid_pattern)===3)) {
-		var uuid_type=arg.slice(37); var uuid=arg.slice(3);
-		if ((pool)&&(pool.ref(uuid))) return pool.ref(uuid);
+		var uuid_type=arg.slice(37);
 		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
+		term=arg.slice(3);
 		if (pool) return pool.ref(uuid);
 		return false;}
 	    else if (refmaps.length) {
@@ -211,7 +219,9 @@ var fdjtKB=
 			     (refmap(arg)):(refmap[arg]));
 		    if (ref) return ref;}
 		return false;}
-	    else if (pool) return pool.ref(arg);
+	    if ((pool)&&(term)) {
+		if (probe) return pool.probe(term);
+		else return pool.ref(term);}
 	    else return false;}
 	
 	function getRef(arg,pool){
@@ -222,6 +232,14 @@ var fdjtKB=
 		return parseRef(arg,pool);
 	    else return false;}
 	fdjtKB.ref=fdjtKB.getRef=getRef;
+	function probeRef(arg,pool){
+	    if (!(arg)) return false;
+	    else if (arg instanceof Ref) return arg;
+	    else if (typeof arg === 'number') return false;
+	    else if (typeof arg === 'string')
+		return parseRef(arg,pool,true);
+	    else return false;}
+	fdjtKB.probe=fdjtKB.probeRef=probeRef;
 	function loadRef(arg){
 	    var obj=getRef(arg);
 	    if (obj) return obj.load();
@@ -742,45 +760,58 @@ var fdjtKB=
 		if ((prop!=='pool')&&(prop!=='qid'))
 		    this.drop(prop,this[prop]);};
 	function init_ref(data){
+	    // If it's already been initialized, we're updating
+	    if (this._init) return this.update(data);
+	    // This is called initialize a reference the first time we
+	    //  get data for it
 	    var pool=this.pool; var map=pool.map;
 	    if ((this._init)&&(this._init>init_start)) {
+		// Inits have already been run in this session, so we just
+		//  update
 		this.update_ref(data);
 		return;}
-	    if ((debug)&&(pool.traceref))
-		fdjtLog("Initial reference to %o <== %o",this,data);
-	    for (key in data)
-		if (!((key==='qid')||(key==='pool'))) {
+	    this._init=fdjtTime();
+	    if (((debug)&&(pool.traceref))||(debug>1))
+		log("Initial reference to %o <== %o @%d",
+		    this,data,this._init);
+	    for (key in data) {
+		// We assume that data doesn't inherit anything,
+		//  so we don't need a 'hasOwnProperty' check
+		if ((key==='qid')||(key==='pool')) {}
+		else if ((key==='_id')||(key==='oid')||(key==='oid')) {
 		    var value=data[key];
-		    // Add ref aliases when unique
-		    if ((key==='uuid')||(key==='oid')) {
-			if (!(map[value])) map[value]=this;
-			else if (map[value]!==this)
-			    fdjtLog.warn("identifier conflict %o=%o for %o and %o",
-					 key,value,map[value],this);
-			else {}}
+		    if (!(map[value])) map[value]=this;
+		    else if (map[value]!==this)
+			warn("identifier conflict %o=%o for %o and %o",
+			     key,value,map[value],this);
+		    else {}}
+		else {
+		    // We use the .add method to get any side effects
+		    var value=data[key];
 		    if (value instanceof Array) {
 			var i=0; var len=value.length;
 			while (i<len) this.add(key,value[i++]);}
-		    else this.add(key,value);}
+		    else this.add(key,value);}}
+	    // Now we run the init procedures for the pool
 	    var inits=pool.inits;
-	    if ((inits)&&(debug)&&(pool.traceinit))
-		fdjtLog("Running pool inits for %o: %o",this,inits);
-	    var i=0; var lim;
-	    this._init=fdjtTime();
 	    if (inits) {
-		var lim=inits.length;
+		if (((debug)&&(pool.traceinit))||(debug>2))
+		    log("Running pool inits for %o: %o",this,inits);
+		var i=0; var lim=inits.length;
 		while (i<lim) inits[i++](this);}
+	    // We now run local delayed inits
 	    var inits=this._inits; delete this._inits;
-	    if ((inits)&&(debug)&&(pool.traceinit))
-		fdjtLog("Running delayed inits for %o: %o",this,inits);
 	    if (inits) {
+		if (((debug)&&(pool.traceinit))||(debug>2))
+		    log("Running delayed inits for %o: %o",this,inits);
 		delete this._inits;
-		i=0; lim=inits.length;
+		var i=0; var lim=inits.length;
 		while (i<lim) inits[i++](this);}
 	    return this;}
 	Ref.prototype.init=init_ref;
 	// This isn't right
 	function update_ref(data){
+	    if (!(this._init)) return this.init(data);
 	    var pool=this.pool; var map=pool.map;
 	    for (var key in data) {
 		if (key==="pool") continue;
@@ -805,38 +836,62 @@ var fdjtKB=
 	    return this;}
 	Ref.prototype.update=update_ref;
 	Ref.prototype.oninit=function(fcn,name){
-	    var debugging=((debug)&&(this.pool.traceinit));
+	    var pool=this.pool;
+	    var debugging=(((debug)&&(pool.traceinit))||(debug>2));
 	    if (this._init) {
+		// If it's already been initialized, just call the function
 		if (debugging) {
-		    if (name)
-			fdjtLog("Init (%s) %o on pre-existing %o",name,fcn,this);
-		    else fdjtLog("Init %o on pre-existing %o",fcn,this);}
+		    if (name) 
+			log("Init/%s current %o with %o",name,this,fcn);
+		    else log("Init current %o with %o",this,fcn);}
 		fcn(this);
 		return true;}
 	    else if (this._inits) {
 		// Save up the init functions
 		if (!(name)) {
 		    if (this._inits.indexOf(fcn)<0) {
-			if (debugging) fdjtLog("Delaying init on %o: %o",this,fcn);
+			if (debugging) log("Delay init on %o: %o",this,fcn);
 			this._inits.push(fcn);}}
 		// Don't do anything if the named init has already been added
-		else if (this._inits[name]) {
 		    /* Note that name can't be anything that an array object
-		       might inherit (like 'length'). */ }
+		       might inherit (like 'length'). */ 
+		else if (this._inits[name]===fcn) {
+		    if (debugging)
+			log("Already added %s init on %o: %o",this,fcn);}
+		else if (this._inits[name]) {
+		    var oldfcn=this._inits[name];
+		    var oldpos=this._inits.indexOf(oldfcn);
+		    warn("Replacing existing %s init on %o with %o, old=%o",
+			 name,this,fcn,oldfcn);
+		    this._inits[name]=fcn;
+		    if (oldpos<0) this._inits.push(fcn);
+		    else this._inits[oldpos]=fcn;}
 		else {
 		    if (debugging)
-			fdjtLog("Delaying init %s on %o: %o",name,this,fcn);
+			fdjtLog("Delay %s init on %o: %o",name,this,fcn);
 		    this._inits[name]=fcn;
 		    this._inits.push(fcn);}}
 	    else if (name) {
 		if (debugging)
-		    fdjtLog("Delaying init %s on %o: %o",name,this,fcn);
+		    fdjtLog("Delay %s init on %o: %o",name,this,fcn);
 		this._inits=[fcn];
 		this._inits[name]=fcn;}
 	    else {
-		fdjtLog("Delaying init on %o: %o",this,fcn);
+		fdjtLog("Delay init on %o: %o",this,fcn);
 		this._inits=[fcn];}
 	    return false;};
+
+	Ref.prototype.toHTML=function(){
+	    var dom=false;
+	    return ((this.pool.forHTML)&&(this.pool.forHTML(this)))||
+		((this.pool.forDOM)&&(dom=this.pool.forDOM(this))&&
+		 (dom.outerHTML))||
+		this._id||this.oid||this.uuid;};
+	Ref.prototype.toDOM=function(){
+	    return ((this.pool.forDOM)&&(this.pool.forDOM(this)))||
+		((this.pool.forHTML)&&(fdjtDOM(this.pool.forHTML(this))))||
+		(fdjtDOM("span.fdjtref",this._id||this.oid||this.uuid));};
+
 
 	/* Using offline storage to back up pools
 	   In the simplest model, the QID is just used as a key
