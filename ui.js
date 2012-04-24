@@ -195,7 +195,7 @@ fdjtUI.Highlight=(function(){
 	var inputs=(getChildren(checkspan,checkable));
 	if (inputs.length===0) return false;
 	if (typeof checked === 'undefined') {
-	    if (input) checked=input.checked;
+	    if (input) checked=(!(input.checked));
 	    else checked=(!((inputs[0]).checked));}
 	if (input) input.checked=checked;
 	if (checked) addClass(checkspan,"ischecked");
@@ -216,8 +216,11 @@ fdjtUI.Highlight=(function(){
     function checkspan_onclick(evt) {
 	evt=evt||event;
 	var target=evt.target||evt.srcTarget;
-	if (getParent(target,"input"))
+	if (((target.tagName)&&(target.tagName==="INPUT"))||
+	    (getParent(target,"input"))) {
+	    fdjtUI.cancel(evt);
 	    setTimeout(function(){checkspan_set(target);},100);
+	    return false;}
 	else {
 	    checkspan_set(target);
 	    fdjtUI.cancel(evt);}
