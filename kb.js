@@ -190,10 +190,20 @@ var fdjtKB=
 	    else return false;}
 	fdjtKB.getPool=getPool;
 
+	// Ref Syntaxes:
+	//   :@/pool/off
+	//   :@base/off
+	//   @/pool/off
+	//   @base/off
+	//   d16e2980-8e18-11e1-a50a-001a922d60ef
+	//   #Ud16e2980-8e18-11e1-a50a-001a922d60ef
+	//   :#Ud16e2980-8e18-11e1-a50a-001a922d60ef
 	function parseRef(arg,pool,probe){
-	    var pool=false, term=arg;
-	    if (((arg[0]===':')&&(arg[1]==='@'))&&
-		(((slash=arg.indexOf('/',2))>=0)))  {
+	    var term=arg;
+	    if ((pool)&&(pool.probe(term)))
+		return pool.probe(term);
+	    else if (((arg[0]===':')&&(arg[1]==='@'))&&
+		(((slash=arg.indexOf('/',3))>=0)))  {
 		pool=fdjtKB.PoolRef(arg.slice(1,slash+1));}
 	    else if (((arg[0]==='@'))&&
 		     (((slash=arg.indexOf('/',2))>=0)))  {
@@ -204,6 +214,13 @@ var fdjtKB=
 	    else if (arg.search(uuid_pattern)===0) {
 		var uuid_type=arg.slice(34);
 		pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
+	    else if ((arg[0]==='#')&&(arg[1]==='U')&&
+		     (arg.search(uuid_pattern)===2)) {
+		var uuid_type=arg.slice(36);
+		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
+		term=arg.slice(3);
+		if (pool) return pool.ref(uuid);
+		return false;}
 	    else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[2]==='U')&&
 		     (arg.search(uuid_pattern)===3)) {
 		var uuid_type=arg.slice(37);
