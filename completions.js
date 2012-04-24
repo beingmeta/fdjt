@@ -83,8 +83,6 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
     // The key is either stored as a DOM property, attribute, 
     function getKey(node){
 	return node.key||(node.getAttribute("key"))||
-	    ((node.value)&&(typeof node === 'string'))||
-	    (node.getAttribute("value"))||
 	    ((hasClass(node,"variation"))&&(fdjtDOM.textify(node)))||
 	    ((hasClass(node,"completion"))&&(completionText(node,"")));}
     Completions.getKey=getKey;
