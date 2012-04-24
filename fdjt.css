@@ -226,6 +226,9 @@ div.completions {font-family: sans,sans-serif;}
 .completions.noinput div.noinputmsg { display: block;}
 .completions.noinput p.noinputmsg { display: block;}
 
+.completions .completion.selected {
+    text-decoration: underline;}
+
 /* Display rules (with displayed attribute) */
 
 .completions a.completion[displayed] { display: inline;}
@@ -628,3 +631,9 @@ div.humane.humane-show:hover { opacity: 0.2; }
 .humane .error {
   color                 : red;
 }
+
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  End: ***
+*/

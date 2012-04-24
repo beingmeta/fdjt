@@ -71,25 +71,28 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	this.cues=[]; this.displayed=[];
 	this.prefixtree={strings: []};
 	this.bykey={}; this.byvalue=new fdjtKB.Map();
+	this.selected=false; this.selclass=false;
 	if (!(options&FDJT_COMPLETE_MATCHCASE)) this.stringmap={};
 	this.initialized=false;
 	return this;}
-    Completions.probe=function(arg){
-	if (arg.tagName==='INPUT') {
-	    var cid=arg.getAttribute('COMPLETIONS');
-	    arg=fdjtID(cid);
-	    if (arg) completions.get(arg);
-	    else return false;}
-	else return completions.get(arg);};
 
+    // A completion is a DOM node with a 'key' string for matching
+    //  and a 'value' for using.  A completion can include *variations*
+    //  (with CSS class variation) which have different key values.
+    
+    // The key is either stored as a DOM property, attribute, 
     function getKey(node){
-	return node.key||(node.getAttribute("key"))||(node.value)||
+	return node.key||(node.getAttribute("key"))||
+	    ((node.value)&&(typeof node === 'string'))||
 	    (node.getAttribute("value"))||
 	    ((hasClass(node,"variation"))&&(fdjtDOM.textify(node)))||
 	    ((hasClass(node,"completion"))&&(completionText(node,"")));}
     Completions.getKey=getKey;
+    // This gets the text of a completion node, excluding variations
+    // and any fdjtdecoration(s).
     function completionText(node,sofar){
 	if (hasClass(node,"variation")) return sofar;
+	else if (hasClass(node,"fdjtdecoration")) return sofar;
 	else if (node.nodeType===3) return sofar+node.nodeValue;
 	else if ((node.nodeType===1)&&(node.childNodes)) {
 	    var children=node.childNodes;
@@ -103,15 +106,8 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	    return sofar;}
 	else return sofar;}
 
-    function getValue(node){
-	if (!(hasClass(node,"completions")))
-	    node=getParent(node,".completions");
-	var completions=((node)&&(Completions.probe(node)));
-	if (completions)
-	    return completions.getValue(node);
-	else return false;}
-    Completions.getValue=getValue;
-
+    /* You can add a node to a completions lookup table.  We update
+     * bykey and the prefix table. */
     function addNodeKey(node,keystring,ptree,bykey,anywhere){
 	var keys=((anywhere)?(keystring.split(/\W/g)):[]).concat(keystring);
 	var i=0; var lim=keys.length;
@@ -123,6 +119,7 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	    else bykey[key]=new Array(node);
 	    bykey._count++;}}
 
+    /* Get nodes for a completion */
     function getNodes(string,ptree,bykey,matchcase){
 	var result=[]; var direct=[]; var variations=[];
 	var keystring=stdspace(string);
@@ -198,9 +195,9 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	while (i<lim) addCompletion(c,completions[i++]);
 	c.initialized=true;}
 
-    Completions.prototype.addCompletion=function(completion) {
+    Completions.prototype.addCompletion=function(completion,key,value) {
 	if (!(this.initialized)) initCompletions(this);
-	addCompletion(this,completion);};
+	addCompletion(this,completion,key,value);};
 
     function updateDisplay(c,todisplay){
 	var displayed=c.displayed;
@@ -221,9 +218,11 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 		    if ((head)&&(!(hasClass(head,"displayed")))) {
 			displayed.push(node); displayed.push(head);
 			addClass(head,"displayed");
-			addClass(node,"displayed");}}}}}
-
-
+			addClass(node,"displayed");}}}}
+	if ((this.selection)&&(!(hasClass(this.selection,"displayed"))))
+	    if (!(this.selectNext())) this.selectPrevious();}
+    
+    
     Completions.prototype.getCompletions=function(string) {
 	if ((string===this.curstring)||(string===this.maxstring)||
 	    ((this.curstring)&&(this.maxstring)&&
@@ -261,12 +260,10 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	if (pos<0) return false;
 	else return this.values[pos];};
     Completions.prototype.getKey=function(completion) {
-	if (completion.key) return completion.value;
+	if (completion.key) return completion.key;
 	else if (completion.getAttribute("key"))
 	    return completion.getAttribute("key");
-	var pos=position(this.nodes,completion);
-	if (pos<0) return false;
-	else return this.values[pos];};
+	else return getKey(completion);};
 
     Completions.prototype.complete=function(string){
 	if (!(this.initialized)) initCompletions(this);
@@ -410,6 +407,71 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 
     fdjtUI.Completions=Completions;
 
+    /* Selection from list/cloud */
+
+    var Selector=fdjtDOM.Selector;
+
+    Completions.prototype.select=function(completion){
+	var pref=false;
+	if (completion instanceof Selector) {
+	    pref=completion; completion=false;}
+	if ((!(completion))&&(pref)) {
+	    var nodes=this.nodes;
+	    var i=0; var lim=nodes.length; while (i<lim) {
+		var node=nodes[i++];
+		if (!(hasClass(node,"displayed"))) continue;
+		else if (hasClass(node,pref)) {completion=node; break;}
+		else continue;}}
+	if (!(completion)) {
+	    var nodes=this.nodes;
+	    var i=0; var lim=nodes.length; while (i<lim) {
+		var node=nodes[i++];
+		if (!(hasClass(node,"displayed"))) continue;
+		else {completion=node; break;}}}
+	if (this.selection) dropClass(this.selection,"selected");
+	addClass(completion,"selected");
+	this.selection=completion;
+	return completion;};
+
+    Completions.prototype.selectNext=function(selection){
+	if (!(selection)) {
+	    if (this.selection) selection=this.selection;
+	    else selection=false;}
+	var nodes=this.nodes;
+	var i=0, lim=nodes.length; while (i<lim) {
+	    var node=nodes[i++];
+	    if (!(hasClass(node,"displayed"))) continue;
+	    else if (!(selection)) {
+		selection=node; break;}
+	    else if (node===selection) selection=false;
+	    else continue;}
+	if (this.selection) dropClass(this.selection,"selected");
+	addClass(selection,"selected");
+	this.selection=selection;
+	return selection;};
+
+    Completions.prototype.selectPrevious=function(selection){
+	var pref=false;
+	if (selection instanceof Selector) {
+	    pref=selection; selection=false;}
+	if (!(selection)) {
+	    if (this.selection) selection=this.selection;
+	    else selection=false;}
+	var nodes=this.nodes;
+	var i=nodes.length-1; while (i>=0) {
+	    var node=nodes[i--];
+	    if (!(hasClass(node,"displayed"))) continue;
+	    else if (!(selection)) {
+		selection=node; break;}
+	    else if (node===selection) selection=false;
+	    else continue;}
+	if (this.selection) dropClass(this.selection,"selected");
+	if (selection) addClass(selection,"selected");
+	this.selection=selection;
+	return selection;};
+
+    /* Options, handlers, etc */
+
     var cached_completions={};
 
     var default_options=
@@ -449,3 +511,8 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 
 }());
 
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  End: ***
+*/
