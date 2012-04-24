@@ -835,10 +835,16 @@ var fdjtDOM=
 	    else if (arg.nodeType===1) {
 		var children=arg.childNodes;
 		var display_type=getDisplayStyle(arg);
+		var classname=arg.className;
 		var string=""; var suffix="";
 		// Figure out what suffix and prefix to use for this element
 		// If inside is false, don't use anything.
-		if (!(inside)) {}
+		if (display_type==='none') return "";
+		else if ((classname)&&
+			 ((classname==='fdjtdecoration')||
+			  (classname.search(/\bfdjtdecoration\b/))))
+		    return "";
+		else if (!(inside)) {}
 		else if (!(display_type)) {}
 		else if (display_type==="inline") {}
 		else if (flat) suffix=" ";
