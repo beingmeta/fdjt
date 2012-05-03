@@ -65,7 +65,7 @@ var fdjtKB=
 	function objectkey(x){
 	    if (typeof x !== 'object') return x;
 	    else if (x instanceof String) return x.toString();
-	    else return x._id||x._fdjtid||register(x);}
+	    else return x._qid||x._id||x._fdjtid||register(x);}
 	fdjtKB.objectkey=objectkey;
 	fdjtKB.isobject=isobject;
 	
@@ -113,11 +113,13 @@ var fdjtKB=
 	    else pools[name]=this;};
 
 	Pool.prototype.addEffect=function(prop,handler) {
-	    if (!(this.effects)) this.effects={};
-	    this.effects[prop]=handler;};
+	    var effects;
+	    if (!(effects=this.effects)) effects=this.effects={};
+	    effects[prop]=handler;};
 	Pool.prototype.addInit=function(handler) {
-	    if (!(this.inits)) this.inits=[];
-	    this.inits.push(handler);};
+	    var inits;
+	    if (!(inits=this.inits)) inits=this.inits=[];
+	    inits.push(handler);};
 
 	Pool.prototype.probe=function(id) {
 	    if (this.map[id]) return (this.map[id]);
@@ -139,10 +141,12 @@ var fdjtKB=
 	    return cons;};
 	Pool.prototype.drop=function(qid) {
 	    var val=this.map[qid];
-	    if ((val)&&(val.ondrop)) val.ondrop();
-	    if (this.storage) this.storage.drop(val);
 	    if (!(val)) return;
+	    if ((val)&&(val.ondrop)) val.ondrop();
+	    if (this.storage) this.storage.drop(val||qid);
 	    delete this.map[qid];
+	    if (val._id) delete this.map[val._id];
+	    if (val._qid) delete this.map[val._qid];
 	    if (val.uuid) delete this.map[val.uuid];
 	    if (val.oid) delete this.map[val.oid];}
 	
@@ -158,7 +162,8 @@ var fdjtKB=
 			fdjtET(),this.name,obj,data);
 		if (this.storage) this.storage.Import(data);
 		if (qid) {
-		    var obj=(this.map[qid]);
+		    var obj=(this.map[qid])||
+			(this.map[qid]=this.cons(qid));
 		    if (obj) obj.update(data);
 		    else {
 			obj=this.ref(qid);
@@ -180,7 +185,6 @@ var fdjtKB=
 	    return refmaps.length;};
 
 	function getPool(arg){
-	    var atpos; 
 	    if (arg instanceof Ref) return arg.pool;
 	    else if (typeof arg === 'number') return false;
 	    else if (typeof arg === 'string') {
@@ -676,7 +680,8 @@ var fdjtKB=
 	    if (qid) this._id=qid;
 	    return this;}
 	fdjtKB.Ref=Ref;
-	Pool.prototype.cons=function(qid){return new Ref(this,qid);};
+	Pool.prototype.cons=function(qid){
+	    return new Ref(this,qid);};
 
 	Ref.prototype.load=function(){
 	    if (this._init) return this;
@@ -804,10 +809,20 @@ var fdjtKB=
 		    else {}}
 		else {
 		    // We use the .add method to get any side effects
-		    var value=data[key];
+		    var value=data[key]; var qid;
 		    if (value instanceof Array) {
 			var i=0; var len=value.length;
-			while (i<len) this.add(key,value[i++]);}
+			while (i<len) {
+			    var v=value[i++]; /* back to here */
+			    if (qid=((v._qid)||(v._id))) {
+				var pool=getPool(qid);
+				if (pool) this.add(key,pool.Import(v));
+				else this.add(key,v);}
+			    else this.add(key,v);}}
+		    else if (qid=((value._qid)||(value._id))) {
+			var pool=getPool(qid);
+			if (pool) this.add(key,pool.Import(value));
+			else this.add(key,v);}
 		    else this.add(key,value);}}
 	    // Now we run the init procedures for the pool
 	    var inits=pool.inits;
@@ -826,7 +841,7 @@ var fdjtKB=
 		while (i<lim) inits[i++](this);}
 	    return this;}
 	Ref.prototype.init=init_ref;
-	// This isn't right
+
 	function update_ref(data){
 	    if (!(this._init)) return this.init(data);
 	    var pool=this.pool; var map=pool.map;
