@@ -3,7 +3,7 @@
 
 ECHO=/bin/echo
 CLEAN=/bin/rm -f
-FDJT_FILES=header.js string.js time.js dom.js kb.js state.js log.js \
+FDJT_FILES=header.js log.js string.js time.js state.js dom.js kb.js \
 	json.js	ajax.js hash.js wsn.js \
 	ui.js taphold.js completions.js syze.js
 
