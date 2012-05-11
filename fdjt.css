@@ -632,6 +632,21 @@ div.humane.humane-show:hover { opacity: 0.2; }
   color                 : red;
 }
 
+div.reticle {
+    background-color: black; margin: 0px; border: 0px; padding: 0px;
+    z-index: 1000; opacity: 0.5;
+    pointer-events: none;}
+div.reticle.vertical {
+    position: fixed; height: 100%; top: 0px; bottom: 0px;
+    width: 1px;}
+div.reticle.horizontal {
+    position: fixed; width: 100%; left: 0px; right: 0px;
+    height: 1px;}
+
+div.reticle.highlight { color: blue;}
+div.reticle.horizontal.highlight { height: 3px;}
+div.reticle.vertical.highlight { width: 3px;}
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***

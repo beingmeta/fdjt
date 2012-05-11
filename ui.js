@@ -28,6 +28,7 @@ fdjtUI.Expansion=(fdjtUI.Expansion)||{};
 fdjtUI.Collapsible=(fdjtUI.Collapsible)||{};
 fdjtUI.Tabs=(fdjtUI.Tabs)||{};
 fdjtUI.MultiText=(fdjtUI.MultiText)||{};
+fdjtUI.Reticle=(fdjtUI.Reticle)||{};
 
 
 /* Co-highlighting */
@@ -719,6 +720,56 @@ fdjtUI.Collapsible.focus=function(evt){
     fdjtUI.Overflow=checkOverflow;}());
 
 
+/* Reticle based functions */
+
+(function() {
+    var getGeometry=fdjtDOM.getGeometry;
+    var vreticle=false;
+    var hreticle=false;
+    function setXY(x,y){
+	if  (vreticle) (vreticle).style.left=x+'px';
+	if  (hreticle) (hreticle).style.top=y+'px';}
+    function setupReticle(){
+	if (!(vreticle)) {
+	    vreticle=fdjtDOM("div.reticle.vertical#VRETICLE"," ")
+	    fdjtDOM.prepend(document.body,vreticle);}
+	if (!(hreticle)) {
+	    hreticle=fdjtDOM("div.reticle.horizontal#HRETICLE"," ")
+	    fdjtDOM.prepend(document.body,hreticle);}
+	fdjtDOM.addListener(document,"mousemove",mousemove);
+	fdjtUI.Reticle.live=true;}
+    
+    function mousemove(evt){
+	var target=fdjtUI.T(evt);
+	var x=evt.clientX, y=evt.clientY;
+	var geom=getGeometry(target);
+	/*
+	fdjtLog("mousemove cx=%d,cy=%d,sx=%d,sy=%d t=%o geom=%j",
+		evt.clientX,evt.clientY,evt.screenX,evt.screenY,
+		target,geom);
+	*/
+	setXY(evt.clientX,evt.clientY);}
+    
+    var highlighted=false;
+    
+    function highlight(flag){
+	if (typeof flag === 'undefined') flag=(!(higlighted));
+	if (flag) {
+	    if (vreticle) fdjtDOM.addClass(vreticle,"highlight");
+	    if (hreticle) fdjtDOM.addClass(hreticle,"highlight");
+	    highlighted=true;}
+	else {
+	    if (vreticle) fdjtDOM.dropClass(vreticle,"highlight");
+	    if (hreticle) fdjtDOM.dropClass(hreticle,"highlight");
+	    highlighted=false;}}
+    
+    fdjtUI.Reticle.setup=setupReticle;
+    fdjtUI.Reticle.highlight=highlight;
+    fdjtUI.Reticle.onmousemove=mousemove;
+    fdjtUI.Reticle.setXY=setXY;
+    fdjtUI.Reticle.live=false;})();
+
+
 /* Miscellaneous event-related functions */
 
 (function(){
@@ -792,7 +843,6 @@ fdjtUI.Collapsible.focus=function(evt){
 	elt.dispatchEvent(focus_evt);
 	return;}
     fdjtUI.focusEvent=focusEvent;
-
 
 }());
 
