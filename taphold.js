@@ -119,10 +119,12 @@ fdjtUI.TapHold=(function(){
 	    if (trace_taps)
 		fdjtLog("endpress %o t=%o p=%o",evt,th_target,pressed);
 	    clearTimeout(th_timer); th_timer=false;
+	    if (reticle.live) 
+		setTimeout(function(){reticle.highlight(false);},1500);
 	    if (th_target===touched) tapped(th_target,evt);}
 	else if (pressed) {released(pressed,evt);}
-	fdjtUI.cancel(evt);
 	if (reticle.live) reticle.highlight(false);
+	fdjtUI.cancel(evt);
 	touched=false; pressed=false;}
     function abortpress(evt){
 	if (th_timer) {

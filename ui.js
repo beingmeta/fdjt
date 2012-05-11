@@ -737,8 +737,11 @@ fdjtUI.Collapsible.focus=function(evt){
 	    hreticle=fdjtDOM("div.reticle.horizontal#HRETICLE"," ")
 	    fdjtDOM.prepend(document.body,hreticle);}
 	fdjtDOM.addListener(document,"mousemove",mousemove);
+	fdjtDOM.addListener(document,"click",doflash);
 	fdjtUI.Reticle.live=true;}
     
+    function doflash(evt){flash();}
+
     function mousemove(evt){
 	var target=fdjtUI.T(evt);
 	var x=evt.clientX, y=evt.clientY;
@@ -763,8 +766,16 @@ fdjtUI.Collapsible.focus=function(evt){
 	    if (hreticle) fdjtDOM.dropClass(hreticle,"highlight");
 	    highlighted=false;}}
     
+    function flash(howlong){
+	if (typeof howlong === 'undefined') howlong=1500;
+	if (highlighted) return;
+	else {
+	    highlight(true);
+	    setTimeout(function(){highlight(false);},howlong);}}
+
     fdjtUI.Reticle.setup=setupReticle;
     fdjtUI.Reticle.highlight=highlight;
+    fdjtUI.Reticle.flash=flash;
     fdjtUI.Reticle.onmousemove=mousemove;
     fdjtUI.Reticle.setXY=setXY;
     fdjtUI.Reticle.live=false;})();
