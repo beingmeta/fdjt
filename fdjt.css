@@ -45,6 +45,9 @@ span.checkspan, a.checkspan { white-space: nowrap; }
 .checkspan[checked] div.checked { display: block;}
 .checkspan[checked] li.checked { display: list-item;}
 
+th .checkspan { font-weight: normal;}
+th .checkspan.ischecked, th .checkspan[checked] { font-weight: bold;}
+
 /* Autoprompt classes */
 
 input.autoprompt { font-family: sans,sans-serif; }

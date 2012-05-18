@@ -180,6 +180,17 @@ fdjtUI.Highlight=(function(){
 	return (elt.nodeType===1)&&
 	    (elt.tagName==='INPUT')&&
 	    ((elt.type=='checkbox')||(elt.type=='radio'));}
+    function getcheckable(elt){
+	if (checkable(elt)) return elt;
+	var cb=getParent(elt,checkable);
+	if (cb) return cb;
+	cb=getChildren(elt,'input');
+	if (cb.length) {
+	    var i=0; var lim=cb.length;
+	    while (i<lim)
+		if (checkable(cb[i])) return cb[i]; else i++;
+	    return false;}
+	else return false}
 
     function checkspan_set(target,checked) {
 	if (typeof target === 'string') target=fdjtID(target);
@@ -190,27 +201,44 @@ fdjtUI.Highlight=(function(){
 	if ((!(target))||(!(target.nodeType))) return;
 	var checkspan=((hasClass(target,"checkspan"))?(target):
 		       (getParent(target,".checkspan")));
-	var input=getParent(target,"input");
 	if (!(checkspan)) return false;
-	var inputs=(getChildren(checkspan,checkable));
-	if (inputs.length===0) return false;
-	if (typeof checked === 'undefined') {
-	    if (input) checked=(!(input.checked));
-	    else checked=(!((inputs[0]).checked));}
-	if (input) input.checked=checked;
+	var checkbox=((checkable(target))&&(target))||
+	    (getcheckable(target))||
+	    (getchecksable(checkspan));
+	if (!(checkbox)) return false;
+	if (typeof checked === 'undefined')
+	    // When the second argument isn't provided, we toggle the
+	    //  checkbox
+	    checked=(!(checkbox.checked));
+	var changed=false;
+	if (checkbox.checked!==checked) {
+	    checkbox.checked=checked; changed=true;}
+	// We change this anyway, just in case there's been a glitch
 	if (checked) addClass(checkspan,"ischecked");
 	else dropClass(checkspan,"ischecked");
-	var i=0; var lim=inputs.length;
-	while (i<lim) {
-	    var cb=inputs[i++];
-	    if (cb===input) continue;
-	    if ((cb.checked)&&(!(checked))) cb.checked=false;
-	    else if ((!(cb.checked))&&(checked)) cb.checked=true;
-	    else continue;
+	if (changed) {
 	    var evt=document.createEvent("HTMLEvents");
 	    evt.initEvent("change",false,true);
-	    cb.dispatchEvent(evt);}
-	return true;}
+	    checkbox.dispatchEvent(evt);}
+	if ((changed)&&(checkbox.type==='radio')) {
+	    var form=checkbox.form;
+	    var name=checkbox.name;
+	    var tosync=fdjtDOM.getChildren(form,'input');
+	    var i=0; var lim=tosync.length;
+	    while (i<lim) {
+		var input=tosync[i++];
+		if ((input.type==='radio')&&(input.name===name)) {
+		    var altspan=getParent(input,".checkspan");
+		    var changed=
+			(((input.checked)&&(!(hasClass(altspan,"ischecked"))))||
+			 ((!(input.checked))&&(hasClass(altspan,"ischecked"))));
+		    if (changed) {
+			if (input.checked)
+			    addClass(altspan,"ischecked");
+			else dropClass(altspan,"ischecked");
+			var evt=document.createEvent("HTMLEvents");
+			evt.initEvent("change",false,true);
+			input.dispatchEvent(evt);}}}}}
     fdjtUI.CheckSpan.set=checkspan_set;
 
     function checkspan_onclick(evt) {
@@ -226,6 +254,17 @@ fdjtUI.Highlight=(function(){
 	    fdjtUI.cancel(evt);}
 	return false;}
     fdjtUI.CheckSpan.onclick=checkspan_onclick;    
+
+    function changed(evt) {
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	if ((target.type==='radio')||(target.type==='checkbox')) {
+	    var checkspan=fdjtDOM.getParent(target,'.checkspan');
+	    if (checkspan)
+		((target.checked)?(fdjtDOM.addClass):(fdjtDOM.dropClass))(
+		    checkspan,"ischecked");}}
+    fdjtUI.CheckSpan.changed=changed;    
+
     })();
 
 
