@@ -40,6 +40,7 @@ fdjtUI.TapHold=(function(){
     var addClass=fdjtDOM.addClass;
     var hasClass=fdjtDOM.hasClass;
     var hasParent=fdjtDOM.hasParent;
+    var reticle=fdjtUI.Reticle;
 
     function getTarget(evt){
 	if ((evt.changedTouches)&&((evt.changedTouches.length)))
@@ -104,6 +105,7 @@ fdjtUI.TapHold=(function(){
 	if (!(th_target)) return;
 	touched=th_target; pressed=false
 	if (trace_taps) fdjtLog("startpress %o",evt);
+	if (reticle.live) reticle.highlight(true);
 	fdjtUI.cancel(evt);
 	th_timer=setTimeout((function(evt){
 	    if (trace_taps) fdjtLog("startpress/timeout %o",evt);
@@ -117,14 +119,18 @@ fdjtUI.TapHold=(function(){
 	    if (trace_taps)
 		fdjtLog("endpress %o t=%o p=%o",evt,th_target,pressed);
 	    clearTimeout(th_timer); th_timer=false;
+	    if (reticle.live) 
+		setTimeout(function(){reticle.highlight(false);},1500);
 	    if (th_target===touched) tapped(th_target,evt);}
 	else if (pressed) {released(pressed,evt);}
+	if (reticle.live) reticle.highlight(false);
 	fdjtUI.cancel(evt);
 	touched=false; pressed=false;}
     function abortpress(evt){
 	if (th_timer) {
 	    clearTimeout(th_timer); th_timer=false;}
 	else if (pressed) {released(pressed,evt);}
+	if (reticle.live) reticle.highlight(false);
 	touched=false; pressed=false;}
 
     function outer_mousemove(evt){
@@ -146,7 +152,9 @@ fdjtUI.TapHold=(function(){
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
 	    return;
-	else fdjtUI.cancel(evt);
+	else {
+	    if (reticle.live) reticle.onmousemove(evt);
+	    fdjtUI.cancel(evt);}
 	if ((pressed)&&
 	    (th_target!==pressed)) {
 	    if (trace_taps)
