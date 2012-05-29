@@ -299,18 +299,22 @@ var CodexLayout=
 	    node.removeAttribute("data-codexorigin");}
 	
 	function revertLayout(layout) {
-	    var tweaked=TOA(layout.container.getElementsByClassName("codextweaked"));
+	    var tweaked=TOA(
+		layout.container.getElementsByClassName("codextweaked"));
 	    if ((tweaked)&&(tweaked.length)) {
-		layout.logfn("Dropping tweaks of %d relocated nodes",tweaked.length);
+		layout.logfn("Dropping tweaks of %d relocated nodes",
+			     tweaked.length);
 		var i=0; var lim=tweaked.length;
 		while (i<lim) {
 		    var node=tweaked[i++]; node.style='';
 		    dropClass(node,"codextweaked");
 		    if ((node.tagName==='img')||(node.tagName==='IMG')) {
 			node.width=''; node.height='';}}}
-	    var cantsplit=TOA(layout.container.getElementsByClassName("codextweaked"));
+	    var cantsplit=TOA(
+		layout.container.getElementsByClassName("codextweaked"));
 	    dropClass(cantsplit,"codexcantsplit");
-	    var moved=TOA(layout.container.getElementsByClassName("codexrelocated"));
+	    var moved=TOA(
+		layout.container.getElementsByClassName("codexrelocated"));
 	    if ((moved)&&(moved.length)) {
 		layout.logfn("Restoring original layout of %d relocated nodes and %d texts",
 			     moved.length);
@@ -323,11 +327,16 @@ var CodexLayout=
 	    var layout=this;
 
 	    // Layout rules
-	    var forcebreakbefore=this.forcebreakbefore=init.forcebreakbefore||false;
-	    var forcebreakafter=this.forcebreakafter=init.forcebreakafter||false;
-	    var avoidbreakinside=this.avoidbreakinside=init.avoidbreakinside||false;
-	    var avoidbreakafter=this.avoidbreakafter=init.avoidbreakafter||false;
-	    var avoidbreakbefore=this.avoidbreakbefore=init.avoidbreakbefore||false;
+	    var forcebreakbefore=this.forcebreakbefore=
+		init.forcebreakbefore||false;
+	    var forcebreakafter=this.forcebreakafter=
+		init.forcebreakafter||false;
+	    var avoidbreakinside=this.avoidbreakinside=
+		init.avoidbreakinside||false;
+	    var avoidbreakafter=this.avoidbreakafter=
+		init.avoidbreakafter||false;
+	    var avoidbreakbefore=
+		this.avoidbreakbefore=init.avoidbreakbefore||false;
 	    var pageblock=this.pageblock=init.pageblock||false;
 	    var fullpages=this.fullpages=init.fullpages||false;
 	    var floatpages=this.floatpages=init.floatpages||false;
@@ -337,8 +346,19 @@ var CodexLayout=
 	    var page_height=this.height=init.page_height||fdjtDOM.viewHeight();
 	    var page_width=this.width=init.page_width||fdjtDOM.viewWidth();
 	    
+	    // Break 'paragraphs' (anything with just text and inline nodes)
+	    var break_blocks=this.break_blocks=
+		((typeof init.break_blocks === 'undefined')?(true):
+		 (init.break_blocks));
+
+	    // Scale pages (use CSS to shrink pages to fit)
+	    var scale_pages=this.scale_pages=
+		((typeof init.scale_pages === 'undefined')?(true):
+		 (init.scale_pages));
+
 	    // This is the node DOM container where we place new pages
-	    var container=this.container=init.container||fdjtDOM("div.codexpages");
+	    var container=this.container=
+		init.container||fdjtDOM("div.codexpages");
 	    
 	    var logfn=this.logfn=
 		init.logfn||CodexLayout.logfn||
@@ -555,9 +575,9 @@ var CodexLayout=
 			return true;
 		    else return false;}
 
-		// Cerate a new page
+		// Create a new page
+		// If node is passed, it is the first element on the new page
 		function newPage(node){
-		    // If node exists, it is the first element on the new page
 		    if ((float_pages)&&(float_pages.length)) {
 			// First add any floating pages that may have
 			// accumulated
@@ -569,7 +589,9 @@ var CodexLayout=
 			(node.parentNode.childNodes.length===1))
 			node=node.parentNode;
 		    if (needNewPage(node)) {
-			// If we really need to create a new page, do so
+			// If we really need to create a new page, do so,
+			//  starting by dropping the curpage class from the
+			//  current page
 			if (page) dropClass(page,"curpage");
 			layout.page=page=fdjtDOM("div.codexpage.curpage");
 			if (!(pagerule)) {
@@ -594,6 +616,11 @@ var CodexLayout=
 			layout.drag=drag=[];}
 		    // Finally, move the node to the page
 		    if (node) moveNodeToPage(node,page,dups);
+
+		    // Now we check for a particularly difficult case,
+		    // where the node we added already overruns the page
+		    // but can't be split.
+		    
 
 		    layout.prev=prev=false;
 		    return page;}
@@ -640,8 +667,9 @@ var CodexLayout=
 
 		// This gets a little complicated
 		function splitBlock(node){
-		    if (avoidBreakInside(node)) {
-			// Simplest case, if we can't split, we just make a new page
+		    if ((!(break_blocks))||(avoidBreakInside(node))) {
+			// Simplest case, if we can't split, we just
+			// make a new page
 			addClass(node,"codexcantsplit");
 			newPage(node);
 			return node;}
@@ -802,10 +830,13 @@ var CodexLayout=
 		    if (!((avail_width)&&(avail_height))) {
 			var h_margin=(geom.left_margin+geom.right_margin);
 			var v_margin=(geom.top_margin+geom.bottom_margin);
-			if (!(avail_width))
-			    avail_width=page_width-(geom.left_margin+geom.right_margin+geom.left);
-			if (!(avail_height))
-			    avail_height=page_height-(geom.top_margin+geom.bottom_margin+geom.top);}
+			if (!(avail_width)) avail_width=
+			    page_width-(geom.left_margin+
+					geom.right_margin+geom.left);
+			if (!(avail_height)) avail_height=
+			    page_height-(geom.top_margin+
+					 geom.bottom_margin+
+					 geom.top);}
 		    // If the node doesn't have any dimensions,
 		    //  something hasn't loaded, so don't try tweaking
 		    if ((geom.width===0)||(geom.height===0)) return;
@@ -826,7 +857,8 @@ var CodexLayout=
 				var j=0; var jlim=images.length;
 				while (j<jlim) {
 				    var img=images[j++];
-				    if (hasClass(img,/\bcodextweaked\b/)) continue;
+				    if (hasClass(img,/\bcodextweaked\b/))
+					continue;
 				    else if (hasClass(img,/\bcodexavoidtweak\b/))
 					continue;
 				    else if ((img.getAttribute('style'))||
@@ -883,19 +915,21 @@ var CodexLayout=
 		    if (!(page_width)) page_width=geom.width;
 		    if (!(page_height)) page_height=geom.height;}
 		if ((bounds.width>page_width)||(bounds.height>page_height)) {
-		    var scaled=fdjt$(".codexscale",completed);
-		    if ((scaled)&&(scaled.length)) {
-			// To be implemented: try adjusting these elements first
-			bounds=insideBounds(completed);}
-		    if ((bounds.width>page_width)||(bounds.height>page_height)) {
-			var boxed=fdjtDOM("div",completed.childNodes);
-			var scalex=page_width/bounds.width;
-			var scaley=page_height/bounds.height;
-			var scale=((scalex<scaley)?(scalex):(scaley));
-			var transform='scale('+scale+','+scale+')';
-			boxed.style[fdjtDOM.transform]=transform;
-			boxed.style[fdjtDOM.transform+"-origin"]='top';
-			completed.appendChild(boxed);}}
+		    addClass(completed,"codexoversize");
+		    if (scale_pages) {
+			var scaled=fdjt$(".codexscale",completed);
+			if ((scaled)&&(scaled.length)) {
+			    bounds=insideBounds(completed);}
+			if ((bounds.width>page_width)||
+			    (bounds.height>page_height)) {
+			    var boxed=fdjtDOM("div",completed.childNodes);
+			    var scalex=page_width/bounds.width;
+			    var scaley=page_height/bounds.height;
+			    var scale=((scalex<scaley)?(scalex):(scaley));
+			    var transform='scale('+scale+','+scale+')';
+			    boxed.style[fdjtDOM.transform]=transform;
+			    boxed.style[fdjtDOM.transform+"-origin"]='top';
+			    completed.appendChild(boxed);}}}
 		if (this.pagedone) this.pagedone(completed);
 		dropClass(completed,"curpage");}
 	    this.finishPage=finishPage;
