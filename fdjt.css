@@ -45,8 +45,9 @@ span.checkspan, a.checkspan { white-space: nowrap; }
 .checkspan[checked] div.checked { display: block;}
 .checkspan[checked] li.checked { display: list-item;}
 
-th .checkspan { font-weight: normal;}
+th .checkspan, th.checkspan { font-weight: normal;}
 th .checkspan.ischecked, th .checkspan[checked] { font-weight: bold;}
+th.checkspan.ischecked, th.checkspan[checked] { font-weight: bold;}
 
 /* Autoprompt classes */
 
@@ -433,6 +434,13 @@ table.fdjtform tbody.collapsible.expanded img.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded button.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded input.expanded { display: inline;}
 table.fdjtform tbody.collapsible.expanded .collapsed { display: none;}
+
+table.fdjtform th.leftalign, th.leftalign, td.leftalign { text-align: left;}
+table.fdjtform th.rightalign, th.rightalign, td.rightalign { text-align: right;}
+table.fdjtform th.centeralign, th.centeralign, td.centeralign {
+    text-align: center;}
+
+th button, td button { white-space: nowrap;}
 
 form.evalform input[name='EXPR'] {
     font-family: fixed; width: 100%;}
