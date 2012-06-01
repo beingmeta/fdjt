@@ -33,6 +33,8 @@ fdjtUI.TapHold=(function(){
     var th_timer=false;
     var mouse_down=false;
     var shift_down=false;
+    var start_x=false;
+    var start_y=false;
     var touch_x=false;
     var touch_y=false;
     
@@ -125,6 +127,7 @@ fdjtUI.TapHold=(function(){
 	else if (pressed) {released(pressed,evt);}
 	if (reticle.live) reticle.highlight(false);
 	fdjtUI.cancel(evt);
+	start_x=false; start_y=false;
 	touched=false; pressed=false;}
     function abortpress(evt){
 	if (th_timer) {
@@ -148,6 +151,10 @@ fdjtUI.TapHold=(function(){
 	th_target=target;
 	touch_x=evt.clientX||getClientX(evt);
 	touch_y=evt.clientY||getClientY(evt);
+	if ((start_x)&&(start_y)&&(th_timer)&&
+	    (((Math.abs(touch_x-start_x))+(Math.abs(touch_y-start_y)))>12)) {
+	    clearTimeout(th_timer);
+	    th_timer=pressed=th_target=false;}
 	if (evt.touches) th_target=document.elementFromPoint(touch_x,touch_y);
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
@@ -185,8 +192,8 @@ fdjtUI.TapHold=(function(){
 	mouse_down=true;
 	if (trace_taps) fdjtLog("down %o",evt);
 	th_target=fdjtUI.T(evt);
-	touch_x=evt.clientX||getClientX(evt);
-	touch_y=evt.clientY||getClientY(evt);
+	start_x=touch_x=evt.clientX||getClientX(evt);
+	start_x=touch_y=evt.clientY||getClientY(evt);
 	if (evt.ctrlKey) return;
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
