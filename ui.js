@@ -172,7 +172,7 @@ fdjtUI.Highlight=(function(){
 	    input.checked=true;
 	    fdjtDOM.addClass(span,"ischecked");}
 	else input.checked=false;
-	if (arguments.length>4)
+	if (arguments.length>4) 
 	    fdjtDOM.appendArray(span,arguments,4);
 	return span;}
     fdjtUI.CheckSpan=CheckSpan;
@@ -205,7 +205,7 @@ fdjtUI.Highlight=(function(){
 	if (!(checkspan)) return false;
 	var checkbox=((checkable(target))&&(target))||
 	    (getcheckable(target))||
-	    (getchecksable(checkspan));
+	    (getcheckable(checkspan));
 	if (!(checkbox)) return false;
 	if (typeof checked === 'undefined')
 	    // When the second argument isn't provided, we toggle the
