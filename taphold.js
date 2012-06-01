@@ -192,7 +192,8 @@ fdjtUI.TapHold=(function(){
 	    (evt.touches.length>1))
 	    return;
 	if (fdjtUI.isClickable(evt)) return;
-	if (!(touched)) startpress(th_target,evt);}
+	if (!(touched)) startpress(th_target,evt);
+	fdjtUI.cancel(evt);}
     
     function keyup(evt){
 	evt=evt||event;
@@ -217,7 +218,9 @@ fdjtUI.TapHold=(function(){
 	if (fdjtUI.isClickable(evt)) return;
 	if ((!(shift_down))&&(!(mouse_down)))
 	    endpress(evt);
-	else fdjtLog("md=%o, sd=%o",mouse_down,shift_down);}
+	else if (trace_taps)
+	    fdjtLog("md=%o, sd=%o",mouse_down,shift_down);
+	fdjtUI.cancel(evt);}
 
     function TapHold(elt,fortouch){
 	elt=elt||window;
