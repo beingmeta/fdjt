@@ -842,7 +842,7 @@ var fdjtDOM=
 		if (display_type==='none') return "";
 		else if ((classname)&&
 			 ((classname==='fdjtdecoration')||
-			  (classname.search(/\bfdjtdecoration\b/))))
+			  (classname.search(/\bfdjtdecoration\b/)>=0)))
 		    return "";
 		else if (!(inside)) {}
 		else if (!(display_type)) {}
