@@ -56,7 +56,7 @@ var fdjtAjax=
 	fdjtAjax.jsonCall=function(callback,base_uri){
 	    return fdjtAjax(function(req) {
 		callback(JSON.parse(req.responseText));},
-			    base_uri,fdjtDOM.Array(arguments,2));};
+	      base_uri,fdjtDOM.Array(arguments,2));};
 
 	fdjtAjax.xmlCall=function(callback,base_uri){
 	    return fdjtAjax(function(req) {
