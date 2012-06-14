@@ -1040,7 +1040,8 @@ var fdjtDOM=
 		return true;
 	    else if ((test===true)&&
 		     ((node.tagName==='IMG')||
-		      (node.tagName==='OBJECT')))
+		      (node.tagName==='OBJECT')||
+		      (node.tagName==='HR')))
 		return true;
 	    else if (node.childNodes) {
 		var children=node.childNodes;
