@@ -176,27 +176,28 @@ var fdjtState=
 	    else return false;
 	    var results=[];
 	    var ename=encodeURIComponent(name);
-	    var namepat=new RegExp
-	    ("(&|^|\\?)"+ename+"(=|&|$)",((matchcase)?"g":"gi"));
+	    var namepat=new RegExp("(&|^|\\?)"+ename+"(=|&|$)",
+				   ((matchcase)?"g":"gi"));
 	    var query=location.search;
 	    var start=query.search(namepat);
 	    while (start>=0) {
 		// Skip over separator if non-initial
 		if ((query[start]==='?')||(query[start]==='&')) start++;
 		// Skip over the name
-		var valstart=start+ename.length; var end=false;
+		var valstart=start+ename.length;
+		var valstring=query.slice(valstart+1);
+		var end=valstring.search(/(&|$)/g);
 		if (query[valstart]==="=") {
-		    var valstring=query.slice(valstart+1);
-		    end=valstring.search(/(&|$)/g);
 		    if (end<=0) {
 			results.push("");
 			if (!(multiple)) break;}
 		    else {
 			results.push(valstring.slice(0,end));
+			end=end+valstart+1;
 			if (!(multiple)) break;}}
-		else if (multiple)
+		else if (multiple) 
 		    results.push(query.slice(start,end));
-		else if (verbatim)
+		else if (verbatim) 
 		    return query.slice(start,end);
 		else return querydecode(query.slice(start,end));
 		if (end>0) {
