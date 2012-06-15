@@ -86,13 +86,13 @@ var fdjtString=
 	    else if (arg._fdjtid) return '#@'+arg._fdjtid;
 	    else if ((arg.type)&&((arg.target)||arg.srcElement)) {
 		var target=arg.target||arg.srcElement;
-		var ox=arg.offsetX, oy=arg.offsetY;
+		var ox=arg.clientX, oy=arg.clientY;
 		var result="["+arg.type+"@"+stringify(target)+"(m="+
 		    (((arg.shiftKey===true)?"s":"")+
 		     ((arg.ctrlKey===true)?"c":"")+
 		     ((arg.altKey===true)?"a":"")+
 		     (arg.button||0));
-		if (ox) result=result+",x="+ox+",y="+oy;
+		if (ox||oy) result=result+",cx="+ox+",cy="+oy;
 		else if (arg.touches) {
 		    var i=0; var n=arg.touches.length;
 		    result=result+",touches="+n;}

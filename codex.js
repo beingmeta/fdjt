@@ -230,13 +230,24 @@ var CodexLayout=
 
 	var codex_reloc_serial=1;
 	
+	function getFirstContent(node){
+	    var child=node.firstChild;
+	    while (child) {
+		if (child.nodeType===3) {
+		    if (!(isEmpty(child.nodeValue))) return child;}
+		else if (child.nodeType!==1) {}
+		else return child;
+		child=child.nextSibling;}
+	    return false;}
+		    
 	// This moves a node into another container, leaving
 	// a back pointer for restoration
 	function moveNode(arg,into,blockp){
 	    var baseclass; var node=arg;
 	    // If we're moving a first child, we might as well move the parent
 	    if (hasParent(node,into)) return node;
-	    while ((node.parentNode)&&(node===node.parentNode.firstChild)&&
+	    while ((node.parentNode)&&
+		   (node===getFirstContent(node.parentNode))&&
 		   (node.parentNode!==document.body)&&
 		   (node.parentNode!==Codex.content)&&
 		   (!(hasClass(node.parentNode,"codexpage"))))

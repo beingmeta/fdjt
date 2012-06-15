@@ -820,6 +820,37 @@ fdjtUI.Collapsible.focus=function(evt){
     fdjtUI.Reticle.live=false;})();
 
 
+/* Image swapping */
+
+(function(){
+    function ImageSwap(img,interval){
+	if (typeof img==='string') img=fdjtID(img);
+	if (!(img)) return false;
+	if (!(interval))
+	    interval=((img.getAttribute('data-interval'))?
+		      (parseInt((img.getAttribute('data-interval')))):
+		      (ImageSwap.interval));
+	if (!(img.getAttribute("data-images"))) {
+	    img.setAttribute("data-images",img.src);}
+	if (!(img.defaultsrc)) img.defaultsrc=img.src;
+	var images=(img.getAttribute('data-images')).split(';');
+	if (images.length===0) return false;
+	else if (images.length===1) {
+	    img.src=images[0];
+	    return false;}
+	var counter=0;
+	return setInterval(function(){
+	    img.src=images[counter++];
+	    if (counter>=images.length) counter=0;},
+			   interval);}
+	    
+    ImageSwap.reset=function(img){
+	if (img.defaultsrc) img.src=img.defaultsrc;};
+    ImageSwap.interval=1000;
+
+    fdjtUI.ImageSwap=ImageSwap;})();
+
+
 /* Miscellaneous event-related functions */
 
 (function(){
