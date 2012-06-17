@@ -662,7 +662,7 @@ var CodexLayout=
 			newpage="newpage";}
 		    
 		    if (trace>1) {
-			if (node) logfj("Layout/%s %o at %o",newpage,page,node);
+			if (node) logfn("Layout/%s %o at %o",newpage,page,node);
 			else logfn("Layout/%s %o",newpage,page);}
 		    
 		    if (node) moveNodeToPage(node,page,dups);
