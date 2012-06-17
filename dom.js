@@ -639,10 +639,13 @@ var fdjtDOM=
 		while (i<lim) remove_node(node[i++]);
 		return;}
 	    var cur=node;
-	    if (typeof node === 'string')
+	    if (typeof node === 'string') {
 		if (node[0]==='#') cur=document.getElementById(node.slice(1));
-	    else cur=document.getElementById(node);
-	    if (cur) cur.parentNode.removeChild(cur);
+		else cur=document.getElementById(node);}
+	    if ((cur)&&(cur.parentNode))
+		cur.parentNode.removeChild(cur);
+	    else if (cur)
+		fdjtLog.uhoh("Looks like %o has already been removed (no parent)",cur);
 	    else fdjtLog.uhoh("Can't find %o to remove it",node);}
 	fdjtDOM.remove=remove_node;
 	
