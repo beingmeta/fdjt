@@ -1682,21 +1682,30 @@ var fdjtDOM=
 			  (document.body.children));};
 
 	if (navigator.userAgent.search("WebKit")>=0) {
-	    fdjtDOM.transition='-webkit-transition';
-	    fdjtDOM.transitionProperty='-webkit-transition-property';
-	    fdjtDOM.transform='-webkit-transform';
-	    fdjtDOM.columnWidth='-webkit-column-width';
-	    fdjtDOM.columnGap='-webkit-column-gap';}
+	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-webkit-transition';
+	    if (!(fdjtDOM.transitionProperty))
+		fdjtDOM.transitionProperty='-webkit-transition-property';
+	    if (!(fdjtDOM.transform)) fdjtDOM.transform='-webkit-transform';
+	    if (!(fdjtDOM.transformOrigin))
+		fdjtDOM.transformOrigin='-webkit-transform-origin';
+	    if (!(fdjtDOM.columnWidth)) fdjtDOM.columnWidth='-webkit-column-width';
+	    if (!(fdjtDOM.columnGap)) fdjtDOM.columnGap='-webkit-column-gap';}
 	else if (navigator.userAgent.search("Mozilla")>=0) {
-	    fdjtDOM.transitionProperty='-moz-transition-property';
-	    fdjtDOM.transition='-moz-transition';
-	    fdjtDOM.transform='-moz-transform';
-	    fdjtDOM.columnWidth='MozColumnWidth';
-	    fdjtDOM.columnGap='MozColumnGap';}
+	    if (!(fdjtDOM.transitionProperty))
+		fdjtDOM.transitionProperty='-moz-transition-property';
+	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-moz-transition';
+	    if (!(fdjtDOM.transform)) fdjtDOM.transform='-moz-transform';
+	    if (!(fdjtDOM.transformOrigin))
+		fdjtDOM.transformOrigin='-moz-transform-origin';
+	    if (!(fdjtDOM.columnWidth)) fdjtDOM.columnWidth='MozColumnWidth';
+	    if (!(fdjtDOM.columnGap)) fdjtDOM.columnGap='MozColumnGap';}
 	else {
-	    fdjtDOM.transitionProperty='transition-property';
-	    fdjtDOM.transition='transition';
-	    fdjtDOM.transform='transform';}
+	    if (!(fdjtDOM.transitionProperty))
+		fdjtDOM.transitionProperty='transition-property';
+	    if (!(fdjtDOM.transition)) fdjtDOM.transition='transition';
+	    if (!(fdjtDOM.transform)) fdjtDOM.transform='transform';
+	    if (!(fdjtDOM.transformOrigin))
+		fdjtDOM.transformOrigin='-moz-transform-origin';}
 	
 	/* Selection-y functions */
 
