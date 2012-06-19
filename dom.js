@@ -878,7 +878,7 @@ var fdjtDOM=
 
 	/* Geometry functions */
 
-	function getGeometry(elt,root,outer,withstack){
+	function getGeometry(elt,root,extra,withstack){
 	    if (!(withstack)) withstack=false;
 	    if (typeof elt === 'string')
 		elt=document.getElementById(elt);
@@ -888,6 +888,7 @@ var fdjtDOM=
 	    var width=elt.offsetWidth;
 	    var height=elt.offsetHeight;
 	    var rootp=((root)&&(root.offsetParent));
+	    var style=((extra)&&(getStyle(elt)));
 
 	    if (elt===root) 
 		return {left: 0,top: 0,width:width,height: height,
@@ -900,20 +901,29 @@ var fdjtDOM=
 		left += elt.offsetLeft;
 		elt=elt.offsetParent;}
 	    
-	    if (outer) {
-		var outer_width, outer_height;
-		var style=getStyle(elt);
+	    if (style) {
 		var t_margin=parsePX(style.marginTop);
 		var r_margin=parsePX(style.marginRight);
 		var b_margin=parsePX(style.marginBottom);
 		var l_margin=parsePX(style.marginLeft);
-		outer_width=width+l_margin+r_margin;
-		outer_height=height+t_margin+b_margin;
+		var t_padding=parsePX(style.paddingTop);
+		var r_padding=parsePX(style.paddingRight);
+		var b_padding=parsePX(style.paddingBottom);
+		var l_padding=parsePX(style.paddingLeft);
+		var t_border=parsePX(style.borderTopWidth);
+		var r_border=parsePX(style.borderRightWidth);
+		var b_border=parsePX(style.borderBottomWidth);
+		var l_border=parsePX(style.borderLeftWidth);
+		var outer_width=width+l_margin+r_margin;
+		var outer_height=height+t_margin+b_margin;
+		var inner_width=width-(l_border+l_padding+r_border+r_padding);
+		var inner_height=height-(t_border+t_padding+b_border+b_padding);
 		return {left: left, top: top, width: width,height: height,
 			right:left+width,bottom:top+height,
 			top_margin: t_margin, bottom_margin: b_margin,
 			left_margin: l_margin, right_margin: r_margin,
 			outer_height: outer_height,outer_width: outer_width,
+			inner_height: inner_height,outer_width: inner_width,
 			stack:withstack};}
 	    else return {left: left, top: top, width: width,height: height,
 			 right:left+width,bottom:top+height,
