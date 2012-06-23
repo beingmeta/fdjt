@@ -321,6 +321,12 @@ var fdjtDOM=
 	    dropClass(elt,drop,attrib); addClass(elt,add,attrib);}
 	fdjtDOM.swapClass=swapClass;
 
+	function setClass(elt,classname,add){
+	    if (typeof elt === 'string') elt=document.getElementById(elt);
+	    if (add) addClass(elt,classname);
+	    else dropClass(elt,classname);}
+	fdjtDOM.setClass=setClass;
+
 	function toggleClass(elt,classname,attrib){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
 	    else if ((NodeList)&&(elt instanceof NodeList))
