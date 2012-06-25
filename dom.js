@@ -541,7 +541,12 @@ var fdjtDOM=
 	/* Real simple DOM search */
 
 	function getParent(elt,parent,attrib){
-	    if (!(parent)) return false;
+	    if (typeof elt === 'string') {
+		if (elt[0]==='#')
+		    elt=document.getElementById(elt.slice(1));
+		else elt=document.getElementById(elt);}
+	    if (!(elt)) return false;
+	    else if (!(parent)) return false;
 	    else if (parent.nodeType) {
 		while (elt) {
 		    if (elt===parent) return parent;

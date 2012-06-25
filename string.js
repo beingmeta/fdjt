@@ -245,26 +245,49 @@ var fdjtString=
 				      return String.fromCharCode(+paren);});}
 	fdjtString.unEntify=unEntify;
 
-	function padNum(num,digits){
+	function padNum(num,digits,prec){
 	    var ndigits=
 		((num<10)?(1):(num<100)?(2):(num<1000)?(3):(num<10000)?(4):
 		 (num<100000)?(5):(num<1000000)?(6):(num<1000000)?(7):
 		 (num<100000000)?(8):(num<1000000000)?(9):(num<10000000000)?(10):(11));
-	    var nzeroes=digits-ndigits;
+	    var nzeroes=digits-ndigits; var numstring=num.toString();
+	    var prefix=""; var suffix="";
+	    if (prec) {
+		var point=numstring.indexOf('.');
+		if ((point>=0)&&((point+prec)<numstring.length))
+		    numstring=numstring.slice(0,point+prec+1);
+		else if ((point<0)||(numstring.length<(point+prec+1))) {
+		    var j=0; var pad=(point+prec+1)-numstring.length;
+		    while (j<pad) {suffix=suffix+"0"; j++;}}}
 	    switch (nzeroes) {
-	    case 0: return ""+num;
-	    case 1: return "0"+num;
-	    case 2: return "00"+num;
-	    case 3: return "000"+num;
-	    case 4: return "0000"+num;
-	    case 5: return "00000"+num;
-	    case 6: return "000000"+num;
-	    case 7: return "0000000"+num;
-	    case 8: return "00000000"+num;
-	    case 9: return "000000000"+num;
-	    case 10: return "0000000000"+num;
-	    default: return ""+num;}}
+	    case 0: prefix=""; break;
+	    case 1: prefix="0"; break;
+	    case 2: prefix="00"; break;
+	    case 3: prefix="000"; break;
+	    case 4: prefix="0000"; break;
+	    case 5: prefix="00000"; break;
+	    case 6: prefix="000000"; break;
+	    case 7: prefix="0000000"; break;
+	    case 8: prefix="00000000"; break;
+	    case 9: prefix="000000000"; break;
+	    case 10: prefix="0000000000"; break;
+	    default: {
+		var j=0; while (j<nzeroes) {prefix=prefix+"0"; j++;}}}
+	    return prefix+numstring+suffix;}
 	fdjtString.padNum=padNum;
+
+	function precString(num,prec){
+	    var numstring=num.toString();
+	    var suffix="";
+	    if (prec) {
+		var point=numstring.indexOf('.');
+		if ((point>=0)&&((point+prec)<numstring.length))
+		    numstring=numstring.slice(0,point+prec+1);
+		else if ((point<0)||(numstring.length<(point+prec+1))) {
+		    var j=0; var pad=(point+prec+1)-numstring.length;
+		    while (j<pad) {suffix=suffix+"0"; j++;}}}
+	    return numstring+suffix;}
+	fdjtString.precString=precString;
 
 	/* Getting initials */
 
