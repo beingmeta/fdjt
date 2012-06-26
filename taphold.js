@@ -50,14 +50,14 @@ fdjtUI.TapHold=(function(){
 	else return fdjtUI.T(evt);}
 
     function getClientX(evt){
-	if (typeof evt.offsetX === "number") return evt.offsetX;
+	if (typeof evt.offsetX === "number") return evt.clientX;
 	else if ((evt.touches)&&(evt.touches.length)) {
 	    var touch=evt.touches[0];
 	    return touch.clientX;}
 	else if (typeof evt.clientX === "number") return evt.clientX;
 	else return false;}
     function getClientY(evt){
-	if (typeof evt.offsetY === "number") return evt.offsetY;
+	if (typeof evt.offsetY === "number") return evt.clientY;
 	else if ((evt.touches)&&(evt.touches.length)) {
 	    var touch=evt.touches[0];
 	    return touch.clientY;}
@@ -69,13 +69,12 @@ fdjtUI.TapHold=(function(){
 	if (trace_taps)
 	    fdjtLog("Synthesizing %s on %o @%d,%d",etype,target,
 		    touch_x,touch_y);
-	evt.initEvent(etype, true, true);
+	evt.initUIEvent(etype, true, true);
 	evt.clientX=touch_x; evt.clientY=touch_y;
 	// If the target no longer has a parent, it's been removed
-	//  from the DOM, so we use the event target if there is one
+	//  from the DOM, so we use the originating event target (if
+	//  there is one)
 	if ((orig)&&(!(target.parentNode))) target=fdjtUI.T(orig);
-	// Does dispatchEvent set this?
-	// evt.target=target;
 	if (orig) fdjtUI.cancel(orig);
 	target.dispatchEvent(evt);}
 
@@ -190,10 +189,11 @@ fdjtUI.TapHold=(function(){
 	    (evt.button))
 	    return;
 	mouse_down=true;
-	if (trace_taps) fdjtLog("down %o",evt);
 	th_target=fdjtUI.T(evt);
 	start_x=touch_x=evt.clientX||getClientX(evt);
 	start_x=touch_y=evt.clientY||getClientY(evt);
+	if (trace_taps)
+	    fdjtLog("down %o t=%o x=%o y=%o",evt,th_target,start_x,start_y);
 	if (evt.ctrlKey) return;
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
@@ -213,15 +213,16 @@ fdjtUI.TapHold=(function(){
 	evt=evt||event;
 	if (!(mouse_down)) return;
 	mouse_down=false;
+	touch_x=evt.clientX||getClientX(evt)||touch_x;
+	touch_y=evt.clientY||getClientY(evt)||touch_y;
 	if (trace_taps)
-	    fdjtLog("up %o etl=%o",evt,
+	    fdjtLog("up %o etl=%o tht=%o sx=%o sy=%o x=%o y=%o",evt,
 		    ((evt.touches)&&(evt.touches.length)&&
-		     evt.touches.length));
+		     evt.touches.length),
+		    th_target,start_x,start_y,touch_x,touch_y);
 	if ((evt.touches)&&(evt.touches.length)&&
 	    (evt.touches.length>1))
 	    return;
-	touch_x=evt.clientX||getClientX(evt);
-	touch_y=evt.clientY||getClientY(evt);
 	if (fdjtUI.isClickable(evt)) return;
 	if ((!(shift_down))&&(!(mouse_down)))
 	    endpress(evt);
