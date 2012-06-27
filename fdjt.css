@@ -177,7 +177,8 @@ table.fdjt td textarea.fullwidth { width: 100%;}
 /* Auto completion */
 
 div.completions {font-family: sans,sans-serif;}
-.completions .label { float: right;}
+.completions .label { float: right; font-size: 125%;}
+.completions img.label { height: 5ex;}
 
 .completions .nocompletemsg { display: none;}
 .completions.noresults span.nocompletemsg { display: inline;}

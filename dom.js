@@ -321,6 +321,12 @@ var fdjtDOM=
 	    dropClass(elt,drop,attrib); addClass(elt,add,attrib);}
 	fdjtDOM.swapClass=swapClass;
 
+	function setClass(elt,classname,add){
+	    if (typeof elt === 'string') elt=document.getElementById(elt);
+	    if (add) addClass(elt,classname);
+	    else dropClass(elt,classname);}
+	fdjtDOM.setClass=setClass;
+
 	function toggleClass(elt,classname,attrib){
 	    if (typeof elt === 'string') elt=document.getElementById(elt);
 	    else if ((NodeList)&&(elt instanceof NodeList))
@@ -535,7 +541,12 @@ var fdjtDOM=
 	/* Real simple DOM search */
 
 	function getParent(elt,parent,attrib){
-	    if (!(parent)) return false;
+	    if (typeof elt === 'string') {
+		if (elt[0]==='#')
+		    elt=document.getElementById(elt.slice(1));
+		else elt=document.getElementById(elt);}
+	    if (!(elt)) return false;
+	    else if (!(parent)) return false;
 	    else if (parent.nodeType) {
 		while (elt) {
 		    if (elt===parent) return parent;
@@ -639,10 +650,13 @@ var fdjtDOM=
 		while (i<lim) remove_node(node[i++]);
 		return;}
 	    var cur=node;
-	    if (typeof node === 'string')
+	    if (typeof node === 'string') {
 		if (node[0]==='#') cur=document.getElementById(node.slice(1));
-	    else cur=document.getElementById(node);
-	    if (cur) cur.parentNode.removeChild(cur);
+		else cur=document.getElementById(node);}
+	    if ((cur)&&(cur.parentNode))
+		cur.parentNode.removeChild(cur);
+	    else if (cur)
+		fdjtLog.uhoh("Looks like %o has already been removed (no parent)",cur);
 	    else fdjtLog.uhoh("Can't find %o to remove it",node);}
 	fdjtDOM.remove=remove_node;
 	
@@ -875,7 +889,7 @@ var fdjtDOM=
 
 	/* Geometry functions */
 
-	function getGeometry(elt,root,outer,withstack){
+	function getGeometry(elt,root,extra,withstack){
 	    if (!(withstack)) withstack=false;
 	    if (typeof elt === 'string')
 		elt=document.getElementById(elt);
@@ -885,6 +899,7 @@ var fdjtDOM=
 	    var width=elt.offsetWidth;
 	    var height=elt.offsetHeight;
 	    var rootp=((root)&&(root.offsetParent));
+	    var style=((extra)&&(getStyle(elt)));
 
 	    if (elt===root) 
 		return {left: 0,top: 0,width:width,height: height,
@@ -897,20 +912,29 @@ var fdjtDOM=
 		left += elt.offsetLeft;
 		elt=elt.offsetParent;}
 	    
-	    if (outer) {
-		var outer_width, outer_height;
-		var style=getStyle(elt);
+	    if (style) {
 		var t_margin=parsePX(style.marginTop);
 		var r_margin=parsePX(style.marginRight);
 		var b_margin=parsePX(style.marginBottom);
 		var l_margin=parsePX(style.marginLeft);
-		outer_width=width+l_margin+r_margin;
-		outer_height=height+t_margin+b_margin;
+		var t_padding=parsePX(style.paddingTop);
+		var r_padding=parsePX(style.paddingRight);
+		var b_padding=parsePX(style.paddingBottom);
+		var l_padding=parsePX(style.paddingLeft);
+		var t_border=parsePX(style.borderTopWidth);
+		var r_border=parsePX(style.borderRightWidth);
+		var b_border=parsePX(style.borderBottomWidth);
+		var l_border=parsePX(style.borderLeftWidth);
+		var outer_width=width+l_margin+r_margin;
+		var outer_height=height+t_margin+b_margin;
+		var inner_width=width-(l_border+l_padding+r_border+r_padding);
+		var inner_height=height-(t_border+t_padding+b_border+b_padding);
 		return {left: left, top: top, width: width,height: height,
 			right:left+width,bottom:top+height,
 			top_margin: t_margin, bottom_margin: b_margin,
 			left_margin: l_margin, right_margin: r_margin,
 			outer_height: outer_height,outer_width: outer_width,
+			inner_height: inner_height,outer_width: inner_width,
 			stack:withstack};}
 	    else return {left: left, top: top, width: width,height: height,
 			 right:left+width,bottom:top+height,
@@ -1682,21 +1706,30 @@ var fdjtDOM=
 			  (document.body.children));};
 
 	if (navigator.userAgent.search("WebKit")>=0) {
-	    fdjtDOM.transition='-webkit-transition';
-	    fdjtDOM.transitionProperty='-webkit-transition-property';
-	    fdjtDOM.transform='-webkit-transform';
-	    fdjtDOM.columnWidth='-webkit-column-width';
-	    fdjtDOM.columnGap='-webkit-column-gap';}
+	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-webkit-transition';
+	    if (!(fdjtDOM.transitionProperty))
+		fdjtDOM.transitionProperty='-webkit-transition-property';
+	    if (!(fdjtDOM.transform)) fdjtDOM.transform='-webkit-transform';
+	    if (!(fdjtDOM.transformOrigin))
+		fdjtDOM.transformOrigin='-webkit-transform-origin';
+	    if (!(fdjtDOM.columnWidth)) fdjtDOM.columnWidth='-webkit-column-width';
+	    if (!(fdjtDOM.columnGap)) fdjtDOM.columnGap='-webkit-column-gap';}
 	else if (navigator.userAgent.search("Mozilla")>=0) {
-	    fdjtDOM.transitionProperty='-moz-transition-property';
-	    fdjtDOM.transition='-moz-transition';
-	    fdjtDOM.transform='-moz-transform';
-	    fdjtDOM.columnWidth='MozColumnWidth';
-	    fdjtDOM.columnGap='MozColumnGap';}
+	    if (!(fdjtDOM.transitionProperty))
+		fdjtDOM.transitionProperty='-moz-transition-property';
+	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-moz-transition';
+	    if (!(fdjtDOM.transform)) fdjtDOM.transform='-moz-transform';
+	    if (!(fdjtDOM.transformOrigin))
+		fdjtDOM.transformOrigin='-moz-transform-origin';
+	    if (!(fdjtDOM.columnWidth)) fdjtDOM.columnWidth='MozColumnWidth';
+	    if (!(fdjtDOM.columnGap)) fdjtDOM.columnGap='MozColumnGap';}
 	else {
-	    fdjtDOM.transitionProperty='transition-property';
-	    fdjtDOM.transition='transition';
-	    fdjtDOM.transform='transform';}
+	    if (!(fdjtDOM.transitionProperty))
+		fdjtDOM.transitionProperty='transition-property';
+	    if (!(fdjtDOM.transition)) fdjtDOM.transition='transition';
+	    if (!(fdjtDOM.transform)) fdjtDOM.transform='transform';
+	    if (!(fdjtDOM.transformOrigin))
+		fdjtDOM.transformOrigin='-moz-transform-origin';}
 	
 	/* Selection-y functions */
 

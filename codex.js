@@ -170,6 +170,64 @@ var CodexLayout=
 		image.style['max-height']=image.style['min-height']=h;
 	    addClass(image,"codextweaked");}
 	
+	/* pagescale */
+
+	function applyPageScaling(toscale,scaled,width,height) {
+	    var toscale=fdjtDOM.$(".sbookpagescaled");
+	    var i=0; var lim=toscale.length;
+	    while (i<lim) {
+		var node=toscale[i++]; 
+		if (!(node.style[fdjtDOM.transform])) {
+		    var placeholder=false;
+		    var scale_attrib=node.getAttribute('data-pagescale');
+		    if ((node.offsetHeight===0)||(node.offsetHeight===0)) {
+			placeholder=fdjtDOM(node.tagName);
+			fdjtDOM.replace(node,placeholder);
+			fdjtDOM.prepend(document.body,node);
+			if ((node.offsetHeight===0)||(node.offsetHeight===0)) {
+			    fdjtDOM.replace(placeholder,node);
+			    continue;}}
+		    var scale_spec=((scale_attrib)?(scale_attrib.split(',')):["0.5","0.5"]);
+		    var scale_factor=false;
+		    if (scale_spec.length>1) {
+			var to_width=parseFloat(scale_spec[0])*width;
+			var to_height=parseFloat(scale_spec[1])*height;
+			var v_scale=to_height/node.offsetHeight;
+			var h_scale=to_width/node.offsetWidth;
+			if ((v_scale<1)&&(h_scale<1))
+			    scale_factor=Math.min(v_scale,h_scale);
+			else if ((vscale<1.2)&&(h_scale<1.2)) {}
+			else if ((vscale<1.2)&&(h_scale<1.2))
+			    scale_factor=Math.min(v_scale,h_scale);}
+		    else {
+			var to_height=parseFloat(scale_spec[0])*height;
+			var v_scale=to_height/node.offsetHeight;
+			if ((v_scale<1)||(v_scale>1.2)) scale_factor=v_scale;}
+		    if (scale_factor) {
+			if ((node.tagName==='IMG')&&(!((node.style.width)||(node.style.height)))) {
+			    var force_width=Math.round(scale_factor*node.offsetWidth);
+			    var force_height=Math.round(scale_factor*node.offsetHeight);
+			    node.style.width=force_width+"px";
+			    node.style.height=force_height+"px";}
+			else {
+			    if (node.getAttribute("data-scaleorigin"))
+				node.style[fdjtDOM.transformOrigin]=node.getAttribute("data-scaleorigin");
+			    else node.style[fdjtDOM.transformOrigin]="center top";
+			    node.style[fdjtDOM.transform]='scale('+scale_factor+')';}
+			scaled.push(node);}
+		    if (placeholder) fdjtDOM.replace(placeholder,node);}}
+	    return scaled;}
+
+	function revertPageScaling(scaled) {
+	    var i=0; var lim=scaled.length;
+	    while (i<lim) {
+		var node=scaled[i++];
+		if ((node.tagName==='IMG')&&(node.style.width)) 
+		    node.style.height=node.style.width='';
+		else {
+		    node.style[fdjtDOM.transform]='';
+		    node.style[fdjtDOM.transformOrigin]='';}}}
+
 	/* Codex trace levels */
 	/* 0=notrace (do final summary if tracing startup)
 	   1=trace repagination chunk by chunk
@@ -662,7 +720,7 @@ var CodexLayout=
 			newpage="newpage";}
 		    
 		    if (trace>1) {
-			if (node) logfj("Layout/%s %o at %o",newpage,page,node);
+			if (node) logfn("Layout/%s %o at %o",newpage,page,node);
 			else logfn("Layout/%s %o",newpage,page);}
 		    
 		    if (node) moveNodeToPage(node,page,dups);
@@ -939,7 +997,7 @@ var CodexLayout=
 			    var scale=((scalex<scaley)?(scalex):(scaley));
 			    var transform='scale('+scale+','+scale+')';
 			    boxed.style[fdjtDOM.transform]=transform;
-			    boxed.style[fdjtDOM.transform+"-origin"]='top';
+			    boxed.style[fdjtDOM.transformOrigin]='center top';
 			    completed.appendChild(boxed);}}}
 		if (this.pagedone) this.pagedone(completed);
 		dropClass(completed,"curpage");}
@@ -1055,13 +1113,22 @@ var CodexLayout=
 		addClass(newpage,"curpage");}
 	    this.gotoPage=gotoPage;
 
-	    this.Revert=function(){revertLayout(this);};
+	    this.Revert=function(){
+		revertLayout(this);
+		pageScaleRevert(this.scaled);};
 
 	    /* Finally return the layout */
 
 	    return this;}
 
 	CodexLayout.tracelevel=0;
+	CodexLayout.applyPageScaling=applyPageScaling;
+	CodexLayout.revertPageScaling=revertPageScaling;
+	CodexLayout.prototype.applpyPageScaling=function(candidates){
+	    if (!(candidates)) candidates=fdjtDOM.$(".pagescaled");
+	    var scaled=this.scaled=new Array();
+	    applyPageScaling(candidates,scaled,this.width,this.height);
+	    return scaled;};
 	
 	return CodexLayout;})();
 
