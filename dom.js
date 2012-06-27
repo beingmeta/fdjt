@@ -782,6 +782,21 @@ var fdjtDOM=
 	    return results;}
 	fdjtDOM.getInputValues=getInputValues;
 
+	function getInputsFor(root,name,value){
+	    if (typeof root === 'string')
+		root=document.getElementById(root);
+	    if (!(root)) return [];
+	    var results=[];
+	    var inputs=root.getElementsByTagName('input');
+	    var i=0; var lim=inputs.length;
+	    while (i<lim) {
+		var input=inputs[i++];
+		if (input.name!==name) continue;
+		else if (input.value!==value) continue;
+		else results.push(input);}
+	    return results;}
+	fdjtDOM.getInputsFor=getInputsFor;
+
 	/* Getting style information generally */
 
 	function getStyle(elt,prop){
