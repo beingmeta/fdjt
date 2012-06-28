@@ -69,7 +69,9 @@ fdjtUI.TapHold=(function(){
 	if (trace_taps)
 	    fdjtLog("Synthesizing %s on %o @%d,%d",etype,target,
 		    touch_x,touch_y);
-	evt.initUIEvent(etype, true, true);
+	evt.initUIEvent(etype, true, true,window,
+			(((orig.touches)?(orig.touches.length):(orig.button))||
+			 1));
 	evt.clientX=touch_x; evt.clientY=touch_y;
 	// If the target no longer has a parent, it's been removed
 	//  from the DOM, so we use the originating event target (if
