@@ -6,13 +6,20 @@ CLEAN=/bin/rm -f
 FDJT_FILES=header.js log.js string.js time.js state.js dom.js kb.js \
 	json.js	ajax.js hash.js wsn.js \
 	ui.js taphold.js completions.js syze.js
+BUILDUUID:=`uuidgen`
+BUILDTIME:=`date`
+BUILDHOST:=`hostname`
 
 all: fdjt.js
 
 buildstamp.js: $(FDJT_FILES)
-	$(ECHO) "var fdjt_revision='"`git describe`"';" > buildstamp.js
-	$(ECHO) "var fdjt_buildhost='"`hostname`"';" >> buildstamp.js
-	$(ECHO) "var fdjt_buildtime='"`date`"';" >> buildstamp.js 
+	$(ECHO) "// FDJT build information" > buildstamp.js
+	$(ECHO) "var fdjt_revision='"`git describe`"';" >> buildstamp.js
+	$(ECHO) "var fdjt_buildhost='${BUILDHOST}';" >> buildstamp.js
+	$(ECHO) "var fdjt_buildtime='"${BUILDTIME}"';" >> buildstamp.js
+	$(ECHO) "var fdjt_builduuid='"${BUILDUUID}"';" >> buildstamp.js 
+	$(ECHO) >> buildstamp.js
+
 fdjt.js: $(FDJT_FILES) buildstamp.js
 	cat buildstamp.js $(FDJT_FILES) > $@
 TAGS: $(FDJT_FILES)

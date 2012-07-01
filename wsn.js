@@ -1,5 +1,7 @@
 /* -*- Mode: Javascript; Character-encoding: utf-8; -*- */
 
+/* ######################### fdjt/wsn.js ###################### */
+
 /* Copyright (C) 2011 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    It implements a method for breaking narrative HTML content
