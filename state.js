@@ -162,6 +162,15 @@ var fdjtState=
 	    else return false;}
 	fdjtState.dropLocal=dropLocal;
 	
+	function listLocal(){
+	    var keys=[];
+	    if (window.localStorage) {
+		var storage=window.localStorage;
+		var i=0; var lim=storage.length;
+		while (i<lim) keys.push(storage.key(i++));}
+	    return keys;}
+	fdjtState.listLocal=listLocal;
+
 	function clearLocal(){
 	    if (window.localStorage) {
 		var storage=window.localStorage;
