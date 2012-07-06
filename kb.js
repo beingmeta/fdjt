@@ -158,8 +158,9 @@ var fdjtKB=
 		while (i<lim) this.Import(data[i++]);
 		return;}
 	    else if (typeof data === 'string') {
-		this.ref(data);
-		return;}
+		var ref=this.ref(data);
+		if (ref.pool.storage) ref.pool.storage.load(ref);
+		return ref;}
 	    else {
 		var qid=data._id||data.oid||data.uuid;
 		if (((debug)&&(this.traceimport))||(debug>1))
