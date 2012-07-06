@@ -557,6 +557,10 @@ div.backtrace div.last_entry {
 
 span.fdjthighlight { background-color: yellow;}
 
+/* For inline images */
+
+img.inline { height: 1.5em; display: inline;}
+
 /* Progress boxes */
 
 div.fdjtprogress {
@@ -643,6 +647,11 @@ div.humane.humane-show:hover { opacity: 0.2; }
 .humane .error {
   color                 : red;
 }
+
+/* Reticle CSS */
+
+/* Reticles help when giving demos by highlighting the position and
+   action of the mouse.  */
 
 div.reticle {
     background-color: black; margin: 0px; border: 0px; padding: 0px;
