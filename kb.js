@@ -804,7 +804,7 @@ var fdjtKB=
 	    if (((debug)&&(pool.traceref))||(debug>1))
 		log("Initial reference to %o <== %o @%d",
 		    this,data,this._init);
-	    for (key in data) {
+	    for (var key in data) {
 		// We assume that data doesn't inherit anything,
 		//  so we don't need a 'hasOwnProperty' check
 		if ((key==='qid')||(key==='pool')) {}
@@ -815,6 +815,7 @@ var fdjtKB=
 			warn("identifier conflict %o=%o for %o and %o",
 			     key,value,map[value],this);
 		    else {}}
+		else if (key[0]==='_') {}
 		else {
 		    // We use the .add method to get any side effects
 		    var value=data[key]; var qid;
@@ -822,7 +823,8 @@ var fdjtKB=
 			var i=0; var len=value.length;
 			while (i<len) {
 			    var v=value[i++]; /* back to here */
-			    if (qid=((v._qid)||(v._id))) {
+			    if ((!(v))&&(v!==false)&&(v!==0)) {}
+			    else if (qid=((v._qid)||(v._id))) {
 				var pool=getPool(qid);
 				if (pool) this.add(key,pool.Import(v));
 				else this.add(key,v);}
