@@ -929,6 +929,14 @@ fdjtUI.Collapsible.focus=function(evt){
 
 }());
 
+fdjtUI.disableForm=function(form){
+    if (typeof form === 'string') form=fdjtID(form);
+    if (!(form)) return;
+    var elements=fdjtDOM.getChildren(
+	form,"button,input,optgroup,option,select,textarea");
+    var i=0; var lim=elements.length;
+    while (i<lim) elements[i++].disabled=true;};
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
