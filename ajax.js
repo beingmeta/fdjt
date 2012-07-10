@@ -37,22 +37,22 @@ var fdjtAjax=
 
 	var trace_ajax=false;
 	
-	function fdjtAjax(callback,base_uri,args){
+	function fdjtAjax(success_callback,base_uri,args,other_callback){
 	    var req=new XMLHttpRequest();
-	    var uri=compose_uri(base_uri,args);
+	    var uri=((args)?(compose_uri(base_uri,args)):(base_uri));
 	    req.open("GET",uri,true);
 	    req.withCredentials=true;
 	    req.onreadystatechange=function () {
 		if ((req.readyState == 4) && (req.status == 200)) {
-		    callback(req);}};
+		    success_callback(req);}
+		else if (other_callback) other_callback(req);};
 	    req.send(null);
 	    return req;}
 	fdjtAjax.revid="$Id$";
 	fdjtAjax.version=parseInt("$Revision$".slice(10,-1));
 
 	fdjtAjax.textCall=function(callback,base_uri){
-	    return fdjtAjax(function(req) {
-		callback(req.responseText);},
+	    return fdjtAjax(function(req) {callback(req.responseText);},
 			    base_uri,fdjtDOM.Array(arguments,2));};
 
 	fdjtAjax.jsonCall=function(callback,base_uri){
@@ -61,10 +61,9 @@ var fdjtAjax=
 	      base_uri,fdjtDOM.Array(arguments,2));};
 
 	fdjtAjax.xmlCall=function(callback,base_uri){
-	    return fdjtAjax(function(req) {
-		callback(req.responseXML);},
+	    return fdjtAjax(function(req) {callback(req.responseXML);},
 			    base_uri,fdjtDOM.Array(arguments,2));};
-
+	
 	fdjtAjax.jsonpCall=function(uri,id,cleanup){
 	    if ((id)&&($ID(id))) return false;
 	    var script_elt=fdjtNewElement("SCRIPT");

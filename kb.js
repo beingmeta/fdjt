@@ -157,6 +157,11 @@ var fdjtKB=
 		var i=0; var lim=data.length;
 		while (i<lim) this.Import(data[i++]);
 		return;}
+	    else if (typeof data === 'string') {
+		var ref=this.ref(data);
+		if ((!(ref._init))&&(ref.pool.storage))
+		    ref.pool.storage.load(ref);
+		return ref;}
 	    else {
 		var qid=data._id||data.oid||data.uuid;
 		if (((debug)&&(this.traceimport))||(debug>1))
@@ -265,8 +270,9 @@ var fdjtKB=
 	fdjtKB.probe=fdjtKB.probeRef=probeRef;
 	function loadRef(arg){
 	    var obj=getRef(arg);
-	    if (obj) return obj.load();
-	    else return undefined;}
+	    if (!(obj)) return undefined;
+	    else if (obj._init) return obj;
+	    else obj.load();}
 	fdjtKB.load=fdjtKB.loadRef=loadRef;
 	
 	function doimport(data){
@@ -798,7 +804,7 @@ var fdjtKB=
 	    if (((debug)&&(pool.traceref))||(debug>1))
 		log("Initial reference to %o <== %o @%d",
 		    this,data,this._init);
-	    for (key in data) {
+	    for (var key in data) {
 		// We assume that data doesn't inherit anything,
 		//  so we don't need a 'hasOwnProperty' check
 		if ((key==='qid')||(key==='pool')) {}
@@ -809,6 +815,7 @@ var fdjtKB=
 			warn("identifier conflict %o=%o for %o and %o",
 			     key,value,map[value],this);
 		    else {}}
+		else if (key[0]==='_') {}
 		else {
 		    // We use the .add method to get any side effects
 		    var value=data[key]; var qid;
@@ -816,7 +823,8 @@ var fdjtKB=
 			var i=0; var len=value.length;
 			while (i<len) {
 			    var v=value[i++]; /* back to here */
-			    if (qid=((v._qid)||(v._id))) {
+			    if ((!(v))&&(v!==false)&&(v!==0)) {}
+			    else if (qid=((v._qid)||(v._id))) {
 				var pool=getPool(qid);
 				if (pool) this.add(key,pool.Import(v));
 				else this.add(key,v);}
@@ -848,7 +856,7 @@ var fdjtKB=
 	    if (!(this._init)) return this.init(data);
 	    var pool=this.pool; var map=pool.map;
 	    for (var key in data) {
-		if (key==="pool") continue;
+		if ((key==="pool")||(key=="init")) continue;
 		var val=data[key], cur=this[key];
 		if (val===cur) continue;
 		else if (!(cur)) {
