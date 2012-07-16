@@ -110,6 +110,25 @@ var fdjtString=
 	    if (string.length<lim) return string;
 	    else return string.slice(0,lim);}
 
+	var floor=Math.floor;
+
+	function ellipsize(string,lim,fudge){
+	    if (typeof fudge !== 'number') fudge=0.1;
+	    if (!(lim)) return string;
+	    else if (string.length<(lim+floor(fudge*lim)))
+		return string;
+	    else {
+		var edge=string[lim];
+		if (/\s/.test(edge)===0) 
+		    return string.slice(0,lim);
+		else {
+		    var chopped=string.slice(0,lim);
+		    var broke=chopped.search(/\s+\w+$/);
+		    if (broke>0) return chopped.slice(0,broke);
+		    else return chopped;}}}
+	fdjtString.ellipsize=ellipsize;
+		
+
 	fdjtString.isEmpty=function(string){
 	    if (typeof string === "string")  {
 		var i=0; var lim=string.length;
