@@ -753,7 +753,8 @@ var fdjtKB=
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
 	    var vals=false;
-	    if (this.hasOwnProperty(prop)) {
+	    if (prop==='_id') {}
+	    else if (this.hasOwnProperty(prop)) {
 		var cur=this[prop];
 		if (cur===val) delete this[prop];
 		else if (cur instanceof Array) {
