@@ -668,6 +668,13 @@ div.reticle.highlight { color: blue;}
 div.reticle.horizontal.highlight { height: 3px;}
 div.reticle.vertical.highlight { width: 3px;}
 
+/* Ellipsis */
+
+.ellipsis {}
+.ellipsis .elided { display: none;}
+.ellipsis.compact .elided { display: none;}
+.ellipsis.expanded .elision { display: none;}
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
