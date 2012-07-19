@@ -22,7 +22,7 @@ buildstamp.js: $(FDJT_FILES)
 
 fdjt.js: $(FDJT_FILES) buildstamp.js
 	cat buildstamp.js $(FDJT_FILES) > $@
-TAGS: $(FDJT_FILES)
+TAGS: $(FDJT_FILES) codex.js
 	etags -o $@ $^
 ext/underscore.js: ext/underscore/underscore.js
 	cp -p ext/underscore/underscore.js ext/underscore.js
