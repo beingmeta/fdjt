@@ -275,7 +275,7 @@ var CodexLayout=
 		node.className=nodeclass+" codexdupstart";
 	    // If the original had an ID, save it in various ways
 	    if (node.id) {
-		copy.codexdupid=node.id;
+		copy.codexbaseid=node.id;
 		copy.setAttribute("data-baseid",node.id);
 		copy.id=null;}
 	    // Record the copy you've made (to avoid recreation)
