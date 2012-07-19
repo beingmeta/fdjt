@@ -944,6 +944,7 @@ fdjtUI.Collapsible.focus=function(evt){
 (function(){
     var ellipsize=fdjtString.ellipsize;
     var getParent=fdjtDOM.getParent;
+    var hasClass=fdjtDOM.hasClass;
     var addClass=fdjtDOM.addClass;
     var dropClass=fdjtDOM.dropClass;
     var toggleClass=fdjtDOM.toggleClass;
