@@ -45,6 +45,8 @@ fdjtUI.TapHold=(function(){
     var hasClass=fdjtDOM.hasClass;
     var hasParent=fdjtDOM.hasParent;
     var reticle=fdjtUI.Reticle;
+    var cancel=fdjtUI.cancel;
+    var cancel=function(evt){};
 
     function getTarget(evt){
 	if ((evt.changedTouches)&&((evt.changedTouches.length)))
@@ -81,7 +83,7 @@ fdjtUI.TapHold=(function(){
 	//  from the DOM, so we use the originating event target (if
 	//  there is one)
 	if ((orig)&&(!(target.parentNode))) target=fdjtUI.T(orig);
-	if (orig) fdjtUI.cancel(orig);
+	if (orig) cancel(orig);
 	target.dispatchEvent(evt);}
 
     function tap_handler(evt){
@@ -110,10 +112,10 @@ fdjtUI.TapHold=(function(){
 	if (pressed) return;
 	if (th_timer) return;
 	if (!(th_target)) return;
-	touched=th_target; pressed=false
+	touched=th_target; pressed=false;
 	if (trace_taps) fdjtLog("startpress %o",evt);
 	if (reticle.live) reticle.highlight(true);
-	fdjtUI.cancel(evt);
+	cancel(evt);
 	th_timer=setTimeout((function(evt){
 	    if (trace_taps) fdjtLog("startpress/timeout %o",evt);
 	    pressed=th_target;
@@ -131,7 +133,7 @@ fdjtUI.TapHold=(function(){
 	    if (th_target===touched) tapped(th_target,evt);}
 	else if (pressed) {released(pressed,evt);}
 	if (reticle.live) reticle.highlight(false);
-	fdjtUI.cancel(evt);
+	cancel(evt);
 	start_x=false; start_y=false;
 	touched=false; pressed=false;}
     function abortpress(evt){
@@ -166,7 +168,7 @@ fdjtUI.TapHold=(function(){
 	    return;
 	else {
 	    if (reticle.live) reticle.onmousemove(evt);
-	    fdjtUI.cancel(evt);}
+	    cancel(evt);}
 	if ((pressed)&&
 	    (th_target!==pressed)) {
 	    if (trace_taps)
@@ -206,7 +208,7 @@ fdjtUI.TapHold=(function(){
 	    return;
 	if (fdjtUI.isClickable(evt)) return;
 	if (!(touched)) startpress(th_target,evt);
-	fdjtUI.cancel(evt);}
+	cancel(evt);}
     
     function keyup(evt){
 	evt=evt||event;
@@ -234,7 +236,7 @@ fdjtUI.TapHold=(function(){
 	    endpress(evt);
 	else if (trace_taps)
 	    fdjtLog("md=%o, sd=%o",mouse_down,shift_down);
-	fdjtUI.cancel(evt);}
+	cancel(evt);}
 
     function TapHold(elt,fortouch){
 	elt=elt||window;
