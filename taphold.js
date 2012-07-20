@@ -46,7 +46,10 @@ fdjtUI.TapHold=(function(){
     var hasParent=fdjtDOM.hasParent;
     var reticle=fdjtUI.Reticle;
     var cancel=fdjtUI.cancel;
-    var cancel=function(evt){};
+    // We disable the default behavior, which is usually selection
+    // (where we do tap and hold)
+    var nodefault=fdjtUI.nodefault;
+    var dontcancel=function(evt){};
 
     function getTarget(evt){
 	if ((evt.changedTouches)&&((evt.changedTouches.length)))
@@ -83,7 +86,7 @@ fdjtUI.TapHold=(function(){
 	//  from the DOM, so we use the originating event target (if
 	//  there is one)
 	if ((orig)&&(!(target.parentNode))) target=fdjtUI.T(orig);
-	if (orig) cancel(orig);
+	if (orig) nodefault(orig);
 	target.dispatchEvent(evt);}
 
     function tap_handler(evt){
@@ -115,7 +118,7 @@ fdjtUI.TapHold=(function(){
 	touched=th_target; pressed=false;
 	if (trace_taps) fdjtLog("startpress %o",evt);
 	if (reticle.live) reticle.highlight(true);
-	cancel(evt);
+	nodefault(evt);
 	th_timer=setTimeout((function(evt){
 	    if (trace_taps) fdjtLog("startpress/timeout %o",evt);
 	    pressed=th_target;
@@ -133,7 +136,7 @@ fdjtUI.TapHold=(function(){
 	    if (th_target===touched) tapped(th_target,evt);}
 	else if (pressed) {released(pressed,evt);}
 	if (reticle.live) reticle.highlight(false);
-	cancel(evt);
+	nodefault(evt);
 	start_x=false; start_y=false;
 	touched=false; pressed=false;}
     function abortpress(evt){
@@ -168,7 +171,7 @@ fdjtUI.TapHold=(function(){
 	    return;
 	else {
 	    if (reticle.live) reticle.onmousemove(evt);
-	    cancel(evt);}
+	    nodefault(evt);}
 	if ((pressed)&&
 	    (th_target!==pressed)) {
 	    if (trace_taps)
@@ -208,7 +211,7 @@ fdjtUI.TapHold=(function(){
 	    return;
 	if (fdjtUI.isClickable(evt)) return;
 	if (!(touched)) startpress(th_target,evt);
-	cancel(evt);}
+	nodefault(evt);}
     
     function keyup(evt){
 	evt=evt||event;
@@ -236,7 +239,7 @@ fdjtUI.TapHold=(function(){
 	    endpress(evt);
 	else if (trace_taps)
 	    fdjtLog("md=%o, sd=%o",mouse_down,shift_down);
-	cancel(evt);}
+	nodefault(evt);}
 
     function TapHold(elt,fortouch){
 	elt=elt||window;
