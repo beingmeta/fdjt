@@ -56,6 +56,13 @@ var fdjtKB=
 	var warn=fdjtLog.warn;
 	var log=fdjtLog;
 
+	// Patterns for absolute references
+	var uuidpat=
+	    /(U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
+	var oidpat=/(@|:@)([0-9A-Fa-f]+|\/[A-Za-z][A-Za-z0-9-_\.]+[A-Za-z])\/([0-9A-Fa-f]+)/;
+	fdjtKB.oidpat=oidpat;
+	fdjtKB.uuidpat=uuidpat;
+
 	// This checks if a reference is a 'real object'
 	// I.E., something which shouldn't be used as a key
 	//  or fast set member and not an array either
@@ -132,14 +139,19 @@ var fdjtKB=
 		return this.ref(ref).load();
 	    else return ref.load();};
 
-	Pool.prototype.ref=function(qid,cons) {
-	    if (qid instanceof Ref) return qid;
-	    if (this.map[qid]) return this.map[qid];
-	    if (!(cons)) cons=this.cons(qid);
+	Pool.prototype.ref=function(id,cons) {
+	    if (id instanceof Ref) return id;
+	    if (this.map[id]) return this.map[id];
+	    if (!(cons)) cons=this.cons(id);
 	    else if (cons instanceof Ref) {}
-	    else cons=this.cons(qid);
-	    if (!(cons._id)) cons._id=qid;
-	    this.map[qid]=cons; cons.pool=this;
+	    else if (cons.call) cons=new cons(id);
+	    else cons=this.cons(id);
+	    if (!(cons._id)) cons._id=id;
+	    this.map[id]=cons; cons.pool=this;
+	    if (!(cons._qid)) {
+		if (id.search(oidpat)===0) cons._qid=id;
+		else if (id.search(uuidpat)===0) cons._qid=id;
+		else {}}
 	    return cons;};
 	Pool.prototype.drop=function(qid) {
 	    var val=this.map[qid];
@@ -211,10 +223,17 @@ var fdjtKB=
 	//   :#Ud16e2980-8e18-11e1-a50a-001a922d60ef
 	function parseRef(arg,pool,probe){
 	    var term=arg;
-	    if ((pool)&&(pool.probe(term)))
-		return pool.probe(term);
+	    if ((pool)&&(typeof pool === 'string'))
+		pool=fdjtKB.PoolRef(pool);
+	    if ((pool)&&(pool.parseRef))
+		return pool.parseRef(term,probe);
+	    // These are all qualified references of various sorts
+	    else if ((pool)&&(arg[0]==="@")&&(arg[1]==="@")) 
+		term=term.slice(2);
+	    else if ((pool)&&(arg[0]===":")&&(arg[1]==="@")&&(arg[2]==="@"))
+		term=term.slice(3);
 	    else if (((arg[0]===':')&&(arg[1]==='@'))&&
-		(((slash=arg.indexOf('/',3))>=0)))  {
+		     (((slash=arg.indexOf('/',3))>=0)))  {
 		pool=fdjtKB.PoolRef(arg.slice(1,slash+1));}
 	    else if (((arg[0]==='@'))&&
 		     (((slash=arg.indexOf('/',2))>=0)))  {
@@ -944,26 +963,26 @@ var fdjtKB=
 	    this.pool=pool;
 	    return this;}
 	function offline_get(obj,prop){
-	    var qid=obj._id||obj.uuid||obj.oid;
+	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
 	    var data=fdjtState.getLocal(qid);
 	    if (data) obj.init(data);
 	    return obj[prop];}
 	OfflineKB.prototype.load=function(obj){
-	    var qid=obj._id||obj.uuid||obj.oid;
+	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
 	    var data=fdjtState.getLocal(qid,true);
 	    if (data) return obj.init(data);
 	    else return undefined;};
 	OfflineKB.prototype.get=offline_get;
 	OfflineKB.prototype.add=function(obj,slotid,val){
-	    var qid=obj._id||obj.uuid||obj.oid;
+	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
 	    if ((slotid)&&(val))
 		fdjtState.setLocal(qid,JSON.stringify(obj));};
 	OfflineKB.prototype.drop=function(obj,slotid,val){
-	    var qid=obj._id||obj.uuid||obj.oid;
+	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
 	    if (!(slotid)) fdjtState.dropLocal(qid);
 	    else fdjtState.setLocal(qid,JSON.stringify(obj));};
 	OfflineKB.prototype.Import=function(obj){
-	    var qid=obj._id||obj.uuid||obj.oid;
+	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
 	    fdjtState.setLocal(qid,obj,true);};
 	fdjtKB.OfflineKB=OfflineKB;
 	
