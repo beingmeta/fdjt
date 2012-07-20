@@ -51,6 +51,17 @@ fdjtUI.TapHold=(function(){
     var nodefault=fdjtUI.nodefault;
     var dontcancel=function(evt){};
 
+    var keynums={
+	shift: 16, alt: 18, control: 17, meta: 224,
+	os: 91, altgr: 225, fn: -1,
+	numlock: 144, capslock: 20, scrolllock: 145};
+    var keynames={};
+    for (var akeyname in keynums)
+	if (keynums.hasOwnProperty(akeyname)) {
+	    var akeynum=keynums[akeyname];
+	    if ((typeof akeynum === 'number')&&(akeynum>0))
+		keynames[akeynum]=akeyname;}
+    
     function getTarget(evt){
 	if ((evt.changedTouches)&&((evt.changedTouches.length)))
 	    return evt.changedTouches[evt.changedTouches.length-1].target;
@@ -184,11 +195,23 @@ fdjtUI.TapHold=(function(){
     function keydown(evt){
 	evt=evt||event;
 	if (!(TapHold.holdkey)) return;
-	if (evt.keyCode===TapHold.holdkey) {
+	var holdkey=TapHold.holdkey, holdkeynum, holdkeyname;
+	if (!(holdkey)) return;
+	else if (holdkey===true) holdkey="Shift";
+	if (typeof holdkey === 'number') {
+	    holdkeyname=keynames[holdkey];
+	    holdkeynum=holdkey;}
+	else if (typeof holdkey === 'string') {
+	    holdkeynum=keynums[holdkey.toLowerCase()];
+	    holdkeyname=holdkey.toLowerCase();}
+	else {
+	    fdjtLog.warn("Invalid holdkey specification %s",holdkey);
+	    return;}
+	if ((evt.key===holdkeyname)||
+	    (evt.keyCode===holdkeynum)||
+	    ((evt.getModifierState)&&
+	     (evt.getModifierState(holdkeyname)))) {
 	    holdkey_down=true;
-	    if ((evt.shiftKey)&&(holdkey!==DOM_VK_SHIFT)) return;
-	    if ((evt.ctrlKey)&&(holdkey!==DOM_VK_CONTROL)) return;
-	    if ((evt.altKey)&&(holdkey!==DOM_VK_ALT)) return;
 	    var target=fdjtUI.T(evt);
 	    if ((target)&&(target.tagName)&&
 		((target.tagName==='INPUT')||
@@ -217,15 +240,25 @@ fdjtUI.TapHold=(function(){
 	nodefault(evt);}
     
     function keyup(evt){
-	var holdkey=TapHold.holdkey;
-	if (!(holdkey)) return;
 	evt=evt||event;
-	var keycode=evt.keyCode;
-	if (keycode===TapHold.holdkey) {
+	if (!(TapHold.holdkey)) return;
+	var holdkey=TapHold.holdkey, holdkeynum, holdkeyname;
+	if (!(holdkey)) return;
+	else if (holdkey===true) holdkey="Shift";
+	if (typeof holdkey === 'number') {
+	    holdkeyname=keynames[holdkey];
+	    holdkeynum=holdkey;}
+	else if (typeof holdkey === 'string') {
+	    holdkeynum=keynums[holdkey.toLowerCase()];
+	    holdkeyname=holdkey.toLowerCase();}
+	else {
+	    fdjtLog.warn("Invalid holdkey specification %s",holdkey);
+	    return;}
+	if ((evt.key===holdkeyname)||
+	    (evt.keyCode===holdkeynum)||
+	    ((evt.getModifierState)&&
+	     (evt.getModifierState(holdkeyname)))) {
 	    holdkey_down=false;
-	    if ((evt.shiftKey)&&(holdkey!==DOM_VK_SHIFT)) return;
-	    if ((evt.ctrlKey)&&(holdkey!==DOM_VK_CONTROL)) return;
-	    if ((evt.altKey)&&(holdkey!==DOM_VK_ALT)) return;
 	    if ((!(holdkey_down))&&(!(mouse_down))) endpress();}}
     TapHold.keyup=keyup;
     function mouseup(evt){
