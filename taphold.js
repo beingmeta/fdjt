@@ -34,7 +34,7 @@ fdjtUI.TapHold=(function(){
     var th_target=false;
     var th_timer=false;
     var mouse_down=false;
-    var shift_down=false;
+    var holdkey_down=false;
     var start_x=false;
     var start_y=false;
     var touch_x=false;
@@ -183,9 +183,12 @@ fdjtUI.TapHold=(function(){
     
     function keydown(evt){
 	evt=evt||event;
-	if (evt.keyCode===16) {
-	    shift_down=true;
-	    if ((evt.ctrlKey)||(evt.altKey)) return;
+	if (!(TapHold.holdkey)) return;
+	if (evt.keyCode===TapHold.holdkey) {
+	    holdkey_down=true;
+	    if ((evt.shiftKey)&&(holdkey!==DOM_VK_SHIFT)) return;
+	    if ((evt.ctrlKey)&&(holdkey!==DOM_VK_CONTROL)) return;
+	    if ((evt.altKey)&&(holdkey!==DOM_VK_ALT)) return;
 	    var target=fdjtUI.T(evt);
 	    if ((target)&&(target.tagName)&&
 		((target.tagName==='INPUT')||
@@ -214,11 +217,16 @@ fdjtUI.TapHold=(function(){
 	nodefault(evt);}
     
     function keyup(evt){
+	var holdkey=TapHold.holdkey;
+	if (!(holdkey)) return;
 	evt=evt||event;
-	if (evt.keyCode===16) {
-	    shift_down=false;
-	    if ((evt.ctrlKey)||(evt.altKey)) return;
-	    if ((!(shift_down))&&(!(mouse_down))) endpress();}}
+	var keycode=evt.keyCode;
+	if (keycode===TapHold.holdkey) {
+	    holdkey_down=false;
+	    if ((evt.shiftKey)&&(holdkey!==DOM_VK_SHIFT)) return;
+	    if ((evt.ctrlKey)&&(holdkey!==DOM_VK_CONTROL)) return;
+	    if ((evt.altKey)&&(holdkey!==DOM_VK_ALT)) return;
+	    if ((!(holdkey_down))&&(!(mouse_down))) endpress();}}
     TapHold.keyup=keyup;
     function mouseup(evt){
 	evt=evt||event;
@@ -235,10 +243,11 @@ fdjtUI.TapHold=(function(){
 	    (evt.touches.length>1))
 	    return;
 	if (fdjtUI.isClickable(evt)) return;
-	if ((!(shift_down))&&(!(mouse_down)))
+	if ((!(holdkey_down))&&(!(mouse_down)))
 	    endpress(evt);
 	else if (trace_taps)
-	    fdjtLog("md=%o, sd=%o",mouse_down,shift_down);
+	    fdjtLog("md=%o, kd=%o",mouse_down,holdkey_down);
+	else {}
 	nodefault(evt);}
 
     function TapHold(elt,fortouch){
@@ -265,6 +274,7 @@ fdjtUI.TapHold=(function(){
     TapHold.mouseup=mouseup;
     TapHold.mousedown=mousedown;
     TapHold.keydown=keydown;
+    TapHold.holdkey=16;
 
     TapHold.ispressed=function(){
 	return (pressed);}
