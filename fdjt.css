@@ -559,7 +559,17 @@ span.fdjthighlight { background-color: yellow;}
 
 /* For inline images */
 
-img.inline { height: 1.5em; display: inline;}
+img.inline {
+    height: 1.25em;
+    display: inline; float: none;
+    padding-left: 0.2em; padding-right: 0.2em;
+    vertical-align: bottom;}
+.nosvg { display: none; }
+.inline.nosvg { display: none; }
+body.NOSVG img.svg { display: none;}
+body.NOSVG img.inline.svg { display: none;}
+body.NOSVG .nosvg { display: inline;}
+body.NOSVG .inline.nosvg { display: inline;}
 
 /* Progress boxes */
 
