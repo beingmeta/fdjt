@@ -187,6 +187,10 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	while (i<lim) {
 	    var variation=variations[i++];
 	    var vkey=stdspace(variation.key||getKey(variation));
+	    if (!(matchcase)) {
+		var lower=vkey.toLowerCase();
+		smap[lower]=vkey;
+		vkey=lower;}
 	    addNodeKey(variation,vkey,ptree,bykey,anyword);}}
 
     function initCompletions(c){
@@ -496,7 +500,9 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
     
     function update(evt){
 	evt=evt||event;
-	var target=fdjtUI.T(evt);
+	if (typeof evt==='string') evt=fdjtID(evt);
+	if (!(evt)) return;
+	var target=((evt.nodeType)?(evt):(fdjtUI.T(evt)));
 	var name=target.name;
 	var completions=cached_completions[name];
 	var compid=fdjtDOM.getAttrib(target,"completions");
