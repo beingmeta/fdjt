@@ -1401,6 +1401,8 @@ var fdjtDOM=
 
 	/* Going forward */
 
+	/* If there's a children property (childNodes which are elements),
+	   we assume that all the element-specific fields exist. */
 	var havechildren=((document)&&
 			  (document.body)&&
 			  (document.body.childNodes)&&
@@ -1716,12 +1718,23 @@ var fdjtDOM=
 	    else evt.returnValue=false;
 	    evt.cancelBubble=true;};
 
+	/* Check for SVG */
+	function checkSVG(){
+	    if (!(document.implementation.hasFeature(
+		"http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")||
+		  navigator.mimeTypes["image/svg+xml"]))
+		addClass(document.body,"NOSVG");
+	    else dropClass(document.body,"NOSVG");}
+	
 	fdjtDOM.init=function(){
+	    checkSVG();
 	    havechildren=((document)&&
 			  (document.body)&&
 			  (document.body.childNodes)&&
 			  (document.body.children));};
-
+	if (!(fdjtDOM_noinit))
+	    fdjtDOM.addListener(window,"load",fdjtDOM.init);
+	
 	if (navigator.userAgent.search("WebKit")>=0) {
 	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-webkit-transition';
 	    if (!(fdjtDOM.transitionProperty))

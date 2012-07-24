@@ -565,7 +565,9 @@ img.inline {
     padding-left: 0.2em; padding-right: 0.2em;
     vertical-align: bottom;}
 .nosvg { display: none; }
+img.nosvg { display: none; }
 .inline.nosvg { display: none; }
+img.inline.nosvg { display: none; }
 body.NOSVG img.svg { display: none;}
 body.NOSVG img.inline.svg { display: none;}
 body.NOSVG .nosvg { display: inline;}
