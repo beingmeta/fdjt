@@ -1726,13 +1726,42 @@ var fdjtDOM=
 		addClass(document.body,"NOSVG");
 	    else dropClass(document.body,"NOSVG");}
 	
-	fdjtDOM.init=function(){
-	    checkSVG();
+	function checkChildren(){
 	    havechildren=((document)&&
 			  (document.body)&&
 			  (document.body.childNodes)&&
-			  (document.body.children));};
-	if (!(fdjtDOM_noinit))
+			  (document.body.children));}
+
+	var inits_run=false;
+	var inits=[checkChildren,checkSVG];
+	var init_names={checkChildren: checkChildren,checkSVG: checkSVG};
+
+	fdjtDOM.init=function(){
+	    if (inits_run) return false;
+	    var i=0; var lim=inits.length;
+	    while (i<lim) inits[i++]();
+	    inits_run=true;};
+	
+	fdjtDOM.addInit=function(fcn,name,runagain){
+	    var replace=((name)&&(init_names[name]));
+	    var i=0, lim=inits.length;
+	    while (i<lim) {
+		if ((replace)&&(inits[i]===replace)) {
+		    if (inits_run) {
+			fdjtLog.warn("Replacing init %s which has already run",name);
+			if (runagain) {
+			    fdjtLog.warn("Running the new version");
+			    inits[i]=fcn; init_names[name]=fcn; fcn();
+			    return;}}
+		    else {
+			inits[i]=fcn; init_names[name]=fcn;
+			return;}}
+		else if (inits[i]===fcn) return;
+		else i++;}
+	    inits.push(fcn);
+	    if (name) init_names[name]=fcn;};
+
+	if ((typeof fdjt_init === 'undefined')||(!(fdjt_init)))
 	    fdjtDOM.addListener(window,"load",fdjtDOM.init);
 	
 	if (navigator.userAgent.search("WebKit")>=0) {
