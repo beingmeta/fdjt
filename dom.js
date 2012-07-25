@@ -1732,9 +1732,26 @@ var fdjtDOM=
 			  (document.body.childNodes)&&
 			  (document.body.children));}
 
+	function fixSVG(){
+	    if (!(document.implementation.hasFeature(
+		"http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")||
+		  navigator.mimeTypes["image/svg+xml"])) {
+		var hasSuffix=fdjtString.hasSuffix;
+		var images=getChildren("IMG");
+		var i=0, lim=images.length;
+		while (i<lim) {
+		    var image=images[i++]; var src=image.src;
+		    if (!(src)) continue;
+		    if ((hasSuffix(src,".svg"))||(hasSuffix(src,".svgz"))) {
+			var bmp=image.getAttribute('bmp');
+			if (bmp) image.src=bmp;}}}}
+		
+
 	var inits_run=false;
-	var inits=[checkChildren,checkSVG];
-	var init_names={checkChildren: checkChildren,checkSVG: checkSVG};
+	var inits=[checkChildren,checkSVG,fixSVG];
+	var init_names={
+	    checkChildren: checkChildren,
+	    checkSVG: checkSVG,fixSVG: fixSVG};
 
 	fdjtDOM.init=function(){
 	    if (inits_run) return false;
