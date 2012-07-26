@@ -177,8 +177,8 @@ table.fdjt td textarea.fullwidth { width: 100%;}
 /* Auto completion */
 
 div.completions {font-family: sans,sans-serif;}
-.completions .label { float: right; font-size: 125%;}
-.completions img.label { height: 5ex;}
+.completions .completionslabel { float: right; font-size: 125%;}
+.completions img.completionslabel { height: 5ex;}
 
 .completions .nocompletemsg { display: none;}
 .completions.noresults span.nocompletemsg { display: inline;}
@@ -202,6 +202,8 @@ div.completions {font-family: sans,sans-serif;}
 .completions.showempty.noinput span.completion { display: inline; }
 .completions.showempty.noinput li.completion { display: list-item; }
 .completions.showempty.noinput div.completion { display: block; }
+.completions.showempty.noinput tr.completion { display: table-row; }
+.completions.showempty.noinput tbody.completion { display: table-row-group; }
 /* Override these */
 .completions.showempty.noinput .completion.hidden { display: none; }
 
@@ -240,6 +242,8 @@ div.completions {font-family: sans,sans-serif;}
 .completions span.completion[displayed] { display: inline;}
 .completions li.completion[displayed] { display: list-item;}
 .completions div.completion[displayed] { display: block;}
+.completions tr.completion[displayed] { display: table-row;}
+.completions tbody.completion[displayed] { display: table-row-group;}
 
 .completions .completion[displayed] span.variation[displayed] { 
    display: inline; }
@@ -257,6 +261,8 @@ div.completions {font-family: sans,sans-serif;}
 .completions span.completion.displayed { display: inline;}
 .completions li.completion.displayed { display: list-item;}
 .completions div.completion.displayed { display: block;}
+.completions tr.completion.displayed { display: table-row;}
+.completions tbody.completion.displayed { display: table-row-group;}
 
 .completions a.completion.displayed span.variation.displayed { 
    display: inline; }
@@ -266,6 +272,10 @@ div.completions {font-family: sans,sans-serif;}
    display: list-item; }
 .completions .completion.displayed div.variation.displayed { 
    display: block; }
+.completions .completion.displayed tr.variation.displayed { 
+   display: table-row; }
+.completions .completion.displayed tbody.variation.displayed { 
+   display: table-row-group; }
 
 .completions.maxcomplete .completion.displayed .variation.displayed { 
    display: none; }
