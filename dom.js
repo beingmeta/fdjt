@@ -31,17 +31,14 @@ var fdjtDOM=
 	function fdjtDOM(spec){
 	    var node;
 	    if (spec.nodeType) node=spec;
-	    else if (typeof spec==='string')
-		if (spec[0]==='<') {
-		    var container=document.createElement("DIV");
-		    container.innerHTML=spec;
-		    var children=container.childNodes;
-		    var i=0; var len=children.length;
-		    while (i<len)
-			if (children[i].nodeType===1) return children[i];
-		    else i++;
-		    return false;}
-	    else {
+	    else if ((typeof spec==='string')&&(spec[0]==='<'))  {
+		var container=document.createElement("span");
+		container.innerHTML=spec;
+		var children=container.childNodes;
+		if (children.length===1)
+		    return children[0];
+		else return container;}
+	    else if (typeof spec==='string') {
 		var elts=spec.match(css_selector_regex);
 		var classname=false;
 		node=document.createElement(elts[0]);
