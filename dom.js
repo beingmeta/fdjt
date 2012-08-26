@@ -724,6 +724,11 @@ var fdjtDOM=
 
 	function getInputs(root,name,type){
 	    var results=[];
+	    if (typeof root === 'string') {
+		var root_elt=document.getElementById(root);
+		if (!(root_elt)) fdjtLog.warn("Couldn't resolve %s to an object",root);
+		root=root_elt;}
+	    if (!(root)) return results;
 	    var inputs=root.getElementsByTagName('input');
 	    var i=0; var lim=inputs.length;
 	    while (i<lim) {
@@ -1601,6 +1606,25 @@ var fdjtDOM=
 	    var docelt=((win.document)&&(win.document.documentElement));
 	    return ((win.innerWidth)||((docelt)&&(docelt.clientWidth)));};
 
+	/* Generating element IDs */
+
+	var id_count=0; var unique=Math.floor(Math.random()*100000);
+	function getNodeID(elt){
+	    var id=elt.id; var nelt;
+	    if (id) return id;
+	    else {
+		id="TMPID_"+unique+"_"+(id_count++);
+		while ((!(nelt=document.getElementById(id)))||
+		       (nelt===elt)) {
+		    id="TMPID_"+unique+"_"+(id_count++);
+		    if ((!(nelt=document.getElementById(id)))||
+			(nelt===elt))
+			unique=Math.floor(Math.random()*100000);
+		    id="TMPID_"+unique+"_"+(id_count++);}
+		elt.id=id;
+		return id;}}
+	fdjtDOM.getNodeID=getNodeID;
+		
 	/* Stylesheet manipulation */
 
 	// Adapted from 
@@ -1954,7 +1978,6 @@ var fdjtDOM=
 		document.location.href;
 	    docbase=getMeta("baseid");}
 	
-
 	function getAssignedIDs(node){
 	    var refuris=[];
 	    var baseids=[];
