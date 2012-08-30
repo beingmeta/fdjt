@@ -210,11 +210,10 @@ fdjtUI.Highlight=(function(){
 	    (getcheckable(target))||
 	    (getcheckable(checkspan));
 	if (!(checkbox)) return false;
-	if (typeof checked === 'undefined')
-	    // When the second argument isn't provided, we toggle the
-	    //  checkbox
-	    checked=(!(checkbox.checked));
 	var changed=false;
+	if (typeof checked === 'undefined') {
+	    var hasclass=hasClass(checkspan,"ischecked");
+	    checked=(!(hasclass));}
 	if (checkbox.checked!==checked) {
 	    checkbox.checked=checked; changed=true;}
 	// We change this anyway, just in case there's been a glitch
