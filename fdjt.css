@@ -413,6 +413,12 @@ div.richtip .maximize { display: none; }
 .floatleft { float: left;}
 .floatright { float: right;}
 
+table.fdjtdata table { border: solid silver 2px;}
+table.fdjtdata table.fdjtdata { width: auto;}
+table.fdjtdata td ul, table.fdjtdata td ol {
+    margin-left: 0px; margin-right: 0px;
+    margin-top: 0px; margin-bottom: 0px;}
+
 /* Tables for form input */
 
 table.fdjtform { width: 100%;}
