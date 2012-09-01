@@ -100,7 +100,7 @@ var fdjtState=
 		fdjtLog.warn("Error setting cookie %s",name);}}
 	fdjtState.setCookie=setCookie;
 	
-	function clearCookie(name,path,domain){
+	function clearCookie(name,domain,path){
 	    try {
 		var valuestring="ignoreme";
 		var cookietext=name+"="+encodeURIComponent(valuestring)+
