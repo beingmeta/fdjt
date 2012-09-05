@@ -1936,38 +1936,54 @@ var fdjtDOM=
 		    starts_in: within.id,ends_in: ends_in.id,
 		    end: end_edge+range.endOffset};}
 
-	function findString(node,string,count){
-	    if (!(count)) count=1;
-	    var fulltext=node2text(node); var loc=-1, cur=0;
-	    while ((loc=fulltext.indexOf(string,cur))>=0) {
+	function findString(node,needle,off,count){
+	    if (typeof off === 'undefined') off=0;
+	    if (typeof count === 'undefined') count=1;
+	    var match=false;
+	    var fulltext=node2text(node);
+	    var scan=((off===0)?(fulltext):(fulltext.slice(off)));
+	    var pat=((typeof needle === 'string')?
+		     (new RegExp(needle.replace(/\s+/g,"(\\s+)"),"gm")):
+		     (needle));
+	    while ((match=pat.exec(scan))) {
 		if (count===1) {
-		    var start=get_text_pos(node,loc,0);
-		    var end=get_text_pos(node,loc+string.length,0);
+		    var loc=match.index;
+		    var absloc=loc+off;
+		    var start=get_text_pos(node,absloc,0);
+		    var end=get_text_pos(node,absloc+match[0].length,0);
 		    if ((!start)||(!end)) return false;
 		    var range=document.createRange();
 		    range.setStart(start.node,start.off);
 		    range.setEnd(end.node,end.off);
 		    return range;}
-		else {count--; cur=loc+string.length;}}
+		else {count--;
+		      off=match.index+match[0].length;
+		      scan=scan.slice(off);}}
 	    return false;}
 	fdjtDOM.findString=findString;
 
-	function findMatches(node,rx){
-	    var rx=((typeof rx==='string')?
-		    (new RegExp(rx,"gm")):
-		    (new RegExp(rx)));
+	function findMatches(node,needle,off){
+	    if (typeof off === 'undefined') off=0;
+	    if (typeof count === 'undefined') count=1;
+	    var match=false; var results=[];
 	    var fulltext=node2text(node);
-	    var match=rx.exec(fulltext), results=[];
-	    if (!(match)) return results;
-	    while (match) {
-		var end=textPos(node,rx.lastIndex,0);
-		var start=textPos(node,rx.lastIndex-match[0].length,0);
-		if ((!start)||(!end)) return results;
-		var range=document.createRange();
-		range.setStart(start.node,start.off);
-		range.setEnd(end.node,end.off);
-		results.push(range);
-		match=rx.exec(fulltext);}
+	    var scan=((off===0)?(fulltext):(fulltext.slice(off)));
+	    var pat=((typeof needle === 'string')?
+		     (new RegExp(needle.replace(/\s+/g,"(\\s+)"),"gm")):
+		     (needle));
+	    while ((match=pat.exec(scan))) {
+		var loc=match.index;
+		var absloc=loc+off;
+		var start=get_text_pos(node,absloc,0);
+		var end=get_text_pos(node,absloc+match[0].length,0);
+		if ((start>=0)&&(end>start)) {
+		    var range=document.createRange();
+		    range.setStart(start.node,start.off);
+		    range.setEnd(end.node,end.off);
+		    results.push(range);}
+		count--;
+		off=match.index+match[0].length;
+		scan=scan.slice(off);}
 	    return results;}
 	fdjtDOM.findMatches=findMatches;
 
