@@ -1740,8 +1740,11 @@ var fdjtDOM=
 	    evt.cancelBubble=true;};
 
 	/* Check for SVG */
+	var nosvg=true;
+
 	function checkSVG(){
-	    if (!(document.implementation.hasFeature(
+	    if (nosvg) addClass(document.body,"NOSVG");
+	    else if (!(document.implementation.hasFeature(
 		"http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")||
 		  navigator.mimeTypes["image/svg+xml"]))
 		addClass(document.body,"NOSVG");
@@ -1754,9 +1757,10 @@ var fdjtDOM=
 			  (document.body.children));}
 
 	function fixSVG(){
-	    if (!(document.implementation.hasFeature(
-		"http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")||
-		  navigator.mimeTypes["image/svg+xml"])) {
+	    if ((nosvg)||
+		(!(document.implementation.hasFeature(
+		    "http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")||
+		   navigator.mimeTypes["image/svg+xml"]))) {
 		var hasSuffix=fdjtString.hasSuffix;
 		var images=getChildren("IMG");
 		var i=0, lim=images.length;
