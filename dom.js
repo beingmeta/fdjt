@@ -1794,7 +1794,7 @@ var fdjtDOM=
 	var inits=[checkChildren,checkSVG]; // ,fixSVG
 	var init_names={
 	    checkChildren: checkChildren,
-	    checkSVG: checkSVG,fixSVG: fixSVG};
+	    checkSVG: checkSVG,fixSVG: goSVG};
 
 	fdjtDOM.init=function(){
 	    if (inits_run) return false;
