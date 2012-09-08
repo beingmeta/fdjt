@@ -74,6 +74,7 @@ var fdjtString=
 	function stringify(arg){
 	    if (typeof arg === 'undefined') return '?undef?';
 	    else if (!(arg)) return arg;
+	    else if (typeof arg === 'number') return ""+arg;
 	    else if (arg.tagName) {
 		var output="["+arg.tagName;
 		if (arg.className)
@@ -101,7 +102,7 @@ var fdjtString=
 		else if ((arg.keyCode)||(arg.charCode))
 		    result=result+",kc="+arg.keyCode+",cc="+arg.charCode;
 		return result+")]";}
-	    else return arg;}
+	    else return ""+arg;}
 
 	var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
 
