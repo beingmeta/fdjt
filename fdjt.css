@@ -589,6 +589,10 @@ body.NOSVG img.inline.svg { display: none;}
 body.NOSVG .nosvg { display: inline;}
 body.NOSVG .inline.nosvg { display: inline;}
 
+img.hires { display: none !important;}
+img.svg { display: none !important;}
+img.stdres {}
+
 /* Progress boxes */
 
 div.fdjtprogress {

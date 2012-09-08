@@ -1756,24 +1756,42 @@ var fdjtDOM=
 			  (document.body.childNodes)&&
 			  (document.body.children));}
 
-	function fixSVG(){
+	function useBMP(){
+	    var hasSuffix=fdjtString.hasSuffix;
+	    var images=fdjt$("IMG");
+	    var i=0, lim=images.length;
+	    while (i<lim) {
+		var image=images[i++]; var src=image.src;
+		if (!(src)) continue;
+		if ((hasSuffix(src,".svg"))||(hasSuffix(src,".svgz"))) {
+		    var bmp=image.getAttribute('bmp');
+		    if (bmp) {
+			image.setAttribute('svg',image.src);
+			image.src=bmp;}}}}
+	function useSVG(){
+	    var hasSuffix=fdjtString.hasSuffix;
+	    var images=fdjt$("IMG");
+	    var i=0, lim=images.length;
+	    while (i<lim) {
+		var image=images[i++]; var src=image.src;
+		if (!(src)) continue;
+		if ((!((hasSuffix(src,".svg"))||(hasSuffix(src,".svgz"))))&&
+		    (image.getAttribute('svg'))) {
+		    var svg=image.getAttribute('svg');
+		    image.setAttribute('bmp',image.src);
+		    image.src=svg;}}}
+	fdjtDOM.useSVG=useSVG;
+	fdjtDOM.useBMP=useBMP;
+
+	function goSVG(){
 	    if ((nosvg)||
 		(!(document.implementation.hasFeature(
 		    "http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")||
 		   navigator.mimeTypes["image/svg+xml"]))) {
-		var hasSuffix=fdjtString.hasSuffix;
-		var images=getChildren("IMG");
-		var i=0, lim=images.length;
-		while (i<lim) {
-		    var image=images[i++]; var src=image.src;
-		    if (!(src)) continue;
-		    if ((hasSuffix(src,".svg"))||(hasSuffix(src,".svgz"))) {
-			var bmp=image.getAttribute('bmp');
-			if (bmp) image.src=bmp;}}}}
-		
+		useBMP();}}
 
 	var inits_run=false;
-	var inits=[checkChildren,checkSVG,fixSVG];
+	var inits=[checkChildren,checkSVG]; // ,fixSVG
 	var init_names={
 	    checkChildren: checkChildren,
 	    checkSVG: checkSVG,fixSVG: fixSVG};
