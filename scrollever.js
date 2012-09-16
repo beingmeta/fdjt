@@ -54,7 +54,8 @@ function fdjtScrollEver(spec) {
 	req.onreadystatechange=function () {
 	    if ((req.readyState == 4) && (req.status == 200)) {
 		var tbl=fdjtDOM("TABLE");
-		tbl.innerHTML=req.responseText;
+		var htmltext=req.responseText;
+		tbl.innerHTML=htmltext;
 		var add=[];
 		var children=tbl.childNodes;
 		var i=0; var lim=children.length;
@@ -79,3 +80,8 @@ function fdjtScrollEver(spec) {
 	    getMoreResults();}
     return (timer=setInterval(scrollChecker,interval));}
 
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  End: ***
+*/
