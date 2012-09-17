@@ -822,6 +822,15 @@ fdjtUI.Collapsible.focus=function(evt){
     fdjtUI.Reticle.live=false;})();
 
 
+/* File uploader affirmation handling */
+
+(function(){
+    fdjtUI.uploadSpecified=function(evt){
+	evt=evt||event;
+	var parent=fdjtDOM.getParent(fdjtUI.T(evt),'.fileuploader');
+	if (parent) fdjtDOM.addClass(parent,'inuse');};})();
+
+
 /* Image swapping */
 
 (function(){

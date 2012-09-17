@@ -680,6 +680,13 @@ div.humane.humane-show:hover { opacity: 0.2; }
   color                 : red;
 }
 
+/* File upload affirmations */
+
+.fileuploader .affirmation { display: none;}
+.fileuploader.inuse span.affirmation { display: inline;}
+.fileuploader.inuse div.affirmation { display: block;}
+.fileuploader.inuse p.affirmation { display: block;}
+
 /* Reticle CSS */
 
 /* Reticles help when giving demos by highlighting the position and
