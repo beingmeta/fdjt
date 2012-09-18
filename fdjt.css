@@ -24,6 +24,7 @@
 .checkspan { cursor: pointer;}
 .checkspan .alt { font-size: inherit; font-weight: bold;}
 span.checkspan, a.checkspan { white-space: nowrap; }
+span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
 .checkspan .checked { display: none;}
 
 .checkspan.ischecked { font-weight: bold; }
