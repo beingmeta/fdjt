@@ -110,6 +110,9 @@ var fdjtKB=
 	    else if (!(create)) return false;
 	    else return new Pool(name);};
 	
+	Pool.prototype.reset=function(){
+	    this.map={}; this.index=Index(); this.xforms={};
+	    this.storage=false;};
 	Pool.prototype.toJSON=function(){return "@@"+this.name;};
 	
 	// Check if a named pool exists
