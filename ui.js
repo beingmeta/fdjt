@@ -32,6 +32,7 @@ fdjtUI.Collapsible=(fdjtUI.Collapsible)||{};
 fdjtUI.Tabs=(fdjtUI.Tabs)||{};
 fdjtUI.MultiText=(fdjtUI.MultiText)||{};
 fdjtUI.Reticle=(fdjtUI.Reticle)||{};
+fdjtUI.FocusBlock=(fdjtUI.FocusBlock)||{};
 
 
 /* Co-highlighting */
@@ -247,11 +248,14 @@ fdjtUI.Highlight=(function(){
     function checkspan_onclick(evt) {
 	evt=evt||event;
 	var target=evt.target||evt.srcTarget;
-	if (((target.tagName)&&(target.tagName==="INPUT"))||
-	    (getParent(target,"input"))) {
+	var input=getParent(target,"input");
+	if ((input)&&
+	    ((input.type==='CHECKBOX')||
+	     (input.type==='RADIO'))) {
 	    fdjtUI.cancel(evt);
 	    setTimeout(function(){checkspan_set(target);},100);
 	    return false;}
+	else if (input) return false;
 	else {
 	    checkspan_set(target);
 	    fdjtUI.cancel(evt);}
@@ -405,7 +409,41 @@ fdjtUI.Highlight=(function(){
     fdjtUI.InputHelp.onfocus=show_help_onfocus;
     fdjtUI.InputHelp.onblur=hide_help_onblur;})();
 
+
 
+/* Focus blocks */
+
+(function(){
+
+    var getParent=fdjtDOM.getParent;
+    var addClass=fdjtDOM.addClass;
+    var dropClass=fdjtDOM.dropClass;
+
+    var blur_timeout=false;
+    var blur_target=false;
+
+    function focusblock_onfocus(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	var block=getParent(target,".focusblock");
+	if (block) {
+	    if (blur_target===block) {
+		clearTimeout(blur_timeout);
+		blur_target=false; blue_timeout=false;}
+	    addClass(block,'fdjtfocus');}}
+    function focusblock_onblur(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	var block=getParent(target,".focusblock");
+	if (block) {
+	    blur_target=block;
+	    blur_timeout=setTimeout(function(){
+		dropClass(block,'fdjtfocus');
+		blur_target=false; blur_timeout=false;},
+				    2000);}}
+
+    fdjtUI.FocusBlock.onfocus=focusblock_onfocus;
+    fdjtUI.FocusBlock.onblur=focusblock_onblur;})();
 
 /* Text input boxes which create checkspans on enter. */
 
