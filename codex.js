@@ -442,6 +442,7 @@ var CodexLayout=
 	    var pagenum=this.pagenum=0; // Tracks current page number
 	    var pages=this.pages=[]; // Array of all pages generated, in order
 	    var dups=this.dups={}; // Tracks nodes/contexts already duplicated
+	    var cur_root=this.root=false; // The root currently being added
 
 	    // Tracks text nodes which have been split, keyed by the
 	    // temporary IDs assigned to them
@@ -505,6 +506,7 @@ var CodexLayout=
 		if (typeof progressfn === 'undefined')
 		    progressfn=layout.progressfn||false;
 		if (!(layout.started)) layout.started=start;
+		layout.root=cur_root=root;
 		layout.root_count++;
 
 		var blocks=[], terminals=[], styles=[];
@@ -553,7 +555,6 @@ var CodexLayout=
 		    else if ((hasClass(block,/\bcodexfullpage\b/))||
 			     ((fullpages)&&(testNode(block,fullpages)))) {
 			// Full pages automatically get their own page
-			prev=false; layout.drag=drag=[];
 			fullPage(block);
 			ni++; return;}
 		    else if ((page.childNodes.length)&&
@@ -564,7 +565,7 @@ var CodexLayout=
 			// This is the easy case.  Note that we
 			// don't force a page break if the current
 			// page is empty.
-			prev=false; layout.drag=drag=[];
+			layout.drag=drag=[];
 		    	newPage(block);}
 		    else moveNodeToPage(block,page,dups);
 		    // Finally, we check if everything fits We're
@@ -678,6 +679,7 @@ var CodexLayout=
 			page.id=pageprefix+(pagenum);
 			page.setAttribute("data-pagenum",pagenum);
 			fdjtDOM(container,page);
+			layout.prev=prev=false;
 			pages.push(page);
 			newpage="newpage";}
 		    
@@ -690,16 +692,11 @@ var CodexLayout=
 		    if ((drag)&&(drag.length)) {
 			var i=0; var lim=drag.length;
 			while (i<lim) moveNodeToPage(drag[i++],page,dups);
+			layout.prev=prev=drag[drag.length-1];
 			layout.drag=drag=[];}
 		    // Finally, move the node to the page
 		    if (node) moveNodeToPage(node,page,dups);
 
-		    // Now we check for a particularly difficult case,
-		    // where the node we added already overruns the page
-		    // but can't be split.
-		    
-
-		    layout.prev=prev=false;
 		    return page;}
 
 		// Could this just be the following?
@@ -737,6 +734,8 @@ var CodexLayout=
 
 		    layout.prev=prev=false;
 		    layout.prevstyle=prevstyle=false;
+		    layout.drag=drag=[];
+
 		    return page;}
 
 		// This gets a little complicated
@@ -963,22 +962,19 @@ var CodexLayout=
 		    while ((ni<nblocks)&&
 			   ((fdjtTime()-loop_start)<timeslice))
 			step();
-		    if (ni>=nblocks) {
+		    if (progressfn) progressfn(layout);
+		    if (ni<nblocks) layout.timer=
+			setTimeout(loop,timeskip||timeslice);
+		    else {
 			var last_block=blocks[nblocks-1];
 			if ((forcedBreakAfter(last_block))||
 			    (hasClass(last_block,/\bcodexfullpage\b/))||
 			    ((fullpages)&&(testNode(last_block,fullpages))))
-			    newPage();}
-		    if (progressfn) progressfn(layout);
-		    if (ni<nblocks) layout.timer=
-			setTimeout(loop,timeskip||timeslice);
-		    else if (donefn) {
+			    newPage();
 			if (layout.timer) clearTimeout(layout.timer);
 			layout.timer=false;
-			donefn(layout);}
-		    else {
-			if (layout.timer) clearTimeout(layout.timer);
-			layout.timer=false;}}
+			layout.root=cur_root=false;
+			if (donefn) donefn(layout);}}
 
 		// This is the inner loop
 		if (!(timeslice)) {
@@ -1040,13 +1036,24 @@ var CodexLayout=
 		    ((forcebreakbefore)&&(testNode(elt,forcebreakbefore)));}
 	    this.forcedBreakBefore=forcedBreakBefore;
 	    
+	    var getLastElement=fdjtDOM.getLastElement;
+
 	    function forcedBreakAfter(elt,style){ 
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
-		return (style.pageBreakAfter==='always')||
+		var force=(style.pageBreakAfter==='always')||
 		    (hasClass(elt,"forcebreakafter"))||
 		    ((forcebreakafter)&&
-		     (testNode(elt,forcebreakafter)));}
+		     (testNode(elt,forcebreakafter)));
+		if (force) return force;
+		if (elt===cur_root) return false;
+		if (!(cur_root)) return false;
+		var parent=elt.parentNode;
+		var last=(parent.lastElementChild)||
+		    ((parent.children[parent.children.length-1]));
+		if (elt===last)
+		    return forcedBreakAfter(parent);
+		else return false;}
 	    this.forcedBreakAfter=forcedBreakAfter;
 
 	    // We explicitly check for these classes because some browsers
@@ -1074,14 +1081,24 @@ var CodexLayout=
 	    this.avoidBreakBefore=avoidBreakBefore;
 
 	    function avoidBreakAfter(elt,style){
+		var avoid=false;
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
 		if (style.pageBreakAfter==='avoid') return true;
 		else if ((style.pageBreakAfter)&&
 			 (style.pageBreakAfter!=="auto"))
 		    return false;
-		else return ((avoidbreakafter)&&
-			     (testNode(elt,avoidbreakafter)));}
+		else avoid=((avoidbreakafter)&&
+			    (testNode(elt,avoidbreakafter)));
+		if (avoid) return avoid;
+		if (elt===cur_root) return false;
+		if (!(cur_root)) return false;
+		var parent=elt.parentNode;
+		var last=(parent.lastElementChild)||
+		    ((parent.children[parent.children.length-1]));
+		if (elt===last)
+		    return avoidBreakAfter(parent);
+		else return false;}
 	    this.avoidBreakAfter=avoidBreakAfter;
 	    
 	    function getPage(spec) {
