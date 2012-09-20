@@ -630,6 +630,22 @@ var fdjtDOM=
 		else scan=scan.parentNode;}
 	    return false;};
 	
+	/* First and last elements */
+	function getFirstElement(node){
+	    if (node.firstElementChild) return node.firstElementChild;
+	    else if ((node.children)&&(node.children.length))
+		return node.children[0];
+	    else return false;}
+	fdjtDOM.getFirstElement=getFirstElement;
+	function getLastElement(node){
+	    if (node.lastElementChild) return node.lastElementChild;
+	    else if ((node.children)&&(node.children.length))
+		return node.children[node.children.length-1];
+	    else return false;}
+	fdjtDOM.getLastElement=getLastElement;
+	    
+
+
 	/* Manipulating the DOM */
 
 	fdjtDOM.replace=function(existing,replacement){
