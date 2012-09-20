@@ -548,7 +548,7 @@ var CodexLayout=
 		    if (!(block)) {ni++; return;}
 		    else if ((hasClass(block,/\bcodexfloatpage\b/))||
 			     ((floatpages)&&(testNode(block,floatpages)))) {
-			// Float pages just get pushed (until newPage bfelow)
+			// Float pages just get pushed (until newPage below)
 			float_pages.push[block]; ni++; return;}
 		    else if ((hasClass(block,/\bcodexfullpage\b/))||
 			     ((fullpages)&&(testNode(block,fullpages)))) {
@@ -666,7 +666,7 @@ var CodexLayout=
 		    if ((node)&&(node.nodeType===3)&&
 			(node.parentNode.childNodes.length===1))
 			node=node.parentNode;
-		    if (needNewPage(node)) {
+		    if ((!(node))||(needNewPage(node))) {
 			// If we really need to create a new page, do so,
 			//  starting by dropping the curpage class from the
 			//  current page
@@ -735,9 +735,6 @@ var CodexLayout=
 		    if (node) moveNodeToPage(node,page,dups);
 		    
 		    tweakBlock(node);
-
-		    // Now we make a new page for whatever comes next
-		    newPage();
 
 		    layout.prev=prev=false;
 		    layout.prevstyle=prevstyle=false;
@@ -918,6 +915,9 @@ var CodexLayout=
 		    // If the node doesn't have any dimensions,
 		    //  something hasn't loaded, so don't try tweaking
 		    if ((geom.width===0)||(geom.height===0)) return;
+		    if ((avail_width>=geom.width)&&
+			(avail_height>=geom.height))
+			return;
 		    var scalex=(avail_width/geom.width);
 		    var scaley=(avail_height/geom.height);
 		    var scale=((scalex<scaley)?(scalex):(scaley));
