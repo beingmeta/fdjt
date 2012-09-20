@@ -559,9 +559,8 @@ var CodexLayout=
 		    else if ((page.childNodes.length)&&
 			     ((forcedBreakBefore(block,style))||
 			      ((prev)&&(forcedBreakAfter(prev)))||
-			      ((prev)&&
-			       ((hasClass(prev,/\bcodexfullpage\b/))||
-				((fullpages)&&(testNode(prev,fullpages))))))) {
+			      ((prev)&&((hasClass(prev,/\bcodexfullpage\b/))||
+					((fullpages)&&(testNode(prev,fullpages))))))) {
 			// This is the easy case.  Note that we
 			// don't force a page break if the current
 			// page is empty.
@@ -964,6 +963,12 @@ var CodexLayout=
 		    while ((ni<nblocks)&&
 			   ((fdjtTime()-loop_start)<timeslice))
 			step();
+		    if (ni>=nblocks) {
+			var last_block=blocks[nblocks-1];
+			if ((forcedBreakAfter(last_block))||
+			    (hasClass(last_block,/\bcodexfullpage\b/))||
+			    ((fullpages)&&(testNode(last_block,fullpages))))
+			    newPage();}
 		    if (progressfn) progressfn(layout);
 		    if (ni<nblocks) layout.timer=
 			setTimeout(loop,timeskip||timeslice);
