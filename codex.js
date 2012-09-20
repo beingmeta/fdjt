@@ -545,11 +545,11 @@ var CodexLayout=
 		    // If a block is false, continue
 		    if (!(block)) {ni++; return;}
 		    else if ((hasClass(block,/\bcodexfloatpage\b/))||
-			     ((floatpages)&&(testNode(block.floatpages)))) {
+			     ((floatpages)&&(testNode(block,floatpages)))) {
 			// Float pages just get pushed (until newPage bfelow)
 			float_pages.push[block]; ni++; return;}
 		    else if ((hasClass(block,/\bcodexfullpage\b/))||
-			     ((fullpages)&&(testNode(block.fullpages)))) {
+			     ((fullpages)&&(testNode(block,fullpages)))) {
 			// Full pages automatically get their own page
 			prev=false; layout.drag=drag=[];
 			fullPage(block);
@@ -1038,7 +1038,8 @@ var CodexLayout=
 		if (!(style)) style=getStyle(elt);
 		return (style.pageBreakAfter==='always')||
 		    (hasClass(elt,"forcebreakafter"))||
-		    ((forcebreakafter)&&(testNode(elt,forcebreakafter)));}
+		    ((forcebreakafter)&&
+		     (testNode(elt,forcebreakafter)));}
 	    this.forcedBreakAfter=forcedBreakAfter;
 
 	    // We explicitly check for these classes because some browsers
@@ -1050,7 +1051,8 @@ var CodexLayout=
 		if (elt.tagName==='IMG') return true;
 		if (!(style)) style=getStyle(elt);
 		return (style.pageBreakInside==='avoid')||
-		    ((elt.className)&&(elt.className.search(page_block_classes)>=0))||
+		    ((elt.className)&&
+		     (elt.className.search(page_block_classes)>=0))||
 		    ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)));}
 	    this.avoidBreakInside=avoidBreakInside;
 	    
@@ -1060,16 +1062,19 @@ var CodexLayout=
 		var info=((elt.id)&&(Codex.docinfo[elt.id]));
 		return ((style.pageBreakBefore==='avoid')||
 			(hasClass(elt,"avoidbreakbefore"))||
-			((avoidbreakbefore)&&(testNode(elt,avoidbreakbefore))));}
+			((avoidbreakbefore)&&
+			 (testNode(elt,avoidbreakbefore))));}
 	    this.avoidBreakBefore=avoidBreakBefore;
 
 	    function avoidBreakAfter(elt,style){
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
 		if (style.pageBreakAfter==='avoid') return true;
-		else if ((style.pageBreakAfter)&&(style.pageBreakAfter!=="auto"))
+		else if ((style.pageBreakAfter)&&
+			 (style.pageBreakAfter!=="auto"))
 		    return false;
-		else return ((avoidbreakafter)&&(testNode(elt,avoidbreakafter)));}
+		else return ((avoidbreakafter)&&
+			     (testNode(elt,avoidbreakafter)));}
 	    this.avoidBreakAfter=avoidBreakAfter;
 	    
 	    function getPage(spec) {
