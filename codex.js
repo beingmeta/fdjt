@@ -122,7 +122,9 @@ var CodexLayout=
 		if (node===test) return true;
 		else if (typeof atest === 'string') {
 		    if (!(node.className)) continue;
-		    var classrx=new Regexp("\b"+atest+"\b");
+		    // Handle use of selector syntax
+		    if (atest[0]==='.') atest=atest.slice(1);
+		    var classrx=new RegExp("\\b"+atest+"\\b");
 		    if (node.className.search(classrx)>=0) return true;}
 		else if ((atest.match)&&(atest.match(node)))
 		    // This should get most versions of CSS selectors
@@ -555,14 +557,14 @@ var CodexLayout=
 			fullPage(block);
 			ni++; return;}
 		    else if ((page.childNodes.length)&&
-			     (forcedBreakBefore(block,style))) {
+			     ((forcedBreakBefore(block,style))||
+			      ((prev)&&(forcedBreakAfter(prev)))||
+			      ((prev)&&
+			       ((hasClass(prev,/\bcodexfullpage\b/))||
+				((fullpages)&&(testNode(prev,fullpages))))))) {
 			// This is the easy case.  Note that we
 			// don't force a page break if the current
 			// page is empty.
-			prev=false; layout.drag=drag=[];
-		    	newPage(block);}
-		    else if ((prev)&&(forcedBreakAfter(prev))) {
-			// This is just symmetrical to the above case
 			prev=false; layout.drag=drag=[];
 		    	newPage(block);}
 		    else moveNodeToPage(block,page,dups);
