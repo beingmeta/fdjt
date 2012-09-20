@@ -807,11 +807,14 @@ var CodexLayout=
 				var bi=0, blen=breaks.length;
 				if (blen<2) {page_break=child; break;}
 				while (bi<blen) {
-				    var s=breaks[bi++];
+				    var s=breaks[bi++]; var ws;
 				    if (!(word)) word=s;
-				    else if (s.search(/\s/)===0) {
-					words.push(word);
-					if (bi<blen) word=s+breaks[bi++];}
+				    else if ((ws=s.search(/\s/))>=0) {
+					if (ws===0) {
+					    words.push(word);
+					    if (bi<blen) word=s+breaks[bi++];}
+					else {
+					    words.push(word+s); word=false;}}
 				    else word=word+s;}
 				if (word) words.push(word);
 				// If there's only one word, no splitting today,
@@ -829,8 +832,7 @@ var CodexLayout=
 				    geom=getGeomX(node);
 				    if (geom.bottom>page_height) {
 					wtop=wbreak;
-					wbreak=wbot+
-					    floor((wbreak-wbot)/2);}
+					wbreak=wbot+floor((wbreak-wbot)/2);}
 				    else {
 					var nextw=document.createTextNode(
 					    words[wbreak+1]);
