@@ -538,7 +538,8 @@ var CodexLayout=
 			drag.push(prev);
 		    else if ((block)&&(terminal))
 			// Otherwise, we don't have to worry about
-			// what we're dragging along
+			// what we've been dragging along so far,
+			// so we clear it.
 			layout.drag=drag=[];
 		    else {}
 		    // If a block is false, continue
@@ -558,6 +559,10 @@ var CodexLayout=
 			// This is the easy case.  Note that we
 			// don't force a page break if the current
 			// page is empty.
+			prev=false; layout.drag=drag=[];
+		    	newPage(block);}
+		    else if ((prev)&&(forcedBreakAfter(prev))) {
+			// This is just symmetrical to the above case
 			prev=false; layout.drag=drag=[];
 		    	newPage(block);}
 		    else moveNodeToPage(block,page,dups);
