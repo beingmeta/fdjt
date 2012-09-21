@@ -79,24 +79,7 @@ var CodexLayout=
 	    return {left: left, top: top, width: width,height: height,
 		    right:left+width,bottom:top+height};}
 
-	function getGeomX(elt,root){
-	    var top = elt.offsetTop;
-	    var left = elt.offsetLeft;
-	    var width=elt.offsetWidth;
-	    var height=elt.offsetHeight;
-	    var rootp=((root)&&(root.offsetParent));
-
-	    if (elt===root) 
-		return {left: 0,top: 0,width:width,height: height};
-	    elt=elt.offsetParent;
-	    while (elt) {
-		if ((root)&&((elt===root)||(elt===rootp))) break;
-		top += elt.offsetTop;
-		left += elt.offsetLeft;
-		elt=elt.offsetParent;}
-	    
-	    return {left: left, top: top, width: width,height: height,
-		    right:left+width,bottom:top+height};}
+	/* Node testing */
 
 	var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
 	
@@ -751,7 +734,7 @@ var CodexLayout=
 		    var children=TOA(node.childNodes);
 		    var i=children.length-1;
 		    while (i>=0) node.removeChild(children[i--]);
-		    var geom=getGeom(node);
+		    var geom=getGeom(node,page);
 		    if (geom.bottom>page_height) {
 			// If the version without any children is
 			// already over the edge, just start a new
@@ -772,7 +755,7 @@ var CodexLayout=
 		    while (i<n) {
 			var child=children[i++]; var nodetype=child.nodeType;
 			// Add the child back and get the geometry
-			node.appendChild(child); geom=getGeom(node);
+			node.appendChild(child); geom=getGeom(node,page);
 			if (geom.bottom>page_height) { // Over the edge
 			    if ((nodetype!==3)&&(!((hasContent(node,child,true)))))
 				// If there's no content before the
@@ -829,7 +812,7 @@ var CodexLayout=
 					words.slice(0,wbreak).join(""));
 				    node.replaceChild(newprobe,probenode);
 				    probenode=newprobe;
-				    geom=getGeomX(node);
+				    geom=getGeom(node,page);
 				    if (geom.bottom>page_height) {
 					wtop=wbreak;
 					wbreak=wbot+floor((wbreak-wbot)/2);}
@@ -837,7 +820,7 @@ var CodexLayout=
 					var nextw=document.createTextNode(
 					    words[wbreak+1]);
 					node.appendChild(nextw);
-					var ngeom=getGeomX(node);
+					var ngeom=getGeom(node,page);
 					node.removeChild(nextw);
 					if (ngeom.bottom>page_height) {
 					    foundbreak=true; break;}
