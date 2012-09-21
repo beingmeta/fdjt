@@ -228,7 +228,7 @@ var CodexLayout=
 
 	// This recreates a node and it's DOM context (containers) on
 	//  a new page, calling itself recursively as needed
-	function dupContext(node,page,dups){
+	function dupContext(node,page,dups,crumbs){
 	    if ((node===document.body)||(node.id==="CODEXCONTENT")||
 		(node.id==="CODEXROOT")||(hasClass(node,"codexroot"))||
 		(hasClass(node,"codexpage")))
@@ -238,7 +238,7 @@ var CodexLayout=
 		     (node.className.search(/\bcodexwraptext\b/)>=0))
 		// We don't bother duplicating text wrapping convenience
 		//  classes
-		return dupContext(node.parentNode,page,dups);
+		return dupContext(node.parentNode,page,dups,crumbs);
 	    // Now we actually duplicate it.  
 	    var id=node.id;
 	    // If it doesn't have an ID, we give it one, because we'll want
@@ -250,7 +250,7 @@ var CodexLayout=
 		if ((dup)&&(hasParent(dup,page))) return dup;}
 	    // Duplicate it's parent
 	    var copy=node.cloneNode(false);
-	    var parent=dupContext(node.parentNode,page,dups);
+	    var parent=dupContext(node.parentNode,page,dups,crumbs);
 	    var nodeclass=node.className||"";
 	    // Jigger the class name
 	    copy.className=
@@ -287,7 +287,7 @@ var CodexLayout=
 		    
 	// This moves a node into another container, leaving
 	// a back pointer for restoration
-	function moveNode(arg,into,blockp){
+	function moveNode(arg,into,blockp,crumbs){
 	    var baseclass; var node=arg;
 	    // If we're moving a first child, we might as well move the parent
 	    if (hasParent(node,into)) return node;
@@ -306,22 +306,25 @@ var CodexLayout=
 		wrapnode.appendChild(node);
 		baseclass="codexwraptext";
 		node=wrapnode;}
-	    if ((node.parentNode)&&(!(node.getAttribute("data-codexorigin")))) {
+	    if ((node.parentNode)&&((!(node.id))||(!(crumbs[node.id])))) {
+		// If the node has a parent and hasn't been moved before,
+		//  we leave a "crumb" (a placeholder) in the original
+		//  location.
+		if (!(node.id)) node.id="CODEXTMPID"+(tmpid_count++);
 		// Record origin information; we'll use this to revert
 		//  the layout if we need to (for example, before
 		//  laying out again under different constraints)
-		var origin=fdjtDOM("span.codexorigin");
-		var id=origin.id="CODEXORIGIN"+(codex_reloc_serial++);
+		var crumb=document.createTextNode("");
+		crumbs[node.id]=crumb;
 		if (baseclass) node.className=baseclass+" codexrelocated";
 		else node.className="codexrelocated";
-		node.setAttribute("data-codexorigin",id);
-		node.parentNode.replaceChild(origin,node);}
+		node.parentNode.replaceChild(crumb,node);}
 	    into.appendChild(node);
 	    return node;}
 	
-	// This moves a node onto a page, recreating its original DOM
-	// context on the new page.
-	function moveNodeToPage(node,page,dups){
+	// This moves a node onto a page, recreating (as far as
+	// possible) its original DOM context on the new page.
+	function moveNodeToPage(node,page,dups,crumbs){
 	    if ((!(page.getAttribute("data-topid")))&&
 		(node.id)&&(Codex.docinfo[node.id])) {
 		var info=Codex.docinfo[node.id];
@@ -333,28 +336,29 @@ var CodexLayout=
 		(parent.id==="CODEXCONTENT")||(parent.id==="CODEXROOT")||
 		(hasClass(parent,"codexroot"))||(hasClass(parent,"codexpage")))
 		// You don't need to dup the parent on the new page
-		return moveNode(node,page);
+		return moveNode(node,page,false,crumbs);
 	    else {
-		var dup_parent=dupContext(parent,page,dups);
-		return moveNode(node,dup_parent||page);}}
+		var dup_parent=dupContext(parent,page,dups,crumbs);
+		return moveNode(node,dup_parent||page,false,crumbs);}}
 
 	// Reverting layout
 
-	function restoreNode(node,info){
-	    var originid=node.getAttribute("data-codexorigin");
-	    var origin=((originid)&&document.getElementById(originid));
+	function restoreNode(node,info,crumbs,texts){
+	    var id=node.id;
+	    if (!(id)) return;
+	    var origin=crumbs[id];
 	    if (origin) {
+		var parent=origin.parentNode;
 		if (hasClass(node,/\bcodexwraptext\b/g)) {
 		    if (hasClass(node,/\bcodexwraptextsplit\b/g))
-			origin.parentNode.replaceChild(
-			    info.texts[originid],origin);
-		    else origin.parentNode.replaceChild(
-			node.childNodes[0],origin);}
+			parent.replaceChild(texts[id],origin);
+		    else parent.replaceChild(node.childNodes[0],origin);}
 		else origin.parentNode.replaceChild(node,origin);}
-	    dropClass(node,"codexrelocated");
-	    node.removeAttribute("data-codexorigin");}
+	    dropClass(node,"codexrelocated");}
 	
 	function revertLayout(layout) {
+	    var crumbs=layout.crumbs;
+	    var texts=layout.texts;
 	    var tweaked=TOA(
 		layout.container.getElementsByClassName("codextweaked"));
 	    if ((tweaked)&&(tweaked.length)) {
@@ -372,10 +376,13 @@ var CodexLayout=
 	    var moved=TOA(
 		layout.container.getElementsByClassName("codexrelocated"));
 	    if ((moved)&&(moved.length)) {
-		layout.logfn("Restoring original layout of %d relocated nodes and %d texts",
-			     moved.length);
+		layout.logfn(
+		    "Restoring original layout of %d nodes and %d texts",
+		    moved.length);
 		var i=0; var lim=moved.length;
-		while (i<lim) restoreNode(moved[i++],layout);}}
+		while (i<lim)
+		    restoreNode(moved[i++],layout,crumbs,texts);}
+	    layout.texts={}; layout.crumbs={};}
 	
 	function CodexLayout(init){
 	    if (!(init)) init={};
@@ -425,6 +432,9 @@ var CodexLayout=
 	    var pagenum=this.pagenum=0; // Tracks current page number
 	    var pages=this.pages=[]; // Array of all pages generated, in order
 	    var dups=this.dups={}; // Tracks nodes/contexts already duplicated
+	    // Maps IDs to text nodes left behind as placeholders when
+	    //  the original nodes were moved.
+	    var crumbs=this.crumbs={}; 
 	    var cur_root=this.root=false; // The root currently being added
 
 	    // Tracks text nodes which have been split, keyed by the
@@ -504,7 +514,7 @@ var CodexLayout=
 		// node might be transformed in some way when
 		// moved (if, for example, it is a text node, it
 		// might be split).
-		node=moveNodeToPage(root,page,dups);
+		node=moveNodeToPage(root,page,dups,crumbs);
 		
 		var ni=0, nblocks=blocks.length; 
 		    
@@ -550,7 +560,7 @@ var CodexLayout=
 			// page is empty.
 			layout.drag=drag=[];
 		    	newPage(block);}
-		    else moveNodeToPage(block,page,dups);
+		    else moveNodeToPage(block,page,dups,crumbs);
 		    // Finally, we check if everything fits We're
 		    // walking through the blocks[] but only
 		    // advance when an element fits or can't be
@@ -674,11 +684,12 @@ var CodexLayout=
 		    // them to the new page
 		    if ((drag)&&(drag.length)) {
 			var i=0; var lim=drag.length;
-			while (i<lim) moveNodeToPage(drag[i++],page,dups);
+			while (i<lim)
+			    moveNodeToPage(drag[i++],page,dups,crumbs);
 			layout.prev=prev=drag[drag.length-1];
 			layout.drag=drag=[];}
 		    // Finally, move the node to the page
-		    if (node) moveNodeToPage(node,page,dups);
+		    if (node) moveNodeToPage(node,page,dups,crumbs);
 
 		    return page;}
 
@@ -711,7 +722,7 @@ var CodexLayout=
 			if (node) logfn("Layout/%s %o at %o",newpage,page,node);
 			else logfn("Layout/%s %o",newpage,page);}
 		    
-		    if (node) moveNodeToPage(node,page,dups);
+		    if (node) moveNodeToPage(node,page,dups,crumbs);
 		    
 		    tweakBlock(node);
 
@@ -1119,12 +1130,12 @@ var CodexLayout=
 		var newpage=false;
 		if (!(spec)) return false;
 		else if (typeof spec === 'number')
-		    newpage=fdjtID(pageprefix+spec);
+		    newpage=document.getElementById(pageprefix+spec);
 		else if (spec.nodeType) {
 		    if (hasClass(spec,"codexpage")) newpage=spec;
 		    else newpage=getParent(spec,".codexpage");}
 		else if (typeof spec === "string")
-		    newpage=getPage(fdjtID(spec));
+		    newpage=getPage(document.getElementById(spec));
 		else {
 		    logfn("Can't determine page from %o",spec);
 		    return false;}
@@ -1136,7 +1147,8 @@ var CodexLayout=
 
 	    this.Revert=function(){
 		revertLayout(this);
-		pageScaleRevert(this.scaled);};
+		if (this.scaled)
+		    revertPageScaling(this.scaled);};
 
 	    /* Finally return the layout */
 
