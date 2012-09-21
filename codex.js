@@ -757,6 +757,9 @@ var CodexLayout=
 			newPage(node);
 			return node;}
 		    var page_break=node; var i=0; var n=children.length;
+		    // TODO: This should be modularized into a splitChildren
+		    //  function and a splitText function.
+
 		    // We add children back until we go over the edge,
 		    //  at which point we'll create a new page.
 		    //  page_break is where we need to break If
@@ -764,25 +767,30 @@ var CodexLayout=
 		    //  trying to split, it means that we can't split
 		    //  this node.
 		    while (i<n) {
-			var child=children[i++]; var nodetype=child.nodeType;
+			var child=children[i++];
+			var childtype=child.nodeType;
 			// Add the child back and get the geometry
 			node.appendChild(child); geom=getGeom(node,page);
 			if (geom.bottom>page_height) { // Over the edge
-			    if ((nodetype!==3)&&(!((hasContent(node,child,true)))))
+			    if ((childtype!==3)&&
+				(!((hasContent(node,child,true)))))
 				// If there's no content before the
 				// child (and it's not a text node
 				// that can be split), just quit,
 				// leaving page_break as the node
 				// we're trying to split itself.
 				break;
-			    else if ((nodetype!==3)&&(nodetype!==1)) {
+			    else if ((childtype!==3)&&(childtype!==1)) {
 				// This is probably an error, so stop trying
 				break;}
-			    // If it's either text or relocated text, try to break it
-			    else if ((nodetype===1)&&
+			    // If it's either text or relocated text,
+			    // try to break it
+			    else if ((childtype===1)&&
 				     (!(hasClass(child,"codexwraptext"))))
-				// If it's an element, just push it over; this
-				// could be more clever for inline elements
+				// If it's an element, just push it
+				// over, except for wrapped texts;
+				// this could be more clever for
+				// inline elements
 				page_break=child;
 			    else {
 				// If it's text, split it into words,
@@ -794,7 +802,7 @@ var CodexLayout=
 				// but we want to get the longest
 				// possible run of words because we
 				// want to avoid ragged lines
-				var text=((nodetype===3)?(child.nodeValue):
+				var text=((childtype===3)?(child.nodeValue):
 					  (child.firstChild.nodeValue));
 				var breaks=text.split(/\b/g), words=[];
 				var word=false; var probenode=child;
@@ -811,9 +819,38 @@ var CodexLayout=
 					    words.push(word+s); word=false;}}
 				    else word=word+s;}
 				if (word) words.push(word);
-				// If there's only one word, no splitting today,
-				//  just push the node itself onto the next page
-				if (words.length<2) {page_break=child; break;}
+				// If there aren't many words, don't
+				//  bother splitting and just push the
+				//  whole node onto the next page
+				if (words.length<7) {page_break=child; break;}
+				// Try to guess the line height in
+				// order to avoid windows or orphans
+				var line_height;
+				var use_page_height=page_height;
+				var first_word=
+				    document.createTextNode(words[0]);
+				// Remove the text we're splitting and
+				// replace it with the first word.
+				// Use the change in .bottom to
+				// estimate the line height.
+				node.removeChild(probenode);
+				var before=getGeom(node,page);
+				node.appendChild(first_word);
+				var after=getGeom(node,page);
+				node.replaceChild(probenode,first_word);
+				line_height=after.bottom-before.bottom;
+				if ((before.bottom+(line_height*2))>page_height) {
+				    page_break=child; break;}
+				else if ((geom.bottom-(line_height*2))<page_height)
+				    // Specifying a shorter page
+				    //  height here avoids orphans
+				    //  (single lines) on the next
+				    //  page.
+				    use_page_height=page_height-(line_height*2);
+				// Now we do a binary search to find
+				//  the word which pushes the node
+				//  below the page height.  That's
+				//  where we'll break.
 				var w=0; var wlen=words.length;
 				var wbreak=floor(wlen/2);
 				var foundbreak=false;
@@ -824,7 +861,7 @@ var CodexLayout=
 				    node.replaceChild(newprobe,probenode);
 				    probenode=newprobe;
 				    geom=getGeom(node,page);
-				    if (geom.bottom>page_height) {
+				    if (geom.bottom>use_page_height) {
 					wtop=wbreak;
 					wbreak=wbot+floor((wbreak-wbot)/2);}
 				    else {
@@ -833,7 +870,7 @@ var CodexLayout=
 					node.appendChild(nextw);
 					var ngeom=getGeom(node,page);
 					node.removeChild(nextw);
-					if (ngeom.bottom>page_height) {
+					if (ngeom.bottom>use_page_height) {
 					    foundbreak=true; break;}
 					else {
 					    wbot=wbreak+1;
@@ -861,7 +898,7 @@ var CodexLayout=
 			    	    fdjtDOM.insertAfter(keep,page_break);
 				    // Finally, we save texts which
 				    // we've split for later restoration
-				    if ((nodetype===1)&&
+				    if ((childtype===1)&&
 					(child.getAttribute("data-codexorigin"))) {
 					var originid=child.getAttribute("data-codexorigin");
 					textsplits[originid]=child.firstChild;}}}
