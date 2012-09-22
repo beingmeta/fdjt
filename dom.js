@@ -184,6 +184,16 @@ var fdjtDOM=
 	    else return false;}
 	fdjtDOM.parsePX=parsePX;
 
+	function getLineHeight(node){
+	    var style=getStyle(node);
+	    var lh=style.lineHeight, fs=style.fontSize;
+	    if (lh==="normal") return parsePX(fs);
+	    else if (lh.search(/px$/)>0) return parsePX(lh);
+	    else if (lh.search(/%$/)>0) 
+		return (parseFloat(lh.slice(0,-1))/100)*(parsePX(fs));
+	    else return parsePX(fs);}
+	fdjtDOM.getLineHeight=getLineHeight;
+
 	var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
 
 	var whitespace_pat=/(\s)+/;
@@ -675,6 +685,11 @@ var fdjtDOM=
 	    else fdjtLog.uhoh("Can't find %o to remove it",node);}
 	fdjtDOM.remove=remove_node;
 	
+	function removeChildren(node){
+	    var children=node.childNodes, n=children.length-1;
+	    while (n>=0) node.removeChild(children[n--]);}
+	fdjtDOM.removeChildren=removeChildren;
+
 	fdjtDOM.append=function (node) {
 	    if (typeof node === 'string') node=document.getElementById(node);
 	    domappend(node,arguments,1);};
