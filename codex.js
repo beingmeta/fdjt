@@ -289,20 +289,14 @@ var CodexLayout=
 	// a back pointer for restoration
 	function moveNode(arg,into,blockp,crumbs){
 	    var baseclass; var node=arg;
-	    // If we're moving a first child, we might as well move the parent
 	    if (hasParent(node,into)) return node;
-	    while ((node.parentNode)&&
-		   (node===getFirstContent(node.parentNode))&&
-		   (node.parentNode!==document.body)&&
-		   (node.parentNode!==Codex.content)&&
-		   (!(hasClass(node.parentNode,"codexpage"))))
-		node=node.parentNode;
 	    if (node.nodeType===1) baseclass=node.className;
 	    else if (node.nodeType===3) {
 		// Wrap text nodes in elements before moving
 		var wrapnode=fdjtDOM(
 		    ((blockp)?"div.codexwraptext":"span.codexwraptext"));
-		node.parentNode.replaceChild(wrapnode,node);
+		if (node.parentNode)
+		    node.parentNode.replaceChild(wrapnode,node);
 		wrapnode.appendChild(node);
 		baseclass="codexwraptext";
 		node=wrapnode;}
@@ -332,6 +326,13 @@ var CodexLayout=
 		page.setAttribute("data-sbookloc",info.starts_at);}
 	    if (hasParent(node,page)) return node;
 	    var parent=node.parentNode;
+	    // If we're moving a first child, we might as well move the parent
+	    while ((parent)&&
+		   (parent!==document.body)&&
+		   (parent!==Codex.content)&&
+		   (!(hasClass(parent,"codexpage")))&&
+		   (node===getFirstContent(parent))) {
+		node=parent; parent=parent.parentNode;}
 	    if ((!(parent))||(parent===document.body)||
 		(parent.id==="CODEXCONTENT")||(parent.id==="CODEXROOT")||
 		(hasClass(parent,"codexroot"))||(hasClass(parent,"codexpage")))
@@ -656,9 +657,13 @@ var CodexLayout=
 			while (i<lim) fullPage(float_pages[i++]);
 			float_pages=[];}
 		    var newpage="pagetop";
-		    if ((node)&&(node.nodeType===3)&&
-			(node.parentNode.childNodes.length===1))
-			node=node.parentNode;
+		    if ((node)&&(node.nodeType===3)) {
+			var parent=node.parentNode;
+			if ((parent)&&(parent.childNodes.length===1)&&
+			    (parent!==document.body)&&
+			    (parent!==Codex.content)&&
+			    (!(hasClass(parent,"codexpage"))))
+			    node=parent;}
 		    if ((!(node))||(needNewPage(node))) {
 			// If we really need to create a new page, do so,
 			//  starting by dropping the curpage class from the
@@ -732,16 +737,22 @@ var CodexLayout=
 
 		    return page;}
 
+		var getLineHeight=fdjtDOM.getLineHeight;
+
 		// This gets a little complicated
 		function splitBlock(node){
-		    if ((!(break_blocks))||(avoidBreakInside(node))) {
+		    if ((!(break_blocks))||(avoidBreakInside(node))||
+			(!(node.childNodes))||(node.childNodes.length===0)) {
 			// Simplest case, if we can't split, we just
-			// make a new page
+			// make a new page starting with the node.
 			addClass(node,"codexcantsplit");
 			newPage(node);
 			return node;}
 		    // Otherwise, we remove all of the node's children
-		    // and then add them back bit by bit.
+		    // and then add back just enough to reach the
+		    // edge, potentially splitting some children to
+		    // make this work.
+		    var line_height=getLineHeight(node)||12;
 		    var children=TOA(node.childNodes);
 		    var i=children.length-1;
 		    while (i>=0) node.removeChild(children[i--]);
@@ -756,172 +767,200 @@ var CodexLayout=
 			addClass(node,"codexcantsplit");
 			newPage(node);
 			return node;}
-		    var page_break=node; var i=0; var n=children.length;
-		    // TODO: This should be modularized into a splitChildren
-		    //  function and a splitText function.
-
-		    // We add children back until we go over the edge,
-		    //  at which point we'll create a new page.
-		    //  page_break is where we need to break If
-		    //  page_break is the same as the node we're
-		    //  trying to split, it means that we can't split
-		    //  this node.
-		    while (i<n) {
-			var child=children[i++];
-			var childtype=child.nodeType;
-			// Add the child back and get the geometry
-			node.appendChild(child); geom=getGeom(node,page);
-			if (geom.bottom>page_height) { // Over the edge
-			    if ((childtype!==3)&&
-				(!((hasContent(node,child,true)))))
-				// If there's no content before the
-				// child (and it's not a text node
-				// that can be split), just quit,
-				// leaving page_break as the node
-				// we're trying to split itself.
-				break;
-			    else if ((childtype!==3)&&(childtype!==1)) {
-				// This is probably an error, so stop trying
-				break;}
-			    // If it's either text or relocated text,
-			    // try to break it
-			    else if ((childtype===1)&&
-				     (!(hasClass(child,"codexwraptext"))))
-				// If it's an element, just push it
-				// over, except for wrapped texts;
-				// this could be more clever for
-				// inline elements
-				page_break=child;
-			    else {
-				// If it's text, split it into words,
-				// then replace the child with
-				// 'probenode's containing
-				// progressively longer and longer
-				// strings.  It would be nice to use
-				// some kind of binary search here,
-				// but we want to get the longest
-				// possible run of words because we
-				// want to avoid ragged lines
-				var text=((childtype===3)?(child.nodeValue):
-					  (child.firstChild.nodeValue));
-				var breaks=text.split(/\b/g), words=[];
-				var word=false; var probenode=child;
-				var bi=0, blen=breaks.length;
-				if (blen<2) {page_break=child; break;}
-				while (bi<blen) {
-				    var s=breaks[bi++]; var ws;
-				    if (!(word)) word=s;
-				    else if ((ws=s.search(/\s/))>=0) {
-					if (ws===0) {
-					    words.push(word);
-					    if (bi<blen) word=s+breaks[bi++];}
-					else {
-					    words.push(word+s); word=false;}}
-				    else word=word+s;}
-				if (word) words.push(word);
-				// If there aren't many words, don't
-				//  bother splitting and just push the
-				//  whole node onto the next page
-				if (words.length<7) {page_break=child; break;}
-				// Try to guess the line height in
-				// order to avoid windows or orphans
-				var line_height;
-				var use_page_height=page_height;
-				var first_word=
-				    document.createTextNode(words[0]);
-				// Remove the text we're splitting and
-				// replace it with the first word.
-				// Use the change in .bottom to
-				// estimate the line height.
-				node.removeChild(probenode);
-				var before=getGeom(node,page);
-				node.appendChild(first_word);
-				var after=getGeom(node,page);
-				node.replaceChild(probenode,first_word);
-				line_height=after.bottom-before.bottom;
-				if ((before.bottom+(line_height*2))>page_height) {
-				    page_break=child; break;}
-				else if ((geom.bottom-(line_height*2))<page_height)
-				    // Specifying a shorter page
-				    //  height here avoids orphans
-				    //  (single lines) on the next
-				    //  page.
-				    use_page_height=page_height-(line_height*2);
-				// Now we do a binary search to find
-				//  the word which pushes the node
-				//  below the page height.  That's
-				//  where we'll break.
-				var w=0; var wlen=words.length;
-				var wbreak=floor(wlen/2);
-				var foundbreak=false;
-				var wtop=wlen; var wbot=0;
-				while ((wbreak>=wbot)&&(wbreak<wtop)) {
-				    var newprobe=document.createTextNode(
-					words.slice(0,wbreak).join(""));
-				    node.replaceChild(newprobe,probenode);
-				    probenode=newprobe;
-				    geom=getGeom(node,page);
-				    if (geom.bottom>use_page_height) {
-					wtop=wbreak;
-					wbreak=wbot+floor((wbreak-wbot)/2);}
-				    else {
-					var nextw=document.createTextNode(
-					    words[wbreak+1]);
-					node.appendChild(nextw);
-					var ngeom=getGeom(node,page);
-					node.removeChild(nextw);
-					if (ngeom.bottom>use_page_height) {
-					    foundbreak=true; break;}
-					else {
-					    wbot=wbreak+1;
-					    wbreak=wbreak+
-						floor((wtop-wbreak)/2);}}}
-				if (wbreak+1===wtop) foundbreak=true;
-				// We're done searching for the word break
-				if ((wbreak===0)||(wbreak===wlen-1)) {
-				    // If we didn't find anything, put
-				    // the child back and make it into
-				    // the page break
-				    node.replaceChild(child,probenode);
-				    page_break=child;
-				    break;}
-				else { // Do the split
-				    drag=[];
-				    page_break=document.createTextNode(
-					// This is the text pushed onto the new page
-					words.slice(wbreak).join(""));
-				    var keep=document.createTextNode(
-					words.slice(0,wbreak).join(""));
-				    // We replace the probe node with 'keep'
-				    node.replaceChild(keep,probenode);
-				    // And insert the page break after 'keep'
-			    	    fdjtDOM.insertAfter(keep,page_break);
-				    // Finally, we save texts which
-				    // we've split for later restoration
-				    if ((childtype===1)&&
-					(child.getAttribute("data-codexorigin"))) {
-					var originid=child.getAttribute("data-codexorigin");
-					textsplits[originid]=child.firstChild;}}}
-			    break;}
-			else continue;}
-		    // Finally, we create a new page
-		    newPage(page_break);
-		    if (page_break===node) {
-			// If we couldn't find an internal page_break, this node can't be split
+		    else if ((geom.top+(line_height*2))>page_height) {
+			// If the top is too close to the bottom
+			//  of the page, just push it over.
+			i=0; var n=children.length;
+			while (i<n) node.appendChild(children[i++]);
+			newPage(node);
+			return node;}
+		    var push=splitChildren(node,children,geom,line_height);
+		    if (!(push)) {
+			/* Doesn't need to be split after all.
+			   Not sure when this will happen, if ever. */
+			fdjtLog(
+			    "Tried to break %o which didn't need breaking",
+			    node);
+			i=0; var n=children.length;
+			while (i<n) {
+			    var child=children[i++];
+			    if (child) node.appendChild(child);}
+			return node;}
+		    else if (push===node) {
+			i=0; var n=children.length;
+			while (i<n) {
+			    var child=children[i++];
+			    if (child) node.appendChild(child);}
 			addClass(node,"codexcantsplit");
-			if (trace) logfn("Layout/cantBreak %o onto %o",node,page);}
-		    else if (page_break!==node) {
+			newPage(node);
+			return node;}
+		    else { 
+			var page_break=push[0]; i=1; n=push.length;
+			// Finally, we create a new page
+			newPage(page_break);
 			var dup=page_break.parentNode;
 			// This (dup) is the copied parent of the page
 			// break.  We append all the remaining children
 			// to this duplicated parent on the new page.
-			while (i<n) dup.appendChild(children[i++]);
+			while (i<n) dup.appendChild(push[i++]);
 			if (trace>1)
 			    logfn("Layout/splitBlock %o @ %o into %o on %o",
-				  node,page_break,dup,page);}
-		    else {}
-		    return dup;}
+				  node,page_break,dup,page);
+			return dup;}}
 
+		function isTextyNode(node){
+		    return ((node.childNodes)&&
+			    (node.childNodes.length===1)&&
+			    (node.childNodes[0].nodeType===3));}
+
+		var removeChildren=fdjtDOM.removeChildren;
+
+		function splitChildren(node,children,init_geom,line_height){
+		    /* node is a node and children are its children,
+		       which have been removed from it.  We return an
+		       array of children which should go onto the next
+		       page, possibly synthesizing a new child by
+		       splitting some text.  */
+		    var page_break=node; var use_page_height=page_height;
+		    var geom=init_geom||getGeom(node,page);
+		    if (!(line_height))
+			line_height=getLineHeight(node)||12;
+		    if ((geom.bottom-(line_height*2))<page_height)
+			/* If the node is just a little bit over the
+			   bottom, we tweak the page height to avoid
+			   leaving single lines on the other side. */
+			use_page_height=page_height-line_height;
+		    // We add children back until we go over the edge
+		    // and then figure out if there's a way to split
+		    // the child that broke the page.
+		    var i=0, n=children.length, childtype=false;
+		    while (i<n) {
+			var child=children[i++];
+			childtype=child.nodeType;
+			// Add the child back and get the geometry
+			node.appendChild(child); geom=getGeom(node,page);
+			if (geom.bottom>use_page_height) {
+			    page_break=child; break;}
+			else continue;}
+		    if (page_break===node) // Never went over the edge
+			return false;
+		    // This child pushed the node over the edge
+		    else if ((childtype!==3)&&(childtype!==1)) {
+			// This is probably an error
+			if (i===1) return node;
+			else return children.slice(i-1);}
+		    else if ((childtype===1)&&
+			     (!((hasContent(node,child,true)))))
+			// This indicates that the whole node should
+			// be pushed
+			return node;
+		    else if ((childtype===1)&&
+			     ((!(child.childNodes))||
+			      ((child.childNodes.length===0))||
+			      (!(isTextyNode(child))))) {
+                        // We don't try to break nodes that don't have
+                        // children or (for now) nodes that have non
+                        // textual children.
+			if (i===1) return node;
+			else return children.slice(i-1);}
+		    // If it's text, split it into words, then try to
+		    // find the length at which one more word pushes
+		    // it over the edge.
+		    var probenode=page_break, text=false;
+		    var original=page_break, outer=node;
+		    if (childtype===1) {
+			probenode=original=page_break.firstChild;
+			outer=page_break;
+			text=probenode.nodeValue;}
+		    else text=page_break.nodeValue;
+		    // Now, break the text up at possible page breaks
+		    var breaks=text.split(/\b/g), words=[], word=false;
+		    var bi=0, blen=breaks.length;
+		    while (bi<blen) {
+			var s=breaks[bi++]; var ws;
+			if ((ws=s.search(/\s/))>=0) { /* Includes whitespace */
+			    if (ws===0) { /* Starts with whitespace */
+				if (word) words.push(word);
+				if (bi<blen) word=s+breaks[bi++];
+				else word=s;}
+			    else {
+				if (word) words.push(word+s);
+				else words.push(s);
+				word=false;}}
+			else if (word) word=word+s;
+			else word=s;}
+		    if (word) words.push(word);
+		    // If there aren't many words, don't bother
+		    //  splitting and just push the whole node onto
+		    //  the next page
+		    if (words.length<2) {
+			if (i===1) return node;
+			else return children.slice[i-1];}
+		    // Now we do a binary search to find the word
+		    //  which pushes the node below the page height.
+		    //  That's where we'll break.
+		    var w=0; var wlen=words.length;
+		    var wbreak=floor(wlen/2);
+		    var foundbreak=false;
+		    var wtop=wlen; var wbot=0;
+		    while ((wbreak>=wbot)&&(wbreak<wtop)) {
+			var newprobe=document.createTextNode(
+			    words.slice(0,wbreak).join(""));
+			node.replaceChild(newprobe,probenode);
+			probenode=newprobe;
+			geom=getGeom(node,page);
+			if (geom.bottom>use_page_height) {
+			    wtop=wbreak;
+			    wbreak=wbot+floor((wbreak-wbot)/2);}
+			else {
+			    var nextw=document.createTextNode(
+				words[wbreak+1]);
+			    node.appendChild(nextw);
+			    var ngeom=getGeom(node,page);
+			    node.removeChild(nextw);
+			    if (ngeom.bottom>use_page_height) {
+				foundbreak=true; break;}
+			    else {
+				wbot=wbreak+1;
+				wbreak=wbreak+
+				    floor((wtop-wbreak)/2);}}}
+		    if (wbreak+1===wtop) foundbreak=true;
+		    // We're done searching for the word break
+		    if ((wbreak===0)||(wbreak===wlen-1)) {
+			// If the break is at the beginning or end
+			// use the page_break as a whole
+			node.replaceChild(page_break,probenode);
+			if (i===1) return node;
+			else return children.slice[i-1];}
+		    else { // Do the split
+			var keeptext=words.slice(0,wbreak).join("");
+			var pushtext=words.slice(wbreak).join("");
+			var keepnode, pushnode, id=false;
+			if ((page_break.nodeType===1)&&
+			    (hasClass(page_break,"codextextsplit"))) {}
+			else if (page_break.nodeType===1) {
+			    if (!(id=page_break.id))
+				page_break.id=id="CODEXTMPID"+(tmpid_count++);
+			    keepnode=page_break;
+			    pushnode=page_break.cloneNode(true);}
+			else {
+			    keepnode=fdjtDOM("span.codexsplitstart");
+			    keepnode.id=id="CODEXTMPID"+(tmpid_count++);
+			    pushnode=fdjtDOM("span.codextextsplit");}
+			removeChildren(keepnode);
+			removeChildren(pushnode);
+			keepnode.appendChild(
+			    document.createTextNode(keeptext));
+			pushnode.appendChild(
+			    document.createTextNode(pushtext));
+			node.replaceChild(keepnode,probenode);
+			node.appendChild(pushnode);
+			var move_children=children.slice(i-1);
+			while (i<n) node.appendChild(children[i++]);
+			move_children[0]=pushnode;
+			if (id) textsplits[id]=original;
+			return move_children;}}
+	
 		// This uses lots of tricks (mostly CSS3) to get a
 		// page to fit after subdivision based layout which
 		// hasn't yielded adequate results
