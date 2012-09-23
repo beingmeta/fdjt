@@ -869,6 +869,11 @@ var CodexLayout=
 		    var probenode=page_break, text=false;
 		    var original=page_break, outer=node;
 		    if (childtype===1) {
+			// This is the case where it's an inline
+			//  element rather than a text object.  In
+			//  this case, we do our probing on the
+			//  element rather than the top level node
+			//  that we're considering.
 			probenode=original=page_break.firstChild;
 			outer=page_break;
 			text=probenode.nodeValue;}
@@ -906,30 +911,33 @@ var CodexLayout=
 		    while ((wbreak>=wbot)&&(wbreak<wtop)) {
 			var newprobe=document.createTextNode(
 			    words.slice(0,wbreak).join(""));
-			node.replaceChild(newprobe,probenode);
+			outer.replaceChild(newprobe,probenode);
 			probenode=newprobe;
 			geom=getGeom(node,page);
 			if (geom.bottom>use_page_height) {
+			    /* Already over, wrap back */
 			    wtop=wbreak;
 			    wbreak=wbot+floor((wbreak-wbot)/2);}
 			else {
+			    /* Add one more work to see if we break the page. */
 			    var nextw=document.createTextNode(
 				words[wbreak+1]);
-			    node.appendChild(nextw);
+			    outer.appendChild(nextw);
 			    var ngeom=getGeom(node,page);
-			    node.removeChild(nextw);
+			    outer.removeChild(nextw);
 			    if (ngeom.bottom>use_page_height) {
 				foundbreak=true; break;}
 			    else {
 				wbot=wbreak+1;
-				wbreak=wbreak+
-				    floor((wtop-wbreak)/2);}}}
+				wbreak=wbreak+floor((wtop-wbreak)/2);}}}
 		    if (wbreak+1===wtop) foundbreak=true;
 		    // We're done searching for the word break
 		    if ((wbreak===0)||(wbreak===wlen-1)) {
 			// If the break is at the beginning or end
 			// use the page_break as a whole
-			node.replaceChild(page_break,probenode);
+			if (childtype===1)
+			    outer.replaceChild(original,probenode);
+			else node.replaceChild(page_break,probenode);
 			if (i===1) return node;
 			else return children.slice[i-1];}
 		    else { // Do the split
@@ -937,7 +945,9 @@ var CodexLayout=
 			var pushtext=words.slice(wbreak).join("");
 			var keepnode, pushnode, id=false;
 			if ((page_break.nodeType===1)&&
-			    (hasClass(page_break,"codextextsplit"))) {}
+			    (hasClass(page_break,"codextextsplit"))) {
+			    keepnode=page_break;
+			    pushnode=page_break.cloneNode(true);}
 			else if (page_break.nodeType===1) {
 			    if (!(id=page_break.id))
 				page_break.id=id="CODEXTMPID"+(tmpid_count++);
@@ -953,7 +963,9 @@ var CodexLayout=
 			    document.createTextNode(keeptext));
 			pushnode.appendChild(
 			    document.createTextNode(pushtext));
-			node.replaceChild(keepnode,probenode);
+			if (childtype===3)
+			    node.replaceChild(keepnode,probenode);
+			else node.replaceChild(keepnode,page_break);
 			node.appendChild(pushnode);
 			var move_children=children.slice(i-1);
 			while (i<n) node.appendChild(children[i++]);
