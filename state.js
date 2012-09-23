@@ -54,7 +54,7 @@ var fdjtState=
 	function getCookie(name,parse){
 	    try {
 		var cookies=document.cookie;
-		var namepat=new RegExp("(^|(; ))"+name+"=");
+		var namepat=new RegExp("(^|(; ))"+name+"=","g");
 		var pos=cookies.search(namepat);
 		var valuestring;
 		if (pos>=0) {
