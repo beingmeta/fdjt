@@ -276,9 +276,10 @@ fdjtUI.Highlight=(function(){
 	    var i=0, lim=others.length;
 	    while (i<lim) {
 		var other=others[i++];
-		if (other.form!==form) continue;
+		if (other===target) continue;
+		else if (other.form!==form) continue;
 		else if (other.type !== 'radio') continue;
-		var ocs=fdjtDOM.getParent(target,'.checkspan');
+		var ocs=fdjtDOM.getParent(other,'.checkspan');
 		dropClass(ocs,"ischecked");}}}
     fdjtUI.CheckSpan.changed=changed;    
 
