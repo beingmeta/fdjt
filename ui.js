@@ -227,7 +227,7 @@ fdjtUI.Highlight=(function(){
 	if ((changed)&&(checkbox.type==='radio')) {
 	    var form=checkbox.form;
 	    var name=checkbox.name;
-	    var tosync=fdjtDOM.getChildren(form,'input');
+	    var tosync=getChildren(form,'input');
 	    var i=0; var lim=tosync.length;
 	    while (i<lim) {
 		var input=tosync[i++];
@@ -266,10 +266,20 @@ fdjtUI.Highlight=(function(){
 	evt=evt||event;
 	var target=fdjtUI.T(evt);
 	if ((target.type==='radio')||(target.type==='checkbox')) {
-	    var checkspan=fdjtDOM.getParent(target,'.checkspan');
+	    var checkspan=getParent(target,'.checkspan');
 	    if (checkspan)
-		((target.checked)?(fdjtDOM.addClass):(fdjtDOM.dropClass))(
-		    checkspan,"ischecked");}}
+		((target.checked)?(addClass):(dropClass))(
+		    checkspan,"ischecked");}
+	if (target.type==='radio') {
+	    var form=target.form;
+	    var others=document.getElementsByName(target.name);
+	    var i=0, lim=others.length;
+	    while (i<lim) {
+		var other=others[i++];
+		if (other.form!==form) continue;
+		else if (other.type !== 'radio') continue;
+		var ocs=fdjtDOM.getParent(target,'.checkspan');
+		dropClass(ocs,"ischecked");}}}
     fdjtUI.CheckSpan.changed=changed;    
 
     })();
