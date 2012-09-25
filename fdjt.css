@@ -50,6 +50,26 @@ th .checkspan, th.checkspan { font-weight: normal;}
 th .checkspan.ischecked, th .checkspan[checked] { font-weight: bold;}
 th.checkspan.ischecked, th.checkspan[checked] { font-weight: bold;}
 
+/* Check blocks */
+
+div.checkblock {  text-align: left; margin-top: 0.5em;}
+td div.checkblock { margin-top: 0px; }
+div.checkblock > table { display: none; }
+ul.checkblock > li, ol.checkblock > li { display: none; }
+div.checkblock > p {
+   margin-left: 5em; text-indent: -3em;
+   margin-top: 0px; margin-bottom: 0px; font-size: 80%;
+   display: none;}
+div.checkblock > p:first-child {
+   margin-left: 3em; text-indent: -3em; display: block;}
+.checkblock.checkspan.ischecked > p { font-weight: normal; }
+.checkblock.checkspan.ischecked > p:first-child {
+   font-weight: bold; }
+div.checkblock.ischecked > p { display: block; }
+div.checkblock.ischecked > table { display: table; }
+ul.checkblock.ischecked >  li { display: list-item; }
+ol.checkblock.ischecked >  li { display: list-item; }
+
 /* Autoprompt classes */
 
 input.autoprompt { font-family: sans,sans-serif; }
