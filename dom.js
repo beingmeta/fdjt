@@ -2029,11 +2029,11 @@ var fdjtDOM=
 		var absloc=loc+off;
 		var start=get_text_pos(node,absloc,0);
 		var end=get_text_pos(node,absloc+match[0].length,0);
-		if ((start>=0)&&(end>start)) {
-		    var range=document.createRange();
-		    range.setStart(start.node,start.off);
-		    range.setEnd(end.node,end.off);
-		    results.push(range);}
+		if ((!start)||(!end)) return false;
+		var range=document.createRange();
+		range.setStart(start.node,start.off);
+		range.setEnd(end.node,end.off);
+		results.push(range);
 		count--;
 		off=match.index+match[0].length;
 		scan=scan.slice(off);}
