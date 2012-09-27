@@ -28,11 +28,23 @@ var fdjtAjax=
 	    if (base_uri[-1]==='&') need_amp=false;
 	    else if (base_uri.indexOf('?')>=0) need_amp=true;
 	    else uri=base_uri+"?";
-	    var i=0; while (i<args.length) {
-		if (!(args[i])) {i=i+2; continue;}
-		uri=uri+((need_amp) ? ("&") : (""))+args[i]+"="+args[i+1];
-		need_amp=true;
-		i=i+2;}
+	    if (typeof args === 'string')
+		uri=uri+((need_amp) ? ("&") : (""))+args;
+	    else if (args.length) {
+		var i=0; while (i<args.length) {
+		    if (!(args[i])) {i=i+2; continue;}
+		    uri=uri+((need_amp) ? ("&") : (""))+
+			encodeURIComponent(args[i])+
+			"="+encodeURIComponent(args[i+1]);
+		    need_amp=true;
+		    i=i+2;}}
+	    else {
+		for (var key in args) {
+		    if (args.hasOwnProperty(key)) {
+			uri=uri+((need_amp) ? ("&") : (""))+
+			    encodeURIComponent(key)+
+			    "="+encodeURIComponent(args[key]);
+			need_amp=true;}}}
 	    return uri;}
 
 	var trace_ajax=false;
