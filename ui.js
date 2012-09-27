@@ -248,17 +248,17 @@ fdjtUI.Highlight=(function(){
     function checkspan_onclick(evt) {
 	evt=evt||event;
 	var target=evt.target||evt.srcTarget;
-	var input=getParent(target,"input");
-	if ((input)&&
-	    ((input.type==='CHECKBOX')||
-	     (input.type==='RADIO'))) {
-	    fdjtUI.cancel(evt);
-	    setTimeout(function(){checkspan_set(target);},100);
-	    return false;}
-	else if (input) return false;
-	else {
-	    checkspan_set(target);
-	    fdjtUI.cancel(evt);}
+	if ((target.tagName==='TEXTAREA')||
+	    (target.tagName==='SELECT')||
+	    (target.tagName==='OPTION')||
+	    ((target.tagName==='INPUT')&&
+	     (!((target.type==='checkbox')||
+		(target.type==='radio')))))
+	    return;
+	var checkspan=getParent(target,".checkspan");
+	if (!(checkspan)) return;
+	var checked=hasClass(checkspan,"ischecked");
+	checkspan_set(target,(!(checked)));
 	return false;}
     fdjtUI.CheckSpan.onclick=checkspan_onclick;    
 
@@ -281,9 +281,25 @@ fdjtUI.Highlight=(function(){
 		else if (other.type !== 'radio') continue;
 		var ocs=fdjtDOM.getParent(other,'.checkspan');
 		dropClass(ocs,"ischecked");}}}
-    fdjtUI.CheckSpan.changed=changed;    
+    fdjtUI.CheckSpan.changed=changed;
 
-    })();
+    function initCheckspans(){
+	var checkspans=document.getElementsByClassName("checkspan");
+	var i=0, lim=checkspans.length;
+	while (i<lim) {
+	    var checkspan=checkspans[i++];
+	    var inputs=fdjtDOM.getInputs(checkspan);
+	    var j=0, jlim=inputs.length;
+	    while (j<jlim) {
+		var input=inputs[j++];
+		if ((input.type==='radio')||(input.type==='checkspan')) {
+		    if (input.checked) addClass(checkspan,"ischecked");
+		    break;}}}}
+    fdjtUI.CheckSpan.initCheckspans=initCheckspans;
+
+    fdjtDOM.addInit(initCheckspans,"CheckSpans",false);
+
+})();
 
 
 /* Progress boxes */
