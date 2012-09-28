@@ -1833,7 +1833,7 @@ var fdjtDOM=
 	    while (i<lim) inits[i++]();
 	    inits_run=true;};
 	
-	fdjtDOM.addInit=function(fcn,name,runagain){
+	function addInit(fcn,name,runagain){
 	    var replace=((name)&&(init_names[name]));
 	    var i=0, lim=inits.length;
 	    while (i<lim) {
@@ -1850,7 +1850,8 @@ var fdjtDOM=
 		else if (inits[i]===fcn) return;
 		else i++;}
 	    inits.push(fcn);
-	    if (name) init_names[name]=fcn;};
+	    if (name) init_names[name]=fcn;}
+	fdjtDOM.addInit=addInit;
 
 	if ((typeof fdjt_init === 'undefined')||(!(fdjt_init)))
 	    fdjtDOM.addListener(window,"load",fdjtDOM.init);
@@ -2040,54 +2041,28 @@ var fdjtDOM=
 	    return results;}
 	fdjtDOM.findMatches=findMatches;
 
-	var docuri=false; var docbase=false;
-	function init_docuri(){
-	    if (docuri) return;
-	    docuri=getLink("refuri")||getLink("canonical")||
-		document.location.href;
-	    docbase=getMeta("baseid");}
+	var custom_input_types=
+	    ["email","number","range","tel",
+	     "datetime","datetime-local","date","time","week","month"];
+
+	function setupCustomInputs(dom){
+	    if (!(dom)) dom=document.body;
+	    var input_elt=document.createElement("input");
+	    var i=0, ntypes=custom_input_types.length;
+	    while (i<ntypes) {
+		var typename=custom_input_types[i++];
+		input_elt.type=typename;
+		if (input_elt.type===typename) {
+		    var inputs=dom.getElementsByClassName(
+			"fdjt"+typename+"input");
+		    var j=0, lim=inputs.length;
+		    while (j<lim) {
+			var input=inputs[j++];
+			if (input.tagName!=="INPUT") continue;
+			input.type=typename;}}}}
+	fdjtDOM.setupCustomInputs=setupCustomInputs;
 	
-	function getAssignedIDs(node){
-	    var refuris=[];
-	    var baseids=[];
-	    var scan=node;
-	    var refuri=false;
-	    while (scan) {
-		if ((scan)&&(scan.getAttribute)&&
-		    ((refuri=scan.getAttribute("data-refuri"))||
-		     (refuri=scan.getAttribute("refuri")))) {
-		    var baseid=scan.getAttribute("data-baseid")||
-			scan.getAttribute("baseid")||
-			false;
-		    refuris.push(refuri); baseids.push(baseid);
-		    scan=scan.parentNode;}
-		else scan=scan.parentNode;}
-	    var link=getLink("refuri")||getLink("canonical");
-	    var base=getLink("baseid");
-	    if (docuri) init_docuri();
-	    refuris.push(docuri);
-	    baseids.push(docbase);
-	    var ids=[];
-	    if (node.id) ids.push(node.id);
-	    if (node.childNodes) {
-		var children=node.childNodes, child;
-		var i=0; var lim=children.length;
-		while (i<lim) {
-		    if (((child=children[i++]).nodeType===1)&&
-			(child.tagName==='A')) {
-			if (child.name) ids.push(child.name);
-			else if (child.id) ids.push(child.id);}}}
-	    var refs=[];
-	    var i=0; var lim=ids.length;
-	    while (i<lim) {
-		var id=ids[i++];
-		var j=0; var jlim=refuris.length;
-		while (j<jlim) {
-		    if ((!(baseids[j]))||
-			(id.search(baseids[j])===0))
-			refs.push(refuris[j]+"#"+id);
-		    j++;}}
-	    return refs;}
+	addInit(setupCustomInputs,"custominputs");
 
 	fdjtDOM.getParaHash=function(node){
 	    return paraHash(textify(node));}
