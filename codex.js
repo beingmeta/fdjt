@@ -359,7 +359,7 @@ var CodexLayout=
 	
 	function revertLayout(layout) {
 	    var crumbs=layout.crumbs;
-	    var texts=layout.texts;
+	    var textsplits=layout.textsplits;
 	    var tweaked=TOA(
 		layout.container.getElementsByClassName("codextweaked"));
 	    if ((tweaked)&&(tweaked.length)) {
@@ -374,6 +374,20 @@ var CodexLayout=
 	    var cantsplit=TOA(
 		layout.container.getElementsByClassName("codextweaked"));
 	    dropClass(cantsplit,"codexcantsplit");
+	    var split=TOA(
+		layout.container.getElementsByClassName("codexsplitstart"));
+	    var i=0, lim=split.length;
+	    while (i<lim) {
+		var node=split[i++];
+		var nodeid=node.id;
+		var text=textsplits[nodeid];
+		node.parentNode.replaceChild(text,node);}
+	    var shards=TOA(
+		layout.container.getElementsByClassName("codextextsplit"));
+	    var i=0, lim=shards.length;
+	    while (i<lim) {
+		var node=shards[i++];
+		node.parentNode.removeChild(node);}
 	    var moved=TOA(
 		layout.container.getElementsByClassName("codexrelocated"));
 	    if ((moved)&&(moved.length)) {
@@ -382,8 +396,8 @@ var CodexLayout=
 		    moved.length);
 		var i=0; var lim=moved.length;
 		while (i<lim)
-		    restoreNode(moved[i++],layout,crumbs,texts);}
-	    layout.texts={}; layout.crumbs={};}
+		    restoreNode(moved[i++],layout,crumbs,textsplits);}
+	    layout.textsplits={}; layout.crumbs={};}
 	
 	function CodexLayout(init){
 	    if (!(init)) init={};
