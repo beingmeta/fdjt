@@ -506,9 +506,14 @@ var fdjtKB=
 	fdjtKB.Set=Set;
 
 	function setify(array) {
-	    if (array._sortlen===array.length) return array;
+	    var len;
+	    if (array._sortlen===(len=array.length)) return array;
 	    // else if ((array._sortlen)&&(array._sortlen>1))
-	    else if (array.length===0) return array;
+	    else if (len===0) return array;
+	    else if (len===1) {
+		array._sortlen=1;
+		array._allstrings=(typeof array[0] === 'string');
+		return array;}
 	    else {
 		var allstrings=true;
 		for (elt in array)
@@ -518,10 +523,10 @@ var fdjtKB=
 		else array.sort(set_sortfn);
 		var read=1; var write=1; var lim=array.length;
 		var cur=array[0];
-		while (read<lim)
+		while (read<lim) {
 		    if (array[read]!==cur) {
-			cur=array[read++]; write++;}
-		else read++;
+			array[write++]=cur=array[read++];}
+		    else read++;}
 		array._sortlen=array.length=write;
 		return array;}}
 	
