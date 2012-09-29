@@ -2051,7 +2051,7 @@ var fdjtDOM=
 	    var i=0, ntypes=custom_input_types.length;
 	    while (i<ntypes) {
 		var typename=custom_input_types[i++];
-		input_elt.type=typename;
+		try {input_elt.type=typename;} catch {}
 		if (input_elt.type===typename) {
 		    var inputs=dom.getElementsByClassName(
 			"fdjt"+typename+"input");
