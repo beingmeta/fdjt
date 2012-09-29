@@ -831,6 +831,17 @@ var fdjtDOM=
 		else results.push(input);}
 	    return results;}
 	fdjtDOM.getInputsFor=getInputsFor;
+	fdjtDOM.getInputFor=function(root,name,value){
+	    var results=getInputsFor(root,name||false,value||false);
+	    if ((results)&&(results.length===1))
+		return results[0];
+	    else if ((results)&&(results.length)) {
+		fdjtLog.warn(
+		    "Ambiguous input reference name=%o type=%o under %o",
+		    name,type,root);
+		return results[0];}
+	    else return false;};
+
 
 	/* Getting style information generally */
 
