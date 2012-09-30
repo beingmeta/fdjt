@@ -246,21 +246,17 @@ var fdjtKB=
 		term=arg.slice(0,atpos);}
 	    else if (arg.search(uuid_pattern)===0) {
 		var uuid_type=arg.slice(34);
-		pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);}
+		pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type)||pool;}
 	    else if ((arg[0]==='#')&&(arg[1]==='U')&&
 		     (arg.search(uuid_pattern)===2)) {
 		var uuid_type=arg.slice(36);
-		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
-		term=arg.slice(3);
-		if (pool) return pool.ref(uuid);
-		return false;}
+		pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type)||pool;
+		term=arg.slice(3);}
 	    else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[2]==='U')&&
 		     (arg.search(uuid_pattern)===3)) {
 		var uuid_type=arg.slice(37);
-		var pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type);
-		term=arg.slice(3);
-		if (pool) return pool.ref(uuid);
-		return false;}
+		pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type)||pool;
+		term=arg.slice(3);}
 	    else if (refmaps.length) {
 		var i=0; var lim=refmaps.length;
 		while (i<lim) {
