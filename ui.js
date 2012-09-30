@@ -255,6 +255,9 @@ fdjtUI.Highlight=(function(){
 	     (!((target.type==='checkbox')||
 		(target.type==='radio')))))
 	    return;
+	var anchor=((target.tagName==='A')?(target):
+		    (getParent(target,'A')));
+	if ((anchor)&&(anchor.href)) return;
 	var checkspan=getParent(target,".checkspan");
 	if (!(checkspan)) return;
 	var checked=hasClass(checkspan,"ischecked");
