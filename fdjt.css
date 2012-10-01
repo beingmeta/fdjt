@@ -142,7 +142,7 @@ div.tabcontent p {
 span.dterm {
     font-family: sans,sans-serif; color: blue; white-space: nowrap;
     opacity: .95;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)"
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)";
     filter: alpha(opacity=95);
     -webkit-opacity: .95;
     -khtml-opacity: .95;
@@ -179,7 +179,7 @@ span.font_sizer {
   text-align: center; cursor: pointer; margin: 2px;
   background: gray; color: white;
   opacity: .75;
-  ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)"
+  ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)";
   filter: alpha(opacity=75);
   -webkit-opacity: .75;
   -khtml-opacity: .75;
@@ -402,7 +402,7 @@ div.richtip {
   font-size: 12px; font-family: sans-serif; font-weight: normal;
   width: 33%; position: absolute; top: 24pt; left: 24pt;
   display: none; background: lightgray; z-index: 32; opacity: .85;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)"
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)";
   filter: alpha(opacity=85);
   -webkit-opacity: .85;
   -khtml-opacity: .85;
@@ -410,7 +410,7 @@ div.richtip {
   -o-opacity: .85;}
 div.richtip:hover { 
     opacity: .95;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)"
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)";
     filter: alpha(opacity=95);
     -webkit-opacity: .95;
     -khtml-opacity: .95;
@@ -741,7 +741,7 @@ div.humane.humane-show:hover { opacity: 0.2; }
 div.reticle {
     background-color: black; margin: 0px; border: 0px; padding: 0px;
     z-index: 1000; opacity: .5;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter: alpha(opacity=50);
     -webkit-opacity: .5;
     -khtml-opacity: .5;
