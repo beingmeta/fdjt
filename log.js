@@ -27,6 +27,7 @@ var fdjtLog=(function(){
 
     var logreq=false;
     var logreqs=[];
+    var use_console_log;
 
     function fdjtLog(string){
 	var output=false;
@@ -61,9 +62,13 @@ var fdjtLog=(function(){
 	    else backlog.push(entry);}
 	if ((fdjtLog.useconsole)||
 	    ((!(fdjtLog.console))&&(!(fdjtLog.console_fn))))
-	    if ((window.console) && (window.console.log) &&
-		(window.console.count)) {
-		if (output)
+	    if (use_console_log) {
+		if (!(window.console.log.call)) 
+		    // In IE, window.console.log is an object, not a function,
+		    //  but a straight call still works.
+		    window.console.log(
+			"["+fdjtET()+"s] "+fdjtString.apply(null,arguments));
+		else if (output)
 		    window.console.log.call(
 			window.console,"["+fdjtET()+"s] "+output);
 		else {
@@ -109,6 +114,14 @@ var fdjtLog=(function(){
     };
 
     fdjtLog.useconsole=true;
+
+    if ((console)&&(console.log)) {
+	if (console.count) use_console_log=true;
+	else {
+	    use_console_log=true;
+	    try {console.log("Testing console");}
+	    catch (ex) { use_console_log=false;}}}
+    else use_console_log=false;
 
     return fdjtLog;})();
 
