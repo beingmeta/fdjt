@@ -140,7 +140,13 @@ div.tabcontent p {
 /* KNodes (from knodules) */
 
 span.dterm {
-  opacity: .95; color: blue; font-family: sans,sans-serif; white-space: nowrap;}
+    font-family: sans,sans-serif; color: blue; white-space: nowrap;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)"
+    filter: alpha(opacity=95);
+    -khtml-opacity: .95;
+    -moz-opacity: .95;
+    opacity: .95;}
+span.dterm.long { white-space: wrap;}
 span.dterm span.disambig {
   color: red;}
 span.dterm .langid {
@@ -166,7 +172,12 @@ p.gloss span.spacer {
 /* Font sizers */
 
 span.font_sizer {
-  float: right; width: 16px; -moz-opacity: 0.75;
+  float: right; width: 16px;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)"
+  filter: alpha(opacity=75);
+  -khtml-opacity: .75;
+  -moz-opacity: .75;
+  opacity: .75;
   font-size: 14px; font-weight: bold; 
   text-align: center; cursor: pointer; margin: 2px;
   background: gray; color: white;}
@@ -387,10 +398,18 @@ div.richtip {
   font-size: 12px; font-family: sans-serif; font-weight: normal;
   width: 33%; position: absolute; top: 24pt; left: 24pt;
   display: none; background: lightgray;
-  opacity: .85; -moz-opacity: .85; -webkit-opacity: 0.85;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)"
+  filter: alpha(opacity=85);
+  -khtml-opacity: .85;
+  -moz-opacity: .85;
+  opacity: .85;
   z-index: 32;}
 div.richtip:hover { 
-  opacity: 0.95; -moz-opacity: 0.95; -webkit-opacity: 0.95;}
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)"
+    filter: alpha(opacity=95);
+    -khtml-opacity: .95;
+    -moz-opacity: .95;
+    opacity: .95;}
 
 div.richtip span.dterm {
   color: blue; font-size: 14px; font-weight: bold;}
@@ -715,7 +734,12 @@ div.humane.humane-show:hover { opacity: 0.2; }
 
 div.reticle {
     background-color: black; margin: 0px; border: 0px; padding: 0px;
-    z-index: 1000; opacity: 0.5;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"
+    filter: alpha(opacity=50);
+    -khtml-opacity: .5;
+    -moz-opacity: .5;
+    opacity: .5;
+    z-index: 1000;
     pointer-events: none;}
 div.reticle.vertical {
     position: fixed; height: 100%; top: 0px; bottom: 0px;
