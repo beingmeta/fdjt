@@ -49,15 +49,18 @@ var fdjtAjax=
 
 	var trace_ajax=false;
 	
-	function fdjtAjax(success_callback,base_uri,args,other_callback){
-	    var req=new XMLHttpRequest();
+	function fdjtAjax(success_callback,base_uri,args,other_callback,
+			  with_creds){
+	    var req=(((window.XDomainRequest)&&(!(with_creds)))?
+		     (new XDomainRequest()):
+		     (new XMLHttpRequest()));
 	    var uri=((args)?(compose_uri(base_uri,args)):(base_uri));
-	    req.open("GET",uri,true);
-	    req.withCredentials=true;
+	    if (with_creds) req.withCredentials=true;
 	    req.onreadystatechange=function () {
 		if ((req.readyState == 4) && (req.status == 200)) {
 		    success_callback(req);}
 		else if (other_callback) other_callback(req);};
+	    req.open("GET",uri);
 	    req.send(null);
 	    return req;}
 	fdjtAjax.revid="$Id$";
@@ -160,7 +163,7 @@ var fdjtAjax=
 	    return result;}
 	fdjtAjax.formJSON=formJSON;
 
-	function ajaxSubmit(form,callback,cbctype){
+	function ajaxSubmit(form,callback,cbctype,nocreds){
 	    var ajax_uri=form.getAttribute("ajaxaction")||form.action;
 	    if (!(ajax_uri)) return false;
 	    // Whether to do AJAX synchronously or not.
@@ -177,16 +180,25 @@ var fdjtAjax=
 			ajax_uri,form,callback);
 	    // Firefox doesn't run the callback on synchronous calls
 	    var success=false; var callback_run=false;
-	    var req=new XMLHttpRequest();
+	    var req=(((window.XDomainRequest)&&(!(syncp))&&(nocreds))?
+		     (new XDomainRequest()):
+		     (new XMLHttpRequest()));
 	    var params=formParams(form);
 	    fdjtDOM.addClass(form,"submitting");
-	    if (form.method==="GET")
-		req.open('GET',ajax_uri+"?"+params,(!(syncp)));
-	    else if (form.method==="PUT")
-		req.open('PUT',ajax_uri,(!(syncp)));
-	    else req.open('POST',ajax_uri,(!(syncp)));
+	    if (syncp) {
+		if (form.method==="GET")
+		    req.open('GET',ajax_uri+"?"+params,false);
+		else if (form.method==="PUT")
+		    req.open('PUT',ajax_uri,false);
+		else req.open('POST',ajax_uri,false);}
+	    else {
+		if (form.method==="GET")
+		    req.open('GET',ajax_uri+"?"+params);
+		else if (form.method==="PUT")
+		    req.open('PUT',ajax_uri);
+		else req.open('POST',ajax_uri);}
 	    if (cbctype) req.setRequestHeader("Accept",cbctype);
-	    req.withCredentials=true;
+	    if (!(nocreds)) req.withCredentials=true;
 	    req.onreadystatechange=function () {
 		if (trace_ajax)
 		    fdjtLog("Got callback (%d,%d) %o for %o, callback=%o",
