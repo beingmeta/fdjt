@@ -61,7 +61,9 @@ var fdjtLog=(function(){
 		fdjtDOM.append(domconsole,entry);
 	    else backlog.push(entry);}
 	if ((fdjtLog.useconsole)||
-	    ((!(fdjtLog.console))&&(!(fdjtLog.console_fn))))
+	    ((!(fdjtLog.console))&&(!(fdjtLog.console_fn)))) {
+	    if (typeof use_console_log === 'undefined')
+		init_use_console_log();
 	    if (use_console_log) {
 		if (!(window.console.log.call)) 
 		    // In IE, window.console.log is an object, not a function,
@@ -77,7 +79,7 @@ var fdjtLog=(function(){
 		    newargs[1]=fdjtET();
 		    var i=1; var lim=arguments.length;
 		    while (i<lim) {newargs[i+1]=arguments[i]; i++;}
-		    window.console.log.apply(window.console,newargs);}}}
+		    window.console.log.apply(window.console,newargs);}}}}
     fdjtLog.console=null;
     fdjtLog.id="$Id$";
     fdjtLog.version=parseInt("$Revision$".slice(10,-1));
@@ -115,13 +117,14 @@ var fdjtLog=(function(){
 
     fdjtLog.useconsole=true;
 
-    if ((console)&&(console.log)) {
-	if (console.count) use_console_log=true;
-	else {
-	    use_console_log=true;
-	    try {console.log("Testing console");}
-	    catch (ex) { use_console_log=false;}}}
-    else use_console_log=false;
+    function init_use_console_log() {
+	if ((window.console)&&(window.console.log)) {
+	    if (window.console.count) use_console_log=true;
+	    else {
+		use_console_log=true;
+		try {window.console.log("Testing console");}
+		catch (ex) { use_console_log=false;}}}
+	else use_console_log=false;}
 
     return fdjtLog;})();
 
@@ -335,7 +338,6 @@ var fdjtTrace=fdjtLog;
     fdjtLog.HumaneHide=remove;
 
 }(window,document));
-
 
 var fdjtNotify=fdjtLog.notify;
 

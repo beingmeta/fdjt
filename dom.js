@@ -1875,7 +1875,7 @@ var fdjtDOM=
 	fdjtDOM.addInit=addInit;
 
 	if ((typeof _fdjt_init === 'undefined')||(!(_fdjt_init)))
-	    fdjtDOM.addListener(document,"load",fdjtDOM.init);
+	    fdjtDOM.addListener(window,"load",fdjtDOM.init);
 	
 	if (navigator.userAgent.search("WebKit")>=0) {
 	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-webkit-transition';
