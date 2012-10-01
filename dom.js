@@ -2074,8 +2074,8 @@ var fdjtDOM=
 		var typename=custom_input_types[i++];
 		try {input_elt.type=typename;} catch (err) {}
 		if (input_elt.type===typename) {
-		    var inputs=dom.getElementsByClassName(
-			"fdjt"+typename+"input");
+		    var inputs=getChildren(
+			document.body,".fdjt"+typename+"input");
 		    var j=0, lim=inputs.length;
 		    while (j<lim) {
 			var input=inputs[j++];

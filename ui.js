@@ -287,7 +287,7 @@ fdjtUI.Highlight=(function(){
     fdjtUI.CheckSpan.changed=changed;
 
     function initCheckspans(){
-	var checkspans=document.getElementsByClassName("checkspan");
+	var checkspans=fdjt$(".checkspan");
 	var i=0, lim=checkspans.length;
 	while (i<lim) {
 	    var checkspan=checkspans[i++];
