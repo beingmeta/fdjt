@@ -74,6 +74,8 @@ function fdjtScrollEver(spec) {
 	if (busy) return;
 	var page_height=document.documentElement.scrollHeight;
 	var scroll_pos=window.pageYOffset;
+	if (typeof scroll_pos !== 'number')
+	    scroll_pos=document.documentElement.scrollTop;
 	var client_height=document.documentElement.clientHeight;
 	if (((page_height-(scroll_pos+client_height))<thresh)||
 	    (page_height<client_height))
