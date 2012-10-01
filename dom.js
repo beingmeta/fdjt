@@ -1835,11 +1835,20 @@ var fdjtDOM=
 	var inits_run=false;
 	var inits=[checkChildren,checkSVG]; // ,fixSVG
 	var init_names={
-	    checkChildren: checkChildren,
-	    checkSVG: checkSVG,fixSVG: goSVG};
+	    checkChildren: checkChildren,checkSVG: checkSVG};
 
 	fdjtDOM.init=function(){
+	    var names=[];
 	    if (inits_run) return false;
+	    for (var name in init_names)
+		if (init_names.hasOwnProperty(name)) names.push(name);
+	    if (names.length===0)
+		fdjtLog("Running %d DOM inits",inits.length);
+	    else if (names.length===inits.length)
+		fdjtLog("Running %d DOM inits (%s)",
+			inits.length,names.join());
+	    else fdjtLog("Running %d DOM inits (including %s)",
+			 inits.length,names.join());
 	    var i=0; var lim=inits.length;
 	    while (i<lim) inits[i++]();
 	    inits_run=true;};
@@ -1850,7 +1859,8 @@ var fdjtDOM=
 	    while (i<lim) {
 		if ((replace)&&(inits[i]===replace)) {
 		    if (inits_run) {
-			fdjtLog.warn("Replacing init %s which has already run",name);
+			fdjtLog.warn(
+			    "Replacing init %s which has already run",name);
 			if (runagain) {
 			    fdjtLog.warn("Running the new version");
 			    inits[i]=fcn; init_names[name]=fcn; fcn();
@@ -1864,8 +1874,8 @@ var fdjtDOM=
 	    if (name) init_names[name]=fcn;}
 	fdjtDOM.addInit=addInit;
 
-	if ((typeof fdjt_init === 'undefined')||(!(fdjt_init)))
-	    fdjtDOM.addListener(window,"load",fdjtDOM.init);
+	if ((typeof _fdjt_init === 'undefined')||(!(_fdjt_init)))
+	    fdjtDOM.addListener(document,"load",fdjtDOM.init);
 	
 	if (navigator.userAgent.search("WebKit")>=0) {
 	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-webkit-transition';
@@ -2073,7 +2083,7 @@ var fdjtDOM=
 			input.type=typename;}}}}
 	fdjtDOM.setupCustomInputs=setupCustomInputs;
 	
-	addInit(setupCustomInputs,"custominputs");
+	addInit(setupCustomInputs,"CustomInputs");
 
 	fdjtDOM.getParaHash=function(node){
 	    return paraHash(textify(node));}
