@@ -41,6 +41,12 @@ function fdjtScrollEver(spec) {
     if (typeof thresh !== 'number') thresh=parseInt(thresh);
     if (typeof interval !== 'number') interval=parseInt(interval);
     
+    if (fdjtScrollEver.debug) {
+	fdjtLog("fdjtScrollEver called: %o/%o+%o, fetch=%s",
+		off,limit,win,url);
+	fdjtLog("fdjtScrollEver scrolling on %opx, checking every %ous on %o",
+		thresh,interval,container);}
+
     function getMoreResults(){
 	if (busy) return;
 	if ((!(url))||(!(container))||(off>=limit)) {
@@ -53,6 +59,8 @@ function fdjtScrollEver(spec) {
 	req.withCredentials=true;
 	req.onreadystatechange=function () {
 	    if ((req.readyState == 4) && (req.status == 200)) {
+		if (fdjtScrollEver.debug)
+		    fdjtLog("fdjtScrollEver getMoreResults (response)");
 		var tbl=fdjtDOM("TABLE");
 		var htmltext=req.responseText;
 		tbl.innerHTML=htmltext;
@@ -68,6 +76,8 @@ function fdjtScrollEver(spec) {
 		fdjtDOM(container,add);
 		off=off+win;
 		busy=false;}};
+	if (fdjtScrollEver.debug)
+	    fdjtLog("fdjtScrollEver getMoreResults (call)");
 	req.send(null);}
 
     function scrollChecker(){
@@ -81,6 +91,8 @@ function fdjtScrollEver(spec) {
 	    (page_height<client_height))
 	    getMoreResults();}
     return (timer=setInterval(scrollChecker,interval));}
+
+// fdjtScrollEver.debug=true;
 
 /* Emacs local variables
    ;;;  Local variables: ***
