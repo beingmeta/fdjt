@@ -30,7 +30,8 @@ function fdjtScrollEver(spec) {
 	fdjtDOM.getMeta("SCROLLWINDOW")||7;
     var limit=spec.limit||fdjtState.getQuery("LIMIT")||
 	fdjtDOM.getMeta("SCROLLMAX")||7;
-    var container=spec.container||fdjtDOM.getMeta("SCROLLELEMENT");
+    var container=spec.container||fdjtDOM.getMeta("SCROLLELEMENT")||
+	fdjtID("FDJTSCROLLCONTAINER");
     var thresh=spec.thresh||fdjtDOM.getMeta("SCROLLTHRESH")||100;
     var interval=spec.interval||fdjtDOM.getMeta("SCROLLINTERVAL")||500;
     if (typeof container==='string')
@@ -61,9 +62,15 @@ function fdjtScrollEver(spec) {
 	    if ((req.readyState == 4) && (req.status == 200)) {
 		if (fdjtScrollEver.debug)
 		    fdjtLog("fdjtScrollEver getMoreResults (response)");
-		var tbl=fdjtDOM("TABLE");
+		var tbl=fdjtDOM(container.tagName);
 		var htmltext=req.responseText;
-		tbl.innerHTML=htmltext;
+		try {tbl.innerHTML=htmltext;}
+		catch (ex) {
+		    var span=document.createElement("span");
+		    span.style.display='none';
+		    span.innerHTML="<"+container.tagName+">"+
+			htmltext+"</"+container.tagName+">";
+		    tbl=span.childNodes[0];}
 		var add=[];
 		var children=tbl.childNodes;
 		var i=0; var lim=children.length;
