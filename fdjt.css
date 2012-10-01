@@ -141,11 +141,13 @@ div.tabcontent p {
 
 span.dterm {
     font-family: sans,sans-serif; color: blue; white-space: nowrap;
+    opacity: .95;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)"
     filter: alpha(opacity=95);
+    -webkit-opacity: .95;
     -khtml-opacity: .95;
     -moz-opacity: .95;
-    opacity: .95;}
+    -o-opacity: .95;}
 span.dterm.long { white-space: wrap;}
 span.dterm span.disambig {
   color: red;}
@@ -173,14 +175,16 @@ p.gloss span.spacer {
 
 span.font_sizer {
   float: right; width: 16px;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)"
-  filter: alpha(opacity=75);
-  -khtml-opacity: .75;
-  -moz-opacity: .75;
-  opacity: .75;
   font-size: 14px; font-weight: bold; 
   text-align: center; cursor: pointer; margin: 2px;
-  background: gray; color: white;}
+  background: gray; color: white;
+  opacity: .75;
+  ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)"
+  filter: alpha(opacity=75);
+  -webkit-opacity: .75;
+  -khtml-opacity: .75;
+  -moz-opacity: .75;
+  -o-opacity: .75;}
 
 /* Flexboxes */
 
@@ -397,19 +401,21 @@ div.richtip {
   text-align: left; padding: 3px;
   font-size: 12px; font-family: sans-serif; font-weight: normal;
   width: 33%; position: absolute; top: 24pt; left: 24pt;
-  display: none; background: lightgray;
+  display: none; background: lightgray; z-index: 32; opacity: .85;
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)"
   filter: alpha(opacity=85);
+  -webkit-opacity: .85;
   -khtml-opacity: .85;
   -moz-opacity: .85;
-  opacity: .85;
-  z-index: 32;}
+  -o-opacity: .85;}
 div.richtip:hover { 
+    opacity: .95;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)"
     filter: alpha(opacity=95);
+    -webkit-opacity: .95;
     -khtml-opacity: .95;
     -moz-opacity: .95;
-    opacity: .95;}
+    -o-opacity: .95;}
 
 div.richtip span.dterm {
   color: blue; font-size: 14px; font-weight: bold;}
@@ -734,12 +740,13 @@ div.humane.humane-show:hover { opacity: 0.2; }
 
 div.reticle {
     background-color: black; margin: 0px; border: 0px; padding: 0px;
+    z-index: 1000; opacity: .5;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"
     filter: alpha(opacity=50);
+    -webkit-opacity: .5;
     -khtml-opacity: .5;
     -moz-opacity: .5;
-    opacity: .5;
-    z-index: 1000;
+    -o-opacity: .5;
     pointer-events: none;}
 div.reticle.vertical {
     position: fixed; height: 100%; top: 0px; bottom: 0px;
