@@ -1025,8 +1025,8 @@ fdjtUI.Collapsible.focus=function(evt){
     var dropClass=fdjtDOM.dropClass;
     var toggleClass=fdjtDOM.toggleClass;
 
-    function Ellipsis(spec,string,lim){
-	var content=ellipsize(string,lim);
+    function Ellipsis(spec,string,lim,thresh){
+	var content=ellipsize(string,lim,thresh||0.2);
 	if (content.length===string.length) {
 	    if (spec) return fdjtDOM(spec,string);
 	    else return document.createTextNode(string);}
@@ -1036,7 +1036,8 @@ fdjtUI.Collapsible.focus=function(evt){
 	var remaining=string.slice(content.length);
 	var elided=fdjtDOM("span.elided",remaining);
 	var elision=fdjtDOM(
-	    "span.elision",fdjtString("…%d%% more…",100-pct));
+	    "span.elision",fdjtString("…see %d%% more…",100-pct));
+	elision.title="click to see elided text, click again to hide it";
 	elt.appendChild(elided); elt.appendChild(elision);
 	return elt;}
     fdjtUI.Ellipsis=Ellipsis;
