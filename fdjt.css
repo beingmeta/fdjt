@@ -204,7 +204,8 @@ table.fdjtdata th {
 table.fdjtdata td { 
   vertical-align: top; text-align: left; padding-left: 2px;}
 
-table.fdjt {width: 100%; font-family: sans,sans-serif;}
+table.fdjt {font-family: sans,sans-serif;}
+table.fdjt.full { width: 100%; }
 table.fdjt th { vertical-align: top; text-align: right;}
 table.fdjt td { vertical-align: top; text-align: left;}
 table.fdjt td input.fullwidth[type='TEXT'] { width: 100%;}
