@@ -1746,8 +1746,6 @@ var fdjtDOM=
 		var i=0; var lim=node.length;
 		while (i<lim) addListener(node[i++],evtype,handler);
 		return;}
-	    else if (node.length)
-		return addListener(TOA(node),evtype,handler);
 	    // OK, actually do it
 	    if (evtype==='title') { 
 		// Not really a listener, but helpful
