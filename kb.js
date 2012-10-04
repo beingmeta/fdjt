@@ -138,8 +138,16 @@ var fdjtKB=
 	    else return false;};
 
 	Pool.prototype.load=function(ref) {
-	    if (typeof ref==='string')
-		return this.ref(ref).load();
+	    if (typeof ref==='string') {
+		var obj=this.map[ref];
+		if (obj) {
+		    if (obj._init) return obj;
+		    else return obj.load();}
+		else if (this.storage) {
+		    var data=this.storage.probe(ref);
+		    if (data) return this.ref(ref).init(data);
+		    else return undefined;}
+		else return undefined;}
 	    else return ref.load();};
 
 	Pool.prototype.ref=function(id,cons) {
@@ -178,20 +186,28 @@ var fdjtKB=
 		    ref.pool.storage.load(ref);
 		return ref;}
 	    else {
-		var qid=data._id||data.oid||data.uuid;
+		var qid=data._qid||data._id||data.oid||data.uuid;
+		if (!(qid)) return data;
+		var ref=((qid)&&(this.map[qid]));
+		var cur=((this.storage)&&(this.storage.probe(qid)));
+		if ((cur)&&(cur._modified)&&(data._modified)&&
+		    (cur._modified>data._modified)) {
+		    if (debug)
+			log("[%fs] Skipping out-of-date import to %s %o <== %o",
+			    fdjtET(),qid,cur,data);
+		    if ((ref)&&(ref._init)) return ref;
+		    else if (ref) return ref.init(cur);
+		    else return this.ref(qid).init(cur);}
+		var obj=(((ref)&&(ref._init))?(ref):
+			 ((ref)&&(cur))?(ref.init(cur)):
+			 (ref)?(ref):(this.ref(qid)));
 		if (((debug)&&(this.traceimport))||(debug>1))
 		    log("[%fs] Import to %s %o <== %o",
-			fdjtET(),this.name,obj,data);
+			fdjtET(),qid,obj,data);
 		if (this.storage) this.storage.Import(data);
-		if (qid) {
-		    var obj=(this.map[qid])||
-			(this.map[qid]=this.cons(qid));
-		    if (obj) obj.update(data);
-		    else {
-			obj=this.ref(qid);
-			obj.init(data);}
-		    return obj;}
-		else return data;}};
+		if (ref||cur) obj.update(data);
+		else obj.init(data);
+		return obj;}};
 	
 	Pool.prototype.find=function(prop,val){
 	    if (!(this.index)) return [];
@@ -290,7 +306,7 @@ var fdjtKB=
 	    var obj=getRef(arg);
 	    if (!(obj)) return undefined;
 	    else if (obj._init) return obj;
-	    else obj.load();}
+	    else return obj.load();}
 	fdjtKB.load=fdjtKB.loadRef=loadRef;
 	
 	function doimport(data){
@@ -723,8 +739,9 @@ var fdjtKB=
 	    if (this.hasOwnProperty(prop)) return this[prop];
 	    else if (this.pool.storage) {
 		var fetched=this.pool.storage.get(this,prop);
-		if (typeof fetched !== 'undefined')
+		if (typeof fetched !== 'undefined') {
 		    this[prop]=fetched;
+		    return fetched;}
 		else if (this.hasOwnProperty(prop))
 		    return this[prop];
 		else return fetched;}
@@ -732,14 +749,15 @@ var fdjtKB=
 	Ref.prototype.getSet=function(prop){
 	    if (this.hasOwnProperty(prop)) {
 		var val=this[prop];
-		if (val instanceof Array)
+		if (val instanceof Array) {
 		    if (val._sortlen===val.length) return val;
-		else return setify(val);
+		    else return setify(val);}
 		else return [val];}
 	    else if (this.pool.storage) {
 		var fetched=this.pool.storage.get(this,prop);
 		if (typeof fetched !== 'undefined')
 		    this[prop]=fetched;
+		else fetched=this[prop]||[];
 		return setify(fetched);}
 	    else return [];};
 	Ref.prototype.getArray=function(prop){
@@ -753,7 +771,7 @@ var fdjtKB=
 		    this[prop]=fetched;
 		return [fetched];}
 	    else return [];};
-	Ref.prototype.add=function(prop,val){
+	Ref.prototype.add=function(prop,val,batch){
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
 	    if (this.hasOwnProperty(prop)) {
@@ -764,6 +782,7 @@ var fdjtKB=
 		else {}
 		else this[prop]=Set([cur,val]);}
 	    else this[prop]=val;
+	    if (batch) return true;
 	    if (this.pool.storage)
 		this.pool.storage.add(this,prop,val);
 	    if ((this.pool.effects)&&(this.pool.effects[prop]))
@@ -771,7 +790,7 @@ var fdjtKB=
 	    if (this.pool.index)
 		this.pool.index(this,prop,val,true);
 	    return true;};
-	Ref.prototype.drop=function(prop,val){
+	Ref.prototype.drop=function(prop,val,batch){
 	    if (typeof val === 'undefined') val=this[prop];
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
@@ -784,6 +803,7 @@ var fdjtKB=
 		    if (!(set_drop(cur,val))) return false;
 		    if (cur.length===0) delete this[prop];}
 		else return false;
+		if (batch) return true;
 		if (this.pool.storage)
 		    this.pool.storage.drop(this,prop,val);
 		if (this.pool.index)
@@ -819,11 +839,6 @@ var fdjtKB=
 	    // This is called initialize a reference the first time we
 	    //  get data for it
 	    var pool=this.pool; var map=pool.map;
-	    if ((this._init)&&(this._init>init_start)) {
-		// Inits have already been run in this session, so we just
-		//  update
-		this.update_ref(data);
-		return;}
 	    this._init=fdjtTime();
 	    if (((debug)&&(pool.traceref))||(debug>1))
 		log("Initial reference to %o <== %o @%d",
@@ -850,14 +865,14 @@ var fdjtKB=
 			    if ((!(v))&&(v!==false)&&(v!==0)) {}
 			    else if (qid=((v._qid)||(v._id))) {
 				var pool=getPool(qid);
-				if (pool) this.add(key,pool.Import(v));
-				else this.add(key,v);}
-			    else this.add(key,v);}}
+				if (pool) this.add(key,pool.Import(v),true);
+				else this.add(key,v,true);}
+			    else this.add(key,v,true);}}
 		    else if (qid=((value._qid)||(value._id))) {
 			var pool=getPool(qid);
 			if (pool) this.add(key,pool.Import(value));
-			else this.add(key,v);}
-		    else this.add(key,value);}}
+			else this.add(key,v,true);}
+		    else this.add(key,value,true);}}
 	    // Now we run the init procedures for the pool
 	    var inits=pool.inits;
 	    if (inits) {
@@ -879,6 +894,9 @@ var fdjtKB=
 	function update_ref(data){
 	    if (!(this._init)) return this.init(data);
 	    var pool=this.pool; var map=pool.map;
+	    if ((this._modified)&&(data._modified)&&
+		(this._modified>data._modified))
+		return this;
 	    for (var key in data) {
 		if ((key==="pool")||(key=="init")) continue;
 		var val=data[key], cur=this[key];
@@ -886,19 +904,19 @@ var fdjtKB=
 		else if (!(cur)) {
 		    if (val instanceof Array) {
 			var i=0, lim=val.length;
-			while (i<lim) this.add(key,val[i++]);}
+			while (i<lim) this.add(key,val[i++],true);}
 		    else this.add(key,val);}
 		else if ((val instanceof Array)||
 			 (cur instanceof Array)) {
 		    var toadd=difference(val,cur);
 		    var todrop=difference(cur,val);
 		    var i=0; var lim=todrop.length;
-		    while (i<lim) this.drop(key,todrop[i++]);
+		    while (i<lim) this.drop(key,todrop[i++],true);
 		    var i=0; var lim=toadd.length;
-		    while (i<lim) this.add(key,toadd[i++]);}
+		    while (i<lim) this.add(key,toadd[i++],true);}
 		else {
-		    this.drop(key,cur);
-		    this.add(key,val);}}
+		    this.drop(key,cur,true);
+		    this.add(key,val,true);}}
 	    return this;}
 	Ref.prototype.update=update_ref;
 	Ref.prototype.oninit=function(fcn,name){
@@ -976,6 +994,8 @@ var fdjtKB=
 	    var data=fdjtState.getLocal(qid,true);
 	    if (data) return obj.init(data);
 	    else return undefined;};
+	OfflineKB.prototype.probe=function(qid){
+	    return fdjtState.getLocal(qid,true);};
 	OfflineKB.prototype.get=offline_get;
 	OfflineKB.prototype.add=function(obj,slotid,val){
 	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
