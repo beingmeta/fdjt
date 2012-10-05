@@ -25,8 +25,8 @@
 
 var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 fdjtUI.TapHold=(function(){
-    var trace_taps=true;
-    var debug_taps=true;
+    var trace_taps=false;
+    var debug_taps=false;
     var window_setup=false;
     
     var touched=false;
