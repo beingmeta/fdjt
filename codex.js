@@ -1147,6 +1147,8 @@ var CodexLayout=
 		if (elt===cur_root) return false;
 		if (!(cur_root)) return false;
 		var parent=elt.parentNode;
+		if ((!(parent))||(parent===document))
+		    return false;
 		var last=(parent.lastElementChild)||
 		    ((parent.children[parent.children.length-1]));
 		if (elt===last)
@@ -1192,6 +1194,8 @@ var CodexLayout=
 		if (elt===cur_root) return false;
 		if (!(cur_root)) return false;
 		var parent=elt.parentNode;
+		if ((!(parent))||(parent===document))
+		    return false;
 		var last=(parent.lastElementChild)||
 		    ((parent.children[parent.children.length-1]));
 		if (elt===last)
