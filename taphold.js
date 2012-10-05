@@ -279,8 +279,9 @@ fdjtUI.TapHold=(function(){
 	    (evt.touches.length>1))
 	    return;
 	if (fdjtUI.isClickable(evt)) return;
-	if ((!(holdkey_down))&&(!(mouse_down)))
-	    endpress(evt);
+	if ((!(holdkey_down))&&(!(mouse_down))) {
+	    fdjtUI.cancel(evt);
+	    endpress(evt);}
 	else if (trace_taps)
 	    fdjtLog("md=%o, kd=%o",mouse_down,holdkey_down);
 	else {}
