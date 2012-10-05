@@ -771,7 +771,7 @@ var fdjtKB=
 		    this[prop]=fetched;
 		return [fetched];}
 	    else return [];};
-	Ref.prototype.add=function(prop,val,batch){
+	Ref.prototype.add=function(prop,val,restore){
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
 	    if (this.hasOwnProperty(prop)) {
@@ -782,15 +782,14 @@ var fdjtKB=
 		else {}
 		else this[prop]=Set([cur,val]);}
 	    else this[prop]=val;
-	    if (batch) return true;
-	    if (this.pool.storage)
+	    if ((this.pool.storage)&&(!(restore)))
 		this.pool.storage.add(this,prop,val);
 	    if ((this.pool.effects)&&(this.pool.effects[prop]))
 		this.pool.effects[prop](this,prop,val);
 	    if (this.pool.index)
 		this.pool.index(this,prop,val,true);
 	    return true;};
-	Ref.prototype.drop=function(prop,val,batch){
+	Ref.prototype.drop=function(prop,val){
 	    if (typeof val === 'undefined') val=this[prop];
 	    if (this.pool.xforms[prop])
 		val=this.pool.xforms[prop](val)||val;
@@ -803,7 +802,6 @@ var fdjtKB=
 		    if (!(set_drop(cur,val))) return false;
 		    if (cur.length===0) delete this[prop];}
 		else return false;
-		if (batch) return true;
 		if (this.pool.storage)
 		    this.pool.storage.drop(this,prop,val);
 		if (this.pool.index)
@@ -870,7 +868,7 @@ var fdjtKB=
 			    else this.add(key,v,true);}}
 		    else if (qid=((value._qid)||(value._id))) {
 			var pool=getPool(qid);
-			if (pool) this.add(key,pool.Import(value));
+			if (pool) this.add(key,pool.Import(value),true);
 			else this.add(key,v,true);}
 		    else this.add(key,value,true);}}
 	    // Now we run the init procedures for the pool
