@@ -914,7 +914,7 @@ var CodexLayout=
 		    //  the next page
 		    if (words.length<2) {
 			if (i===1) return node;
-			else return children.slice[i-1];}
+			else return children.slice(i-1);}
 		    // Now we do a binary search to find the word
 		    //  which pushes the node below the page height.
 		    //  That's where we'll break.
@@ -934,8 +934,7 @@ var CodexLayout=
 			    wbreak=wbot+floor((wbreak-wbot)/2);}
 			else {
 			    /* Add one more work to see if we break the page. */
-			    var nextw=document.createTextNode(
-				words[wbreak+1]);
+			    var nextw=document.createTextNode(words[wbreak]);
 			    outer.appendChild(nextw);
 			    var ngeom=getGeom(node,page);
 			    outer.removeChild(nextw);
@@ -953,7 +952,7 @@ var CodexLayout=
 			    outer.replaceChild(original,probenode);
 			else node.replaceChild(page_break,probenode);
 			if (i===1) return node;
-			else return children.slice[i-1];}
+			else return children.slice(i-1);}
 		    else { // Do the split
 			var keeptext=words.slice(0,wbreak).join("");
 			var pushtext=words.slice(wbreak).join("");
