@@ -905,44 +905,49 @@ var fdjtDOM=
 
 	function textify(arg,flat,inside){
 	    if (arg.text) return flatten(arg.text);
-	    else if (arg.nodeType)
+	    else if (arg.nodeType) {
 		if (arg.nodeType===3) return arg.nodeValue;
-	    else if (arg.nodeType===1) {
-		var children=arg.childNodes;
-		var display_type=getDisplayStyle(arg);
-		var classname=arg.className;
-		var string=""; var suffix="";
-		// Figure out what suffix and prefix to use for this element
-		// If inside is false, don't use anything.
-		if (display_type==='none') return "";
-		else if ((classname)&&
-			 ((classname==='fdjtdecoration')||
-			  (classname.search(/\bfdjtdecoration\b/)>=0)))
-		    return "";
-		else if (!(inside)) {}
-		else if (!(display_type)) {}
-		else if (display_type==="inline") {}
-		else if (flat) suffix=" ";
-		else if ((display_type==="block") ||
-			 (display_type==="table") ||
-			 (display_type==="preformatted")) {
-		    string="\n"; suffix="\n";}
-		else if (display_type==="table-row") suffix="\n";
-		else if (display_type==="table-cell") string="\t";
-		else {}
-		var i=0; while (i<children.length) {
-		    var child=children[i++];
-		    if (!(child.nodeType)) continue;
-		    if (child.nodeType===3)
-			if (flat)
-			    string=string+flatten(child.nodeValue);
-		    else string=string+child.nodeValue;
-		    else if (child.nodeType===1) {
-			var stringval=textify(child,flat,true);
-			if (stringval) string=string+stringval;}
-		    else continue;}
-		return string+suffix;}
-	    else {}
+		else if (arg.nodeType===1) {
+		    var children=arg.childNodes;
+		    var display_type=getDisplayStyle(arg);
+		    var classname=arg.className;
+		    var string=""; var suffix="";
+		    if (display_type==='none') return "";
+		    else if ((classname)&&
+			     ((classname==='fdjtdecoration')||
+			      (classname.search(/\bfdjtdecoration\b/)>=0)))
+			return "";
+		    else if ((!(children))||(children.length===0)) {
+			if (arg.alt) return "["+arg.alt+"]";
+			else if (arg.title)
+			    return "["+arg.title+"]";
+			else return "[?]";}
+		    // Figure out what suffix and prefix to use for this element
+		    // If inside is false, don't use anything.
+		    else if (!(inside)) {}
+		    else if (!(display_type)) {}
+		    else if (display_type==="inline") {}
+		    else if (flat) suffix=" ";
+		    else if ((display_type==="block") ||
+			     (display_type==="table") ||
+			     (display_type==="preformatted")) {
+			string="\n"; suffix="\n";}
+		    else if (display_type==="table-row") suffix="\n";
+		    else if (display_type==="table-cell") string="\t";
+		    else {}
+		    var i=0; while (i<children.length) {
+			var child=children[i++];
+			if (!(child.nodeType)) continue;
+			if (child.nodeType===3)
+			    if (flat)
+				string=string+flatten(child.nodeValue);
+			else string=string+child.nodeValue;
+			else if (child.nodeType===1) {
+			    var stringval=textify(child,flat,true);
+			    if (stringval) string=string+stringval;}
+			else continue;}
+		    return string+suffix;}
+		else {}}
 	    else if (arg.toString)
 		return arg.toString();
 	    else return arg.toString();}
@@ -1093,7 +1098,10 @@ var fdjtDOM=
 			width=width+textwidth(child);
 		    else {}}
 		return width;}
-	    else return 0;}
+	    else if (node.nodeType!==1) return 0;
+	    else if (node.alt) return node.alt.length+2;
+	    else if (node.title) return node.title.length+2;
+	    else return 3;}
 	fdjtDOM.textWidth=textwidth;
 
 	function countBreaks(arg){
