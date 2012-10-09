@@ -318,10 +318,10 @@ var CodexLayout=
 	
 	// This moves a node onto a page, recreating (as far as
 	// possible) its original DOM context on the new page.
-	function moveNodeToPage(node,page,dups,crumbs){
+	function moveNodeToPage(node,page,dups,crumbs,docinfo){
 	    if ((!(page.getAttribute("data-topid")))&&
-		(node.id)&&(Codex.docinfo[node.id])) {
-		var info=Codex.docinfo[node.id];
+		(node.id)&&(docinfo[node.id])) {
+		var info=docinfo[node.id];
 		page.setAttribute("data-topid",node.id);
 		page.setAttribute("data-sbookloc",info.starts_at);}
 	    if (hasParent(node,page)) return node;
@@ -419,6 +419,7 @@ var CodexLayout=
 	    var fullpages=this.fullpages=init.fullpages||false;
 	    var floatpages=this.floatpages=init.floatpages||false;
 	    var pageprefix=this.pageprefix=init.pageprefix||"CODEXPAGE";
+	    var docinfo=this.docinfo=init.docinfo||false;
 
 	    // Layout Dimensions
 	    var page_height=this.height=init.page_height||fdjtDOM.viewHeight();
@@ -529,7 +530,7 @@ var CodexLayout=
 		// node might be transformed in some way when
 		// moved (if, for example, it is a text node, it
 		// might be split).
-		node=moveNodeToPage(root,page,dups,crumbs);
+		node=moveNodeToPage(root,page,dups,crumbs,docinfo);
 		
 		var ni=0, nblocks=blocks.length; 
 		    
@@ -575,7 +576,7 @@ var CodexLayout=
 			// page is empty.
 			layout.drag=drag=[];
 		    	newPage(block);}
-		    else moveNodeToPage(block,page,dups,crumbs);
+		    else moveNodeToPage(block,page,dups,crumbs,docinfo);
 		    // Finally, we check if everything fits We're
 		    // walking through the blocks[] but only
 		    // advance when an element fits or can't be
@@ -704,11 +705,11 @@ var CodexLayout=
 		    if ((drag)&&(drag.length)) {
 			var i=0; var lim=drag.length;
 			while (i<lim)
-			    moveNodeToPage(drag[i++],page,dups,crumbs);
+			    moveNodeToPage(drag[i++],page,dups,crumbs,docinfo);
 			layout.prev=prev=drag[drag.length-1];
 			layout.drag=drag=[];}
 		    // Finally, move the node to the page
-		    if (node) moveNodeToPage(node,page,dups,crumbs);
+		    if (node) moveNodeToPage(node,page,dups,crumbs,docinfo);
 
 		    return page;}
 
@@ -741,7 +742,7 @@ var CodexLayout=
 			if (node) logfn("Layout/%s %o at %o",newpage,page,node);
 			else logfn("Layout/%s %o",newpage,page);}
 		    
-		    if (node) moveNodeToPage(node,page,dups,crumbs);
+		    if (node) moveNodeToPage(node,page,dups,crumbs,docinfo);
 		    
 		    tweakBlock(node);
 
@@ -1172,7 +1173,6 @@ var CodexLayout=
 	    function avoidBreakBefore(elt,style){
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
-		var info=((elt.id)&&(Codex.docinfo[elt.id]));
 		return ((style.pageBreakBefore==='avoid')||
 			(hasClass(elt,"avoidbreakbefore"))||
 			((avoidbreakbefore)&&
@@ -1182,6 +1182,7 @@ var CodexLayout=
 	    function avoidBreakAfter(elt,style){
 		var avoid=false;
 		if (!(elt)) return false;
+		if (/H\d/.exec(elt.tagName)) return true;
 		if (!(style)) style=getStyle(elt);
 		if (style.pageBreakAfter==='avoid') return true;
 		else if ((style.pageBreakAfter)&&
