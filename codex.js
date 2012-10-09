@@ -318,12 +318,7 @@ var CodexLayout=
 	
 	// This moves a node onto a page, recreating (as far as
 	// possible) its original DOM context on the new page.
-	function moveNodeToPage(node,page,dups,crumbs,docinfo){
-	    if ((!(page.getAttribute("data-topid")))&&
-		(node.id)&&(docinfo[node.id])) {
-		var info=docinfo[node.id];
-		page.setAttribute("data-topid",node.id);
-		page.setAttribute("data-sbookloc",info.starts_at);}
+	function moveNodeToPage(node,page,dups,crumbs){
 	    if (hasParent(node,page)) return node;
 	    var parent=node.parentNode;
 	    // If we're moving a first child, we might as well move the parent
@@ -419,7 +414,6 @@ var CodexLayout=
 	    var fullpages=this.fullpages=init.fullpages||false;
 	    var floatpages=this.floatpages=init.floatpages||false;
 	    var pageprefix=this.pageprefix=init.pageprefix||"CODEXPAGE";
-	    var docinfo=this.docinfo=init.docinfo||false;
 
 	    // Layout Dimensions
 	    var page_height=this.height=init.page_height||fdjtDOM.viewHeight();
@@ -530,7 +524,7 @@ var CodexLayout=
 		// node might be transformed in some way when
 		// moved (if, for example, it is a text node, it
 		// might be split).
-		node=moveNodeToPage(root,page,dups,crumbs,docinfo);
+		node=moveNodeToPage(root,page,dups,crumbs);
 		
 		var ni=0, nblocks=blocks.length; 
 		    
@@ -576,7 +570,7 @@ var CodexLayout=
 			// page is empty.
 			layout.drag=drag=[];
 		    	newPage(block);}
-		    else moveNodeToPage(block,page,dups,crumbs,docinfo);
+		    else moveNodeToPage(block,page,dups,crumbs);
 		    // Finally, we check if everything fits We're
 		    // walking through the blocks[] but only
 		    // advance when an element fits or can't be
@@ -705,11 +699,11 @@ var CodexLayout=
 		    if ((drag)&&(drag.length)) {
 			var i=0; var lim=drag.length;
 			while (i<lim)
-			    moveNodeToPage(drag[i++],page,dups,crumbs,docinfo);
+			    moveNodeToPage(drag[i++],page,dups,crumbs);
 			layout.prev=prev=drag[drag.length-1];
 			layout.drag=drag=[];}
 		    // Finally, move the node to the page
-		    if (node) moveNodeToPage(node,page,dups,crumbs,docinfo);
+		    if (node) moveNodeToPage(node,page,dups,crumbs);
 
 		    return page;}
 
@@ -742,7 +736,7 @@ var CodexLayout=
 			if (node) logfn("Layout/%s %o at %o",newpage,page,node);
 			else logfn("Layout/%s %o",newpage,page);}
 		    
-		    if (node) moveNodeToPage(node,page,dups,crumbs,docinfo);
+		    if (node) moveNodeToPage(node,page,dups,crumbs);
 		    
 		    tweakBlock(node);
 
