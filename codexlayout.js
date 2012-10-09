@@ -429,11 +429,6 @@ var CodexLayout=
 		((typeof init.scale_pages === 'undefined')?(true):
 		 (init.scale_pages));
 
-	    // Scale pages (use CSS to shrink pages to fit)
-	    var tweak_blocks=this.tweak_blocks=
-		((typeof init.tweak_blocks === 'undefined')?(true):
-		 (init.tweak_blocks));
-
 	    // This is the node DOM container where we place new pages
 	    var container=this.container=
 		init.container||fdjtDOM("div.codexpages");
@@ -593,41 +588,19 @@ var CodexLayout=
 			    newPage(block);
 			else if (((!(break_blocks))||
 				  (avoidBreakInside(block))||
-				  (hasClass(block,"codexcantsplit")))&&
-				 ((!(tweak_blocks))||
-				  (hasClass(block,"codextweaked"))||
-				  (hasClass(block,"codexavoidtweak")))) {
+				  (hasClass(block,"codexcantsplit")))) {
 			    var curpage=page;
 			    newPage(block);
 			    if (page===curpage) {
 				if (geom.bottom>page_height)
 				    addClass(page,"codexoversize");
 				ni++;}}
-			else if ((!(break_blocks))||
-				 (avoidBreakInside(block))||
-				 (hasClass(block,"codexcantsplit"))) {
-			    // If we can't split this block (this
-			    // class might be added by previous
-			    // processing), we try to tweak it (which
-			    // means using CSS magic for scaling,
-			    // etc).
-			    tweakBlock(block);
-			    addClass(block,"codextweaked");}
 			else {
 			    // Now we try to split the block, we
 			    // store the 'split block' back in the
 			    // blocks variable because we might
 			    // need to split it again.
-			    blocks[ni]=splitBlock(block);
-			    // If the block couldn't be split, try to tweak it
-			    // Could this be removed entirely?
-			    if (hasClass(block,"codexcantsplit")) {
-				var geom=getGeom(block,page);
-				if (geom.bottom>page_height) {
-				    // Still over the edge, so tweak it
-				    if (!(hasClass(block,"codexavoidtweak")))
-					tweakBlock(block);}
-				ni++;}}}
+			    blocks[ni]=splitBlock(block);}}
 		    // We fit on the page, so we'll look at the next block.
 		    else ni++;
 		    // Update the prev pointer for terminals
@@ -723,12 +696,6 @@ var CodexLayout=
 		    if (node) moveNodeToPage(node,page,dups,crumbs);
 
 		    return page;}
-
-		// Could this just be the following?
-		function fullPage(node){
-		    newPage(node);
-		    tweakBlock(node);
-		    newPage();}
 
 		function fullPage(node){
 		    var newpage="fullpagetop";
