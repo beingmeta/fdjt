@@ -46,15 +46,19 @@ var HatchShow={
 	var parent=elt.parentNode, container;
 	if (parent.className==="hatchshow_temp")
 	    return parent;
-	container=document.createElement("span");
-	container.className='hatchshow_temp';
-	parent.replaceChild(container,elt);
-	container.appendChild(elt);
-	container.style.display='block';
 	var cstyle=elt.currentStyle||
 	    ((window.getComputedStyle)&&
 	     (window.getComputedStyle(elt,null)));
 	var style=elt.style;
+	if (((cstyle)&&(cstyle.display==='block'))||
+	    (style.display==='block')||(elt.tagName==='div')||
+	    (elt.tagName==='p')||(elt.tagName[0]==='h'))
+	    container=document.createElement("div");
+	else container=document.createElement("span");
+	container.className='hatchshow_temp';
+	parent.replaceChild(container,elt);
+	container.appendChild(elt);
+	container.style.display='block';
 	// Set up CSS valures if needed
 	if (!((cstyle)&&(cstyle.display==="inline-block"))) {
 	    try {style.display="inline-block;"} catch (ex) {};
@@ -91,6 +95,8 @@ var HatchShow={
 	else return ((parent.parentNode)&&
 		     (parentWidth(parent.parentNode)));}
 
+    // This is the core of the algorithm, adjusting the font size
+    //  to put the inner element's size just past the outer element.
     function tweakFontSize(elt,delta,container,size,min,max){
 	if (!(container)) container=setupDOM(elt);
 	var parent=container.parentNode, pw=parentWidth(parent);
