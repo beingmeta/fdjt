@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2011 beingmeta, inc.
+/* Copyright (C) 2001-2012 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    These are style declarations that work with the UI elements
     implemented in handlers.js and other files.
@@ -559,7 +559,26 @@ div.fdjtlog span.time {
 .fdjtexpands.fdjtexpanded li.whenexpanded {
     display: list-item;}
 
-/* FramerD error display */
+/* Tabular output of FramerD data structures */
+
+table.fdcompound {
+    border-left: solid black 2px;
+    border-right: solid black 2px;}
+table.fdcompound.fdtable { border: solid black 2px; }
+table.fdcompound.vector { border: 4px; }
+table.fdcompound.choice { border: dotted;}
+table.fdcompound th.count {
+    font-family: sans, sans-serif;
+    font-weight: normal; font-size: 80%; 
+    visibility: hidden;}
+table.fdcompound tr:hover > th.count { visibility: visible; }
+table.fdcompound th.size { text-align: left; }
+table.fdcompound th.delimiter { font-size: 120%; font-weight: bold;}
+table.fdcompound th.delimiter.open {text-align: right;}
+table.fdcompound th.delimiter.close {
+    text-align: left; vertical-align: bottom;}
+table.fdcompound.fdtable th.key {
+    font-family: sans, sans-serif;}
 
 /* Error pages */
 
@@ -571,6 +590,71 @@ div.server_sorry {
   font-family: sans; font-size: 120%; color: silver;}
 div.server_sorry div.error {
   font-weight: bold; font-size: 140%; color: white;}
+
+div.error {
+  margin-left: 8em; text-indent: -8em; font-family: sans; }
+div.error span.ex { font-weight: bold;}
+div.error span.cxt { font-weight: normal; }
+div.error span.details { font-weight: normal; font-style: italic; }
+div.error span.irritant {
+  margin-left: 6px; white-space: nowrap;
+  color: red;}
+div.error div.irritant {
+  margin-left: 6px; font-family: fixed; white-space: pre;
+  color: red;}
+
+/* Backtraces */
+
+table.backtrace {
+    font-family: sans,sans-serif; width: 100%;
+    border-collapse: collapse;}
+table.backtrace > tbody > tr:first-child { border-top: solid black 2px;}
+table.backtrace th, table.backtrace td { vertical-align: top;}
+table.backtrace th { text-align: right; padding-right: 4px;}
+table.backtrace td { text-align: left; padding-left: 2px;}
+table.backtrace td.string { font-family: serif;}
+table.backtrace tbody.error {
+    background-color: lightblue; color: black;}
+table.backtrace tbody.error span.exception {
+    font-weight: bold; color: purple;}
+table.backtrace tbody.error span.context {
+    font-weight: bold; font-family: fixed;}
+table.backtrace tbody.error tr.details td { font-style: italic;}
+table.backtrace tbody.error tr.irritant td {
+    background-color: white; font-family: fixed; color: black;} 
+
+table.backtrace td > table { font-size: 90%;}
+
+table.backtrace > tbody > tr > th {
+    font-size: 125%; font-variant: small-caps;}
+table.backtrace > tbody > tr.details > th {
+    font-size: 90%; color: green;}
+table.backtrace > tbody > tr.irritant > th {
+    font-size: 90%; color: red;}
+table.backtrace > tbody > tr > td {
+    text-align: left; padding-top: 2px;}
+table.backtrace > tbody.eval td.expr {
+    background-color: white; color: black; white-space: pre;}
+table.backtrace > tbody.eval td.expr .focus { color: blue; }
+table.backtrace > tbody.call > tr > td {
+    background-color: whitesmoke; color: black;}
+table.backtrace > tbody.bindings > tr > td {
+    background-color: lightskyblue; color: black;}
+table.backtrace > tbody.bindings > tr > td > table.bindings {
+    font-family: fixed;}
+table.bindings { }
+table.bindings th.head { text-align: left;}
+table.bindings tr.binding th.var { font-family: sans,sans-serif;}
+table.backtrace > tbody.bindings > tr:first-child > th { background-color: blue;}
+table.backtrace > tbody.eval > tr > th { background-color: white; color: black;}
+table.backtrace > tbody.call > tr th { background-color: red; color: white;}
+table.backtrace > tbody.bindings > tr > td, table.backtrace > tbody.eval > tr > td {
+    font-family: fixed;}
+table.backtrace > tbody.call > tr > td { color: red; }
+table.backtrace > tbody.call > tr > td span.operator {font-weight: bold;}
+table.backtrace > tbody.call > tr > td span {white-space: nowrap;}
+
+/* Old backtrace code */
 
 div.error {
   margin-left: 8em; text-indent: -8em; font-family: sans; }
@@ -819,6 +903,15 @@ table.backtrace > tbody.bindings > tr > td, table.backtrace > tbody.eval > tr > 
 table.backtrace > tbody.call > tr > td { color: red; }
 table.backtrace > tbody.call > tr > td span.operator {font-weight: bold;}
 table.backtrace > tbody.call > tr > td span {white-space: nowrap;}
+
+table.fdcompound { border-left: solid black 2px;}
+table.fdcompound th.count {
+    font-weight: normal; font-size: 80%; font-style: italic;}
+table.fdcompound th.delimiter { font-size: 120%; font-weight: bold;}
+table.fdcompound th.delimiter.open {text-align: right;}
+table.fdcompound th.delimiter.close {text-align: left;}
+table.fdcompound.table th.key {
+  font-family: sans, sans-serif;}
 
 /* Emacs local variables
    ;;;  Local variables: ***
