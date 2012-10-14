@@ -27,24 +27,22 @@
 */
 
 /* To do:
-    modularize font size adjustment with delta
     add maxheight constraints
-    handle resizing
-    documentation
+    more documentation
 */
 
 var HatchShow={
-    min_font_size: false,
-    max_font_size: false,
-    classes: ["hsjs"],
+    minfont: false,
+    maxfont: false,
+    classes: ["hatchshow"],
     onload: true,onresize: true,
     unhide: true};
 
 (function(){
 
-    function setupDOM(elt){
+    function setupDOM(elt,opts){
 	var parent=elt.parentNode, container;
-	if (parent.className==="hatchshow_temp")
+	if (parent.className==="hs_fontsize_wrapper")
 	    return parent;
 	var cstyle=elt.currentStyle||
 	    ((window.getComputedStyle)&&
@@ -55,7 +53,7 @@ var HatchShow={
 	    (elt.tagName==='p')||(elt.tagName[0]==='h'))
 	    container=document.createElement("div");
 	else container=document.createElement("span");
-	container.className='hatchshow_temp';
+	container.className="hs_fontsize_wrapper";
 	parent.replaceChild(container,elt);
 	container.appendChild(elt);
 	container.style.display='block';
@@ -63,10 +61,12 @@ var HatchShow={
 	if (!((cstyle)&&(cstyle.display==="inline-block"))) {
 	    try {style.display="inline-block;"} catch (ex) {};
 	    if (style.display!=="inline-block") style.display='inline';}
+	var white_space_value=((opts)&&(opts.wsval))||
+	    (HatchShow.wsval)||"nowrap";
 	if (!((cstyle)&&
 	      ((cstyle.whiteSpace==="pre")||
 	       (cstyle.whiteSpace==="nowrap"))))
-	    style.whiteSpace="pre";
+	    style.whiteSpace=white_space_value;
 	var size=parseSize(((cstyle)&&(cstyle.fontSize))||
 			   (style.fontSize));
 	if (size) container.style.fontSize=size+"px";
@@ -76,7 +76,7 @@ var HatchShow={
 	    //   font-size style of its own, which we would clobber.
 	    size=12; container.style.fontSize=size+"px";}
 	return container;}
-
+    
     function parseSize(arg){
 	// To be more clever and robust, we could handle units besides
 	// pixels
@@ -95,8 +95,9 @@ var HatchShow={
 	else return ((parent.parentNode)&&
 		     (parentWidth(parent.parentNode)));}
 
-    // This is the core of the algorithm, adjusting the font size
-    //  to put the inner element's size just past the outer element.
+    // This is the core of the algorithm, adjusting the font size to
+    //  put the inner element's size just outside or inside the outer
+    //  element.
     function tweakFontSize(elt,delta,container,size,min,max){
 	if (!(container)) container=setupDOM(elt);
 	var parent=container.parentNode, pw=parentWidth(parent);
@@ -116,9 +117,16 @@ var HatchShow={
 	else {}
 	return size;}
     
-    function adjust(elt,min,max,unhide){
-	var container=setupDOM(elt);
+    // This is the function to adjust an element, which starts by
+    // setting up the DOM as neccessary and then using tweakFontSize
+    // with different deltas (10, 1 and 0.1) to zero in on a pretty
+    // good value.
+    function adjust(elt,opts){
+	var container=setupDOM(elt,opts);
 	var size=parseSize(container.style.fontSize);
+	var max=((opts)&&(opts.maxfont))||(HatchShow.maxfont);
+	var min=((opts)&&(opts.minfont))||(HatchShow.minfont);
+	var unhide=((opts)&&(opts.unhide))||(HatchShow.unhide);
 	if (typeof unhide === 'undefined') unhide=HatchShow.unhide;
 	size=tweakFontSize(elt,10,container,size,min,max);
 	size=tweakFontSize(elt,1,container,size,min,max);
@@ -128,18 +136,29 @@ var HatchShow={
 	if (w>pw) size=tweakFontSize(elt,0.1,container,size,min,max);
 	if (unhide) elt.style.visibility='visible';
 	return size;}
-    HatchShow.adjust=function(elt,minfont,maxfont,unhide){
-	if (!(maxfont)) maxfont=HatchShow.max_font;
-	if (!(minfont)) minfont=HatchShow.min_font;
-	return adjust(elt,minfont,maxfont,unhide);}
+    HatchShow.adjust=adjust;
     
-    // This handles getting the elements to adjust
+    // This handles getting the elements to adjust and makes up for
+    // not being able to count on jQuery or another selector library,
+    // though it does check for some of those libraries.
     function getElements(elt){
 	var results=[];
 	var classes=HatchShow.classes;
 	if (classes.length===0) return [];
 	if (!(elt)) elt=document.body;
-	if (elt.getElementsByClassName) {
+	if (elt.querySelectorAll) {
+	    var spec="."+(classes.join(", '"));
+	    return elt.querySelectorAll(spec);}
+	else if (window.jQuery) {
+	    var spec="."+(classes.join(", '"));
+	    return jQuery(spec);}
+	else if (window.fdjtDOM) {
+	    var spec="."+(classes.join(", '"));
+	    return fdjtDOM.$(spec);}
+	else if (window.Sizzle) {
+	    var spec="."+(classes.join(", '"));
+	    return Sizzle(spec);}
+	else if (elt.getElementsByClassName) {
 	    if (classes.length===1)
 		return elt.getElementsByClassName(classes[0]);
 	    else {
@@ -149,12 +168,6 @@ var HatchShow={
 		    results=results.concat(
 			elt.getElementsByClassName(classname));}
 		return results;}}
-	else if (elt.querySelectorAll) {
-	    var spec="."+(classes.join(", '"));
-	    return elt.querySelectorAll(spec);}
-	else if (window.$) {
-	    var spec="."+(classes.join(", '"));
-	    return window.$(spec);}
 	else {
 	    var regex_string=
 		((classes.length===1)?("\\b"+classes[0]+"\\b"):
@@ -173,6 +186,8 @@ var HatchShow={
 		slowZoneSearch(elt,regex,results);
 		return results;}}}
 
+    // This does a laborious search for elements whose className
+    // contains the given regex.
     function slowZoneSearch(elt,regex,results){
 	if (elt.nodeType!==1) return;
 	if ((elt.className)&&(node.className.search(regex)>=0))
@@ -183,12 +198,15 @@ var HatchShow={
 	    var child=children[i++];
 	    if (child.nodeType===1) slowZoneSearch(child,regex,results);}}
     
-    function setup(elt){
+    // This sets up a DOM tree for use with the module; it's called by
+    // the onload and onresize handlers and can also be called
+    // explicitly if we're adding elements to the DOM.
+    function setup(elt,opts){
 	if (!(elt)) elt=document.body;
 	var elts=getElements(elt);
-	var min_font=HatchShow.min_font, max_font=HatchShow.max_font;
 	var i=0, lim=elts.length;
-	while (i<lim) adjust(elts[i++],min_font,max_font);}
+	while (i<lim) adjust(elts[i++],opts||false);}
+    HatchShow.setup=setup;
 
     function onload(evt){
 	if (HatchShow.onload) setup(document.body);}
