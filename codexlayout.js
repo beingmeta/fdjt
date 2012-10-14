@@ -519,6 +519,16 @@ var CodexLayout=
 		gatherBlocks(root,blocks,terminals,styles);
 		layout.block_count=layout.block_count+blocks.length;
 
+		// If there aren't any blocks, we try adding the
+		//  content to the current page and, if it goes over,
+		//  create a new page for it.
+		if (blocks.length===0) {
+		    var node=moveNodeToPage(root,page,dups,crumbs);
+		    if (page.offsetHeight>page_height) {
+			newPage(); moveNodeToPage(root,page,dups,crumbs);}
+		    return;}
+		
+
 		// Then move the node onto the current page; we
 		// set node to the result of the move, because the
 		// node might be transformed in some way when
@@ -563,8 +573,9 @@ var CodexLayout=
 		    else if ((page.childNodes.length)&&
 			     ((forcedBreakBefore(block,style))||
 			      ((prev)&&(forcedBreakAfter(prev)))||
-			      ((prev)&&((hasClass(prev,/\bcodexfullpage\b/))||
-					((fullpages)&&(testNode(prev,fullpages))))))) {
+			      ((prev)&&
+			       ((hasClass(prev,/\bcodexfullpage\b/))||
+				((fullpages)&&(testNode(prev,fullpages))))))) {
 			// This is the easy case.  Note that we
 			// don't force a page break if the current
 			// page is empty.
@@ -648,13 +659,14 @@ var CodexLayout=
 
 		// Create a new page
 		// If node is passed, it is the first element on the new page
-		function newPage(node){
+		function newPage(node,forcepage){
 		    if ((float_pages)&&(float_pages.length)) {
 			// First add any floating pages that may have
 			// accumulated
 			var i=0; var lim=float_pages.length;
 			while (i<lim) fullPage(float_pages[i++]);
-			float_pages=[];}
+			float_pages=[];
+			forcepage=true;}
 		    var newpage="pagetop";
 		    if ((node)&&(node.nodeType===3)) {
 			var parent=node.parentNode;
@@ -663,7 +675,7 @@ var CodexLayout=
 			    (parent!==Codex.content)&&
 			    (!(hasClass(parent,"codexpage"))))
 			    node=parent;}
-		    if ((!(node))||(needNewPage(node))) {
+		    if ((!(node))||(forcepage)||(needNewPage(node))) {
 			// If we really need to create a new page, do so,
 			//  starting by dropping the curpage class from the
 			//  current page
