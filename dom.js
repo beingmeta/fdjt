@@ -1188,6 +1188,12 @@ var fdjtDOM=
 	fdjtDOM.hoverflow=function(node){
 	    return (node.scrollWidth/node.clientWidth);}
 
+	/* Adjusting font sizes (wrappers for hatchshow.js) */
+	fdjtDOM.adjustFont(elt,opts){
+	    return HatchShow.adjust(elt,opts);}
+	fdjtDOM.adjustFonts(elt,opts){
+	    return HatchShow.setup(elt,opts);}
+	
 	/* Sizing to fit */
 
 	var default_trace_adjust=false;
@@ -1295,7 +1301,8 @@ var fdjtDOM=
 	function adjustToFit(container,threshold,padding){
 	    var trace_adjust=(container.traceadjust)||
 		fdjtDOM.trace_adjust||
-		((container.className)&&(container.className.search(/\btraceadjust\b/)>=0))||
+		((container.className)&&
+		 (container.className.search(/\btraceadjust\b/)>=0))||
 		default_trace_adjust;
 	    var style=getStyle(container);
 	    var geom=getGeometry(container);
@@ -1319,7 +1326,8 @@ var fdjtDOM=
 		(fdjtDOM.parsePX(style.borderBottomWidth)||0)+
 		padding;
 	    maxwidth=maxwidth-hpadding; maxheight=maxheight-vpadding; 
-	    var itfits=((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
+	    var itfits=
+		((bounds.height/maxheight)<=1)&&((bounds.width/maxwidth)<=1);
 	    if (trace_adjust) 
 		fdjtLog("Adjust (%o) %s cur=%o%s, best=%o~%o, limit=%ox%o=%o, box=%ox%o=%o, style=%s",
 			goodenough,fdjtDOM.nodeString(container),
