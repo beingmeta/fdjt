@@ -32,17 +32,19 @@
 */
 
 var HatchShow={
-    minfont: false,
-    maxfont: false,
-    classes: ["hatchshow"],
     onload: true,onresize: true,
+    // These properties can all be overridden in the *opts* argument
+    //  to these functions
+    minfont: false,maxfont: false,
+    classes: ["hatchshow","fullwidth"],
+    whitespace: "nowrap",
     unhide: true};
 
 (function(){
 
     function setupDOM(elt,opts){
 	var parent=elt.parentNode, container;
-	if (parent.className==="hs_fontsize_wrapper")
+	if (parent.className==="fontsize_wrapper")
 	    return parent;
 	var cstyle=elt.currentStyle||
 	    ((window.getComputedStyle)&&
@@ -53,7 +55,7 @@ var HatchShow={
 	    (elt.tagName==='p')||(elt.tagName[0]==='h'))
 	    container=document.createElement("div");
 	else container=document.createElement("span");
-	container.className="hs_fontsize_wrapper";
+	container.className="fontsize_wrapper";
 	parent.replaceChild(container,elt);
 	container.appendChild(elt);
 	container.style.display='block';
@@ -98,10 +100,10 @@ var HatchShow={
     // This is the core of the algorithm, adjusting the font size to
     //  put the inner element's size just outside or inside the outer
     //  element.
-    function tweakFontSize(elt,delta,container,size,min,max){
-	if (!(container)) container=setupDOM(elt);
+    function tweakFontSize(elt,delta,container,size,min,max,pw){
 	var parent=container.parentNode, pw=parentWidth(parent);
 	if (!(size)) size=parseSize(container.style.fontSize);
+	var cursize=size;
 	// This should hold us for a while
 	if (!(max)) max=7000000; if (!(min)) min=1; 
 	// This is where the real scaling happens
@@ -138,6 +140,14 @@ var HatchShow={
 	return size;}
     HatchShow.adjust=adjust;
     
+    function classes2spec(classes){
+	var specs=[]; var i=0, lim=classes.length;
+	while (i<lim) {
+	    var classname=classes[i++];
+	    if (classname[0]===".") specs.push(classname);
+	    else specs.push("."+classname);}
+	return specs.join(",");}
+
     // This handles getting the elements to adjust and makes up for
     // not being able to count on jQuery or another selector library,
     // though it does check for some of those libraries.
@@ -147,13 +157,13 @@ var HatchShow={
 	if (classes.length===0) return [];
 	if (!(elt)) elt=document.body;
 	if (elt.querySelectorAll) {
-	    var spec="."+(classes.join(", '"));
+	    var spec=classes2spec(classes);
 	    return elt.querySelectorAll(spec);}
 	else if (window.jQuery) {
-	    var spec="."+(classes.join(", '"));
+	    var spec=classes2spec(classes);
 	    return jQuery(spec);}
 	else if (window.fdjtDOM) {
-	    var spec="."+(classes.join(", '"));
+	    var spec=classes2spec(classes);
 	    return fdjtDOM.$(spec);}
 	else if (window.Sizzle) {
 	    var spec="."+(classes.join(", '"));
@@ -202,10 +212,14 @@ var HatchShow={
     // the onload and onresize handlers and can also be called
     // explicitly if we're adding elements to the DOM.
     function setup(elt,opts){
-	if (!(elt)) elt=document.body;
-	var elts=getElements(elt);
-	var i=0, lim=elts.length;
-	while (i<lim) adjust(elts[i++],opts||false);}
+	if (typeof elt === 'array') {
+	    var i=0, lim=elt.length;
+	    while (i<lim) adjust(elt[i++],opts||false);}
+	else {
+	    if (!(elt)) elt=document.body;
+	    var elts=getElements(elt);
+	    var i=0, lim=elts.length;
+	    while (i<lim) adjust(elts[i++],opts||false);}}
     HatchShow.setup=setup;
 
     function onload(evt){
