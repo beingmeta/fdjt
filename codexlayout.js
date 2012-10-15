@@ -174,7 +174,9 @@ var CodexLayout=
 			if ((node.offsetHeight===0)||(node.offsetHeight===0)) {
 			    fdjtDOM.replace(placeholder,node);
 			    continue;}}
-		    var scale_spec=((scale_attrib)?(scale_attrib.split(',')):["0.5","0.5"]);
+		    var scale_spec=
+			((scale_attrib)?(scale_attrib.split(',')):
+			 ["0.5","0.5"]);
 		    var scale_factor=false;
 		    if (scale_spec.length>1) {
 			var to_width=parseFloat(scale_spec[0])*width;
@@ -191,16 +193,22 @@ var CodexLayout=
 			var v_scale=to_height/node.offsetHeight;
 			if ((v_scale<1)||(v_scale>1.2)) scale_factor=v_scale;}
 		    if (scale_factor) {
-			if ((node.tagName==='IMG')&&(!((node.style.width)||(node.style.height)))) {
-			    var force_width=Math.round(scale_factor*node.offsetWidth);
-			    var force_height=Math.round(scale_factor*node.offsetHeight);
+			if ((node.tagName==='IMG')&&
+			    (!((node.style.width)||(node.style.height)))) {
+			    var force_width=
+				Math.round(scale_factor*node.offsetWidth);
+			    var force_height=
+				Math.round(scale_factor*node.offsetHeight);
 			    node.style.width=force_width+"px";
 			    node.style.height=force_height+"px";}
 			else {
 			    if (node.getAttribute("data-scaleorigin"))
-				node.style[fdjtDOM.transformOrigin]=node.getAttribute("data-scaleorigin");
-			    else node.style[fdjtDOM.transformOrigin]="center top";
-			    node.style[fdjtDOM.transform]='scale('+scale_factor+')';}
+				node.style[fdjtDOM.transformOrigin]=
+				node.getAttribute("data-scaleorigin");
+			    else node.style[fdjtDOM.transformOrigin]=
+				"center top";
+			    node.style[fdjtDOM.transform]=
+				'scale('+scale_factor+')';}
 			scaled.push(node);}
 		    if (placeholder) fdjtDOM.replace(placeholder,node);}}
 	    return scaled;}
