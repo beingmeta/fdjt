@@ -534,8 +534,9 @@ var CodexLayout=
 		    var node=moveNodeToPage(root,page,dups,crumbs);
 		    if (page.offsetHeight>page_height) {
 			newPage(); moveNodeToPage(root,page,dups,crumbs);}
-		    return;}
-		
+		    layout.root=cur_root=false;
+		    if (donefn) donefn(layout);
+		    return this;}
 
 		// Then move the node onto the current page; we
 		// set node to the result of the move, because the
