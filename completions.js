@@ -91,9 +91,9 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
     // This gets the text of a completion node, excluding variations
     // and any fdjtdecoration(s).
     function completionText(node,sofar){
-	if (hasClass(node,"variation")) return sofar;
-	else if (hasClass(node,"fdjtdecoration")) return sofar;
-	else if (node.nodeType===3) return sofar+node.nodeValue;
+	if (node.nodeType===3) return sofar+node.nodeValue;
+	else if (hasClass(node,"variation")) return sofar;
+	else if (hasClass(node,"fdjtskiptext")) return sofar;
 	else if ((node.nodeType===1)&&(node.childNodes)) {
 	    var children=node.childNodes;
 	    var i=0; var lim=children.length;

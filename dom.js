@@ -903,7 +903,8 @@ var fdjtDOM=
 
 	function flatten(string){return string.replace(/\s+/," ");};
 
-	function textify(arg,flat,inside){
+	function textify(arg,flat,depth,domarkup){
+	    if (typeof depth !== 'number') depth=0;
 	    if (arg.text) return flatten(arg.text);
 	    else if (arg.nodeType) {
 		if (arg.nodeType===3) return arg.nodeValue;
@@ -914,18 +915,18 @@ var fdjtDOM=
 		    var string=""; var suffix="";
 		    if (display_type==='none') return "";
 		    else if ((classname)&&
-			     ((classname==='fdjtdecoration')||
-			      (classname.search(/\bfdjtdecoration\b/)>=0)))
+			     ((classname==='fdjtskiptext')||
+			      (classname.search(/\bfdjtskiptext\b/)>=0)))
 			return "";
 		    else if ((!(children))||(children.length===0)) {
-			if (arg.alt) return "["+arg.alt+"]";
-			else if (arg.title)
-			    return "["+arg.title+"]";
+			if (!(domarkup)) return "";
+			else if (arg.alt) return "["+arg.alt+"]";
 			else return "[?]";}
 		    // Figure out what suffix and prefix to use for this element
-		    // If inside is false, don't use anything.
-		    else if (!(inside)) {}
 		    else if (!(display_type)) {}
+		    // If you're inside the element (depth>0), don't use anything
+		    // Let's try it without this
+		    // else if (depth) {}
 		    else if (display_type==="inline") {}
 		    else if (flat) suffix=" ";
 		    else if ((display_type==="block") ||
@@ -943,7 +944,7 @@ var fdjtDOM=
 				string=string+flatten(child.nodeValue);
 			else string=string+child.nodeValue;
 			else if (child.nodeType===1) {
-			    var stringval=textify(child,flat,true);
+			    var stringval=textify(child,flat,true,domarkup);
 			    if (stringval) string=string+stringval;}
 			else continue;}
 		    return string+suffix;}
@@ -1088,7 +1089,11 @@ var fdjtDOM=
 
 	function textwidth(node){
 	    if (node.nodeType===3) return node.nodeValue.length;
-	    else if ((node.nodeType===1)&&(node.childNodes)) {
+	    else if (node.nodeType!==1) return 0;
+	    else if ((node.className==="fdjtskiptext")||
+		     (node.className.search(/\bfdjtskiptext/)>=0))
+		return 0;
+	    else if (node.childNodes) {
 		var children=node.childNodes;
 		var i=0; var lim=children.length; var width=0;
 		while (i<lim) {
@@ -1098,9 +1103,7 @@ var fdjtDOM=
 			width=width+textwidth(child);
 		    else {}}
 		return width;}
-	    else if (node.nodeType!==1) return 0;
 	    else if (node.alt) return node.alt.length+2;
-	    else if (node.title) return node.title.length+2;
 	    else return 3;}
 	fdjtDOM.textWidth=textwidth;
 
@@ -2100,7 +2103,7 @@ var fdjtDOM=
 	addInit(setupCustomInputs,"CustomInputs");
 
 	fdjtDOM.getParaHash=function(node){
-	    return paraHash(textify(node));}
+	    return paraHash(textify(node,true,false,false));}
 
 	return fdjtDOM;
     })();
