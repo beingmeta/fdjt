@@ -1189,9 +1189,9 @@ var fdjtDOM=
 	    return (node.scrollWidth/node.clientWidth);}
 
 	/* Adjusting font sizes (wrappers for hatchshow.js) */
-	fdjtDOM.adjustFont(elt,opts){
-	    return HatchShow.adjust(elt,opts);}
-	fdjtDOM.adjustFonts(elt,opts){
+	fdjtDOM.adjustFont=function(elt,opts){
+	    return HatchShow.adjust(elt,opts);};
+	fdjtDOM.adjustFonts=function(elt,opts){
 	    return HatchShow.setup(elt,opts);}
 	
 	/* Sizing to fit */
