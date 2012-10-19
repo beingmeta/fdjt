@@ -504,6 +504,9 @@ table.fdjtform th.rightalign, th.rightalign, td.rightalign { text-align: right;}
 table.fdjtform th.centeralign, th.centeralign, td.centeralign {
     text-align: center;}
 
+table.fdjtform td.text, table.fdjt td.text, table.fdjtdata td.text {
+    vertical-align: baseline;}
+
 th button, td button { white-space: nowrap;}
 
 form.evalform input[name='EXPR'] {
