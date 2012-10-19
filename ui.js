@@ -211,12 +211,15 @@ fdjtUI.Highlight=(function(){
 	    (getcheckable(target))||
 	    (getcheckable(checkspan));
 	if (!(checkbox)) return false;
+	var ischecked=hasClass(checkspan,"ischecked");
 	var changed=false;
-	if (typeof checked === 'undefined') {
-	    var hasclass=hasClass(checkspan,"ischecked");
-	    checked=(!(hasclass));}
+	if (typeof checked === 'undefined') checked=ischecked;
 	if (checkbox.checked!==checked) {
 	    checkbox.checked=checked; changed=true;}
+	// If the checkspan is inconsistent, the checkbox was probably
+	// just changed
+	else if (ischecked!==checkbox.checked) changed=true;
+	else {}
 	// We change this anyway, just in case there's been a glitch
 	if (checked) addClass(checkspan,"ischecked");
 	else dropClass(checkspan,"ischecked");
@@ -799,7 +802,10 @@ fdjtUI.Collapsible.focus=function(evt){
     var timeouts={};
     
     fdjtUI.Delay=function(interval,name,fcn){
-	window.setTimeout(fcn,interval);};}());
+	window.setTimeout(fcn,interval);};
+    fdjtUI.Delayed=function(fcn,interval){
+	if (!(interval)) interval=25;
+	window.setTimeout(fcn,interval);};})();
 
 /* Triggering submit events */
 
