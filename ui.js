@@ -1081,24 +1081,7 @@ fdjtUI.Collapsible.focus=function(evt){
 
 /* Non-blocking alerts */
 
-(function(){
-    function close_alert(evt){
-	evt=evt||event;
-	var target=fdjtUI.T(evt);
-	var alert=fdjtDOM.getParent(target,".fdjtalert");
-	if (alert) setTimeout(function(){
-	    fdjtDOM.removeChild(alert);});}
 
-    fdjtUI.alert=function(){
-	var close_button=fdjtImage(
-	    "https://beingmeta/static/g/codex/redx64x64.png",
-	    "closebutton","Close");
-	var box=fdjtDOM("div.fdjtalert",close_button);
-	close_button.onclick=close_alert();
-	fdjtDOM.append(fdjtDOM.toArray(arguments));
-	fdjtDOM.prepend(document.body,box);}
-    
-})();
 
 /* Emacs local variables
    ;;;  Local variables: ***
