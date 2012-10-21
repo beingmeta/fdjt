@@ -1081,6 +1081,30 @@ fdjtUI.Collapsible.focus=function(evt){
 
 /* Non-blocking alerts */
 
+(function(){
+    function close_alert(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	var alertbox=fdjtDOM.getParent(target,".fdjtalert");
+	if (alertbox) setTimeout(
+	    function(){
+		fdjtDOM.addClass(alertbox,"closing");
+		setTimeout(function(){fdjtDOM.remove(alertbox);},
+			   1500);},
+	    100);}
+
+    function alertfn(){
+	var close_button=fdjtDOM.Image(
+	    "https://beingmeta.s3.amazonaws.com/static/g/codex/redx40x40.png",
+	    "closebutton","Close");
+	var box=fdjtDOM("div.fdjtalert",close_button);
+	close_button.onclick=close_alert;
+	close_button.title="click to close";
+	fdjtDOM.appendArray(box,arguments);
+	fdjtDOM.prepend(document.body,box);}
+
+    fdjtUI.alert=alertfn;
+})();
 
 
 /* Emacs local variables
