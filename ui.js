@@ -1095,7 +1095,7 @@ fdjtUI.Collapsible.focus=function(evt){
 	    "closebutton","Close");
 	var box=fdjtDOM("div.fdjtalert",close_button);
 	close_button.onclick=close_alert();
-	fdjtDOM.append(arguments);
+	fdjtDOM.append(fdjtDOM.toArray(arguments));
 	fdjtDOM.prepend(document.body,box);}
     
 })();
