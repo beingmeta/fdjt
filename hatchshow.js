@@ -36,7 +36,7 @@ var HatchShow={
     // These properties can all be overridden in the *opts* argument
     //  to these functions
     minfont: false,maxfont: false,
-    classes: ["hatchshow","fullwidth"],
+    classes: ["hatchshow","adjustfont"],
     whitespace: "nowrap",
     unhide: true};
 
