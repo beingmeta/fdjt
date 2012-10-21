@@ -818,7 +818,13 @@ fdjtUI.Collapsible.focus=function(evt){
 	submit_event.initEvent('submit',false,true);
 	form.dispatchEvent(submit_event);
 	form.submit();}
-    fdjtUI.dosubmit=dosubmit;}());
+    fdjtUI.dosubmit=dosubmit;
+
+    function submitOnEnter(evt){
+	if ((evt.keyCode===13)||(evt.charCode===13)) {
+	    fdjtUI.cancel(evt);
+	    dosubmit(evt);}}
+    fdjtUI.submitOnEnter=submitOnEnter;}());
 
 /* Looking for vertical box overflow */
 
@@ -1070,6 +1076,28 @@ fdjtUI.Collapsible.focus=function(evt){
 	else {
 	    addClass(ellipsis,"expanded");
 	    dropClass(ellipsis,"compact");}};
+    
+})();
+
+/* Non-blocking alerts */
+
+(function(){
+    function close_alert(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	var alert=fdjtDOM.getParent(target,".fdjtalert");
+	if (alert) setTimeout(function(){
+	    fdjtDOM.removeChild(alert);});}
+
+    fdjtUI.alert=function(){
+	var close_button=fdjtImage(
+	    "https://beingmeta/static/g/codex/redx64x64.png",
+	    "closebutton","Close");
+	var box=fdjtDOM("div.fdjtalert",close_button);
+	close_button.onclick=close_alert();
+	fdjtDOM.append(arguments);
+	fdjtDOM.prepend(document.body,box);}
+    
 })();
 
 /* Emacs local variables

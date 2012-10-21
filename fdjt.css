@@ -916,6 +916,14 @@ table.fdcompound th.delimiter.close {text-align: left;}
 table.fdcompound.table th.key {
   font-family: sans, sans-serif;}
 
+/* Alerts */
+
+div.fdjtalert {
+    position: fixed;
+    top: auto; bottom: auto; left: auto; right: auto;}
+div.fdjtalert .closebutton {
+    position: absolute; left: 5px; right: 5px;}
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
