@@ -48,7 +48,7 @@ fdjtUI.TapHold=(function(){
     var cancel=fdjtUI.cancel;
     // We disable the default behavior, which is usually selection
     // (where we do tap and hold)
-    var nodefault=fdjtUI.nodefault;
+    var noDefault=fdjtUI.noDefault;
     var dontcancel=function(evt){};
 
     var keynums={
@@ -97,7 +97,7 @@ fdjtUI.TapHold=(function(){
 	//  from the DOM, so we use the originating event target (if
 	//  there is one)
 	if ((orig)&&(!(target.parentNode))) target=fdjtUI.T(orig);
-	if (orig) nodefault(orig);
+	if (orig) noDefault(orig);
 	target.dispatchEvent(evt);}
 
     function tap_handler(evt){
@@ -129,7 +129,7 @@ fdjtUI.TapHold=(function(){
 	touched=th_target; pressed=false;
 	if (trace_taps) fdjtLog("startpress %o",evt);
 	if (reticle.live) reticle.highlight(true);
-	nodefault(evt);
+	noDefault(evt);
 	th_timer=setTimeout((function(evt){
 	    if (trace_taps) fdjtLog("startpress/timeout %o",evt);
 	    pressed=th_target;
@@ -147,7 +147,7 @@ fdjtUI.TapHold=(function(){
 	    if (th_target===touched) tapped(th_target,evt);}
 	else if (pressed) {released(pressed,evt);}
 	if (reticle.live) reticle.highlight(false);
-	nodefault(evt);
+	noDefault(evt);
 	start_x=false; start_y=false;
 	touched=false; pressed=false;}
     function abortpress(evt){
@@ -185,9 +185,8 @@ fdjtUI.TapHold=(function(){
 	    return;
 	else {
 	    if (reticle.live) reticle.onmousemove(evt);
-	    nodefault(evt);}
-	if ((pressed)&&
-	    (th_target!==pressed)) {
+	    noDefault(evt);}
+	if ((pressed)&&(th_target!==pressed)) {
 	    if (trace_taps)
 		fdjtLog("move %o %o %d,%d",
 			th_target,th_target.name,touch_x,touch_y);
@@ -240,7 +239,7 @@ fdjtUI.TapHold=(function(){
 	    return;
 	if (fdjtUI.isClickable(evt)) return;
 	if (!(touched)) startpress(th_target,evt);
-	nodefault(evt);}
+	noDefault(evt);}
     
     function keyup(evt){
 	evt=evt||event;
@@ -285,10 +284,12 @@ fdjtUI.TapHold=(function(){
 	else if (trace_taps)
 	    fdjtLog("md=%o, kd=%o",mouse_down,holdkey_down);
 	else {}
-	nodefault(evt);}
+	noDefault(evt);}
 
     function TapHold(elt,fortouch){
-	elt=elt||window;
+	if (!(elt)) {
+	    fdjtLog.warn("TapHold with no argument!");
+	    return;}
 	addClass(elt,"fdjtaphold");
 	fdjtDOM.addListener(elt,((fortouch)?("touchmove"):("mousemove")),
 			    mousemove);
