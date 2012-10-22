@@ -581,6 +581,12 @@ var fdjtDOM=
 	    var sel=new Selector(spec);
 	    return ((sel.match(node))?(node):(getParent(node,sel)));};
 
+	function getChildNodes(node){
+	    if (node.nodeType!==1) return [];
+	    else if (!(node.childNodes)) return [];
+	    else return toArray(node.childNodes);}
+	fdjtDOM.getChildNodes=getChildNodes;
+
 	function getChildren(node,classname,attrib,results){
 	    if (typeof node === "string") node=fdjtID(node);
 	    if (!(node)) return [];
