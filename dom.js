@@ -1760,7 +1760,12 @@ var fdjtDOM=
 
 	function addListener(node,evtype,handler){
 	    if (!(node)) node=document;
-	    if (typeof node === 'string') node=fdjtID(node);
+	    if (typeof node === 'string') {
+		var elt=fdjtID(node);
+		if (!(node)) {
+		    fdjtLog("Can't find #%s",node)
+		    return;}
+		node=elt;}
 	    else if (node instanceof Array) {
 		var i=0; var lim=node.length;
 		while (i<lim) addListener(node[i++],evtype,handler);
