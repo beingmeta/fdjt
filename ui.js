@@ -950,7 +950,7 @@ fdjtUI.Collapsible.focus=function(evt){
     fdjtUI.T=function(evt) {
 	evt=evt||event; return (evt.target)||(evt.srcElement);};
 
-    fdjtUI.nodefault=function(evt){
+    fdjtUI.noDefault=function(evt){
 	evt=evt||event;
 	if (evt.preventDefault) evt.preventDefault();
 	else evt.returnValue=false;
@@ -992,7 +992,7 @@ fdjtUI.Collapsible.focus=function(evt){
 	else evt.returnValue=false;
 	evt.cancelBubble=true;
 	return false;};
-    fdjtUI.nobubble=function(evt){
+    fdjtUI.noBubble=function(evt){
 	evt=evt||event;
 	evt.cancelBubble=true;};
 
