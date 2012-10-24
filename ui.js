@@ -1089,7 +1089,9 @@ fdjtUI.Collapsible.focus=function(evt){
 	if (alertbox) setTimeout(
 	    function(){
 		fdjtDOM.addClass(alertbox,"closing");
-		setTimeout(function(){fdjtDOM.remove(alertbox);},
+		setTimeout(function(){
+		    if (fdjtDOM.hasClass(alertbox,"closing"))
+			fdjtDOM.remove(alertbox);},
 			   1500);},
 	    100);}
 
@@ -1101,10 +1103,32 @@ fdjtUI.Collapsible.focus=function(evt){
 	close_button.onclick=close_alert;
 	close_button.title="click to close";
 	fdjtDOM.appendArray(box,arguments);
-	fdjtDOM.prepend(document.body,box);}
+	fdjtDOM.prepend(document.body,box);
+	return box;}
 
     fdjtUI.alert=alertfn;
-})();
+
+    function alertfor(n){
+	var args=fdjtDOM.Array(arguments,1);
+	var box=alertfn.apply(null,args);
+	if (n<=0) return box;
+	var closebutton=fdjtDOM.getChild(box,".closebutton");
+	var countdown=fdjtDOM("div.countdown",n+"...");
+	box.replaceChild(countdown,closebutton);
+	var ticker=setInterval(function(){
+	    if (n<=0) {
+		clearInterval(ticker);
+		fdjtDOM.addClass(box,"closing");
+		setTimeout(function(){fdjtDOM.remove(box);},
+			   1500);}		    
+	    else {n--; countdown.innerHTML=n+"...";}},
+			       1000);
+	fdjtDOM.addListener(box,"click",function(evt){
+	    clearInterval(ticker); fdjtDOM.dropClass(box,"closing");
+	    box.replaceChild(closebutton,countdown);
+	    countdown.innerHTML="cancelled";});
+	return box;}
+    fdjtUI.alertFor=alertfor;})();
 
 
 /* Emacs local variables
