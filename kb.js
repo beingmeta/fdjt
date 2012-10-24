@@ -198,16 +198,16 @@ var fdjtKB=
 		    if ((ref)&&(ref._init)) return ref;
 		    else if (ref) return ref.init(cur);
 		    else return this.ref(qid).init(cur);}
-		var obj=(((ref)&&(ref._init))?(ref):
-			 ((ref)&&(cur))?(ref.init(cur)):
-			 (ref)?(ref):(this.ref(qid)));
+		if ((ref)&&(ref._init)) ref.update(data);
+		else if (ref) ref.init(data);
+		else {
+		    ref=this.ref(qid);
+		    ref.init(data);}
 		if (((debug)&&(this.traceimport))||(debug>1))
 		    log("[%fs] Import to %s %o <== %o",
 			fdjtET(),qid,obj,data);
 		if (this.storage) this.storage.Import(data);
-		if (ref||cur) obj.update(data);
-		else obj.init(data);
-		return obj;}};
+		return ref;}};
 	
 	Pool.prototype.find=function(prop,val){
 	    if (!(this.index)) return [];
@@ -253,7 +253,8 @@ var fdjtKB=
 		term=term.slice(3);
 	    else if (((arg[0]===':')&&(arg[1]==='@'))&&
 		     (((slash=arg.indexOf('/',3))>=0)))  {
-		pool=fdjtKB.PoolRef(arg.slice(1,slash+1));}
+		pool=fdjtKB.PoolRef(arg.slice(1,slash+1));
+		term=term.slice(1);}
 	    else if (((arg[0]==='@'))&&
 		     (((slash=arg.indexOf('/',2))>=0)))  {
 		pool=fdjtKB.PoolRef(arg.slice(0,slash+1));}
