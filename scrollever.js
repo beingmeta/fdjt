@@ -24,18 +24,35 @@
 function fdjtScrollEver(spec) {
     var busy=false, timer=false;
     if (!(spec)) spec={};
-    var url=spec.url||fdjtDOM.getLink("SCROLLFETCH");
+    var url=spec.url||
+	fdjtDOM.getLink("~{http://fdjt.org/}scrollfetch")||
+	fdjtDOM.getLink("~SCROLLFETCH");
     var off=spec.off||fdjtState.getQuery("OFF")||0;
     var win=spec.win||fdjtState.getQuery("WINDOW")||
-	fdjtDOM.getMeta("SCROLLWINDOW")||7;
+	fdjtDOM.getMeta("~{http://fdjt.org/}scrollwindow")||
+	fdjtDOM.getMeta("~SCROLLWINDOW")||
+	7;
     var limit=spec.limit||fdjtState.getQuery("LIMIT")||
-	fdjtDOM.getMeta("SCROLLMAX")||7;
-    var container=spec.container||fdjtDOM.getMeta("SCROLLELEMENT")||
-	fdjtID("FDJTSCROLLCONTAINER");
-    var thresh=spec.thresh||fdjtDOM.getMeta("SCROLLTHRESH")||100;
-    var interval=spec.interval||fdjtDOM.getMeta("SCROLLINTERVAL")||500;
-    if (typeof container==='string')
-	container=document.getElementById(container);
+	fdjtDOM.getMeta("~{http://fdjt.org/}scrollmax")||
+	fdjtDOM.getMeta("~scrollmax")||
+	7;
+    var container=spec.container||
+	fdjtDOM.getMeta("~{http://fdjt.org/}scrollelement")||
+	fdjtDOM.getMeta("~scrollelement")||
+	"FDJTSCROLLCONTAINER";
+    if (typeof container === 'string') {
+	if (fdjtID(container)) container=fdjtID(container);
+	else {
+	    fdjtLog.warn("No container %s",container);
+	    return;}}
+    var thresh=spec.thresh||
+	fdjtDOM.getMeta("~{http://fdjt.org/}scrollthresh")||
+	fdjtDOM.getMeta("~scrollthresh")||
+	100;
+    var interval=spec.interval||
+	fdjtDOM.getMeta("~{http://fdjt.org/}scrollinterval")||
+	fdjtDOM.getMeta("~scrollinterval")||
+	500;
     if (typeof off !== 'number') off=parseInt(off);
     if (typeof win !== 'number') win=parseInt(win);
     if (typeof limit !== 'number') limit=parseInt(limit);

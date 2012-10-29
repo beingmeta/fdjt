@@ -1425,48 +1425,147 @@ var fdjtDOM=
 	    return false;}
 	fdjtDOM.getHEAD=getHEAD;
 
-	function getMeta(name,multiple,matchcase,dom){
+	var schema2tag={}, tag2schema={};
+	var got_meta_schemas=false;
+	function getMetaSchemas(){
+	    var links=
+		((document.getElementsByTagName)&&
+		 (document.getElementsByTagName('link')))||
+		((document.head..getElementsByTagName)&&
+		 (document.head.getElementsByTagName('link')))||
+		(getChildren(document,'link'));
+	    var i=0, lim=links.length;
+	    while (i<lim) {
+		var link=links[i++];
+		if (!(link.rel)) continue;
+		else if (!(link.href)) continue;
+		else if (link.rel.search("schema.")===0) {
+		    var tag=link.rel.slice(7);
+		    var href=link.href;
+		    // We let there be multiple references
+		    schema2tag[href]=tag;
+		    tag2schema[tag]=href;}
+		else continue;}}
+	var app_schemas={};
+	fdjtDOM.addAppSchema=function(name,spec){
+	    app_schemas[name]=spec;};
+
+	function getMeta(name,multiple,foldcase,dom){
 	    var results=[];
-	    var matchname=((!(matchcase))&&(name.toUpperCase()));
 	    var elts=((document.getElementsByTagName)?
 		      (document.getElementsByTagName("META")):
 		      (getChildren(document,"META")));
+	    var rx=((name instanceof RegExp)?(name):(false));
+	    if ((typeof name ==='string')&&
+		(typeof foldcase==='undefined')) {
+		if (name[0]==='^') {
+		    foldcase=false; name=name.slice(1);}
+		else if (name[0]==='~') {
+		    foldcase=true; name=name.slice(1);}
+		else {}}
+	    if (typeof name !== 'string') {}
+	    else if (name[0]==='{') {
+		var schema_end=name.indexOf('}'), schema=false;
+		if (schema_end>2) schema=name.slice(1,schema_end);
+		var prefix=((schema)&&(schema2tag[schema]));
+		if (prefix) name=prefix+"."+name.slice(schema_end+1);}
+	    else if (name[0]==='=') {
+		// This overrides any schema expansion
+		name=name.slice(1);}
+	    else if ((name[0]==='*')&&(name[1]==='.')) {
+		// This overrides any schema expansion
+		rx=new RegExp("[^.]\\."+name.slice(2),
+			      ((foldcase)?("i"):("")));}
+	    else if (name.indexOf('.')>0) {
+		var dot=name.indexOf('.');
+		var prefix=name.slice(0,dot);
+		var schema=app_schemas[prefix];
+		if ((schema)&&(schema2tag[schema])) 
+		    name=schema2tag[schema]+name.slice(dot);}
+	    else {}
+	    var matchname=((foldcase)&&
+			   (typeof name === 'string')&&
+			   (name.toUpperCase()));
 	    var i=0; while (i<elts.length) {
-		if (elts[i])
-		    if ((elts[i].name===name)||
-			((matchname)&&(elts[i].name)&&
-			 (elts[i].name.toUpperCase()===matchname))) {
-			if (multiple) {
-			    if (dom) results.push(elts[i++]);
-			    else results.push(elts[i++].content);}
-			else if (dom) return elts[i];
-			else return elts[i].content;}
-		else i++;}
+		var elt=elts[i++];
+		if (!(elt)) continue;
+		else if (!(elt.name)) continue;
+		else if ((rx)?(rx.exec(elt.name)):
+			 (matchname)?
+			 (matchname===elt.name.toUpperCase()):
+			 (name===elt.name)) {
+		    if (multiple) {
+			if (dom) results.push(elt);
+			else results.push(elt.content);}
+		    else if (dom) return elt;
+		    else return elt.content;}
+		else {}}
 	    if (multiple) return results;
 	    else return false;}
 	fdjtDOM.getMeta=getMeta;
+	fdjtDOM.getMetaElts=function(name){
+	    var matchcase;
+	    return getMeta(name,true,matchcase,true);};
 
 	// This gets a LINK href field
-	function getLink(name,multiple,matchcase,dom){
+	function getLink(name,multiple,foldcase,dom){
 	    var results=[];
-	    var matchname=((!((matchcase)))&&(name.toUpperCase()));
 	    var elts=((document.getElementsByTagName)?
 		      (document.getElementsByTagName("LINK")):
 		      (getChildren(document,"LINK")));
+	    var rx=((name instanceof RegExp)?(name):(false));
+	    if ((typeof name ==='string')&&
+		(typeof foldcase==='undefined')) {
+		if (name[0]==='^') {
+		    foldcase=false; name=name.slice(1);}
+		else if (name[0]==='~') {
+		    foldcase=true; name=name.slice(1);}
+		else {}}
+	    if (typeof name !== 'string') {}
+	    else if (name[0]==='{') {
+		var schema_end=name.indexOf('}'), schema=false;
+		if (schema_end>2) schema=name.slice(1,schema_end);
+		var prefix=((schema)&&(schema2tag[schema]));
+		if (prefix) name=prefix+"."+name.slice(schema_end+1);}
+	    else if (name[0]==='=') {
+		// This overrides any schema expansion and does
+		//  just a literal string match
+		name=name.slice(1);}
+	    else if ((name[0]==='*')&&(name[1]==='.')) {
+		// Schema wildcard, not recommended
+		rx=new RegExp("[^.]\\."+name.slice(2),
+			      ((foldcase)?("i"):("")));}
+	    else if (name.indexOf('.')>0) {
+		var dot=name.indexOf('.');
+		var prefix=name.slice(0,dot);
+		var schema=app_schemas[prefix];
+		if ((schema)&&(schema2tag[schema])) 
+		    name=schema2tag[schema]+name.slice(dot);}
+	    else {}
+	    var matchname=((foldcase)&&
+			   (typeof name === 'string')&&
+			   (name.toUpperCase()));
 	    var i=0; while (i<elts.length) {
-		if (elts[i])
-		    if ((elts[i].rel===name)||
-			((matchname)&&(elts[i].rel)&&
-			 (elts[i].rel.toUpperCase()===matchname))) {
-			if (multiple) {
-			    if (dom) results.push(elts[i++]);
-			    else results.push(elts[i++].href);}
-			else if (dom) return elts[i];
-			else return elts[i].href;}
-		else i++;}
+		var elt=elts[i++];
+		if (!(elt)) continue;
+		else if (!(elt.rel)) continue;
+		else if ((rx)?(rx.exec(elt.rel)):
+			 (matchname)?
+			 (matchname===elt.rel.toUpperCase()):
+			 (name===elt.rel)) {
+		    if (multiple) {
+			if (dom) results.push(elt);
+			else results.push(elt.href);}
+		    else if (dom) return elt;
+		    else return elt.href;}
+		else {}}
 	    if (multiple) return results;
 	    else return false;}
 	fdjtDOM.getLink=getLink;
+	fdjtDOM.getLinks=function(name){return getLink(name,true);};
+	fdjtDOM.getLinkElts=function(name){
+	    var matchcase;
+	    return getLink(name,true,matchcase,true);};
 
 	/* Going forward */
 
@@ -2112,6 +2211,8 @@ var fdjtDOM=
 	fdjtDOM.setupCustomInputs=setupCustomInputs;
 	
 	addInit(setupCustomInputs,"CustomInputs");
+
+	addInit(getMetaSchemas,"MetaSchemas");
 
 	fdjtDOM.getParaHash=function(node){
 	    return paraHash(textify(node,true,false,false));}
