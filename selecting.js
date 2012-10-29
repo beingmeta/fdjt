@@ -172,6 +172,7 @@ var fdjtSelecting=
 	    while ((target)&&(target.nodeType!==1))
 		target=target.parentNode;
 	    if (!(target)) return;
+	    if (target.tagName!=="SPAN") return;
 	    var select_elt=getParent(target,".fdjtselecting");
 	    if (!(select_elt)) return;
 	    else fdjtUI.cancel(evt);
