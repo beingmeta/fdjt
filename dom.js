@@ -1431,7 +1431,7 @@ var fdjtDOM=
 	    var links=
 		((document.getElementsByTagName)&&
 		 (document.getElementsByTagName('link')))||
-		((document.head..getElementsByTagName)&&
+		((document.head.getElementsByTagName)&&
 		 (document.head.getElementsByTagName('link')))||
 		(getChildren(document,'link'));
 	    var i=0, lim=links.length;
