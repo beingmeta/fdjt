@@ -217,7 +217,9 @@ var fdjtSelecting=
 		    (scan.id)&&(scan.id.search(prefix)===0)) {
 		    combine.push(scan.firstChild.nodeValue);
 		    if (scan===end) break;}
-		if (scan.nextSibling) scan=scan.nextSibling;
+		if ((scan.firstChild)&&(scan.firstChild.nodeType!==3))
+		    scan=scan.firstChild;
+		else if (scan.nextSibling) scan=scan.nextSibling;
 		else {
 		    while (scan) {
 			if ((wpos=position(scan,wrappers))>=0) break;
