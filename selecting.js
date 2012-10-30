@@ -57,7 +57,7 @@ var fdjtSelecting=
 	    var sel=this;
 	    var orig=this.orig=[], wrapped=this.wrapped=[];
 	    var words=this.words=[], wrappers=this.wrappers=[];
-	    var prefix=this.prefix="fdjtSel"+this.serial;
+	    var prefix=this.prefix="fdjtSel0"+this.serial;
 	    selectors[prefix]=sel;
 	    var stripid=prefix.length+1;
 	    var k=0, n=nodes.length;
@@ -69,7 +69,7 @@ var fdjtSelecting=
 		     (fdjtDOM("span.fdjtselecting")):
 		     (fdjtDOM("div.fdjtselecting")));
 		// Initialize the wrapper
-		wrapper.id=prefix+"_W"+k;
+		wrapper.id=prefix+"w"+k;
 		selectors[wrapper.id]=sel;
 		wrappers.push(wrapper);
 		addHandlers(wrapper,sel,opts);
@@ -119,7 +119,7 @@ var fdjtSelecting=
 				       (notspace<=0)?(space):
 				       (space<notspace)?(space):
 				       (notspace));
-			    if (split<0) split=scan.length;
+			    if (split<=0) split=scan.length;
 			    var span=fdjtDOM("span",scan.slice(0,split));
 			    span.id=prefix+"_"+(words.length);
 			    words.push(span);
@@ -298,6 +298,7 @@ var fdjtSelecting=
 	    while (i<lim) {
 		var wrapper=wrappers[i++];
 		delete selectors[wrapper.id];}
+	    delete selectors[this.prefix];
 	    delete this.wrapped; delete this.orig;
 	    delete this.wrappers; delete this.nodes;
 	    delete this.words; delete this.wrappers;
