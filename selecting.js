@@ -222,8 +222,8 @@ var fdjtSelecting=
 		// Figure out whether you're moving the beginning or end
 		if (off<=sel.min) start=word;
 		else if (off>=sel.max) end=word;
-		else if ((off-sel.min)<((sel.max-sel.min)/2)) end=word;
-		else start=word;
+		else if ((off-sel.min)<((sel.max-sel.min)/2)) start=word;
+		else end=word;
 		sel.selectRange(start,end);}
 	    return true;}
 
