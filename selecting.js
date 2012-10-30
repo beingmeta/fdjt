@@ -108,7 +108,24 @@ var fdjtSelecting=
 		var i=0, lim=sliced.length, count=0;
 		while (i<lim) {
 		    var word=sliced[i++];
-		    if (word.length>0) {
+		    if (word.length===0) continue;
+		    else if ((word.search(/\S/)>=0)&&
+			     (word.search(/\s/)>=0)) {
+			var scan=word;
+			while (scan.length) {
+			    var space=scan.search(/\s/);
+			    var notspace=scan.search(/\S/);
+			    var split=((space<=0)?(notspace):
+				       (notspace<=0)?(space):
+				       (space<notspace)?(space):
+				       (notspace));
+			    if (split<0) split=scan.length;
+			    var span=fdjtDOM("span",scan.slice(0,split));
+			    span.id=prefix+"_"+(words.length);
+			    words.push(span);
+			    wordspans.push(span);
+			    scan=scan.slice(split);}}
+		    else {
 			var span=fdjtDOM("span",word);
 			span.id=prefix+"_"+(words.length);
 			words.push(span);
