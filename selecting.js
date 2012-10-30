@@ -167,7 +167,7 @@ var fdjtSelecting=
 	    	words[min].className="fdjtselectstart";}
 	    this.min=min; this.max=max;
 	    this.start=start; this.end=end;
-	    if (this.onchange) sel.onchange();}
+	    if (this.onchange) this.onchange();}
 
 	/* Handler support */
 	
@@ -263,13 +263,17 @@ var fdjtSelecting=
 		if (overWord(target)) fdjtUI.cancel(evt);}
 	fdjtSelecting.handler=handler;
 
-	function getMouseHandlers(){
-	    var pressed=false; var timer=false;
+	function getMouseHandlers(initpressed){
+	    var pressed=initpressed||false; var timer=false;
 	    return {
 		mousedown: function(evt){
-		    pressed=fdjtTime(); handler(evt);},
+		    fdjtUI.cancel(evt);
+		    pressed=fdjtTime();
+		    handler(evt);},
 		mouseup: function(evt){
-		    pressed=false; handler(evt);},
+		    fdjtUI.cancel(evt);
+		    pressed=false;
+		    handler(evt);},
 		mousemove: function(evt){
 		    if (pressed) handler(evt);},
 		mouseout: function(evt){
@@ -277,8 +281,8 @@ var fdjtSelecting=
 		mouseover: function(evt){
 		    if (timer) clearTimeout(timer); timer=false;}};}
 
-	function addHandlers(container){
-	    var handlers=getMouseHandlers();
+	function addHandlers(container,sel,opts){
+	    var handlers=getMouseHandlers(((opts)&&(opts.initpressed)));
 	    for (var etype in handlers) {
 		if (handlers.hasOwnProperty(etype))
 		    fdjtDOM.addListener(container,etype,handlers[etype]);}}
