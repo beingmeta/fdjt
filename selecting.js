@@ -157,12 +157,17 @@ var fdjtSelecting=
 		// Minimize the effort for a change in selection
 		var cur_min=this.wordnum(this.start);
 		var cur_max=this.wordnum(this.end);
-		if (min<cur_min) selectWords(words,min,cur_min);
-		else if (min>cur_min) deselectWords(words,cur_min,min);
-		else {}
-		if (max>cur_max) selectWords(words,cur_max,max);
-		else if (max<cur_max) deselectWords(words,max,cur_max);
-		else {}
+		if ((min>cur_max)||(max<cur_min)) {
+		    deselectWords(words,cur_min,cur_max);
+		    selectWords(words,min,max);}
+		else {
+		    // Overlapping, just do the difference
+		    if (min<cur_min) selectWords(words,min,cur_min);
+		    else if (min>cur_min) deselectWords(words,cur_min,min);
+		    else {}
+		    if (max>cur_max) selectWords(words,cur_max,max);
+		    else if (max<cur_max) deselectWords(words,max,cur_max);
+		    else {}}
 		words[max].className="fdjtselectstart";
 	    	words[min].className="fdjtselectstart";}
 	    this.min=min; this.max=max;
@@ -208,14 +213,36 @@ var fdjtSelecting=
 	// Getting the selection
 
 	// This should be consistent with textify/textlen functions in fdjtDOM.
-	fdjtSelecting.prototype.getString=function(){
+	fdjtSelecting.prototype.setString=function(string){
+	    var wrappers=this.wrappers;
+	    var whole=((wrappers.length===1)&&(wrappers[0]));
+	    if (!(whole)) {
+		whole=fdjtDOM("div"); 
+		var i=0, lim=wrappers.length;
+		while (i<lim) {
+		    var wrapper=wrappers[i++];
+		    whole.appendChild(wrapper.cloneNode(true));}}
+	    var found=fdjtDOM.findString(whole,string);
+	    if (!(found)) return;
+	    var start=found.startContainer, end=found.endContainer;
+	    while ((start)&&(start.nodeType!==1)) start=start.parentNode;
+	    while ((end)&&(end.nodeType!==1)) end=end.parentNode;
+	    if ((start)&&(end)&&(start.id)&&(end.id)&&
+		(start.id.search(this.prefix)===0)&&
+		(end.id.search(this.prefix)===0)) {
+		start=document.getElementById(start.id);
+		end=document.getElementById(end.id);}
+	    else return;
+	    if ((start)&&(end)) this.selectRange(start,end);}
+
+	fdjtSelecting.prototype.getString=function(start,end){
+	    if (!(start)) start=this.start; if (!(end)) end=this.end;
 	    var words=this.words; var wrappers=this.wrappers; 
 	    var combine=[]; var prefix=this.prefix; var wpos=-1;
-	    var scan=this.start; var end=this.end;
-	    while (scan) {
+	    var scan=start; while (scan) {
 		if (scan.nodeType===1) {
 		    var style=getStyle(scan);
-		    if (style.display!=='inline') combine.push(" // ");}
+		    if (style.display!=='inline') combine.push("\n");}
 		if ((scan.nodeType===1)&&(scan.tagName==='SPAN')&&
 		    (scan.id)&&(scan.id.search(prefix)===0)) {
 		    combine.push(scan.firstChild.nodeValue);
@@ -233,8 +260,14 @@ var fdjtSelecting=
 			if ((wpos+1)<wrappers.length)
 			    scan=wrappers[wpos+1];}}
 		if (!(scan)) break;}
-	    return combine.join("");};
+	    return combine.join("");}
 
+	fdjtSelecting.prototype.getOffset=function(){
+	    if (!(this.start)) return false;
+	    var selected=this.getString();
+	    var preselected=this.getString(this.words[0],this.end);
+	    return preselected.length-selected.length;}
+	
 	// Life span functions
 
 	fdjtSelecting.prototype.clear=function(){
