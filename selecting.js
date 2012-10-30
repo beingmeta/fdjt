@@ -263,12 +263,25 @@ var fdjtSelecting=
 		if (overWord(target)) fdjtUI.cancel(evt);}
 	fdjtSelecting.handler=handler;
 
+	function getMouseHandlers(){
+	    var pressed=false; var timer=false;
+	    return {
+		mousedown: function(evt){
+		    pressed=fdjtTime(); handler(evt);},
+		mouseup: function(evt){
+		    pressed=false; handler(evt);},
+		mousemove: function(evt){
+		    if (pressed) handler(evt);},
+		mouseout: function(evt){
+		    timer=setTimeout(function(){pressed=false;},500);},
+		mouseover: function(evt){
+		    if (timer) clearTimeout(timer); timer=false;}};}
+
 	function addHandlers(container){
-	    container.onmousedown=handler;
-	    container.onmouseup=handler;
-	    container.onmousemove=function(evt){
-		evt=evt||event;
-		if ((evt.button)||(evt.which)) handler(evt);};}
+	    var handlers=getMouseHandlers();
+	    for (var etype in handlers) {
+		if (handlers.hasOwnProperty(etype))
+		    fdjtDOM.addListener(container,etype,handlers[etype]);}}
 
 	// Return the constructor
 	return fdjtSelecting;})();
