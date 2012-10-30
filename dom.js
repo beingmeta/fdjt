@@ -913,12 +913,17 @@ var fdjtDOM=
 	    if (typeof depth !== 'number') depth=0;
 	    if (arg.text) return flatten(arg.text);
 	    else if (arg.nodeType) {
-		if (arg.nodeType===3) return arg.nodeValue;
+		if (arg.nodeType===3) {
+		    if (flat) return flatten(arg.nodeValue);
+		    else return arg.nodeValue;}
 		else if (arg.nodeType===1) {
 		    var children=arg.childNodes;
-		    var display_type=getDisplayStyle(arg);
+		    var style=getStyle(arg);
+		    var display_type=style.display;
+		    var whitespace=style.whiteSpace;
 		    var classname=arg.className;
 		    var string=""; var suffix="";
+		    if (whitespace!=="normal") flat=false;
 		    if (display_type==='none') return "";
 		    else if ((classname)&&
 			     ((classname==='fdjtskiptext')||
@@ -930,9 +935,6 @@ var fdjtDOM=
 			else return "[?]";}
 		    // Figure out what suffix and prefix to use for this element
 		    else if (!(display_type)) {}
-		    // If you're inside the element (depth>0), don't use anything
-		    // Let's try it without this
-		    // else if (depth) {}
 		    else if (display_type==="inline") {}
 		    else if (flat) suffix=" ";
 		    else if ((display_type==="block") ||
@@ -945,10 +947,9 @@ var fdjtDOM=
 		    var i=0; while (i<children.length) {
 			var child=children[i++];
 			if (!(child.nodeType)) continue;
-			if (child.nodeType===3)
-			    if (flat)
-				string=string+flatten(child.nodeValue);
-			else string=string+child.nodeValue;
+			if (child.nodeType===3) {
+			    if (flat) string=string+flatten(child.nodeValue);
+			    else string=string+child.nodeValue;}
 			else if (child.nodeType===1) {
 			    var stringval=textify(child,flat,true,domarkup);
 			    if (stringval) string=string+stringval;}
