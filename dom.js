@@ -78,6 +78,21 @@ var fdjtDOM=
 	fdjtDOM.clone=function(node){
 	    return node.cloneNode(true);}
 
+	function getIE(){
+	    if (navigator.appName == 'Microsoft Internet Explorer') {
+		var ua = navigator.userAgent;
+		var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+		if (re.exec(ua) != null)
+		    rv = parseFloat( RegExp.$1 );
+		else rv=1;
+		// Fails for non-numbers
+		if (!(rv>0)) rv=1;
+		return rv;}
+	    else return 0;}
+
+	fdjtDOM.ie=getIE();
+	fdjtDOM.iem=Math.floor(fdjtDOM.ie);
+
 	function domappend(node,content,i) {
 	    if (content.nodeType)
 		node.appendChild(content);
