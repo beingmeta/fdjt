@@ -58,7 +58,7 @@ var fdjtSelecting=
 	    var orig=this.orig=[], wrapped=this.wrapped=[];
 	    var words=this.words=[], wrappers=this.wrappers=[];
 	    var prefix=this.prefix="fdjtSel"+this.serial;
-	    var lengths=this.lengths={};
+	    selectors[prefix]=sel;
 	    var stripid=prefix.length+1;
 	    var k=0, n=nodes.length;
 	    while (k<n) {
@@ -86,28 +86,19 @@ var fdjtSelecting=
 	    //  for this instance
 	    this.start=false; this.end=false;
 	    this.min=-1; this.max=-1;
+	    this.onchange=((opts)&&(opts.onchange))||false;
 	    var over=false;
-	    // This can be called when over a target and expands or
-	    // contracts the selection based on the target.
-	    function over(target){
-		while ((target)&&(target.nodeType!==1))
-		    target=target.parentNode;
-		if ((target)&&(target.id)&&
-		    (target.tagName==="SPAN")&&
-		    (target.id.search(prefix)===0)) {
-		    if (over===target) return false;
-		    else over=target;
-		    return this.overWord(over);}}
-	    this.over=over;
 	    // This gets the word offset for a particular target
 	    this.wordnum=function wordnum(target){
+		var id=false;
 		while ((target)&&(target.nodeType!==1))
 		    target=target.parentNode;
-		if ((target)&&(target.id)&&
+		if ((target)&&((id=target.id))&&
 		    (target.tagName==="SPAN")&&
-		    (target.id.search(prefix)===0))
-		    return parseInt(target.id.slice(stripid));
+		    (id.search(prefix)===0))
+		    return parseInt(id.slice(stripid));
 		else return false;};
+	    
 	    return this;}
 	
 	function wrapText(node,orig,wrapped,words,prefix){
@@ -175,32 +166,44 @@ var fdjtSelecting=
 		words[max].className="fdjtselectstart";
 	    	words[min].className="fdjtselectstart";}
 	    this.min=min; this.max=max;
-	    this.start=start; this.end=end;}
+	    this.start=start; this.end=end;
+	    if (this.onchange) sel.onchange();}
 
 	/* Handler support */
 	
 	function overWord(word){
-	    var container=word; while (container) {
-		if ((container.className)&&(container.id)&&
-		    (container.className.search(/\bfdjtselecting\b/)>=0))
-		    break;
-		else container=container.parentNode;}
-	    if (!(container)) return;
-	    var sel=selectors[container.id];
+	    var sel=false, id=false;
+	    while ((word)&&(word.nodeType!==1)) word=word.parentNode;
+	    if ((word)&&((id=word.id))&&
+		(word.tagName==='SPAN')&&
+		(id.search("fdjtSel")===0)) {
+		var split=id.indexOf("_");
+		if (split) sel=selectors[id.slice(0,split)];}
+	    if (!(sel)) {
+		var container=word; while (container) {
+		    if ((container.className)&&(container.id)&&
+			(container.className.search(/\bfdjtselecting\b/)>=0))
+			break;
+		    else container=container.parentNode;}
+		if (!(container)) return false;
+		else sel=selectors[container.id];}
+	    if (!(sel)) return false;
 	    if (!(sel.start))
+		// We could have some impressive smarts here
 		sel.selectRange(word,word);
 	    else if (sel.start===sel.end)
 		// selectRange sorts out the correct start/end order
-		sel.selectRange(word,target);
+		sel.selectRange(sel.start,word);
 	    else {
 		var off=sel.wordnum(word);
 		var start=sel.start, end=sel.end;
-		// Figure out which one you're changing
-		if (off<=sel.min) start=target;
-		else if (off>=sel.max) end=target;
-		else if ((off-sel.min)<((sel.max-sel.min)/2)) end=target;
-		else start=target;
-		sel.selectRange(start,end);}}
+		// Figure out whether you're moving the beginning or end
+		if (off<=sel.min) start=word;
+		else if (off>=sel.max) end=word;
+		else if ((off-sel.min)<((sel.max-sel.min)/2)) end=word;
+		else start=word;
+		sel.selectRange(start,end);}
+	    return true;}
 
 	// Getting the selection
 
@@ -252,30 +255,20 @@ var fdjtSelecting=
 	
 	// Handlers
 
-	function updateSelection(evt){
+	function handler(evt){
 	    evt=evt||event;
 	    var target=fdjtUI.T(evt);
-	    var container=getParent(target,".fdjtselecting");
-	    if (!(container)) return;
-	    else fdjtUI.cancel(evt);
-	    var sel=selectors[container.id];
-	    if (!(sel.start))
-		sel.selectRange(target,target);
-	    else if (sel.start===sel.end)
-		sel.selectRange(sel.start,target);
-	    else {
-		var off=sel.wordnum(target);
-		var start=sel.start, end=sel.end;
-		if (off<=sel.min) start=target;
-		else if (off>=sel.max) end=target;
-		else if ((off-sel.min)<((sel.max-sel.min)/2))
-		    start=target;
-		else end=target;
-		sel.selectRange(start,end);}}
+	    while ((target)&&(target.nodeType!==1)) target=target.parentNode;
+	    if ((target)&&(target.id)&&(target.tagName==='SPAN'))
+		if (overWord(target)) fdjtUI.cancel(evt);}
+	fdjtSelecting.handler=handler;
 
 	function addHandlers(container){
-	    container.onmousedown=updateSelection;
-	    container.onmouseup=updateSelection;}
+	    container.onmousedown=handler;
+	    container.onmouseup=handler;
+	    container.onmousemove=function(evt){
+		evt=evt||event;
+		if ((evt.button)||(evt.which)) handler(evt);};}
 
 	// Return the constructor
 	return fdjtSelecting;})();
