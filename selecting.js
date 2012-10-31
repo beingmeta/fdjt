@@ -45,7 +45,7 @@ var fdjtSelecting=
 
 	function fdjtSelecting(nodes,opts){
 	    if (!(this instanceof fdjtSelecting))
-		return new fdjtSelecting(nodes);
+		return new fdjtSelecting(nodes,opts);
 	    else this.serial=++serialnum;
 	    if (typeof nodes==='string') {
 		var elt=document.getElementById(nodes);
@@ -339,6 +339,7 @@ var fdjtSelecting=
 	    if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
 		(target.id.search("fdjtSel")===0))
 		if (overWord(target)) fdjtUI.cancel(evt);}
+	fdjtSelecting.hold_handler=hold_handler;
 	fdjtSelecting.handler=hold_handler;
 	function tap_handler(evt){
 	    evt=evt||event;
@@ -354,12 +355,16 @@ var fdjtSelecting=
 			fdjtUI.cancel(evt);
 			sel.setRange(target,target);}}
 		else if (overWord(target)) fdjtUI.cancel(evt);}}
-
+	fdjtSelecting.tap_handler=tap_handler;
 	
 	function addHandlers(container,sel,opts){
 	    fdjtUI.TapHold(container);
-	    fdjtDOM.addListener(container,"tap",tap_handler);
-	    fdjtDOM.addListener(container,"hold",hold_handler);}
+	    fdjtDOM.addListener(container,"tap",
+				((opts)&&(opts.ontap))||
+				tap_handler);
+	    fdjtDOM.addListener(container,"hold",
+				((opts)&&(opts.onhold))||
+				hold_handler);}
 
 	// Return the constructor
 	return fdjtSelecting;})();
