@@ -1048,14 +1048,14 @@ fdjtUI.Collapsible.focus=function(evt){
 	var remaining=string.slice(content.length);
 	var elided=fdjtDOM("span.elided",remaining);
 	var elision=fdjtDOM(
-	    "span.elision",fdjtString("…see %d%% more… ",100-pct));
-	var delision=fdjtDOM("span.delision"," →……←");
-	elision.title="see elided text";
+	    "span.elision",fdjtString(" …see %d%% more… ",100-pct));
+	var delision=fdjtDOM("span.delision"," →…see less…←");
+	elision.title="show elided text";
 	delision.title="hide elided text";
 	elision.onclick=toggle; delision.onclick=toggle;
-	elt.appendChild(elided);
 	elt.appendChild(elision);
 	elt.appendChild(delision);
+	elt.appendChild(elided);
 	return elt;}
     fdjtUI.Ellipsis=Ellipsis;
 
