@@ -306,16 +306,19 @@ fdjtUI.TapHold=(function(){
 	    fdjtLog.warn("TapHold with no argument!");
 	    return;}
 	addClass(elt,"fdjtaphold");
-	fdjtDOM.addListener(elt,((fortouch)?("touchmove"):("mousemove")),
-			    mousemove);
-	fdjtDOM.addListener(elt,((fortouch)?("touchstart"):("mousedown")),
-			    mousedown);
-	fdjtDOM.addListener(elt,((fortouch)?("touchend"):("mouseup")),
-			    mouseup);
+	if (!(fortouch))
+	    fdjtDOM.addListener(elt,"mousemove",mousemove);
+	fdjtDOM.addListener(elt,"touchmove",mousemove);
+	if (!(fortouch))
+	    fdjtDOM.addListener(elt,"mousedown",mousedown);
+	fdjtDOM.addListener(elt,"touchstart",mousedown);
+	if (!(fortouch))
+	    fdjtDOM.addListener(elt,"mouseup",mouseup);
+	fdjtDOM.addListener(elt,"touchend",mouseup);
 	if (!(window_setup)) {
-	    fdjtDOM.addListener(document,
-				((fortouch)?("touchmove"):("mousemove")),
-				outer_mousemove);
+	    if (!(fortouch))
+		fdjtDOM.addListener(document,"mousemove",outer_mousemove);
+	    fdjtDOM.addListener(document,"touchmove",outer_mousemove);
 	    fdjtDOM.addListener(document,"keydown",keydown);
 	    fdjtDOM.addListener(document,"keyup",keyup);
 	    window_setup=window;}
