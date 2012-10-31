@@ -70,6 +70,8 @@ var fdjtSelecting=
 		     (fdjtDOM("div.fdjtselecting")));
 		// Initialize the wrapper
 		wrapper.id=prefix+"w"+k;
+		wrapper.title=((opts)&&(opts.title))||
+		    "Tap or hold to select text range";
 		selectors[wrapper.id]=sel;
 		wrappers.push(wrapper);
 		addHandlers(wrapper,sel,opts);
@@ -85,7 +87,7 @@ var fdjtSelecting=
 	    // These track the state of the current selection
 	    //  for this instance
 	    this.start=false; this.end=false;
-	    this.min=-1; this.max=-1;
+	    this.min=-1; this.max=-1; this.n_words=0;
 	    this.onchange=((opts)&&(opts.onchange))||false;
 	    var over=false;
 	    // This gets the word offset for a particular target
@@ -120,13 +122,14 @@ var fdjtSelecting=
 				       (space<notspace)?(space):
 				       (notspace));
 			    if (split<=0) split=scan.length;
-			    var span=fdjtDOM("span",scan.slice(0,split));
+			    var span=fdjtDOM(
+				"span.fdjtword",scan.slice(0,split));
 			    span.id=prefix+"_"+(words.length);
 			    words.push(span);
 			    wordspans.push(span);
 			    scan=scan.slice(split);}}
 		    else {
-			var span=fdjtDOM("span",word);
+			var span=fdjtDOM("span.fdjtword",word);
 			span.id=prefix+"_"+(words.length);
 			words.push(span);
 			wordspans.push(span);}}
@@ -156,9 +159,17 @@ var fdjtSelecting=
 		words[i++].className="fdjtselected";}
 	function deselectWords(words,start,end){
 	    var i=start; while (i<=end)
-		words[i++].className="";}
+		words[i++].className="fdjtword";}
 
-	fdjtSelecting.prototype.selectRange=function(start,end){
+	fdjtSelecting.prototype.setRange=function(start,end){
+	    if (!(start)) {
+		if ((this.start)&&(this.end)) {
+		    deselectWords(this.words,this.min,this.max);}
+		this.start=this.end=false;
+		this.min=this.max=-1;
+		this.n_words=0;
+		if (this.onchange) this.onchange();
+		return;}
 	    var words=this.words;
 	    var min=this.wordnum(start), max=this.wordnum(end);
 	    if (max<min) {
@@ -185,10 +196,11 @@ var fdjtSelecting=
 		    if (max>cur_max) selectWords(words,cur_max,max);
 		    else if (max<cur_max) deselectWords(words,max,cur_max);
 		    else {}}
-		words[max].className="fdjtselectstart";
+		words[max].className="fdjtselectend";
 	    	words[min].className="fdjtselectstart";}
 	    this.min=min; this.max=max;
 	    this.start=start; this.end=end;
+	    this.n_words=(max-min)+1;
 	    if (this.onchange) this.onchange();}
 
 	/* Handler support */
@@ -212,24 +224,38 @@ var fdjtSelecting=
 	    if (!(sel)) return false;
 	    if (!(sel.start))
 		// We could have some impressive smarts here
-		sel.selectRange(word,word);
+		sel.setRange(word,word);
 	    else if (sel.start===sel.end)
-		// selectRange sorts out the correct start/end order
-		sel.selectRange(sel.start,word);
+		// Just one word is selected, so use word as the 'end' and
+		// let setRange sort out the correct order
+		sel.setRange(sel.start,word);
 	    else {
 		var off=sel.wordnum(word);
 		var start=sel.start, end=sel.end;
 		// Figure out whether you're moving the beginning or end
 		if (off<=sel.min) start=word;
 		else if (off>=sel.max) end=word;
-		else if ((off-sel.min)<((sel.max-sel.min)/2)) start=word;
+		// Tried this implementation and it just doesn't feel right
+		// else if ((off-sel.min)<((sel.max-sel.min)/2)) start=word;
+		else if ((off-sel.min)<3) start=word;
 		else end=word;
-		sel.selectRange(start,end);}
+		sel.setRange(start,end);}
 	    return true;}
 
-	// Getting the selection
+	function getSelector(word){
+	    var id=false;
+	    if ((word)&&((id=word.id))&&
+		(word.tagName==='SPAN')&&
+		(id.search("fdjtSel")===0)) {
+		var split=id.indexOf("_");
+		if (split)
+		    return selectors[id.slice(0,split)]||false;
+		else return false;}
+	    else return false;}
 
-	// This should be consistent with textify/textlen functions in fdjtDOM.
+
+	// Getting the selection text
+	// This tries to be consistent with textify functions in fdjtDOM
 	fdjtSelecting.prototype.setString=function(string){
 	    var wrappers=this.wrappers;
 	    var whole=((wrappers.length===1)&&(wrappers[0]));
@@ -250,7 +276,7 @@ var fdjtSelecting=
 		start=document.getElementById(start.id);
 		end=document.getElementById(end.id);}
 	    else return;
-	    if ((start)&&(end)) this.selectRange(start,end);}
+	    if ((start)&&(end)) this.setRange(start,end);}
 
 	fdjtSelecting.prototype.getString=function(start,end){
 	    if (!(start)) start=this.start; if (!(end)) end=this.end;
@@ -306,18 +332,34 @@ var fdjtSelecting=
 	
 	// Handlers
 
-	function handler(evt){
+	function hold_handler(evt){
 	    evt=evt||event;
 	    var target=fdjtUI.T(evt);
 	    while ((target)&&(target.nodeType!==1)) target=target.parentNode;
-	    if ((target)&&(target.id)&&(target.tagName==='SPAN'))
+	    if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
+		(target.id.search("fdjtSel")===0))
 		if (overWord(target)) fdjtUI.cancel(evt);}
-	fdjtSelecting.handler=handler;
+	fdjtSelecting.handler=hold_handler;
+	function tap_handler(evt){
+	    evt=evt||event;
+	    var target=fdjtUI.T(evt);
+	    while ((target)&&(target.nodeType!==1)) target=target.parentNode;
+	    if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
+		(target.id.search("fdjtSel")===0)) {
+		if ((target.className==="fdjtselectstart")||
+		    (target.className==="fdjtselectend")) {
+		    var sel=getSelector(target);
+		    if (sel.n_words===1) sel.setRange(false);
+		    else {
+			fdjtUI.cancel(evt);
+			sel.setRange(target,target);}}
+		else if (overWord(target)) fdjtUI.cancel(evt);}}
+
 	
 	function addHandlers(container,sel,opts){
 	    fdjtUI.TapHold(container);
-	    fdjtDOM.addListener(container,"tap",handler);
-	    fdjtDOM.addListener(container,"hold",handler);}
+	    fdjtDOM.addListener(container,"tap",tap_handler);
+	    fdjtDOM.addListener(container,"hold",hold_handler);}
 
 	/*
 	function getHandlers(initpressed){

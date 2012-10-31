@@ -990,6 +990,13 @@ div.fdjtselecting, span.fdjtselecting {
 .fdjtselecting .fdjtselectstart, .fdjtselecting .fdjtselectend {
     background-color: gold; }
 
+.fdjtselecting .fdjtword:hover, .fdjtselecting .fdjtword:hover {
+    background-color: silver;}
+.fdjtselecting .fdjtselected:hover,
+.fdjtselecting .fdjtselectstart:hover,
+.fdjtselecting .fdjtselectend:hover {
+    text-decoration: underline;}
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
