@@ -361,41 +361,6 @@ var fdjtSelecting=
 	    fdjtDOM.addListener(container,"tap",tap_handler);
 	    fdjtDOM.addListener(container,"hold",hold_handler);}
 
-	/*
-	function getHandlers(initpressed){
-	    var pressed=initpressed||false; var timer=false;
-	    var up=function up(evt){
-		evt=evt||event;
-		fdjtUI.cancel(evt);
-		pressed=false;
-		handler(evt);};
-	    var down=function down(evt){
-		evt=evt||event;
-		fdjtUI.cancel(evt);
-		pressed=fdjtTime();
-		handler(evt);};
-	    var mousemove=function mousemove(evt){
-		evt=evt||event;
-		if (pressed) handler(evt);};
-	    var mouseout=function mouseout(evt){
-		timer=setTimeout(function(){pressed=false;},500);};
-	    var mouseover=function mouseover(evt){
-		if (timer) clearTimeout(timer);
-		timer=false;};
-	    
-	    return {
-		mousedown: down, touchstart: down,
-		mouseup: up, touchend: up,
-		mousemove: mousemove, mouseout: mouseout,
-		mouseover: mouseover, touchmove: touchmove};}
-
-	  {
-	  var handlers=getHandlers(((opts)&&(opts.initpressed)));
-	  for (var etype in handlers) {
-	  if (handlers.hasOwnProperty(etype))
-	  fdjtDOM.addListener(container,etype,handlers[etype]);}}
-	*/
-	
 	// Return the constructor
 	return fdjtSelecting;})();
 
