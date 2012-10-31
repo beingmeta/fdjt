@@ -996,7 +996,7 @@ div.fdjtalert .closebutton {
     border: 0px important!;
     background-color: yellow; }
 .fdjtselecting .fdjtselectstart, .fdjtselecting .fdjtselectend {
-    background-color: gold; }
+    background-color: #F7F700; }
 
 .fdjtselecting .fdjtword:hover, .fdjtselecting .fdjtword:hover {
     background-color: silver;}
