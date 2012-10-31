@@ -852,9 +852,11 @@ div.reticle.vertical.highlight { width: 3px;}
 .ellipsis {}
 .ellipsis .elided { display: none;}
 .ellipsis .elision { cursor: pointer;}
+.ellipsis .delision { display: none;}
 .ellipsis.compact .elided { display: none;}
 .ellipsis.expanded .elided { display: inline;}
 .ellipsis.expanded .elision { display: none;}
+.ellipsis.expanded span.delision { display: inline;}
 
 /* Backtraces */
 
