@@ -52,6 +52,7 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
     var dropClass=fdjtDOM.dropClass;
     var getChildren=fdjtDOM.getChildren;
     var getParent=fdjtDOM.getParent;
+    var getStyle=fdjtDOM.getStyle;
     var position=fdjtKB.position;
 
     var isEmpty=fdjtString.isEmpty;
@@ -423,14 +424,14 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	    var nodes=this.nodes;
 	    var i=0; var lim=nodes.length; while (i<lim) {
 		var node=nodes[i++];
-		if (!(hasClass(node,"displayed"))) continue;
+		if (getStyle(node).display==='none') continue;
 		else if (hasClass(node,pref)) {completion=node; break;}
 		else continue;}}
 	if (!(completion)) {
 	    var nodes=this.nodes;
 	    var i=0; var lim=nodes.length; while (i<lim) {
 		var node=nodes[i++];
-		if (!(hasClass(node,"displayed"))) continue;
+		if (getStyle(node).display==='none') continue;
 		else {completion=node; break;}}}
 	if (this.selection) dropClass(this.selection,"selected");
 	addClass(completion,"selected");
@@ -444,7 +445,7 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	var nodes=this.nodes;
 	var i=0, lim=nodes.length; while (i<lim) {
 	    var node=nodes[i++];
-	    if (!(hasClass(node,"displayed"))) continue;
+	    if (getStyle(node).display==='none') continue;
 	    else if (!(selection)) {
 		selection=node; break;}
 	    else if (node===selection) selection=false;
@@ -464,7 +465,7 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 	var nodes=this.nodes;
 	var i=nodes.length-1; while (i>=0) {
 	    var node=nodes[i--];
-	    if (!(hasClass(node,"displayed"))) continue;
+	    if (getStyle(node).display==='none') continue;
 	    else if (!(selection)) {
 		selection=node; break;}
 	    else if (node===selection) selection=false;
