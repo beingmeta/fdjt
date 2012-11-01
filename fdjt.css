@@ -947,12 +947,19 @@ div.fdjtalert {
     -moz-transition-duration:  0.75s;
     -ms-transition-duration:  0.75s;
     -o-transition-duration:  0.75s;
+    transition-timing-function:  ease-in;
+    -webkit-transition-timing-function:  ease-in;
+    -khtml-transition-timing-function:  ease-in;
+    -moz-transition-timing-function:  ease-in;
+    -ms-transition-timing-function:  ease-in;
+    -o-transition-timing-function:  ease-in;
     border: solid black 4px;
     border-radius: 12px;
     -webkit-border-radius: 12px;
     -khtml-border-radius: 12px;
     -moz-border-radius: 12px;
     -o-border-radius: 12px;}
+div.fdjtalert#FDJTALERT { z-index: 600;}
 div.fdjtalert.closing {
     opacity: .05;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=05)";
@@ -961,18 +968,21 @@ div.fdjtalert.closing {
     -khtml-opacity: .05;
     -moz-opacity: .05;
     -o-opacity: .05;}
+div.fdjtalert.closing { cursor: pointer;}
 
 div.fdjtalert > div, div.fdjtalert > span { vertical-align: middle;}
 
 div.fdjtalert .countdown {
-    color: red; font-weight: bold; opacity: 0.7;
-    position: absolute; height: 1em; top: 0.5ex; right: 0.5ex;
-    cursor: pointer;}
+    color: red; font-weight: normal; font-size: 75%;
+    position: absolute; height: 1em; top: 4px; left: 0.5ex;
+    font-variant: small-caps;
+    display: none;}
+div.fdjtalert.closing .countdown { display: block; }
 
 div.fdjtalert .closebutton {
     position: absolute;
     width: 1em; height: 1em;
-    top: 0.5ex; right: 0.5ex;
+    top: 4px; right: 0.5ex;
     cursor: pointer;}
 
 /* Text selection */

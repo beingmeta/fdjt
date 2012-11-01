@@ -1103,24 +1103,24 @@ fdjtUI.Collapsible.focus=function(evt){
 /* Non-blocking alerts */
 
 (function(){
-    function close_alert(evt){
-	evt=evt||event;
-	var target=fdjtUI.T(evt);
-	var alertbox=fdjtDOM.getParent(target,".fdjtalert");
-	if (alertbox) setTimeout(
-	    function(){
-		fdjtDOM.addClass(alertbox,"closing");
-		setTimeout(function(){
-		    if (fdjtDOM.hasClass(alertbox,"closing"))
-			fdjtDOM.remove(alertbox);},
-			   1500);},
-	    100);}
+    
+    var alert_ticker=false; var close_ticker=false;
+    var max_z=false;
 
     function alertfn(){
+	if (alert_ticker) {
+	    clearInterval(alert_ticker); alert_ticker=false;
+	    if (close_ticker) {
+		clearInterval(close_ticker); close_ticker=false;}
+	    var curbox=fdjtID("FDJTALERT");
+	    if (curbox) {
+		curbox.id="";
+		fdjtDOM.dropClass(curbox,"closing");}}
 	var close_button=fdjtDOM.Image(
 	    "https://beingmeta.s3.amazonaws.com/static/g/codex/redx40x40.png",
 	    "closebutton","Close");
-	var box=fdjtDOM("div.fdjtalert",close_button);
+	var countdown=fdjtDOM("div.countdown","Closing...");
+	var box=fdjtDOM("div.fdjtalert#FDJTALERT",countdown,close_button);
 	close_button.onclick=close_alert;
 	close_button.title="click to close";
 	fdjtDOM.appendArray(box,arguments);
@@ -1129,27 +1129,49 @@ fdjtUI.Collapsible.focus=function(evt){
 
     fdjtUI.alert=alertfn;
 
-    function alertfor(n){
+    function alertFor(n){
 	var args=fdjtDOM.Array(arguments,1);
 	var box=alertfn.apply(null,args);
 	if (n<=0) return box;
-	var closebutton=fdjtDOM.getChild(box,".closebutton");
-	var countdown=fdjtDOM("div.countdown",n+"...");
-	box.replaceChild(countdown,closebutton);
-	var ticker=setInterval(function(){
+	box.style[fdjtDOM.transitionDelay]=(n/2)+"s";
+	box.style[fdjtDOM.transitionDuration]=(n/2)+"s";
+	fdjtDOM.getChild(box,".countdown").
+	    innerHTML="Closing in "+n+"...";
+	close_ticker=setTimeout(function(){
+	    if (close_ticker) {
+		clearTimeout(close_ticker);
+		close_ticker=false;}
+	    fdjtDOM.addClass(box,"closing");},10);
+	alert_ticker=setInterval(function(){
 	    if (n<=0) {
-		clearInterval(ticker);
-		fdjtDOM.addClass(box,"closing");
+		clearInterval(alert_ticker);
+		alert_ticker=false;
 		setTimeout(function(){fdjtDOM.remove(box);},
-			   1500);}		    
-	    else {n--; countdown.innerHTML=n+"...";}},
-			       1000);
-	fdjtDOM.addListener(box,"click",function(evt){
-	    clearInterval(ticker); fdjtDOM.dropClass(box,"closing");
-	    box.replaceChild(closebutton,countdown);
-	    countdown.innerHTML="cancelled";});
+			   100);}		    
+	    else fdjtDOM.getChild(box,".countdown").
+		innerHTML="Closing in "+(n--)+"...";;},
+				 1000);
+	fdjtDOM.addListener(box,"click",alert_click);
 	return box;}
-    fdjtUI.alertFor=alertfor;})();
+    fdjtUI.alertFor=alertFor;
+
+    function alert_click(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	var box=fdjtDOM.getParent(target,".fdjtalert");
+	if (alert_ticker) {
+	    clearInterval(alert_ticker);
+	    alert_ticker=false;}
+	fdjtDOM.dropClass(box,"closing");}
+	
+    function close_alert(evt){
+	evt=evt||event;
+	var target=fdjtUI.T(evt);
+	var alertbox=fdjtDOM.getParent(target,".fdjtalert");
+	if (alertbox) setTimeout(
+	    function(){
+		fdjtDOM.remove(alertbox);},
+	    100);}})();
 
 
 /* Emacs local variables
