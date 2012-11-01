@@ -202,7 +202,8 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 
     Completions.prototype.addCompletion=function(completion,key,value) {
 	if (!(this.initialized)) initCompletions(this);
-	addCompletion(this,completion,key,value);};
+	addCompletion(this,completion,key,value);
+	if (this.visible) this.visible=false;};
 
     function updateDisplay(c,todisplay){
 	var displayed=c.displayed;
@@ -224,9 +225,11 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 			displayed.push(node); displayed.push(head);
 			addClass(head,"displayed");
 			addClass(node,"displayed");}}}}
+	// Clear the visible ordered elements cache
+	c.visible=false;
+	// Move the selection if neccessary
 	if ((this.selection)&&(!(hasClass(this.selection,"displayed"))))
 	    if (!(this.selectNext())) this.selectPrevious();}
-    
     
     Completions.prototype.getCompletions=function(string) {
 	if ((string===this.curstring)||(string===this.maxstring)||
@@ -416,37 +419,53 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 
     var Selector=fdjtDOM.Selector;
 
-    Completions.prototype.select=function(completion){
-	var pref=false;
+    function gatherVisible(root){
+	var scan=root.firstChild; var displayed=[];
+	while (scan!==root) {
+	    if (scan.nodeType===1) {
+		var iscompletion=hasClass(scan,"completion");
+		if ((iscompletion)&&(getStyle(scan).display!=="none")) 
+		    displayed.push(scan);
+		if ((scan.firstChild)&&(!(iscompletion))) {
+		    scan=scan.firstChild; continue;}}
+	    while ((scan!==root)&&(!(scan.nextSibling)))
+		scan=scan.parentNode;
+	    if (scan!==root) scan=scan.nextSibling;}
+	return displayed;}
+
+    // This gets visible nodes in their order of appearance, for which
+    // we can't use .nodes or .displayed
+    Completions.prototype.getVisible=function getVisible(){
+	if (this.visible) return this.visible;
+	else {
+	    var visible=this.visible=gatherVisible(this.dom);
+	    return visible;}}
+
+    Completions.prototype.select=function select(completion){
+	var pref=false; var displayed=this.getVisible();
 	if (completion instanceof Selector) {
 	    pref=completion; completion=false;}
 	if ((!(completion))&&(pref)) {
-	    var nodes=this.nodes;
+	    var nodes=displayed;
 	    var i=0; var lim=nodes.length; while (i<lim) {
 		var node=nodes[i++];
-		if (getStyle(node).display==='none') continue;
-		else if (hasClass(node,pref)) {completion=node; break;}
+		if (hasClass(node,pref)) {completion=node; break;}
 		else continue;}}
-	if (!(completion)) {
-	    var nodes=this.nodes;
-	    var i=0; var lim=nodes.length; while (i<lim) {
-		var node=nodes[i++];
-		if (getStyle(node).display==='none') continue;
-		else {completion=node; break;}}}
+	if ((!(completion))&&(displayed.length))
+	    completion=displayed[0];
 	if (this.selection) dropClass(this.selection,"selected");
 	addClass(completion,"selected");
 	this.selection=completion;
 	return completion;};
-
+    
     Completions.prototype.selectNext=function(selection){
 	if (!(selection)) {
 	    if (this.selection) selection=this.selection;
 	    else selection=false;}
-	var nodes=this.nodes;
+	var nodes=this.getVisible();
 	var i=0, lim=nodes.length; while (i<lim) {
 	    var node=nodes[i++];
-	    if (getStyle(node).display==='none') continue;
-	    else if (!(selection)) {
+	    if (!(selection)) {
 		selection=node; break;}
 	    else if (node===selection) selection=false;
 	    else continue;}
@@ -457,16 +476,13 @@ var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 
     Completions.prototype.selectPrevious=function(selection){
 	var pref=false;
-	if (selection instanceof Selector) {
-	    pref=selection; selection=false;}
 	if (!(selection)) {
 	    if (this.selection) selection=this.selection;
 	    else selection=false;}
-	var nodes=this.nodes;
+	var nodes=this.getVisible();
 	var i=nodes.length-1; while (i>=0) {
 	    var node=nodes[i--];
-	    if (getStyle(node).display==='none') continue;
-	    else if (!(selection)) {
+	    if (!(selection)) {
 		selection=node; break;}
 	    else if (node===selection) selection=false;
 	    else continue;}
