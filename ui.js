@@ -820,6 +820,12 @@ fdjtUI.Collapsible.focus=function(evt){
 	form.submit();}
     fdjtUI.dosubmit=dosubmit;
 
+    function forceSubmit(form){
+	var submit_event = document.createEvent("HTMLEvents");
+	submit_event.initEvent('submit',false,true);
+	form.dispatchEvent(submit_event);}
+    fdjtUI.forceSubmit=forceSubmit;
+
     function submitOnEnter(evt){
 	if ((evt.keyCode===13)||(evt.charCode===13)) {
 	    fdjtUI.cancel(evt);
