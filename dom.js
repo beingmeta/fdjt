@@ -2024,24 +2024,42 @@ var fdjtDOM=
 	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-webkit-transition';
 	    if (!(fdjtDOM.transitionProperty))
 		fdjtDOM.transitionProperty='-webkit-transition-property';
+	    if (!(fdjtDOM.transitionDuration))
+		fdjtDOM.transitionDuration='-webkit-transition-duration';
+	    if (!(fdjtDOM.transitionDelay))
+		fdjtDOM.transitionDelay='-webkit-transition-delay';
+	    if (!(fdjtDOM.transitionTiming))
+		fdjtDOM.transitionTiming='-webkit-transition-timing-function';
 	    if (!(fdjtDOM.transform)) fdjtDOM.transform='-webkit-transform';
 	    if (!(fdjtDOM.transformOrigin))
 		fdjtDOM.transformOrigin='-webkit-transform-origin';
 	    if (!(fdjtDOM.columnWidth)) fdjtDOM.columnWidth='-webkit-column-width';
 	    if (!(fdjtDOM.columnGap)) fdjtDOM.columnGap='-webkit-column-gap';}
 	else if (navigator.userAgent.search("Mozilla")>=0) {
+	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-moz-transition';
 	    if (!(fdjtDOM.transitionProperty))
 		fdjtDOM.transitionProperty='-moz-transition-property';
-	    if (!(fdjtDOM.transition)) fdjtDOM.transition='-moz-transition';
+	    if (!(fdjtDOM.transitionDuration))
+		fdjtDOM.transitionDuration='-moz-transition-duration';
+	    if (!(fdjtDOM.transitionDelay))
+		fdjtDOM.transitionDelay='-moz-transition-delay';
+	    if (!(fdjtDOM.transitionTiming))
+		fdjtDOM.transitionTiming='-moz-transition-timing-function';
 	    if (!(fdjtDOM.transform)) fdjtDOM.transform='-moz-transform';
 	    if (!(fdjtDOM.transformOrigin))
 		fdjtDOM.transformOrigin='-moz-transform-origin';
 	    if (!(fdjtDOM.columnWidth)) fdjtDOM.columnWidth='MozColumnWidth';
 	    if (!(fdjtDOM.columnGap)) fdjtDOM.columnGap='MozColumnGap';}
 	else {
+	    if (!(fdjtDOM.transition)) fdjtDOM.transition='transition';
 	    if (!(fdjtDOM.transitionProperty))
 		fdjtDOM.transitionProperty='transition-property';
-	    if (!(fdjtDOM.transition)) fdjtDOM.transition='transition';
+	    if (!(fdjtDOM.transitionDuration))
+		fdjtDOM.transitionDuration='transition-duration';
+	    if (!(fdjtDOM.transitionDelay))
+		fdjtDOM.transitionDelay='transition-delay';
+	    if (!(fdjtDOM.transitionTiming))
+		fdjtDOM.transitionTiming='transition-timing-function';
 	    if (!(fdjtDOM.transform)) fdjtDOM.transform='transform';
 	    if (!(fdjtDOM.transformOrigin))
 		fdjtDOM.transformOrigin='-moz-transform-origin';}
