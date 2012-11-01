@@ -2104,7 +2104,7 @@ var fdjtDOM=
 	    if (cur>pos) return false;
 	    else if (node.nodeType===3) {
 		var stringval=node.nodeValue;
-		if (pos<(cur+stringval.length))
+		if (pos<=(cur+stringval.length))
 		    return { node: node, off: pos-cur};
 		else return cur+stringval.length;}
 	    else if (node.nodeType===1) {
@@ -2186,7 +2186,7 @@ var fdjtDOM=
 		    var loc=match.index;
 		    var absloc=loc+off;
 		    var start=get_text_pos(node,absloc,0);
-		    var end=get_text_pos(node,absloc+(match[0].length-1),0);
+		    var end=get_text_pos(node,absloc+(match[0].length),0);
 		    if ((!start)||(!end)) return false;
 		    var range=document.createRange();
 		    range.setStart(start.node,start.off);
