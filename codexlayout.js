@@ -1267,6 +1267,13 @@ var CodexLayout=
 	    var scaled=this.scaled=new Array();
 	    applyPageScaling(candidates,scaled,this.width,this.height);
 	    return scaled;};
+	CodexLayout.prototype.getDups=function getDups4ID(id){
+	    if (!(id)) return [];
+	    else if (id.nodeType) id=id.id;
+	    var base=fdjtID(id);
+	    var dups=this.dups[id];
+	    if (dups) return [base].concat(dups);
+	    else return base;}
 	
 	return CodexLayout;})();
 
