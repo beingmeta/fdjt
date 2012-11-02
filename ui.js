@@ -144,7 +144,7 @@ fdjtUI.Highlight=(function(){
 		else if (hasParent(ends_in,scan))
 		    scan=scan.firstChild;
 		else {
-		    highlights.push(highlight_node(scan));
+		    highlights.push(highlight_node(scan,hclass,htitle));
 		    while ((scan)&&(!(scan.nextSibling)))
 			scan=scan.parentNode;
 		    scan=scan.nextSibling;}}
