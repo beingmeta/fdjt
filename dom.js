@@ -2218,16 +2218,16 @@ var fdjtDOM=
 	    return false;}
 	fdjtDOM.findString=findString;
 
-	function findMatches(node,needle,off){
+	function findMatches(node,needle,off,count){
 	    if (typeof off === 'undefined') off=0;
-	    if (typeof count === 'undefined') count=1;
+	    if (typeof count === 'undefined') count=-1;
 	    var match=false; var results=[];
 	    var fulltext=node2text(node);
 	    var scan=((off===0)?(fulltext):(fulltext.slice(off)));
 	    var pat=((typeof needle === 'string')?
 		     (new RegExp(needle.replace(/\s+/g,"(\\s+)"),"gm")):
 		     (needle));
-	    while ((match=pat.exec(scan))) {
+	    while ((count!==0)&&(match=pat.exec(scan))) {
 		var loc=match.index;
 		var absloc=loc+off;
 		var start=get_text_pos(node,absloc,0);
