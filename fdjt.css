@@ -550,6 +550,7 @@ div.fdjtlog span.time {
 .fdjtexpands.fdjtexpanded .whencollapsed { display: none;}
 
 .fdjtexpands.fdjtexpanded span.whenexpanded,
+.fdjtexpands.fdjtexpanded img.whenexpanded,
 .fdjtexpands.fdjtexpanded a.whenexpanded,
 .fdjtexpands.fdjtexpanded em.whenexpanded,
 .fdjtexpands.fdjtexpanded strong.whenexpanded,
