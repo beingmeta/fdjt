@@ -123,16 +123,18 @@ fdjtUI.Highlight=(function(){
 	else if (ending) {
 	    parent.replaceChild(ending,node);
 	    parent.insertBefore(middle,ending);}
-	else parent.replaceChild(middle,node);}
+	else parent.replaceChild(middle,node);
+	return middle;}
     function highlight_range(range,hclass,htitle){
 	range=fdjtDOM.refineRange(range);
 	var starts_in=range.startContainer;
 	var ends_in=range.endContainer;
 	if (starts_in===ends_in)
-	    return highlight_node_range(
+	    return [highlight_node_range(
 		starts_in,range.startOffset,range.endOffset,
-		hclass,htitle);
+		hclass,htitle)];
 	else {
+	    var highlights=[];
 	    var scan=starts_in;
 	    while ((scan)&&(!(scan.nextSibling)))
 		scan=scan.parentNode;
@@ -142,14 +144,17 @@ fdjtUI.Highlight=(function(){
 		else if (hasParent(ends_in,scan))
 		    scan=scan.firstChild;
 		else {
-		    highlight_node(scan);
+		    highlights.push(highlight_node(scan));
 		    while ((scan)&&(!(scan.nextSibling)))
 			scan=scan.parentNode;
 		    scan=scan.nextSibling;}}
 	    // Do the ends
-	    highlight_node_range(
-		starts_in,range.startOffset,false,hclass,htitle);
-	    highlight_node_range(ends_in,0,range.endOffset,hclass,htitle);}}
+	    highlights.push(
+		highlight_node_range(
+		    starts_in,range.startOffset,false,hclass,htitle));
+	    highlights.push(
+		highlight_node_range(ends_in,0,range.endOffset,hclass,htitle));
+	    return highlights;}}
 
     highlight_range.clear=clear_highlights;
     highlight_range.highlight=highlight_range;

@@ -2104,25 +2104,35 @@ var fdjtDOM=
 	    else return accum;}
 	fdjtDOM.node2text=node2text;
 	
-	function get_text_pos(node,pos,cur){
+	function get_text_pos(node,pos,cur,starting){
 	    if (cur>pos) return false;
 	    else if ((!(node.nodeType))&&(node.length)) {
 		var i=0, lim=node.length;
 		while (i<lim) {
-		    cur=get_text_pos(node[i++],pos,cur);
+		    cur=get_text_pos(node[i++],pos,cur,starting);
 		    if (!(typeof cur === "number")) return cur;}
 		return cur;}
 	    else if (node.nodeType===3) {
 		var stringval=node.nodeValue;
-		if (pos<=(cur+stringval.length))
+		if (pos<(cur+stringval.length))
 		    return { node: node, off: pos-cur};
+		else if (pos===(cur+stringval.length))
+		    return { node: node, off: pos-cur,atend: true};
 		else return cur+stringval.length;}
 	    else if (node.nodeType===1) {
 		var children=node.childNodes;
 		var i=0, lim=children.length;
 		while (i<lim) {
-		    cur=get_text_pos(children[i++],pos,cur);
-		    if (!(typeof cur === 'number')) return cur;}
+		    cur=get_text_pos(children[i++],pos,cur,starting);
+		    if (!(typeof cur === 'number')) {
+			if ((starting)&&(cur.atend)) {
+			    cur=pos; while (i<lim) {
+				var next=get_text_pos(
+				    children[i++],cur,pos,starting);
+				if ((next)&&(typeof next!=="number"))
+				    return next;}
+			    return cur;}
+			else return cur;}}
 		return cur;}
 	    else return cur;}
 
@@ -2195,7 +2205,7 @@ var fdjtDOM=
 		if (count===1) {
 		    var loc=match.index;
 		    var absloc=loc+off;
-		    var start=get_text_pos(node,absloc,0);
+		    var start=get_text_pos(node,absloc,0,true);
 		    var end=get_text_pos(node,absloc+(match[0].length),0);
 		    if ((!start)||(!end)) return false;
 		    var range=document.createRange();
