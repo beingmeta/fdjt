@@ -2087,7 +2087,11 @@ var fdjtDOM=
 
 	function node2text(node,accum){
 	    if (!(accum)) accum="";
-	    if (node.nodeType===3) {
+	    if ((!(node.nodeType))&&(node.length)) {
+		var i=0, lim=node.length;
+		while (i<lim) accum=node2text(node[i++],accum);
+		return accum;}
+	    else if (node.nodeType===3) {
 		var stringval=node.nodeValue;
 		if (stringval) accum=accum+stringval;
 		return accum;}
@@ -2102,6 +2106,12 @@ var fdjtDOM=
 	
 	function get_text_pos(node,pos,cur){
 	    if (cur>pos) return false;
+	    else if ((!(node.nodeType))&&(node.length)) {
+		var i=0, lim=node.length;
+		while (i<lim) {
+		    cur=get_text_pos(node[i++],pos,cur);
+		    if (!(typeof cur === "number")) return cur;}
+		return cur;}
 	    else if (node.nodeType===3) {
 		var stringval=node.nodeValue;
 		if (pos<=(cur+stringval.length))
