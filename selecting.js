@@ -364,7 +364,10 @@ var fdjtSelecting=
 				tap_handler);
 	    fdjtDOM.addListener(container,"hold",
 				((opts)&&(opts.onhold))||
-				hold_handler);}
+				hold_handler);
+	    if ((opts)&&(opts.onrelease))
+		fdjtDOM.addListener(
+		    container,"release",(opts.onrelease));}
 
 	// Return the constructor
 	return fdjtSelecting;})();
