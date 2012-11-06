@@ -216,6 +216,12 @@ fdjtUI.Highlight=(function(){
 	    (getcheckable(target))||
 	    (getcheckable(checkspan));
 	if (!(checkbox)) return false;
+	if (hasClass(checkspan,"isdisabled")) {
+	    if (checkbox.disabled) return false;
+	    else dropClass(checkspan,"isdisabled");}
+	else if (checkbox.disabled) {
+	    addClass(checkspan,"isdisabled");
+	    return false;}
 	var ischecked=hasClass(checkspan,"ischecked");
 	var changed=false;
 	if (typeof checked === 'undefined') checked=ischecked;
@@ -305,6 +311,7 @@ fdjtUI.Highlight=(function(){
 		var input=inputs[j++];
 		if ((input.type==='radio')||(input.type==='checkspan')) {
 		    if (input.checked) addClass(checkspan,"ischecked");
+		    if (input.disabled) addClass(checkspan,"isdisabled");
 		    break;}}}}
     fdjtUI.CheckSpan.initCheckspans=initCheckspans;
 
