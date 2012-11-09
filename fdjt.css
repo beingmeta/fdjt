@@ -987,6 +987,21 @@ div.fdjtalert .closebutton {
     top: 4px; right: 0.5ex;
     cursor: pointer;}
 
+div.fdjtalert.fdjtconfirm .closebutton { display: none;}
+div.fdjtalert.fdjtconfirm div.message {}
+div.fdjtalert.fdjtconfirm div.choices {
+    font-size: 150%;
+    padding-bottom: 1em; padding-top: 1em;
+    text-align: center;}
+div.fdjtalert.fdjtconfirm div.choices button {
+    padding: 1ex;
+    border-radius: 1ex;
+    -webkit-border-radius: 1ex;
+    -khtml-border-radius: 1ex;
+    -moz-border-radius: 1ex;
+    -o-border-radius: 1ex;}
+
+
 /* Text selection */
 
 .fdjtselecting {

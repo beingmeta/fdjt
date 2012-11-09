@@ -1167,6 +1167,35 @@ fdjtUI.Collapsible.focus=function(evt){
 	return box;}
     fdjtUI.alertFor=alertFor;
 
+    function makeChoice(spec,close_choice,i){
+	var dom=spec.dom||
+	    ((spec.label)&&(fdjtDOM("button",spec.label)))||
+	    fdjtDOM("button","Choice "+i);
+	dom.onclick=function(evt){
+	    evt=evt||event;
+	    if (spec.handler) spec.handler();
+	    fdjtUI.cancel(evt);
+	    close_choice();};
+	return dom;}
+
+    function choose(choices){
+	var buttons=[]; var box=false;
+	function close_choice(){
+	    var i=0, lim=buttons.length;
+	    while (i<lim) buttons[i++].onclick=null;
+	    if (box) fdjtDOM.remove(box);}
+	if (typeof choices === "function") 
+	    choices=[{label: "Cancel"},{label: "OK",handler: choices}];
+	var i=0, lim=choices.length;
+	while (i<lim) buttons.push(
+	    makeChoice(choices[i++],close_choice,i));
+	var msg=fdjtDOM.toArray(arguments).slice(1);
+	box=fdjtDOM("div.fdjtalert.fdjtconfirm#FDJTALERT",
+		    fdjtDOM("div.message",msg),
+		    fdjtDOM("div.choices",buttons));
+	fdjtDOM.prepend(document.body,box);}
+    fdjtUI.choose=choose;
+
     function alert_click(evt){
 	evt=evt||event;
 	var target=fdjtUI.T(evt);
