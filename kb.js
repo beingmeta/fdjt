@@ -991,7 +991,7 @@ var fdjtKB=
 		if (map.hasOwnProperty(key)) {
 		    var obj=map[key];
 		    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-		    if (qid) setLocal(qid,jsonString(obj),true);};}
+		    if (qid) setLocal(qid,jsonString(obj));};}
 	    return this;}
 	function offline_get(obj,prop){
 	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
