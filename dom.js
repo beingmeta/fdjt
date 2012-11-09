@@ -1528,6 +1528,8 @@ var fdjtDOM=
 	    var results=[];
 	    var elts=((document.getElementsByTagName)?
 		      (document.getElementsByTagName("LINK")):
+		      ((document.body)&&(document.body.getElementsByTagName))?
+		      (document.body.getElementsByTagName("LINK")):
 		      (getChildren(document,"LINK")));
 	    var rx=((name instanceof RegExp)?(name):(false));
 	    if ((typeof name ==='string')&&
