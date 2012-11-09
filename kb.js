@@ -980,33 +980,43 @@ var fdjtKB=
 	   In the simplest model, the QID is just used as a key
 	   in local storage to store a JSON version of the object. */
 
+	var getLocal=fdjtState.getLocal;
+	var setLocal=fdjtState.setLocal;
+	var dropLocal=fdjtState.dropLocal;
+	var jsonString=JSON.stringify;
+
 	function OfflineKB(pool){
-	    this.pool=pool;
+	    this.pool=pool; var map=pool.map;
+	    for (var key in map) {
+		if (map.hasOwnProperty(key)) {
+		    var obj=map[key];
+		    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
+		    if (qid) setLocal(qid,jsonString(obj),true);};}
 	    return this;}
 	function offline_get(obj,prop){
 	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-	    var data=fdjtState.getLocal(qid);
+	    var data=getLocal(qid);
 	    if (data) obj.init(data);
 	    return obj[prop];}
 	OfflineKB.prototype.load=function(obj){
 	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-	    var data=fdjtState.getLocal(qid,true);
+	    var data=getLocal(qid,true);
 	    if (data) return obj.init(data);
 	    else return undefined;};
 	OfflineKB.prototype.probe=function(qid){
-	    return fdjtState.getLocal(qid,true);};
+	    return getLocal(qid,true);};
 	OfflineKB.prototype.get=offline_get;
 	OfflineKB.prototype.add=function(obj,slotid,val){
 	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
 	    if ((slotid)&&(val))
-		fdjtState.setLocal(qid,JSON.stringify(obj));};
+		setLocal(qid,jsonString(obj));};
 	OfflineKB.prototype.drop=function(obj,slotid,val){
 	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-	    if (!(slotid)) fdjtState.dropLocal(qid);
-	    else fdjtState.setLocal(qid,JSON.stringify(obj));};
+	    if (!(slotid)) dropLocal(qid);
+	    else setLocal(qid,jsonString(obj));};
 	OfflineKB.prototype.Import=function(obj){
 	    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-	    fdjtState.setLocal(qid,obj,true);};
+	    setLocal(qid,obj,true);};
 	fdjtKB.OfflineKB=OfflineKB;
 	
 	/* Miscellaneous array and table functions */
@@ -1085,4 +1095,5 @@ var fdjtKB=
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
    ;;;  End: ***
-*/
+*
+/
