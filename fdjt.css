@@ -929,7 +929,7 @@ div.fdjtalert {
     width: 50%; left: 25%; right: 25%;
     top: 40%; height: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
-    z-index: 500; 
+    z-index: 200; 
     opacity: .90;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
     filter: alpha(opacity=90);
@@ -961,7 +961,7 @@ div.fdjtalert {
     -khtml-border-radius: 12px;
     -moz-border-radius: 12px;
     -o-border-radius: 12px;}
-div.fdjtalert#FDJTALERT { z-index: 600;}
+div.fdjtalert#FDJTALERT { z-index: 200;}
 div.fdjtalert.closing {
     opacity: .05;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=05)";
