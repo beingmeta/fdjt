@@ -193,6 +193,7 @@ var CodexLayout=
 		return dupContext(node.parentNode,page,dups,crumbs);
 	    // Now we actually duplicate it.  
 	    var id=node.id;
+	    if (!(id)) id=node.getAttribute("data-baseid");
 	    // If it doesn't have an ID, we give it one, because we'll want
 	    //  to refer to it later while wanting to avoid DOM cycles
 	    if (!(id)) id=node.id="CODEXTMPID"+(tmpid_count++);
@@ -204,16 +205,18 @@ var CodexLayout=
 	    var copy=node.cloneNode(false);
 	    var parent=dupContext(node.parentNode,page,dups,crumbs);
 	    var nodeclass=node.className||"";
+	    var duplicated=(nodeclass.search(/\bcodexdup.*\b/)>=0);
 	    // Jigger the class name
 	    copy.className=
 		((nodeclass.replace(/\b(codexrelocated|codexdup.*)\b/,""))+
 		 " codexdup").replace(/\s+/," ").trim();
-	    if (nodeclass.search(/\bcodexdupstart\b/)<0)
-		node.className=nodeclass+" codexdupstart";
+	    if (!(duplicated)) {
+		if (nodeclass.search(/\bcodexdupstart\b/)<0)
+		    node.className=nodeclass+" codexdupstart";}
 	    // If the original had an ID, save it in various ways
-	    if (node.id) {
-		copy.codexbaseid=node.id;
-		copy.setAttribute("data-baseid",node.id);
+	    if (id) {
+		copy.codexbaseid=id;
+		copy.setAttribute("data-baseid",id);
 		copy.id=null;}
 	    // Record the copy you've made (to avoid recreation)
 	    dups[id]=copy;
@@ -1195,7 +1198,7 @@ var CodexLayout=
 			fdjtDOM(parent,children);}}
 		var pagetops=fdjtDOM.$(".codexpagetop");
 		var i=0, lim=pagetops.length;
-		while (i<lim) dropClass(pagetops[i++]);
+		while (i<lim) dropClass(pagetops[i++],"codexpagetop");
 		revertLayout(this);}
 
 	    /* Finally return the layout */
