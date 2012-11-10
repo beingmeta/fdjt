@@ -280,16 +280,19 @@ var CodexLayout=
 		   (!(hasClass(parent,"codexpage")))&&
 		   (scan===getFirstContent(parent))) {
 		scan=parent; parent=scan.parentNode;}
+	    var istop=(!hasContent(page));
 	    if ((!(parent))||(parent===document.body)||
 		(parent.id==="CODEXCONTENT")||(parent.id==="CODEXROOT")||
 		(hasClass(parent,"codexroot"))||(hasClass(parent,"codexpage"))) {
 		// You don't need to dup the parent on the new page
-		moveNode(scan,page,false,crumbs);
-		return node;}
+		moveNode(scan,page,false,crumbs);}
 	    else {
 		var dup_parent=dupContext(parent,page,dups,crumbs);
-		moveNode(scan,dup_parent||page,false,crumbs);
-		return node;}}
+		moveNode(scan,dup_parent||page,false,crumbs);}
+	    if (istop) {scan=node; while ((scan)&&(scan!==page)) {
+		addClass(scan,"codexpagetop");
+		scan=scan.parentNode;}}
+	    return node;}
 
 	// Reverting layout
 
@@ -494,6 +497,10 @@ var CodexLayout=
 		if (typeof progressfn === 'undefined')
 		    progressfn=layout.progressfn||false;
 		if (!(layout.started)) layout.started=start;
+		// If it's already been added to a page, don't do it again.
+		if (getParent(root,".codexpage")) {
+		    if (donefn) donefn(layout);
+		    return false;}
 		layout.root_count++;
 
 		// If we can use layout properties of the root, we do
@@ -1186,7 +1193,11 @@ var CodexLayout=
 			var parent=scalebox.parentNode;
 			fdjtDOM.remove(scalebox);
 			fdjtDOM(parent,children);}}
+		var pagetops=fdjtDOM.$(".codexpagetop");
+		var i=0, lim=pagetops.length;
+		while (i<lim) dropClass(pagetops[i++]);
 		revertLayout(this);}
+
 	    /* Finally return the layout */
 	    return this;};
 	
