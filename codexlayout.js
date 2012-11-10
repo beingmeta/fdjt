@@ -223,13 +223,6 @@ var CodexLayout=
 		    node.style[fdjtDOM.transform]='';
 		    node.style[fdjtDOM.transformOrigin]='';}}}
 
-	/* Codex trace levels */
-	/* 0=notrace (do final summary if tracing startup)
-	   1=trace repagination chunk by chunk
-	   2=trace inserted page breaks
-	   3=trace every node consideration
-	*/
-
 	/* Duplicating nodes */
 
 	var tmpid_count=1;
@@ -402,6 +395,14 @@ var CodexLayout=
 		    restoreNode(moved[i++],layout,crumbs,textsplits);}
 	    layout.textsplits={}; layout.crumbs={};}
 	
+	/* Codex trace levels */
+	/* 0=notrace
+	   1=trace tracked nodes
+	   2=trace addition of top level chunks
+	   3=trace insertion of page breaks
+	   4=trace every node consideration
+	*/
+
 	function CodexLayout(init){
 	    if (!(init)) init={};
 
@@ -431,6 +432,16 @@ var CodexLayout=
 	    var break_blocks=this.break_blocks=
 		((typeof init.break_blocks === 'undefined')?(true):
 		 (init.break_blocks));
+
+	    // Atomic nodes can't be broken.  Specifying this can
+	    // speed up page layout in some cases.
+	    var atomic=init.atomic||false;
+	    if (typeof atomic === "string") atomic=fdjtDOM.selector(atomic);
+	    else if ((atomic.length)&&(atomic.join))
+		// Arrays of selector strings
+		atomic=fdjtDOM.selector(atomic.join(","));
+	    else {}
+	    this.atomic=atomic;
 
 	    // Scale pages (use CSS to shrink pages to fit)
 	    var scale_pages=this.scale_pages=
@@ -485,7 +496,14 @@ var CodexLayout=
 
 	    this.started=false; // When we started
 	    var trace=this.tracelevel=  // How much to trace
-		init.tracelevel||CodexLayout.tracelevel;
+		init.tracelevel||CodexLayout.tracelevel||
+		(fdjtState.getLocal("codexlayout.trace",true))||0;
+	    var track=init.track||CodexLayout.track||
+		(fdjtState.getLocal("codexlayout.track"))||false;
+	    if (track) {
+		this.track=track=fdjtDOM.Selector(track);
+		if (!(trace)) trace=this.tracelevel=1;}
+	    else this.track=false;
 	    this.roots=init.roots||false; // Where all roots can be bracked
 	    this.root_count=0; // Number of root nodes added
 	    this.block_count=0;
@@ -493,20 +511,24 @@ var CodexLayout=
 	    
 	    var pagerule=this.pagerule=init.pagerule||false;
 	    
-	    // Notes on new sliced design:
+	    function move2page(node,page){
+		if (trace) {
+		    if ((trace>3)||((track)&&(track.match(node))))
+			logfn("Moving node %o to page %o",node,page);}
+		return moveNodeToPage(node,page,dups,crumbs);}
+	    function moveNode(node){
+		if (trace) {
+		    if ((trace>3)||((track)&&(track.match(node))))
+			logfn("Moving node %o to page %o",node,page);}
+		return moveNodeToPage(node,page,dups,crumbs);}
 
-	    //  addContent current calls loop() exactly once, so it's
-	    //  not really a loop.  We move the work of loop() before
-	    //  the iteration (the while iteration over blocks) out of
-	    //  loop() and make loop() the inner block of the while
-	    //  loop.  We then have loop() check a timeslice and use
-	    //  setTimeout to postpone it's continuation.  addContent
-	    //  takes an optional timeslice arg (in msecs) and an
-	    //  optional whendone function and progress reporting
-	    //  function.  If root is an array, we should probably
-	    //  iterate over it, which means moving most of the
-	    //  layout.js code back into here.
 
+	    //  addContent calls loop() exactly once to set up the
+	    //   actual loop to be timesliced with repeated calls
+	    //   setTimeout and a final call to doneFn.  The real
+	    //   inner function is step(), which relies on state
+	    //   stored in its closure.
+	    
 	    function addContent(root,timeslice,timeskip,
 				trace,progressfn,donefn) {
 
@@ -520,109 +542,174 @@ var CodexLayout=
 		layout.root=cur_root=root;
 		layout.root_count++;
 
+		// If we can use layout properties of the root, we do
+		// so immediately, and synchronously
+		if ((hasClass(root,/\bcodexfullpage\b/))||
+		    ((fullpages)&&(testNode(root,fullpages)))) {
+		    newPage(root); newPage();
+		    prev=this.prev=root;
+		    prevstyle=this.prevstyle=getStyle(root);
+		    if (donefn) donefn();
+		    return;}
+		else if ((forcedBreakBefore(root))||
+			 ((prev)&&(forcedBreakAfter(prev)))) {
+		    root=newPage(root);
+		    prev=this.prev=root;
+		    prevstyle=this.prevstyle=getStyle(root);
+		    if (page.offsetHeight<=page_height) {
+			if (donefn) donefn();
+			return;}
+		    else if (avoidBreakInside(root)) {
+			newPage();
+			if (donefn) donefn();
+			return;}}
+		else if ((atomic)&&(atomic.match(root))) {
+		    root=moveNode(root);
+		    prev=this.prev=root;
+		    prevstyle=this.prevstyle=getStyle(root);
+		    if (page.offsetHeight<page_height) {
+			if (donefn) donefn();
+			return;}
+		    else {
+			root=newPage(root);
+			if (page.offsetHeight>page_height) newPage();
+			if (donefn) donefn();
+			return;}}
+		else {
+		    // Move the root onto the current page (we set
+		    // root to the result in case the motion created a
+		    // new node).
+		    root=moveNode(root);
+		    prev=this.prev=root;
+		    prevstyle=this.prevstyle=getStyle(root);
+		    if (page.offsetHeight<page_height) {
+			if (donefn) donefn();
+			return;}}
+
 		var blocks=[], terminals=[], styles=[];
 		// gather all of the block-level elements
-		// (recursively) in the node, noting which ones
-		// are terminals
+		// (recursively) in the node, noting which ones are
+		// terminals.  This should be pretty fast, so we do it
+		// synchronously
 		gatherBlocks(root,blocks,terminals,styles);
 		layout.block_count=layout.block_count+blocks.length;
+		if (trace>1)
+		    logfn("Laying out %d blocks from %o; page=%o",
+			  blocks.length,root,page);
 
 		// If there aren't any blocks, we try adding the
 		//  content to the current page and, if it goes over,
-		//  create a new page for it.
+		//  create a new page for it and call the donefn.  At
+		//  the top level, we only split blocks.
 		if (blocks.length===0) {
-		    var node=moveNodeToPage(root,page,dups,crumbs);
+		    var node=moveNode(root);
 		    if (page.offsetHeight>page_height) {
-			newPage(); moveNodeToPage(root,page,dups,crumbs);}
+			newPage(); moveNode(node);}
 		    layout.root=cur_root=false;
 		    if (donefn) donefn(layout);
 		    return this;}
-
-		// Then move the node onto the current page; we
-		// set node to the result of the move, because the
-		// node might be transformed in some way when
-		// moved (if, for example, it is a text node, it
-		// might be split).
-		node=moveNodeToPage(root,page,dups,crumbs);
 		
 		var ni=0, nblocks=blocks.length; 
 		    
 		function step(){
 		    var block=blocks[ni]; var style=styles[ni];
 		    var terminal=terminals[ni]||false;
+		    var tracing=false;
 		    if (block.id) layout.lastid=block.id;
-		    // FIRST, HANDLE DRAGGING If this block is
-		    // terminal and we don't want to break before
-		    // this block or after the preceding block,
-		    // drag along the previous block to the new
-		    // page.  NOTE that dragged blocks have
-		    // already been placed, so the previous page
-		    // will end up short.  Them's the breaks.
+
+		    if ((trace)&&(block)&&
+			((trace>3)||((track)&&(track.match(block))))) {
+			logfn("Considering block %o (#%d from %o); page=%o",
+			      block,ni,root,page);
+			tracing=true;}
+		    
+		    // FIRST, HANDLE DRAGGING
+
+		    // If this block is terminal and we don't want to
+		    // break before this block or after the preceding
+		    // block, drag along the previous block to the new
+		    // page.
+
+		    // NOTE that dragged blocks have already been
+		    // placed, so the previous page will end up short.
+		    // Them's the breaks.
 		    if ((block)&&(terminal)&&(prev)&&
 			((avoidBreakBefore(block,style))||
-			 (avoidBreakAfter(prev,prevstyle))))
-			drag.push(prev);
-		    else if ((block)&&(terminal))
+			 (avoidBreakAfter(prev,prevstyle)))) {
+			if (tracing) logfn("Possibly dragging %o",prev);
+			drag.push(prev);}
+		    else if ((block)&&(terminal)&&(drag)&&(drag.length)) {
 			// Otherwise, we don't have to worry about
 			// what we've been dragging along so far,
 			// so we clear it.
-			layout.drag=drag=[];
+			if (tracing) logfn("Dropping %d drags",layout.drag.length);
+			layout.drag=drag=[];}
 		    else {}
+		    
 		    // If a block is false, continue
 		    if (!(block)) {ni++; return;}
 		    else if ((hasClass(block,/\bcodexfloatpage\b/))||
 			     ((floatpages)&&(testNode(block,floatpages)))) {
 			// Float pages just get pushed (until newPage below)
+			if (tracing) logfn("Pushing float page %o",block);
 			float_pages.push[block]; ni++; return;}
 		    else if ((hasClass(block,/\bcodexfullpage\b/))||
 			     ((fullpages)&&(testNode(block,fullpages)))) {
 			// Full pages automatically get their own page
-			fullPage(block);
+			if (tracing) logfn("Full single page for %o",block);
+			block=newPage(block); newPage();
 			ni++; return;}
 		    else if ((page.childNodes.length)&&
 			     ((forcedBreakBefore(block,style))||
-			      ((prev)&&(forcedBreakAfter(prev)))||
+			      ((prev)&&(forcedBreakAfter(prev,prevstyle)))||
 			      ((prev)&&
 			       ((hasClass(prev,/\bcodexfullpage\b/))||
 				((fullpages)&&(testNode(prev,fullpages))))))) {
-			// This is the easy case.  Note that we
-			// don't force a page break if the current
-			// page is empty.
+			// This is the easy case.  Note that we don't
+			// force a page break if the current page is
+			// empty.
+			if (tracing) logfn("Forced new page for %o",block);
 			layout.drag=drag=[];
-		    	newPage(block);}
-		    else moveNodeToPage(block,page,dups,crumbs);
-		    // Finally, we check if everything fits We're
-		    // walking through the blocks[] but only
-		    // advance when an element fits or can't be
-		    // split or tweaked Note that we may process
-		    // an element [i] more than once if we split
-		    // the node and part of the split landed back in [i].
+		    	block=newPage(block);}
+		    else block=moveNode(block);
+
+		    // Finally, we check if everything fits.  We're
+		    // walking through the blocks[] but only advance
+		    // when an element fits or can't be split or
+		    // tweaked Note that we may process an element [i]
+		    // more than once if we split the node and part of
+		    // the split landed back in [i].
 		    var geom=getGeom(block,page);
-		    if (trace>2) logfn("Layout/loop %o %j",block,geom);
+		    if ((trace)&&((trace>3)||((track)&&(track.match(block)))))
+			logfn("Layout/geom %o %j",block,geom);
 		    if ((terminal)&&(geom.bottom>page_height)) {
 			// We're a terminal node and we extend
 			// below the bottom of the page
 			if (geom.top>page_height)
 			    // If our top is also over the bottom of the page,
 			    //  we just start a new page
-			    newPage(block);
+			    block=newPage(block);
 			else if (((!(break_blocks))||
-				  (avoidBreakInside(block))||
+				  ((atomic)&&(atomic.match(block)))||
+				  (avoidBreakInside(block,style))||
 				  (hasClass(block,"codexcantsplit")))) {
 			    var curpage=page;
-			    newPage(block);
+			    block=newPage(block);
 			    if (page===curpage) {
 				if (geom.bottom>page_height)
 				    addClass(page,"codexoversize");
 				ni++;}}
 			else {
-			    // Now we try to split the block, we
-			    // store the 'split block' back in the
-			    // blocks variable because we might
-			    // need to split it again.
+			    // Now we try to split the block, we store
+			    // the 'split block' back in the blocks
+			    // variable because we might need to split
+			    // it again.
+			    if (tracing) logfn("Splitting block %o",block);
 			    blocks[ni]=splitBlock(block);}}
 		    // We fit on the page, so we'll look at the next block.
-		    else ni++;
+		    else {
+			if (tracing) logfn("Fits on page: %o",block);
+			ni++;}
 		    // Update the prev pointer for terminals
 		    if (terminal) {layout.prev=prev=block;}}
 
@@ -632,7 +719,12 @@ var CodexLayout=
 		function gatherBlocks(node,blocks,terminals,styles){
 		    if (node.nodeType!==1) return;
 		    if (node.codexui) return;
-		    var style=getStyle(node); var disp=style.display;
+		    var style=getStyle(node); 
+		    if ((atomic)&&(atomic.match(node))) {
+			blocks.push(node); styles.push(node);
+			terminals.push(node);
+			return;}
+		    var disp=style.display;
 		    if ((style.position==='static')&&(disp!=='inline')) {
 			var loc=blocks.length;
 			blocks.push(node);
@@ -673,7 +765,7 @@ var CodexLayout=
 			// First add any floating pages that may have
 			// accumulated
 			var i=0; var lim=float_pages.length;
-			while (i<lim) fullPage(float_pages[i++]);
+			while (i<lim) newPage(float_pages[i++]);
 			float_pages=[];
 			forcepage=true;}
 		    var newpage="pagetop";
@@ -701,55 +793,23 @@ var CodexLayout=
 			pages.push(page);
 			newpage="newpage";}
 		    
-		    if (trace>1) {
-			if (node) logfn("Layout/%s %o at %o",newpage,page,node);
-			else logfn("Layout/%s %o",newpage,page);}
-		    
+		    if (trace) {
+			if ((trace>2)||
+			    ((track)&&(node)&&(track.match(node)))) {
+			    if (node) logfn("Layout/%s %o at %o",
+					    newpage,page,node);
+			    else logfn("Layout/%s %o",newpage,page);}}
+			
 		    // If there are things we are dragging along, move
 		    // them to the new page
 		    if ((drag)&&(drag.length)) {
 			var i=0; var lim=drag.length;
-			while (i<lim)
-			    moveNodeToPage(drag[i++],page,dups,crumbs);
+			while (i<lim) moveNode(drag[i++],crumbs);
 			layout.prev=prev=drag[drag.length-1];
 			layout.drag=drag=[];}
 		    // Finally, move the node to the page
-		    if (node) moveNodeToPage(node,page,dups,crumbs);
-
-		    return page;}
-
-		function fullPage(node){
-		    var newpage="fullpagetop";
-		    if ((!(page))||
-			((!(node))&&(!(hasContent(page,true,true))))||
-			(((node)&&(hasParent(node,page)))?
-			 (hasContent(page,node,true)):
-			 (hasContent(page,true,true)))) {
-			if (page) dropClass(page,"curpage");
-			layout.page=page=fdjtDOM("div.codexpage.curpage");
-			if (!(pagerule)) {
-			    page.style.height=page_height+'px';
-			    page.style.width=page_width+'px';}
-			pagenum++; layout.pagenum=pagenum;
-			page.id=pageprefix+(pagenum);
-			page.setAttribute("data-pagenum",pagenum);
-			fdjtDOM(container,page);
-			pages.push(page);
-			newpage="newpage";}
-		    
-		    if (trace>1) {
-			if (node) logfn("Layout/%s %o at %o",newpage,page,node);
-			else logfn("Layout/%s %o",newpage,page);}
-		    
-		    if (node) moveNodeToPage(node,page,dups,crumbs);
-		    
-		    tweakBlock(node);
-
-		    layout.prev=prev=false;
-		    layout.prevstyle=prevstyle=false;
-		    layout.drag=drag=[];
-
-		    return page;}
+		    if (node) return moveNode(node);
+		    else return false;}
 
 		var getLineHeight=fdjtDOM.getLineHeight;
 
@@ -1129,7 +1189,7 @@ var CodexLayout=
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
 		return (style.pageBreakBefore==='always')||
-		    (hasClass(elt,"forcebreakbefore"))||
+		    ((elt.className)&&(elt.className.search(/\bforcebreakbefore\b/)>=0))||
 		    ((forcebreakbefore)&&(testNode(elt,forcebreakbefore)));}
 	    this.forcedBreakBefore=forcedBreakBefore;
 	    
@@ -1139,9 +1199,8 @@ var CodexLayout=
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
 		var force=(style.pageBreakAfter==='always')||
-		    (hasClass(elt,"forcebreakafter"))||
-		    ((forcebreakafter)&&
-		     (testNode(elt,forcebreakafter)));
+		    ((elt.className)&&(elt.className.search(/\bforcebreakafter\b/)>=0))||
+		    ((forcebreakafter)&&(testNode(elt,forcebreakafter)));
 		if (force) return force;
 		if (elt===cur_root) return false;
 		if (!(cur_root)) return false;
@@ -1173,9 +1232,8 @@ var CodexLayout=
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
 		return ((style.pageBreakBefore==='avoid')||
-			(hasClass(elt,"avoidbreakbefore"))||
-			((avoidbreakbefore)&&
-			 (testNode(elt,avoidbreakbefore))));}
+			((elt.className)&&(elt.className.search(/\bavoidbreakbefore\b/)>=0))||
+			((avoidbreakbefore)&&(testNode(elt,avoidbreakbefore))));}
 	    this.avoidBreakBefore=avoidBreakBefore;
 
 	    function avoidBreakAfter(elt,style){
