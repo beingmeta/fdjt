@@ -60,12 +60,13 @@ var CodexLayout=
 	
 	var floor=Math.floor;
 
-	function getGeom(elt,root){
+	function getGeom(elt,root,extra){
 	    var top = elt.offsetTop;
 	    var left = elt.offsetLeft;
 	    var width=elt.offsetWidth;
 	    var height=elt.offsetHeight;
 	    var rootp=((root)&&(root.offsetParent));
+	    var style=((extra)&&(getStyle(elt)));
 
 	    if (elt===root) 
 		return {left: 0,top: 0,width:width,height: height};
@@ -76,8 +77,38 @@ var CodexLayout=
 		left += elt.offsetLeft;
 		elt=elt.offsetParent;}
 	    
-	    return {left: left, top: top, width: width,height: height,
-		    right:left+width,bottom:top+height};}
+	    if (extra) {
+		var t_margin=parsePX(style.marginTop);
+		var r_margin=parsePX(style.marginRight);
+		var b_margin=parsePX(style.marginBottom);
+		var l_margin=parsePX(style.marginLeft);
+		var t_padding=parsePX(style.paddingTop);
+		var r_padding=parsePX(style.paddingRight);
+		var b_padding=parsePX(style.paddingBottom);
+		var l_padding=parsePX(style.paddingLeft);
+		var t_border=parsePX(style.borderTopWidth);
+		var r_border=parsePX(style.borderRightWidth);
+		var b_border=parsePX(style.borderBottomWidth);
+		var l_border=parsePX(style.borderLeftWidth);
+		var outer_width=width+l_margin+r_margin;
+		var outer_height=height+t_margin+b_margin;
+		var inner_width=width-(l_border+l_padding+r_border+r_padding);
+		var inner_height=height-(t_border+t_padding+b_border+b_padding);
+		var lh=style.lineHeight, fs=style.fontSize, lhpx=false;
+		if (lh==="normal") lhpx=parsePX(fs);
+		else if (lh.search(/px$/)>0) lhpx=parsePX(lh);
+		else if (lh.search(/%$/)>0) 
+		    lhpx=(parseFloat(lh.slice(0,-1))/100)*(parsePX(fs));
+		else lhpx=parsePX(fs);
+		return {left: left, top: top, width: width,height: height,
+			right:left+width,bottom:top+height,
+			top_margin: t_margin, bottom_margin: b_margin,
+			left_margin: l_margin, right_margin: r_margin,
+			outer_height: outer_height,outer_width: outer_width,
+			inner_height: inner_height,outer_width: inner_width,
+			line_height: lhpx};}
+	    else return {left: left, top: top, width: width,height: height,
+			 right:left+width,bottom:top+height};}
 
 	/* Node testing */
 
@@ -143,86 +174,6 @@ var CodexLayout=
 	    alert("Layout needs to log but cannot");
 	    alerted=true;}
 	
-	/* Scaling things */
-	
-	function scaleImage(image,scale,geom){
-	    if (!(geom)) geom=getGeom(image);
-	    // Set image width/height explicitly rather than
-	    // scaling because that's more portable
-	    var w=Math.round(geom.width*scale);
-	    var h=Math.round(geom.height*scale);
-	    image.width=image.style.width=
-		image.style['max-width']=image.style['min-width']=w;
-	    image.height=image.style.height=
-		image.style['max-height']=image.style['min-height']=h;
-	    addClass(image,"codextweaked");}
-	
-	/* pagescale */
-
-	function applyPageScaling(toscale,scaled,width,height) {
-	    var toscale=fdjtDOM.$(".sbookpagescaled");
-	    var i=0; var lim=toscale.length;
-	    while (i<lim) {
-		var node=toscale[i++]; 
-		if (!(node.style[fdjtDOM.transform])) {
-		    var placeholder=false;
-		    var scale_attrib=node.getAttribute('data-pagescale');
-		    if ((node.offsetHeight===0)||(node.offsetHeight===0)) {
-			placeholder=fdjtDOM(node.tagName);
-			fdjtDOM.replace(node,placeholder);
-			fdjtDOM.prepend(document.body,node);
-			if ((node.offsetHeight===0)||(node.offsetHeight===0)) {
-			    fdjtDOM.replace(placeholder,node);
-			    continue;}}
-		    var scale_spec=
-			((scale_attrib)?(scale_attrib.split(',')):
-			 ["0.5","0.5"]);
-		    var scale_factor=false;
-		    if (scale_spec.length>1) {
-			var to_width=parseFloat(scale_spec[0])*width;
-			var to_height=parseFloat(scale_spec[1])*height;
-			var v_scale=to_height/node.offsetHeight;
-			var h_scale=to_width/node.offsetWidth;
-			if ((v_scale<1)&&(h_scale<1))
-			    scale_factor=Math.min(v_scale,h_scale);
-			else if ((vscale<1.2)&&(h_scale<1.2)) {}
-			else if ((vscale<1.2)&&(h_scale<1.2))
-			    scale_factor=Math.min(v_scale,h_scale);}
-		    else {
-			var to_height=parseFloat(scale_spec[0])*height;
-			var v_scale=to_height/node.offsetHeight;
-			if ((v_scale<1)||(v_scale>1.2)) scale_factor=v_scale;}
-		    if (scale_factor) {
-			if ((node.tagName==='IMG')&&
-			    (!((node.style.width)||(node.style.height)))) {
-			    var force_width=
-				Math.round(scale_factor*node.offsetWidth);
-			    var force_height=
-				Math.round(scale_factor*node.offsetHeight);
-			    node.style.width=force_width+"px";
-			    node.style.height=force_height+"px";}
-			else {
-			    if (node.getAttribute("data-scaleorigin"))
-				node.style[fdjtDOM.transformOrigin]=
-				node.getAttribute("data-scaleorigin");
-			    else node.style[fdjtDOM.transformOrigin]=
-				"center top";
-			    node.style[fdjtDOM.transform]=
-				'scale('+scale_factor+')';}
-			scaled.push(node);}
-		    if (placeholder) fdjtDOM.replace(placeholder,node);}}
-	    return scaled;}
-
-	function revertPageScaling(scaled) {
-	    var i=0; var lim=scaled.length;
-	    while (i<lim) {
-		var node=scaled[i++];
-		if ((node.tagName==='IMG')&&(node.style.width)) 
-		    node.style.height=node.style.width='';
-		else {
-		    node.style[fdjtDOM.transform]='';
-		    node.style[fdjtDOM.transformOrigin]='';}}}
-
 	/* Duplicating nodes */
 
 	var tmpid_count=1;
@@ -321,22 +272,24 @@ var CodexLayout=
 	// possible) its original DOM context on the new page.
 	function moveNodeToPage(node,page,dups,crumbs){
 	    if (hasParent(node,page)) return node;
-	    var parent=node.parentNode;
+	    var scan=node, parent=scan.parentNode;
 	    // If we're moving a first child, we might as well move the parent
 	    while ((parent)&&
 		   (parent!==document.body)&&
 		   (parent!==Codex.content)&&
 		   (!(hasClass(parent,"codexpage")))&&
-		   (node===getFirstContent(parent))) {
-		node=parent; parent=parent.parentNode;}
+		   (scan===getFirstContent(parent))) {
+		scan=parent; parent=scan.parentNode;}
 	    if ((!(parent))||(parent===document.body)||
 		(parent.id==="CODEXCONTENT")||(parent.id==="CODEXROOT")||
-		(hasClass(parent,"codexroot"))||(hasClass(parent,"codexpage")))
+		(hasClass(parent,"codexroot"))||(hasClass(parent,"codexpage"))) {
 		// You don't need to dup the parent on the new page
-		return moveNode(node,page,false,crumbs);
+		moveNode(scan,page,false,crumbs);
+		return node;}
 	    else {
 		var dup_parent=dupContext(parent,page,dups,crumbs);
-		return moveNode(node,dup_parent||page,false,crumbs);}}
+		moveNode(scan,dup_parent||page,false,crumbs);
+		return node;}}
 
 	// Reverting layout
 
@@ -447,6 +400,7 @@ var CodexLayout=
 	    var scale_pages=this.scale_pages=
 		((typeof init.scale_pages === 'undefined')?(true):
 		 (init.scale_pages));
+	    this.scaled=[];
 
 	    // This is the node DOM container where we place new pages
 	    var container=this.container=
@@ -532,58 +486,43 @@ var CodexLayout=
 	    function addContent(root,timeslice,timeskip,
 				trace,progressfn,donefn) {
 
+		var newpage=false;
 		var start=fdjtTime();
-		if (!(page)) newPage();
+		if (!(page)) {newPage(); newpage=true;}
 
 		if (typeof trace === 'undefined') trace=layout.tracelevel;
 		if (typeof progressfn === 'undefined')
 		    progressfn=layout.progressfn||false;
 		if (!(layout.started)) layout.started=start;
-		layout.root=cur_root=root;
 		layout.root_count++;
 
 		// If we can use layout properties of the root, we do
 		// so immediately, and synchronously
 		if ((hasClass(root,/\bcodexfullpage\b/))||
 		    ((fullpages)&&(testNode(root,fullpages)))) {
-		    newPage(root); newPage();
+		    if (newpage) moveNode(root); else newPage(root);
+		    newPage();
 		    prev=this.prev=root;
 		    prevstyle=this.prevstyle=getStyle(root);
-		    if (donefn) donefn();
+		    if (donefn) donefn(layout);
 		    return;}
-		else if ((forcedBreakBefore(root))||
-			 ((prev)&&(forcedBreakAfter(prev)))) {
-		    root=newPage(root);
-		    prev=this.prev=root;
-		    prevstyle=this.prevstyle=getStyle(root);
-		    if (page.offsetHeight<=page_height) {
-			if (donefn) donefn();
-			return;}
-		    else if (avoidBreakInside(root)) {
-			newPage();
-			if (donefn) donefn();
-			return;}}
-		else if ((atomic)&&(atomic.match(root))) {
-		    root=moveNode(root);
-		    prev=this.prev=root;
-		    prevstyle=this.prevstyle=getStyle(root);
-		    if (page.offsetHeight<page_height) {
-			if (donefn) donefn();
-			return;}
-		    else {
-			root=newPage(root);
-			if (page.offsetHeight>page_height) newPage();
-			if (donefn) donefn();
-			return;}}
 		else {
-		    // Move the root onto the current page (we set
-		    // root to the result in case the motion created a
-		    // new node).
-		    root=moveNode(root);
-		    prev=this.prev=root;
-		    prevstyle=this.prevstyle=getStyle(root);
-		    if (page.offsetHeight<page_height) {
-			if (donefn) donefn();
+		    if ((forcedBreakBefore(root))||
+			((prev)&&(forcedBreakAfter(prev)))) {
+			root=newPage(root); newpage=true;}
+		    else root=moveNode(root);
+		    var geom=getGeom(root,page);
+		    if (geom.bottom<=page_height) {
+			prev=this.prev=root;
+			prevstyle=this.prevstyle=getStyle(root);
+			if (donefn) donefn(layout);
+			return;}
+		    else if (((atomic)&&(atomic.match(root)))||
+			     (avoidBreakInside(root))) {
+			if (!(newpage)) newPage(root);
+			prev=this.prev=root;
+			prevstyle=this.prevstyle=getStyle(root);
+			if (donefn) donefn(layout);
 			return;}}
 
 		var blocks=[], terminals=[], styles=[];
@@ -602,13 +541,13 @@ var CodexLayout=
 		//  create a new page for it and call the donefn.  At
 		//  the top level, we only split blocks.
 		if (blocks.length===0) {
-		    var node=moveNode(root);
-		    if (page.offsetHeight>page_height) {
-			newPage(); moveNode(node);}
+		    if (!(newpage)) newPage(root);
 		    layout.root=cur_root=false;
 		    if (donefn) donefn(layout);
-		    return this;}
+		    return;}
 		
+		layout.root=cur_root=root;
+
 		var ni=0, nblocks=blocks.length; 
 		    
 		function step(){
@@ -711,7 +650,9 @@ var CodexLayout=
 			if (tracing) logfn("Fits on page: %o",block);
 			ni++;}
 		    // Update the prev pointer for terminals
-		    if (terminal) {layout.prev=prev=block;}}
+		    if (terminal) {
+			layout.prev=prev=block;
+			layout.prevstyle=prevstyle=style;}}
 
 		// Gather all the block-level elements inside a node,
 		// recording which ones are terminals (don't have any
@@ -826,7 +767,11 @@ var CodexLayout=
 		    // and then add back just enough to reach the
 		    // edge, potentially splitting some children to
 		    // make this work.
-		    var line_height=getLineHeight(node)||12;
+		    var init_geom=getGeom(node,page,true);
+		    var line_height=init_geom.line_height||12;
+		    if ((init_geom.top+init_geom.top_margin+(line_height*2))>page_height) {
+			// If the top is too close to the bottom of the page, just push it over.
+			return newPage(node);}
 		    var children=TOA(node.childNodes);
 		    var i=children.length-1;
 		    while (i>=0) node.removeChild(children[i--]);
@@ -835,20 +780,13 @@ var CodexLayout=
 			// If the version without any children is
 			// already over the edge, just start a new
 			// page on the node (after restoring all the
-			// children)
+			// children to the node).
 			i=0; var n=children.length;
 			while (i<n) node.appendChild(children[i++]);
 			addClass(node,"codexcantsplit");
 			newPage(node);
 			return node;}
-		    else if ((geom.top+(line_height*2))>page_height) {
-			// If the top is too close to the bottom
-			//  of the page, just push it over.
-			i=0; var n=children.length;
-			while (i<n) node.appendChild(children[i++]);
-			newPage(node);
-			return node;}
-		    var push=splitChildren(node,children,geom,line_height);
+		    var push=splitChildren(node,children,init_geom,line_height);
 		    if (!(push)) {
 			/* Doesn't need to be split after all.
 			   Not sure when this will happen, if ever. */
@@ -1046,74 +984,6 @@ var CodexLayout=
 			if (id) textsplits[id]=original;
 			return move_children;}}
 	
-		// This uses lots of tricks (mostly CSS3) to get a
-		// page to fit after subdivision based layout which
-		// hasn't yielded adequate results
-		function tweakBlock(node,avail_width,avail_height){
-		    if (hasClass(node,"codextweaked")) return;
-		    else if (hasClass(node,"codexavoidtweak")) return;
-		    else if (node.getAttribute("style")) {
-			addClass(node,"codexavoidtweak");
-			return;}
-		    else addClass(node,"codextweaked");
-		    var geom=getGeometry(node,page,true);
-		    if (!((avail_width)&&(avail_height))) {
-			var h_margin=(geom.left_margin+geom.right_margin);
-			var v_margin=(geom.top_margin+geom.bottom_margin);
-			if (!(avail_width)) avail_width=
-			    page_width-(geom.left_margin+
-					geom.right_margin+geom.left);
-			if (!(avail_height)) avail_height=
-			    page_height-(geom.top_margin+
-					 geom.bottom_margin+
-					 geom.top);}
-		    // If the node doesn't have any dimensions,
-		    //  something hasn't loaded, so don't try tweaking
-		    if ((geom.width===0)||(geom.height===0)) return;
-		    if ((avail_width>=geom.width)&&
-			(avail_height>=geom.height))
-			return;
-		    var scalex=(avail_width/geom.width);
-		    var scaley=(avail_height/geom.height);
-		    var scale=((scalex<scaley)?(scalex):(scaley));
-		    // Try a CSS scale transform
-		    node.style[fdjtDOM.transform]='scale('+scale+','+scale+')';
-		    var ngeom=getGeometry(node,page,true);
-		    if (ngeom.height===geom.height) {
-			if ((node.tagName==='IMG')||(node.tagName==='img')) {
-			    node.style[fdjtDOM.transform]='';
-			    scaleImage(node,scale,geom);}
-			else {
-			    // If that didn't work, try some tricks
-			    var images=fdjtDOM.getChildren(node,"IMG");
-			    if ((images)&&(images.length)) {
-				var j=0; var jlim=images.length;
-				while (j<jlim) {
-				    var img=images[j++];
-				    if (hasClass(img,/\bcodextweaked\b/))
-					continue;
-				    else if (hasClass(img,/\bcodexavoidtweak\b/))
-					continue;
-				    else if ((img.getAttribute('style'))||
-					     (img.getAttribute('width'))||
-					     (img.getAttribute('height'))) {
-					addClass(img,'codexavoidtweak');
-					continue;}
-				    var igeom=getGeom(img,page);
-				    // If the node doesn't have any
-				    //  dimensions, it hasn't been loaded,
-				    //  so don't try tweaking the page
-				    if ((igeom.width===0)||(igeom.height===0))
-					return;
-				    var relscale=Math.max(
-					igeom.width/geom.width,
-					igeom.height/geom.height);
-				    scaleImage(img,scale*relscale,igeom);}}}
-			ngeom=getGeom(node,page,true);
-			if (ngeom.height===geom.height)
-			    addClass(node,"codexuntweakable");}
-		    addClass(node,"codextweaked");}
-
 		function loop(){
 		    var loop_start=fdjtTime();
 		    while ((ni<nblocks)&&
@@ -1150,22 +1020,20 @@ var CodexLayout=
 		    var geom=getGeom(completed);
 		    if (!(page_width)) page_width=geom.width;
 		    if (!(page_height)) page_height=geom.height;}
-		if ((bounds.width>page_width)||(bounds.height>page_height)) {
+		if ((bounds.right>page_width)||(bounds.bottom>page_height)) {
 		    addClass(completed,"codexoversize");
 		    if (scale_pages) {
-			var scaled=fdjt$(".codexscale",completed);
-			if ((scaled)&&(scaled.length)) {
-			    bounds=insideBounds(completed);}
-			if ((bounds.width>page_width)||
-			    (bounds.height>page_height)) {
-			    var boxed=fdjtDOM("div",completed.childNodes);
-			    var scalex=page_width/bounds.width;
-			    var scaley=page_height/bounds.height;
-			    var scale=((scalex<scaley)?(scalex):(scaley));
-			    var transform='scale('+scale+','+scale+')';
-			    boxed.style[fdjtDOM.transform]=transform;
-			    boxed.style[fdjtDOM.transformOrigin]='center top';
-			    completed.appendChild(boxed);}}}
+			var boxed=fdjtDOM("div.codexscalebox",completed.childNodes);
+			var scalex=page_width/bounds.right;
+			var scaley=page_height/bounds.bottom;
+			var scale=((scalex<scaley)?(scalex):(scaley));
+			var transform='scale('+scale+','+scale+')';
+			this.scaled.push(boxed);
+			boxed.style[fdjtDOM.transform]=transform;
+			boxed.style[fdjtDOM.transformOrigin]='center top';
+			completed.appendChild(boxed);
+			addClass(completed,"codexscaled");}
+		    else addClass(completed,"codexoversize");}
 		if (this.pagedone) this.pagedone(completed);
 		dropClass(completed,"curpage");}
 	    this.finishPage=finishPage;
@@ -1179,7 +1047,7 @@ var CodexLayout=
 			    /\bcodexdup\b/,"codexdupend");}
 		dropClass(page,"curpage");
 		var i=0; var lim= pages.length;
-		while (i<lim) finishPage(pages[i++]);
+		while (i<lim) this.finishPage(pages[i++]);
 		layout.done=fdjtTime();}
 	    this.Finish=Finish;
 
@@ -1309,22 +1177,20 @@ var CodexLayout=
 	    this.gotoPage=gotoPage;
 
 	    this.Revert=function(){
-		revertLayout(this);
-		if (this.scaled)
-		    revertPageScaling(this.scaled);};
-
+		if (this.scaled) {
+		    var scaled=this.scaled;
+		    var i=0, lim=scaled.length;
+		    while (i<lim) {
+			var scalebox=scaled[i++];
+			var children=fdjtDOM.toArray(scalebox.childNodes);
+			var parent=scalebox.parentNode;
+			fdjtDOM.remove(scalebox);
+			fdjtDOM(parent,children);}}
+		revertLayout(this);}
 	    /* Finally return the layout */
-
-	    return this;}
-
+	    return this;};
+	
 	CodexLayout.tracelevel=0;
-	CodexLayout.applyPageScaling=applyPageScaling;
-	CodexLayout.revertPageScaling=revertPageScaling;
-	CodexLayout.prototype.applpyPageScaling=function(candidates){
-	    if (!(candidates)) candidates=fdjtDOM.$(".pagescaled");
-	    var scaled=this.scaled=new Array();
-	    applyPageScaling(candidates,scaled,this.width,this.height);
-	    return scaled;};
 	CodexLayout.prototype.getDups=function getDups4ID(id){
 	    if (!(id)) return [];
 	    else if (id.nodeType) id=id.id;
