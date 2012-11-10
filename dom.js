@@ -1018,13 +1018,19 @@ var fdjtDOM=
 		var outer_height=height+t_margin+b_margin;
 		var inner_width=width-(l_border+l_padding+r_border+r_padding);
 		var inner_height=height-(t_border+t_padding+b_border+b_padding);
+		var lh=style.lineHeight, fs=style.fontSize, lhpx=false;
+		if (lh==="normal") lhpx=parsePX(fs);
+		else if (lh.search(/px$/)>0) lhpx=parsePX(lh);
+		else if (lh.search(/%$/)>0) 
+		    lhpx=(parseFloat(lh.slice(0,-1))/100)*(parsePX(fs));
+		else lhpx=parsePX(fs);
 		return {left: left, top: top, width: width,height: height,
 			right:left+width,bottom:top+height,
 			top_margin: t_margin, bottom_margin: b_margin,
 			left_margin: l_margin, right_margin: r_margin,
 			outer_height: outer_height,outer_width: outer_width,
 			inner_height: inner_height,outer_width: inner_width,
-			stack:withstack};}
+			line_height: lhpx,stack:withstack};}
 	    else return {left: left, top: top, width: width,height: height,
 			 right:left+width,bottom:top+height,
 			 stack:withstack};}
