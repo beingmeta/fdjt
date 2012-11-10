@@ -1051,7 +1051,7 @@ var CodexLayout=
 	    /* Finishing the overall layout */
 
 	    function Finish(){
-		for (dupid in dups) {
+		for (var dupid in dups) {
 		    var dup=dups[dupid];
 		    dup.className=dup.className.replace(
 			    /\bcodexdup\b/,"codexdupend");}

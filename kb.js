@@ -241,7 +241,7 @@ var fdjtKB=
 	//   #Ud16e2980-8e18-11e1-a50a-001a922d60ef
 	//   :#Ud16e2980-8e18-11e1-a50a-001a922d60ef
 	function parseRef(arg,pool,probe){
-	    var term=arg;
+	    var term=arg; var slash=false, atpos=false;
 	    if ((pool)&&(typeof pool === 'string'))
 		pool=fdjtKB.PoolRef(pool);
 	    if ((pool)&&(pool.parseRef))

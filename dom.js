@@ -63,7 +63,7 @@ var fdjtDOM=
 		if (classname) node.className=classname;}
 	    else {
 		node=document.createElement(spec.tagName||"span");
-		for (attrib in spec) {
+		for (var attrib in spec) {
 		    if (attrib==="tagName") continue;
 		    else node.setAttribute(attrib,spec[attrib]);}}
 	    domappend(node,arguments,1);
