@@ -1055,8 +1055,9 @@ fdjtUI.Collapsible.focus=function(evt){
     var dropClass=fdjtDOM.dropClass;
     var toggleClass=fdjtDOM.toggleClass;
 
-    function Ellipsis(spec,string,lim,thresh){
+    function Ellipsis(spec,string,lim,thresh,handler){
 	var content=ellipsize(string,lim,thresh||0.2);
+	if (!(handler)) handler=toggle;
 	if (content.length===string.length) {
 	    if (spec) return fdjtDOM(spec,string);
 	    else return document.createTextNode(string);}
@@ -1070,7 +1071,7 @@ fdjtUI.Collapsible.focus=function(evt){
 	var delision=fdjtDOM("span.delision"," →…see less…←");
 	elision.title="show elided text";
 	delision.title="hide elided text";
-	elision.onclick=toggle; delision.onclick=toggle;
+	elision.onclick=handler; delision.onclick=handler;
 	elt.appendChild(elision);
 	elt.appendChild(delision);
 	elt.appendChild(elided);
@@ -1093,15 +1094,18 @@ fdjtUI.Collapsible.focus=function(evt){
     
     function toggle(arg){
 	var evt=false;
-	if (!(arg)) arg=evt=event;
-	if (typeof arg === 'string') arg=fdjtID(arg);
+	if (!(arg)) {
+	    evt=event||false;
+	    if (evt) arg=fdjtUI.T(evt);
+	    else return;}
+	else if (typeof arg === 'string') arg=fdjtID(arg);
 	else if (arg.nodeType) {}
 	else {
 	    evt=arg;
 	    arg=fdjtUI.T(arg);}
 	var ellipsis=getParent(arg,".ellipsis");
 	if (!(ellipsis)) return;
-	fdjtUI.cancel(evt);
+	if (evt) fdjtUI.cancel(evt);
 	if (hasClass(ellipsis,"expanded")) {
 	    addClass(ellipsis,"compact");
 	    dropClass(ellipsis,"expanded");}
