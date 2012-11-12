@@ -125,11 +125,11 @@ var CodexLayout=
 		return true;}
 	    else return false;}
 	
-	    function optimizeLayoutRule(rule){
+	    function optimizeLayoutRule(rule,dflt){
 		if (!(rule)) return rule;
 		else if (typeof rule === "string") {
 		    if ((rule[0]===".")&&
-			(rule.slice(1).search(/\.|#|\[/)<0))
+			(rule.slice(1).search(/\.|#|\[/)<0)) 
 			return new RegExp("\\b"+rule.slice(1)+"\\b");
 		    else return new Selector(rule);}
 		else if (rule instanceof RegExp) return rule;
@@ -420,7 +420,7 @@ var CodexLayout=
 	    var avoidbreakbefore=this.avoidbreakbefore=
 		optimizeLayoutRule(init.avoidbreakbefore||false);
 	    var scaletopage=this.scaletopage=
-		optimizeLayoutRule(init.scaletopage||["codexscaletopage"]);
+		optimizeLayoutRule(init.scaletopage||false);
 	    var fullpages=this.fullpages=
 		optimizeLayoutRule(init.fullpages||false);
 	    var singlepages=this.singlepages=
@@ -604,14 +604,16 @@ var CodexLayout=
 
 		// If we can use layout properties of the root, we do
 		// so immediately, and synchronously
-		if ((hasClass(root,/\bcodexfullpage\b/))||
-		    (hasClass(root,/\bcodexsinglepage\b/))||
+		if ((hasClass(root,/\b(codexfullpage|codexsinglepage)\b/))||
 		    ((fullpages)&&(testNode(root,fullpages)))||
 		    ((singlepages)&&(testNode(root,singlepages)))) {
 		    if (newpage) moveNode(root); else newPage(root);
 		    // Scale any embedded items
-		    if (testNode(root,scaletopage)) scaleToPage(root);
+		    if ((hasClass(root,/\bcodexscaletopage\b/))||
+			(testNode(root,scaletopage)))
+			scaleToPage(root);
 		    scaleToPage(fdjtDOM.getChildren(root,scaletopage));
+		    scaleToPage(fdjtDOM.getChildren(root,/\bcodexscaletopage\b/));
 		    newPage();
 		    prev=this.prev=root;
 		    prevstyle=this.prevstyle=getStyle(root);
@@ -706,8 +708,9 @@ var CodexLayout=
 			// Float pages just get pushed (until newPage below)
 			if (tracing) logfn("Pushing float page %o",block);
 			float_pages.push[block]; ni++; return;}
-		    else if ((hasClass(block,/\bcodexfullpage\b/))||
-			     ((fullpages)&&(testNode(block,fullpages)))) {
+		    else if ((hasClass(block,/\b(codexfullpage|codexsinglepage)\b/))||
+			     ((fullpages)&&(testNode(block,fullpages)))||
+			     ((singlepages)&&(testNode(block,singlepages)))) {
 			// Full pages automatically get their own page
 			if (tracing) logfn("Full single page for %o",block);
 			block=newPage(block); newPage();
@@ -716,8 +719,9 @@ var CodexLayout=
 			     ((forcedBreakBefore(block,style))||
 			      ((prev)&&(forcedBreakAfter(prev,prevstyle)))||
 			      ((prev)&&
-			       ((hasClass(prev,/\bcodexfullpage\b/))||
-				((fullpages)&&(testNode(prev,fullpages))))))) {
+			       ((hasClass(prev,/\b(codexfullpage|codexsinglepage)\b/))||
+				((fullpages)&&(testNode(prev,fullpages)))||
+				((singlepages)&&(testNode(prev,singlepages))))))) {
 			// This is the easy case.  Note that we don't
 			// force a page break if the current page is
 			// empty.
