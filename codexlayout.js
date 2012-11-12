@@ -54,6 +54,7 @@ var CodexLayout=
 	var hasClass=fdjtDOM.hasClass;
 	var addClass=fdjtDOM.addClass;
 	var dropClass=fdjtDOM.dropClass;
+	var swapClass=fdjtDOM.swapClass;
 	var nextElt=fdjtDOM.nextElt;
 	var forward=fdjtDOM.forward;
 	var TOA=fdjtDOM.toArray;
@@ -326,6 +327,11 @@ var CodexLayout=
 		    dropClass(node,"codextweaked");
 		    if ((node.tagName==='img')||(node.tagName==='IMG')) {
 			node.width=''; node.height='';}}}
+	    var pagescaled=TOA(
+		layout.container.getElementsByClassName("codexpagescaled"))
+	    var i=0, lim=pagescaled.length; while (i<lim) {
+		var elt=pagescaled[i++];
+		swapClass(elt,"codexpagescaled","codexpagescale");}
 	    var cantsplit=TOA(
 		layout.container.getElementsByClassName("codextweaked"));
 	    dropClass(cantsplit,"codexcantsplit");
@@ -482,6 +488,35 @@ var CodexLayout=
 			logfn("Moving node %o to page %o",node,page);}
 		return moveNodeToPage(node,page,dups,crumbs);}
 
+	    function parseScale(s){
+		if (s.search(/%$/g)>0) {
+		    var pct=parseFloat(s.slice(0,s.len-1));
+		    return pct/100;}
+		else parseFloat(s);}
+
+	    function pageScale(elt){
+		if (typeof elt === "string") elt=fdjtID(elt);
+		if (!(elt)) return;
+		else if (elt.nodeType) {
+		    var ps=elt.getAttrib("data-pagescale");
+		    if (!(ps)) return;
+		    if (elt.style[fdjtDOM.transform]) return;
+		    var psv=ps.split(/ |,|x/g);
+		    var psw=1, psh=1;
+		    if (psv.length===2) {
+			psw=parseScale(psv[0]);
+			psh=parseScale(psv[1]);}
+		    else psh=parseScale(psv[0]);
+		    var pw=page_width*psw, ph=page_height*psh;
+		    var w=elt.offsetWidth, h=elt.offsetHeight;
+		    var sw=pw/w, sh=ph/h;
+		    elt.style[fdjtDOM.transform]="scale("+sw+","+sh+")";
+		    swapClass(elt,"codexpagescale","codexpagescaled");}
+		else if (elt.length) {
+		    var i=0, lim=elt.length;
+		    while (i<lim) pageScale(elt[i++]);}
+		else {}}
+
 
 	    //  addContent calls loop() exactly once to set up the
 	    //   actual loop to be timesliced with repeated calls
@@ -505,6 +540,9 @@ var CodexLayout=
 		    if (donefn) donefn(layout);
 		    return false;}
 		layout.root_count++;
+
+		if (hasClass(root,"codexpagescale")) pageScale(root);
+		pageScale(fdjtDOM.getChildren(root,".codexpagescale"));
 
 		// If we can use layout properties of the root, we do
 		// so immediately, and synchronously
