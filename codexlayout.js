@@ -544,6 +544,7 @@ var CodexLayout=
 		else return parseFloat(s);}
 
 	    function scaleToPage(elt){
+		return;
 		if (typeof elt === "string") elt=fdjtID(elt);
 		if ((!(elt))||(elt.length===0)) return;
 		else if (elt.nodeType) {
@@ -561,14 +562,19 @@ var CodexLayout=
 		    var w=elt.offsetWidth, h=elt.offsetHeight;
 		    var sw=pw/w, sh=ph/h;
 		    var scale=((sw<sh)?(sw):(sh));
-		    var scalestring="scale("+scale+","+scale+")";
-		    var current=(style.transform)||style[fdjtDOM.transform];
-		    if ((!current)||(current==="none")||(current.length===0)) {
-			elt.style.transformOrigin="center top";
-			elt.style[fdjtDOM.transformOrigin]="center top";
-			elt.style.transform=scalestring;
-			elt.style[fdjtDOM.transform]=scalestring;}}
-		else if (elt.length) {
+		    if (elt.tagName==="IMG") {
+			var nw=w*scale, nh=h*scale;
+			elt.style.width=nw+"px";
+			elt.style.height=nh+"px";}
+		    else {
+			var scalestring="scale("+scale+","+scale+")";
+			var current=(style.transform)||style[fdjtDOM.transform];
+			if ((!current)||(current==="none")||(current.length===0)) {
+			    elt.style.transformOrigin="center top";
+			    elt.style[fdjtDOM.transformOrigin]="center top";
+			    elt.style.transform=scalestring;
+			    elt.style[fdjtDOM.transform]=scalestring;}}}
+		    else if (elt.length) {
 		    var i=0, lim=elt.length;
 		    while (i<lim) scaleToPage(elt[i++]);}
 		else {}}
