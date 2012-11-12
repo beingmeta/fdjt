@@ -539,7 +539,10 @@ var fdjtDOM=
 		    while (i<lim) gatherByClass(children[i++],pat,results);}}}
 	function gatherByTag(node,tag,results){
 	    if (node.nodeType===1) {
-		if (node.tagName===tag) results.push(node);
+		if ((typeof tag === "string")?
+		    (node.tagName.toLowerString()===tag):
+		    ((tag instanceof RegExp)&&(tag.match(node.tagName))))
+		    results.push(node);
 		var children=node.childNodes;
 		if (children) {
 		    var i=0; var lim=children.length; var result;
@@ -609,13 +612,19 @@ var fdjtDOM=
 	    if (!(attrib)) {
 		if (typeof classname === 'function')
 		    filter_children(node,classname,results);
+		else if (classname instanceof RegExp)
+		    regexp_filter_children(node,classname,results);
 		else if (classname instanceof Selector)
 		    return classname.find(node,results);
 		else if (typeof classname === 'string') {
 		    if ((usenative) && (node.querySelectorAll))
 			return node.querySelectorAll(classname);
 		    else return getChildren(
-			node,new Selector(classname),false,results);}}
+			node,new Selector(classname),false,results);}
+		else if (classname.length) {
+		    var i=0, lim=classname.length;
+		    while (i<lim) getChildren(node,classname[i++],attrib,results);}
+		else {}}
 	    else if (!(typeof attrib === 'string'))
 		throw { error: 'bad selector arg', selector: classname};
 	    else {
@@ -637,6 +646,16 @@ var fdjtDOM=
 		if (children) {
 		    var i=0; var lim=children.length; var result;
 		    while (i<lim) filter_children(children[i++],filter,results);}}}
+
+	function regexp_filter_children(node,rx,results){
+	    if (node.nodeType===1) {
+		if ((node.className)&&(node.className.search(rx)>=0))
+		    results.push(node);
+		var children=node.childNodes;
+		if (children) {
+		    var i=0; var lim=children.length; var result;
+		    while (i<lim)
+			regexp_filter_children(children[i++],rx,results);}}}
 
 	fdjtDOM.getAttrib=function(elt,attrib,ns){
 	    var probe;
