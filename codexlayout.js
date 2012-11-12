@@ -458,6 +458,7 @@ var CodexLayout=
 		((use_scaling)&&
 		 ((typeof init.scale_pages === 'undefined')?(true):
 		  (init.scale_pages)));
+	    this.scaledpages=[];
 
 	    // This keeps track of item scaling
 	    var scaled=this.scaled=[];
@@ -1138,10 +1139,12 @@ var CodexLayout=
 		    var scalex=page_width/bounds.right;
 		    var scaley=page_height/bounds.bottom;
 		    var scale=((scalex<scaley)?(scalex):(scaley));
-		    if ((scale<0)||(fullpage)) {
+		    if ((scale<1)||(fullpage)) {
 			var transform='scale('+scale+','+scale+')';
 			this.scaledpages.push(boxed);
+			boxed.style.transform=transform
 			boxed.style[fdjtDOM.transform]=transform;
+			boxed.style.transformOrigin='center top';
 			boxed.style[fdjtDOM.transformOrigin]='center top';
 			fdjtDOM(boxed,completed.childNodes);
 			completed.appendChild(boxed);
