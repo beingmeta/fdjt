@@ -1140,7 +1140,8 @@ var CodexLayout=
 					    (bounds.bottom<(page_height*0.95))));
 			       
 		if (((oversize)||(undersize))&&(scale_pages)) {
-		    var boxed=fdjtDOM("div.codexscalebox");
+		    var boxed=fdjtDOM("div.codexscalebox",completed.childNodes);
+		    completed.appendChild(boxed);
 		    var scalex=page_width/bounds.right;
 		    var scaley=page_height/bounds.bottom;
 		    var scale=((scalex<scaley)?(scalex):(scaley));
@@ -1151,8 +1152,6 @@ var CodexLayout=
 			boxed.style[fdjtDOM.transform]=transform;
 			boxed.style.transformOrigin='center top';
 			boxed.style[fdjtDOM.transformOrigin]='center top';
-			fdjtDOM(boxed,completed.childNodes);
-			completed.appendChild(boxed);
 			addClass(completed,"codexscaledpage");}
 		    else if (oversize)
 			addClass(completed,"codexoversizepage");
