@@ -927,7 +927,7 @@ div.fdjtalert {
     background-color: silver; color: black;
     font-size: 200%; font-family: helvetica,sans,sans-serif;
     width: 50%; left: 25%; right: 25%;
-    top: 40%; height: auto;
+    top: 30%; height: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
     z-index: 200; 
     opacity: .90;
@@ -1001,6 +1001,10 @@ div.fdjtalert.fdjtconfirm div.choices button {
     -moz-border-radius: 1ex;
     -o-border-radius: 1ex;}
 
+
+@media screen and (max-height: 400px) {
+    div.fdjtalert { top: 10%; }
+}
 
 /* Text selection */
 
