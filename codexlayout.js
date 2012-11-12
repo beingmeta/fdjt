@@ -544,7 +544,6 @@ var CodexLayout=
 		else return parseFloat(s);}
 
 	    function scaleToPage(elt){
-		return;
 		if (typeof elt === "string") elt=fdjtID(elt);
 		if ((!(elt))||(elt.length===0)) return;
 		else if (elt.nodeType) {
