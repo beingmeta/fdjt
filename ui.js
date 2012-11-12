@@ -1175,6 +1175,8 @@ fdjtUI.Collapsible.focus=function(evt){
 	var dom=spec.dom||
 	    ((spec.label)&&(fdjtDOM("button",spec.label)))||
 	    fdjtDOM("button","Choice "+i);
+	dom.onmousedown=fdjtUI.cancel;
+	dom.onmouseup=fdjtUI.cancel;
 	dom.onclick=function(evt){
 	    evt=evt||event;
 	    if (spec.handler) spec.handler();
@@ -1186,7 +1188,11 @@ fdjtUI.Collapsible.focus=function(evt){
 	var buttons=[]; var box=false;
 	function close_choice(){
 	    var i=0, lim=buttons.length;
-	    while (i<lim) buttons[i++].onclick=null;
+	    while (i<lim) {
+		buttons[i].onclick=null;
+		buttons[i].onmousedown=null;
+		buttons[i].onmouseup=null;
+		i++;}
 	    if (box) fdjtDOM.remove(box);}
 	if (typeof choices === "function") 
 	    choices=[{label: "Cancel"},{label: "OK",handler: choices}];
