@@ -30,7 +30,7 @@ var fdjtLog=(function(){
     var use_console_log;
 
     function fdjtLog(string){
-	var output=false; var now=fdjtET();
+	var output=false;
 	if (((fdjtLog.doformat)||(string.search("%j")))&&
 	    (typeof fdjtString !== 'undefined'))
 	    output=fdjtString.apply(null,arguments);
@@ -38,12 +38,12 @@ var fdjtLog=(function(){
 	    if (output) fdjtLog.console_fn.call(fdjtLog.console,output);
 	    else fdjtLog.console_fn.apply(fdjtLog.console,arguments);}
 	if (fdjtLog.logurl) {
-	    var msg="["+now+"s] "+fdjtString.apply(null,arguments);
+	    var msg="["+fdjtET()+"s] "+fdjtString.apply(null,arguments);
 	    console.log("remote logging %s",msg);
 	    remote_log(msg);}
 	if (fdjtLog.console) {
 	    var domconsole=fdjtLog.console;
-	    var timespan=fdjtDOM("span.time",now);
+	    var timespan=fdjtDOM("span.time",fdjtET());
 	    var entry=fdjtDOM("div.fdjtlog");
 	    if (output) entry.innerHTML=output;
 	    else entry.innerHTML=fdjtString.apply(null,arguments);
@@ -69,14 +69,14 @@ var fdjtLog=(function(){
 		    // In IE, window.console.log is an object, not a function,
 		    //  but a straight call still works.
 		    window.console.log(
-			"["+now+"s] "+fdjtString.apply(null,arguments));
+			"["+fdjtET()+"s] "+fdjtString.apply(null,arguments));
 		else if (output)
 		    window.console.log.call(
-			window.console,"["+now+"s] "+output);
+			window.console,"["+fdjtET()+"s] "+output);
 		else {
 		    var newargs=new Array(arguments.length+1);
 		    newargs[0]="[%fs] "+string;
-		    newargs[1]=now;
+		    newargs[1]=fdjtET();
 		    var i=1; var lim=arguments.length;
 		    while (i<lim) {newargs[i+1]=arguments[i]; i++;}
 		    window.console.log.apply(window.console,newargs);}}}}
