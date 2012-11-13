@@ -361,7 +361,9 @@ var fdjtSelecting=
 	    var fortouch=((typeof opts.fortouch !== "undefined")?
 			  (opts.fortouch):
 			  (fdjtSelecting.fortouch||false));
-	    fdjtUI.TapHold(container,fortouch);
+	    fdjtUI.TapHold(container,fortouch,
+			   ((opts)&&(opts.holdthresh)),
+			   ((opts)&&(opts.movethresh)));
 	    fdjtDOM.addListener(container,"tap",
 				((opts)&&(opts.ontap))||
 				tap_handler);
