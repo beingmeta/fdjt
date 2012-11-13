@@ -25,7 +25,7 @@
 
 var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 fdjtUI.TapHold=(function(){
-    var trace_taps=false;
+    var trace_taps=true;
     var debug_taps=false;
     var window_setup=false;
     
@@ -83,24 +83,24 @@ fdjtUI.TapHold=(function(){
 	else if (typeof evt.clientY === "number") return evt.clientY;
 	else return false;}
     
-    function fakeEvent(target,etype,orig){
+    function dispatchEvent(target,etype,orig){
+	if (!(target)) target=fdjtUI.T(orig);
 	var evt = document.createEvent("UIEvent");
-	if (trace_taps)
-	    fdjtLog("Synthesizing %s on %o @%d,%d",etype,target,
-		    touch_x,touch_y);
 	var event_arg=
 	    (((orig)&&(orig.touches)&&(orig.touches.length))||
 	     ((orig)&&(orig.button))||
-	     1);
+	     0);
 	evt.initUIEvent(etype, true, true,window,event_arg);
 	evt.clientX=touch_x; evt.clientY=touch_y;
-	// If the target no longer has a parent, it's been removed
-	//  from the DOM, so we use the originating event target (if
-	//  there is one)
-	if ((orig)&&(!(target.parentNode))) target=fdjtUI.T(orig);
-	if (orig) noDefault(orig);
+	if (trace_taps)
+	    fdjtLog("Synthesizing %s on %o @%d,%d from %o",
+		    etype,target,touch_x,touch_y,orig);
+	if (orig) cancel(orig); // noDefault
+	if (!(getParent(target,document.body))) target=fdjtUI.T(orig);
+	if ((!target)||(!(getParent(target,document.body))))
+	    target=document.getElementAtPoint(touch_x,touch_y);
 	target.dispatchEvent(evt);}
-
+    
     function tap_handler(evt){
 	var target=fdjtUI.T(evt);
 	var msgelt=fdjtID("TAPHOLDMESSAGE");
@@ -117,10 +117,10 @@ fdjtUI.TapHold=(function(){
 	if (msgelt) msgelt.innerHTML=fdjtString("Released %o",target);
 	fdjtLog("Released %o",target);}
 
-    function tapped(target,evt){return fakeEvent(target,"tap",evt);}
-    function held(target,evt){return fakeEvent(target,"hold",evt);}
-    function released(target,evt){return fakeEvent(target,"release",evt);}
-    function slipped(target,evt){return fakeEvent(target,"slip",evt);}
+    function tapped(target,evt){return dispatchEvent(target,"tap",evt);}
+    function held(target,evt){return dispatchEvent(target,"hold",evt);}
+    function released(target,evt){return dispatchEvent(target,"release",evt);}
+    function slipped(target,evt){return dispatchEvent(target,"slip",evt);}
 
     function startpress(evt){
 	if (touched) return;
