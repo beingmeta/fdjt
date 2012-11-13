@@ -94,10 +94,10 @@ fdjtUI.TapHold=(function(){
 	evt.clientX=touch_x; evt.clientY=touch_y;
 	if (trace_taps)
 	    fdjtLog("Synthesizing %s on %o @%d,%d from %o",
-		    etype,target,touch_x,touch_y,orig);
+		    etype,target,touch_x,touch_y,orig||"scratch");
 	if (orig) cancel(orig); // noDefault
-	if (!(getParent(target,document.body))) target=fdjtUI.T(orig);
-	if ((!target)||(!(getParent(target,document.body))))
+	if (!(hasParent(target,document.body))) target=fdjtUI.T(orig);
+	if ((!target)||(!(hasParent(target,document.body))))
 	    target=document.getElementAtPoint(touch_x,touch_y);
 	target.dispatchEvent(evt);}
     
@@ -123,6 +123,7 @@ fdjtUI.TapHold=(function(){
     function slipped(target,evt){return dispatchEvent(target,"slip",evt);}
 
     function startpress(evt){
+	evt=evt||event;
 	if (touched) return;
 	if (pressed) return;
 	if (th_timer) return;
@@ -202,8 +203,8 @@ fdjtUI.TapHold=(function(){
 	    noDefault(evt);}
 	if ((pressed)&&(th_target!==pressed)) {
 	    if (trace_taps)
-		fdjtLog("move %o %o %d,%d",
-			th_target,th_target.name,touch_x,touch_y);
+		fdjtLog("TapHold/move %o %o %d,%d",
+			evt,th_target,touch_x,touch_y);
 	    slipped(pressed);
 	    pressed=th_target;
 	    held(pressed);}}
@@ -252,7 +253,7 @@ fdjtUI.TapHold=(function(){
 	    (evt.touches.length>1))
 	    return;
 	if (fdjtUI.isClickable(evt)) return;
-	if (!(touched)) startpress(th_target,evt);
+	if (!(touched)) startpress(evt);
 	noDefault(evt);}
     
     function keyup(evt){
