@@ -25,7 +25,7 @@
 
 var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
 fdjtUI.TapHold=(function(){
-    var trace_taps=true;
+    var trace_taps=false;
     var debug_taps=false;
     var window_setup=false;
     
@@ -198,8 +198,8 @@ fdjtUI.TapHold=(function(){
 	if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)) {
 	    var distance=(Math.abs(touch_x-start_x))+
 		(Math.abs(touch_y-start_y));
-	    var speed=distance/(fdjtET()-start_t);
-	    if (speed>movethresh) {
+	    // var speed=distance/(fdjtET()-start_t);
+	    if (distance>movethresh) {
 		clearTimeout(th_timer);
 		touched=th_timer=pressed=th_target=false;
 		th_targets=[];}}
