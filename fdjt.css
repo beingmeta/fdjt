@@ -990,11 +990,10 @@ div.fdjtalert .closebutton {
 div.fdjtalert.fdjtconfirm .closebutton { display: none;}
 div.fdjtalert.fdjtconfirm div.message {}
 div.fdjtalert.fdjtconfirm div.choices {
-    font-size: 150%;
     padding-bottom: 1em; padding-top: 1em;
     text-align: center;}
 div.fdjtalert.fdjtconfirm div.choices button {
-    padding: 1ex;
+    padding: 1ex; font-size: 70%;
     border-radius: 1ex;
     -webkit-border-radius: 1ex;
     -khtml-border-radius: 1ex;
