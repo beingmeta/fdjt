@@ -30,101 +30,101 @@ var fdjtLog=(function(){
     var use_console_log;
 
     function fdjtLog(string){
-	var output=false; var now=fdjtET();
-	if (((fdjtLog.doformat)||(string.search("%j")))&&
-	    (typeof fdjtString !== 'undefined'))
-	    output=fdjtString.apply(null,arguments);
-	if (fdjtLog.console_fn) {
-	    if (output) fdjtLog.console_fn.call(fdjtLog.console,output);
-	    else fdjtLog.console_fn.apply(fdjtLog.console,arguments);}
-	if (fdjtLog.logurl) {
-	    var msg="["+now+"s] "+fdjtString.apply(null,arguments);
-	    console.log("remote logging %s",msg);
-	    remote_log(msg);}
-	if (fdjtLog.console) {
-	    var domconsole=fdjtLog.console;
-	    var timespan=fdjtDOM("span.time",now);
-	    var entry=fdjtDOM("div.fdjtlog");
-	    if (output) entry.innerHTML=output;
-	    else entry.innerHTML=fdjtString.apply(null,arguments);
-	    fdjtDOM.prepend(entry,timespan);
-	    if (typeof domconsole === 'string') {
-		var found=document.getElementById(domconsole);
-		if (found) {
-		    domconsole=fdjtLog.console=found;
-		    var i=0; var lim=backlog.length;
-		    while (i<lim) fdjtDOM(domconsole,backlog[i++]);
-		    backlog=[];}
-		else domconsole=false;}
-	    else if (!(domconsole.nodeType)) domconsole=false;
-	    if (domconsole)
-		fdjtDOM.append(domconsole,entry);
-	    else backlog.push(entry);}
-	if ((fdjtLog.useconsole)||
-	    ((!(fdjtLog.console))&&(!(fdjtLog.console_fn)))) {
-	    if (typeof use_console_log === 'undefined')
-		init_use_console_log();
-	    if (use_console_log) {
-		if (!(window.console.log.call)) 
-		    // In IE, window.console.log is an object, not a function,
-		    //  but a straight call still works.
-		    window.console.log(
-			"["+now+"s] "+fdjtString.apply(null,arguments));
-		else if (output)
-		    window.console.log.call(
-			window.console,"["+now+"s] "+output);
-		else {
-		    var newargs=new Array(arguments.length+1);
-		    newargs[0]="[%fs] "+string;
-		    newargs[1]=now;
-		    var i=1; var lim=arguments.length;
-		    while (i<lim) {newargs[i+1]=arguments[i]; i++;}
-		    window.console.log.apply(window.console,newargs);}}}}
+        var output=false; var now=fdjtET();
+        if (((fdjtLog.doformat)||(string.search("%j")))&&
+            (typeof fdjtString !== 'undefined'))
+            output=fdjtString.apply(null,arguments);
+        if (fdjtLog.console_fn) {
+            if (output) fdjtLog.console_fn.call(fdjtLog.console,output);
+            else fdjtLog.console_fn.apply(fdjtLog.console,arguments);}
+        if (fdjtLog.logurl) {
+            var msg="["+now+"s] "+fdjtString.apply(null,arguments);
+            console.log("remote logging %s",msg);
+            remote_log(msg);}
+        if (fdjtLog.console) {
+            var domconsole=fdjtLog.console;
+            var timespan=fdjtDOM("span.time",now);
+            var entry=fdjtDOM("div.fdjtlog");
+            if (output) entry.innerHTML=output;
+            else entry.innerHTML=fdjtString.apply(null,arguments);
+            fdjtDOM.prepend(entry,timespan);
+            if (typeof domconsole === 'string') {
+                var found=document.getElementById(domconsole);
+                if (found) {
+                    domconsole=fdjtLog.console=found;
+                    var i=0; var lim=backlog.length;
+                    while (i<lim) fdjtDOM(domconsole,backlog[i++]);
+                    backlog=[];}
+                else domconsole=false;}
+            else if (!(domconsole.nodeType)) domconsole=false;
+            if (domconsole)
+                fdjtDOM.append(domconsole,entry);
+            else backlog.push(entry);}
+        if ((fdjtLog.useconsole)||
+            ((!(fdjtLog.console))&&(!(fdjtLog.console_fn)))) {
+            if (typeof use_console_log === 'undefined')
+                init_use_console_log();
+            if (use_console_log) {
+                if (!(window.console.log.call)) 
+                    // In IE, window.console.log is an object, not a function,
+                    //  but a straight call still works.
+                    window.console.log(
+                        "["+now+"s] "+fdjtString.apply(null,arguments));
+                else if (output)
+                    window.console.log.call(
+                        window.console,"["+now+"s] "+output);
+                else {
+                    var newargs=new Array(arguments.length+1);
+                    newargs[0]="[%fs] "+string;
+                    newargs[1]=now;
+                    var i=1; var lim=arguments.length;
+                    while (i<lim) {newargs[i+1]=arguments[i]; i++;}
+                    window.console.log.apply(window.console,newargs);}}}}
     fdjtLog.console=null;
     fdjtLog.id="$Id$";
     fdjtLog.version=parseInt("$Revision$".slice(10,-1));
 
     function remote_log(msg){
-	var req=new XMLHttpRequest();
-	req.open('POST',fdjtLog.logurl,(!(fdjtLog.logsync)));
-	req.setRequestHeader("Content-type","text; charset=utf-8");
-	req.send(msg);
-	return req;}
+        var req=new XMLHttpRequest();
+        req.open('POST',fdjtLog.logurl,(!(fdjtLog.logsync)));
+        req.setRequestHeader("Content-type","text; charset=utf-8");
+        req.send(msg);
+        return req;}
 
     fdjtLog.warn=function(string){
-	if ((!(fdjtLog.console_fn))&&
-	    (!(window.console)&&(window.console.log)&&(window.console.log.count))) {
-	    var output=fdjtString.apply(null,arguments);
-	    alert(output);}
-	else fdjtLog.apply(null,arguments);};
+        if ((!(fdjtLog.console_fn))&&
+            (!(window.console)&&(window.console.log)&&(window.console.log.count))) {
+            var output=fdjtString.apply(null,arguments);
+            alert(output);}
+        else fdjtLog.apply(null,arguments);};
 
     fdjtLog.uhoh=function(string){
-	if (fdjtLog.debugging) fdjtLog.warn.call(this,arguments);}
+        if (fdjtLog.debugging) fdjtLog.warn.call(this,arguments);}
 
     fdjtLog.bkpt=function(string){
-	var output=false;
-	if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
-	    output=fdjtString.apply(null,arguments);
-	if (fdjtLog.console_fn)
-	    if (output) fdjtLog.console_fn(fdjtLog.console,output);
-	else fdjtLog.console_fn.apply(fdjtLog.console,arguments);
-	else if ((window.console) && (window.console.log) &&
-		 (window.console.count))
-	    if (output)
-		window.console.log.call(window.console,output);
-	else window.console.log.apply(window.console,arguments);
+        var output=false;
+        if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
+            output=fdjtString.apply(null,arguments);
+        if (fdjtLog.console_fn)
+            if (output) fdjtLog.console_fn(fdjtLog.console,output);
+        else fdjtLog.console_fn.apply(fdjtLog.console,arguments);
+        else if ((window.console) && (window.console.log) &&
+                 (window.console.count))
+            if (output)
+                window.console.log.call(window.console,output);
+        else window.console.log.apply(window.console,arguments);
     };
 
     fdjtLog.useconsole=true;
 
     function init_use_console_log() {
-	if ((window.console)&&(window.console.log)) {
-	    if (window.console.count) use_console_log=true;
-	    else {
-		use_console_log=true;
-		try {window.console.log("Testing console");}
-		catch (ex) { use_console_log=false;}}}
-	else use_console_log=false;}
+        if ((window.console)&&(window.console.log)) {
+            if (window.console.count) use_console_log=true;
+            else {
+                use_console_log=true;
+                try {window.console.log("Testing console");}
+                catch (ex) { use_console_log=false;}}}
+        else use_console_log=false;}
 
     return fdjtLog;})();
 
@@ -145,11 +145,11 @@ var fdjtTrace=fdjtLog;
 ;(function(win,doc){
     var eventOn, eventOff;
     if (win.addEventListener) {
-	eventOn = function(obj,type,fn){obj.addEventListener(type,fn,false)};
-	eventOff = function(obj,type,fn){obj.removeEventListener(type,fn,false)};
+        eventOn = function(obj,type,fn){obj.addEventListener(type,fn,false)};
+        eventOff = function(obj,type,fn){obj.removeEventListener(type,fn,false)};
     } else {
-	eventOn = function(obj,type,fn){obj.attachEvent('on'+type,fn)};
-	eventOff = function(obj,type,fn){obj.detachEvent('on'+type,fn)};
+        eventOn = function(obj,type,fn){obj.attachEvent('on'+type,fn)};
+        eventOff = function(obj,type,fn){obj.detachEvent('on'+type,fn)};
     }
 
     var eventing = false;
@@ -178,9 +178,9 @@ var fdjtTrace=fdjtLog;
     });
 
     function setup() {
-	var probe=doc.getElementById('HUMANE');
-	if (probe) humaneEl=probe;
-	else {
+        var probe=doc.getElementById('HUMANE');
+        if (probe) humaneEl=probe;
+        else {
             humaneEl = doc.createElement('div');
             humaneEl.id = 'HUMANE';
             humaneEl.className = 'humane';
@@ -213,7 +213,7 @@ var fdjtTrace=fdjtLog;
         }
 
         timeout = setTimeout(function(){
-	    // allow notification to stay alive for timeout
+            // allow notification to stay alive for timeout
             if(!eventing){
                 eventOn(doc.body,'mousemove',remove);
                 eventOn(doc.body,'click',remove);
@@ -224,22 +224,22 @@ var fdjtTrace=fdjtLog;
             }
         }, fdjtLog.notify.timeout);
 
-	var msg=queue.shift();
-	if (msg.nodeType) {
-	    humaneEl.innerHTML = "";
-	    humaneEl.appendChild(msg);}
-	else if (typeof msg !== 'string')
-	    throw new Exception("Bad arg to Humane");
-	else if ((msg.length>1)&&(msg[0]==='#')) {
-	    var nodeid=msg.slice(1);
-	    node=msgnodes[nodeid];
-	    if ((!(node))&&(node=document.getElementById(nodeid)))
-		msgnodes[nodeid]=node;
-	    if (node) {
-		humaneEl.innerHTML = "";
-		humaneEl.appendChild(node);}
-	    else humaneEl.innerHTML = msg;}
-	else humaneEl.innerHTML = msg;
+        var msg=queue.shift();
+        if (msg.nodeType) {
+            humaneEl.innerHTML = "";
+            humaneEl.appendChild(msg);}
+        else if (typeof msg !== 'string')
+            throw new Exception("Bad arg to Humane");
+        else if ((msg.length>1)&&(msg[0]==='#')) {
+            var nodeid=msg.slice(1);
+            node=msgnodes[nodeid];
+            if ((!(node))&&(node=document.getElementById(nodeid)))
+                msgnodes[nodeid]=node;
+            if (node) {
+                humaneEl.innerHTML = "";
+                humaneEl.appendChild(node);}
+            else humaneEl.innerHTML = msg;}
+        else humaneEl.innerHTML = msg;
         animate(1);
     }
 
@@ -307,25 +307,25 @@ var fdjtTrace=fdjtLog;
     }
 
     function notify(message){
-	fdjtLog.apply(null,arguments);
-	if (arguments.length>1)
-	    message=fdjtString.apply(null,arguments);
+        fdjtLog.apply(null,arguments);
+        if (arguments.length>1)
+            message=fdjtString.apply(null,arguments);
         queue.push(message);
         if(isSetup) run();}
 
     function msg(message){
-	if (!(message)) {
+        if (!(message)) {
             if(!eventing){
                 eventOn(doc.body,'mousemove',remove);
                 eventOn(doc.body,'click',remove);
                 eventOn(doc.body,'keypress',remove);
                 eventOn(doc.body,'touchstart',remove);
                 eventing = true;}
-	    animationInProgress=true;
-	    animate(1);
-	    return;}
-	if (arguments.length>1)
-	    message=fdjtString.apply(null,arguments);
+            animationInProgress=true;
+            animate(1);
+            return;}
+        if (arguments.length>1)
+            message=fdjtString.apply(null,arguments);
         queue.push(message);
         if(isSetup) run();}
 
@@ -344,5 +344,6 @@ var fdjtNotify=fdjtLog.notify;
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  indent-tabs-mode: nil ***
    ;;;  End: ***
 */
