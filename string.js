@@ -114,10 +114,32 @@ var fdjtString=
 	var floor=Math.floor;
 
 	function ellipsize(string,lim,fudge){
+	    var before, after;
 	    if (typeof fudge !== 'number') fudge=0.1;
+	    if (!(lim)) return string;
+	    else if (typeof lim === "number") {}
+	    else if (lim.constructor === Array) {
+		before=lim[0]||0; after=lim[1]||0; lim=after+before;}
+	    else return string;
 	    if (!(lim)) return string;
 	    else if (string.length<(lim+floor(fudge*lim)))
 		return string;
+	    else if ((before)&&(after)) {
+		var len=string.length;
+		var start, end; // of the elided text
+		if (/\s/.test(string[before])===0) 
+		    start=before;
+		else {
+		    var chopped=string.slice(0,before);
+		    var broke=chopped.search(/\s+\w+$/);
+		    if (broke>0) start=broke; else start=before;}
+		if (/\s/.test(string[len-after])===0) end=len-after;
+		else {
+		    var chopped=string.slice(len-after);
+		    var broke=chopped.search(/\s+/);
+		    if (broke>0) end=(len-after)+broke;
+		    else end=after;}
+		return [string.slice(0,start),string.slice(end)];}
 	    else {
 		var edge=string[lim];
 		if (/\s/.test(edge)===0) 
