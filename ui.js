@@ -1186,6 +1186,7 @@ fdjtUI.Collapsible.focus=function(evt){
             fdjtDOM("button","Choice "+i);
         dom.onmousedown=fdjtUI.cancel;
         dom.onmouseup=fdjtUI.cancel;
+	dom.tabIndex=i;
         dom.onclick=function(evt){
             evt=evt||event;
             if (spec.handler) spec.handler();
@@ -1194,25 +1195,46 @@ fdjtUI.Collapsible.focus=function(evt){
         return dom;}
 
     function choose(choices){
-        var buttons=[]; var box=false;
+	var box=false; var selection=-1, buttons=[];
         function close_choice(){
             var i=0, lim=buttons.length;
             while (i<lim) {
                 buttons[i].onclick=null;
                 buttons[i].onmousedown=null;
                 buttons[i].onmouseup=null;
-                i++;}
+		i++;}
+	    if (box) box.onkeypress=null;
+	    if (form) form.onsubmit=null;
             if (box) fdjtDOM.remove(box);}
         if (typeof choices === "function") 
             choices=[{label: "Cancel"},{label: "OK",handler: choices}];
         var i=0, lim=choices.length;
-        while (i<lim) buttons.push(
-            makeChoice(choices[i++],close_choice,i));
+        while (i<lim) {
+	    var choice=choices[i];
+	    var button=makeChoice(choice,close_choice,i);
+	    buttons.push(button);
+	    if ((selection<0)&&(choice.selected)) {
+		button.setAttribute("autofocus","autofocus");
+		selection=i;}
+	    i++;}
+	if (selection<0) selection=0; 
         var msg=fdjtDOM.toArray(arguments).slice(1);
         box=fdjtDOM("div.fdjtalert.fdjtconfirm#FDJTALERT",
                     fdjtDOM("div.message",msg),
                     fdjtDOM("div.choices",buttons));
-        fdjtDOM.prepend(document.body,box);}
+	box.onkeypress=function(evt){
+	    evt=evt||event;
+	    var kc=evt.keyCode;
+	    if (kc===9) {
+		selection++;
+		if (selection>=buttons.length) selection=0;
+		buttons[selection].focus();}
+	    else if (kc===13) {
+		if (choices[selection].handler)
+		    (choices[selection].handler)();
+		close_choice();}};
+        fdjtDOM.prepend(document.body,box);
+	buttons[selection].focus();}
     fdjtUI.choose=choose;
 
     function alert_click(evt){

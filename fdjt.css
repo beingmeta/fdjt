@@ -101,6 +101,14 @@ img.helpicon {
   font-size: 80%; vertical-align: middle;
   font-weight: bold; font-style: normal;}
 
+/* Utility classes */
+
+div.fdjtclearfloats {
+    width: 100%; height: 0px; clear: both;
+    margin: 0px; padding: 0px; border: 0px;}
+
+.fdjtinvisible { display: none;}
+
 /* Tabs */
 
 div.tabbar { line-height: 200%;}
@@ -995,12 +1003,16 @@ div.fdjtalert.fdjtconfirm div.choices {
     text-align: center;}
 div.fdjtalert.fdjtconfirm div.choices button {
     padding: 1ex; font-size: 70%;
+    border: solid transparent 3px;
     border-radius: 1ex;
+    margin-left: 0.5ex; margin-right: 0.5ex;
     -webkit-border-radius: 1ex;
     -khtml-border-radius: 1ex;
     -moz-border-radius: 1ex;
     -o-border-radius: 1ex;}
-
+div.fdjtalert.fdjtconfirm div.choices button.selected,
+div.fdjtalert.fdjtconfirm div.choices button:focus {
+    color: black; border: solid black 3px;}
 
 @media screen and (max-height: 400px) {
     div.fdjtalert { top: 10%; }
