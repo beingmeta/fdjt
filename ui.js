@@ -1057,24 +1057,33 @@ fdjtUI.Collapsible.focus=function(evt){
 
     function Ellipsis(spec,string,lim,thresh,handler){
 	var content=ellipsize(string,lim,thresh||0.2);
+	var split=(!(typeof content === "string"));
+	var len=string.length;
 	if (!(handler)) handler=toggle;
-	if (content.length===string.length) {
+	if ((typeof content === "string")&&(content.length===len)) {
+	    // No elision, just return the string
 	    if (spec) return fdjtDOM(spec,string);
 	    else return document.createTextNode(string);}
-	var pct=Math.round((100*(content.length))/string.length);
-	var elt=fdjtDOM(spec||"span.ellipsis",content); elt.title=string;
+	var before=((split)?(content[0]):(content));
+	var after=((split)?(content[1]):(""));
+	var clen=before.length+after.length;
+	var pct=Math.round((100*(clen))/len);
 	if (spec) addClass(elt,"ellipsis");
-	var remaining=string.slice(content.length);
+	var remaining=((split)?
+		       (string.slice(before.length,len-after.length)):
+		       (string.slice(before.length)));
 	var elided=fdjtDOM("span.elided",remaining);
 	var elision=fdjtDOM(
-	    "span.elision",fdjtString(" …see %d%% more… ",100-pct));
-	var delision=fdjtDOM("span.delision"," →…see less…←");
+	    "span.elision",fdjtString(" …←%d%%→…",100-pct));
+	var delision=fdjtDOM(
+	    "span.delision",fdjtString(" →…%d%%…← ",100-pct));
 	elision.title="show elided text";
 	delision.title="hide elided text";
 	elision.onclick=handler; delision.onclick=handler;
-	elt.appendChild(elision);
-	elt.appendChild(delision);
-	elt.appendChild(elided);
+	var elt=fdjtDOM(spec||"span.ellipsis",
+			before," ",elision,delision,elided," ",after);
+	if (spec) addClass(elt,"ellipsis");
+	elt.title=fdjtString.stdspace(string);
 	return elt;}
     fdjtUI.Ellipsis=Ellipsis;
 
