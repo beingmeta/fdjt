@@ -96,6 +96,7 @@ fdjtUI.TapHold=(function(){
         if (trace_taps)
             fdjtLog("Synthesizing %s on %o @%d,%d from %o",
                     etype,target,touch_x,touch_y,orig||"scratch");
+	if (holdkey_down) evt.holdKey=true;
         if (orig) {
 	    cancel(orig);
             if (!(hasParent(target,document.body)))
@@ -253,7 +254,7 @@ fdjtUI.TapHold=(function(){
             else if (!(touched)) startpress(evt);}}
     function mousedown(evt,holdthresh){
         evt=evt||event;
-        if ((evt.shiftKey)||(evt.ctrlKey)||
+        if ((evt.ctrlKey)||
             (evt.altKey)||(evt.metaKey)||
             (evt.button))
             return;
@@ -265,7 +266,6 @@ fdjtUI.TapHold=(function(){
         if (trace_taps)
             fdjtLog("down %o t=%o x=%o y=%o t=%o",
                     evt,th_target,start_x,start_y,start_t);
-        if (evt.ctrlKey) return;
         if ((evt.touches)&&(evt.touches.length)&&
             (evt.touches.length>1))
             return;
