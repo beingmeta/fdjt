@@ -32,12 +32,14 @@ var fdjtDOM=
             var node;
             if (spec.nodeType) node=spec;
             else if ((typeof spec==='string')&&(spec[0]==='<'))  {
-                var container=document.createElement("span");
+                var container=document.createDocumentFragment();
+                // We could do template expansion here
                 container.innerHTML=spec;
                 var children=container.childNodes;
-                if (children.length===1)
-                    return children[0];
+                if (children.length===1) return children[0];
                 else return container;}
+            else if ((typeof spec==='string')&&(spec[0]==='#')&&
+                    (node=document.getElementById(spec.slice(1)))) {}
             else if (typeof spec==='string') {
                 var elts=spec.match(css_selector_regex);
                 var classname=false;
@@ -94,67 +96,58 @@ var fdjtDOM=
         fdjtDOM.iem=Math.floor(fdjtDOM.ie);
 
         function domappend(node,content,i) {
-            if (content.nodeType)
-                node.appendChild(content);
-            else if (typeof content === 'string')
+            if (content.nodeType) node.appendChild(content);
+            else if (typeof content === 'string') 
                 node.appendChild(document.createTextNode(content));
             else if (content.toDOM)
-                domappend(node,content.toDOM());
+                return domappend(node,content.toDOM());
             else if (content.toHTML)
-                domappend(node,content.toHTML());
+                return domappend(node,content.toHTML());
             else if (content.length) {
+                var frag=((node instanceof DocumentFragment)?(node):
+                          (document.createDocumentFragment()));
+                // We copy node lists because they're prone to change
+                // underneath us as we're moving DOM nodes around.
+                var elts=((NodeList)&&(content instanceof NodeList))?
+                    (TOA(content)):(content);
+                var len=elts.length; 
                 if (typeof i === 'undefined') i=0;
-                if ((NodeList)&&(content instanceof NodeList)) content=TOA(content);
-                var len=content.length;
                 while (i<len) {
-                    var elt=content[i++];
+                    var elt=elts[i++];
                     if (!(elt)) {}
                     else if (typeof elt === 'string')
-                        node.appendChild(document.createTextNode(elt));
-                    else if (elt.nodeType)
-                        node.appendChild(elt);
+                        frag.appendChild(document.createTextNode(elt));
+                    else if (elt.nodeType) frag.appendChild(elt);
                     else if (elt.length)
-                        domappend(node,elt,0);
+                        domappend(frag,elt,0);
                     else if (elt.toDOM)
-                        domappend(node,elt.toDOM());
+                        domappend(frag,elt.toDOM());
                     else if (elt.toHTML)
-                        domappend(node,elt.toHTML());
+                        domappend(frag,elt.toHTML());
                     else if (elt.toString)
-                        node.appendChild(document.createTextNode(elt.toString()));
-                    else node.appendChild(document.createTextNode(""+elt));}}
-            else node.appendChild(document.createTextNode(""+content));}
+                        frag.appendChild(document.createTextNode(
+                            elt.toString()));
+                    else frag.appendChild(document.createTextNode(""+elt));}
+                if (node!==frag) node.appendChild(frag);}
+            else node.appendChild(document.createTextNode(""+content));
+            return node;}
         function dominsert(before,content,i) {
             var node=before.parentNode;
-            if (content.nodeType)
-                node.insertBefore(content,before);
-            else if (typeof content === 'string')
-                node.insertBefore(content,before);
+            if (content.nodeType) node.insertBefore(content,node);
+            else if (typeof content === 'string') 
+                node.insertBefore(document.createTextNode(content),before);
             else if (content.toDOM)
-                dominsert(before,content.toDOM());
+                return dominsert(before,content.toDOM());
             else if (content.toHTML)
-                dominsert(before,content.toHTML());
+                return dominsert(before,node,content.toHTML());
             else if (content.length) {
-                if (typeof i === 'undefined') i=0;
-                if ((NodeList)&&(content instanceof NodeList)) content=TOA(content);
-                var j=content.length-1;
-                while (j>=i) {
-                    var elt=content[j--];
-                    if (!(elt)) {}
-                    else if (typeof elt === 'string')
-                        node.insertBefore(document.createTextNode(elt),before);
-                    else if (elt.nodeType)
-                        node.insertBefore(elt,before);
-                    else if (elt.length)
-                        dominsert(before,elt,0);
-                    else if (elt.toDOM)
-                        dominsert(before,elt.toDOM());
-                    else if (elt.toHTML)
-                        dominsert(before,elt.toHTML());
-                    else if (elt.toString)
-                        node.insertBefore(document.createTextNode(elt.toString()),before);
-                    else node.insertBefore(document.createTextNode(""+elt),before);}}
-            else node.insertBefore(document.createTextNode(""+elt),before);}
-
+                var frag=((node instanceof DocumentFragment)?(node):
+                          (document.createDocumentFragment()));
+                domappend(frag,content,i);
+                node.insertBefore(frag,before);
+                return before;}
+            else node.insertBefore(document.createTextNode(""+content),before);
+            return node;}
         fdjtDOM.appendArray=domappend;
         
         function toArray(arg) {
@@ -168,7 +161,7 @@ var fdjtDOM=
             while (i<lim) {result.push(arg[i]); i++;}
             return result;}
         function TOA(arg,start) {
-            if (arg instanceof Array) {
+            if ((arg.constructor === Array)||(arg instanceof Array)) {
                 if (start) return arg.slice(start);
                 else return arg;}
             start=start||0;
@@ -177,6 +170,7 @@ var fdjtDOM=
             while (i<lim) {result[i]=arg[i+start]; i++;}
             return result;}
         fdjtDOM.Array=TOA;
+        fdjtDOM.slice=TOA;
 
         /* Utility patterns and functions */
 
@@ -2270,8 +2264,36 @@ var fdjtDOM=
             return results;}
         fdjtDOM.findMatches=findMatches;
 
+        /* Paragraph hashes */
+
+        fdjtDOM.getParaHash=function(node){
+            return paraHash(textify(node,true,false,false));}
+
+        /* Getting transition event names */
+
+        function checkTransitionEvents(){
+            var div = document.createElement('div');
+            var handler = function(e) {
+                fdjtDOM.transitionEnd = e.type;
+                this.removeEventListener('webkitTransitionEnd', arguments.callee);
+                this.removeEventListener('transitionend', arguments.callee);};
+            div.setAttribute("style","position:absolute;top:0px;transition:top 1ms ease;-webkit-transition:top 1ms ease;-moz-transition:top 1ms ease");
+            div.addEventListener('webkitTransitionEnd', handler, false);
+            div.addEventListener('transitionend', handler, false);
+            document.documentElement.appendChild(div);
+            setTimeout(function() {
+                div.style.top = '100px';
+                setTimeout(function() {
+                    div.parentNode.removeChild(div);
+                    div = handler = null;},
+                           100);},
+                       0);}
+        addInit(checkTransitionEvents,"checkTransitionEvents");
+
+        /* Custom input types (number, date, email, url, etc) */
+
         var custom_input_types=
-            ["email","number","range","tel",
+            ["email","number","range","tel","url",
              "datetime","datetime-local","date","time","week","month"];
 
         function setupCustomInputs(dom){
@@ -2290,13 +2312,11 @@ var fdjtDOM=
                         if (input.tagName!=="INPUT") continue;
                         input.type=typename;}}}}
         fdjtDOM.setupCustomInputs=setupCustomInputs;
-        
         addInit(setupCustomInputs,"CustomInputs");
 
-        addInit(getMetaSchemas,"MetaSchemas");
+        /* Meta schemas */
 
-        fdjtDOM.getParaHash=function(node){
-            return paraHash(textify(node,true,false,false));}
+        addInit(getMetaSchemas,"MetaSchemas");
 
         return fdjtDOM;
     })();
