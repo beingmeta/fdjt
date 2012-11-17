@@ -932,31 +932,31 @@ table.fdcompound.table th.key {
 
 div.fdjtalert {
     position: fixed;
-    background-color: silver; color: black;
+    background-color: slategray; color: black;
     font-size: 200%; font-family: helvetica,sans,sans-serif;
     width: 50%; left: 25%; right: 25%;
     top: 30%; height: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
     z-index: 200; 
-    opacity: .90;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=90)";
-    filter: alpha(opacity=90);
-    -webkit-opacity: .90;
-    -khtml-opacity: .90;
-    -moz-opacity: .90;
-    -o-opacity: .90;
+    opacity: .99;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=99)";
+    filter: alpha(opacity=99);
+    -webkit-opacity: .99;
+    -khtml-opacity: .99;
+    -moz-opacity: .99;
+    -o-opacity: .99;
     transition-property: opacity;
     -webkit-transition-property: -webkit-opacity;
     -khtml-transition-property: -khtml-opacity;
     -moz-transition-property: -moz-opacity;
     -ms-transition-property: filter;
     -o-transition-property: -o-opacity;
-    transition-duration:  0.75s;
-    -webkit-transition-duration:  0.75s;
-    -khtml-transition-duration:  0.75s;
-    -moz-transition-duration:  0.75s;
-    -ms-transition-duration:  0.75s;
-    -o-transition-duration:  0.75s;
+    transition-duration:  0.50s;
+    -webkit-transition-duration:  0.50s;
+    -khtml-transition-duration:  0.50s;
+    -moz-transition-duration:  0.50s;
+    -ms-transition-duration:  0.50s;
+    -o-transition-duration:  0.50s;
     transition-timing-function:  ease-in;
     -webkit-transition-timing-function:  ease-in;
     -khtml-transition-timing-function:  ease-in;
@@ -972,8 +972,8 @@ div.fdjtalert {
 div.fdjtalert#FDJTALERT { z-index: 200;}
 div.fdjtalert.closing {
     opacity: .05;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=05)";
-    filter: alpha(opacity=05);
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter: alpha(opacity=50);
     -webkit-opacity: .05;
     -khtml-opacity: .05;
     -moz-opacity: .05;
@@ -983,11 +983,11 @@ div.fdjtalert.closing { cursor: pointer;}
 div.fdjtalert > div, div.fdjtalert > span { vertical-align: middle;}
 
 div.fdjtalert .countdown {
-    color: red; font-weight: normal; font-size: 75%;
+    color: lightred; font-weight: bold; font-size: 50%;
     position: absolute; height: 1em; top: 4px; left: 0.5ex;
-    font-variant: small-caps;
-    display: none;}
-div.fdjtalert.closing .countdown { display: block; }
+    font-variant: small-caps;}
+div.fdjtalert .countdown { display: none;}
+div.fdjtalert.closing .countdown { display: block;}
 
 div.fdjtalert .closebutton {
     position: absolute;
@@ -995,15 +995,14 @@ div.fdjtalert .closebutton {
     top: 4px; right: 0.5ex;
     cursor: pointer;}
 
-div.fdjtalert.fdjtconfirm .closebutton { display: none;}
 div.fdjtalert.fdjtconfirm div.message {}
 div.fdjtalert.fdjtconfirm div.message .smaller { font-size: 50%;}
 div.fdjtalert.fdjtconfirm div.choices {
-    padding-bottom: 1em; padding-top: 1em;
-    text-align: center;}
+    padding-bottom: 1em; padding-top: 1em; text-align: center;}
 div.fdjtalert.fdjtconfirm div.choices button {
     padding: 1ex; font-size: 70%;
-    border: solid transparent 3px;
+    border: solid silver 3px;
+    background-color: silver;
     border-radius: 1ex;
     margin-left: 0.5ex; margin-right: 0.5ex;
     -webkit-border-radius: 1ex;
