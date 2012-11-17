@@ -1204,7 +1204,6 @@ fdjtUI.Collapsible.focus=function(evt){
                 buttons[i].onmouseup=null;
 		i++;}
 	    if (box) box.onkeypress=null;
-	    if (form) form.onsubmit=null;
             if (box) fdjtDOM.remove(box);}
         if (typeof choices === "function") 
             choices=[{label: "Cancel"},{label: "OK",handler: choices}];
