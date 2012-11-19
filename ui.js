@@ -1149,7 +1149,8 @@ fdjtUI.Collapsible.focus=function(evt){
         var box=fdjtDOM.getParent(target,".fdjtalert");
         if (box) {
             clear_countdown(box);
-            if (fdjtDOM.transitionEnd) {
+            if ((fdjtDOM.transitionEnd)&&
+                (!(fdjtDOM.hasClass(box,"closing")))) {
                 fdjtDOM.addListener(box,fdjtDOM.transitionEnd,function(){
                     fdjtDOM.remove(box);});
                 fdjtDOM.addClass(box,"closing");}
