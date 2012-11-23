@@ -1232,11 +1232,11 @@ var fdjtDOM=
         fdjtDOM.hoverflow=function(node){
             return (node.scrollWidth/node.clientWidth);}
 
-        /* Adjusting font sizes (wrappers for hatchshow.js) */
+        /* Adjusting font sizes (wrappers for adjustfont.js) */
         fdjtDOM.adjustFont=function(elt,opts){
-            return HatchShow.adjust(elt,opts);};
+            return fdjtUI.adjustFont.adjust(elt,opts);};
         fdjtDOM.adjustFonts=function(elt,opts){
-            return HatchShow.setup(elt,opts);}
+            return fdjtUI.adjustFont.setup(elt,opts);};
         
         /* Sizing to fit */
 
@@ -1792,22 +1792,44 @@ var fdjtDOM=
 
         /* Viewport/window functions */
 
-        fdjtDOM.viewTop=function(win){
-            win=win||window;
-            return (win.pageYOffset||win.scrollY||
-                    win.document.documentElement.scrollTop||0);};
-        fdjtDOM.viewLeft=function(win){
-            win=win||window;
-            return (win.pageXOffset||win.scrollX||
-                    win.document.documentElement.scrollLeft||0);};
-        fdjtDOM.viewHeight=function(win){
-            win=win||window;
-            var docelt=((win.document)&&(win.document.documentElement));
-            return (win.innerHeight)||((docelt)&&(docelt.clientHeight));};
-        fdjtDOM.viewWidth=function(win){
-            win=win||window;
-            var docelt=((win.document)&&(win.document.documentElement));
-            return ((win.innerWidth)||((docelt)&&(docelt.clientWidth)));};
+        fdjtDOM.viewTop=function viewTop(win){
+            if (typeof win==="string") {
+                if (!(win=document.getElementById(win))) return;}
+            if ((!(win))||(win===window)||
+                ((Window)&&(win instanceof Window))) {
+                win=win||window;
+                return (win.pageYOffset||win.scrollY||
+                        win.document.documentElement.scrollTop||0);}
+            else return win.scrollTop;};
+        
+        fdjtDOM.viewLeft=function viewLeft(win){
+            if (typeof win==="string") {
+                if (!(win=document.getElementById(win))) return;}
+            if ((!(win))||(win===window)||
+                ((Window)&&(win instanceof Window))) {
+                win=win||window;
+                return (win.pageXOffset||win.scrollX||
+                        win.document.documentElement.scrollLeft||0);}
+            else return win.scrollLeft;};
+
+        fdjtDOM.viewHeight=function viewHeight(win){
+            if (typeof win==="string") {
+                if (!(win=document.getElementById(win))) return;}
+            if ((!(win))||(win===window)||
+                ((Window)&&(win instanceof Window))) {
+                win=win||window;
+                var docelt=((win.document)&&(win.document.documentElement));
+                return (win.innerHeight)||((docelt)&&(docelt.clientHeight));}
+            else return win.offsetHeight;};
+        fdjtDOM.viewWidth=function viewWidth(win){
+            if (typeof win==="string") {
+                if (!(win=document.getElementById(win))) return;}
+            if ((!(win))||(win===window)||
+                ((Window)&&(win instanceof Window))) {
+                win=win||window;
+                var docelt=((win.document)&&(win.document.documentElement));
+                return ((win.innerWidth)||((docelt)&&(docelt.clientWidth)));}
+            else return win.offsetWidth;};
 
         /* Generating element IDs */
 
