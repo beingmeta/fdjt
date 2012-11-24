@@ -2306,15 +2306,22 @@ fdjt.DOM=
 
         /* Getting transition event names */
 
+        var transition_events=[
+            'transitionend','webkitTransitionEnd',
+            'mozTransitionEnd','oTransitionEnd',
+            'msTransitionEnd'];
+
         function checkTransitionEvents(){
             var div = document.createElement('div');
             var handler = function(e) {
                 fdjtDOM.transitionEnd = e.type;
-                this.removeEventListener('webkitTransitionEnd', arguments.callee);
-                this.removeEventListener('transitionend', arguments.callee);};
-            div.setAttribute("style","position:absolute;top:0px;transition:top 1ms ease;-webkit-transition:top 1ms ease;-moz-transition:top 1ms ease");
-            div.addEventListener('webkitTransitionEnd', handler, false);
-            div.addEventListener('transitionend', handler, false);
+                var i=0, lim=transition_events.length;
+                this.removeEventListener(
+                    transition_events[i++],arguments.callee);};
+            div.setAttribute("style","position:absolute;top:0px;transition:top 1ms ease;-webkit-transition:top 1ms ease;-moz-transition:top 1ms ease;-o-transition:top 1ms ease;-ms-transition:top 1ms ease;");
+            var i=0, lim=transition_events.length;
+            while (i<lim) div.addEventListener(
+                transition_events[i++], handler, false);
             document.documentElement.appendChild(div);
             setTimeout(function() {
                 div.style.top = '100px';
