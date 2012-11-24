@@ -22,17 +22,21 @@
 
 */
 
-var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
-fdjtUI.CoHi=(fdjtUI.CoHi)||{classname: "cohi"};
-fdjtUI.AutoPrompt=(fdjtUI.AutoPrompt)||{};
-fdjtUI.InputHelp=(fdjtUI.InputHelp)||{};
-fdjtUI.Ellipsis=(fdjtUI.Ellipsis)||{};
-fdjtUI.Expansion=(fdjtUI.Expansion)||{};
-fdjtUI.Collapsible=(fdjtUI.Collapsible)||{};
-fdjtUI.Tabs=(fdjtUI.Tabs)||{};
-fdjtUI.MultiText=(fdjtUI.MultiText)||{};
-fdjtUI.Reticle=(fdjtUI.Reticle)||{};
-fdjtUI.FocusBlock=(fdjtUI.FocusBlock)||{};
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+if (!(fdjt.UI)) fdjt.UI={};
+if (!(fdjt.UI.CoHi)) fdjt.UI.CoHi={classname: "cohi"};
+if (!(fdjt.UI.AutoPrompt)) fdjt.UI.AutoPrompt={};
+if (!(fdjt.UI.InputHelp)) fdjt.UI.InputHelp={};
+if (!(fdjt.UI.Ellipsis)) fdjt.UI.Ellipsis={};
+if (!(fdjt.UI.Expansion)) fdjt.UI.Expansion={};
+if (!(fdjt.UI.Collapsible)) fdjt.UI.Collapsible={};
+if (!(fdjt.UI.Tabs)) fdjt.UI.Tabs={};
+if (!(fdjt.UI.MultiText)) fdjt.UI.MultiText={};
+if (!(fdjt.UI.Reticle)) fdjt.UI.Reticle={};
+if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
 
 
 /* Co-highlighting */
@@ -41,6 +45,9 @@ fdjtUI.FocusBlock=(fdjtUI.FocusBlock)||{};
    all elements with the same name. */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     var highlights={};
     function highlight(namearg,classname_arg){
         var classname=((classname_arg) || (fdjtUI.CoHi.classname));
@@ -57,7 +64,7 @@ fdjtUI.FocusBlock=(fdjtUI.FocusBlock)||{};
             var n=elts.length, i=0;
             while (i<n) fdjtDOM.addClass(elts[i++],classname);}}
     
-    fdjtUI.CoHi.onmouseover=function(evt,classname_arg){
+    fdjtUI.CoHi.onmouseover=function cohi_onmouseover(evt,classname_arg){
         var target=fdjtDOM.T(evt);
         while (target)
             if ((target.tagName==='INPUT') || (target.tagName==='TEXTAREA') ||
@@ -67,7 +74,7 @@ fdjtUI.FocusBlock=(fdjtUI.FocusBlock)||{};
         else target=target.parentNode;
         if (!(target)) return;
         highlight(target.name,classname_arg);};
-    fdjtUI.CoHi.onmouseout=function(evt,classname_arg){
+    fdjtUI.CoHi.onmouseout=function cohi_onmouseout(evt,classname_arg){
         var target=fdjtDOM.T(evt);
         highlight(false,((classname_arg) || (fdjtUI.CoHi.classname)));};
 })();
@@ -75,7 +82,10 @@ fdjtUI.FocusBlock=(fdjtUI.FocusBlock)||{};
 
 /* Text highlighting */
 
-fdjtUI.Highlight=(function(){
+fdjt.UI.Highlight=(function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     var highlight_class="fdjthighlight";
     var hasClass=fdjtDOM.hasClass;
     var hasParent=fdjtDOM.getParent;
@@ -166,6 +176,10 @@ fdjtUI.Highlight=(function(){
    Text regions which include a checkbox where clicking toggles the checkbox. */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    var fdjtID=fdjt.ID;
+
     var hasClass=fdjtDOM.hasClass;
     var addClass=fdjtDOM.addClass;
     var dropClass=fdjtDOM.dropClass;
@@ -301,7 +315,7 @@ fdjtUI.Highlight=(function(){
     fdjtUI.CheckSpan.changed=changed;
 
     function initCheckspans(){
-        var checkspans=fdjt$(".checkspan");
+        var checkspans=fdjt.$(".checkspan");
         var i=0, lim=checkspans.length;
         while (i<lim) {
             var checkspan=checkspans[i++];
@@ -322,7 +336,8 @@ fdjtUI.Highlight=(function(){
 
 /* Progress boxes */
 
-(function(){
+fdjt.UI.ProgressBar=(function(){
+    var fdjtDOM=fdjt.DOM;
     function ProgressBar(arg){
         if (typeof arg==='undefined')
             arg=fdjtDOM("div.fdjtprogress",
@@ -349,7 +364,7 @@ fdjtUI.Highlight=(function(){
         var newmsg=fdjtDOM("div.message");
         fdjtDOM.appendArray(newmsg,fdjtDOM.Array(arguments,1));
         dom.replaceChild(newmsg,oldmsg);}
-        
+    
     ProgressBar.setProgress=setProgress;
     ProgressBar.setMessage=setMessage;
     ProgressBar.prototype.setProgress=function(progress,total){
@@ -361,12 +376,16 @@ fdjtUI.Highlight=(function(){
         fdjtDOM.appendArray(newmsg,fdjtDOM.Array(arguments));
         dom.replaceChild(newmsg,oldmsg);};
 
-    fdjtUI.ProgressBar=ProgressBar;})();
+    return ProgressBar;})();
 
 
 /* Automatic help display on focus */
 
 (function(){
+
+    var fdjtString=fdjt.String;
+    var fdjtDOM=fdjt.DOM;
+    var fdjtID=fdjt.ID;
 
     var hasClass=fdjtDOM.hasClass;
     var addClass=fdjtDOM.addClass;
@@ -446,19 +465,22 @@ fdjtUI.Highlight=(function(){
                 if (!(nohandlers))
                     fdjtDOM.addListener(form,"submit",autoprompt_onsubmit);}}}
     
-    fdjtUI.AutoPrompt.setup=autoprompt_setup;
-    fdjtUI.AutoPrompt.onfocus=autoprompt_onfocus;
-    fdjtUI.AutoPrompt.onblur=autoprompt_onblur;
-    fdjtUI.AutoPrompt.onsubmit=autoprompt_onsubmit;
-    fdjtUI.AutoPrompt.cleanup=autoprompt_cleanup;
-    fdjtUI.InputHelp.onfocus=show_help_onfocus;
-    fdjtUI.InputHelp.onblur=hide_help_onblur;})();
+    fdjt.UI.AutoPrompt.setup=autoprompt_setup;
+    fdjt.UI.AutoPrompt.onfocus=autoprompt_onfocus;
+    fdjt.UI.AutoPrompt.onblur=autoprompt_onblur;
+    fdjt.UI.AutoPrompt.onsubmit=autoprompt_onsubmit;
+    fdjt.UI.AutoPrompt.cleanup=autoprompt_cleanup;
+    fdjt.UI.InputHelp.onfocus=show_help_onfocus;
+    fdjt.UI.InputHelp.onblur=hide_help_onblur;})();
 
 
 
 /* Focus blocks */
 
 (function(){
+
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
 
     var getParent=fdjtDOM.getParent;
     var addClass=fdjtDOM.addClass;
@@ -487,12 +509,15 @@ fdjtUI.Highlight=(function(){
                 blur_target=false; blur_timeout=false;},
                                     2000);}}
 
-    fdjtUI.FocusBlock.onfocus=focusblock_onfocus;
-    fdjtUI.FocusBlock.onblur=focusblock_onblur;})();
+    fdjt.UI.FocusBlock.onfocus=focusblock_onfocus;
+    fdjt.UI.FocusBlock.onblur=focusblock_onblur;})();
 
 /* Text input boxes which create checkspans on enter. */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     function multitext_keypress(evt,sepch){
         evt=(evt)||(event);
         var ch=evt.charCode;
@@ -514,6 +539,10 @@ fdjtUI.Highlight=(function(){
 /* Tabs */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    var fdjtID=fdjt.ID;
+
     var hasClass=fdjtDOM.hasClass;
     var addClass=fdjtDOM.addClass;
     var dropClass=fdjtDOM.dropClass;
@@ -625,33 +654,40 @@ fdjtUI.Highlight=(function(){
 
 /* Collapse/Expand */
 
-fdjtUI.Expansion.toggle=function(evt,spec,exspec){
-  evt=evt||event;
-    var target=fdjtUI.T(evt);
-    var wrapper=fdjtDOM.getParent(target,spec||".fdjtexpands");
-    if (wrapper) fdjtDOM.toggleClass(wrapper,exspec||"fdjtexpanded");};
-fdjtUI.Expansion.onclick=fdjtUI.Expansion.toggle;
+(function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
 
-fdjtUI.Collapsible.click=function(evt){
-  evt=evt||event;
-  var target=fdjtUI.T(evt);
-  if (fdjtUI.isDefaultClickable(target)) return;
-  var wrapper=fdjtDOM.getParent(target,".collapsible");
-  if (wrapper) {
-    fdjtUI.cancel(evt);
-    fdjtDOM.toggleClass(wrapper,"expanded");};};
+   fdjtUI.Expansion.toggle=function(evt,spec,exspec){
+        evt=evt||event;
+        var target=fdjtUI.T(evt);
+        var wrapper=fdjtDOM.getParent(target,spec||".fdjtexpands");
+        if (wrapper) fdjtDOM.toggleClass(wrapper,exspec||"fdjtexpanded");};
+    fdjtUI.Expansion.onclick=fdjtUI.Expansion.toggle;
 
-fdjtUI.Collapsible.focus=function(evt){
-  evt=evt||event;
-  var target=fdjtUI.T(evt);
-  var wrapper=fdjtDOM.getParent(target,".collapsible");
-  if (wrapper) {
-    fdjtDOM.toggleClass(wrapper,"expanded");};};
+    fdjtUI.Collapsible.click=function(evt){
+        evt=evt||event;
+        var target=fdjtUI.T(evt);
+        if (fdjtUI.isDefaultClickable(target)) return;
+        var wrapper=fdjtDOM.getParent(target,".collapsible");
+        if (wrapper) {
+            fdjtUI.cancel(evt);
+            fdjtDOM.toggleClass(wrapper,"expanded");};};
+
+    fdjtUI.Collapsible.focus=function(evt){
+        evt=evt||event;
+        var target=fdjtUI.T(evt);
+        var wrapper=fdjtDOM.getParent(target,".collapsible");
+        if (wrapper) {
+            fdjtDOM.toggleClass(wrapper,"expanded");};};})();
 
 
 /* Temporary Scrolling */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     var saved_scroll=false;
     var use_native_scroll=false;
     var preview_elt=false;
@@ -770,6 +806,9 @@ fdjtUI.Collapsible.focus=function(evt){
 /* Smart (DOM-aware) scrolling */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     var getGeometry=fdjtDOM.getGeometry;
     var getDisplay=fdjtDOM.getDisplay;
     var getStyle=fdjtDOM.getStyle;
@@ -811,17 +850,22 @@ fdjtUI.Collapsible.focus=function(evt){
 /* Delays */
 
 (function(){
+    var fdjtUI=fdjt.UI;
+
     var timeouts={};
     
-    fdjtUI.Delay=function(interval,name,fcn){
+    fdjt.UI.Delay=function(interval,name,fcn){
         window.setTimeout(fcn,interval);};
-    fdjtUI.Delayed=function(fcn,interval){
+    fdjt.UI.Delayed=function(fcn,interval){
         if (!(interval)) interval=25;
         window.setTimeout(fcn,interval);};})();
 
 /* Triggering submit events */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     function dosubmit(evt){
         evt=evt||event;
         var target=fdjtUI.T(evt);
@@ -847,6 +891,9 @@ fdjtUI.Collapsible.focus=function(evt){
 /* Looking for vertical box overflow */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     var addClass=fdjtDOM.addClass;
     var dropClass=fdjtDOM.dropClass;
     var getGeometry=fdjtDOM.getGeometry;
@@ -862,6 +909,9 @@ fdjtUI.Collapsible.focus=function(evt){
 /* Reticle based functions */
 
 (function() {
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     var getGeometry=fdjtDOM.getGeometry;
     var vreticle=false;
     var hreticle=false;
@@ -923,6 +973,9 @@ fdjtUI.Collapsible.focus=function(evt){
 /* File uploader affirmation handling */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     fdjtUI.uploadSpecified=function(evt){
         evt=evt||event;
         var parent=fdjtDOM.getParent(fdjtUI.T(evt),'.fileuploader');
@@ -932,6 +985,10 @@ fdjtUI.Collapsible.focus=function(evt){
 /* Image swapping */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    var fdjtID=fdjt.ID;
+
     function ImageSwap(img,interval){
         if (typeof img==='string') img=fdjtID(img);
         if (!(img)) return false;
@@ -963,6 +1020,10 @@ fdjtUI.Collapsible.focus=function(evt){
 /* Miscellaneous event-related functions */
 
 (function(){
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    var fdjtID=fdjt.ID;
+
     var hasClass=fdjtDOM.hasClass;
     
     fdjtUI.T=function(evt) {
@@ -1048,6 +1109,12 @@ fdjtUI.Collapsible.focus=function(evt){
 /* Ellipsis */
 
 (function(){
+    var fdjtString=fdjt.String;
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    var fdjtID=fdjt.ID;
+
+
     var ellipsize=fdjtString.ellipsize;
     var getParent=fdjtDOM.getParent;
     var hasClass=fdjtDOM.hasClass;
@@ -1129,6 +1196,10 @@ fdjtUI.Collapsible.focus=function(evt){
 
 (function(){
     
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    var fdjtID=fdjt.ID;
+
     var alert_ticker=false; var close_ticker=false;
     var max_z=false;
 

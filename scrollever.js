@@ -21,100 +21,107 @@
 
 */
 
-function fdjtScrollEver(spec) {
-    var busy=false, timer=false;
-    if (!(spec)) spec={};
-    var url=spec.url||
-        fdjtDOM.getLink("~{http://fdjt.org/}scrollfetch")||
-        fdjtDOM.getLink("~SCROLLFETCH");
-    var off=spec.off||fdjtState.getQuery("OFF")||0;
-    var win=spec.win||fdjtState.getQuery("WINDOW")||
-        fdjtDOM.getMeta("~{http://fdjt.org/}scrollwindow")||
-        fdjtDOM.getMeta("~SCROLLWINDOW")||
-        7;
-    var limit=spec.limit||fdjtState.getQuery("LIMIT")||
-        fdjtDOM.getMeta("~{http://fdjt.org/}scrollmax")||
-        fdjtDOM.getMeta("~scrollmax")||
-        7;
-    var container=spec.container||
-        fdjtDOM.getMeta("~{http://fdjt.org/}scrollelement")||
-        fdjtDOM.getMeta("~scrollelement")||
-        "FDJTSCROLLCONTAINER";
-    if (typeof container === 'string') {
-        if (fdjtID(container)) container=fdjtID(container);
-        else {
-            fdjtLog.warn("No container %s",container);
-            return;}}
-    var thresh=spec.thresh||
-        fdjtDOM.getMeta("~{http://fdjt.org/}scrollthresh")||
-        fdjtDOM.getMeta("~scrollthresh")||
-        100;
-    var interval=spec.interval||
-        fdjtDOM.getMeta("~{http://fdjt.org/}scrollinterval")||
-        fdjtDOM.getMeta("~scrollinterval")||
-        500;
-    if (typeof off !== 'number') off=parseInt(off);
-    if (typeof win !== 'number') win=parseInt(win);
-    if (typeof limit !== 'number') limit=parseInt(limit);
-    if (typeof thresh !== 'number') thresh=parseInt(thresh);
-    if (typeof interval !== 'number') interval=parseInt(interval);
-    
-    if (fdjtScrollEver.debug) {
-        fdjtLog("fdjtScrollEver called: %o/%o+%o, fetch=%s",
-                off,limit,win,url);
-        fdjtLog("fdjtScrollEver scrolling on %opx, checking every %ous on %o",
-                thresh,interval,container);}
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
 
-    function getMoreResults(){
-        if (busy) return;
-        if ((!(url))||(!(container))||(off>=limit)) {
-            if (timer) clearTimeout(timer);
-            return;}
-        else busy=true;
-        var call=url.replace("-off-",fdjtString(off+win));
-        var req=new XMLHttpRequest();
-        req.open("GET",call,true);
-        req.withCredentials=true;
-        req.onreadystatechange=function () {
-            if ((req.readyState == 4) && (req.status == 200)) {
-                if (fdjtScrollEver.debug)
-                    fdjtLog("fdjtScrollEver getMoreResults (response)");
-                var tbl=fdjtDOM(container.tagName);
-                var htmltext=req.responseText;
-                try {tbl.innerHTML=htmltext;}
-                catch (ex) {
-                    var span=document.createElement("span");
-                    span.style.display='none';
-                    span.innerHTML="<"+container.tagName+">"+
-                        htmltext+"</"+container.tagName+">";
-                    tbl=span.childNodes[0];}
-                var add=[];
-                var children=tbl.childNodes;
-                var i=0; var lim=children.length;
-                while (i<lim) {
-                    var child=children[i++];
-                    if ((child.nodeType===1)&&(child.id)) {
-                        if (document.getElementById(child.id)) {}
+fdjt.ScrollEver=(function(){
+    function fdjtScrollEver(spec) {
+        var busy=false, timer=false;
+        if (!(spec)) spec={};
+        var url=spec.url||
+            fdjtDOM.getLink("~{http://fdjt.org/}scrollfetch")||
+            fdjtDOM.getLink("~SCROLLFETCH");
+        var off=spec.off||fdjtState.getQuery("OFF")||0;
+        var win=spec.win||fdjtState.getQuery("WINDOW")||
+            fdjtDOM.getMeta("~{http://fdjt.org/}scrollwindow")||
+            fdjtDOM.getMeta("~SCROLLWINDOW")||
+            7;
+        var limit=spec.limit||fdjtState.getQuery("LIMIT")||
+            fdjtDOM.getMeta("~{http://fdjt.org/}scrollmax")||
+            fdjtDOM.getMeta("~scrollmax")||
+            7;
+        var container=spec.container||
+            fdjtDOM.getMeta("~{http://fdjt.org/}scrollelement")||
+            fdjtDOM.getMeta("~scrollelement")||
+            "FDJTSCROLLCONTAINER";
+        if (typeof container === 'string') {
+            if (fdjtID(container)) container=fdjtID(container);
+            else {
+                fdjtLog.warn("No container %s",container);
+                return;}}
+        var thresh=spec.thresh||
+            fdjtDOM.getMeta("~{http://fdjt.org/}scrollthresh")||
+            fdjtDOM.getMeta("~scrollthresh")||
+            100;
+        var interval=spec.interval||
+            fdjtDOM.getMeta("~{http://fdjt.org/}scrollinterval")||
+            fdjtDOM.getMeta("~scrollinterval")||
+            500;
+        if (typeof off !== 'number') off=parseInt(off);
+        if (typeof win !== 'number') win=parseInt(win);
+        if (typeof limit !== 'number') limit=parseInt(limit);
+        if (typeof thresh !== 'number') thresh=parseInt(thresh);
+        if (typeof interval !== 'number') interval=parseInt(interval);
+        
+        if (fdjtScrollEver.debug) {
+            fdjtLog("fdjtScrollEver called: %o/%o+%o, fetch=%s",
+                    off,limit,win,url);
+            fdjtLog("fdjtScrollEver scrolling on %opx, checking every %ous on %o",
+                    thresh,interval,container);}
+
+        function getMoreResults(){
+            if (busy) return;
+            if ((!(url))||(!(container))||(off>=limit)) {
+                if (timer) clearTimeout(timer);
+                return;}
+            else busy=true;
+            var call=url.replace("-off-",fdjtString(off+win));
+            var req=new XMLHttpRequest();
+            req.open("GET",call,true);
+            req.withCredentials=true;
+            req.onreadystatechange=function () {
+                if ((req.readyState == 4) && (req.status == 200)) {
+                    if (fdjtScrollEver.debug)
+                        fdjtLog("fdjtScrollEver getMoreResults (response)");
+                    var tbl=fdjtDOM(container.tagName);
+                    var htmltext=req.responseText;
+                    try {tbl.innerHTML=htmltext;}
+                    catch (ex) {
+                        var span=document.createElement("span");
+                        span.style.display='none';
+                        span.innerHTML="<"+container.tagName+">"+
+                            htmltext+"</"+container.tagName+">";
+                        tbl=span.childNodes[0];}
+                    var add=[];
+                    var children=tbl.childNodes;
+                    var i=0; var lim=children.length;
+                    while (i<lim) {
+                        var child=children[i++];
+                        if ((child.nodeType===1)&&(child.id)) {
+                            if (document.getElementById(child.id)) {}
+                            else add.push(child);}
                         else add.push(child);}
-                    else add.push(child);}
-                fdjtDOM(container,add);
-                off=off+win;
-                busy=false;}};
-        if (fdjtScrollEver.debug)
-            fdjtLog("fdjtScrollEver getMoreResults (call)");
-        req.send(null);}
+                    fdjtDOM(container,add);
+                    off=off+win;
+                    busy=false;}};
+            if (fdjtScrollEver.debug)
+                fdjtLog("fdjtScrollEver getMoreResults (call)");
+            req.send(null);}
 
-    function scrollChecker(){
-        if (busy) return;
-        var page_height=document.documentElement.scrollHeight;
-        var scroll_pos=window.pageYOffset;
-        if (typeof scroll_pos !== 'number')
-            scroll_pos=document.documentElement.scrollTop;
-        var client_height=document.documentElement.clientHeight;
-        if (((page_height-(scroll_pos+client_height))<thresh)||
-            (page_height<client_height))
-            getMoreResults();}
-    return (timer=setInterval(scrollChecker,interval));}
+        function scrollChecker(){
+            if (busy) return;
+            var page_height=document.documentElement.scrollHeight;
+            var scroll_pos=window.pageYOffset;
+            if (typeof scroll_pos !== 'number')
+                scroll_pos=document.documentElement.scrollTop;
+            var client_height=document.documentElement.clientHeight;
+            if (((page_height-(scroll_pos+client_height))<thresh)||
+                (page_height<client_height))
+                getMoreResults();}
+        return (timer=setInterval(scrollChecker,interval));}
+    return fdjtScrollEver;})();
 
 // fdjtScrollEver.debug=true;
 

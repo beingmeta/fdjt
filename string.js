@@ -22,7 +22,11 @@
 
 */
 
-var fdjtString=
+if (window) {if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+
+fdjt.String=
     (function(){
         function fdjtString(string){
             if ((typeof string !== 'string')&&

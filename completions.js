@@ -22,8 +22,19 @@
 
 */
 
-var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+if (!(fdjt.UI)) fdjt.UI={};
+
 (function(){
+    var fdjtString=fdjt.DOM;
+    var fdjtLog=fdjt.Log;
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    var fdjtKB=fdjt.KB, fdjtID=fdjt.ID;
+
     var serial=0;
 
     /* Constants */

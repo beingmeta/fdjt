@@ -22,11 +22,17 @@
 
 */
 
-var fdjt$=false;
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
 
-var fdjtDOM=
+fdjt.DOM=
     (function(){
         var usenative=true;
+        var fdjtString=fdjt.String;
+        var fdjtTime=fdjt.Time;
+        var fdjtLog=fdjt.Log;
 
         function fdjtDOM(spec){
             var node;
@@ -94,6 +100,13 @@ var fdjtDOM=
 
         fdjtDOM.ie=getIE();
         fdjtDOM.iem=Math.floor(fdjtDOM.ie);
+
+        function fdjtID(id) {
+            return ((id)&&
+                    ((document.getElementById(id))||
+                     ((id[0]==='#')&&
+                      (document.getElementById(id.slice(1))))));}
+        fdjt.ID=fdjtID;
 
         function domappend(node,content,i) {
             if (content.nodeType) node.appendChild(content);
@@ -626,9 +639,9 @@ var fdjtDOM=
                 gather_children(node,classname,attrib||false,results);}
             return results;}
         fdjtDOM.getChildren=getChildren;
-        fdjt$=fdjtDOM.$=function(spec,root){
+        fdjt.$=fdjtDOM.$=function(spec,root){
             return toArray(getChildren(root||document,spec));};
-        fdjt$1=fdjtDOM.getFirstChild=function(elt,spec){
+        fdjt.$1=fdjtDOM.getFirstChild=function(elt,spec){
             var children=getChildren(elt,spec);
             if (children.length) return children[0]; else return false;};
         fdjtDOM.getChild=fdjtDOM.getFirstChild;
@@ -1234,9 +1247,9 @@ var fdjtDOM=
 
         /* Adjusting font sizes (wrappers for adjustfont.js) */
         fdjtDOM.adjustFont=function(elt,opts){
-            return fdjtUI.adjustFont.adjust(elt,opts);};
+            return fdjt.UI.adjustFont.adjust(elt,opts);};
         fdjtDOM.adjustFonts=function(elt,opts){
-            return fdjtUI.adjustFont.setup(elt,opts);};
+            return fdjt.UI.adjustFont.setup(elt,opts);};
         
         /* Sizing to fit */
 
@@ -1986,7 +1999,7 @@ var fdjtDOM=
 
         function useBMP(){
             var hasSuffix=fdjtString.hasSuffix;
-            var images=fdjt$("IMG");
+            var images=fdjt.$("IMG");
             var i=0, lim=images.length;
             while (i<lim) {
                 var image=images[i++]; var src=image.src;
@@ -1998,7 +2011,7 @@ var fdjtDOM=
                         image.src=bmp;}}}}
         function useSVG(){
             var hasSuffix=fdjtString.hasSuffix;
-            var images=fdjt$("IMG");
+            var images=fdjt.$("IMG");
             var i=0, lim=images.length;
             while (i<lim) {
                 var image=images[i++]; var src=image.src;
@@ -2343,11 +2356,6 @@ var fdjtDOM=
         return fdjtDOM;
     })();
 
-function fdjtID(id) {
-    return ((id)&&
-            ((document.getElementById(id))||
-             ((id[0]==='#')&&
-              (document.getElementById(id.slice(1))))));}
 function _(string) { return string;}
 
 /* Emacs local variables

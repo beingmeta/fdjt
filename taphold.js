@@ -23,8 +23,17 @@
 
 */
 
-var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
-fdjtUI.TapHold=(function(){
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+if (!(fdjt.UI)) fdjt.UI={};
+
+fdjt.UI.TapHold=(function(){
+    var fdjtString=fdjt.DOM;
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
     var trace_taps=false;
     var debug_taps=false;
     var window_setup=false;

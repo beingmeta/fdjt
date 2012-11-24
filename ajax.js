@@ -20,7 +20,12 @@
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
-var fdjtAjax=
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+
+fdjt.Ajax=
     (function(){
         
         function compose_uri(base_uri,args){

@@ -39,8 +39,20 @@
 
 */
 
-var CodexLayout=
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+
+fdjt.CodexLayout=
     (function(){
+
+	var fdjtDOM=fdjt.DOM;
+	var fdjtString=fdjt.String;
+	var fdjtLog=fdjt.Log;
+	var fdjtTime=fdjt.Time;
+	var fdjtState=fdjt.State;
+	var fdjtID=fdjt.ID;
 
 	var hasContent=fdjtDOM.hasContent;
 	var getGeometry=fdjtDOM.getGeometry;

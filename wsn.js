@@ -39,7 +39,15 @@
 
 */
 
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+
 var WSN=(function(){
+
+    var fdjtString=fdjt.String;
+    var fdjtHash=fdjt.Hash;
 
     var unicode_regex=/(\p{Mark})/g;
     
@@ -237,4 +245,7 @@ var WSN=(function(){
 	unicode_regexes=false;}
     
     return WSN;})();
+
+fdjt.WSN=WSN;
+
 

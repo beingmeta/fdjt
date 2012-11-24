@@ -31,8 +31,13 @@
    more documentation
 */
 
-var fdjtUI=((typeof fdjtUI === 'undefined')?{}:(fdjtUI));
-fdjtUI.adjustFont=
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+if (!(fdjt.UI)) fdjt.UI={}
+
+fdjt.UI.adjustFont=
     (function(){
 	function setupContainer(elt,opts){
 	    var parent=elt.parentNode, container;

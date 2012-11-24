@@ -30,10 +30,22 @@
   fdjtKB.Ref (objects created within a pool)
 */
 
-var fdjtKB=
-    (function(){
+if (window) {if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+
+if (!(fdjt.KB)) {
+    fdjt.KB=(function(){
+        var fdjtString=fdjt.String;
+        var fdjtState=fdjt.State;
+        var fdjtTime=fdjt.Time;
+        var fdjtLog=fdjt.Log;
+        var fdjtDOM=fdjt.DOM;
+        var JSON=(window.JSON)||(fdjt.JSON);
+
         // This is the top level object/module 
-        fdjtKB={};
+        var fdjtKB={};
+
         // These are typically set by subversion, but now we have
         //   git and haven't come up with a good replacement.
         // fdjtKB.revid="$Id$";
@@ -53,8 +65,8 @@ var fdjtKB=
             else debug=1;};
 
         // Various imports
-        var warn=fdjtLog.warn;
-        var log=fdjtLog;
+        var warn=fdjt.Log.warn;
+        var log=fdjt.Log;
 
         // Patterns for absolute references
         var uuidpat=
@@ -1088,8 +1100,8 @@ var fdjtKB=
 
         fdjtKB.contains=arr_contains;
         fdjtKB.position=arr_position;
-        
-        return fdjtKB;})();
+
+        return fdjtKB;})();}
 
 /* Emacs local variables
    ;;;  Local variables: ***

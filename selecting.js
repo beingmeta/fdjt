@@ -23,9 +23,17 @@
 
 */
 
-var fdjtSelecting=
-    (function(){
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
 
+fdjt.UI.Selecting=
+    (function(){
+        var fdjtString=fdjt.DOM;
+        var fdjtDOM=fdjt.DOM;
+        var fdjtUI=fdjt.UI;
+        
         var dropClass=fdjtDOM.dropClass;
         var addClass=fdjtDOM.addClass;
         var getStyle=fdjtDOM.getStyle;

@@ -24,7 +24,11 @@
 
 /* Time functions */
 
-var fdjtTime=
+if (window) {if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+
+fdjt.Time=
     (function (){
         function fdjtTime() {
             return (new Date()).getTime();}
@@ -76,7 +80,7 @@ var fdjtTime=
         fdjtTime.tick2time=function(tick){
             return (new Date(tick*1000)).toTimeString();};
 
-        var fmt=fdjtString;
+        var fmt=fdjt.String;
 
         fdjtTime.secs2string=function(interval){
             if (interval<1)
@@ -218,7 +222,7 @@ var fdjtTime=
 
         return fdjtTime;})();
 
-var fdjtET=fdjtTime.ET;
+fdjt.ET=fdjt.Time.ET;
 
 /* Emacs local variables
 ;;;  Local variables: ***

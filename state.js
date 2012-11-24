@@ -22,7 +22,12 @@
 
 */
 
-var fdjtState=
+if (window) {
+    if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+
+fdjt.State=
     (function(){
 
         function fdjtState(name,val,persist){

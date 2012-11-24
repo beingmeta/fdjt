@@ -22,7 +22,14 @@
 
 */
 
-var fdjtLog=(function(){
+if (window) {if (!(window.fdjt)) window.fdjt={};}
+else if (typeof fdjt === "undefined") fdjt={};
+else {}
+
+fdjt.Log=(function(){
+    var fdjtTime=fdjt.Time;
+    var fdjtString=fdjt.String;
+
     var backlog=[];
 
     var logreq=false;
@@ -30,7 +37,7 @@ var fdjtLog=(function(){
     var use_console_log;
 
     function fdjtLog(string){
-        var output=false; var now=fdjtET();
+        var output=false; var now=fdjt.ET();
         if (((fdjtLog.doformat)||(string.search("%j")))&&
             (typeof fdjtString !== 'undefined'))
             output=fdjtString.apply(null,arguments);
@@ -43,22 +50,22 @@ var fdjtLog=(function(){
             remote_log(msg);}
         if (fdjtLog.console) {
             var domconsole=fdjtLog.console;
-            var timespan=fdjtDOM("span.time",now);
-            var entry=fdjtDOM("div.fdjtlog");
+            var timespan=fdjt.DOM("span.time",now);
+            var entry=fdjt.DOM("div.fdjtlog");
             if (output) entry.innerHTML=output;
             else entry.innerHTML=fdjtString.apply(null,arguments);
-            fdjtDOM.prepend(entry,timespan);
+            fdjt.DOM.prepend(entry,timespan);
             if (typeof domconsole === 'string') {
                 var found=document.getElementById(domconsole);
                 if (found) {
                     domconsole=fdjtLog.console=found;
                     var i=0; var lim=backlog.length;
-                    while (i<lim) fdjtDOM(domconsole,backlog[i++]);
+                    while (i<lim) fdjt.DOM(domconsole,backlog[i++]);
                     backlog=[];}
                 else domconsole=false;}
             else if (!(domconsole.nodeType)) domconsole=false;
             if (domconsole)
-                fdjtDOM.append(domconsole,entry);
+                fdjt.DOM.append(domconsole,entry);
             else backlog.push(entry);}
         if ((fdjtLog.useconsole)||
             ((!(fdjtLog.console))&&(!(fdjtLog.console_fn)))) {
@@ -130,7 +137,7 @@ var fdjtLog=(function(){
 
 // This is for temporary trace statements; we use a different name
 //  so that they're easy to find.
-var fdjtTrace=fdjtLog;
+fdjt.Trace=fdjt.Log;
 
 /**
  * HumaneJS
@@ -143,6 +150,8 @@ var fdjtTrace=fdjtLog;
  *  humane('hello world');
  */
 ;(function(win,doc){
+    var fdjtLog=fdjt.Log;
+
     var eventOn, eventOff;
     if (win.addEventListener) {
         eventOn = function(obj,type,fn){obj.addEventListener(type,fn,false)};
@@ -339,7 +348,7 @@ var fdjtTrace=fdjtLog;
 
 }(window,document));
 
-var fdjtNotify=fdjtLog.notify;
+fdjt.Notify=fdjt.Log.notify;
 
 /* Emacs local variables
    ;;;  Local variables: ***
