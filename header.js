@@ -51,3 +51,5 @@ if (!String.prototype.trim) {
 	}
     })()};
 
+var fdjt=((typeof fdjt === "undefined")?({}):(fdjt));
+

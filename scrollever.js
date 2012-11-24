@@ -25,8 +25,12 @@ if (window) {
     if (!(window.fdjt)) window.fdjt={};}
 else if (typeof fdjt === "undefined") fdjt={};
 else {}
+if (!(fdjt.UI)) fdjt.UI={};
 
-fdjt.ScrollEver=(function(){
+fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
+    var fdjtDOM=fdjt.DOM, fdjtID=fdjt.ID;
+    var fdjtState=fdjt.State, fdjtString=fdjt.String;
+
     function fdjtScrollEver(spec) {
         var busy=false, timer=false;
         if (!(spec)) spec={};
