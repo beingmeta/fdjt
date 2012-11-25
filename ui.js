@@ -237,7 +237,7 @@ fdjt.UI.Highlight=(function(){
             addClass(checkspan,"isdisabled");
             return false;}
         var ischecked=hasClass(checkspan,"ischecked");
-        var changed=false;
+        var changed=false; var unchecked=[];
         if (typeof checked === 'undefined') checked=ischecked;
         if (checkbox.checked!==checked) {
             checkbox.checked=checked; changed=true;}
@@ -248,10 +248,6 @@ fdjt.UI.Highlight=(function(){
         // We change this anyway, just in case there's been a glitch
         if (checked) addClass(checkspan,"ischecked");
         else dropClass(checkspan,"ischecked");
-        if (changed) {
-            var evt=document.createEvent("HTMLEvents");
-            evt.initEvent("change",false,true);
-            checkbox.dispatchEvent(evt);}
         if ((changed)&&(checkbox.type==='radio')) {
             var form=checkbox.form;
             var name=checkbox.name;
@@ -259,18 +255,27 @@ fdjt.UI.Highlight=(function(){
             var i=0; var lim=tosync.length;
             while (i<lim) {
                 var input=tosync[i++];
-                if ((input.type==='radio')&&(input.name===name)) {
-                    var altspan=getParent(input,".checkspan");
-                    var changed=
-                        (((input.checked)&&(!(hasClass(altspan,"ischecked"))))||
-                         ((!(input.checked))&&(hasClass(altspan,"ischecked"))));
-                    if (changed) {
-                        if (input.checked)
-                            addClass(altspan,"ischecked");
-                        else dropClass(altspan,"ischecked");
-                        var evt=document.createEvent("HTMLEvents");
-                        evt.initEvent("change",false,true);
-                        input.dispatchEvent(evt);}}}}}
+                if (input===checkbox) continue;
+                else if ((input.type==='radio')&&
+                         (input.name===name)) {
+                    var cspan=getParent(input,".checkspan");
+                    if (cspan===checkspan) continue;
+                    else if (hasClass(cspan,"ischecked"))
+                        if (!(input.checked)) unchecked.push(input);}
+                else {}}}
+        if (changed) {
+            var evt=document.createEvent("HTMLEvents");
+            evt.initEvent("change",false,true);
+            checkbox.dispatchEvent(evt);}
+        if (unchecked.length) {
+            var i=0, lim=unchecked.length;
+            while (i<lim) {
+                var uncheck=unchecked[i++];
+                var altspan=getParent(uncheck,".checkspan");
+                dropClass(altspan,"ischecked");
+                var evt=document.createEvent("HTMLEvents");
+                evt.initEvent("change",false,true);
+                input.dispatchEvent(evt);}}}
     fdjtUI.CheckSpan.set=checkspan_set;
 
     function checkspan_onclick(evt) {
