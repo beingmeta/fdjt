@@ -29,7 +29,7 @@ else {}
 if (!(fdjt.UI)) fdjt.UI={};
 
 (function(){
-    var fdjtString=fdjt.DOM;
+    var fdjtString=fdjt.String;
     var fdjtLog=fdjt.Log;
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
