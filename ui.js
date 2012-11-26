@@ -334,7 +334,7 @@ fdjt.UI.Highlight=(function(){
                     break;}}}}
     fdjtUI.CheckSpan.initCheckspans=initCheckspans;
 
-    fdjtDOM.addInit(initCheckspans,"CheckSpans",false);
+    fdjt.addInit(initCheckspans,"CheckSpans",false);
 
 })();
 
