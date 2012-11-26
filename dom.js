@@ -2333,8 +2333,6 @@ fdjt.DOM=
         return fdjtDOM;
     })();
 
-function _(string) { return string;}
-
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***

@@ -30,6 +30,8 @@ else {}
 
 fdjt.Time=
     (function (){
+        function _(x){ return x; }
+
         function fdjtTime() {
             return (new Date()).getTime();}
         fdjtTime.revid="$Id$";

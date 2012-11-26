@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; -*- */
 
-/* ######################### fdjt/dom.js ###################### */
+/* ######################### fdjt/init.js ###################### */
 
 /* Copyright (C) 2009-2012 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
@@ -80,3 +80,9 @@ else {}
 })();
 
 
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  indent-tabs-mode: nil ***
+   ;;;  End: ***
+*/
