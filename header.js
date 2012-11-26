@@ -4,6 +4,10 @@
    This file was created from several component files and is
    part of the FDJT web toolkit (www.fdjt.org)
 
+   Portions of this code are available under the following license:
+   * iScroll v4.2.5 ~ Copyright (c) 2012 Matteo Spinelli, http://cubiq.org
+   * Released under MIT license, http://cubiq.org/license
+
    This program comes with absolutely NO WARRANTY, including implied
    warranties of merchantability or fitness for any particular
    purpose.
