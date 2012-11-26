@@ -31,6 +31,7 @@ if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.UI.TapHold=(function(){
     var fdjtString=fdjt.DOM;
+    var fdjtLog=fdjt.Log;
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 

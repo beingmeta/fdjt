@@ -30,6 +30,8 @@ else {}
 fdjt.State=
     (function(){
 
+        var fdjtLog=fdjt.Log;
+
         function fdjtState(name,val,persist){
             if (arguments.length===1)
                 return ((window.sessionStorage)&&(getSession(name)))||

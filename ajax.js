@@ -28,6 +28,8 @@ else {}
 fdjt.Ajax=
     (function(){
         
+        var fdjtDOM=fdjt.DOM, fdjtUI=fdjt.UI, fdjtLog=fdjt.Log;
+
         function compose_uri(base_uri,args){
             var uri=base_uri; var need_amp=false;
             if (base_uri[-1]==='&') need_amp=false;
@@ -67,8 +69,6 @@ fdjt.Ajax=
             req.open("GET",uri);
             req.send(null);
             return req;}
-        fdjtAjax.revid="$Id$";
-        fdjtAjax.version=parseInt("$Revision$".slice(10,-1));
 
         fdjtAjax.textCall=function(callback,base_uri){
             return fdjtAjax(function(req) {callback(req.responseText);},
@@ -151,19 +151,23 @@ fdjt.Ajax=
                 if ((!(input.disabled)) &&
                     (((input.type==="radio") || (input.type==="checkbox")) ?
                      (input.checked) : (true)))
-                    add_field(result,input.name,input.value,multifields,downcase||false);}
+                    add_field(result,input.name,input.value,
+                              multifields,downcase||false);}
             var textareas=fdjtDOM.getChildren(form,"TEXTAREA");
             i=0; while (i<textareas.length) {
                 var textarea=textareas[i++];
                 if (!(textarea.disabled)) 
-                    add_field(result,textarea.name,textarea.value,multifields,downcase||false);}
+                    add_field(result,textarea.name,textarea.value,
+                              multifields,downcase||false);}
             var selectboxes=fdjtDOM.getChildren(form,"SELECT");
             i=0; while (i<selectboxes.length) {
                 var selectbox=selectboxes[i++]; var name=selectbox.name;
                 var options=fdjtDOM.getChildren(selectbox,"OPTION");
                 var j=0; while (j<options.length) {
                     var option=options[j++];
-                    if (option.selected) add_field(result,name,option.value,multifields,downcase||false);}}
+                    if (option.selected)
+                        add_field(result,name,option.value,
+                                  multifields,downcase||false);}}
             return result;}
         fdjtAjax.formJSON=formJSON;
 
@@ -207,7 +211,8 @@ fdjt.Ajax=
                 if (trace_ajax)
                     fdjtLog("Got callback (%d,%d) %o for %o, callback=%o",
                             req.readyState,req.status,req,ajax_uri,callback);
-                if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
+                if ((req.readyState === 4) && (req.status>=200) &&
+                    (req.status<300)) {
                     if ((callback)&&(trace_ajax))
                         fdjtLog("Got callback (%d,%d) %o for %o, calling %o",
                                 req.readyState,req.status,req,ajax_uri,callback);
@@ -232,7 +237,8 @@ fdjt.Ajax=
                 if (trace_ajax)
                     fdjtLog("Running callback (rs=%d,status=%d) %o for %o, calling %o",
                             req.readyState,req.status,req,ajax_uri,callback);
-                if ((req.readyState === 4) && (req.status>=200) && (req.status<300)) {
+                if ((req.readyState === 4) && (req.status>=200) &&
+                    (req.status<300)) {
                     fdjtDOM.dropClass(form,"submitting");
                     success=true;
                     if (callback) callback(req,form);}};
@@ -295,12 +301,14 @@ fdjt.Ajax=
             return sync_get(function (req) { return req.responseText; },
                             base_uri,copy_args(arguments,1));};
         fdjtAjax.getJSON=function(base_uri) {
-            return sync_get(function (req) { return JSON.parse(req.responseText); },
+            return sync_get(function (req) {
+                return JSON.parse(req.responseText); },
                             base_uri,fdjtDOM.Array(arguments,1));};
         fdjtAjax.getXML=function(base_uri) {
-            return fdjtAjaxGet(function (req) { return JSON.parse(req.responseXML); },
+            return fdjtAjaxGet(function (req) {
+                return JSON.parse(req.responseXML); },
                                base_uri,fdjtDOM.Array(arguments,1));};
-
+        
         fdjtAjax.onsubmit=form_submit;
 
         return fdjtAjax;})();

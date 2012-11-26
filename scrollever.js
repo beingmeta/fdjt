@@ -31,6 +31,7 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
     var fdjtDOM=fdjt.DOM, fdjtID=fdjt.ID;
     var fdjtState=fdjt.State, fdjtString=fdjt.String;
     var fdjtLog=fdjt.Log;
+    
     function fdjtScrollEver(spec) {
         var busy=false, timer=false;
         if (!(spec)) spec={};
