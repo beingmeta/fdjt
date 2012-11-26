@@ -30,7 +30,7 @@ if (!(fdjt.UI)) fdjt.UI={};
 fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
     var fdjtDOM=fdjt.DOM, fdjtID=fdjt.ID;
     var fdjtState=fdjt.State, fdjtString=fdjt.String;
-
+    var fdjtLog=fdjt.Log;
     function fdjtScrollEver(spec) {
         var busy=false, timer=false;
         if (!(spec)) spec={};
@@ -116,11 +116,15 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
 
         function scrollChecker(){
             if (busy) return;
-            var page_height=document.documentElement.scrollHeight;
-            var scroll_pos=window.pageYOffset;
-            if (typeof scroll_pos !== 'number')
+            var iscroll=spec.iscroll||window.iscroller||false;
+            var page_height=(iscroll)?(iscroll.scrollerH):
+                (document.documentElement.scrollHeight);
+            var scroll_pos=(iscroll)?(-iscroll.y):
+                (window.pageYOffset);
+            if ((!(iscroll))&&(typeof scroll_pos !== 'number'))
                 scroll_pos=document.documentElement.scrollTop;
-            var client_height=document.documentElement.clientHeight;
+            var client_height=(iscroll)?(iscroll.wrapperH):
+                (document.documentElement.clientHeight);
             if (((page_height-(scroll_pos+client_height))<thresh)||
                 (page_height<client_height))
                 getMoreResults();}
