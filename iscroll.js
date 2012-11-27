@@ -117,7 +117,7 @@
 	    topOffset: 0,
 	    checkDOMChanges: false,		// Experimental
 	    handleClick: true,
-
+            fingers: false,
 	    // Scrollbar
 	    hScrollbar: true,
 	    vScrollbar: true,
@@ -151,8 +151,6 @@
 	    onZoom: null,
 	    onZoomEnd: null
 	};
-
-        that.doubletouch=false;
 
 	// User defined options
 	for (i in options) that.options[i] = options[i];
@@ -362,8 +360,8 @@
 
 	    if (!that.enabled) return;
 
-             if ((that.doubletouch)&&(e.touches)&&
-                 (e.touches.length!==2))
+             if ((that.options.fingers)&&(e.touches)&&
+                 (e.touches.length!==that.options.fingers))
                  return;
 
 	    if (that.options.onBeforeScrollStart) that.options.onBeforeScrollStart.call(that, e);
