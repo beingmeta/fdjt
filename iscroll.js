@@ -11,7 +11,9 @@
 		((target.onclick)||
 		 (target.tagName==='INPUT')||
 		 (target.tagName==='TEXTAREA')||
-		 ((target.tagName==='A')&&(target.href))))
+		 ((target.tagName==='A')&&(target.href))||
+		 ((target.className)&&
+		  (target.className.search(/\b(clickable|checkspan)\b/)>=0))))
 		return true;
 	    target=target.parentNode;}
 	return false;}
@@ -149,6 +151,8 @@
 	    onZoom: null,
 	    onZoomEnd: null
 	};
+
+        that.doubletouch=false;
 
 	// User defined options
 	for (i in options) that.options[i] = options[i];
@@ -357,6 +361,10 @@
 	    c1, c2;
 
 	    if (!that.enabled) return;
+
+             if ((that.doubletouch)&&(e.touches)&&
+                 (e.touches.length!==2))
+                 return;
 
 	    if (that.options.onBeforeScrollStart) that.options.onBeforeScrollStart.call(that, e);
 
@@ -1114,3 +1122,11 @@
     else window.iScroll = iScroll;
 
 })(window, document);
+
+
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  indent-tabs-mode: nil ***
+   ;;;  End: ***
+*/
