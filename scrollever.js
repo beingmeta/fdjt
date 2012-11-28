@@ -110,6 +110,9 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
                         else add.push(child);}
                     fdjtDOM(container,add);
                     off=off+win;
+                    var iscroll=spec.iscroll||window.iscroller||false;
+                    if (iscroll)
+                        setTimeout(function(){iscroll.refresh();},10);
                     busy=false;}};
             if (fdjtScrollEver.debug)
                 fdjtLog("fdjtScrollEver getMoreResults (call)");
