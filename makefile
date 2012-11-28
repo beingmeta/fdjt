@@ -4,9 +4,9 @@
 ECHO=/bin/echo
 CLEAN=/bin/rm -f
 FDJT_FILES=header.js string.js time.js log.js init.js state.js \
-	dom.js kb.js json.js ajax.js hash.js wsn.js ui.js \
+	dom.js kb.js json.js hash.js wsn.js ui.js \
 	completions.js taphold.js adjustfont.js selecting.js \
-	iscroll.js scrollever.js syze.js \
+	iscroll.js scrollever.js syze.js ajax.js \
 	globals.js
 BUILDUUID:=`uuidgen`
 BUILDTIME:=`date`
