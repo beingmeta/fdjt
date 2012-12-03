@@ -252,6 +252,33 @@ fdjt.DOM=
             else return node.toString();}
         fdjtDOM.nodeString=nodeString;
         
+        /* Getting "values" of elements */
+        function getElementValues(elt,spec,parse,multiple){
+            var candidates=[];
+            if (spec.search(/(\.|#|[|,)/g)>=0) 
+                candidates=getChildren(elt,spec);
+            else if (elt.getElementsByClassName)
+                candidates=elt.getElementsByClassName(spec);
+            else candidates=getChildren();
+            if (candidates.length===0) {
+                if (multiple) return [];
+                else return false;}
+            else if (multiple) {
+                var values=[];
+                var i=0, lim=multiple.length;
+                while (i<lim) {
+                    var txt=candidates[i++].innerText;
+                    if (parse) values.push(JSON.parse(txt));
+                    else values.push(txt);}
+                return values;}
+            else if (parse)
+                return JSON.parse(candidates[0].innerText);
+            else return candidates[0].innerText;}
+        fdjtDOM.getElementValues=getElementValues;
+        function getElementValue(elt,spec,parse){
+            return getElementValues(elt,spec,parse,false);}
+        fdjtDOM.getElementValue=getElementValue;
+
         /* Simple class/attrib manipulation functions */
 
         function hasClass(elt,classname,attrib){
