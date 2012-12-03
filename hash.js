@@ -53,7 +53,7 @@ else if (typeof fdjt === "undefined") fdjt={};
 else {}
 
 if (!(fdjt.Hash))
-    fdjt.Hash=(function fdjtHash(){
+    fdjt.Hash=(function(){
 	/*
 	 * Configurable variables. You may need to tweak these to be compatible with
 	 * the server-side, but the defaults work in most cases.
@@ -1227,4 +1227,4 @@ if (!(fdjt.Hash))
 	    b64_hmac_sha512: b64_hmac_sha512,
 	    hmac_sha512: any_hmac_sha512};
 
-    });
+    })();
