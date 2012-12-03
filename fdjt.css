@@ -31,6 +31,12 @@ span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
 .checkspan input[TYPE="CHECKBOX"], .checkspan input[TYPE="RADIO"] {
     font-size: inherit;}
 
+.fontsize_wrapper .checkspan input[TYPE="CHECKBOX"],
+.checkspan .fontsize_wrapper input[TYPE="CHECKBOX"],
+.fontsize_wrapper .checkspan input[TYPE="RADIO"],
+.checkspan .fontsize_wrapper input[TYPE="RADIO"] {
+    height: 1ex; width: 1ex;}
+
 .checkspan.ischecked { font-weight: bold; }
 .checkspan.ischecked .alt { font-size: 80%; font-weight: normal;}
 .checkspan.ischecked .unchecked { display: none;}
