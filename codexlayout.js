@@ -70,6 +70,7 @@ fdjt.CodexLayout=
 	var nextElt=fdjtDOM.nextElt;
 	var forward=fdjtDOM.forward;
 	var TOA=fdjtDOM.toArray;
+	var getElementValue=fdjtDOM.getElementValue;
 	
 	var floor=Math.floor;
 
@@ -559,7 +560,9 @@ fdjt.CodexLayout=
 		if (typeof elt === "string") elt=fdjtID(elt);
 		if ((!(elt))||(elt.length===0)) return;
 		else if (elt.nodeType) {
-		    var ps=elt.getAttribute("data-pagescale");
+		    var ps=elt.getAttribute("data-pagescale")||
+			elt.getAttribute("data-pagescale")||
+			getElementValue(elt,"codexscaling");
 		    var style=getStyle(elt);
 		    if (!(ps)) return;
 		    if (elt.style[fdjtDOM.transform]) return;
@@ -585,7 +588,7 @@ fdjt.CodexLayout=
 			    elt.style[fdjtDOM.transformOrigin]="center top";
 			    elt.style.transform=scalestring;
 			    elt.style[fdjtDOM.transform]=scalestring;}}}
-		    else if (elt.length) {
+		else if (elt.length) {
 		    var i=0, lim=elt.length;
 		    while (i<lim) scaleToPage(elt[i++]);}
 		else {}}
