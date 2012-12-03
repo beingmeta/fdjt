@@ -42,3 +42,4 @@ body.codexfixed div.codexpage {
 body.codexfade div.codexpage { opacity: 0; }
 body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 
+.codexspagescaling { display: none;}
