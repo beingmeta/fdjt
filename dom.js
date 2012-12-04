@@ -255,7 +255,7 @@ fdjt.DOM=
         /* Getting "values" of elements */
         function getElementValues(elt,spec,parse,multiple){
             var candidates=[];
-            if (spec.search(/(\.|#|[|,)/g)>=0) 
+            if (spec.search(/(\.|#|\[|,)/g)>=0) 
                 candidates=getChildren(elt,spec);
             else if (elt.getElementsByClassName)
                 candidates=elt.getElementsByClassName(spec);
