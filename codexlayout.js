@@ -562,7 +562,7 @@ fdjt.CodexLayout=
 		else if (elt.nodeType) {
 		    var ps=elt.getAttribute("data-pagescale")||
 			elt.getAttribute("data-pagescale")||
-			getElementValue(elt,"codexscaling");
+			getElementValue(elt,"xdatapagescale");
 		    var style=getStyle(elt);
 		    if (!(ps)) return;
 		    if (elt.style[fdjtDOM.transform]) return;
