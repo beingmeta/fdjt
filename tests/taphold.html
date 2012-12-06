@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <title>fdjt TapHold test</title>
+    <link rel="stylesheet" type="text/css" href="../fdjt.css"/>
+    <script language="javascript" type="text/javascript"
+	    src="../fdjt.js">
+    </script>
+    <script language="javascript">
+      function logEvent(evt){
+      var target=fdjt.UI.T(evt), show=false;
+      fdjt.Log("Event %o, target=%o",evt,target);
+      if (target.nodeType===3)
+      show=fdjt.DOM("span.text",target.cloneNode(true));
+      else if (fdjt.DOM.getStyle(target).display==='inline') {
+        show=target.tagName;
+        if (target.id) show=show+"#"+target.id;
+        if ((target.className)&&(target.className.length))
+      show=show+"."+target.className.replace(/\s+/,".");
+      show=[show,"(",target.cloneNode(true),")"];}
+      else {
+        show=target.tagName;
+        if (target.id) show=show+"#"+target.id;
+        if ((target.className)&&(target.className.length))
+      show=show+"."+target.className.replace(/\s+/,".");}
+      fdjt.DOM(fdjt.ID("EVENTLOG"),
+      fdjt.DOM("span.event",
+      fdjt.DOM("span.type",evt.type),
+      " ",fdjt.DOM("span.point",evt.clientX,",",evt.clientY)," ",
+      show)," ");}
+      function loaded(){
+      var addListener=fdjt.DOM.addListener;
+      fdjt.Log("loaded");
+      fdjt.UI.TapHold(document.body,{taptap: 200});
+      var area=fdjt.ID("TESTAREA");
+      addListener(area,"tap",logEvent);
+      addListener(area,"hold",logEvent);
+      addListener(area,"slip",logEvent);
+      addListener(area,"release",logEvent);
+      addListener(area,"taphold",logEvent);
+      addListener(area,"doubletap",logEvent);}
+      window.onload=loaded;
+    </script>
+    <style>
+      body { font-family: sans,sans-serif;}
+      div#EVENTLOG {
+      position: fixed; left: 0px; right: 0px; top: 0px;
+      height: 25%;
+      padding-left: 10%; padding-right: 10%; text-align:center;
+      overflow: auto;}
+      div#TESTAREA {
+      position: fixed; left: 0px; right: 0px; bottom: 0px;
+      height: 75%;
+      padding-left: 10%; padding-right: 10%; text-align:center;
+      overflow: auto;}
+      div p { text-align: left; }
+      span.event { white-space: nowrap;}
+      span.event:before { content: " // "; }
+      .event .type { font-weight: bold;}
+      .event .point { font-family: fixed; font-size: 80%;}
+    </style>
+  </head>
+  <body>
+    <div id="EVENTLOG">
+      <h1>Event Log</h1>
+    </div>
+    <div id="TESTAREA">
+      <h1>fdjt TapHold Test</h1>
+
+      <p id="P1">The gloomy mansion stands firmly within the ivy-covered,
+	stoutly-built walls of Dunfern, vast in proportion and magnificent in
+	display. It has been built over three hundred years, and its structure
+	stands respectably distant from modern advancement, and in some
+	degrees it could boast of architectural 10 designs rarely, if ever,
+	attempted since its construction.</p>
+
+      <p id="P2"><span class="word">The</span> <span class="word">entrance</span> <span class="word">to</span> <span class="word">this</span> <span class="word">beautiful</span> <span class="word">home</span> <span class="word">of</span> <span class="word">Sir</span> <span class="word">Hugh</span> <span class="word">Dunfern,</span> <span class="word">the
+	  present</span> <span class="word">owner,</span> <span class="word">is</span> <span class="word">planned</span> <span class="word">on</span> <span class="word">most</span> <span class="word">antique</span> <span class="word">principles;</span> <span class="word">nothing</span> <span class="word">save</span> <span class="word">an
+	  enormous</span> <span class="word">iron</span> <span class="word">gate</span> <span class="word">meets</span> <span class="word">the</span> <span class="word">gaze</span> <span class="word">of</span> <span class="word">the</span> <span class="word">visitor,</span> <span class="word">who</span> <span class="word">at</span> <span class="word">first</span> <span class="word">is
+	  inclined</span> <span class="word">to</span> <span class="word">think</span> <span class="word">that</span> <span class="word">all</span> <span class="word">public</span> <span class="word">rumours</span> <span class="word">relative</span> <span class="word">to</span> <span class="word">its</span> <span class="word">magnificence
+	  are</span> <span class="word">only</span> <span class="word">the</span> <span class="word">utterances</span> <span class="word">of</span> <span class="word">the</span> <span class="word">boastful</span> <span class="word">and</span> <span class="word">idle;</span> <span class="word">nor</span> <span class="word">until</span> <span class="word">within</span> <span class="word">its
+	  winding</span> <span class="word">paths</span> <span class="word">of</span> <span class="word">finest</span> <span class="word">pebble,</span> <span class="word">studded</span> <span class="word">here</span> <span class="word">and</span> <span class="word">there</span> <span class="word">with</span> <span class="word">huge
+	  stones</span> <span class="word">of</span> <span class="word">unpolished</span> <span class="word">granite,</span> <span class="word">could</span> <span class="word">the</span> <span class="word">mind</span> <span class="word">for</span> <span class="word">a</span> <span class="word">moment</span> <span class="word">conceive</span> <span class="word">or
+	  entertain</span> <span class="word">the</span> <span class="word">faintest</span> <span class="word">idea</span> <span class="word">of</span> <span class="word">its</span> <span class="word">quaint</span> <span class="word">grandeur</span>.</p>
+
+      <p id="P3">Beautiful, however, as Dunfern mansion may seem to the anxious eye
+	of the beholder, yet it is not altogether free from mystery. Whilst
+	many of its rooms, with walls of crystal, are gorgeously and profusely
+	furnished, others are locked incessantly against the foot of the
+	cautious intruder, having in them only a few traditional relics of no
+	material consequence whatever, or even interest, to any outside the
+	ancestral line of its occupants.</p>
+    </div>
+  </body>
+</html>

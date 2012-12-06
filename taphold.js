@@ -42,6 +42,7 @@ fdjt.UI.TapHold=(function(){
     
     var touched=false;
     var pressed=false;
+    var tap_target=false;
     var th_target=false;
     var th_targets=[];
     var th_timer=false;
@@ -105,7 +106,7 @@ fdjt.UI.TapHold=(function(){
         evt.initUIEvent(etype, true, true,window,event_arg);
         evt.clientX=touch_x; evt.clientY=touch_y;
         if (trace_taps)
-            fdjtLog("Synthesizing %s on %o @%d,%d from %o",
+            fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o",
                     etype,target,touch_x,touch_y,orig||"scratch");
 	if (holdkey_down) evt.holdKey=true;
         if (orig) {
@@ -136,17 +137,23 @@ fdjt.UI.TapHold=(function(){
     function held(target,evt){return dispatchEvent(target,"hold",evt);}
     function released(target,evt){return dispatchEvent(target,"release",evt);}
     function slipped(target,evt){return dispatchEvent(target,"slip",evt);}
-
+    function taptapped(target,evt){
+        return dispatchEvent(target,"taptap",evt);}
+    function tapheld(target,evt){
+        return dispatchEvent(target,"taphold",evt);}
+    
     function startpress(evt,holdthresh){
         evt=evt||event;
+        if ((tap_target)&&(th_timer)) {
+            clearTimeout(th_timer); th_timer=false;}
         if ((touched)||(pressed)||(th_timer)) return;
         else if (!(th_target)) return;
         else {touched=th_target; pressed=false;}
-        if (trace_taps) fdjtLog("startpress %o",evt);
+        if (trace_taps) fdjtLog("TapHold/startpress %o",evt);
         if (reticle.live) reticle.highlight(true);
         noDefault(evt);
         th_timer=setTimeout((function(){
-            if (trace_taps) fdjtLog("startpress/timeout %o",evt);
+            if (trace_taps) fdjtLog("TapHold/startpress/timeout %o",evt);
             if (th_targets.length>0) {
                 var touched=th_targets;
                 var i=0, lim=touched.length;
@@ -155,21 +162,38 @@ fdjt.UI.TapHold=(function(){
                     if ((i===lim)&&(elt===th_target)) break;
                     held(elt); slipped(elt);}}
             pressed=th_target; th_targets=[];
-            held(th_target,evt);
+            if (tap_target) {tapheld(th_target,evt); tap_target=false;}
+            else held(th_target,evt);
             th_timer=false;
             touched=false;}),
                             holdthresh||TapHold.interval||100);}
-    function endpress(evt){
+    function endpress(evt,taptapthresh){
         if ((!(pressed))&&(!(touched))&&(!(th_timer))) return;
         if (trace_taps)
-            fdjtLog("TapHold/endpress %o t=%o p=%o tch=%o tm=%o",
-                    evt,th_target,pressed,touched,th_timer);
+            fdjtLog("TapHold/endpress %o t=%o p=%o tch=%o tm=%o ttt=%o/%o",
+                    evt,th_target,pressed,touched,th_timer,
+                    tap_target,taptapthresh||false);
         if (th_timer) {
             clearTimeout(th_timer); th_timer=false;
             if (reticle.live) 
                 setTimeout(function(){reticle.highlight(false);},1500);
-            if (th_target===touched)
-                tapped(th_target,evt);
+            if (th_target===touched) {
+                if ((tap_target)&&(tap_target===th_target)) {
+                    tap_target=false;
+                    taptapped(th_target,evt);}
+                else if (taptapthresh) {
+                    tap_target=th_target;
+                    if (trace_taps)
+                        fdjtLog("TapHold/taptap waiting %d on %o",
+                                taptapthresh,tap_target);
+                    th_timer=setTimeout(function(){
+                        var tmp=tap_target; tap_target=false;
+                        th_timer=false;
+                        if (trace_taps)
+                            fdjtLog("TapHold/singletap on %o",tmp);
+                        tapped(tmp,evt);},
+                                        taptapthresh);}
+                else tapped(th_target,evt);}
             else slipped(th_target,evt);}
         else if (pressed) {released(pressed,evt);}
         if (reticle.live) reticle.highlight(false);
@@ -185,7 +209,7 @@ fdjt.UI.TapHold=(function(){
             clearTimeout(th_timer); th_timer=false;}
         else if (pressed) {released(pressed,evt);}
         if (reticle.live) reticle.highlight(false);
-        touched=false; pressed=false;
+        touched=false; pressed=false; tap_target=false;
         th_targets=[];}
 
     function outer_move(evt){
@@ -286,7 +310,7 @@ fdjt.UI.TapHold=(function(){
         start_y=touch_y=evt.clientY||getClientY(evt);
         start_t=fdjtET();
         if (trace_taps)
-            fdjtLog("down %o t=%o x=%o y=%o t=%o",
+            fdjtLog("TapHold/down %o t=%o x=%o y=%o t=%o",
                     evt,th_target,start_x,start_y,start_t);
         if ((evt.touches)&&(evt.touches.length)&&
             (evt.touches.length>1))
@@ -302,7 +326,7 @@ fdjt.UI.TapHold=(function(){
         th_target=target; th_targets=[target];
         mouse_down=true;
         if (trace_taps)
-            fdjtLog("fakePress t=%o x=%o y=%o t=%o",
+            fdjtLog("TapHold/fakePress t=%o x=%o y=%o t=%o",
                     th_target,start_x,start_y,start_t);
         startpress(evt,holdthresh);}
     
@@ -329,18 +353,18 @@ fdjt.UI.TapHold=(function(){
             if ((!(holdkey_down))&&(!(mouse_down)))
                 endpress();}}
     TapHold.keyup=keyup;
-    function up(evt){
+    function up(evt,taptapthresh){
         evt=evt||event;
         if (!(mouse_down)) return;
         mouse_down=false;
         touch_x=evt.clientX||getClientX(evt)||touch_x;
         touch_y=evt.clientY||getClientY(evt)||touch_y;
         if (trace_taps)
-            fdjtLog("up %o etl=%o tht=%o sx=%o sy=%o x=%o y=%o t=%o",evt,
+            fdjtLog("TapHold/up %o etl=%o tht=%o sx=%o sy=%o x=%o y=%o t=%o ttt=%o",evt,
                     ((evt.touches)&&(evt.touches.length)&&
                      evt.touches.length),
                     th_target,start_x,start_y,touch_x,touch_y,
-                    start_t);
+                    start_t,taptapthresh||false);
         if ((evt.touches)&&(evt.touches.length)&&
             (evt.touches.length>1))
             return;
@@ -350,7 +374,7 @@ fdjt.UI.TapHold=(function(){
                     evt,mouse_down,holdkey_down,th_target);
         if ((!(holdkey_down))&&(!(mouse_down))&&(touched)) {
             fdjtUI.cancel(evt);
-            endpress(evt);}
+            endpress(evt,taptapthresh);}
         else {}}
 
     function get_down_handler(holdthresh){
@@ -361,10 +385,27 @@ fdjt.UI.TapHold=(function(){
         return function(evt){
             return move(evt,movethresh);}}
 
-    function TapHold(elt,fortouch,holdthresh,movethresh){
+    function get_up_handler(taptapthresh){
+        return function(evt){
+            return up(evt,taptapthresh);}}
+
+    function TapHold(elt,fortouch,holdthresh,movethresh,taptapthresh){
         if (!(elt)) {
             fdjtLog.warn("TapHold with no argument!");
             return;}
+        if ((fortouch)&&(fortouch.hasOwnProperty)) {
+            var opts=fortouch;
+            if (opts.hasOwnProperty("touch")) fortouch=opts.touch;
+            else fortouch=false;
+            if (!(holdthresh)) holdthresh=opts.hold;
+            if (!(movethresh)) movethresh=opts.move;
+            if (!(taptapthresh)) taptapthresh=opts.taptap;}
+        else if (!(fortouch)) fortouch=false;
+        if (typeof holdthresh !== "number") holdthresh=200;
+        if (typeof movethresh !== "number") movethresh=20;
+        if (typeof movethresh !== "number") 
+        if ((taptapthresh)&&(typeof taptapthresh !== "number"))
+            taptapthresh=200;
         addClass(elt,"fdjtaphold");
         var mm=((movethresh)?(get_move_handler(movethresh)):(move));
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousemove",mm);
@@ -372,8 +413,9 @@ fdjt.UI.TapHold=(function(){
         var md=((holdthresh)?(get_down_handler(holdthresh)):(down));
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousedown",md);
         fdjtDOM.addListener(elt,"touchstart",md);
-        if (!(fortouch)) fdjtDOM.addListener(elt,"mouseup",up);
-        fdjtDOM.addListener(elt,"touchend",up);
+        var mu=((taptapthresh)?(get_up_handler(taptapthresh)):(up));
+        if (!(fortouch)) fdjtDOM.addListener(elt,"mouseup",mu);
+        fdjtDOM.addListener(elt,"touchend",mu);
         fdjtDOM.addListener(elt,"touchcancel",abortpress);        
         if (!(window_setup)) {
             if (!(fortouch))
@@ -382,7 +424,6 @@ fdjt.UI.TapHold=(function(){
             fdjtDOM.addListener(document,"keydown",keydown);
             fdjtDOM.addListener(document,"keyup",keyup);
             window_setup=window;}
-
         if (debug_taps) {
             fdjtDOM.addListener(elt,"tap",tap_handler);
             fdjtDOM.addListener(elt,"hold",hold_handler);
