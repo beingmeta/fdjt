@@ -1062,6 +1062,16 @@ div.fdjtalert.fdjtconfirm div.choices button:focus {
 .fdjtselecting .fdjtselectend:hover {
     text-decoration: underline;}
 
+/* Page break classes */
+
+.alwaysbreakbefore { page-break-before: always;}
+.alwaysbreakafter { page-break-after: always;}
+.avoidbreakbefore { page-break-before: avoid;}
+.avoidbreakafter { page-break-after: avoid;}
+.avoidbreakinside { page-break-inside: avoid;}
+.forcebreakbefore { page-break-before: always;}
+.forcebreakafter { page-break-after: always;}
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***

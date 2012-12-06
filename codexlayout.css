@@ -42,4 +42,14 @@ body.codexfixed div.codexpage {
 body.codexfade div.codexpage { opacity: 0; }
 body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 
-.codexspagescaling { display: none;}
+.xdatapagescale { display: none;}
+
+.alwaysbreakbefore { page-break-before: always;}
+.alwaysbreakafter { page-break-after: always;}
+.avoidbreakbefore { page-break-before: avoid;}
+.avoidbreakafter { page-break-after: avoid;}
+.avoidbreakinside { page-break-inside: avoid;}
+.forcebreakbefore { page-break-before: always;}
+.forcebreakafter { page-break-after: always;}
+
+

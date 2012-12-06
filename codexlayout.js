@@ -1201,7 +1201,9 @@ fdjt.CodexLayout=
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
 		return (style.pageBreakBefore==='always')||
-		    ((elt.className)&&(elt.className.search(/\bforcebreakbefore\b/)>=0))||
+		    ((elt.className)&&
+		     (elt.className.search(
+			     /\b(forcebreakbefore|alwaysbreakbefore)\b/)>=0))||
 		    ((forcebreakbefore)&&(testNode(elt,forcebreakbefore)));}
 	    this.forcedBreakBefore=forcedBreakBefore;
 	    
@@ -1211,7 +1213,9 @@ fdjt.CodexLayout=
 		if (!(elt)) return false;
 		if (!(style)) style=getStyle(elt);
 		var force=(style.pageBreakAfter==='always')||
-		    ((elt.className)&&(elt.className.search(/\bforcebreakafter\b/)>=0))||
+		    ((elt.className)&&
+		     (elt.className.search(
+			     /\b(forcebreakafter|alwaysbreakafter)\b/)>=0))||
 		    ((forcebreakafter)&&(testNode(elt,forcebreakafter)));
 		if (force) return force;
 		if (elt===cur_root) return false;
