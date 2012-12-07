@@ -141,9 +141,9 @@ fdjt.UI.Selecting=
                         span.id=prefix+"_"+(words.length);
                         words.push(span);
                         wordspans.push(span);}}
-                return fdjtDOM("span.fdjtwrapped",wordspans);}
+                return fdjtDOM("span.fdjtselectwrap",wordspans);}
             else if (node.nodeType!==1) return node;
-            else if (node.className==='fdjtwrapped') return node;
+            else if (node.className==='fdjtselectwrap') return node;
             else if (node.nodeType===1) {
                 var children=node.childNodes;
                 if (!(children)) return node;
