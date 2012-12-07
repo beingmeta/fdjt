@@ -89,7 +89,7 @@ fdjt.UI.Selecting=
                 node.parentNode.replaceChild(wrapper,node);
                 orig.push(node); wrapped.push(wrapper);
                 // Actually wrap the words in spans
-                wrapText(node,orig,wrapped,words,prefix);
+                wrapText(node,orig,wrapped,words,prefix,opts);
                 // And put the node back into the DOM
                 wrapper.appendChild(node);}
             // These track the state of the current selection
@@ -111,7 +111,7 @@ fdjt.UI.Selecting=
             
             return this;}
         
-        function wrapText(node,orig,wrapped,words,prefix){
+        function wrapText(node,orig,wrapped,words,prefix,opts){
             if (node.nodeType===3) {
                 var text=node.nodeValue;
                 var sliced=text.split(/\b/), wordspans=[];
@@ -141,14 +141,14 @@ fdjt.UI.Selecting=
                         span.id=prefix+"_"+(words.length);
                         words.push(span);
                         wordspans.push(span);}}
-                return fdjtDOM("span.fdjtselecting",wordspans);}
+                return fdjtDOM("span.fdjtselectwrap",wordspans);}
             else if (node.nodeType!==1) return node;
-            else if (node.className==='fdjtselecting') return node;
+            else if (node.className==='fdjtselectwrap') return node;
             else if (node.nodeType===1) {
                 var children=node.childNodes;
                 if (!(children)) return node;
                 else if (children.length===0) return node;
-                else if (node.className==='wrapped') return node;
+                else if (node.className==='fdjtselectwrap') return node;
                 else {
                     var i=0, lim=children.length;
                     while (i<lim) {
