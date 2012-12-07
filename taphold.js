@@ -434,6 +434,11 @@ fdjt.UI.TapHold=(function(){
     TapHold.holdkey=16;
     TapHold.fakePress=fakePress;
 
+    TapHold.traceTaps=function(flag){
+        if (typeof flag === "undefined")
+            trace_taps=(!(trace_taps));
+        else trace_taps=flag;};
+
     TapHold.ispressed=function(){
         return (pressed);}
 
