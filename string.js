@@ -97,14 +97,16 @@ fdjt.String=
                 var result="["+arg.type+"@"+stringify(target)+"(m="+
                     (((arg.shiftKey===true)?"s":"")+
                      ((arg.ctrlKey===true)?"c":"")+
+                     ((arg.metaKey===true)?"m":"")
                      ((arg.altKey===true)?"a":"")+
-                     (arg.button||0));
-                if (ox||oy) result=result+",cx="+ox+",cy="+oy;
-                else if (arg.touches) {
+                     "b="+(arg.button)+",w="+(arg.which));
+                if ((typeof ox === "number")||(typeof oy === "number"))
+                    result=result+",cx="+ox+",cy="+oy;
+                if (arg.touches) {
                     var i=0; var n=arg.touches.length;
                     result=result+",touches="+n;}
-                else if ((arg.keyCode)||(arg.charCode))
-                    result=result+",kc="+arg.keyCode+",cc="+arg.charCode;
+                if (arg.keyCode) result=result+",kc="+arg.keyCode;
+                if (arg.charCode) result=result+",cc="+arg.charCode;
                 return result+")]";}
             else return ""+arg;}
 
