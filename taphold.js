@@ -56,7 +56,9 @@ fdjt.UI.TapHold=(function(){
     
     var getGeometry=fdjtDOM.getGeometry;
     var addClass=fdjtDOM.addClass;
+    var dropClass=fdjtDOM.dropClass;
     var hasClass=fdjtDOM.hasClass;
+    var getParent=fdjtDOM.getParent;
     var hasParent=fdjtDOM.hasParent;
     var reticle=fdjtUI.Reticle;
     var cancel=fdjtUI.cancel;
@@ -195,7 +197,7 @@ fdjt.UI.TapHold=(function(){
                                         taptapthresh);}
                 else tapped(th_target,evt);}
             else slipped(th_target,evt);}
-        else if (pressed) {released(pressed,evt);}
+        else if (pressed) released(pressed,evt);
         if (reticle.live) reticle.highlight(false);
         if (evt) noDefault(evt);
         start_x=false; start_y=false; start_t=false;
@@ -211,9 +213,17 @@ fdjt.UI.TapHold=(function(){
         if (reticle.live) reticle.highlight(false);
         touched=false; pressed=false; tap_target=false;
         th_targets=[];}
+    function mouseout(evt){
+        var to=evt.toElement||evt.relatedTarget;
+        if ((pressed)&&(!(hasParent(to,".fdjtaphold")))) {
+            if (!(holdkey_down)) {
+                released(pressed,evt);
+                touched=pressed=th_target=false;}
+            mouse_down=false;}}
 
     function outer_move(evt){
         evt=evt||event;
+        if (evt.which === 0) mouse_down=false;
         var target=fdjtUI.T(evt);
         // If it doesn't have a parent, it's been removed from the DOM,
         //  so we can't tell if it *was* in a .fdjtaphold region, so we punt.
@@ -225,9 +235,12 @@ fdjt.UI.TapHold=(function(){
             if (pressed) slipped(pressed);
             touched=pressed=th_target=false; th_targets=[];
             return;}}
-
+    function outer_down(evt){mouse_down=true;};
+    function outer_up(evt){mouse_down=false;};
+    
     function move(evt,movethresh){
         evt=evt||event;
+        if (evt.which === 0) mouse_down=false;
         var target=fdjtUI.T(evt);
         // if (target!==th_target) fdjtLog("New target %o",target);
         touch_x=evt.clientX||getClientX(evt);
@@ -302,7 +315,8 @@ fdjt.UI.TapHold=(function(){
         evt=evt||event;
         if ((evt.ctrlKey)||
             (evt.altKey)||(evt.metaKey)||
-            (evt.button))
+            (evt.button)||
+            ((evt.which)&&(evt.which>1)))
             return;
         mouse_down=true;
         th_target=fdjtUI.T(evt); th_targets=[th_target];
@@ -412,14 +426,17 @@ fdjt.UI.TapHold=(function(){
         fdjtDOM.addListener(elt,"touchmove",mm);
         var md=((holdthresh)?(get_down_handler(holdthresh)):(down));
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousedown",md);
+        if (!(fortouch)) fdjtDOM.addListener(elt,"mouseout",mouseout);
         fdjtDOM.addListener(elt,"touchstart",md);
         var mu=((taptapthresh)?(get_up_handler(taptapthresh)):(up));
         if (!(fortouch)) fdjtDOM.addListener(elt,"mouseup",mu);
         fdjtDOM.addListener(elt,"touchend",mu);
         fdjtDOM.addListener(elt,"touchcancel",abortpress);        
         if (!(window_setup)) {
-            if (!(fortouch))
-                fdjtDOM.addListener(document,"mousemove",outer_move);
+            if (!(fortouch)) {
+                // fdjtDOM.addListener(document,"mouseup",outer_up);
+                // fdjtDOM.addListener(document,"mousedown",outer_down);
+                fdjtDOM.addListener(document,"mousemove",outer_move);}
             fdjtDOM.addListener(document,"touchmove",outer_move);
             fdjtDOM.addListener(document,"keydown",keydown);
             fdjtDOM.addListener(document,"keyup",keyup);
