@@ -315,8 +315,8 @@ if (!(fdjt.KB)) {
                 return parseRef(arg,pool,true);
             else return false;}
         fdjtKB.probe=fdjtKB.probeRef=probeRef;
-        function loadRef(arg){
-            var obj=getRef(arg);
+        function loadRef(arg,pool){
+            var obj=getRef(arg,pool);
             if (!(obj)) return undefined;
             else if (obj._init) return obj;
             else return obj.load();}
