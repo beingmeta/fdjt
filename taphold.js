@@ -223,35 +223,41 @@ fdjt.UI.TapHold=(function(){
 
     function outer_move(evt){
         evt=evt||event;
-        if (evt.which === 0) mouse_down=false;
-        var target=fdjtUI.T(evt);
+        var target;
+        if (evt.touches) {
+            var x=evt.clientX||getClientX(evt);
+            var y=evt.clientY||getClientY(evt);
+            target=document.elementFromPoint(x,y);}
+        else target=fdjtUI.T(evt);
         // If it doesn't have a parent, it's been removed from the DOM,
         //  so we can't tell if it *was* in a .fdjtaphold region, so we punt.
         if (!(target.parentNode)) return;
-        if (!(hasParent(target,".fdjtaphold"))) {
+        if ((pressed)&&(!(hasParent(target,".fdjtaphold")))) {
             if ((pressed)&&(trace_taps))
                 fdjtLog("TapHold/slipout %o: t=%o p=%o",
                         evt,th_target,pressed);
-            if (pressed) slipped(pressed);
+            released(pressed);
             touched=pressed=th_target=false; th_targets=[];
+            mouse_down=false;
             return;}}
     function outer_down(evt){mouse_down=true;};
     function outer_up(evt){mouse_down=false;};
     
     function move(evt,movethresh){
         evt=evt||event;
-        if (evt.which === 0) mouse_down=false;
-        var target=fdjtUI.T(evt);
+        var target;
         // if (target!==th_target) fdjtLog("New target %o",target);
         touch_x=evt.clientX||getClientX(evt);
         touch_y=evt.clientY||getClientY(evt);
         // If touched is false, the tap/hold was aborted somehow
         if (!(touched)) return;
+        if (evt.touches)
+            target=document.elementFromPoint(touch_x,touch_y);
+        else target=fdjtUI.T(evt);
         if (trace_taps)
             fdjtLog("TapHold/move %o %o -> %o s=%d,%d t=%d,%d, thresh=%o",
                     evt,th_target,target,start_x,start_y,
                     touch_x,touch_y,movethresh);
-        th_target=target;
         if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)) {
             var distance=(Math.abs(touch_x-start_x))+
                 (Math.abs(touch_y-start_y));
@@ -268,13 +274,11 @@ fdjt.UI.TapHold=(function(){
                 fdjtLog("TapHold/moved s=%d,%d t=%d,%d d=%d thresh=%o",
                         start_x,start_y,touch_x,touch_y,
                         distance,movethresh);}
-        if (evt.touches) {
-            th_target=document.elementFromPoint(touch_x,touch_y);
-            if ((touched)&&(!(pressed))&&
-                (th_targets[th_targets.length-1]!==th_target))
-                th_targets.push(th_target);}
-        if ((evt.touches)&&(evt.touches.length)&&
-            (evt.touches.length>1))
+        if (hasParent(target,".fdjtaphold")) th_target=target;
+        if ((evt.touches)&&(touched)&&(!(pressed))&&
+            (th_targets[th_targets.length-1]!==th_target))
+            th_targets.push(th_target);
+        if ((evt.touches)&&(evt.touches.length)&&(evt.touches.length>1))
             return;
         else {
             if (reticle.live) reticle.onmousemove(evt);
