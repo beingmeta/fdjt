@@ -97,7 +97,7 @@ fdjt.String=
                 var result="["+arg.type+"@"+stringify(target)+"(m="+
                     (((arg.shiftKey===true)?"s":"")+
                      ((arg.ctrlKey===true)?"c":"")+
-                     ((arg.metaKey===true)?"m":"")
+                     ((arg.metaKey===true)?"m":"")+
                      ((arg.altKey===true)?"a":"")+
                      "b="+(arg.button)+",w="+(arg.which));
                 if ((typeof ox === "number")||(typeof oy === "number"))
