@@ -496,6 +496,10 @@ table.fdjtform td.rightalign { text-align: right;}
 
 table.fdjtform td input[TYPE='TEXT'] {width: 100%;}
 table.fdjtform td textarea { width: 100%;}
+table.fdjtform td p {
+    font-size: 80%; max-width: 45em;
+    margin-top: 0.25ex;
+    margin-bottom: 0.25ex;}
 
 table.fdjtform td.messages {
     text-align: center; font-style: italic;}
