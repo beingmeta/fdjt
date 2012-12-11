@@ -66,6 +66,7 @@ fdjt.UI.Selecting=
             var orig=this.orig=[], wrapped=this.wrapped=[];
             var words=this.words=[], wrappers=this.wrappers=[];
             var prefix=this.prefix="fdjtSel0"+this.serial;
+            this.adjust=false; /* This will be 'start' or 'end' */
             selectors[prefix]=sel;
             var stripid=prefix.length+1;
             var k=0, n=nodes.length;
@@ -231,7 +232,7 @@ fdjt.UI.Selecting=
                 else sel=selectors[container.id];}
             if (!(sel)) return false;
             if (!(sel.start))
-                // We could have some impressive smarts here
+                // We could have some smarts here
                 sel.setRange(word,word);
             else if (sel.start===sel.end)
                 // Just one word is selected, so use word as the 'end' and
@@ -240,13 +241,21 @@ fdjt.UI.Selecting=
             else {
                 var off=sel.wordnum(word);
                 var start=sel.start, end=sel.end;
+                // Check that you're consistent with the end you're moving
+                if ((sel.adjust==='start')&&(off>sel.max)) return;
+                if ((sel.adjust==='end')&&(off<sel.min)) return;
                 // Figure out whether you're moving the beginning or end
-                if (off<=sel.min) start=word;
-                else if (off>=sel.max) end=word;
+                if (sel.adjust==='start') start=word;
+                else if (sel.adjust==='end') end=word;
+                else if (off<=sel.min) {
+                    start=word; sel.setAdjust('start');}
+                else if (off>=sel.max) {
+                    end=word; sel.setAdjust('end');}
                 // Tried this implementation and it just doesn't feel right
-                // else if ((off-sel.min)<((sel.max-sel.min)/2)) start=word;
-                else if ((off-sel.min)<3) start=word;
-                else end=word;
+                else if ((off-sel.min)<((sel.max-sel.min)/2)) {
+                    start=word; sel.setAdjust('start');}
+                // else if ((off-sel.min)<3) start=word;
+                else {end=word; sel.setAdjust('end');}
                 sel.setRange(start,end);}
             return true;}
 
@@ -260,7 +269,6 @@ fdjt.UI.Selecting=
                     return selectors[id.slice(0,split)]||false;
                 else return false;}
             else return false;}
-
 
         // Getting the selection text
         // This tries to be consistent with textify functions in fdjtDOM
@@ -319,6 +327,19 @@ fdjt.UI.Selecting=
             var preselected=this.getString(this.words[0],this.end);
             return preselected.length-selected.length;}
         
+        fdjtSelecting.prototype.setAdjust=function(val){
+            fdjt.Log("setAdjust %o",val);
+            if (val) {
+                this.adjust=val;
+                fdjt.DOM.swapClass(
+                    this.nodes,/\b(fdjtadjuststart|fdjtadjustend)\b/,
+                    "fdjtadjust"+val);}
+            else {
+                this.adjust=false;
+                fdjt.DOM.dropClass(
+                    this.nodes,/\b(fdjtadjuststart|fdjtadjustend)\b/);}};
+
+
         // Life span functions
 
         fdjtSelecting.prototype.clear=function(){
@@ -355,15 +376,27 @@ fdjt.UI.Selecting=
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
             if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
                 (target.id.search("fdjtSel")===0)) {
+                var sel=getSelector(target);
                 if ((target.className==="fdjtselectstart")||
                     (target.className==="fdjtselectend")) {
-                    var sel=getSelector(target);
                     if (sel.n_words===1) sel.setRange(false);
                     else {
                         fdjtUI.cancel(evt);
                         sel.setRange(target,target);}}
-                else if (overWord(target)) fdjtUI.cancel(evt);}}
+                else if (overWord(target)) fdjtUI.cancel(evt);}
+                sel.adjust=false;}
         fdjtSelecting.tap_handler=tap_handler;
+        function release_handler(evt){
+            evt=evt||event;
+            var target=fdjtUI.T(evt);
+            while ((target)&&(target.nodeType!==1)) target=target.parentNode;
+            if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
+                (target.id.search("fdjtSel")===0)) {
+                var sel=getSelector(target);
+                sel.setAdjust(false);}}
+        fdjtSelecting.release_handler=release_handler;
+        function get_release_handler(also){
+            return function(evt){release_handler(evt); also(evt);}};
         
         function addHandlers(container,sel,opts){
             var fortouch=((typeof opts.fortouch !== "undefined")?
@@ -380,7 +413,9 @@ fdjt.UI.Selecting=
                                 hold_handler);
             if ((opts)&&(opts.onrelease))
                 fdjtDOM.addListener(
-                    container,"release",(opts.onrelease));}
+                    container,"release",
+                    get_release_handler(opts.onrelease));
+            else fdjtDOM.addListener(container,"release",release_handler);}
 
         // Return the constructor
         return fdjtSelecting;})();

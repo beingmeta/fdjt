@@ -486,7 +486,7 @@ table.fdjtdata td ul, table.fdjtdata td ol {
 
 /* Tables for form input */
 
-table.fdjtform { width: 100%;}
+table.fdjtform { }
 table.fdjtform th, table.fdjtform td { vertical-align: top;}
 
 table.fdjtform th { text-align: right;}
@@ -1050,6 +1050,15 @@ div.fdjtalert.fdjtconfirm div.choices button:focus {
     -webkit-user-select: none;
     -webkit-touch-callout: none;}
 .fdjtselectwrap {background-color: lightyellow; }
+.fdjtselectwrap > span {
+    transition-property: background-color;
+    transition-duration: 1s;
+    -o-transition-property: background-color;
+    -o-transition-duration: 1s;
+    -moz-transition-property: background-color;
+    -moz-transition-duration: 1s;
+    -webkit-transition-property: background-color;
+    -webkit-transition-duration: 1s;}
 
 .fdjtselecting .fdjtselected {
     margin: 0px important!;
@@ -1059,12 +1068,14 @@ div.fdjtalert.fdjtconfirm div.choices button:focus {
 .fdjtselecting .fdjtselectstart, .fdjtselecting .fdjtselectend {
     background-color: #F7F700; }
 
-.fdjtselecting .fdjtword:hover, .fdjtselecting .fdjtword:hover {
-    background-color: silver;}
 .fdjtselecting .fdjtselected:hover,
 .fdjtselecting .fdjtselectstart:hover,
 .fdjtselecting .fdjtselectend:hover {
     text-decoration: underline;}
+
+.fdjtselecting .fdjtadjuststart .fdjtselectstart,
+.fdjtselecting .fdjtadjustend .fdjtselectend {
+    background-color: gold;}
 
 /* Page break classes */
 
