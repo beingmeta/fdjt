@@ -1087,6 +1087,14 @@ div.fdjtalert.fdjtconfirm div.choices button:focus {
 .forcebreakbefore { page-break-before: always;}
 .forcebreakafter { page-break-after: always;}
 
+/* Adjust font wrapper */
+
+span.adjustfont_wrapper {
+    margin: 0px !important;
+    padding: 0px !important;
+    border: 0px !important;
+    display: block;}
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***

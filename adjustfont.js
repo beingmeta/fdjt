@@ -41,7 +41,7 @@ fdjt.UI.adjustFont=
     (function(){
 	function setupContainer(elt,opts){
 	    var parent=elt.parentNode, container;
-	    if (parent.className==="fontsize_wrapper")
+	    if (parent.className==="adjustfont_wrapper")
 		return parent;
 	    var cstyle=getStyle(elt), style=elt.style;
 	    if (((cstyle)&&(cstyle.display==='block'))||
@@ -49,7 +49,7 @@ fdjt.UI.adjustFont=
 		(elt.tagName==='p')||(elt.tagName[0]==='h'))
 		container=document.createElement("div");
 	    else container=document.createElement("span");
-	    container.className="fontsize_wrapper";
+	    container.className="adjustfont_wrapper";
 	    parent.replaceChild(container,elt);
 	    container.appendChild(elt);
 	    container.style.display='block';
@@ -120,6 +120,8 @@ fdjt.UI.adjustFont=
 	    var pct=parsePct(container.style.fontSize);
 	    var unhide=((opts)&&(opts.unhide))||(adjustFont.unhide);
 	    var max=((opts)&&(opts.maxpct)), min=((opts)&&(opts.minpct));
+            var saved_display=elt.style.display;
+            var visualized=((elt.offsetWidth===0)&&(makeVisible(elt)));
 	    if (!(max)) {
 		max=parsePct(elt.getAttribute("data-maxfont"));
 		if (!(max)) max=adjustFont.maxpct;
@@ -132,6 +134,7 @@ fdjt.UI.adjustFont=
 		else if (opts) opts.mincpt=min;
 		else {}}
 	    if (!(min)) min=5;
+            elt.style.display='inline-block';
 	    // Tweak the font percent size at progressively finer
 	    // granularities
 	    pct=tweakFontSize(elt,25,container,pct,min,max);
@@ -140,9 +143,60 @@ fdjt.UI.adjustFont=
 	    var w=elt.offsetWidth, pw=parentWidth(container.parentNode);
 	    // If you're over, adjust it one last time to make it fit
 	    if (w>pw) pct=tweakFontSize(elt,0.1,container,pct,min,max);
+            if (visualized) restoreVisibility(visualized);
+            elt.style.display=saved_display;
 	    if (unhide) elt.style.visibility='visible';
 	    return pct;}
 	
+        function makeVisible(elt){
+            var results=[];
+            while (elt) {
+                var cstyle=getStyle(elt);
+                var style=elt.style
+                if (!(style)) elt=elt.parentNode; 
+                else if (cstyle.display==='none') {
+                    var tag=elt.tagName;
+                    var saved={};
+                    if ((style.opacity===0)||
+                        ((style.opacity)&&(style.opacity!=='')))
+                        saved.opacity=style.opacity;
+                    if ((style.visibility)&&(style.visibility!==''))
+                        saved.visibility=style.visibility;
+                    if ((style.display)&&(style.display!==''))
+                        saved.display=style.display;
+                    style.visibility='hidden';
+                    style.opacity=0.0;
+                    if ((elt.tag==="TH")||(elt.tag==="TD"))
+                        style.display="table-cell";
+                    else if (elt.tag==="TR")
+                        style.display="table-row";
+                    else if (elt.tag==="LI")
+                        style.display="list-item";
+                    else if (elt.tag==="TBODY")
+                        style.display="table-row-group";
+                    else if (elt.tag==="TABLE")
+                        style.display="table";
+                    else style.display="block";
+                    results.push([elt,saved]);
+                    elt=elt.parentNode;}
+                else elt=elt.parentNode;}
+            return results;}
+        function restoreVisibility(elements){
+            var i=0, lim=elements.length;
+            while (i<lim) {
+                var entry=elements[i++];
+                var elt=entry[0], saved=entry[1];
+                if (saved.display)
+                    elt.style.display=saved.display;
+                else elt.style.display='';
+                if (saved.visibility)
+                    elt.style.visibility=elt.saved.visibility;
+                else elt.style.visibility=''; 
+                if ((saved.opacity===0)||(saved.opacity))
+                    elt.style.opacity=saved.opacity;
+                else elt.style.opacity='';}}
+                
+        
 	function classes2spec(classes){
 	    var specs=[]; var i=0, lim=classes.length;
 	    while (i<lim) {
