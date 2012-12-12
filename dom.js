@@ -1274,9 +1274,9 @@ fdjt.DOM=
 
         /* Adjusting font sizes (wrappers for adjustfont.js) */
         fdjtDOM.adjustFont=function(elt,opts){
-            return fdjt.UI.adjustFont.adjust(elt,opts);};
+            return fdjt.UI.adjustFont.update(elt,opts);};
         fdjtDOM.adjustFonts=function(elt,opts){
-            return fdjt.UI.adjustFont.setup(elt,opts);};
+            return fdjt.UI.adjustFont.update(elt,opts);};
         
         /* Sizing to fit */
 

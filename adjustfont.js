@@ -268,7 +268,7 @@ fdjt.UI.adjustFont=
 	// This sets up a DOM tree for use with the module; it's called by
 	// the onload and onresize handlers and can also be called
 	// explicitly if we're adding elements to the DOM.
-	function setup(elt,opts){
+	function update(elt,opts){
 	    if (typeof elt === 'array') {
 		var i=0, lim=elt.length;
 		while (i<lim) adjustFont(elt[i++],opts||false);}
@@ -277,10 +277,11 @@ fdjt.UI.adjustFont=
 		var elts=getElements(elt);
 		var i=0, lim=elts.length;
 		while (i<lim) adjustFont(elts[i++],opts||false);}}
-	adjustFont.setup=setup;
+        adjustFont.update=update;
+	adjustFont.setup=update;
 
-	function adjustfont_onresize(){setup(document.body);}
-	function adjustfont_onload(){setup(document.body);}
+	function adjustfont_onresize(){update(document.body);}
+	function adjustfont_onload(){update(document.body);}
 
 	function onload(evt){
 	    if (adjustFont.onload) {
