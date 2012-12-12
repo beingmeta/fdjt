@@ -190,7 +190,7 @@ fdjt.UI.adjustFont=
                     elt.style.display=saved.display;
                 else elt.style.display='';
                 if (saved.visibility)
-                    elt.style.visibility=elt.saved.visibility;
+                    elt.style.visibility=saved.visibility;
                 else elt.style.visibility=''; 
                 if ((saved.opacity===0)||(saved.opacity))
                     elt.style.opacity=saved.opacity;
