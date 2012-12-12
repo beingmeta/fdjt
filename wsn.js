@@ -52,12 +52,14 @@ var WSN=(function(){
     var unicode_regex=/(\p{Mark})/g;
     
     function WSN(arg,sortfn,wordfn,keepdup){
-	if (!(arg)) {
+	if (arg==="") return arg;
+	else if ((!(arg))&&(this instanceof WSN)) {
 	    // Assume we're being used as a constructor.
 	    if (sortfn) this.sortfn=sortfn;
 	    if (wordfn) this.wordfn=wordfn;
 	    if (keepdup) this.keepdup=keepdup;
 	    return this;}
+	else if (!(arg)) return arg;
 	if (typeof sortfn === 'undefined') sortfn=WSN.sortfn||false;
 	if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
 	if (typeof keepdup === 'undefined') keepdup=WSN.keepdup||false;
