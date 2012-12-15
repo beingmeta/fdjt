@@ -87,14 +87,14 @@ fdjt.UI.TapHold=(function(){
         if (typeof evt.offsetX === "number") return evt.clientX;
         else if ((evt.touches)&&(evt.touches.length)) {
             var touch=evt.touches[0];
-            return touch.clientX;}
+            return touch.screenX;}
         else if (typeof evt.clientX === "number") return evt.clientX;
         else return false;}
     function getClientY(evt){
         if (typeof evt.offsetY === "number") return evt.clientY;
         else if ((evt.touches)&&(evt.touches.length)) {
             var touch=evt.touches[0];
-            return touch.clientY;}
+            return touch.screenY;}
         else if (typeof evt.clientY === "number") return evt.clientY;
         else return false;}
     
@@ -231,7 +231,7 @@ fdjt.UI.TapHold=(function(){
         else target=fdjtUI.T(evt);
         // If it doesn't have a parent, it's been removed from the DOM,
         //  so we can't tell if it *was* in a .fdjtaphold region, so we punt.
-        if (!(target.parentNode)) return;
+        if ((!(target))||(!(target.parentNode))) return;
         if ((pressed)&&(!(hasParent(target,".fdjtaphold")))) {
             if ((pressed)&&(trace_taps))
                 fdjtLog("TapHold/slipout %o: t=%o p=%o",
