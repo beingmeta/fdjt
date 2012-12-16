@@ -36,7 +36,7 @@ fdjt.UI.TapHold=(function(){
     var fdjtUI=fdjt.UI;
     var fdjtET=fdjt.ET;
 
-    var trace_taps=true;
+    var trace_taps=false;
     var debug_taps=false;
     var window_setup=false;
     
@@ -411,15 +411,17 @@ fdjt.UI.TapHold=(function(){
             var opts=fortouch;
             if (opts.hasOwnProperty("touch")) fortouch=opts.touch;
             else fortouch=false;
-            if (!(holdthresh)) holdthresh=opts.hold;
-            if (!(movethresh)) movethresh=opts.move;
-            if (!(taptapthresh)) taptapthresh=opts.taptap;}
+            if (!(holdthresh)) holdthresh=opts.hold||opts.holdthresh;
+            if (!(movethresh)) movethresh=opts.move||opts.movethresh;
+            if (!(taptapthresh)) taptapthresh=opts.taptap||opts.taptapthresh;}
         else if (!(fortouch)) fortouch=false;
-        if (typeof holdthresh !== "number") holdthresh=200;
-        if (typeof movethresh !== "number") movethresh=20;
+        if (typeof holdthresh !== "number")
+            holdthresh=TapHold.holdthresh||300;
+        if (typeof movethresh !== "number")
+            movethresh=TapHold.movethresh||20;
         if (typeof movethresh !== "number") 
         if ((taptapthresh)&&(typeof taptapthresh !== "number"))
-            taptapthresh=200;
+            taptapthresh=TapHold.taptapthresh||200;
         addClass(elt,"fdjtaphold");
         var mm=((movethresh)?(get_move_handler(movethresh)):(taphold_move));
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousemove",mm);
