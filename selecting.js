@@ -80,7 +80,7 @@ fdjt.UI.Selecting=
                 // Initialize the wrapper
                 wrapper.id=prefix+"w"+k;
                 wrapper.title=((opts)&&(opts.title))||
-                    "Tap or hold to select text range";
+                    "Tap or hold/drag to move the ends of the text range";
                 selectors[wrapper.id]=sel;
                 wrappers.push(wrapper);
                 addHandlers(wrapper,sel,opts);
@@ -269,6 +269,7 @@ fdjt.UI.Selecting=
                     return selectors[id.slice(0,split)]||false;
                 else return false;}
             else return false;}
+        fdjtSelecting.getSelector=getSelector;
 
         // Getting the selection text
         // This tries to be consistent with textify functions in fdjtDOM
