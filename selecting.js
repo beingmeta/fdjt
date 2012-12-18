@@ -329,7 +329,7 @@ fdjt.UI.Selecting=
             return preselected.length-selected.length;}
         
         fdjtSelecting.prototype.setAdjust=function(val){
-            fdjt.Log("setAdjust %o",val);
+            // fdjt.Log("setAdjust %o",val);
             if (val) {
                 this.adjust=val;
                 fdjt.DOM.swapClass(
@@ -384,8 +384,8 @@ fdjt.UI.Selecting=
                     else {
                         fdjtUI.cancel(evt);
                         sel.setRange(target,target);}}
-                else if (overWord(target)) fdjtUI.cancel(evt);}
-                sel.adjust=false;}
+                else if (overWord(target)) fdjtUI.cancel(evt);
+                if (sel) sel.adjust=false;}}
         fdjtSelecting.tap_handler=tap_handler;
         function release_handler(evt){
             evt=evt||event;
