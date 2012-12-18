@@ -74,6 +74,15 @@ fdjt.CodexLayout=
 	
 	var floor=Math.floor;
 
+	function appendChildren(node,children,start){
+	    var lim=children.length; var i=(start)||0;
+	    var frag=document.createDocumentFragment();
+	    while (i<lim) {
+		if (children[i])
+		    frag.appendChild(children[i++]);
+		else i++;}
+	    node.appendChild(frag);}
+
 	function getGeom(elt,root,extra){
 	    var top = elt.offsetTop;
 	    var left = elt.offsetLeft;
@@ -915,7 +924,7 @@ fdjt.CodexLayout=
 			// page on the node (after restoring all the
 			// children to the node).
 			i=0; var n=children.length;
-			while (i<n) node.appendChild(children[i++]);
+			appendChildren(node,children);
 			addClass(node,"codexcantsplit");
 			newPage(node);
 			return node;}
@@ -923,19 +932,12 @@ fdjt.CodexLayout=
 		    if (!(push)) {
 			/* Doesn't need to be split after all.
 			   Not sure when this will happen, if ever. */
-			fdjtLog(
-			    "Tried to break %o which didn't need breaking",
-			    node);
-			i=0; var n=children.length;
-			while (i<n) {
-			    var child=children[i++];
-			    if (child) node.appendChild(child);}
+			fdjtLog("Tried to break %o which didn't need breaking",
+				node);
+			appendChildren(node,children);
 			return node;}
 		    else if (push===node) {
-			i=0; var n=children.length;
-			while (i<n) {
-			    var child=children[i++];
-			    if (child) node.appendChild(child);}
+			appendChildren(node,children);
 			addClass(node,"codexcantsplit");
 			newPage(node);
 			return node;}
@@ -947,7 +949,7 @@ fdjt.CodexLayout=
 			// This (dup) is the copied parent of the page
 			// break.  We append all the remaining children
 			// to this duplicated parent on the new page.
-			while (i<n) dup.appendChild(push[i++]);
+			appendChildren(dup,push,1);
 			if (trace>1)
 			    logfn("Layout/splitBlock %o @ %o into %o on %o",
 				  node,page_break,dup,page);
@@ -1110,9 +1112,11 @@ fdjt.CodexLayout=
 			if (childtype===3)
 			    node.replaceChild(keepnode,probenode);
 			else node.replaceChild(keepnode,page_break);
+			// Put the page break back in context for copying
 			node.appendChild(pushnode);
 			var move_children=children.slice(i-1);
-			while (i<n) node.appendChild(children[i++]);
+			// Put the children back into context for copying
+			appendChildren(node,children,i);
 			move_children[0]=pushnode;
 			if (id) textsplits[id]=original;
 			return move_children;}}
