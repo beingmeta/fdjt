@@ -1138,7 +1138,7 @@ fdjt.CodexLayout=
 			if (layout.timer) clearTimeout(layout.timer);
 			layout.timer=false;
 			layout.root=cur_root=false;
-			if (donefn) donefn(layout);}}
+			if (donefn) setTimeout(function(){donefn(layout);},10);}}
 
 		// This is the inner loop
 		if (!(timeslice)) {
