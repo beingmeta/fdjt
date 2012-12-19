@@ -86,9 +86,10 @@ fdjt.UI.adjustFont=
 			 (parentWidth(parent.parentNode)));}
 
 	function getStyle(elt){
-	    return elt.currentStyle||
-		((window.getComputedStyle)&&
-		 (window.getComputedStyle(elt,null)));}
+	    return (elt)&&(elt.nodeType===1)&&
+                (elt.currentStyle||
+		 ((window.getComputedStyle)&&
+		  (window.getComputedStyle(elt,null))));}
 
 	// This is the core of the algorithm, adjusting the font size to
 	//  put the inner element's size just outside or inside the outer
