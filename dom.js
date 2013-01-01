@@ -1836,7 +1836,7 @@ fdjt.DOM=
             if (typeof win==="string") {
                 if (!(win=document.getElementById(win))) return;}
             if ((!(win))||(win===window)||
-                ((Window)&&(win instanceof Window))) {
+                ((window.Window)&&(win instanceof Window))) {
                 win=win||window;
                 return (win.pageYOffset||win.scrollY||
                         win.document.documentElement.scrollTop||0);}
