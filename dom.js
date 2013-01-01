@@ -2008,14 +2008,20 @@ fdjt.DOM=
             evt.cancelBubble=true;};
 
         /* Check for SVG */
-        var nosvg=true;
+        var nosvg;
 
         function checkSVG(){
+            if (typeof nosvg === "undefined") {
+                if ((document.implementation)&&
+                    (document.implementation.hasFeature)&&
+                    (document.implementation.hasFeature(
+                        "http://www.w3.org/TR/SVG11/feature#BasicStructure",
+                        "1.1")))
+                    nosvg=false;
+                else if (navigator.mimeTypes["image/svg+xml"])
+                    nosvg=false;
+                else nosvg=true;}
             if (nosvg) addClass(document.body,"NOSVG");
-            else if (!(document.implementation.hasFeature(
-                "http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")||
-                  navigator.mimeTypes["image/svg+xml"]))
-                addClass(document.body,"NOSVG");
             else dropClass(document.body,"NOSVG");}
         
         function checkChildren(){
