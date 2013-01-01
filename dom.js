@@ -2052,11 +2052,11 @@ fdjt.DOM=
         fdjtDOM.useBMP=useBMP;
 
         function goSVG(){
-            if ((nosvg)||
-                (!(document.implementation.hasFeature(
-                    "http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")||
-                   navigator.mimeTypes["image/svg+xml"]))) {
-                useBMP();}}
+            if (nosvg) useBMP();
+            else useSVG();}
+        function prefSVG(){
+            if (!(nosvg)) useSVG();}
+        fdjtDOM.prefSVG=prefSVG;
 
         var inits_run=false;
         var inits=[checkChildren,checkSVG]; // ,fixSVG
