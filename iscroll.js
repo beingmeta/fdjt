@@ -8,7 +8,7 @@
 	var target=evt.target||evt.srcElement;
 	while (target) {
 	    if ((target.nodeType===1)&& 
-		((target.onclick)||
+		(//(target.onclick)||
 		 (target.tagName==='INPUT')||
 		 (target.tagName==='TEXTAREA')||
 		 ((target.tagName==='A')&&(target.href))||
@@ -216,8 +216,11 @@
 	    var that = this;
 	    switch(e.type) {
 	    case START_EV:
-		if ((!hasTouch && e.button !== 0)||(isClickable(e)))
-		    return;
+		if (!hasTouch && e.button !== 0) {
+		    /* (||(isClickable(e))) */
+		    fdjt.Log("punting, e.button=%o, clickable=%o",
+			     e.button,isClickable(e));
+		    return;}
 		that._start(e);
 		break;
 	    case MOVE_EV: that._move(e); break;

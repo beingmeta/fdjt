@@ -84,6 +84,7 @@ fdjt.String=
                 if (arg.className)
                     output=output+"."+arg.className.replace(/\s+/g,'.');
                 if (arg.id) output=output+"#"+arg.id;
+                if (arg.name) output=output+"[name="+arg.name+"]";
                 return output+"]";}
             else if (arg.nodeType) {
                 if (arg.nodeType===3)

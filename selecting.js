@@ -80,7 +80,7 @@ fdjt.UI.Selecting=
                 // Initialize the wrapper
                 wrapper.id=prefix+"w"+k;
                 wrapper.title=((opts)&&(opts.title))||
-                    "Tap or hold to select text range";
+                    "Tap or hold/drag to move the ends of the text range";
                 selectors[wrapper.id]=sel;
                 wrappers.push(wrapper);
                 addHandlers(wrapper,sel,opts);
@@ -269,6 +269,7 @@ fdjt.UI.Selecting=
                     return selectors[id.slice(0,split)]||false;
                 else return false;}
             else return false;}
+        fdjtSelecting.getSelector=getSelector;
 
         // Getting the selection text
         // This tries to be consistent with textify functions in fdjtDOM
@@ -328,7 +329,7 @@ fdjt.UI.Selecting=
             return preselected.length-selected.length;}
         
         fdjtSelecting.prototype.setAdjust=function(val){
-            fdjt.Log("setAdjust %o",val);
+            // fdjt.Log("setAdjust %o",val);
             if (val) {
                 this.adjust=val;
                 fdjt.DOM.swapClass(
@@ -383,8 +384,8 @@ fdjt.UI.Selecting=
                     else {
                         fdjtUI.cancel(evt);
                         sel.setRange(target,target);}}
-                else if (overWord(target)) fdjtUI.cancel(evt);}
-                sel.adjust=false;}
+                else if (overWord(target)) fdjtUI.cancel(evt);
+                if (sel) sel.adjust=false;}}
         fdjtSelecting.tap_handler=tap_handler;
         function release_handler(evt){
             evt=evt||event;

@@ -2347,6 +2347,8 @@ fdjt.DOM=
                         input.type=typename;}}}}
         fdjtDOM.setupCustomInputs=setupCustomInputs;
         fdjt.addInit(setupCustomInputs,"CustomInputs");
+        fdjtDOM.text_types=
+            /\b(text|email|number|range|tel|url|datetime|datetime-local|date|time|week|month)\b/i;
 
         /* Meta schemas */
 
