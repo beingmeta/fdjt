@@ -1146,9 +1146,9 @@ fdjt.UI.ProgressBar=(function(){
                        (string.slice(before.length)));
         var elided=fdjtDOM("span.elided",remaining);
         var elision=fdjtDOM(
-            "span.elision",fdjtString(" …←%d%%→…",100-pct));
+            "span.elision",fdjtString(" …←%d%% more→…",100-pct));
         var delision=fdjtDOM(
-            "span.delision",fdjtString(" →…%d%%…← ",100-pct));
+            "span.delision",fdjtString(" →…hide %d%%…← ",100-pct));
         elision.title="show elided text";
         delision.title="hide elided text";
         elision.onclick=handler; delision.onclick=handler;
