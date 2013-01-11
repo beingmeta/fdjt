@@ -561,7 +561,7 @@ fdjt.CodexLayout=
 
 	    function parseScale(s){
 		if (s.search(/%$/g)>0) {
-		    var pct=parseFloat(s.slice(0,s.len-1));
+		    var pct=parseFloat(s.slice(0,s.length-1));
 		    return pct/100;}
 		else return parseFloat(s);}
 
@@ -569,6 +569,8 @@ fdjt.CodexLayout=
 		if (typeof elt === "string") elt=fdjtID(elt);
 		if ((!(elt))||(elt.length===0)) return;
 		else if (elt.nodeType) {
+		    if (elt.nodeType!==1) return;
+		    if (hasClass(elt,"codexpagescaled")) return;
 		    var ps=elt.getAttribute("data-pagescale")||
 			elt.getAttribute("data-pagescale")||
 			getElementValue(elt,"xdatapagescale");
@@ -580,7 +582,7 @@ fdjt.CodexLayout=
 		    if (psv.length===2) {
 			psw=parseScale(psv[0]);
 			psh=parseScale(psv[1]);}
-		    else psh=parseScale(psv[0]);
+		    else psw=parseScale(psv[0]);
 		    var pw=page_width*psw, ph=page_height*psh;
 		    var w=elt.offsetWidth, h=elt.offsetHeight;
 		    var sw=pw/w, sh=ph/h;
@@ -596,7 +598,8 @@ fdjt.CodexLayout=
 			    elt.style.transformOrigin="center top";
 			    elt.style[fdjtDOM.transformOrigin]="center top";
 			    elt.style.transform=scalestring;
-			    elt.style[fdjtDOM.transform]=scalestring;}}}
+			    elt.style[fdjtDOM.transform]=scalestring;}}
+		    addClass(elt,"codexpagescaled");}
 		else if (elt.length) {
 		    var i=0, lim=elt.length;
 		    while (i<lim) scaleToPage(elt[i++]);}
@@ -633,11 +636,11 @@ fdjt.CodexLayout=
 		    ((singlepages)&&(testNode(root,singlepages)))) {
 		    if (newpage) moveNode(root); else newPage(root);
 		    // Scale any embedded items
-		    if ((hasClass(root,/\bcodexscaletopage\b/))||
+		    if ((hasClass(root,/\bcodexpagescale\b/))||
 			(testNode(root,scaletopage)))
 			scaleToPage(root);
 		    scaleToPage(fdjtDOM.getChildren(root,scaletopage));
-		    scaleToPage(fdjtDOM.getChildren(root,/\bcodexscaletopage\b/));
+		    scaleToPage(fdjtDOM.getChildren(root,/\bcodexpagescale\b/));
 		    newPage();
 		    prev=this.prev=root;
 		    prevstyle=this.prevstyle=getStyle(root);
@@ -651,6 +654,7 @@ fdjt.CodexLayout=
 		    // Scale any embedded items
 		    if (testNode(root,scaletopage)) scaleToPage(root);
 		    scaleToPage(fdjtDOM.getChildren(root,scaletopage));
+		    scaleToPage(fdjtDOM.getChildren(root,/\bcodexpagescale\b/));
 		    var geom=getGeom(root,page);
 		    if (geom.bottom<=page_height) {
 			prev=this.prev=root;
