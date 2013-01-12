@@ -574,15 +574,15 @@ fdjt.CodexLayout=
 		    var ps=elt.getAttribute("data-pagescale")||
 			elt.getAttribute("data-pagescale")||
 			getElementValue(elt,"xdatapagescale");
-		    var style=getStyle(elt);
-		    if (!(ps)) return;
-		    if (elt.style[fdjtDOM.transform]) return;
-		    var psv=ps.split(/ |,|x/g);
 		    var psw=1, psh=1;
-		    if (psv.length===2) {
-			psw=parseScale(psv[0]);
-			psh=parseScale(psv[1]);}
-		    else psw=parseScale(psv[0]);
+		    var style=getStyle(elt);
+		    if (elt.style[fdjtDOM.transform]) return;
+		    if (ps) {
+			var psv=ps.split(/ |,|x/g);
+			if (psv.length===2) {
+			    psw=parseScale(psv[0]);
+			    psh=parseScale(psv[1]);}
+			else psw=parseScale(psv[0]);}
 		    var pw=page_width*psw, ph=page_height*psh;
 		    var w=elt.offsetWidth, h=elt.offsetHeight;
 		    var sw=pw/w, sh=ph/h;
@@ -636,11 +636,10 @@ fdjt.CodexLayout=
 		    ((singlepages)&&(testNode(root,singlepages)))) {
 		    if (newpage) moveNode(root); else newPage(root);
 		    // Scale any embedded items
-		    if ((hasClass(root,/\bcodexpagescale\b/))||
-			(testNode(root,scaletopage)))
-			scaleToPage(root);
 		    scaleToPage(fdjtDOM.getChildren(root,scaletopage));
 		    scaleToPage(fdjtDOM.getChildren(root,/\bcodexpagescale\b/));
+		    // Now scale the root
+		    scaleToPage(root);
 		    newPage();
 		    prev=this.prev=root;
 		    prevstyle=this.prevstyle=getStyle(root);
