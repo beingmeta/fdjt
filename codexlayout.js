@@ -162,7 +162,7 @@ fdjt.CodexLayout=
 		    var i=0, lim=rule.length;
 		    while (i<lim) {
 			var r=rule[i++];
-			if (typeof r !== "string") newrules.push(rule);
+			if (typeof r !== "string") newrules.push(r);
 			else if (r[0]===".") {
 			    if (r.slice(1).search(/\.|#|\[/)>=0)
 				// complex selector (not just a classname)
