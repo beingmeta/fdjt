@@ -330,7 +330,8 @@ fdjt.String=
         function precString(num,prec){
             var numstring=num.toString();
             var suffix="";
-            if (prec) {
+            if ((typeof prec === 'number')&&
+                (prec>=0)&&(prec<100)) {
                 var point=numstring.indexOf('.');
                 if ((point>=0)&&((point+prec)<numstring.length))
                     numstring=numstring.slice(0,point+prec+1);
