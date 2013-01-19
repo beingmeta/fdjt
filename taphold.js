@@ -98,6 +98,24 @@ fdjt.UI.TapHold=(function(){
         if (touches) return touches[0].screenY;
         else return false;}
     
+    /* This handles the case where there are lots of targets which are
+       too small to pick up events (in some browsers), so we kludge
+       around it. */
+    function getRealTarget(target,x,y){
+        if (hasClass(target,"tapholdcontainer")) {
+            var geom=getGeometry(target);
+            y=y-geom.top; x=x-geom.left;
+            var children=target.childNodes;
+            var i=0, lim=children.length;
+            while (i<lim) {
+                if (children[i].nodeType===1) {
+                    var child=children[i++];
+                    if ((x>child.offsetLeft)&&(y>child.offsetTop))
+                        return child;}
+                else i++}
+            return target;}
+        else return target;}
+
     function dispatchEvent(target,etype,orig){
         if (!(target)) target=fdjtUI.T(orig);
         var evt = document.createEvent("UIEvent");
@@ -220,7 +238,7 @@ fdjt.UI.TapHold=(function(){
         if ((pressed)&&(!(hasParent(to,".fdjtaphold")))) {
             if (!(holdkey_down)) {
                 mouseout_timer=setTimeout(function(){
-                    released(pressed,evt);
+                    slipped(pressed,evt);
                     touched=pressed=th_target=false;
                     mouse_down=false;
                     mouseout_timer=false;},
@@ -268,6 +286,9 @@ fdjt.UI.TapHold=(function(){
         if (evt.touches)
             target=document.elementFromPoint(touch_x,touch_y);
         else target=fdjtUI.T(evt);
+        if (hasClass(target,"tapholdcontainer")) 
+            target=getRealTarget(target,touch_x,touch_y);
+
         if (trace_taps)
             fdjtLog("TapHold/move %o %o -> %o s=%d,%d t=%d,%d, thresh=%o",
                     evt,th_target,target,start_x,start_y,
@@ -340,6 +361,8 @@ fdjt.UI.TapHold=(function(){
         th_target=fdjtUI.T(evt); th_targets=[th_target];
         start_x=touch_x=evt.clientX||getClientX(evt);
         start_y=touch_y=evt.clientY||getClientY(evt);
+        if (hasClass(th_target,"tapholdcontainer")) 
+            th_target=getRealTarget(th_target,touch_x,touch_y);
         start_t=fdjtET();
         if (trace_taps)
             fdjtLog("TapHold/down %o t=%o x=%o y=%o t=%o",
@@ -375,7 +398,7 @@ fdjt.UI.TapHold=(function(){
             holdkeynum=keynums[holdkey.toLowerCase()];
             holdkeyname=holdkey.toLowerCase();}
         else {
-            fdjtLog.warn("Invalid holdkey specification %s",holdkey);
+             fdjtLog.warn("Invalid holdkey specification %s",holdkey);
             return;}
         if ((evt.key===holdkeyname)||
             (evt.keyCode===holdkeynum)||
@@ -391,6 +414,8 @@ fdjt.UI.TapHold=(function(){
         mouse_down=false;
         touch_x=evt.clientX||getClientX(evt)||touch_x;
         touch_y=evt.clientY||getClientY(evt)||touch_y;
+        if (hasClass(th_target,"tapholdcontainer")) 
+            th_target=getRealTarget(th_target,touch_x,touch_y);
         if (trace_taps)
             fdjtLog("TapHold/up %o tht=%o s=%o,%o,%o t=%o,%o m=%o k=%o ttt=%o",
                     evt,th_target,start_x,start_y,start_t,touch_x,touch_y,
