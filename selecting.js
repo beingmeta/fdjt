@@ -214,7 +214,7 @@ fdjt.UI.Selecting=
 
         /* Handler support */
         
-        function overWord(word){
+        function overWord(word,tapped){
             var sel=false, id=false;
             while ((word)&&(word.nodeType!==1)) word=word.parentNode;
             if ((word)&&((id=word.id))&&
@@ -232,11 +232,13 @@ fdjt.UI.Selecting=
                 else sel=selectors[container.id];}
             if (!(sel)) return false;
             if (!(sel.start))
-                // We could have some smarts here
+                // We could have some smarts here to include quoted
+                //  phrases, capitalization runs, etc.
                 sel.setRange(word,word);
             else if (sel.start===sel.end)
-                // Just one word is selected, so use word as the 'end' and
-                // let setRange sort out the correct order
+                // Just one word is selected, so use the touched word
+                // as the 'end' and let setRange sort out the correct
+                // order
                 sel.setRange(sel.start,word);
             else {
                 var off=sel.wordnum(word);
@@ -251,11 +253,15 @@ fdjt.UI.Selecting=
                     start=word; sel.setAdjust('start');}
                 else if (off>=sel.max) {
                     end=word; sel.setAdjust('end');}
-                // Tried this implementation and it just doesn't feel right
-                else if ((off-sel.min)<((sel.max-sel.min)/2)) {
+                else if ((off-sel.min)<6) {
                     start=word; sel.setAdjust('start');}
-                // else if ((off-sel.min)<3) start=word;
-                else {end=word; sel.setAdjust('end');}
+                else if ((sel.max-off)<6) {
+                    end=word; sel.setAdjust('end');}
+                else if (tapped) return;
+                else if ((off-sel.min)>((sel.max-sel.min)/2)) {
+                    end=word; sel.setAdjust('end');}
+                else {
+                    start=word; sel.setAdjust('start');}
                 sel.setRange(start,end);}
             return true;}
 
@@ -378,14 +384,23 @@ fdjt.UI.Selecting=
             if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
                 (target.id.search("fdjtSel")===0)) {
                 var sel=getSelector(target);
-                if ((target.className==="fdjtselectstart")||
-                    (target.className==="fdjtselectend")) {
-                    if (sel.n_words===1) sel.setRange(false);
-                    else {
-                        fdjtUI.cancel(evt);
-                        sel.setRange(target,target);}}
-                else if (overWord(target)) fdjtUI.cancel(evt);
-                if (sel) sel.adjust=false;}}
+                // Tapping on a single word selection clears it
+                if (sel.n_words===1) sel.setRange(false);
+                else if ((target.className==="fdjtselectstart")||
+                         (target.className==="fdjtselectend")) {
+                    // Tapping on a start or end selects just that word
+                    fdjtUI.cancel(evt);
+                    sel.setRange(target,target);}
+                // Otherwise, call overWord, which makes the word the
+                //  beginning or end of the selection
+                else if (overWord(target,true)) {
+                    if (target.className==="fdjtselectstart")
+                        sel.adjust="start";
+                    else if (target.className==="fdjtselectend")
+                        sel.adjust="end";
+                    else sel.adjust=false;
+                    fdjtUI.cancel(evt);}
+                else if (sel) sel.adjust=false;}}
         fdjtSelecting.tap_handler=tap_handler;
         function release_handler(evt){
             evt=evt||event;

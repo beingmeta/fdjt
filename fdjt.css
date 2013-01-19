@@ -1066,12 +1066,18 @@ div.fdjtalert.fdjtconfirm div.choices button:focus {
     border: 0px important!;
     background-color: yellow; }
 .fdjtselecting .fdjtselectstart, .fdjtselecting .fdjtselectend {
-    background-color: #F7F700; }
+    background-color: gold; }
 
 .fdjtselecting .fdjtselected:hover,
 .fdjtselecting .fdjtselectstart:hover,
 .fdjtselecting .fdjtselectend:hover {
     text-decoration: underline;}
+
+body.cxTOUCH .fdjtselecting .fdjtselected:hover,
+body.cxTOUCH .fdjtselecting .fdjtselectstart:hover,
+body.cxTOUCH .fdjtselecting .fdjtselectend:hover {
+    text-decoration: none;}
+
 
 .fdjtselecting .fdjtadjuststart .fdjtselectstart,
 .fdjtselecting .fdjtadjustend .fdjtselectend {
