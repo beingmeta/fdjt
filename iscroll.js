@@ -216,8 +216,7 @@
 	    var that = this;
 	    switch(e.type) {
 	    case START_EV:
-		if (!hasTouch && e.button !== 0) {
-		    /* (||(isClickable(e))) */
+		if (((!(hasTouch))&&(e.button !== 0))||(isClickable(e))) {
 		    fdjt.Log("punting, e.button=%o, clickable=%o",
 			     e.button,isClickable(e));
 		    return;}
