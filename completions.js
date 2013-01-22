@@ -152,6 +152,8 @@ if (!(fdjt.UI)) fdjt.UI={};
                 while (j<jlim) {
                     var c=completions[j++];
                     if (hasClass(c,"hidden")) {}
+                    // Skip redundant completions
+                    else if (result.indexOf(c)>=0) {}
                     else if (hasClass(c,"completion")) {
                         if (isexact) {exactheads.push(c); exact.push(c);}
                         result.push(c); keys.push(string); direct.push(c);}
