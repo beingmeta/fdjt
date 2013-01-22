@@ -131,18 +131,15 @@ fdjt.Ajax=
             return parameters;}
         fdjtAjax.formParams=formParams;
 
-        function add_field(result,name,value,multifields,downcase) {
+        function add_field(result,name,value,downcase) {
             if (downcase) name=name.toLowerCase();
-            if ((multifields)&&(fdjtKB.contains(multifields,name))) {
-                if (result[name]) result[name].push(value);
-                else result[name]=[value];}
-            else {
+            if (result.hasOwnProperty(name)) {
                 var cur=result[name];
-                if (!cur) result[name]=value;
-                else if (cur instanceof Array) cur.push(value);
-                else result[name]=[cur,value];}}
+                if (cur.push) cur.push(value);
+                else result[name]=[cur,value];}
+            else result[name]=value;}
 
-        function formJSON(form,multifields,downcase) {
+        function formJSON(form,downcase) {
             fdjtUI.AutoPrompt.cleanup(form);
             var result={};
             var inputs=fdjtDOM.getChildren(form,"INPUT");
@@ -263,23 +260,24 @@ fdjt.Ajax=
 
         function form_submit(evt,callback){
             evt=evt||event||null;
-            var form=fdjtUI.T(evt);
+            var form=((evt.nodeType)?(evt):(fdjtUI.T(evt)));
             fdjtUI.AutoPrompt.cleanup(form);
             if (fdjtDOM.hasClass(form,"submitting")) {
                 fdjtDOM.dropClass(form,"submitting");
-                return;}
+                form.fdjtsubmit=false;
+                return false;}
             // if (form.fdjtlaunchfailed) return;
             form.fdjtsubmit=true;
             fdjtDOM.addClass(form,"submitting");
             if (ajaxSubmit(form,callback)) {
                 // fdjtLog("Ajax commit worked");
                 fdjtUI.cancel(evt);
-                return false;}
+                return true;}
             else if (jsonpSubmit(form)) {
                 // fdjtLog("Json commit worked");
                 fdjtUI.cancel(evt);
-                return false;}
-            else return;}
+                return true;}
+            else return false;}
 
         function copy_args(args,i){
             var lim=args.length; if (!(i)) i=0;
