@@ -2356,6 +2356,17 @@ fdjt.DOM=
         fdjtDOM.text_types=
             /\b(text|email|number|range|tel|url|datetime|datetime-local|date|time|week|month)\b/i;
 
+        /* Inserting text in an text field or textarea */
+        function insertText(target,text,off){
+            var pos=target.selectionStart;
+            var current=target.value;
+            if ((current)&&(typeof pos === "number")&&(pos>=0))
+                target.value=current.slice(0,pos)+text+current.slice(pos);
+            else target.value=text;
+            if (typeof off === "number")
+                target.selectionEnd=target.selectionStart=pos+off;}
+        fdjtDOM.insertText=insertText;
+
         /* Meta schemas */
 
         fdjt.addInit(getMetaSchemas,"MetaSchemas");
