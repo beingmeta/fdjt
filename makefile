@@ -14,7 +14,7 @@ BUILDHOST:=`hostname`
 
 all: fdjt.js
 
-buildstamp.js: $(FDJT_FILES)
+buildstamp.js: $(FDJT_FILES) fdjt.css codexlayout.css langs.css misc.css
 	$(ECHO) "// FDJT build information" > buildstamp.js
 	$(ECHO) "var fdjt_revision='"`git describe`"';" >> buildstamp.js
 	$(ECHO) "var fdjt_buildhost='${BUILDHOST}';" >> buildstamp.js

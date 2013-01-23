@@ -2,7 +2,7 @@
 
 /* ######################### fdjt/codex.js ###################### */
 
-/* Copyright (C) 2009-2012 beingmeta, inc.
+/* Copyright (C) 2009-2013 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    It implements a method for breaking narrative HTML content
    across multiple pages, attempting to honor page break constraints,

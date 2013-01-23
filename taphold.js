@@ -2,7 +2,7 @@
 
 /* ######################### fdjt/taphold.js ###################### */
 
-/* Copyright (C) 2009-2012 beingmeta, inc.
+/* Copyright (C) 2009-2013 beingmeta, inc.
 
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended Javascript utility functions

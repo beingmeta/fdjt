@@ -2,7 +2,7 @@
 
 /* ######################### fdjt/scrollever.js ###################### */
 
-/* Copyright (C) 2011-2012 beingmeta, inc.
+/* Copyright (C) 2011-2013 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file implements a simple version of infinite scrolling.
 
