@@ -36,7 +36,7 @@ fdjt.UI.TapHold=(function(){
     var fdjtUI=fdjt.UI;
     var fdjtET=fdjt.ET;
 
-    var trace_taphold=true;
+    var trace_taphold=false;
     var window_setup=false;
     
     var touched=false;
