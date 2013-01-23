@@ -22,7 +22,7 @@
 
 */
 
-if (window) {if (!(window.fdjt)) window.fdjt={};}
+        if (window) {if (!(window.fdjt)) window.fdjt={};}
 else if (typeof fdjt === "undefined") fdjt={};
 else {}
 
@@ -133,187 +133,11 @@ fdjt.Log=(function(){
                 catch (ex) { use_console_log=false;}}}
         else use_console_log=false;}
 
-    return fdjtLog;})();
 
-// This is for temporary trace statements; we use a different name
-//  so that they're easy to find.
-fdjt.Trace=fdjt.Log;
+    // This is for temporary trace statements; we use a different name
+    //  so that they're easy to find.
+    fdjt.Trace=fdjt.Log;
 
-/**
- * HumaneJS
- * Humanized Messages for Notifications
- * @author Marc Harter (@wavded)
- * @contributers
- *   Alexander (@bga_)
- *   Jose (@joseanpg)
- * @example
- *  humane('hello world');
- */
-;(function(win,doc){
-    var fdjtLog=fdjt.Log;
-
-    var eventOn, eventOff;
-    if (win.addEventListener) {
-        eventOn = function(obj,type,fn){obj.addEventListener(type,fn,false)};
-        eventOff = function(obj,type,fn){obj.removeEventListener(type,fn,false)};
-    } else {
-        eventOn = function(obj,type,fn){obj.attachEvent('on'+type,fn)};
-        eventOff = function(obj,type,fn){obj.detachEvent('on'+type,fn)};
-    }
-
-    var eventing = false;
-    var animationInProgress = false;
-    var humaneEl = null;
-    // Table mapping msg node IDs into the nodes themselves
-    var msgnodes={};
-    var timeout = null;
-    // ua sniff for filter support
-    var useFilter = /msie [678]/i.test(navigator.userAgent);
-    var isSetup = false;
-    var queue = [];
-
-    eventOn(win,'load',function(){
-        var transitionSupported = (function(style){
-            var prefixes = ['MozT','WebkitT','OT','msT','KhtmlT','t'];
-            for(var i = 0, prefix; prefix = prefixes[i]; i++){
-                if(prefix+'ransition' in style) return true;
-            }
-            return false;
-        }(doc.body.style));
-
-        if(!transitionSupported) animate = jsAnimateOpacity; // override animate
-        setup();
-        run();
-    });
-
-    function setup() {
-        var probe=doc.getElementById('HUMANE');
-        if (probe) humaneEl=probe;
-        else {
-            humaneEl = doc.createElement('div');
-            humaneEl.id = 'HUMANE';
-            humaneEl.className = 'humane';
-            doc.body.appendChild(humaneEl);}
-        if(useFilter) humaneEl.filters.item('DXImageTransform.Microsoft.Alpha').Opacity = 0; // reset value so hover states work
-        isSetup = true;
-    }
-
-    function remove() {
-        eventOff(doc.body,'mousemove',remove);
-        eventOff(doc.body,'click',remove);
-        eventOff(doc.body,'keypress',remove);
-        eventOff(doc.body,'touchstart',remove);
-        eventing = false;
-        if(animationInProgress) animate(0);
-    }
-
-    function run() {
-        if(animationInProgress && !fdjtLog.notify.forceNew) return;
-        if(!queue.length){
-            remove();
-            return;
-        }
-
-        animationInProgress = true;
-
-        if(timeout){
-            clearTimeout(timeout);
-            timeout = null;
-        }
-
-        timeout = setTimeout(function(){
-            // allow notification to stay alive for timeout
-            if(!eventing){
-                eventOn(doc.body,'mousemove',remove);
-                eventOn(doc.body,'click',remove);
-                eventOn(doc.body,'keypress',remove);
-                eventOn(doc.body,'touchstart',remove);
-                eventing = true;
-                if(!fdjtLog.notify.waitForMove) remove();
-            }
-        }, fdjtLog.notify.timeout);
-
-        var msg=queue.shift();
-        if (msg.nodeType) {
-            humaneEl.innerHTML = "";
-            humaneEl.appendChild(msg);}
-        else if (typeof msg !== 'string')
-            throw new Exception("Bad arg to Humane");
-        else if ((msg.length>1)&&(msg[0]==='#')) {
-            var nodeid=msg.slice(1);
-            node=msgnodes[nodeid];
-            if ((!(node))&&(node=document.getElementById(nodeid)))
-                msgnodes[nodeid]=node;
-            if (node) {
-                humaneEl.innerHTML = "";
-                humaneEl.appendChild(node);}
-            else humaneEl.innerHTML = msg;}
-        else humaneEl.innerHTML = msg;
-        animate(1);
-    }
-
-    function animate(level){
-        if(level === 1){
-            humaneEl.className = "humane humane-show";
-        } else {
-            humaneEl.className = "humane";
-            end();
-        }
-    }
-
-    function end(){
-        animationInProgress = false;
-        setTimeout(run,500);
-    }
-
-    // if CSS Transitions not supported, fallback to JS Animation
-    var setOpacity = (function(){
-        if(useFilter){
-            return function(opacity){
-                humaneEl.filters.item('DXImageTransform.Microsoft.Alpha').Opacity = opacity*100;
-            }
-        } else {
-            return function(opacity){
-                humaneEl.style.opacity = String(opacity);
-            }
-        }
-    }());
-    function jsAnimateOpacity(level,callback){
-        var interval;
-        var opacity;
-
-        if (level === 1) {
-            opacity = 0;
-            if(fdjtLog.notify.forceNew){
-                opacity = useFilter ? humaneEl.filters.item('DXImageTransform.Microsoft.Alpha').Opacity/100|0 : humaneEl.style.opacity|0;
-            }
-            humaneEl.style.visibility = "visible";
-            interval = setInterval(function(){
-                if(opacity < 1) {
-                    opacity +=0.1;
-                    if (opacity>1) opacity = 1;
-                    setOpacity(opacity);
-                }
-                else {
-                    clearInterval(interval);
-                }
-            }, 500 / 20);
-        } else {
-            opacity = 1;
-            interval = setInterval(function(){
-                if(opacity > 0) {
-                    opacity -=0.1;
-                    if (opacity<0) opacity = 0;
-                    setOpacity(opacity);
-                }
-                else {
-                    clearInterval(interval);
-                    humaneEl.style.visibility = "hidden";
-                    end();
-                }
-            }, 500 / 20);
-        }
-    }
 
     function notify(message){
         fdjtLog.apply(null,arguments);
@@ -342,13 +166,10 @@ fdjt.Trace=fdjt.Log;
     fdjtLog.notify.timeout = 2000;
     fdjtLog.notify.waitForMove = true;
     fdjtLog.notify.forceNew = false;
+    fdjt.Notify=fdjtLog.notify;
 
-    fdjtLog.Humane=msg;
-    fdjtLog.HumaneHide=remove;
+    return fdjtLog;})(window,document);
 
-}(window,document));
-
-fdjt.Notify=fdjt.Log.notify;
 
 /* Emacs local variables
    ;;;  Local variables: ***
