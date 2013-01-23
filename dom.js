@@ -282,6 +282,10 @@ fdjt.DOM=
         /* Simple class/attrib manipulation functions */
 
         function hasClass(elt,classname,attrib){
+            if (!(elt)) return;
+            else if (typeof elt === 'string') {
+                if (!(elt=document.getElementById(elt)))
+                    return;}
             var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :
                            (elt.className));
             if (!(classinfo)) return false;
