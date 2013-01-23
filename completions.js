@@ -242,7 +242,9 @@ if (!(fdjt.UI)) fdjt.UI={};
         c.visible=false;
         // Move the selection if neccessary
         if ((this.selection)&&(!(hasClass(this.selection,"displayed"))))
-            if (!(this.selectNext())) this.selectPrevious();}
+            if (!(this.selectNext()))
+                if (!(this.selectPrevious()))
+                    this.clearSelection();}
     
     Completions.prototype.getCompletions=function(string) {
         if ((string===this.curstring)||(string===this.maxstring)||
@@ -503,6 +505,14 @@ if (!(fdjt.UI)) fdjt.UI={};
         if (selection) addClass(selection,"selected");
         this.selection=selection;
         return selection;};
+
+    Completions.prototype.clearSelection=function(selection){
+        if ((selection)&&(this.selection)&&(selection!==this.selection))
+            return false;
+        if (!(this.selection)) return;
+        dropClass(this.selection,"selected");
+        this.selection=false;
+        return true;}
 
     /* Options, handlers, etc */
 
