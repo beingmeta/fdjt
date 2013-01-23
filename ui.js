@@ -1258,7 +1258,7 @@ fdjt.UI.ProgressBar=(function(){
 
     function alertBox(){
         var close_button=fdjtDOM.Image(
-            "https://beingmeta.s3.amazonaws.com/static/g/codex/redx40x40.png",
+            "https://s3.amazonaws.com/static.beingmeta.com/g/codex/redx40x40.png",
             "closebutton","Close");
         var countdown=fdjtDOM("div.countdown","Closing…");
         close_button.onclick=close_alert_handler;
