@@ -1003,7 +1003,11 @@ if (!(fdjt.KB)) {
                 if (map.hasOwnProperty(key)) {
                     var obj=map[key];
                     var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-                    if (qid) setLocal(qid,jsonString(obj));};}
+                    if (qid) {
+                        var objpool=obj.pool;
+                        obj.pool="@@"+(objpool.absref||objpool.name);
+                        setLocal(qid,jsonString(obj));
+                        obj.pool=objpool;};}}
             return this;}
         function offline_get(obj,prop){
             var qid=obj._qid||obj.uuid||obj.oid||obj._id;
