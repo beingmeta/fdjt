@@ -430,6 +430,8 @@ fdjt.CodexLayout=
 
 	    var layout=this;
 
+	    this.init=init;
+
 	    // Layout rules
 	    var forcebreakbefore=this.forcebreakbefore=
 		optimizeLayoutRule(init.forcebreakbefore||false);
