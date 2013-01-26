@@ -26,6 +26,7 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
 (function(){
+    "use strict";
     var fdjtString=fdjt.String;
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
@@ -239,10 +240,10 @@ if (!(fdjt.UI)) fdjt.UI={};
         // Clear the visible ordered elements cache
         c.visible=false;
         // Move the selection if neccessary
-        if ((this.selection)&&(!(hasClass(this.selection,"displayed"))))
-            if (!(this.selectNext()))
-                if (!(this.selectPrevious()))
-                    this.clearSelection();}
+        if ((c.selection)&&(!(hasClass(c.selection,"displayed"))))
+            if (!(c.selectNext()))
+                if (!(c.selectPrevious()))
+                    c.clearSelection();}
     
     Completions.prototype.getCompletions=function(string) {
         if ((string===this.curstring)||(string===this.maxstring)||
