@@ -259,7 +259,8 @@ fdjt.UI.TapHold=(function(){
         touch_x=evt.clientX||getClientX(evt);
         touch_y=evt.clientY||getClientY(evt);
         // If touched is false, the tap/hold was aborted somehow
-        if (!(touched)) return;
+        // fdjtLog("taphold_move touched=%o touch_x=%o touch_y=%o",touched,touch_x,touch_y);
+        if (!((touched)||(pressed))) return;
         if (evt.touches)
             target=document.elementFromPoint(touch_x,touch_y);
         else target=fdjtUI.T(evt);
@@ -408,7 +409,7 @@ fdjt.UI.TapHold=(function(){
             (evt.touches.length>1))
             return;
         if (fdjtUI.isClickable(evt)) return;
-        if ((!(holdkey_down))&&(!(mouse_down))&&(touched)) {
+        if ((!(holdkey_down))&&(!(mouse_down))&&((touched)||(pressed))) {
             fdjtUI.cancel(evt);
             endpress(evt,taptapthresh);}
         else {}}
@@ -479,6 +480,12 @@ fdjt.UI.TapHold=(function(){
 
     TapHold.ispressed=function(){
         return (pressed);};
+
+    TqpHold.clear=function(){
+        touched=pressed=th_target=tap_target=false;
+        touch_x=start_x=touch_y=start_y=false;
+        if (th_timer) {clearTimeout(th_timer); th_timer=false;}
+        th_targets=[];};
 
     return TapHold;})();
 
