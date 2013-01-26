@@ -25,6 +25,7 @@
 var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 (function(){
+    "use strict";
     var fdjtLog=fdjt.Log;
     var inits_run=false;
     var inits=[];

@@ -28,6 +28,8 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.Time=
     (function (){
+        "use strict";
+
         function _(x){ return x; }
 
         function fdjtTime() {

@@ -1,5 +1,6 @@
 /*! syze v1.1.1 MIT/GPL2 @rezitech */
 (function (win, docEl) {
+     "use strict";
      // syze variables
      var
      _sizes = [],

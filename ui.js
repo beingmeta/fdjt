@@ -42,6 +42,7 @@ if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
    all elements with the same name. */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -80,6 +81,7 @@ if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
 /* Text highlighting */
 
 fdjt.UI.Highlight=(function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
 
     var highlight_class="fdjthighlight";
@@ -172,6 +174,7 @@ fdjt.UI.Highlight=(function(){
    Text regions which include a checkbox where clicking toggles the checkbox. */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
@@ -338,6 +341,7 @@ fdjt.UI.Highlight=(function(){
 /* Progress boxes */
 
 fdjt.UI.ProgressBar=(function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     function ProgressBar(arg){
         if (typeof arg==='undefined')
@@ -383,6 +387,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Automatic help display on focus */
 
 (function(){
+    "use strict";
 
     var fdjtString=fdjt.String;
     var fdjtDOM=fdjt.DOM;
@@ -479,6 +484,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Focus blocks */
 
 (function(){
+    "use strict";
 
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
@@ -516,6 +522,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Text input boxes which create checkspans on enter. */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -540,6 +547,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Tabs */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtLog=fdjt.Log;
     var fdjtState=fdjt.State;
@@ -658,6 +666,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Collapse/Expand */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -688,6 +697,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Temporary Scrolling */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -791,6 +801,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Smart (DOM-aware) scrolling */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
 
     var getGeometry=fdjtDOM.getGeometry;
@@ -833,6 +844,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Delays */
 
 (function(){
+    "use strict";
 
     fdjt.UI.Delay=function(interval,name,fcn){
         window.setTimeout(fcn,interval);};
@@ -843,6 +855,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Triggering submit events */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -871,6 +884,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Looking for vertical box overflow */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -889,6 +903,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Reticle based functions */
 
 (function() {
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -944,6 +959,7 @@ fdjt.UI.ProgressBar=(function(){
 /* File uploader affirmation handling */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -956,6 +972,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Image swapping */
 
 (function(){
+    "use strict";
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
 
@@ -990,6 +1007,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Miscellaneous event-related functions */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
@@ -1081,6 +1099,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Ellipsis */
 
 (function(){
+    "use strict";
     var fdjtString=fdjt.String;
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;

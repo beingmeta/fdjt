@@ -26,7 +26,7 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.State=
     (function(){
-
+        "use strict";
         var fdjtLog=fdjt.Log;
 
         function fdjtState(name,val,persist){

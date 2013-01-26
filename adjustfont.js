@@ -36,6 +36,7 @@ if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.UI.adjustFont=
     (function(){
+        "use strict";
         function setupContainer(elt,opts){
             var parent=elt.parentNode, container;
             if (parent.className==="adjustfont_wrapper")

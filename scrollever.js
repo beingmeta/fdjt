@@ -25,6 +25,7 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM, fdjtID=fdjt.ID;
     var fdjtState=fdjt.State, fdjtString=fdjt.String;
     var fdjtLog=fdjt.Log;

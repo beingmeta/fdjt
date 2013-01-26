@@ -24,7 +24,7 @@ var fdjt=((window.fdjt)||{});
 
 fdjt.Ajax=
     (function(){
-        
+        "use strict";
         var fdjtDOM=fdjt.DOM, fdjtUI=fdjt.UI, fdjtLog=fdjt.Log;
         var $ID=fdjt.ID;
 

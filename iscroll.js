@@ -5,6 +5,7 @@
 var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 (function(window, doc){
+     "use strict";
      function isClickable(evt){
          evt=evt||event;
          var target=evt.target||evt.srcElement;

@@ -26,6 +26,7 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 if (!(fdjt.i18n))
     fdjt.i18n=(function(){
+        "use strict";
 	var apps={};
 	var maps=[];
 	

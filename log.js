@@ -25,6 +25,7 @@
 var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.Log=(function(){
+    "use strict";
     var fdjtString=fdjt.String;
 
     var backlog=[];
