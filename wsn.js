@@ -2,7 +2,7 @@
 
 /* ######################### fdjt/wsn.js ###################### */
 
-/* Copyright (C) 2011 beingmeta, inc.
+/* Copyright (C) 2011-2013 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    It implements a method for breaking narrative HTML content
    across multiple pages, attempting to honor page break constraints,
@@ -42,10 +42,16 @@
 var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 var WSN=(function(){
-
+    "use strict";
     var fdjtHash=fdjt.Hash;
 
-    var unicode_regex=/(\p{Mark})/g;
+    function get_punct_regex(){
+        try { return (/(\pM)/g);}
+        catch (ex1) {
+            try { return (/(\pP)/g); }
+            catch (ex2) {return (/[.,?!-_@&%$#\\\/\^()]/);}}}
+    
+    var punct_regex=get_punct_regex();
     
     function WSN(arg,sortfn,wordfn,keepdup){
         if (arg==="") return arg;
@@ -60,12 +66,14 @@ var WSN=(function(){
         if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
         if (typeof keepdup === 'undefined') keepdup=WSN.keepdup||false;
         if (typeof arg === 'string') {
-            var norm=
-                ((unicode_regex)?
-                 (arg.toLowerCase().replace(unicode_regex,"")):
-                 (arg.toLowerCase()));
-            if (norm.search(/\S/)>0)
-                norm=norm.slice(norm.search(/\S/));
+            var norm=(arg.toLowerCase().replace(punct_regex,""));
+            // Trim spaces
+            if (norm.trim) norm=norm.trim();
+            else {
+                if (norm.search(/\S/)>0)
+                    norm=norm.slice(norm.search(/\S/));
+                if (norm.search(/\s+$/)>0)
+                    norm=norm.slice(0,norm.search(/\s+$/));}
             var words=norm.split(/\W*\s+\W*/g), word;
             var xwords=[], xword;
             var nwords=words.length;
@@ -134,7 +142,7 @@ var WSN=(function(){
         var i=1; var lim=arr.length;
         while (i<lim) 
             if (arr[i]===last) i++;
-            else result.push(last=arr[i++]);
+        else result.push(last=arr[i++]);
         return result;}
     
     function lensort(x,y){
@@ -199,21 +207,21 @@ var WSN=(function(){
         else return false;}
     WSN.sha1ID=sha1ID;
 
-    function Hash(arg,hashfn,sortfn,wordfn,keepdups){
+    function hash(arg,hashfn,sortfn,wordfn,keepdups){
         if (typeof hashfn === 'undefined') hashfn=WSN.hashfn||false;
         if (typeof sortfn === 'undefined') sortfn=WSN.sortfn||false;
         if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
         if (typeof keepdups === 'undefined') keepdups=WSN.keepdup||false;
         var wsn=WSN(arg,sortfn,wordfn,keepdups);
         return ((hashfn)?(hashfn(wsn)):(wsn));}
-    WSN.Hash=Hash;
+    WSN.hash=hash;
     WSN.prototype.Hash=function(arg){
-        return Hash(arg,this.hashfn||WSN.hashfn||false,
+        return hash(arg,this.hashfn||WSN.hashfn||false,
                     this.sortfn||WSN.sortfn||false,
                     this.wordfn||WSN.wordfn||false,
                     this.keepdup||WSN.keepdup||false);};
 
-    function Map(nodes,hashfn,sortfn,wordfn,keepdups){
+    function maphash(nodes,hashfn,sortfn,wordfn,keepdups){
         if (typeof hashfn === 'undefined') hashfn=WSN.hashfn||false;
         if (typeof sortfn === 'undefined') sortfn=WSN.sortfn||false;
         if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
@@ -226,31 +234,25 @@ var WSN=(function(){
             var id=((hashfn)?(hashfn(wsn)):(wsn));
             map[id]=node;}
         return map;}
-    WSN.Map=Map;
-    WSN.prototype.Map=function(arg){
-        return Map(arg,this.hashfn||WSN.hashfn||false,
-                   this.sortfn||WSN.sortfn||false,
-                   this.wordfn||WSN.wordfn||false,
-                   this.keepdup||WSN.keepdup||false);};
+    WSN.maphash=maphash;
+    WSN.prototype.maphash=function(arg){
+        return maphash(arg,this.hashfn||WSN.hashfn||false,
+                       this.sortfn||WSN.sortfn||false,
+                       this.wordfn||WSN.wordfn||false,
+                       this.keepdup||WSN.keepdup||false);};
     
-    function MapMD5(nodes,sortfn,wordfn,keepdups){
+    function mapMD5(nodes,sortfn,wordfn,keepdups){
         var hashfn=WSN.md5||((fdjtHash)&&(fdjtHash.hex_md5));
-        return Map(nodes,hashfn,sortfn,wordfn,keepdups);}
-    function MapSHA1(nodes,sortfn,wordfn,keepdups){
+        return maphash(nodes,hashfn,sortfn,wordfn,keepdups);}
+    function mapSHA1(nodes,sortfn,wordfn,keepdups){
         var hashfn=WSN.sha1||((fdjtHash)&&(fdjtHash.hex_sha1));
-        return Map(nodes,hashfn,sortfn,wordfn,keepdups);}
-    WSN.MapMD5=MapMD5;
-    WSN.MapSHA1=MapSHA1;
+        return maphash(nodes,hashfn,sortfn,wordfn,keepdups);}
+    WSN.mapMD5=mapMD5;
+    WSN.mapSHA1=mapSHA1;
 
     WSN.md5=((fdjtHash)&&(fdjtHash.hex_md5));
     WSN.sha1=((fdjtHash)&&(fdjtHash.hex_sha1));
 
-    try {
-        if (("A\u0300".search(unicode_regex))<0)
-            unicode_regex=false;}
-    catch (ex) {
-        unicode_regex=false;}
-    
     return WSN;})();
 
 fdjt.WSN=WSN;
