@@ -482,6 +482,7 @@ fdjt.UI.TapHold=(function(){
         return (pressed);};
 
     TapHold.clear=function(){
+        if (pressed) slipped(pressed);
         touched=pressed=th_target=tap_target=false;
         touch_x=start_x=touch_y=start_y=false;
         if (th_timer) {clearTimeout(th_timer); th_timer=false;}
