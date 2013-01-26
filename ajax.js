@@ -55,9 +55,7 @@ fdjt.Ajax=
         var trace_ajax=false;
         
         function fdjtAjax(success_callback,base_uri,args,other_callback){
-            var req=((window.XDomainRequest)?
-                     (new (window.XDomainRequest)()):
-                     (new XMLHttpRequest()));
+            var req=new XMLHttpRequest();
             var uri=((args)?(compose_uri(base_uri,args)):(base_uri));
             req.withCredentials=true;
             req.onreadystatechange=function () {
@@ -181,23 +179,9 @@ fdjt.Ajax=
                         ajax_uri,form,callback);
             // Firefox doesn't run the callback on synchronous calls
             var success=false; var callback_run=false;
-            var req=(((window.XDomainRequest)&&(!(syncp)))?
-                     (new (window.XDomainRequest)()):
-                     (new XMLHttpRequest()));
+            var req=new XMLHttpRequest();
             var params=formParams(form);
             fdjtDOM.addClass(form,"submitting");
-            if (syncp) {
-                if (form.method==="GET")
-                    req.open('GET',ajax_uri+"?"+params,false);
-                else if (form.method==="PUT")
-                    req.open('PUT',ajax_uri,false);
-                else req.open('POST',ajax_uri,false);}
-            else {
-                if (form.method==="GET")
-                    req.open('GET',ajax_uri+"?"+params);
-                else if (form.method==="PUT")
-                    req.open('PUT',ajax_uri);
-                else req.open('POST',ajax_uri);}
             if (cbctype) req.setRequestHeader("Accept",cbctype);
             req.withCredentials=true;
             req.onreadystatechange=function () {
@@ -218,6 +202,18 @@ fdjt.Ajax=
                         fdjtLog("Got callback (%d,%d) %o for %o, not calling %o",
                                 req.readyState,req.status,req,ajax_uri,callback);
                     callback_run=false;}};
+            if (syncp) {
+                if (form.method==="GET")
+                    req.open('GET',ajax_uri+"?"+params,false);
+                else if (form.method==="PUT")
+                    req.open('PUT',ajax_uri,false);
+                else req.open('POST',ajax_uri,false);}
+            else {
+                if (form.method==="GET")
+                    req.open('GET',ajax_uri+"?"+params);
+                else if (form.method==="PUT")
+                    req.open('PUT',ajax_uri);
+                else req.open('POST',ajax_uri);}
             try {
                 if (form.method==="GET") req.send();
                 else {
