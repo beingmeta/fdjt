@@ -22,22 +22,17 @@
 
 */
 
-        if (window) {if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.Log=(function(){
-    var fdjtTime=fdjt.Time;
     var fdjtString=fdjt.String;
 
     var backlog=[];
 
-    var logreq=false;
-    var logreqs=[];
     var use_console_log;
 
     function fdjtLog(string){
-        var output=false; var now=fdjt.ET();
+        var output=false; var now=fdjt.ET(); var i, lim;
         if (((fdjtLog.doformat)||(string.search("%j")))&&
             (typeof fdjtString !== 'undefined'))
             output=fdjtString.apply(null,arguments);
@@ -46,7 +41,8 @@ fdjt.Log=(function(){
             else fdjtLog.console_fn.apply(fdjtLog.console,arguments);}
         if (fdjtLog.logurl) {
             var msg="["+now+"s] "+fdjtString.apply(null,arguments);
-            console.log("remote logging %s",msg);
+            if (window.console)
+                window.console.log("remote logging %s",msg);
             remote_log(msg);}
         if (fdjtLog.console) {
             var domconsole=fdjtLog.console;
@@ -59,7 +55,7 @@ fdjt.Log=(function(){
                 var found=document.getElementById(domconsole);
                 if (found) {
                     domconsole=fdjtLog.console=found;
-                    var i=0; var lim=backlog.length;
+                    i=0, lim=backlog.length;
                     while (i<lim) fdjt.DOM(domconsole,backlog[i++]);
                     backlog=[];}
                 else domconsole=false;}
@@ -84,12 +80,10 @@ fdjt.Log=(function(){
                     var newargs=new Array(arguments.length+1);
                     newargs[0]="[%fs] "+string;
                     newargs[1]=now;
-                    var i=1; var lim=arguments.length;
+                    i=1, lim=arguments.length;
                     while (i<lim) {newargs[i+1]=arguments[i]; i++;}
                     window.console.log.apply(window.console,newargs);}}}}
     fdjtLog.console=null;
-    fdjtLog.id="$Id$";
-    fdjtLog.version=parseInt("$Revision$".slice(10,-1));
 
     function remote_log(msg){
         var req=new XMLHttpRequest();
@@ -98,17 +92,17 @@ fdjt.Log=(function(){
         req.send(msg);
         return req;}
 
-    fdjtLog.warn=function(string){
+    fdjtLog.warn=function(){
         if ((!(fdjtLog.console_fn))&&
             (!(window.console)&&(window.console.log)&&(window.console.log.count))) {
             var output=fdjtString.apply(null,arguments);
-            alert(output);}
+            window.alert(output);}
         else fdjtLog.apply(null,arguments);};
 
-    fdjtLog.uhoh=function(string){
-        if (fdjtLog.debugging) fdjtLog.warn.call(this,arguments);}
+    fdjtLog.uhoh=function(){
+        if (fdjtLog.debugging) fdjtLog.warn.call(this,arguments);};
 
-    fdjtLog.bkpt=function(string){
+    fdjtLog.bkpt=function(){
         var output=false;
         if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
             output=fdjtString.apply(null,arguments);
@@ -137,37 +131,7 @@ fdjt.Log=(function(){
     // This is for temporary trace statements; we use a different name
     //  so that they're easy to find.
     fdjt.Trace=fdjt.Log;
-
-
-    function notify(message){
-        fdjtLog.apply(null,arguments);
-        if (arguments.length>1)
-            message=fdjtString.apply(null,arguments);
-        queue.push(message);
-        if(isSetup) run();}
-
-    function msg(message){
-        if (!(message)) {
-            if(!eventing){
-                eventOn(doc.body,'mousemove',remove);
-                eventOn(doc.body,'click',remove);
-                eventOn(doc.body,'keypress',remove);
-                eventOn(doc.body,'touchstart',remove);
-                eventing = true;}
-            animationInProgress=true;
-            animate(1);
-            return;}
-        if (arguments.length>1)
-            message=fdjtString.apply(null,arguments);
-        queue.push(message);
-        if(isSetup) run();}
-
-    fdjtLog.notify = notify;
-    fdjtLog.notify.timeout = 2000;
-    fdjtLog.notify.waitForMove = true;
-    fdjtLog.notify.forceNew = false;
-    fdjt.Notify=fdjtLog.notify;
-
+    
     return fdjtLog;})(window,document);
 
 

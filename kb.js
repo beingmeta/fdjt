@@ -30,13 +30,10 @@
   fdjtKB.Ref (objects created within a pool)
 */
 
-if (window) {if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 if (!(fdjt.KB)) {
     fdjt.KB=(function(){
-        var fdjtString=fdjt.String;
         var fdjtState=fdjt.State;
         var fdjtTime=fdjt.Time;
         var fdjtLog=fdjt.Log;
@@ -71,7 +68,7 @@ if (!(fdjt.KB)) {
         // Patterns for absolute references
         var uuidpat=
             /(U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/;
-        var oidpat=/(@|:@)([0-9A-Fa-f]+|\/[A-Za-z][A-Za-z0-9-_\.]+[A-Za-z])\/([0-9A-Fa-f]+)/;
+        var oidpat=/(@|:@)([0-9A-Fa-f]+|\/[A-Za-z][A-Za-z0-9\-_\.]+[A-Za-z])\/([0-9A-Fa-f]+)/;
         fdjtKB.oidpat=oidpat;
         fdjtKB.uuidpat=uuidpat;
 
@@ -79,7 +76,6 @@ if (!(fdjt.KB)) {
         // I.E., something which shouldn't be used as a key
         //  or fast set member and not an array either
         var arrayobjs=(typeof new Array(1,2,3) === 'object');
-        var stringobjs=(typeof new String() === 'object');
         function isobject(x){
             return ((typeof x === 'object')&&
                     (!((arrayobjs)&&(x instanceof Array))));}
@@ -97,9 +93,6 @@ if (!(fdjt.KB)) {
         function register(x){
             return (x._id)||(x._fdjtid)||(x._fdjtid=(++counter));}
         fdjtKB.register=register;
-        
-        // This lets us figure out what inits were run in this session.
-        var init_start=fdjtTime();
         
         // Pools are uniquely named id->object mappings
         // This table maps those unique names to the objects themselves
@@ -185,7 +178,7 @@ if (!(fdjt.KB)) {
             if (val._id) delete this.map[val._id];
             if (val._qid) delete this.map[val._qid];
             if (val.uuid) delete this.map[val.uuid];
-            if (val.oid) delete this.map[val.oid];}
+            if (val.oid) delete this.map[val.oid];};
         
         Pool.prototype.Import=function(data) {
             if (data instanceof Array) {
@@ -193,10 +186,10 @@ if (!(fdjt.KB)) {
                 while (i<lim) this.Import(data[i++]);
                 return;}
             else if (typeof data === 'string') {
-                var ref=this.ref(data);
-                if ((!(ref._init))&&(ref.pool.storage))
-                    ref.pool.storage.load(ref);
-                return ref;}
+                var sref=this.ref(data);
+                if ((!(sref._init))&&(sref.pool.storage))
+                    sref.pool.storage.load(sref);
+                return sref;}
             else {
                 var qid=data._qid||data._id||data.oid||data.uuid;
                 if (!(qid)) return data;
@@ -206,7 +199,7 @@ if (!(fdjt.KB)) {
                     (cur._modified>data._modified)) {
                     if (debug)
                         log("[%fs] Skipping out-of-date import to %s %o <== %o",
-                            fdjtET(),qid,cur,data);
+                            fdjt.ET(),qid,cur,data);
                     if ((ref)&&(ref._init)) return ref;
                     else if (ref) return ref.init(cur);
                     else return this.ref(qid).init(cur);}
@@ -217,7 +210,7 @@ if (!(fdjt.KB)) {
                     ref.init(data);}
                 if (((debug)&&(this.traceimport))||(debug>1))
                     log("[%fs] Import to %s %o <== %o",
-                        fdjtET(),qid,obj,data);
+                        fdjt.ET(),qid,ref,data);
                 if (this.storage) this.storage.Import(data);
                 return ref;}};
         
@@ -253,7 +246,7 @@ if (!(fdjt.KB)) {
         //   #Ud16e2980-8e18-11e1-a50a-001a922d60ef
         //   :#Ud16e2980-8e18-11e1-a50a-001a922d60ef
         function parseRef(arg,pool,probe){
-            var term=arg; var slash=false, atpos=false;
+            var term=arg; var slash=false, atpos=false, uuid_type=false;
             if ((pool)&&(typeof pool === 'string'))
                 pool=fdjtKB.PoolRef(pool);
             if ((pool)&&(pool.parseRef))
@@ -274,16 +267,16 @@ if (!(fdjt.KB)) {
                 pool=fdjtKB.PoolRef(arg.slice(atpos+1));
                 term=arg.slice(0,atpos);}
             else if (arg.search(uuid_pattern)===0) {
-                var uuid_type=arg.slice(34);
+                uuid_type=arg.slice(34);
                 pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type)||pool;}
             else if ((arg[0]==='#')&&(arg[1]==='U')&&
                      (arg.search(uuid_pattern)===2)) {
-                var uuid_type=arg.slice(36);
+                uuid_type=arg.slice(36);
                 pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type)||pool;
                 term=arg.slice(3);}
             else if ((arg[0]===':')&&(arg[1]==='#')&&(arg[2]==='U')&&
                      (arg.search(uuid_pattern)===3)) {
-                var uuid_type=arg.slice(37);
+                uuid_type=arg.slice(37);
                 pool=fdjtKB.PoolRef("-UUIDTYPE="+uuid_type)||pool;
                 term=arg.slice(3);}
             else if (refmaps.length) {
@@ -374,11 +367,6 @@ if (!(fdjt.KB)) {
             else return 1;
         }
 
-        function length_sortfn(a,b) {
-            if (a.length===b.length) return 0;
-            else if (a.length<b.length) return -1;
-            else return 1;}
-
         function intersection(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
             if (typeof set2 === 'string') set2=[set2];
@@ -386,7 +374,7 @@ if (!(fdjt.KB)) {
             if ((!(set2))||(set2.length===0)) return [];
             if (set1._sortlen!==set1.length) set1=Set(set1);
             if (set2._sortlen!==set2.length) set2=Set(set2);
-            var results=new Array();
+            var results=[];
             var i=0; var j=0; var len1=set1.length; var len2=set2.length;
             var allstrings=set1._allstrings&&set2._allstrings;
             var new_allstrings=true;
@@ -412,7 +400,7 @@ if (!(fdjt.KB)) {
             if ((!(set2))||(set2.length===0)) return set1;
             if (set1._sortlen!==set1.length) set1=Set(set1);
             if (set2._sortlen!==set2.length) set2=Set(set2);
-            var results=new Array();
+            var results=[];
             var i=0; var j=0; var len1=set1.length; var len2=set2.length;
             var allstrings=set1._allstrings&&set2._allstrings;
             var new_allstrings=true;
@@ -439,7 +427,7 @@ if (!(fdjt.KB)) {
             if ((!(set2))||(set2.length===0)) return set1;
             if (set1._sortlen!==set1.length) set1=Set(set1);
             if (set2._sortlen!==set2.length) set2=Set(set2);
-            var results=new Array();
+            var results=[];
             var i=0; var j=0; var len1=set1.length; var len2=set2.length;
             var allstrings=set1._allstrings&&set2._allstrings;
             while ((i<len1) && (j<len2))
@@ -494,7 +482,6 @@ if (!(fdjt.KB)) {
             if (set2._sortlen!==set2.length) set2=Set(set2);
             var i=0; var j=0; var len1=set1.length; var len2=set2.length;
             var allstrings=set1._allstrings&&set2._allstrings;
-            var new_allstrings=true;
             while ((i<len1) && (j<len2))
                 if (set1[i]===set2[j]) return true;
             else if ((allstrings)?
@@ -508,6 +495,7 @@ if (!(fdjt.KB)) {
         /* sets are really arrays that are sorted to simplify set operations.
            the ._sortlen property tells how much of the array is sorted */
         function Set(arg){
+            var result;
             if (arguments.length===0) return [];
             else if (arguments.length===1) {
                 if (!(arg)) return [];
@@ -517,12 +505,12 @@ if (!(fdjt.KB)) {
                     else if (arg._sortlen) return setify(arg);
                     else return setify([].concat(arg));}
                 else {
-                    var result=[arg]; 
+                    result=[arg]; 
                     if (typeof arg === 'string') result._allstrings=true;
                     result._sortlen=1;
                     return result;}}
             else {
-                var result=[];
+                result=[];
                 for (arg in arguments)
                     if (!(arg)) {}
                 else if (arg instanceof Array) result.concat(arg);
@@ -541,7 +529,7 @@ if (!(fdjt.KB)) {
                 return array;}
             else {
                 var allstrings=true;
-                for (elt in array)
+                for (var elt in array)
                     if (typeof elt !== 'string') {allstrings=false; break;}
                 array._allstrings=allstrings;
                 if (allstrings) array.sort();
@@ -558,7 +546,7 @@ if (!(fdjt.KB)) {
         function set_add(set,val) {
             if (val instanceof Array) {
                 var changed=false;
-                for (elt in val) 
+                for (var elt in val) 
                     if (set_add(set,elt)) changed=true;
                 return changed;}
             else if (set.indexOf) {
@@ -577,7 +565,7 @@ if (!(fdjt.KB)) {
         function set_drop(set,val) {
             if (val instanceof Array) {
                 var changed=false;
-                for (elt in val)
+                for (var elt in val)
                     if (set_drop(set,elt)) changed=true;
                 return changed;}
             else if (set.indexOf) {
@@ -589,7 +577,7 @@ if (!(fdjt.KB)) {
                 var i=0; var lim=set.length;
                 while (i<lim)
                     if (set[i]===val) {
-                        array.splice(i,1);
+                        set.splice(i,1);
                         return true;}
                 else i++;
                 return false;}}
@@ -609,10 +597,11 @@ if (!(fdjt.KB)) {
             [key._id||key.oid||key.uuid||key._fdjtid||register(key)]=val;
             else this.scalar_map[key]=val;};
         Map.prototype.add=function(key,val) {
+            var cur;
             if (isobject(key)) {
                 var objkey=key._id||key.oid||key.uuid||key._fdjtid||
                     register(key);
-                var cur=this.object_map[objkey];
+                cur=this.object_map[objkey];
                 if (!(cur)) {
                     this.object_map[objkey]=[val];
                     return true;}
@@ -625,7 +614,7 @@ if (!(fdjt.KB)) {
                 else {
                     cur.push(val); return true;}}
             else  {
-                var cur=this.scalar_map[key];
+                cur=this.scalar_map[key];
                 if (!(cur)) {
                     this.scalar_map[key]=[val];
                     return true;}
@@ -638,6 +627,7 @@ if (!(fdjt.KB)) {
                 else {
                     cur.push(val); return true;}}};
         Map.prototype.drop=function(key,val) {
+            var cur;
             if (!(val)) {
                 if (isobject(key))
                     delete this.object_map
@@ -646,7 +636,7 @@ if (!(fdjt.KB)) {
             else if (isobject(key)) {
                 var objkey=key._id||key.oid||key.uuid||key._fdjtid||
                     register(key);
-                var cur=this.object_map[key];
+                cur=this.object_map[key];
                 if (!(cur)) return false;
                 else if (!(cur instanceof Array)) {
                     if (cur===val) {
@@ -659,7 +649,7 @@ if (!(fdjt.KB)) {
                     return true;}
                 else return false;}
             else {
-                var cur=this.scalar_map[key]; var pos=-1;
+                cur=this.scalar_map[key]; var pos=-1;
                 if (!(cur)) return false;
                 else if (!(cur instanceof Array)) {
                     if (cur===val) {
@@ -806,7 +796,6 @@ if (!(fdjt.KB)) {
             if (typeof val === 'undefined') val=this[prop];
             if (this.pool.xforms[prop])
                 val=this.pool.xforms[prop](val)||val;
-            var vals=false;
             if (prop==='_id') {}
             else if (this.hasOwnProperty(prop)) {
                 var cur=this[prop];
@@ -849,7 +838,7 @@ if (!(fdjt.KB)) {
             if (this._init) return this.update(data);
             // This is called initialize a reference the first time we
             //  get data for it
-            var pool=this.pool; var map=pool.map;
+            var pool=this.pool; var map=pool.map; var value, i, lim;
             this._init=fdjtTime();
             if (((debug)&&(pool.traceref))||(debug>1))
                 log("Initial reference to %o <== %o @%d",
@@ -859,7 +848,7 @@ if (!(fdjt.KB)) {
                 //  so we don't need a 'hasOwnProperty' check
                 if ((key==='qid')||(key==='pool')) {}
                 else if ((key==='_id')||(key==='oid')||(key==='oid')) {
-                    var value=data[key];
+                    value=data[key];
                     if (!(map[value])) map[value]=this;
                     else if (map[value]!==this)
                         warn("identifier conflict %o=%o for %o and %o",
@@ -868,66 +857,67 @@ if (!(fdjt.KB)) {
                 else if (key[0]==='_') {}
                 else {
                     // We use the .add method to get any side effects
-                    var value=data[key]; var qid;
+                    value=data[key]; var qid;
                     if (value instanceof Array) {
-                        var i=0; var len=value.length;
-                        while (i<len) {
+                        i=0, lim=value.length;
+                        while (i<lim) {
                             var v=value[i++]; /* back to here */
                             if ((!(v))&&(v!==false)&&(v!==0)) {}
-                            else if (qid=((v._qid)||(v._id))) {
-                                var pool=getPool(qid);
+                            else if ((qid=((v._qid)||(v._id)))) {
+                                pool=getPool(qid);
                                 if (pool) this.add(key,pool.Import(v),true);
                                 else this.add(key,v,true);}
                             else this.add(key,v,true);}}
-                    else if (qid=((value._qid)||(value._id))) {
-                        var pool=getPool(qid);
+                    else if ((qid=((value._qid)||(value._id)))) {
+                        pool=getPool(qid);
                         if (pool) this.add(key,pool.Import(value),true);
-                        else this.add(key,v,true);}
+                        else this.add(key,value,true);}
                     else this.add(key,value,true);}}
             // Now we run the init procedures for the pool
             var inits=pool.inits;
             if (inits) {
                 if (((debug)&&(pool.traceinit))||(debug>2))
                     log("Running pool inits for %o: %o",this,inits);
-                var i=0; var lim=inits.length;
+                i=0, lim=inits.length;
                 while (i<lim) inits[i++](this);}
             // We now run local delayed inits
-            var inits=this._inits; delete this._inits;
+            inits=this._inits; delete this._inits;
             if (inits) {
                 if (((debug)&&(pool.traceinit))||(debug>2))
                     log("Running delayed inits for %o: %o",this,inits);
                 delete this._inits;
-                var i=0; var lim=inits.length;
+                i=0, lim=inits.length;
                 while (i<lim) inits[i++](this);}
             return this;}
         Ref.prototype.init=init_ref;
 
         function update_ref(data){
+            var i, lim;
             if (!(this._init)) return this.init(data);
-            var pool=this.pool; var map=pool.map;
             if ((this._modified)&&(data._modified)&&
                 (this._modified>data._modified))
                 return this;
-            for (var key in data) {
-                if ((key==="pool")||(key=="init")) continue;
-                var val=data[key], cur=this[key];
-                if (val===cur) continue;
-                else if (!(cur)) {
-                    if (val instanceof Array) {
-                        var i=0, lim=val.length;
-                        while (i<lim) this.add(key,val[i++],true);}
-                    else this.add(key,val);}
-                else if ((val instanceof Array)||
-                         (cur instanceof Array)) {
-                    var toadd=difference(val,cur);
-                    var todrop=difference(cur,val);
-                    var i=0; var lim=todrop.length;
-                    while (i<lim) this.drop(key,todrop[i++],true);
-                    var i=0; var lim=toadd.length;
-                    while (i<lim) this.add(key,toadd[i++],true);}
-                else {
-                    this.drop(key,cur,true);
-                    this.add(key,val,true);}}
+            for (var key in data)
+                if (data.hasOwnProperty(key)) {
+                    if ((key==="pool")||(key==="init")) continue;
+                    var val=data[key], cur=this[key];
+                    if (val===cur) continue;
+                    else if (!(cur)) {
+                        if (val instanceof Array) {
+                            i=0, lim=val.length;
+                            while (i<lim) this.add(key,val[i++],true);}
+                        else this.add(key,val);}
+                    else if ((val instanceof Array)||
+                             (cur instanceof Array)) {
+                        var toadd=difference(val,cur);
+                        var todrop=difference(cur,val);
+                        i=0, lim=todrop.length;
+                        while (i<lim) this.drop(key,todrop[i++],true);
+                        i=0, lim=toadd.length;
+                        while (i<lim) this.add(key,toadd[i++],true);}
+                    else {
+                        this.drop(key,cur,true);
+                        this.add(key,val,true);}}
             return this;}
         Ref.prototype.update=update_ref;
         Ref.prototype.oninit=function(fcn,name){
@@ -1007,7 +997,7 @@ if (!(fdjt.KB)) {
                         var objpool=obj.pool;
                         obj.pool="@@"+(objpool.absref||objpool.name);
                         setLocal(qid,jsonString(obj));
-                        obj.pool=objpool;};}}
+                        obj.pool=objpool;}}}
             return this;}
         function offline_get(obj,prop){
             var qid=obj._qid||obj.uuid||obj.oid||obj._id;
@@ -1061,7 +1051,7 @@ if (!(fdjt.KB)) {
                 return obj.drop.apply(obj,arguments);
             else if (!(val))
                 /* Drop all vals */
-                obj[field]=new Array();
+                obj[field]=[];
             else if (obj.hasOwnProperty(field)) {
                 var vals=obj[field];
                 var pos=arr_position(vals,val);
@@ -1071,7 +1061,7 @@ if (!(fdjt.KB)) {
 
         fdjtKB.test=function(obj,field,val){
             if (arguments.length===2)
-                return set_contains(obj,field);
+                return arr_contains(obj,field);
             else if (obj instanceof Ref)
                 return obj.test.apply(obj,arguments);
             else if (typeof val === "undefined")
@@ -1112,5 +1102,4 @@ if (!(fdjt.KB)) {
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
    ;;;  indent-tabs-mode: nil ***
    ;;;  End: ***
-*
-/
+*/

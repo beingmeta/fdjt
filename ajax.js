@@ -20,15 +20,13 @@
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window.fdjt)||{});
 
 fdjt.Ajax=
     (function(){
         
         var fdjtDOM=fdjt.DOM, fdjtUI=fdjt.UI, fdjtLog=fdjt.Log;
+        var $ID=fdjt.ID;
 
         function compose_uri(base_uri,args){
             var uri=base_uri; var need_amp=false;
@@ -58,12 +56,12 @@ fdjt.Ajax=
         
         function fdjtAjax(success_callback,base_uri,args,other_callback){
             var req=((window.XDomainRequest)?
-                     (new XDomainRequest()):
+                     (new (window.XDomainRequest)()):
                      (new XMLHttpRequest()));
             var uri=((args)?(compose_uri(base_uri,args)):(base_uri));
             req.withCredentials=true;
             req.onreadystatechange=function () {
-                if ((req.readyState == 4) && (req.status == 200)) {
+                if ((req.readyState === 4) && (req.status === 200)) {
                     success_callback(req);}
                 else if (other_callback) other_callback(req);};
             req.open("GET",uri);
@@ -83,20 +81,22 @@ fdjt.Ajax=
             return fdjtAjax(function(req) {callback(req.responseXML);},
                             base_uri,fdjtDOM.Array(arguments,2));};
         
-        fdjtAjax.jsonpCall=function(uri,id,cleanup){
+        function jsonpCall(uri,id,cleanup){
             if ((id)&&($ID(id))) return false;
-            var script_elt=fdjtNewElement("SCRIPT");
+            var script_elt=fdjt.DOM("SCRIPT");
             if (id) script_elt.id=id;
             if (cleanup) script_elt.oncleanup=cleanup;
             script_elt.language='javascript';
             script_elt.src=uri;
-            document.body.appendChild(script_elt);};
+            document.body.appendChild(script_elt);}
+        fdjtAjax.jsonpCall=jsonpCall;
 
-        fdjtAjax.jsonpFinish=function(id){
+        function jsonpFinish(id){
             var script_elt=$ID(id);
             if (!(script_elt)) return;
             if (script_elt.oncleanup) script_elt.oncleanup();
-            fdjtDOM.remove(script_elt);};
+            fdjtDOM.remove(script_elt);}
+        fdjtAjax.jsonpFinish=jsonpFinish;
 
         function add_query_param(parameters,name,value){
             return ((parameters)?(parameters+"&"):(""))+
@@ -148,14 +148,12 @@ fdjt.Ajax=
                 if ((!(input.disabled)) &&
                     (((input.type==="radio") || (input.type==="checkbox")) ?
                      (input.checked) : (true)))
-                    add_field(result,input.name,input.value,
-                              multifields,downcase||false);}
+                    add_field(result,input.name,input.value,downcase||false);}
             var textareas=fdjtDOM.getChildren(form,"TEXTAREA");
             i=0; while (i<textareas.length) {
                 var textarea=textareas[i++];
                 if (!(textarea.disabled)) 
-                    add_field(result,textarea.name,textarea.value,
-                              multifields,downcase||false);}
+                    add_field(result,textarea.name,textarea.value,downcase||false);}
             var selectboxes=fdjtDOM.getChildren(form,"SELECT");
             i=0; while (i<selectboxes.length) {
                 var selectbox=selectboxes[i++]; var name=selectbox.name;
@@ -163,8 +161,7 @@ fdjt.Ajax=
                 var j=0; while (j<options.length) {
                     var option=options[j++];
                     if (option.selected)
-                        add_field(result,name,option.value,
-                                  multifields,downcase||false);}}
+                        add_field(result,name,option.value,downcase||false);}}
             return result;}
         fdjtAjax.formJSON=formJSON;
 
@@ -176,8 +173,7 @@ fdjt.Ajax=
             if (!(callback)) {
                 if (form.oncallback) callback=form.oncallback;
                 else if (form.getAttribute("ONCALLBACK")) {
-                    callback=new Function
-                    ("req","form",input_elt.getAttribute("ONCALLBACK"));
+                    callback=new Function("req","form",form.getAttribute("ONCALLBACK"));
                     form.oncallback=callback;}}
             if (trace_ajax)
                 fdjtLog("Direct %s AJAX submit to %s for %o with callback %o",
@@ -186,7 +182,7 @@ fdjt.Ajax=
             // Firefox doesn't run the callback on synchronous calls
             var success=false; var callback_run=false;
             var req=(((window.XDomainRequest)&&(!(syncp)))?
-                     (new XDomainRequest()):
+                     (new (window.XDomainRequest)()):
                      (new XMLHttpRequest()));
             var params=formParams(form);
             fdjtDOM.addClass(form,"submitting");
@@ -238,20 +234,19 @@ fdjt.Ajax=
                     (req.status<300)) {
                     fdjtDOM.dropClass(form,"submitting");
                     success=true;
-                    if (callback) callback(req,form);}};
+                    if (callback) callback(req,form);}}
             return success;}
         fdjtAjax.formSubmit=ajaxSubmit;
 
         function jsonpSubmit(form){
             var jsonp_uri=form.getAttribute("jsonpuri");
             if (!(jsonp_uri)) return false;
-            var success=false;
             var jsonid=((form.id)?("JSONP"+form.id):("FORMJSONP"));
             var params=formParams(form);
             fdjtDOM.addClass(form,"submitting");
             try {
                 jsonpCall(jsonp_uri+"?"+params,jsonid,
-                          function(){fdjtDropClass(form,"submitting")});}
+                          function(){fdjt.DOM.dropClass(form,"submitting");});}
             catch (ex) {
                 jsonpFinish(jsonid);
                 fdjtLog.warn("Attempted JSONP call signalled %o",ex);
@@ -303,9 +298,8 @@ fdjt.Ajax=
                 return JSON.parse(req.responseText); },
                             base_uri,fdjtDOM.Array(arguments,1));};
         fdjtAjax.getXML=function(base_uri) {
-            return fdjtAjaxGet(function (req) {
-                return JSON.parse(req.responseXML); },
-                               base_uri,fdjtDOM.Array(arguments,1));};
+            return sync_get(function (req) {return req.responseXML; },
+                            base_uri,fdjtDOM.Array(arguments,1));};
         
         fdjtAjax.onsubmit=form_submit;
 
