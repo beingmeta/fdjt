@@ -557,30 +557,45 @@ fdjt.CodexLayout=
                         elt.getAttribute("data-pagescale")||
                         getElementValue(elt,"xdatapagescale");
                     var psw=1, psh=1;
-                    var style=getStyle(elt);
-                    if (elt.style[fdjtDOM.transform]) return;
+                    var style=elt.style;
+                    var cstyle=getStyle(elt);
+                    // If it has an individual transform, don't mess it up
+                    if ((style[fdjtDOM.transform])&&
+                        (style[fdjtDOM.transform]!=="none")&&
+                        (style[fdjtDOM.transform]!==""))
+                        return;
                     if (ps) {
                         var psv=ps.split(/ |,|x/g);
                         if (psv.length===2) {
                             psw=parseScale(psv[0]);
                             psh=parseScale(psv[1]);}
-                        else psw=parseScale(psv[0]);}
+                        else psh=psw=parseScale(psv[0]);}
                     var pw=page_width*psw, ph=page_height*psh;
                     var w=elt.offsetWidth, h=elt.offsetHeight;
                     var sw=pw/w, sh=ph/h;
                     var scale=((sw<sh)?(sw):(sh));
-                    if (elt.tagName==="IMG") {
+                    if ((elt.tagName==="IMG")&&
+                        (!((style.height)||(style.width)||
+                           (style.maxHeight)||(style.maxWidth)||
+                           (style.minHeight)||(style.minWidth)))) {
+                        style.maxHeight=style.minHeight="inherit";
+                        style.maxWidth=style.minWidth="inherit";
+                        // Get width and height again, with the constraints off
+                        //  This means that pagescaling trumps CSS constraints,
+                        //  but we'll accept that for now
+                        w=elt.offsetWidth, h=elt.offsetHeight;
+                        sw=pw/w, sh=ph/h; scale=((sw<sh)?(sw):(sh));
                         var nw=w*scale, nh=h*scale;
-                        elt.style.width=nw+"px";
-                        elt.style.height=nh+"px";}
+                        style.width=nw+"px";
+                        style.height=nh+"px";}
                     else {
                         var scalestring="scale("+scale+","+scale+")";
                         var current=(style.transform)||style[fdjtDOM.transform];
                         if ((!current)||(current==="none")||(current.length===0)) {
-                            elt.style.transformOrigin="center top";
-                            elt.style[fdjtDOM.transformOrigin]="center top";
-                            elt.style.transform=scalestring;
-                            elt.style[fdjtDOM.transform]=scalestring;}}
+                            style.transformOrigin="center top";
+                            style[fdjtDOM.transformOrigin]="center top";
+                            style.transform=scalestring;
+                            style[fdjtDOM.transform]=scalestring;}}
                     scaled.push(elt);
                     addClass(elt,"codexpagescaled");}
                 else if (elt.length) {
