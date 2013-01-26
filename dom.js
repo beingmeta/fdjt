@@ -27,6 +27,7 @@ var _fdjt_init;
 
 fdjt.DOM=
     (function(){
+        "use strict";
         var usenative=true;
         var fdjtString=fdjt.String;
         var fdjtLog=fdjt.Log;
@@ -2294,7 +2295,7 @@ fdjt.DOM=
                 fdjtDOM.transitionEnd = e.type;
                 var i=0, lim=transition_events.length;
                 while (i<lim) 
-                    this.removeEventListener(transition_events[i++],arguments.callee);};
+                    div.removeEventListener(transition_events[i++],handler);};
             div.setAttribute("style","position:absolute;top:0px;transition:top 1ms ease;-webkit-transition:top 1ms ease;-moz-transition:top 1ms ease;-o-transition:top 1ms ease;-ms-transition:top 1ms ease;");
             var i=0, lim=transition_events.length;
             while (i<lim) div.addEventListener(
@@ -2305,7 +2306,7 @@ fdjt.DOM=
                 setTimeout(function() {
                     div.parentNode.removeChild(div);
                     div = handler = null;},
-                           100);},
+                           2000);},
                        0);}
         fdjt.addInit(checkTransitionEvents,"checkTransitionEvents");
 
