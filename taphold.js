@@ -27,6 +27,7 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.UI.TapHold=(function(){
+    "use strict";
     var fdjtLog=fdjt.Log;
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;

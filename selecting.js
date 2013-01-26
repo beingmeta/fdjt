@@ -28,6 +28,7 @@ if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.UI.Selecting=
     (function(){
+        "use strict";
         var fdjtDOM=fdjt.DOM;
         var fdjtUI=fdjt.UI;
         

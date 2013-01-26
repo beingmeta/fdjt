@@ -43,7 +43,7 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.CodexLayout=
     (function(){
-
+        "use strict";
         var fdjtDOM=fdjt.DOM;
         var fdjtLog=fdjt.Log;
         var fdjtTime=fdjt.Time;

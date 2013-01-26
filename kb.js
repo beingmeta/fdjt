@@ -34,6 +34,7 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 if (!(fdjt.KB)) {
     fdjt.KB=(function(){
+        "use strict";
         var fdjtState=fdjt.State;
         var fdjtTime=fdjt.Time;
         var fdjtLog=fdjt.Log;

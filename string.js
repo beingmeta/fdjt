@@ -26,6 +26,7 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.String=
     (function(){
+        "use strict";
         function fdjtString(string){
             if ((typeof string !== 'string')&&
                 (!(string instanceof String)))
