@@ -224,8 +224,7 @@ fdjt.CodexLayout=
         //  a new page, calling itself recursively as needed
         function dupContext(node,page,dups,crumbs){
             if ((node===document.body)||(node.id==="CODEXCONTENT")||
-                (node.id==="CODEXROOT")||(hasClass(node,"codexroot"))||
-                (hasClass(node,"codexpage")))
+                (hasClass(node,"codexroot"))||(hasClass(node,"codexpage")))
                 return false;
             else if (hasParent(node,page)) return node;
             else if ((node.className)&&
@@ -319,13 +318,16 @@ fdjt.CodexLayout=
             // If we're moving a first child, we might as well move the parent
             while ((parent)&&
                    (parent!==document.body)&&
+                   (parent.id!=="CODEXCONTENT")&&
+                   (!(hasClass(parent,"codexroot")))&&
                    (!(hasClass(parent,"codexpage")))&&
                    (scan===getFirstContent(parent))) {
                 scan=parent; parent=scan.parentNode;}
             var istop=(!hasContent(page));
             if ((!(parent))||(parent===document.body)||
-                (parent.id==="CODEXCONTENT")||(parent.id==="CODEXROOT")||
-                (hasClass(parent,"codexroot"))||(hasClass(parent,"codexpage"))) {
+                (parent.id==="CODEXCONTENT")||
+                (hasClass(parent,"codexroot"))||
+                (hasClass(parent,"codexpage"))) {
                 // You don't need to dup the parent on the new page
                 moveNode(scan,page,false,crumbs);}
             else {
@@ -841,6 +843,9 @@ fdjt.CodexLayout=
                         var parent=node.parentNode;
                         if ((parent)&&(parent.childNodes.length===1)&&
                             (parent!==document.body)&&
+                            (parent!==codex_root)&&
+                            (parent.id!=="CODEXCONTENT")&&
+                            (!(hasClass(parent,"codexroot")))
                             (!(hasClass(parent,"codexpage"))))
                             node=parent;}
                     if ((!(node))||(forcepage)||(needNewPage(node))) {
