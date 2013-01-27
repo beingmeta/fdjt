@@ -182,8 +182,18 @@ fdjt.Ajax=
             var req=new XMLHttpRequest();
             var params=formParams(form);
             fdjtDOM.addClass(form,"submitting");
-            if (cbctype) req.setRequestHeader("Accept",cbctype);
-            req.withCredentials=true;
+            if (syncp) {
+                if (form.method==="GET")
+                    req.open('GET',ajax_uri+"?"+params,false);
+                else if (form.method==="PUT")
+                    req.open('PUT',ajax_uri,false);
+                else req.open('POST',ajax_uri,false);}
+            else {
+                if (form.method==="GET")
+                    req.open('GET',ajax_uri+"?"+params);
+                else if (form.method==="PUT")
+                    req.open('PUT',ajax_uri);
+                else req.open('POST',ajax_uri);}
             req.onreadystatechange=function () {
                 if (trace_ajax)
                     fdjtLog("Got callback (%d,%d) %o for %o, callback=%o",
@@ -202,18 +212,8 @@ fdjt.Ajax=
                         fdjtLog("Got callback (%d,%d) %o for %o, not calling %o",
                                 req.readyState,req.status,req,ajax_uri,callback);
                     callback_run=false;}};
-            if (syncp) {
-                if (form.method==="GET")
-                    req.open('GET',ajax_uri+"?"+params,false);
-                else if (form.method==="PUT")
-                    req.open('PUT',ajax_uri,false);
-                else req.open('POST',ajax_uri,false);}
-            else {
-                if (form.method==="GET")
-                    req.open('GET',ajax_uri+"?"+params);
-                else if (form.method==="PUT")
-                    req.open('PUT',ajax_uri);
-                else req.open('POST',ajax_uri);}
+            if (cbctype) req.setRequestHeader("Accept",cbctype);
+            req.withCredentials=true;
             try {
                 if (form.method==="GET") req.send();
                 else {
