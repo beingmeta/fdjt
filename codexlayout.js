@@ -1353,7 +1353,7 @@ fdjt.CodexLayout=
             /* Finally return the layout */
             return this;}
         
-        CodexLayout.tracelevel=2;
+        CodexLayout.tracelevel=0;
         CodexLayout.prototype.getDups=function getDups4ID(id){
             if (!(id)) return [];
             else if (id.nodeType) id=id.id;
