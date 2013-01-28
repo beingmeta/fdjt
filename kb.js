@@ -830,6 +830,21 @@ if (!(fdjt.KB)) {
                 if (typeof val === 'undefined') return true;
                 else return this.test(prop,val);}
             else return false;};
+        Ref.prototype.store=function(prop,val,restore){
+            var toadd=[], todrop=[];
+            if (this.hasOwnProperty(prop)) {
+                var cur=this[prop];
+                if (cur===val) return false;
+                else {
+                    toadd=difference(val,cur);
+                    todrop=difference(cur,val);}}
+            else if (val instanceof Array)
+                toadd=val;
+            else toadd=[val];
+            var i=0, lim=todrop.length;
+            while (i<lim) this.drop(prop,todrop[i++]);
+            i=0, lim=toadd.length; while (i<lim) this.add(prop,toadd[i++]);
+            return true;};
         Ref.prototype.ondrop=function(){
             for (var prop in this)
                 if ((prop!=='pool')&&(prop!=='qid'))
@@ -867,13 +882,13 @@ if (!(fdjt.KB)) {
                             else if ((qid=((v._qid)||(v._id)))) {
                                 pool=getPool(qid);
                                 if (pool) this.add(key,pool.Import(v),true);
-                                else this.add(key,v,true);}
-                            else this.add(key,v,true);}}
+                                else this.store(key,v,true);}
+                            else this.store(key,v,true);}}
                     else if ((qid=((value._qid)||(value._id)))) {
                         pool=getPool(qid);
-                        if (pool) this.add(key,pool.Import(value),true);
-                        else this.add(key,value,true);}
-                    else this.add(key,value,true);}}
+                        if (pool) this.store(key,pool.Import(value),true);
+                        else this.store(key,value,true);}
+                    else this.store(key,value,true);}}
             // Now we run the init procedures for the pool
             var inits=pool.inits;
             if (inits) {
