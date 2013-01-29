@@ -30,6 +30,7 @@ fdjt.DOM=
         "use strict";
         var usenative=true;
         var fdjtString=fdjt.String;
+        var isEmpty=fdjtString.isEmpty;
         var fdjtLog=fdjt.Log;
 
         function fdjtDOM(spec){
@@ -367,7 +368,11 @@ fdjt.DOM=
                     elt.removeAttribute(attrib);
                     elt.className=elt.className;}
                 else {}}
-            else elt.className=newinfo;
+            else if (newinfo)
+                elt.className=newinfo;
+            else if (!(keep))
+                elt.className=null;
+            else elt.className="";
             return true;}
         fdjtDOM.dropClass=dropClass;
         fdjtDOM.dC=dropClass;
