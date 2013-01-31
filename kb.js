@@ -874,7 +874,9 @@ if (!(fdjt.KB)) {
                 else {
                     // We use the .add method to get any side effects
                     value=data[key]; var qid;
-                    if (value instanceof Array) {
+                    if (typeof value === "undefined") {
+                        this.drop(key);}
+                    else if (value instanceof Array) {
                         i=0, lim=value.length;
                         while (i<lim) {
                             var v=value[i++]; /* back to here */
