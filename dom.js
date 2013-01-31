@@ -487,6 +487,7 @@ fdjt.DOM=
             if (classes.length) {
                 this.classes=classes; this.classnames=classnames;}
             if (attribs) this.attribs=attribs;
+            this.rank=[0,((this.id)?(1):(0)),classnames.length+attribs.length,1];
             selectors[spec]=this;
             return this;}
         Selector.prototype.match=function(elt){
@@ -737,8 +738,6 @@ fdjt.DOM=
             else return false;}
         fdjtDOM.getLastElement=getLastElement;
             
-
-
         /* Manipulating the DOM */
 
         fdjtDOM.replace=function(existing,replacement){
