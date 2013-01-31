@@ -494,8 +494,13 @@ table.fdjtform th { text-align: right;}
 table.fdjtform td { text-align: left;}
 table.fdjtform td.rightalign { text-align: right;}
 
-table.fdjtform td input[TYPE='TEXT'] {width: 100%;}
-table.fdjtform td textarea { width: 100%;}
+table.fdjtform td input[TYPE='URL'],
+table.fdjtform td input[TYPE='EMAIL'],
+table.fdjtform td input[TYPE='PASSWORD'],
+table.fdjtform td input[TYPE='SEARCH'],
+table.fdjtform td input[TYPE='TEXT'],
+table.fdjtform td textarea {
+    width: 100%;}
 table.fdjtform td p {
     font-size: 80%; max-width: 45em;
     margin-top: 0.25ex;
