@@ -1302,9 +1302,19 @@ fdjt.UI.ProgressBar=(function(){
         dom.tabIndex=i;
         dom.onclick=function(evt){
             evt=evt||event;
+            var target=fdjtUI.T(evt);
+            var choices=fdjtDOM.getParent(target,".choices");
+            var cursel=fdjtDOM.getChild(choices,".selected");
+            if (cursel===dom) {}
+            else {
+                if (cursel) {
+                    fdjtDOM.dropClass(cursel,"selected");
+                    cursel.blur();}
+                fdjtDOM.addClass(dom,"selected");
+                dom.focus();}
             if (spec.handler) spec.handler();
             fdjtUI.cancel(evt);
-            close_choice();};
+            setTimeout(close_choice,500);};
         return dom;}
 
     function choose(spec){
@@ -1343,6 +1353,7 @@ fdjt.UI.ProgressBar=(function(){
             buttons.push(button);
             if ((selection<0)&&(choice.isdefault)) {
                 button.setAttribute("autofocus","autofocus");
+                fdjtDOM.addClass(button,"selected");
                 selection=i;}
             i++;}
         if (selection<0) selection=0; 
