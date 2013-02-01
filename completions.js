@@ -22,15 +22,12 @@
 
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
 (function(){
+    "use strict";
     var fdjtString=fdjt.String;
-    var fdjtLog=fdjt.Log;
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
     var fdjtKB=fdjt.KB, fdjtID=fdjt.ID;
@@ -52,9 +49,10 @@ if (!(fdjt.UI)) fdjt.UI={};
     // to be accomodated in matching
     var FDJT_COMPLETE_DISJOINS=32;
     // Default options
-    var default_options=FDJT_COMPLETE_OPTIONS;
-    // Max number of completions to show
-    var maxcomplete=50;
+    var default_options=
+        ((FDJT_COMPLETE_OPTIONS)|
+         (FDJT_COMPLETE_CLOUD)|
+         (FDJT_COMPLETE_ANYWORD));
     // Milliseconds to wait for auto complete
     var complete_delay=100;
 
@@ -86,7 +84,7 @@ if (!(fdjt.UI)) fdjt.UI={};
         this.prefixtree={strings: []};
         this.bykey={}; this.byvalue=new fdjtKB.Map();
         this.selected=false; this.selclass=false;
-        if (!(options&FDJT_COMPLETE_MATCHCASE)) this.stringmap={};
+        if (!((options)&(FDJT_COMPLETE_MATCHCASE))) this.stringmap={};
         this.initialized=false;
         return this;}
 
@@ -142,11 +140,11 @@ if (!(fdjt.UI)) fdjt.UI={};
         var exact=[]; var exactheads=[]; var keys=[];
         var i=0; var lim=strings.length;
         while (i<lim) {
-            var string=strings[i++];
-            var isexact=(string===keystring);
-            if (prefix) prefix=commonPrefix(prefix,string);
-            else prefix=string;
-            var completions=bykey[string];
+            var s=strings[i++];
+            var isexact=(s===keystring);
+            if (prefix) prefix=commonPrefix(prefix,s);
+            else prefix=s;
+            var completions=bykey[s];
             if (completions) {
                 var j=0; var jlim=completions.length;
                 while (j<jlim) {
@@ -156,13 +154,13 @@ if (!(fdjt.UI)) fdjt.UI={};
                     else if (result.indexOf(c)>=0) {}
                     else if (hasClass(c,"completion")) {
                         if (isexact) {exactheads.push(c); exact.push(c);}
-                        result.push(c); keys.push(string); direct.push(c);}
+                        result.push(c); keys.push(s); direct.push(c);}
                     else {
                         var head=getParent(c,".completion");
                         if ((head)&&(hasClass(head,"hidden"))) {}
                         else if (head) {
                             if (isexact) exact.push(head);
-                            result.push(head); keys.push(string);
+                            result.push(head); keys.push(s);
                             variations.push(c);}}}}}
         if (exact.length) result.exact=exact;
         if (exactheads.length) result.exactheads=exactheads;
@@ -185,11 +183,11 @@ if (!(fdjt.UI)) fdjt.UI={};
         var ptree=c.prefixtree;
         var bykey=c.bykey;
         var smap=c.stringmap;
-        var stdkey=stdspace(key);
-        var matchcase=(opts&FDJT_COMPLETE_MATCHCASE);
-        var anyword=(opts&FDJT_COMPLETE_ANYWORD);
+        var stdkey=stdspace(key), lower;
+        var matchcase=((opts)&(FDJT_COMPLETE_MATCHCASE));
+        var anyword=((opts)&(FDJT_COMPLETE_ANYWORD));
         if (!(matchcase)) {
-            var lower=stdkey.toLowerCase();
+            lower=stdkey.toLowerCase();
             smap[lower]=stdkey;
             stdkey=lower;}
         if (!(getParent(completion,container)))
@@ -202,7 +200,7 @@ if (!(fdjt.UI)) fdjt.UI={};
             var variation=variations[i++];
             var vkey=stdspace(variation.key||getKey(variation));
             if (!(matchcase)) {
-                var lower=vkey.toLowerCase();
+                lower=vkey.toLowerCase();
                 smap[lower]=vkey;
                 vkey=lower;}
             addNodeKey(variation,vkey,ptree,bykey,anyword);}}
@@ -220,13 +218,14 @@ if (!(fdjt.UI)) fdjt.UI={};
 
     function updateDisplay(c,todisplay){
         var displayed=c.displayed;
+        var i, lim;
         if (displayed) {
-            var i=0; var lim=displayed.length;
+            i=0, lim=displayed.length;
             while (i<lim) dropClass(displayed[i++],"displayed");
             c.displayed=displayed=[];}
         else c.displayed=displayed=[];
         if (todisplay) {
-            var i=0; var lim=todisplay.length;
+            i=0, lim=todisplay.length;
             while (i<lim) {
                 var node=todisplay[i++];
                 if (hasClass(node,"completion")) {
@@ -241,10 +240,10 @@ if (!(fdjt.UI)) fdjt.UI={};
         // Clear the visible ordered elements cache
         c.visible=false;
         // Move the selection if neccessary
-        if ((this.selection)&&(!(hasClass(this.selection,"displayed"))))
-            if (!(this.selectNext()))
-                if (!(this.selectPrevious()))
-                    this.clearSelection();}
+        if ((c.selection)&&(!(hasClass(c.selection,"displayed"))))
+            if (!(c.selectNext()))
+                if (!(c.selectPrevious()))
+                    c.clearSelection();}
     
     Completions.prototype.getCompletions=function(string) {
         if ((string===this.curstring)||(string===this.maxstring)||
@@ -334,7 +333,7 @@ if (!(fdjt.UI)) fdjt.UI={};
     Completions.prototype.getByKey=function(keys,spec){
         if (!(this.initialized)) initCompletions(this);
         var result=[];
-        var byvalue=this.bykey;
+        var bykey=this.bykey;
         if (spec) spec=new fdjtDOM.Selector(spec);
         if (!(keys instanceof Array)) keys=[keys];
         var i=0; var lim=keys.length;
@@ -387,7 +386,7 @@ if (!(fdjt.UI)) fdjt.UI={};
                     if (hasClass(c,classname)) continue;
                     addClass(c,classname);
                     changed.push(c);}}}
-        return changed;}
+        return changed;};
     Completions.prototype.extendClass=function(values,classname){
         if (!(this.initialized)) initCompletions(this);
         var changed=[];
@@ -454,12 +453,13 @@ if (!(fdjt.UI)) fdjt.UI={};
         if (this.visible) return this.visible;
         else {
             var visible=this.visible=gatherVisible(this.dom);
-            return visible;}}
+            return visible;}};
 
     Completions.prototype.select=function select(completion){
         var pref=false; var displayed=this.getVisible();
         if (completion instanceof Selector) {
-            pref=completion; completion=false;}
+            pref=completion; 
+            completion=false;}
         if ((!(completion))&&(pref)) {
             var nodes=displayed;
             var i=0; var lim=nodes.length; while (i<lim) {
@@ -490,7 +490,6 @@ if (!(fdjt.UI)) fdjt.UI={};
         return selection;};
 
     Completions.prototype.selectPrevious=function(selection){
-        var pref=false;
         if (!(selection)) {
             if (this.selection) selection=this.selection;
             else selection=false;}
@@ -512,16 +511,11 @@ if (!(fdjt.UI)) fdjt.UI={};
         if (!(this.selection)) return;
         dropClass(this.selection,"selected");
         this.selection=false;
-        return true;}
+        return true;};
 
     /* Options, handlers, etc */
 
     var cached_completions={};
-
-    var default_options=
-        FDJT_COMPLETE_OPTIONS|
-        FDJT_COMPLETE_CLOUD|
-        FDJT_COMPLETE_ANYWORD;
 
     function onkey(evt){
         evt=evt||event;

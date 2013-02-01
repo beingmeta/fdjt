@@ -22,10 +22,7 @@
 
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 if (!(fdjt.UI.CoHi)) fdjt.UI.CoHi={classname: "cohi"};
 if (!(fdjt.UI.AutoPrompt)) fdjt.UI.AutoPrompt={};
@@ -38,13 +35,14 @@ if (!(fdjt.UI.MultiText)) fdjt.UI.MultiText={};
 if (!(fdjt.UI.Reticle)) fdjt.UI.Reticle={};
 if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
 
-
+
 /* Co-highlighting */
 
 /* When the mouse moves over a named element, the 'cohi' class is added to
    all elements with the same name. */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -53,15 +51,16 @@ if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
         var classname=((classname_arg) || (fdjtUI.CoHi.classname));
         var newname=(namearg.name)||(namearg);
         var cur=highlights[classname];
+        var i, n;
         if (cur===newname) return;
         if (cur) {
             var drop=document.getElementsByName(cur);
-            var i=0, n=drop.length;
+            i=0, n=drop.length;
             while (i<n) fdjtDOM.dropClass(drop[i++],classname);}
         highlights[classname]=newname||false;
         if (newname) {
             var elts=document.getElementsByName(newname);
-            var n=elts.length, i=0;
+            n=elts.length, i=0;
             while (i<n) fdjtDOM.addClass(elts[i++],classname);}}
     
     fdjtUI.CoHi.onmouseover=function cohi_onmouseover(evt,classname_arg){
@@ -75,16 +74,15 @@ if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
         if (!(target)) return;
         highlight(target.name,classname_arg);};
     fdjtUI.CoHi.onmouseout=function cohi_onmouseout(evt,classname_arg){
-        var target=fdjtDOM.T(evt);
         highlight(false,((classname_arg) || (fdjtUI.CoHi.classname)));};
 })();
 
-
+
 /* Text highlighting */
 
 fdjt.UI.Highlight=(function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
-    var fdjtUI=fdjt.UI;
 
     var highlight_class="fdjthighlight";
     var hasClass=fdjtDOM.hasClass;
@@ -170,12 +168,13 @@ fdjt.UI.Highlight=(function(){
     highlight_range.highlight=highlight_range;
     return highlight_range;})();
 
-
+
 
 /* CheckSpans:
    Text regions which include a checkbox where clicking toggles the checkbox. */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
@@ -183,10 +182,8 @@ fdjt.UI.Highlight=(function(){
     var hasClass=fdjtDOM.hasClass;
     var addClass=fdjtDOM.addClass;
     var dropClass=fdjtDOM.dropClass;
-    var toggleClass=fdjtDOM.toggleClass;
     var getParent=fdjtDOM.getParent;
     var getChildren=fdjtDOM.getChildren;
-    var getChild=fdjtDOM.getChild;
 
     function CheckSpan(spec,varname,val,checked){
         var input=fdjtDOM.Input('input[type=checkbox]',varname,val);
@@ -203,7 +200,7 @@ fdjt.UI.Highlight=(function(){
     function checkable(elt){
         return (elt.nodeType===1)&&
             (elt.tagName==='INPUT')&&
-            ((elt.type=='checkbox')||(elt.type=='radio'));}
+            ((elt.type==='checkbox')||(elt.type==='radio'));}
     function getcheckable(elt){
         if (checkable(elt)) return elt;
         var cb=getParent(elt,checkable);
@@ -214,12 +211,13 @@ fdjt.UI.Highlight=(function(){
             while (i<lim)
                 if (checkable(cb[i])) return cb[i]; else i++;
             return false;}
-        else return false}
+        else return false;}
 
     function checkspan_set(target,checked) {
+        var i, lim;
         if (typeof target === 'string') target=fdjtID(target);
         else if (target.length) {
-            var i=0, lim=target.length;
+            i=0, lim=target.length;
             while (i<lim) checkspan_set(target[i++],checked);
             return;}
         if ((!(target))||(!(target.nodeType))) return;
@@ -252,7 +250,7 @@ fdjt.UI.Highlight=(function(){
             var form=checkbox.form;
             var name=checkbox.name;
             var tosync=getChildren(form,'input');
-            var i=0; var lim=tosync.length;
+            i=0, lim=tosync.length;
             while (i<lim) {
                 var input=tosync[i++];
                 if (input===checkbox) continue;
@@ -263,19 +261,20 @@ fdjt.UI.Highlight=(function(){
                     else if (hasClass(cspan,"ischecked"))
                         if (!(input.checked)) unchecked.push(input);}
                 else {}}}
+        var evt;
         if (changed) {
-            var evt=document.createEvent("HTMLEvents");
+            evt=document.createEvent("HTMLEvents");
             evt.initEvent("change",false,true);
             checkbox.dispatchEvent(evt);}
         if (unchecked.length) {
-            var i=0, lim=unchecked.length;
+            i=0, lim=unchecked.length;
             while (i<lim) {
                 var uncheck=unchecked[i++];
                 var altspan=getParent(uncheck,".checkspan");
                 dropClass(altspan,"ischecked");
-                var evt=document.createEvent("HTMLEvents");
+                evt=document.createEvent("HTMLEvents");
                 evt.initEvent("change",false,true);
-                input.dispatchEvent(evt);}}}
+                uncheck.dispatchEvent(evt);}}}
     fdjtUI.CheckSpan.set=checkspan_set;
 
     function checkspan_onclick(evt) {
@@ -338,10 +337,11 @@ fdjt.UI.Highlight=(function(){
 
 })();
 
-
+
 /* Progress boxes */
 
 fdjt.UI.ProgressBar=(function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     function ProgressBar(arg){
         if (typeof arg==='undefined')
@@ -374,7 +374,7 @@ fdjt.UI.ProgressBar=(function(){
     ProgressBar.setMessage=setMessage;
     ProgressBar.prototype.setProgress=function(progress,total){
         setProgress(this.dom,progress,total);};
-    ProgressBar.prototype.setMessage=function(val){
+    ProgressBar.prototype.setMessage=function(){
         var dom=this.dom;
         var oldmsg=fdjtDOM.getChildren(dom,".message")[0];
         var newmsg=fdjtDOM("div.message");
@@ -383,10 +383,11 @@ fdjt.UI.ProgressBar=(function(){
 
     return ProgressBar;})();
 
-
+
 /* Automatic help display on focus */
 
 (function(){
+    "use strict";
 
     var fdjtString=fdjt.String;
     var fdjtDOM=fdjt.DOM;
@@ -399,7 +400,7 @@ fdjt.UI.ProgressBar=(function(){
     function show_help_onfocus(evt){
         var target=fdjtDOM.T(evt);
         while (target)
-            if ((target.nodeType==1) &&
+            if ((target.nodeType===1) &&
                 ((target.tagName === 'INPUT') ||
                  (target.tagName === 'TEXTAREA')) &&
                 (target.getAttribute('helptext'))) {
@@ -417,7 +418,7 @@ fdjt.UI.ProgressBar=(function(){
     function hide_help_onblur(evt){
         var target=fdjtDOM.T(evt);
         while (target)
-            if ((target.nodeType==1) &&
+            if ((target.nodeType===1) &&
                 ((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
                 (target.getAttribute('HELPTEXT'))) {
                 var helptext=fdjtID(target.getAttribute('HELPTEXT'));
@@ -438,7 +439,7 @@ fdjt.UI.ProgressBar=(function(){
         var elements=fdjtDOM.getChildren(form,".isempty");
         if (elements) {
             var i=0; var lim=elements.length;
-            while (i<elements.length) elements[i++].value="";}}
+            while (i<lim) elements[i++].value="";}}
     function autoprompt_onsubmit(evt) {
         var form=fdjtDOM.T(evt);
         autoprompt_cleanup(form);}
@@ -478,11 +479,12 @@ fdjt.UI.ProgressBar=(function(){
     fdjt.UI.InputHelp.onfocus=show_help_onfocus;
     fdjt.UI.InputHelp.onblur=hide_help_onblur;})();
 
-
+
 
 /* Focus blocks */
 
 (function(){
+    "use strict";
 
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
@@ -501,7 +503,7 @@ fdjt.UI.ProgressBar=(function(){
         if (block) {
             if (blur_target===block) {
                 clearTimeout(blur_timeout);
-                blur_target=false; blue_timeout=false;}
+                blur_target=false; blur_timeout=false;}
             addClass(block,'fdjtfocus');}}
     function focusblock_onblur(evt){
         evt=evt||event;
@@ -516,10 +518,11 @@ fdjt.UI.ProgressBar=(function(){
 
     fdjt.UI.FocusBlock.onfocus=focusblock_onfocus;
     fdjt.UI.FocusBlock.onblur=focusblock_onblur;})();
-
+
 /* Text input boxes which create checkspans on enter. */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -528,7 +531,7 @@ fdjt.UI.ProgressBar=(function(){
         var ch=evt.charCode;
         var target=fdjtUI.T(evt);
         if (typeof sepch === 'string') sepch=sepch.charCodeAt(0);
-        if ((ch!==13)||((sepch)&&(sepch!=ch))) return;
+        if ((ch!==13)||((sepch)&&(sepch!==ch))) return;
         fdjtUI.cancel(evt);
         var checkspec=target.getAttribute("data-checkspec")||"div.checkspan";
         var checkbox=
@@ -540,11 +543,14 @@ fdjt.UI.ProgressBar=(function(){
         target.value='';}
     fdjtUI.MultiText.keypress=multitext_keypress;})();
 
-
+
 /* Tabs */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
+    var fdjtLog=fdjt.Log;
+    var fdjtState=fdjt.State;
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
 
@@ -561,7 +567,7 @@ fdjt.UI.ProgressBar=(function(){
         if (elt) {
             var content_id=false;
             while (elt.parentNode) {
-                if (content_id=fdjtDOM.getAttrib(elt,"contentid")) break;
+                if ((content_id=fdjtDOM.getAttrib(elt,"contentid"))) break;
                 else elt=elt.parentNode;}
             if (!(content_id)) return;
             var content=document.getElementById(content_id);
@@ -614,7 +620,7 @@ fdjt.UI.ProgressBar=(function(){
                 var cid=fdjtDOM.getAttrib(tab,"contentid");
                 var content=(cid)&&fdjtID(cid);
                 if (!(content))
-                    fdjtWarn("No reference for tab content %o",cid);
+                    fdjtLog.warn("No reference for tab content %o",cid);
                 else dropClass(content,shownclass);}
             else dropClass(tab,shownclass);}
         if (fdjtID(contentid)) {
@@ -650,16 +656,17 @@ fdjt.UI.ProgressBar=(function(){
         var tabs=fdjtDOM.getChildren(tabbar,".tab");
         var i=0; while (i<tabs.length) {
             var tab=tabs[i++];
-            if (hasClass(tag,"shown"))
-                return tag.getAttribute("contentid");}
+            if (hasClass(tab,"shown"))
+                return tab.getAttribute("contentid");}
         return false;}
     fdjtUI.Tabs.getSelected=selected_tab;}());
 
 
-
+
 /* Collapse/Expand */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -677,19 +684,20 @@ fdjt.UI.ProgressBar=(function(){
         var wrapper=fdjtDOM.getParent(target,".collapsible");
         if (wrapper) {
             fdjtUI.cancel(evt);
-            fdjtDOM.toggleClass(wrapper,"expanded");};};
+            fdjtDOM.toggleClass(wrapper,"expanded");}};
 
     fdjtUI.Collapsible.focus=function(evt){
         evt=evt||event;
         var target=fdjtUI.T(evt);
         var wrapper=fdjtDOM.getParent(target,".collapsible");
         if (wrapper) {
-            fdjtDOM.toggleClass(wrapper,"expanded");};};})();
+            fdjtDOM.toggleClass(wrapper,"expanded");}};})();
 
-
+
 /* Temporary Scrolling */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -709,41 +717,23 @@ fdjt.UI.ProgressBar=(function(){
             if (!(saved_scroll)) saved_scroll={};
             saved_scroll.scrollX=window.scrollX;
             saved_scroll.scrollY=window.scrollY;}}
-    
-    function scroll_offset(wleft,eleft,eright,wright){
-        var result;
-        if ((eleft>wleft) && (eright<wright)) return wleft;
-        else if ((eright-eleft)<(wright-wleft)) 
-            return eleft-Math.floor(((wright-wleft)-(eright-eleft))/2);
-        else return eleft;}
 
     function scroll_into_view(elt,topedge){
         if ((topedge!==0) && (!topedge) && (fdjtDOM.isVisible(elt)))
             return;
         else if ((use_native_scroll) && (elt.scrollIntoView)) {
-            elt.scrollIntoView(top);
+            elt.scrollIntoView(topedge);
             if ((topedge!==0) && (!topedge) && (fdjtDOM.isVisible(elt,true)))
                 return;}
         else {
             var top = elt.offsetTop;
             var left = elt.offsetLeft;
-            var width = elt.offsetWidth;
             var height = elt.offsetHeight;
-            var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
-            var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
-            var winxedge=winx+(document.documentElement.clientWidth);
-            var winyedge=winy+(document.documentElement.clientHeight);
             
             while(elt.offsetParent) {
                 elt = elt.offsetParent;
                 top += elt.offsetTop;
                 left += elt.offsetLeft;}
-            
-            var targetx=scroll_offset(winx,left,left+width,winxedge);
-            var targety=
-                (((topedge)||(topedge===0)) ?
-                 ((typeof topedge === "number") ? (top+topedge) : (top)) :
-                 (scroll_offset(winy,top,top+height,winyedge)));
             
             var vh=fdjtDOM.viewHeight();
             var x=0; var y;
@@ -807,15 +797,14 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.scrollPreview=scroll_preview;
     fdjtUI.scrollRestore=scroll_restore;}());
 
-
+
 /* Smart (DOM-aware) scrolling */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
-    var fdjtUI=fdjt.UI;
 
     var getGeometry=fdjtDOM.getGeometry;
-    var getDisplay=fdjtDOM.getDisplay;
     var getStyle=fdjtDOM.getStyle;
 
     function smartScroll(win,off,content){
@@ -849,16 +838,14 @@ fdjt.UI.ProgressBar=(function(){
             else return false;}
         else return false;}
 
-    fdjtUI.smartScroll=smartScroll;})();
+    fdjt.UI.smartScroll=smartScroll;})();
 
-
+
 /* Delays */
 
 (function(){
-    var fdjtUI=fdjt.UI;
+    "use strict";
 
-    var timeouts={};
-    
     fdjt.UI.Delay=function(interval,name,fcn){
         window.setTimeout(fcn,interval);};
     fdjt.UI.Delayed=function(fcn,interval){
@@ -868,6 +855,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Triggering submit events */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -896,6 +884,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Looking for vertical box overflow */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -910,14 +899,14 @@ fdjt.UI.ProgressBar=(function(){
         else dropClass(node,"overflow");}
     fdjtUI.Overflow=checkOverflow;}());
 
-
+
 /* Reticle based functions */
 
 (function() {
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
-    var getGeometry=fdjtDOM.getGeometry;
     var vreticle=false;
     var hreticle=false;
     function setXY(x,y){
@@ -925,32 +914,24 @@ fdjt.UI.ProgressBar=(function(){
         if  (hreticle) (hreticle).style.top=y+'px';}
     function setupReticle(){
         if (!(vreticle)) {
-            vreticle=fdjtDOM("div.reticle.vertical#VRETICLE"," ")
+            vreticle=fdjtDOM("div.reticle.vertical#VRETICLE"," ");
             fdjtDOM.prepend(document.body,vreticle);}
         if (!(hreticle)) {
-            hreticle=fdjtDOM("div.reticle.horizontal#HRETICLE"," ")
+            hreticle=fdjtDOM("div.reticle.horizontal#HRETICLE"," ");
             fdjtDOM.prepend(document.body,hreticle);}
         fdjtDOM.addListener(document,"mousemove",mousemove);
         fdjtDOM.addListener(document,"click",doflash);
         fdjtUI.Reticle.live=true;}
     
-    function doflash(evt){flash();}
+    function doflash(){flash();}
 
     function mousemove(evt){
-        var target=fdjtUI.T(evt);
-        var x=evt.clientX, y=evt.clientY;
-        var geom=getGeometry(target);
-        /*
-        fdjtLog("mousemove cx=%d,cy=%d,sx=%d,sy=%d t=%o geom=%j",
-                evt.clientX,evt.clientY,evt.screenX,evt.screenY,
-                target,geom);
-        */
         setXY(evt.clientX,evt.clientY);}
     
     var highlighted=false;
     
     function highlight(flag){
-        if (typeof flag === 'undefined') flag=(!(higlighted));
+        if (typeof flag === 'undefined') flag=(!(highlighted));
         if (flag) {
             if (vreticle) fdjtDOM.addClass(vreticle,"highlight");
             if (hreticle) fdjtDOM.addClass(hreticle,"highlight");
@@ -974,10 +955,11 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.Reticle.setXY=setXY;
     fdjtUI.Reticle.live=false;})();
 
-
+
 /* File uploader affirmation handling */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
@@ -986,11 +968,11 @@ fdjt.UI.ProgressBar=(function(){
         var parent=fdjtDOM.getParent(fdjtUI.T(evt),'.fileuploader');
         if (parent) fdjtDOM.addClass(parent,'inuse');};})();
 
-
+
 /* Image swapping */
 
 (function(){
-    var fdjtDOM=fdjt.DOM;
+    "use strict";
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
 
@@ -999,7 +981,7 @@ fdjt.UI.ProgressBar=(function(){
         if (!(img)) return false;
         if (!(interval))
             interval=((img.getAttribute('data-interval'))?
-                      (parseInt((img.getAttribute('data-interval')))):
+                      (parseInt((img.getAttribute('data-interval')),10)):
                       (ImageSwap.interval));
         if (!(img.getAttribute("data-images"))) {
             img.setAttribute("data-images",img.src);}
@@ -1021,10 +1003,11 @@ fdjt.UI.ProgressBar=(function(){
 
     fdjtUI.ImageSwap=ImageSwap;})();
 
-
+
 /* Miscellaneous event-related functions */
 
 (function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
@@ -1041,7 +1024,8 @@ fdjt.UI.ProgressBar=(function(){
         return false;};
 
     fdjtUI.isClickable=function(target){
-        if (target instanceof Event) target=fdjtUI.T(target);
+        if ((window.event)&&(target instanceof window.Event))
+            target=fdjtUI.T(target);
         while (target) {
             if (((target.tagName==='A')&&(target.href))||
                 (target.tagName==="INPUT") ||
@@ -1058,7 +1042,8 @@ fdjt.UI.ProgressBar=(function(){
         return false;};
 
     fdjtUI.isDefaultClickable=function(target){
-        if (target instanceof Event) target=fdjtUI.T(target);
+        if ((window.Event)&&(target instanceof window.Event))
+            target=fdjtUI.T(target);
         while (target) {
             if (((target.tagName==='A')&&(target.href))||
                 (target.tagName==="INPUT") ||
@@ -1114,6 +1099,7 @@ fdjt.UI.ProgressBar=(function(){
 /* Ellipsis */
 
 (function(){
+    "use strict";
     var fdjtString=fdjt.String;
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
@@ -1125,11 +1111,10 @@ fdjt.UI.ProgressBar=(function(){
     var hasClass=fdjtDOM.hasClass;
     var addClass=fdjtDOM.addClass;
     var dropClass=fdjtDOM.dropClass;
-    var toggleClass=fdjtDOM.toggleClass;
 
     function Ellipsis(spec,string,lim,thresh,handler){
         var content=ellipsize(string,lim,thresh||0.2);
-        var split=(!(typeof content === "string"));
+        var split=(typeof content !== "string");
         var len=string.length;
         if (!(handler)) handler=toggle;
         if ((typeof content === "string")&&(content.length===len)) {
@@ -1202,11 +1187,9 @@ fdjt.UI.ProgressBar=(function(){
 (function(){
     
     var fdjtDOM=fdjt.DOM;
+    var fdjtLog=fdjt.Log;
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
-
-    var alert_ticker=false; var close_ticker=false;
-    var max_z=false;
 
     var countdown_serial=1; var countdown_tickers={};
 
@@ -1316,28 +1299,41 @@ fdjt.UI.ProgressBar=(function(){
             fdjtDOM("button","Choice "+i);
         dom.onmousedown=fdjtUI.cancel;
         dom.onmouseup=fdjtUI.cancel;
-	dom.tabIndex=i;
+        dom.tabIndex=i;
         dom.onclick=function(evt){
             evt=evt||event;
+            var target=fdjtUI.T(evt);
+            var choices=fdjtDOM.getParent(target,".choices");
+            var cursel=fdjtDOM.getChild(choices,".selected");
+            if (cursel===dom) {}
+            else {
+                if (cursel) {
+                    fdjtDOM.dropClass(cursel,"selected");
+                    cursel.blur();}
+                fdjtDOM.addClass(dom,"selected");
+                dom.focus();}
             if (spec.handler) spec.handler();
             fdjtUI.cancel(evt);
             close_choice();};
         return dom;}
 
     function choose(spec){
-	var box=false; var selection=-1, buttons=[];
-        var close_button=false, countdown=false, timer=false;
+        var box=false; var selection=-1, buttons=[], choices;
+        var close_button=false;
         function close_choice(){
             var i=0, lim=buttons.length;
             while (i<lim) {
                 buttons[i].onclick=null;
                 buttons[i].onmousedown=null;
                 buttons[i].onmouseup=null;
-		i++;}
+                i++;}
             if (close_button) close_button.onclick=null;
             if (box) box.onclick=null;
-	    if (box) box.onkeydown=null;
-            if (box) remove_alert(box);}
+            if (box) box.onkeydown=null;
+            if (box) {
+                var timeout=setTimeout(function(){
+                    remove_alert(box); clearTimeout(timeout); timeout=false;},
+                                       500);}}
         if (typeof spec === "function") 
             choices=[{label: "Cancel"},
                      {label: "OK",handler: spec,isdefault: true}];
@@ -1355,14 +1351,15 @@ fdjt.UI.ProgressBar=(function(){
             return;}
         var i=0, lim=choices.length;
         while (i<lim) {
-	    var choice=choices[i];
-	    var button=makeChoice(choice,close_choice,i);
-	    buttons.push(button);
-	    if ((selection<0)&&(choice.isdefault)) {
-		button.setAttribute("autofocus","autofocus");
-		selection=i;}
-	    i++;}
-	if (selection<0) selection=0; 
+            var choice=choices[i];
+            var button=makeChoice(choice,close_choice,i);
+            buttons.push(button);
+            if ((selection<0)&&(choice.isdefault)) {
+                button.setAttribute("autofocus","autofocus");
+                fdjtDOM.addClass(button,"selected");
+                selection=i;}
+            i++;}
+        if (selection<0) selection=0; 
         box=alertBox(fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
                      fdjtDOM("div.choices",buttons));
         close_button=fdjtDOM.getChild(box,".closebutton");
@@ -1372,19 +1369,19 @@ fdjt.UI.ProgressBar=(function(){
         var cancel=(spec.cancel)||false;
 
         // For accessibility, handle tab/enter
-	box.onkeydown=function(evt){
-	    evt=evt||event;
-	    var kc=evt.keyCode;
-	    if (kc===9) {
+        box.onkeydown=function(evt){
+            evt=evt||event;
+            var kc=evt.keyCode;
+            if (kc===9) {
                 if (evt.shiftKey) selection--; else selection++;
                 if (selection<0) selection=buttons.length-1;
-		else if (selection>=buttons.length) selection=0;
-		buttons[selection].focus();
+                else if (selection>=buttons.length) selection=0;
+                buttons[selection].focus();
                 fdjtUI.cancel(evt);}
-	    else if (kc===13) {
-		if (choices[selection].handler)
-		    (choices[selection].handler)();
-		close_choice();
+            else if (kc===13) {
+                if (choices[selection].handler)
+                    (choices[selection].handler)();
+                close_choice();
                 fdjtUI.cancel(evt);}
             else if ((cancel)&&(kc===27)) {
                 close_choice();
@@ -1394,7 +1391,7 @@ fdjt.UI.ProgressBar=(function(){
         if (spec.timeout)
             setCountdown(box,spec.timeout,function(){
                 if (choices[selection].handler) choices[selection].handler();});
-	buttons[selection].focus();}
+        buttons[selection].focus();}
     fdjtUI.choose=choose;
 
 })();

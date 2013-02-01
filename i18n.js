@@ -22,13 +22,11 @@
 
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 if (!(fdjt.i18n))
     fdjt.i18n=(function(){
+        "use strict";
 	var apps={};
 	var maps=[];
 	

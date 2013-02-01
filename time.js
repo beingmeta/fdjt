@@ -24,18 +24,16 @@
 
 /* Time functions */
 
-if (window) {if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.Time=
     (function (){
+        "use strict";
+
         function _(x){ return x; }
 
         function fdjtTime() {
             return (new Date()).getTime();}
-        fdjtTime.revid="$Id$";
-        fdjtTime.version=parseInt("$Revision$".slice(10,-1));
 
         var loaded=fdjtTime.loaded=(new Date()).getTime();
         fdjtTime.tick=function(){
@@ -86,6 +84,7 @@ fdjt.Time=
         var fmt=fdjt.String;
 
         fdjtTime.secs2string=function(interval){
+            var weeks, days, hours, minutes, seconds;
             if (interval<1)
                 return fmt("%f seconds",interval);
             else if (interval===1)
@@ -95,39 +94,39 @@ fdjt.Time=
             else if (interval<60)
                 return fmt("~%d seconds",Math.round(interval/60));
             else if (interval<120) {
-                var minutes=Math.floor(interval/60);
-                var seconds=Math.round(interval-(minutes*60));
+                minutes=Math.floor(interval/60);
+                seconds=Math.round(interval-(minutes*60));
                 if (seconds===1)
                     return _("one minute, one second");
                 else return fmt("one minute, %d seconds",seconds);}
             else if (interval<3600) {
-                var minutes=Math.floor(interval/60);
+                minutes=Math.floor(interval/60);
                 return fmt("~%d minutes",minutes);}
             else if (interval<(2*3600)) {
-                var hours=Math.floor(interval/3600);
-                var minutes=Math.round((interval-(hours*3600))/60);
+                hours=Math.floor(interval/3600);
+                minutes=Math.round((interval-(hours*3600))/60);
                 if (minutes===1)
                     return _("one hour and one minutes");
                 else return fmt("one hour, %d minutes",minutes);}
             else if (interval<(24*3600)) {
-                var hours=Math.floor(interval/3600);
+                hours=Math.floor(interval/3600);
                 return fmt("~%d hours",hours);}
             else if (interval<(2*24*3600)) {
-                var hours=Math.floor((interval-24*3600)/3600);
+                hours=Math.floor((interval-24*3600)/3600);
                 if (hours===1)
                     return _("one day and one hour");
                 else return fmt("one day, %d hours",hours);}
             else if (interval<(7*24*3600)) {
-                var days=Math.floor(interval/(24*3600));
+                days=Math.floor(interval/(24*3600));
                 return fmt("%d days",days);}
             else if (interval<(14*24*3600)) {
-                var days=Math.floor((interval-(7*24*3600))/(24*3600));
+                days=Math.floor((interval-(7*24*3600))/(24*3600));
                 if (days===1)
                     return "one week and one day";
                 else return fmt("one week and %d days",days);}
             else {
-                var weeks=Math.floor(interval/(7*24*3600));
-                var days=Math.round((interval-(days*7*24*3600))/(7*24*3600));
+                weeks=Math.floor(interval/(7*24*3600));
+                days=Math.round((interval-(days*7*24*3600))/(7*24*3600));
                 return fmt("%d weeks, %d days",weeks,days);}};
 
         fdjtTime.secs2short=function(interval){
@@ -180,7 +179,7 @@ fdjt.Time=
                 if ((i<lim)&&((!(done))||(!(done()))))
                     timer=setTimeout(slicefn,nextspace||space);
                 else {
-                    clearTimeout(timer); timer=false;};}
+                    clearTimeout(timer); timer=false;}};
             return slicefn();}
         fdjtTime.timeslice=timeslice;
 
@@ -193,7 +192,7 @@ fdjt.Time=
             var stepfn=function(){
                 var started=fdjtTime(); var now=started;
                 var stopat=started+slice;
-                if (watch) watch(((i==0)?'start':'resume'),i,lim,chunks,used,
+                if (watch) watch(((i===0)?'start':'resume'),i,lim,chunks,used,
                                  zerostart);
                 while ((i<lim)&&((now=fdjtTime())<stopat)) {
                     var elt=vec[i];

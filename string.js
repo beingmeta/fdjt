@@ -22,36 +22,35 @@
 
 */
 
-if (window) {if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.String=
     (function(){
+        "use strict";
         function fdjtString(string){
             if ((typeof string !== 'string')&&
                 (!(string instanceof String)))
                 return stringify(string);
-            var output="";
+            var output="", arg;
             var cmd=string.indexOf('%'); var i=1;
             while (cmd>=0) {
                 if (cmd>0) output=output+string.slice(0,cmd);
                 if (string[cmd+1]==='%') output=output+'%';
                 else if (string[cmd+1]==='o') {
-                    var arg=arguments[i++];
+                    arg=arguments[i++];
                     if (typeof arg === 'string')
                         output=output+"'"+arg+"'";
                     else if (typeof arg === 'number')
                         output=output+arg;
                     else output=output+stringify(arg);}
                 else if (string[cmd+1]==='j') {
-                    var arg=arguments[i++];
+                    arg=arguments[i++];
                     output=output+JSON.stringify(arg);}
                 else if ((string[cmd+1]==='x')&&
                          (typeof arguments[i] === 'number')&&
                          (arguments[i]>=0)&&
                          ((arguments[i]%1)>=0)) {
-                    var arg=arguments[i++];
+                    arg=arguments[i++];
                     output=output+arg.toString(16);}
                 else if (arguments[i])
                     output=output+arguments[i++];
@@ -62,9 +61,6 @@ fdjt.String=
                 cmd=string.indexOf('%');}
             output=output+string;
             return output;}
-
-        fdjtString.revid="$Id$";
-        fdjtString.version=parseInt("$Revision$".slice(10,-1));
 
         fdjtString.nbsp="\u00A0";
         fdjtString.middot="\u00B7";
@@ -103,9 +99,7 @@ fdjt.String=
                      "b="+(arg.button)+",w="+(arg.which));
                 if ((typeof ox === "number")||(typeof oy === "number"))
                     result=result+",cx="+ox+",cy="+oy;
-                if (arg.touches) {
-                    var i=0; var n=arg.touches.length;
-                    result=result+",touches="+n;}
+                if (arg.touches) result=result+",touches="+arg.touches.length;
                 if (arg.keyCode) result=result+",kc="+arg.keyCode;
                 if (arg.charCode) result=result+",cc="+arg.charCode;
                 return result+")]";}
@@ -116,12 +110,13 @@ fdjt.String=
         fdjtString.truncate=function(string,lim){
             if (!(lim)) lim=42;
             if (string.length<lim) return string;
-            else return string.slice(0,lim);}
+            else return string.slice(0,lim);};
 
         var floor=Math.floor;
 
         function ellipsize(string,lim,fudge){
             var before, after;
+            var chopped, broke;
             if (typeof fudge !== 'number') fudge=0.1;
             if (!(lim)) return string;
             else if (typeof lim === "number") {}
@@ -137,13 +132,13 @@ fdjt.String=
                 if (/\s/.test(string[before])===0) 
                     start=before;
                 else {
-                    var chopped=string.slice(0,before);
-                    var broke=chopped.search(/\s+\w+$/);
+                    chopped=string.slice(0,before);
+                    broke=chopped.search(/\s+\w+$/);
                     if (broke>0) start=broke; else start=before;}
                 if (/\s/.test(string[len-after])===0) end=len-after;
                 else {
-                    var chopped=string.slice(len-after);
-                    var broke=chopped.search(/\s+/);
+                    chopped=string.slice(len-after);
+                    broke=chopped.search(/\s+/);
                     if (broke>0) end=(len-after)+broke;
                     else end=after;}
                 return [string.slice(0,start),string.slice(end)];}
@@ -152,8 +147,8 @@ fdjt.String=
                 if (/\s/.test(edge)===0) 
                     return string.slice(0,lim);
                 else {
-                    var chopped=string.slice(0,lim);
-                    var broke=chopped.search(/\s+\w+$/);
+                    chopped=string.slice(0,lim);
+                    broke=chopped.search(/\s+\w+$/);
                     if (broke>0) return chopped.slice(0,broke);
                     else return chopped;}}}
         fdjtString.ellipsize=ellipsize;
@@ -167,7 +162,7 @@ fdjt.String=
                     if (spacechars.indexOf(string[i])>=0) i++;
                     else return false;}
                 return true;}
-            else return false;}
+            else return false;};
 
         fdjtString.findSplit=function(string,split,escape){
             var start=0;
@@ -214,7 +209,7 @@ fdjt.String=
                 return results;}
             else return string.split(';');};
 
-        fdjtString.lineSplit=function(string,escapes,mapfn){
+        fdjtString.lineSplit=function(string,escape,mapfn){
             if ((mapfn) || (escape)) {
                 var results=[];
                 var start=0; var next;
@@ -232,8 +227,6 @@ fdjt.String=
                 return results;}
             else return string.split('\n');};
 
-        var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
-        
         function trim(string){
             var start=0; var len=string.length; 
             if (len<=0) return string;
@@ -249,7 +242,6 @@ fdjt.String=
         fdjtString.trim=trim;
 
         function stdspace(string){
-            var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
             string=string.replace(/\s+/g," ");
             var start=0; var len=string.length; 
             if (len<=0) return string;
@@ -302,13 +294,13 @@ fdjt.String=
                  (num<100000)?(5):(num<1000000)?(6):(num<1000000)?(7):
                  (num<100000000)?(8):(num<1000000000)?(9):(num<10000000000)?(10):(11));
             var nzeroes=digits-ndigits; var numstring=num.toString();
-            var prefix=""; var suffix="";
+            var prefix=""; var suffix=""; var j;
             if (prec) {
                 var point=numstring.indexOf('.');
                 if ((point>=0)&&((point+prec)<numstring.length))
                     numstring=numstring.slice(0,point+prec+1);
                 else if ((point<0)||(numstring.length<(point+prec+1))) {
-                    var j=0; var pad=(point+prec+1)-numstring.length;
+                    j=0; var pad=(point+prec+1)-numstring.length;
                     while (j<pad) {suffix=suffix+"0"; j++;}}}
             switch (nzeroes) {
             case 0: prefix=""; break;
@@ -323,7 +315,7 @@ fdjt.String=
             case 9: prefix="000000000"; break;
             case 10: prefix="0000000000"; break;
             default: {
-                var j=0; while (j<nzeroes) {prefix=prefix+"0"; j++;}}}
+                j=0; while (j<nzeroes) {prefix=prefix+"0"; j++;}}}
             return prefix+numstring+suffix;}
         fdjtString.padNum=padNum;
 
@@ -443,8 +435,8 @@ fdjt.String=
             else {
                 // Subdivide
                 ptree.splits=[];
-                var strings=ptree.strings;
-                var j=0; while (j<strings.length) prefixAdd(ptree,strings[j++],i);
+                var pstrings=ptree.strings;
+                var j=0; while (j<pstrings.length) prefixAdd(ptree,pstrings[j++],i);
                 return prefixAdd(ptree,string,i);}}
         fdjtString.prefixAdd=prefixAdd;
 

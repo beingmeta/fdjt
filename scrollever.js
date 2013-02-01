@@ -21,13 +21,11 @@
 
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
+    "use strict";
     var fdjtDOM=fdjt.DOM, fdjtID=fdjt.ID;
     var fdjtState=fdjt.State, fdjtString=fdjt.String;
     var fdjtLog=fdjt.Log;
@@ -64,11 +62,11 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
             fdjtDOM.getMeta("~{http://fdjt.org/}scrollinterval")||
             fdjtDOM.getMeta("~scrollinterval")||
             500;
-        if (typeof off !== 'number') off=parseInt(off);
-        if (typeof win !== 'number') win=parseInt(win);
-        if (typeof limit !== 'number') limit=parseInt(limit);
-        if (typeof thresh !== 'number') thresh=parseInt(thresh);
-        if (typeof interval !== 'number') interval=parseInt(interval);
+        if (typeof off !== 'number') off=parseInt(off,10);
+        if (typeof win !== 'number') win=parseInt(win,10);
+        if (typeof limit !== 'number') limit=parseInt(limit,10);
+        if (typeof thresh !== 'number') thresh=parseInt(thresh,10);
+        if (typeof interval !== 'number') interval=parseInt(interval,10);
         
         if (fdjtScrollEver.debug) {
             fdjtLog("fdjtScrollEver called: %o/%o+%o, fetch=%s",
@@ -87,7 +85,7 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
             req.open("GET",call,true);
             req.withCredentials=true;
             req.onreadystatechange=function () {
-                if ((req.readyState == 4) && (req.status == 200)) {
+                if ((req.readyState === 4) && (req.status === 200)) {
                     if (fdjtScrollEver.debug)
                         fdjtLog("fdjtScrollEver getMoreResults (response)");
                     var tbl=fdjtDOM(container.tagName);

@@ -22,14 +22,11 @@
 
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.State=
     (function(){
-
+        "use strict";
         var fdjtLog=fdjt.Log;
 
         function fdjtState(name,val,persist){
@@ -51,7 +48,7 @@ fdjt.State=
                 if (window.sessionStorage) setSession(name,val);
             else setCookie(name,val);
             else if (window.sessionStorage) dropSession(name);
-            else clearCookie(name);};
+            else clearCookie(name);}
         fdjtState.domain=false;
         fdjtState.path=false;
         fdjtState.duration=false;
@@ -133,7 +130,7 @@ fdjt.State=
         function getSession(name,parse){
             var val=((window.sessionStorage)?
                      (window.sessionStorage[name]):
-                     (fdjtGetCookie(name)));
+                     (getCookie(name)));
             if (val)
                 if (parse) return JSON.parse(val); else return val;
             else return false;}
@@ -233,8 +230,7 @@ fdjt.State=
         function querydecode(string){
             if (decodeURIComponent)
                 return decodeURIComponent(string);
-            else return 
-            string.replace
+            else return string.replace
             (/%3A/gi,":").replace
             (/%2F/gi,"/").replace
             (/%3F/gi,"?").replace
@@ -301,7 +297,6 @@ fdjt.State=
                      (Math.floor(Math.random()*65536)|0x01)).toString(16),
                     12);
         
-        var default_version=17; 
         var clockid=Math.floor(Math.random()*16384); var msid=1;
         var last_time=new Date().getTime();
         
@@ -344,7 +339,7 @@ fdjt.State=
                 var num_end=afterslash.search(/\W/);
                 var numstring=afterslash.slice(0,num_end);
                 try {
-                    result[s.slice(start,slash)]=parseInt(numstring);}
+                    result[s.slice(start,slash)]=parseInt(numstring,10);}
                 catch (ex) {
                     result[s.slice(start,slash)]=numstring;}
                 s=afterslash.slice(num_end);}

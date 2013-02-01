@@ -23,21 +23,16 @@
 
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.UI.Selecting=
     (function(){
-        var fdjtString=fdjt.DOM;
+        "use strict";
         var fdjtDOM=fdjt.DOM;
         var fdjtUI=fdjt.UI;
         
-        var dropClass=fdjtDOM.dropClass;
-        var addClass=fdjtDOM.addClass;
         var getStyle=fdjtDOM.getStyle;
-        var getParent=fdjtDOM.getParent;
 
         function position(elt,arr){
             if (arr.indexOf) return arr.indexOf(elt);
@@ -90,7 +85,7 @@ fdjt.UI.Selecting=
                 node.parentNode.replaceChild(wrapper,node);
                 orig.push(node); wrapped.push(wrapper);
                 // Actually wrap the words in spans
-                wrapText(node,orig,wrapped,words,prefix,opts);
+                wrapText(node,orig,wrapped,words,prefix);
                 // And put the node back into the DOM
                 wrapper.appendChild(node);}
             // These track the state of the current selection
@@ -98,7 +93,6 @@ fdjt.UI.Selecting=
             this.start=false; this.end=false;
             this.min=-1; this.max=-1; this.n_words=0;
             this.onchange=((opts)&&(opts.onchange))||false;
-            var over=false;
             // This gets the word offset for a particular target
             this.wordnum=function wordnum(target){
                 var id=false;
@@ -107,16 +101,17 @@ fdjt.UI.Selecting=
                 if ((target)&&((id=target.id))&&
                     (target.tagName==="SPAN")&&
                     (id.search(prefix)===0))
-                    return parseInt(id.slice(stripid));
+                    return parseInt(id.slice(stripid),10);
                 else return false;};
             
             return this;}
         
-        function wrapText(node,orig,wrapped,words,prefix,opts){
+        function wrapText(node,orig,wrapped,words,prefix){
+            var i, lim;
             if (node.nodeType===3) {
-                var text=node.nodeValue;
+                var text=node.nodeValue, span;
                 var sliced=text.split(/\b/), wordspans=[];
-                var i=0, lim=sliced.length, count=0;
+                i=0, lim=sliced.length;
                 while (i<lim) {
                     var word=sliced[i++];
                     if (word.length===0) continue;
@@ -131,14 +126,13 @@ fdjt.UI.Selecting=
                                        (space<notspace)?(space):
                                        (notspace));
                             if (split<=0) split=scan.length;
-                            var span=fdjtDOM(
-                                "span.fdjtword",scan.slice(0,split));
+                            span=fdjtDOM("span.fdjtword",scan.slice(0,split));
                             span.id=prefix+"_"+(words.length);
                             words.push(span);
                             wordspans.push(span);
                             scan=scan.slice(split);}}
                     else {
-                        var span=fdjtDOM("span.fdjtword",word);
+                        span=fdjtDOM("span.fdjtword",word);
                         span.id=prefix+"_"+(words.length);
                         words.push(span);
                         wordspans.push(span);}}
@@ -151,7 +145,7 @@ fdjt.UI.Selecting=
                 else if (children.length===0) return node;
                 else if (node.className==='fdjtselectwrap') return node;
                 else {
-                    var i=0, lim=children.length;
+                    i=0, lim=children.length;
                     while (i<lim) {
                         var child=children[i++];
                         var wrap=wrapText(child,orig,wrapped,words,prefix);
@@ -210,7 +204,7 @@ fdjt.UI.Selecting=
             this.min=min; this.max=max;
             this.start=start; this.end=end;
             this.n_words=(max-min)+1;
-            if (this.onchange) this.onchange();}
+            if (this.onchange) this.onchange();};
 
         /* Handler support */
         
@@ -299,11 +293,11 @@ fdjt.UI.Selecting=
                 start=document.getElementById(start.id);
                 end=document.getElementById(end.id);}
             else return;
-            if ((start)&&(end)) this.setRange(start,end);}
+            if ((start)&&(end)) this.setRange(start,end);};
 
         fdjtSelecting.prototype.getString=function(start,end){
             if (!(start)) start=this.start; if (!(end)) end=this.end;
-            var words=this.words; var wrappers=this.wrappers; 
+            var wrappers=this.wrappers; 
             var combine=[]; var prefix=this.prefix; var wpos=-1;
             var scan=start; while (scan) {
                 if (scan.nodeType===1) {
@@ -326,13 +320,13 @@ fdjt.UI.Selecting=
                         if ((wpos+1)<wrappers.length)
                             scan=wrappers[wpos+1];}}
                 if (!(scan)) break;}
-            return combine.join("");}
+            return combine.join("");};
 
         fdjtSelecting.prototype.getOffset=function(){
             if (!(this.start)) return false;
             var selected=this.getString();
             var preselected=this.getString(this.words[0],this.end);
-            return preselected.length-selected.length;}
+            return preselected.length-selected.length;};
         
         fdjtSelecting.prototype.setAdjust=function(val){
             // fdjt.Log("setAdjust %o",val);
@@ -356,9 +350,9 @@ fdjt.UI.Selecting=
             while (i>=0) {
                 var o=orig[i], w=wrapped[i]; i--;
                 w.parentNode.replaceChild(o,w);}
-            var i=0, lim=wrappers.length;
-            while (i<lim) {
-                var wrapper=wrappers[i++];
+            var j=0, lim=wrappers.length;
+            while (j<lim) {
+                var wrapper=wrappers[j++];
                 delete selectors[wrapper.id];}
             delete selectors[this.prefix];
             delete this.wrapped; delete this.orig;
@@ -412,7 +406,7 @@ fdjt.UI.Selecting=
                 sel.setAdjust(false);}}
         fdjtSelecting.release_handler=release_handler;
         function get_release_handler(also){
-            return function(evt){release_handler(evt); also(evt);}};
+            return function(evt){release_handler(evt); also(evt);};}
         
         function addHandlers(container,sel,opts){
             var fortouch=((typeof opts.fortouch !== "undefined")?

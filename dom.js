@@ -22,16 +22,15 @@
 
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+var _fdjt_init;
 
 fdjt.DOM=
     (function(){
+        "use strict";
         var usenative=true;
         var fdjtString=fdjt.String;
-        var fdjtTime=fdjt.Time;
+        var isEmpty=fdjtString.isEmpty;
         var fdjtLog=fdjt.Log;
 
         function fdjtDOM(spec){
@@ -77,24 +76,23 @@ fdjt.DOM=
             domappend(node,arguments,1);
             return node;}
 
-        fdjtDOM.revid="$Id$";
-        fdjtDOM.version=parseInt("$Revision$".slice(10,-1));
         fdjtDOM.useNative=function(flag) {
             if (typeof flag === 'undefined') return usenative;
             else usenative=flag;};
         
         fdjtDOM.clone=function(node){
-            return node.cloneNode(true);}
+            return node.cloneNode(true);};
 
         function getIE(){
-            if (navigator.appName == 'Microsoft Internet Explorer') {
+            if (navigator.appName === 'Microsoft Internet Explorer') {
                 var ua = navigator.userAgent;
-                var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
-                if (re.exec(ua) != null)
+                var re  = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
+                var rv;
+                if (re.exec(ua) !== null)
                     rv = parseFloat( RegExp.$1 );
                 else rv=1;
-                // Fails for non-numbers
-                if (!(rv>0)) rv=1;
+                // Fails for non-whole numbers
+                if (rv<=0) rv=1;
                 return rv;}
             else return 0;}
 
@@ -117,11 +115,11 @@ fdjt.DOM=
             else if (content.toHTML)
                 return domappend(node,content.toHTML());
             else if (content.length) {
-                var frag=((node instanceof DocumentFragment)?(node):
-                          (document.createDocumentFragment()));
+                var frag=(((window.DocumentFragment)&&(node instanceof window.DocumentFragment))?
+                    (node):(document.createDocumentFragment()));
                 // We copy node lists because they're prone to change
                 // underneath us as we're moving DOM nodes around.
-                var elts=((NodeList)&&(content instanceof NodeList))?
+                var elts=((window.NodeList)&&(content instanceof window.NodeList))?
                     (TOA(content)):(content);
                 var len=elts.length; 
                 if (typeof i === 'undefined') i=0;
@@ -154,8 +152,8 @@ fdjt.DOM=
             else if (content.toHTML)
                 return dominsert(before,node,content.toHTML());
             else if (content.length) {
-                var frag=((node instanceof DocumentFragment)?(node):
-                          (document.createDocumentFragment()));
+                var frag=(((window.documentFragment)&&(node instanceof window.DocumentFragment))?
+                          (node):(document.createDocumentFragment()));
                 domappend(frag,content,i);
                 node.insertBefore(frag,before);
                 return before;}
@@ -197,8 +195,8 @@ fdjt.DOM=
             else if (typeof arg === 'string') {
                 var len=arg.length; var num=false;
                 if ((len>2)&&(arg[len-1]==='x')&&(arg[len-2]==='p'))
-                    num=parseInt(arg.slice(0,-2));
-                else num=parseInt(arg);
+                    num=parseInt(arg.slice(0,-2),10);
+                else num=parseInt(arg,10);
                 if (num===0) return 0;
                 else if (isNaN(num)) return dflt;
                 else if (typeof num === 'number') return num;
@@ -224,7 +222,7 @@ fdjt.DOM=
         function classPat(name){
             var rx=new RegExp("\\b"+name+"\\b","g");
             classpats[name]=rx;
-            return rx;};
+            return rx;}
 
         function string_trim(string){
             var start=string.search(/\S/); var end=string.search(/\s+$/g);
@@ -238,10 +236,10 @@ fdjt.DOM=
                 var output="<"+node.tagName;
                 if (node.id) output=output+"#"+node.id;
                 if (node.tagName==='input') {
-                    output+"[type="+node.type+"]";
-                    output+"[name="+node.name+"]";}
+                    output=output+"[type="+node.type+"]";
+                    output=output+"[name="+node.name+"]";}
                 else if (node.tagName==='textarea')
-                    output+"[name="+node.name+"]";
+                    output=output+"[name="+node.name+"]";
                 else if (node.tagName==='img') {
                     if (node.alt) output=output+"[alt="+node.alt+"]";
                     else if (node.src) output=output+"[src="+node.src+"]";}
@@ -304,7 +302,7 @@ fdjt.DOM=
             else if (typeof elt === 'string') {
                 if (!(elt=document.getElementById(elt)))
                     return;}
-            else if ((NodeList)&&(elt instanceof NodeList))
+            else if ((window.NodeList)&&(elt instanceof window.NodeList))
                 return addClass(TOA(elt),classname,attrib);
             else if ((elt.length)&&(!(elt.nodeType))) { // (assume array)
                 var elts=TOA(elt);
@@ -331,14 +329,14 @@ fdjt.DOM=
 
         fdjtDOM.classAdder=function(elt,classname){
             return function() {
-                if (elt) addClass(elt,classname);}};
+                if (elt) addClass(elt,classname);};};
 
-        function dropClass(elt,classname,attrib){
+        function dropClass(elt,classname,attrib,keep){
             if (!(elt)) return;
             else if (typeof elt === 'string') {
                 if (!(elt=document.getElementById(elt)))
                     return;}
-            else if ((NodeList)&&(elt instanceof NodeList))
+            else if ((window.NodeList)&&(elt instanceof window.NodeList))
                 return dropClass(TOA(elt),classname,attrib);
             else if ((elt.length)&&(!(elt.nodeType))) {
                 var elts=TOA(elt);
@@ -362,22 +360,26 @@ fdjt.DOM=
                 newinfo=newinfo.
                 replace(whitespace_pat," ").
                 replace(trimspace_pat,"");
-            if (attrib)
+            if (attrib) {
                 if (newinfo) {
                     elt.setAttribute(attrib,newinfo);
                     elt.className=elt.className;}
-            else if (!(keep)) {
-                elt.removeAttribute(attrib);
-                elt.className=elt.className;}
-            else {}
-            else elt.className=newinfo;
+                else if (!(keep)) {
+                    elt.removeAttribute(attrib);
+                    elt.className=elt.className;}
+                else {}}
+            else if (newinfo)
+                elt.className=newinfo;
+            else if (!(keep))
+                elt.className=null;
+            else elt.className="";
             return true;}
         fdjtDOM.dropClass=dropClass;
         fdjtDOM.dC=dropClass;
 
         fdjtDOM.classDropper=function(elt,classname){
             return function() {
-                if (elt) dropClass(elt,classname);}};
+                if (elt) dropClass(elt,classname);};};
 
         function swapClass(elt,drop,add,attrib) {
             dropClass(elt,drop,attrib); addClass(elt,add,attrib);}
@@ -389,9 +391,9 @@ fdjt.DOM=
             else dropClass(elt,classname);}
         fdjtDOM.setClass=setClass;
 
-        function toggleClass(elt,classname,attrib){
+        function toggleClass(elt,classname,attrib,keep){
             if (typeof elt === 'string') elt=document.getElementById(elt);
-            else if ((NodeList)&&(elt instanceof NodeList))
+            else if ((window.NodeList)&&(elt instanceof window.NodeList))
                 return toggleClass(TOA(elt),classname,attrib);
             else if ((elt.length)&&(!(elt.nodeType))) {
                 var elts=TOA(elt);
@@ -423,14 +425,14 @@ fdjt.DOM=
                 newinfo=newinfo.
                 replace(whitespace_pat," ").
                 replace(trimspace_pat,"");
-            if (attrib)
+            if (attrib) {
                 if (newinfo) {
                     elt.setAttribute(attrib,newinfo);
                     elt.className=elt.className;}
-            else if (!(keep)) {
-                elt.removeAttribute(attrib);
-                elt.className=elt.className;}
-            else {}
+                else if (!(keep)) {
+                    elt.removeAttribute(attrib);
+                    elt.className=elt.className;}
+                else {}}
             else elt.className=newinfo;
             return false;}
         fdjtDOM.toggleClass=toggleClass;
@@ -444,6 +446,7 @@ fdjt.DOM=
         var selectors={};
 
         function Selector(spec,tagcs) {
+            var i, lim;
             if (!(spec)) return this; // just cons with type
             else if (selectors[spec]) return selectors[spec]; // check cache
             else if (!(this instanceof Selector))
@@ -451,7 +454,7 @@ fdjt.DOM=
                 return Selector.call(new Selector(),spec);
             if (spec.indexOf(',')>0) { // compound selectors
                 var specs=spec.split(','); var compound=[];
-                var i=0; var lim=specs.length;
+                i=0, lim=specs.length;
                 while (i<lim) {
                     var sub=string_trim(specs[i++]);
                     compound.push(new Selector(sub));}
@@ -460,7 +463,7 @@ fdjt.DOM=
                 return this;}
             // Otherwise, parse and set up this
             var elts=spec.match(css_selector_regex);
-            var i=0; var lim=elts.length;
+            i=0, lim=elts.length;
             var classes=[]; var classnames=[]; var attribs=false;
             if (!((elts[0][0]==='.')||(elts[0][0]==='#')||(elts[0][0]==='['))) {
                 this.tag=((tagcs)?(elts[0]):(elts[0].toUpperCase()));
@@ -484,11 +487,13 @@ fdjt.DOM=
             if (classes.length) {
                 this.classes=classes; this.classnames=classnames;}
             if (attribs) this.attribs=attribs;
+            this.rank=[0,((this.id)?(1):(0)),classnames.length+attribs.length,1];
             selectors[spec]=this;
             return this;}
         Selector.prototype.match=function(elt){
+            var i, lim;
             if (this.compound) {
-                var compound=this.compound; var i=0; var lim=compound.length;
+                var compound=this.compound; i=0, lim=compound.length;
                 while (i<lim) if (compound[i++].match(elt)) return true;
                 return false;} 
             if ((this.tag)&&(this.tag!==elt.tagName)) return false;
@@ -496,32 +501,34 @@ fdjt.DOM=
             if (this.classes)
                 if (elt.className) {
                     var classname=elt.className; var classes=this.classes;
-                    var i=0; var lim=classes.length;
+                    i=0, lim=classes.length;
                     while (i<lim) if (classname.search(classes[i++])<0) return false;}
             else return false;
             if (this.attribs) {
                 var attribs=this.attribs;
-                for (var name in attribs) {
-                    var val=elt.getAttribute(name);
-                    if (!(val)) return false;
-                    var need=this[name];
-                    if (need===true) {}
-                    else if (typeof need === 'string') {
-                        if (need!==val) return false;}
-                    else if (val.search(need)<0) return false;}}
+                for (var name in attribs)
+                    if (attribs.hasOwnProperty(name)) {
+                        var val=elt.getAttribute(name);
+                        if (!(val)) return false;
+                        var need=this[name];
+                        if (need===true) {}
+                        else if (typeof need === 'string') {
+                            if (need!==val) return false;}
+                        else if (val.search(need)<0) return false;}}
             return true;};
         Selector.prototype.find=function(elt,results){
-            var pickfirst=false;
+            var probe, i, lim;
             if (!(results)) results=[];
             if (this.compound) {
-                var compound=this.compound; var i=0; var lim=compound.length;
+                var compound=this.compound;
+                i=0, lim=compound.length;
                 while (i<lim) compound[i++].find(elt,results);
                 return results;}
             if (this.id) {
-                var elt=document.getElementById(this.id);
-                if (!(elt)) return results;
-                else if (this.match(elt)) {
-                    results.push(elt); return results;}
+                probe=document.getElementById(this.id);
+                if (!(probe)) return results;
+                else if (this.match(probe)) {
+                    results.push(probe); return results;}
                 else return results;}
             var candidates=[];
             var classnames=this.classnames; var attribs=this.attribs;
@@ -532,10 +539,11 @@ fdjt.DOM=
             else if ((this.tag)&&(elt.getElementsByTagName))
                 candidates=elt.getElementsByTagName(this.tag);
             else if (this.attribs) {
-                var attribs=this.attribs;
-                for (var name in attribs) {
-                    gatherByAttrib(elt,name,attribs[name],candidates);
-                    break;}}
+                attribs=this.attribs;
+                for (var name in attribs)
+                    if (attribs.hasOwnProperty(name)) {
+                        gatherByAttrib(elt,name,attribs[name],candidates);
+                        break;}}
             else if (this.tag) {
                 gatherByTag(elt,this.tag,candidates);}
             else {}
@@ -548,7 +556,7 @@ fdjt.DOM=
             else if (candidates instanceof Array)
                 return candidates;
             else return toArray(candidates);
-            var i=0; var lim=candidates.length;
+            i=0, lim=candidates.length;
             while (i<lim) {
                 var candidate=candidates[i++];
                 if (this.match(candidate)) results.push(candidate);}
@@ -573,7 +581,7 @@ fdjt.DOM=
                     results.push(node);
                 var children=node.childNodes;
                 if (children) {
-                    var i=0; var lim=children.length; var result;
+                    var i=0; var lim=children.length;
                     while (i<lim) gatherByClass(children[i++],pat,results);}}}
         function gatherByTag(node,tag,results){
             if (node.nodeType===1) {
@@ -583,7 +591,7 @@ fdjt.DOM=
                     results.push(node);
                 var children=node.childNodes;
                 if (children) {
-                    var i=0; var lim=children.length; var result;
+                    var i=0; var lim=children.length;
                     while (i<lim) gatherByTag(children[i++],tag,results);}}}
         function gatherByAttrib(node,attrib,val,results){
             if (node.nodeType===1) {
@@ -594,8 +602,8 @@ fdjt.DOM=
                     results.push(node);
                 var children=node.childNodes;
                 if (children) {
-                    var i=0; var lim=children.length; var result;
-                    while (i<lim) gatherByTag(children[i++],tag,results);}}}
+                    var i=0; var lim=children.length;
+                    while (i<lim) gatherByAttrib(children[i++],attrib,val,results);}}}
         
         function gather_children(node,pat,attrib,results){
             if (!(attrib)) gatherByClass(node,pat,results);
@@ -605,7 +613,7 @@ fdjt.DOM=
 
         /* Real simple DOM search */
 
-        function getParent(elt,parent,attrib){
+        function getParent(elt,parent){
             if (typeof elt === 'string') {
                 if (elt[0]==='#')
                     elt=document.getElementById(elt.slice(1));
@@ -663,11 +671,9 @@ fdjt.DOM=
                     var i=0, lim=classname.length;
                     while (i<lim) getChildren(node,classname[i++],attrib,results);}
                 else {}}
-            else if (!(typeof attrib === 'string'))
+            else if (typeof attrib !== 'string')
                 throw { error: 'bad selector arg', selector: classname};
-            else {
-                var pat=(classpats[classname]||classPat(classname));
-                gather_children(node,classname,attrib||false,results);}
+            else gather_children(node,classname,attrib||false,results);
             return results;}
         fdjtDOM.getChildren=getChildren;
         fdjt.$=fdjtDOM.$=function(spec,root){
@@ -682,7 +688,7 @@ fdjt.DOM=
                 if (filter(node)) results.push(node);
                 var children=node.childNodes;
                 if (children) {
-                    var i=0; var lim=children.length; var result;
+                    var i=0; var lim=children.length;
                     while (i<lim) filter_children(children[i++],filter,results);}}}
 
         function regexp_filter_children(node,rx,results){
@@ -691,7 +697,7 @@ fdjt.DOM=
                     results.push(node);
                 var children=node.childNodes;
                 if (children) {
-                    var i=0; var lim=children.length; var result;
+                    var i=0; var lim=children.length;
                     while (i<lim)
                         regexp_filter_children(children[i++],rx,results);}}}
 
@@ -732,8 +738,6 @@ fdjt.DOM=
             else return false;}
         fdjtDOM.getLastElement=getLastElement;
             
-
-
         /* Manipulating the DOM */
 
         fdjtDOM.replace=function(existing,replacement){
@@ -812,7 +816,7 @@ fdjt.DOM=
             return node;};
         fdjtDOM.Checkbox=function(name,value,checked){
             var node=fdjtDOM("INPUT");
-            node.type="checkbox"
+            node.type="checkbox";
             node.name=name;
             if (value) node.value=value;
             if (checked) node.checked=true;
@@ -846,24 +850,24 @@ fdjt.DOM=
                     results.push(inputs[i++]); 
                 else i++;}
             if ((!type)||(type==='textarea')||(type==='text')) {
-                var inputs=root.getElementsByTagName('textarea');
-                var i=0; var lim=inputs.length;
+                inputs=root.getElementsByTagName('textarea');
+                i=0, lim=inputs.length;
                 while (i<lim) {
                     if (((!(name))||(inputs[i].name===name))&&
                         ((!(type))||(inputs[i].type===type)))
                         results.push(inputs[i++]); 
                     else i++;}}
             if ((!type)||(type==='button')||(type==='submit')) {
-                var inputs=root.getElementsByTagName('button');
-                var i=0; var lim=inputs.length;
+                inputs=root.getElementsByTagName('button');
+                i=0, lim=inputs.length;
                 while (i<lim) {
                     if (((!(name))||(inputs[i].name===name))&&
                         ((!(type))||(inputs[i].type===type)))
                         results.push(inputs[i++]); 
                     else i++;}}
             if ((!type)||(type==='select')) {
-                var inputs=root.getElementsByTagName('select');
-                var i=0; var lim=inputs.length;
+                inputs=root.getElementsByTagName('select');
+                i=0, lim=inputs.length;
                 while (i<lim) {
                     if ((!(name))||(inputs[i].name===name))
                         results.push(inputs[i++]); 
@@ -915,8 +919,8 @@ fdjt.DOM=
                 return results[0];
             else if ((results)&&(results.length)) {
                 fdjtLog.warn(
-                    "Ambiguous input reference name=%o type=%o under %o",
-                    name,type,root);
+                    "Ambiguous input reference name=%o name=%o under %o",
+                    name,name,root);
                 return results[0];}
             else return false;};
 
@@ -979,7 +983,7 @@ fdjt.DOM=
 
         /* Generating text from the DOM */
 
-        function flatten(string){return string.replace(/\s+/," ");};
+        function flatten(string){return string.replace(/\s+/," ");}
 
         function textify(arg,flat,depth,domarkup){
             if (typeof depth !== 'number') depth=0;
@@ -1041,12 +1045,12 @@ fdjt.DOM=
                 elt=document.getElementById(elt);
             var top = elt.offsetTop;
             var left = elt.offsetLeft;
-            var stack = ((withstack) ? (new Array(elt)) : false);
             var width=elt.offsetWidth;
             var height=elt.offsetHeight;
             var rootp=((root)&&(root.offsetParent));
             var style=((extra)&&(getStyle(elt)));
-
+            if (withstack) withstack=[]; else withstack=false;
+            
             if (elt===root) 
                 return {left: 0,top: 0,width:width,height: height,
                         bottom: height,right: width};
@@ -1086,7 +1090,7 @@ fdjt.DOM=
                         top_margin: t_margin, bottom_margin: b_margin,
                         left_margin: l_margin, right_margin: r_margin,
                         outer_height: outer_height,outer_width: outer_width,
-                        inner_height: inner_height,outer_width: inner_width,
+                        inner_height: inner_height,inner_width: inner_width,
                         line_height: lhpx,stack:withstack};}
             else return {left: left, top: top, width: width,height: height,
                          right:left+width,bottom:top+height,
@@ -1094,16 +1098,15 @@ fdjt.DOM=
         fdjtDOM.getGeometry=getGeometry;
 
         function geomString(geom){
-            return +((typeof geom.width == 'number')?(geom.width):"?")+
-                "x"+((typeof geom.height == 'number')?(geom.height):"?")+
-                "@l:"+((typeof geom.left == 'number')?(geom.left):"?")+
-                ",t:"+((typeof geom.top == 'number')?(geom.top):"?")+
-                "/r:"+((typeof geom.right == 'number')?(geom.right):"?")+
-                ",b:"+((typeof geom.bottom == 'number')?(geom.bottom):"?");}
+            return +((typeof geom.width === 'number')?(geom.width):"?")+
+                "x"+((typeof geom.height === 'number')?(geom.height):"?")+
+                "@l:"+((typeof geom.left === 'number')?(geom.left):"?")+
+                ",t:"+((typeof geom.top === 'number')?(geom.top):"?")+
+                "/r:"+((typeof geom.right === 'number')?(geom.right):"?")+
+                ",b:"+((typeof geom.bottom === 'number')?(geom.bottom):"?");}
         fdjtDOM.geomString=geomString;
 
         function isVisible(elt,partial){
-            var start=elt;
             if (!(partial)) partial=false;
             var top = elt.offsetTop;
             var left = elt.offsetLeft;
@@ -1157,11 +1160,7 @@ fdjt.DOM=
             if (!(delta)) delta=50;
             var top = elt.offsetTop;
             var left = elt.offsetLeft;
-            var width = elt.offsetWidth;
-            var height = elt.offsetHeight;
-            var winx=(window.pageXOffset||document.documentElement.scrollLeft||0);
             var winy=(window.pageYOffset||document.documentElement.scrollTop||0);
-            var winxedge=winx+(document.documentElement.clientWidth);
             var winyedge=winy+(document.documentElement.clientHeight);
             
             while(elt.offsetParent) {
@@ -1169,7 +1168,7 @@ fdjt.DOM=
                 top += elt.offsetTop;
                 left += elt.offsetLeft;}
 
-            return ((top>winx) && (top<winyedge) && (top<winx+delta));}
+            return ((top>winy) && (top<winyedge) && (top<winy+delta));}
         fdjtDOM.isAtTop=isAtTop;
 
         function textwidth(node){
@@ -1201,17 +1200,7 @@ fdjt.DOM=
                 return arg.nodeValue.match(/\W*\s+\W*/g).length;
             else return 0;}
         fdjtDOM.countBreaks=countBreaks;
-
-        function wordOffset(arg){
-            var scan=arg; var count=0;
-            while (scan=(scan.previousSibling||scan.parentNode)) {
-                if (scan.nodeType===3)
-                    count=count+(scan.nodeValue.match(/\W*\s+\W*/g).length);
-                else if (scan.nodeType===1)
-                    count=count+countBreaks(scan);
-                else {}}
-            return count;}
-
+     
         function hasContent(node,recur,test){
             if (node===recur) return false;
             else if (node.nodeType===3)
@@ -1270,11 +1259,11 @@ fdjt.DOM=
 
         /* Determining if something has overflowed */
         fdjtDOM.overflowing=function(node){
-            return (node.scrollHeight>node.clientHeight);}
+            return (node.scrollHeight>node.clientHeight);};
         fdjtDOM.voverflow=function(node){
-            return (node.scrollHeight/node.clientHeight);}
+            return (node.scrollHeight/node.clientHeight);};
         fdjtDOM.hoverflow=function(node){
-            return (node.scrollWidth/node.clientWidth);}
+            return (node.scrollWidth/node.clientWidth);};
 
         /* Adjusting font sizes (wrappers for adjustfont.js) */
         fdjtDOM.adjustFont=function(elt,opts){
@@ -1311,10 +1300,9 @@ fdjt.DOM=
             return {left: left,right: right,top: top, bottom: bottom,
                     width: right-left,height:bottom-top};}
         fdjtDOM.getInsideBounds=getInsideBounds;
-        function applyScale(container,scale,traced){
+        function applyScale(container,scale){
             var images=fdjtDOM.getChildren(container,"IMG");
             var ilim=images.length;
-            var oldscale=container.scale||100;
             if (scale) {
                 container.scale=scale;
                 container.style.fontSize=scale+'%';
@@ -1442,7 +1430,6 @@ fdjt.DOM=
                 if (fit<goodenough) {
                     container.goodscale=scale; return;}}
             // Figure out the next scale factor to try
-            var dh=bounds.height-maxheight; var dw=bounds.width-maxwidth;
             var rh=maxheight/bounds.height; var rw=maxwidth/bounds.width;
             var newscale=
                 ((itfits)?
@@ -1451,7 +1438,7 @@ fdjt.DOM=
                  (rh<rw)?(scale*rh):(scale*rw));
             if (trace_adjust)
                 fdjtLog("[%fs] Trying newscale=%o, rw=%o rh=%o",
-                        fdjtET(),newscale,rw,rh);
+                        fdjt.ET(),newscale,rw,rh);
             applyScale(container,newscale,trace_adjust);}
         fdjtDOM.applyScale=applyScale;
         fdjtDOM.adjustToFit=adjustToFit;
@@ -1505,7 +1492,6 @@ fdjt.DOM=
         fdjtDOM.getHEAD=getHEAD;
 
         var schema2tag={}, tag2schema={};
-        var got_meta_schemas=false;
         function getMetaSchemas(){
             var links=
                 ((document.getElementsByTagName)&&
@@ -1535,6 +1521,7 @@ fdjt.DOM=
                       (document.getElementsByTagName("META")):
                       (getChildren(document,"META")));
             var rx=((name instanceof RegExp)?(name):(false));
+            var prefix, schema;
             if ((typeof name ==='string')&&
                 (typeof foldcase==='undefined')) {
                 if (name[0]==='^') {
@@ -1544,9 +1531,10 @@ fdjt.DOM=
                 else {}}
             if (typeof name !== 'string') {}
             else if (name[0]==='{') {
-                var schema_end=name.indexOf('}'), schema=false;
+                schema=false;
+                var schema_end=name.indexOf('}');
                 if (schema_end>2) schema=name.slice(1,schema_end);
-                var prefix=((schema)&&(schema2tag[schema]));
+                prefix=((schema)&&(schema2tag[schema]));
                 if (prefix) name=prefix+"."+name.slice(schema_end+1);}
             else if (name[0]==='=') {
                 // This overrides any schema expansion
@@ -1557,8 +1545,8 @@ fdjt.DOM=
                               ((foldcase)?("i"):("")));}
             else if (name.indexOf('.')>0) {
                 var dot=name.indexOf('.');
-                var prefix=name.slice(0,dot);
-                var schema=app_schemas[prefix];
+                prefix=name.slice(0,dot);
+                schema=app_schemas[prefix];
                 if ((schema)&&(schema2tag[schema])) 
                     name=schema2tag[schema]+name.slice(dot);}
             else {}
@@ -1594,6 +1582,7 @@ fdjt.DOM=
                       ((document.body)&&(document.body.getElementsByTagName))?
                       (document.body.getElementsByTagName("LINK")):
                       (getChildren(document,"LINK")));
+            var prefix, schema;
             var rx=((name instanceof RegExp)?(name):(false));
             if ((typeof name ==='string')&&
                 (typeof foldcase==='undefined')) {
@@ -1604,9 +1593,10 @@ fdjt.DOM=
                 else {}}
             if (typeof name !== 'string') {}
             else if (name[0]==='{') {
-                var schema_end=name.indexOf('}'), schema=false;
+                schema=false;
+                var schema_end=name.indexOf('}');
                 if (schema_end>2) schema=name.slice(1,schema_end);
-                var prefix=((schema)&&(schema2tag[schema]));
+                prefix=((schema)&&(schema2tag[schema]));
                 if (prefix) name=prefix+"."+name.slice(schema_end+1);}
             else if (name[0]==='=') {
                 // This overrides any schema expansion and does
@@ -1618,8 +1608,8 @@ fdjt.DOM=
                               ((foldcase)?("i"):("")));}
             else if (name.indexOf('.')>0) {
                 var dot=name.indexOf('.');
-                var prefix=name.slice(0,dot);
-                var schema=app_schemas[prefix];
+                prefix=name.slice(0,dot);
+                schema=app_schemas[prefix];
                 if ((schema)&&(schema2tag[schema])) 
                     name=schema2tag[schema]+name.slice(dot);}
             else {}
@@ -1669,7 +1659,7 @@ fdjt.DOM=
                 return node.nextElementSibling;
             else {
                 var scan=node;
-                while (scan=scan.nextSibling) {
+                while ((scan=scan.nextSibling)) {
                     if (!(scan)) return null;
                     else if (scan.nodeType===1) break;
                     else {}}
@@ -1701,26 +1691,26 @@ fdjt.DOM=
                 else node=node.parentNode;}
             return false;}
         function forward_element(node,n){
-            var scan;
+            var scan, i, lim;
             if (n) {
-                var i=0; scan=node;
+                i=0; scan=node;
                 while (i<n) {scan=forward_element(scan); i++;}
                 return scan;}
             if (havechildren) {
                 if ((node.children)&&(node.children.length>0)) {
                     return node.children[0];}
-                if (scan=node.nextElementSibling) return scan;
-                while (node=node.parentNode)
-                    if (scan=node.nextElementSibling) return scan;
+                if ((scan=node.nextElementSibling)) return scan;
+                while ((node=node.parentNode))
+                    if ((scan=node.nextElementSibling)) return scan;
                 return false;}
             else {
                 if (node.childNodes) {
-                    var children=node.childNodes; var i=0; var lim=children.length;
+                    var children=node.childNodes; i=0, lim=children.length;
                     while (i<lim)
-                        if ((scan=children[i++])&&(scan.nodeType===1)) return scan;}
-                while (scan=node.nextSibling) if (scan.nodeType===1) return scan;
-                while (node=node.parentNode)
-                    if (scan=next_element(node)) return scan;
+                        if (((scan=children[i++]))&&((scan.nodeType===1))) return scan;}
+                while ((scan=node.nextSibling)) if (scan.nodeType===1) return scan;
+                while ((node=node.parentNode))
+                    if ((scan=next_element(node))) return scan;
                 return false;}}
         function scan_forward(node,test,justelts){
             if (!(test)) {
@@ -1752,7 +1742,7 @@ fdjt.DOM=
                 return node.previousElementSibling;
             else {
                 var scan=node;
-                while (scan=scan.previousSibling) 
+                while ((scan=scan.previousSibling))
                     if (!(scan)) return null;
                 else if (scan.nodeType===1) break;
                 else {}
@@ -1763,11 +1753,11 @@ fdjt.DOM=
                 if (justelts) {
                     if (havechildren) return node.previousElementSibling;
                     else return previous_element(node);}
-            else return previous_node(node);
+            else return prev_node(node);
             var scan=((justelts)?
                       ((havechildren)?(node.previousElementSibling):
                        (previous_element(node))):
-                      (previous_node(node)));
+                      (prev_node(node)));
             while (scan)
                 if (test(scan)) return scan;
             else if (justelts)
@@ -1840,7 +1830,7 @@ fdjt.DOM=
             if (typeof win==="string") {
                 if (!(win=document.getElementById(win))) return;}
             if ((!(win))||(win===window)||
-                ((window.Window)&&(win instanceof Window))) {
+                ((window.Window)&&(win instanceof window.Window))) {
                 win=win||window;
                 return (win.pageYOffset||win.scrollY||
                         win.document.documentElement.scrollTop||0);}
@@ -1850,7 +1840,7 @@ fdjt.DOM=
             if (typeof win==="string") {
                 if (!(win=document.getElementById(win))) return;}
             if ((!(win))||(win===window)||
-                ((Window)&&(win instanceof Window))) {
+                ((window.Window)&&(win instanceof window.Window))) {
                 win=win||window;
                 return (win.pageXOffset||win.scrollX||
                         win.document.documentElement.scrollLeft||0);}
@@ -1860,7 +1850,7 @@ fdjt.DOM=
             if (typeof win==="string") {
                 if (!(win=document.getElementById(win))) return;}
             if ((!(win))||(win===window)||
-                ((Window)&&(win instanceof Window))) {
+                ((window.Window)&&(win instanceof window.Window))) {
                 win=win||window;
                 var docelt=((win.document)&&(win.document.documentElement));
                 return (win.innerHeight)||((docelt)&&(docelt.clientHeight));}
@@ -1869,7 +1859,7 @@ fdjt.DOM=
             if (typeof win==="string") {
                 if (!(win=document.getElementById(win))) return;}
             if ((!(win))||(win===window)||
-                ((Window)&&(win instanceof Window))) {
+                ((window.Window)&&(win instanceof window.Window))) {
                 win=win||window;
                 var docelt=((win.document)&&(win.document.documentElement));
                 return ((win.innerWidth)||((docelt)&&(docelt.clientWidth)));}
@@ -1907,14 +1897,13 @@ fdjt.DOM=
                 // For each stylesheet
                 for (var i=0; i<document.styleSheets.length; i++) {
                     var styleSheet=document.styleSheets[i];
-                    var cssRule=false;
                     var cssRules=styleSheet.cssRules||styleSheet.rules;
                     var n_rules=((cssRules)&&(cssRules.length));
                     var ii=0; while (ii<n_rules) {
                         if (cssRules[ii])  {
                             var cssRule=cssRules[ii];
-                            if (cssRule.selectorText.toLowerCase()==ruleName) {
-                                if (deleteFlag=='delete') {
+                            if (cssRule.selectorText.toLowerCase()===ruleName) {
+                                if (deleteFlag==='delete') {
                                     if (styleSheet.cssRules) {
                                         styleSheet.deleteRule(ii);}
                                     // Delete rule IE style.
@@ -1953,7 +1942,7 @@ fdjt.DOM=
                     if (sheet.deleteRule) sheet.deleteRule(i);
                     else if (sheet.removeRule) sheet.removeRule(i);
                     else {}}
-                var rules=sheet.cssRules||sheet.rules;
+                rules=sheet.cssRules||sheet.rules;
                 var ruletext=selector+' {'+text+'}';
                 if (sheet.insertRule)
                     sheet.insertRule(ruletext, rules.length);
@@ -1971,7 +1960,7 @@ fdjt.DOM=
             if (typeof node === 'string') {
                 var elt=fdjtID(node);
                 if (!(node)) {
-                    fdjtLog("Can't find #%s",node)
+                    fdjtLog("Can't find #%s",node);
                     return;}
                 node=elt;}
             else if (node instanceof Array) {
@@ -2065,17 +2054,9 @@ fdjt.DOM=
         fdjtDOM.useSVG=useSVG;
         fdjtDOM.useBMP=useBMP;
 
-        function goSVG(){
-            if (nosvg) useBMP();
-            else useSVG();}
         function prefSVG(){
             if (!(nosvg)) useSVG();}
         fdjtDOM.prefSVG=prefSVG;
-
-        var inits_run=false;
-        var inits=[checkChildren,checkSVG]; // ,fixSVG
-        var init_names={
-            checkChildren: checkChildren,checkSVG: checkSVG};
 
         fdjtDOM.init=fdjt.Init;
         fdjtDOM.addInit=fdjt.addInit;
@@ -2140,17 +2121,16 @@ fdjt.DOM=
                 return sel.getRangeAt(0);
             else if (document.createRange) {
                 var range=document.createRange();
-                range.setStart(
-                    selectionObject.anchorNode,selectionObject.anchorOffset);
-                range.setEnd(
-                    selectionObject.focusNode,selectionObject.focusOffset);
+                range.setStart(sel.anchorNode,sel.anchorOffset);
+                range.setEnd(sel.focusNode,sel.focusOffset);
                 return range;}
-            else return false;}
+            else return false;};
 
         function node2text(node,accum){
+            var i, lim;
             if (!(accum)) accum="";
             if ((!(node.nodeType))&&(node.length)) {
-                var i=0, lim=node.length;
+                i=0, lim=node.length;
                 while (i<lim) accum=node2text(node[i++],accum);
                 return accum;}
             else if (node.nodeType===3) {
@@ -2159,7 +2139,7 @@ fdjt.DOM=
                 return accum;}
             else if (node.nodeType===1) {
                 var children=node.childNodes;
-                var i=0, lim=children.length;
+                i=0, lim=children.length;
                 while (i<lim) {
                     accum=node2text(children[i++],accum);}
                 return accum;}
@@ -2167,12 +2147,13 @@ fdjt.DOM=
         fdjtDOM.node2text=node2text;
         
         function get_text_pos(node,pos,cur,starting){
+            var i, lim;
             if (cur>pos) return false;
             else if ((!(node.nodeType))&&(node.length)) {
-                var i=0, lim=node.length;
+                i=0, lim=node.length;
                 while (i<lim) {
                     cur=get_text_pos(node[i++],pos,cur,starting);
-                    if (!(typeof cur === "number")) return cur;}
+                    if (typeof cur !== "number") return cur;}
                 return cur;}
             else if (node.nodeType===3) {
                 var stringval=node.nodeValue;
@@ -2183,10 +2164,10 @@ fdjt.DOM=
                 else return cur+stringval.length;}
             else if (node.nodeType===1) {
                 var children=node.childNodes;
-                var i=0, lim=children.length;
+                i=0, lim=children.length;
                 while (i<lim) {
                     cur=get_text_pos(children[i++],pos,cur,starting);
-                    if (!(typeof cur === 'number')) {
+                    if (typeof cur !== 'number') {
                         if ((starting)&&(cur.atend)) {
                             cur=pos; while (i<lim) {
                                 var next=get_text_pos(
@@ -2213,7 +2194,7 @@ fdjt.DOM=
             var newrange=document.createRange();
             newrange.setStart(start_info.node,start_info.off);
             newrange.setEnd(end_info.node,end_info.off);
-            return newrange;}
+            return newrange;};
         
         function get_text_off(scan,upto,sofar){
             if (!(sofar)) sofar=0;
@@ -2252,7 +2233,7 @@ fdjt.DOM=
                           textOff(ends_in,end,0));
             return {start: start_edge+range.startOffset,
                     starts_in: within.id,ends_in: ends_in.id,
-                    end: end_edge+range.endOffset};}
+                    end: end_edge+range.endOffset};};
 
         function findString(node,needle,off,count){
             if (typeof off === 'undefined') off=0;
@@ -2307,8 +2288,7 @@ fdjt.DOM=
 
         /* Paragraph hashes */
 
-        fdjtDOM.getParaHash=function(node){
-            return paraHash(textify(node,true,false,false));}
+     // fdjtDOM.getParaHash=function(node){return paraHash(textify(node,true,false,false));};
 
         /* Getting transition event names */
 
@@ -2322,8 +2302,8 @@ fdjt.DOM=
             var handler = function(e) {
                 fdjtDOM.transitionEnd = e.type;
                 var i=0, lim=transition_events.length;
-                this.removeEventListener(
-                    transition_events[i++],arguments.callee);};
+                while (i<lim) 
+                    div.removeEventListener(transition_events[i++],handler);};
             div.setAttribute("style","position:absolute;top:0px;transition:top 1ms ease;-webkit-transition:top 1ms ease;-moz-transition:top 1ms ease;-o-transition:top 1ms ease;-ms-transition:top 1ms ease;");
             var i=0, lim=transition_events.length;
             while (i<lim) div.addEventListener(
@@ -2334,7 +2314,7 @@ fdjt.DOM=
                 setTimeout(function() {
                     div.parentNode.removeChild(div);
                     div = handler = null;},
-                           100);},
+                           2000);},
                        0);}
         fdjt.addInit(checkTransitionEvents,"checkTransitionEvents");
 
@@ -2381,7 +2361,7 @@ fdjt.DOM=
 
         /* Run inits on load */
         if ((!(fdjt.noinit))||
-	    ((typeof _fdjt_init === 'undefined')||(!(_fdjt_init))))
+            ((typeof _fdjt_init === 'undefined')||(!(_fdjt_init))))
             fdjtDOM.addListener(window,"load",fdjtDOM.init);
         
         return fdjtDOM;

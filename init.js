@@ -22,12 +22,10 @@
 
 */
 
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
+var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 (function(){
+    "use strict";
     var fdjtLog=fdjt.Log;
     var inits_run=false;
     var inits=[];
@@ -72,11 +70,11 @@ else {}
 
     var device_info=(fdjt.device)||(fdjt.device={});
     if ((window)&&(window.navigator)&&(navigator.appVersion)) {
-	device_info.isAndroid = (/android/gi).test(navigator.appVersion);
-	device_info.isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
-	device_info.isTouchPad = (/hp-tablet/gi).test(navigator.appVersion);
-	device_info.hasTouch = ('ontouchstart' in window) &&
-	    (!(device_info.isTouchPad));}
+        device_info.isAndroid = (/android/gi).test(navigator.appVersion);
+        device_info.isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
+        device_info.isTouchPad = (/hp-tablet/gi).test(navigator.appVersion);
+        device_info.hasTouch = ('ontouchstart' in window) &&
+            (!(device_info.isTouchPad));}
 })();
 
 
