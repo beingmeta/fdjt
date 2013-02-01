@@ -1314,7 +1314,7 @@ fdjt.UI.ProgressBar=(function(){
                 dom.focus();}
             if (spec.handler) spec.handler();
             fdjtUI.cancel(evt);
-            setTimeout(close_choice,500);};
+            close_choice();};
         return dom;}
 
     function choose(spec){
@@ -1330,7 +1330,10 @@ fdjt.UI.ProgressBar=(function(){
             if (close_button) close_button.onclick=null;
             if (box) box.onclick=null;
             if (box) box.onkeydown=null;
-            if (box) remove_alert(box);}
+            if (box) {
+                var timeout=setTimeout(function(){
+                    remove_alert(box); clearTimeout(timeout); timeout=false;},
+                                       500);}}
         if (typeof spec === "function") 
             choices=[{label: "Cancel"},
                      {label: "OK",handler: spec,isdefault: true}];
