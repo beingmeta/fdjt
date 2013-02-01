@@ -126,10 +126,14 @@ fdjt.UI.TapHold=(function(){
             target=document.elementFromPoint(touch_x,touch_y);
         target.dispatchEvent(evt);}
     
-    function tapped(target,evt){return dispatchEvent(target,"tap",evt);}
-    function held(target,evt){return dispatchEvent(target,"hold",evt);}
-    function released(target,evt){return dispatchEvent(target,"release",evt);}
-    function slipped(target,evt){return dispatchEvent(target,"slip",evt);}
+    function tapped(target,evt){
+        return dispatchEvent(target,"tap",evt);}
+    function held(target,evt){
+        return dispatchEvent(target,"hold",evt);}
+    function released(target,evt){
+        return dispatchEvent(target,"release",evt);}
+    function slipped(target,evt){
+        return dispatchEvent(target,"slip",evt);}
     function taptapped(target,evt){
         return dispatchEvent(target,"taptap",evt);}
     function tapheld(target,evt){
