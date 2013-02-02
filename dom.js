@@ -311,7 +311,7 @@ fdjt.DOM=
                 return;}
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
-            if (typeof classinfo !== "string") {
+            if ((classinfo)&&(typeof classinfo !== "string")) {
                 fdjtLog.warn("Non string classname for %o",elt);
                 return false;}
             else if (!(classinfo)) {
@@ -1216,11 +1216,9 @@ fdjt.DOM=
             else if ((test)&&(test.match)&&(test.match(node)))
                 return true;
             else if ((test===true)&&
-                     ((node.tagName==='IMG')||
-                      (node.tagName==='OBJECT')||
-                      (node.tagName==='HR')))
+                     (node.tagName.search(/(img|object|svg|hr)/i)===0))
                 return true;
-            else if (node.childNodes) {
+            else if ((node.childNodes)&&(node.childNodes.length)) {
                 var children=node.childNodes;
                 var i=0; while (i<children.length) {
                     var child=children[i++];
