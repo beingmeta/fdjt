@@ -826,6 +826,18 @@ fdjt.CodexLayout=
                                 terminals[loc]=true;}
                         else terminals[loc]=true;}}
 
+       
+                function firstNchild(ancestor,descendant){
+                    var first=ancestor.firstChild;
+                    while (first) {
+                        if ((first.nodeType===3)&&(first.nodeValue.search(/\S/)>=0))
+                            return false;
+                        else if (first.nodeType===1) break;
+                        else first=first.nextSibling;}
+                    if (!(first)) return false;
+                    else if (first===descendant) return true;
+                    else return firstNchild(first,descendant);}
+
                 // Whether we need to create a new page to have 'node'
                 //  at the page top We don't need a new page if the
                 //  current page has no content or no content up until
@@ -836,11 +848,12 @@ fdjt.CodexLayout=
                         return hasContent(page,true,true);
                     else if (!(hasParent(node,page)))
                         return hasContent(page,true,true);
-                    else if (page.firstChild===node)
+                    else if ((page.firstChild===node)||(firstNchild(page,node)))
                         return false;
-                    else if (hasContent(page,node,true))
-                        return true;
-                    else return false;}
+                    else if (getGeom(node,page).top===0)
+                        // (hasContent(page,node,true))
+                        return false;
+                    else return true;}
 
                 // Create a new page
                 // If node is passed, it is the first element on the new page
