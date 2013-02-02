@@ -311,7 +311,10 @@ fdjt.DOM=
                 return;}
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
-            if ((typeof classinfo !== "string")||(classinfo==="")) {
+            if (typeof classinfo !== "string") {
+                fdjtLog.warn("Non string classname for %o",elt);
+                return false;}
+            else if (!(classinfo)) {
                 elt.className=classname; return true;}
             var class_regex=classpats[classname]||classPat(classname);
             var newinfo=classinfo;
@@ -345,7 +348,8 @@ fdjt.DOM=
                 return;}
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
-            if ((typeof classinfo !== "string")||(classinfo==="")) return false;
+            if ((typeof classinfo !== "string")||(classinfo===""))
+                return false;
             var class_regex=
                 ((typeof classname === 'string')?
                  (classpats[classname]||classPat(classname)):
@@ -499,7 +503,7 @@ fdjt.DOM=
             if ((this.tag)&&(this.tag!==elt.tagName)) return false;
             else if ((this.id)&&(this.id!==elt.id)) return false;
             if (this.classes)
-                if (typeof elt.className !== "string") {
+                if (typeof elt.className === "string") {
                     var classname=elt.className; var classes=this.classes;
                     i=0, lim=classes.length;
                     while (i<lim) if (classname.search(classes[i++])<0) return false;}
