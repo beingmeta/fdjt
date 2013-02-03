@@ -1187,18 +1187,25 @@ fdjt.CodexLayout=
                         var child=children[i++];
                         if (child.nodeType===1) gatherLayoutInfo(child,ids,dups);}}}
 
-            /* Setting content (when there's a saved paginated version) */
+            /* Setting content (when there's a saved version) Mostly
+             this sets up the external data and functions which would
+             have been generated if we'd gone through the layout,
+             especially the dups for split nodes and the saved_ids
+             for restoring unique IDs.
+            */
             function setContent(content){
                 var frag=document.createElement("div");
                 frag.innerHTML=content;
-                var all_ids=[]; var saved_ids={}; var curnodes=[]; var newdups={};
-                var pages=frag.childNodes, addpages=[];
-                var i=0, lim=pages.length; while (i<lim) {
-                    var page=pages[i++];
+                var all_ids=[], saved_ids={};
+                var curnodes=[], newdups={};
+                var newpages=frag.childNodes, addpages=[];
+                var i=0, lim=newpages.length; while (i<lim) {
+                    var page=newpages[i++];
                     addpages.push(page);
                     if (page.nodeType===1) {
-                        if ((page.className)&&(page.className.search(/\bcurpage\b/)>=0))
-                            this.page=page;
+                        if ((page.className)&&
+                            (page.className.search(/\bcurpage\b/)>=0))
+                            dropClass(page,"curpage");
                         gatherLayoutInfo(page,all_ids,newdups);}}
                 i=0, lim=all_ids.length; while (i<lim) {
                     var id=all_ids[i++];
@@ -1209,14 +1216,36 @@ fdjt.CodexLayout=
                 var cur=container.childNodes;
                 i=0, lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
                 i=0; while (i<lim) container.removeChild(curnodes[i++]);
-                i=0, lim=pages.length; while (i<lim) container.appendChild(addpages[i++]);
+                i=0, lim=addpages.length;
+                while (i<lim) container.appendChild(addpages[i++]);
                 this.pages=addpages;
                 dups=this.dups=newdups;
-                this.altids=all_ids;
+                saved_ids._all_ids=all_ids;
                 this.saved_ids=saved_ids;
-                if (!(this.page)) this.page=addpages[0];
+                this.page=addpages[0];
                 this.pagenum=parseInt(this.page.getAttribute("data-pagenum"));}
             this.setContent=setContent;
+
+            // This is for setting individual page content, assuming
+            // the page node already exists
+            function setPageContent(content){
+                var frag=document.createElement("div");
+                frag.innerHTML=content;
+                var newpage=frag.firstChild;
+                var saved_ids=this.saved_ids||(this.saved_ids={});
+                var all_ids=(saved_ids._all_ids)||(saved_ids._all_ids=[]);
+                gatherLayoutInfo(newpage,all_ids,dups);
+                var i=0, lim=all_ids.length; while (i<lim) {
+                    var id=all_ids[i++];
+                    var original=document.getElementById(id);
+                    if (original) {
+                        saved_ids[id]=original;
+                        original.id=null;}}
+                var pagenum=parseInt(newpage.getAttribute("data-pagenum"));
+                var curpage=document.getElementById(newpage.id);
+                fdjtDOM.replace(curpage,newpage);
+                if (this.page===curpage) this.page=newpage;
+                pages[pagenum-1]=newpage;}
 
             /* Finishing the page */
 
@@ -1227,9 +1256,11 @@ fdjt.CodexLayout=
                     var geom=getGeom(completed);
                     if (!(page_width)) page_width=geom.width;
                     if (!(page_height)) page_height=geom.height;}
-                var oversize=((bounds.right>page_width)||(bounds.bottom>page_height));
-                var undersize=((fullpage)&&((bounds.right<(page_width*0.95))&&
-                                            (bounds.bottom<(page_height*0.95))));
+                var oversize=((bounds.right>page_width)||
+                              (bounds.bottom>page_height));
+                var undersize=((fullpage)&&
+                               ((bounds.right<(page_width*0.95))&&
+                                (bounds.bottom<(page_height*0.95))));
                 
                 if (((oversize)||(undersize))&&(scale_pages)) {
                     var boxed=fdjtDOM("div.codexscalebox",completed.childNodes);
@@ -1399,6 +1430,16 @@ fdjt.CodexLayout=
 
             this.Revert=function(){
                 var i, lim;
+                if (this.saved_ids) {
+                    // This means that the content was explicitly set,
+                    //  so we just need to restore the saved ids and clear
+                    //  out the container to revert.
+                    var saved=this.saved_ids, allids=saved._allids;
+                    i=0, lim=allids.length; while (i<lim) {
+                        var id=allids[i++], original=saved[id];
+                        original.id=id;}
+                    this.saved_ids={}; this.dups={};
+                    return;}
                 // Remove any scaleboxes (save the children)
                 if (this.scaledpages) {
                     var scaled=this.scaledpages;
