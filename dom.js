@@ -1208,27 +1208,28 @@ fdjt.DOM=
             else return 0;}
         fdjtDOM.countBreaks=countBreaks;
      
-        function hasContent(node,recur,test){
-            if (node===recur) return false;
+        var nontext_content=/(img|object|svg|hr)/i;
+
+        function hasContent(node,recur,test,limit){
+            if (node===limit) return false;
             else if (node.nodeType===3)
                 return (child.nodeValue.search(/\w/g)>=0);
             else if (node.nodeType!==1) return false;
             else if ((test)&&(test.match)&&(test.match(node)))
                 return true;
-            else if ((test===true)&&
-                     (node.tagName.search(/(img|object|svg|hr)/i)===0))
+            else if (node.tagName.search(nontext_content)===0)
                 return true;
             else if ((node.childNodes)&&(node.childNodes.length)) {
                 var children=node.childNodes;
                 var i=0; while (i<children.length) {
                     var child=children[i++];
-                    if (child===recur) return false;
+                    if (child===limit) return false;
                     else if (child.nodeType===3) {
                         if (child.nodeValue.search(/\w/g)>=0) return true;
                         else continue;}
                     else if (child.nodeType!==1) continue;
                     else if (recur) {
-                        if (hasContent(child,recur,test)) return true;
+                        if (hasContent(child,recur,test,limit)) return true;
                         else continue;}
                     else continue;}
                 return false;}
