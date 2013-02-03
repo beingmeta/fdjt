@@ -301,6 +301,7 @@ fdjt.String=
                     numstring=numstring.slice(0,point+prec+1);
                 else if ((point<0)||(numstring.length<(point+prec+1))) {
                     j=0; var pad=(point+prec+1)-numstring.length;
+                    if (point<0) suffix=suffix+".";
                     while (j<pad) {suffix=suffix+"0"; j++;}}}
             switch (nzeroes) {
             case 0: prefix=""; break;
