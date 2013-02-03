@@ -512,6 +512,8 @@ fdjt.CodexLayout=
             // by figures/tables/etc which we don't want to embed
             var float_blocks=this.float_blocks=[];
 
+            if (init.layout_id) this.layout_id=init.layout_id;
+
             // Startup
 
             this.started=false; // When we started
@@ -1170,22 +1172,28 @@ fdjt.CodexLayout=
                 return this;}
             this.addContent=addContent;
 
-            function gatherLayoutInfo(node,ids,dups){
+            function gatherLayoutInfo(node,ids,dups,restoremap){
                 if (node.nodeType!==1) return;
                 if (node.id) ids.push(node.id);
                 var classname=node.className;
-                if ((typeof classname === "string")&&
-                    (classname.search(/\b(codexdup|codexdupend)\b/)>=0)) {
-                    var baseid=node.getAttribute("data-baseid");
-                    if (!(baseid)) {}
-                    else if (dups[baseid]) dups[baseid].push(node);
-                    else dups[baseid]=[node];}
+                if (typeof classname === "string") {
+                    if (classname.search(/\b(codexdup|codexdupend)\b/)>=0) {
+                        var baseid=node.getAttribute("data-baseid");
+                        if (!(baseid)) {}
+                        else if (dups[baseid]) dups[baseid].push(node);
+                        else dups[baseid]=[node];}
+                    else if ((node.id)&&
+                             (classname.search(/\bcodexrestore\b/)>=0)) {
+                        restoremap[node.id]=node;}}
                 if ((node.childNodes)&&(node.childNodes.length)) {
                     var children=node.childNodes;
                     var i=0, lim=children.length;
                     while (i<lim) {
                         var child=children[i++];
-                        if (child.nodeType===1) gatherLayoutInfo(child,ids,dups);}}}
+                        if (child.nodeType===1)
+                            gatherLayoutInfo(child,ids,dups,restoremap);}}}
+
+            var replaceNode=fdjtDOM.replace;
 
             /* Setting content (when there's a saved version) Mostly
              this sets up the external data and functions which would
@@ -1196,7 +1204,7 @@ fdjt.CodexLayout=
             function setContent(content){
                 var frag=document.createElement("div");
                 frag.innerHTML=content;
-                var all_ids=[], saved_ids={};
+                var all_ids=[], saved_ids={}, restoremap={};
                 var curnodes=[], newdups={};
                 var newpages=frag.childNodes, addpages=[];
                 var i=0, lim=newpages.length; while (i<lim) {
@@ -1206,11 +1214,34 @@ fdjt.CodexLayout=
                         if ((page.className)&&
                             (page.className.search(/\bcurpage\b/)>=0))
                             dropClass(page,"curpage");
-                        gatherLayoutInfo(page,all_ids,newdups);}}
+                        gatherLayoutInfo(page,all_ids,newdups,restoremap);}}
                 i=0, lim=all_ids.length; while (i<lim) {
                     var id=all_ids[i++];
                     var original=document.getElementById(id);
-                    if (original) {
+                    var restore=restoremap[id];
+                    // The restoremap contains content references
+                    //  which are unmodified from the original
+                    //  content, making them a lot smaller and easier
+                    //  to keep around.
+                    if ((restore)&&(original)) {
+                        var classname=restore.className;
+                        var style=restore.getAttribute("style");
+                        var ostyle=original.getAttribute("style");
+                        var crumb=document.createTextNode();
+                        replaceNode(original,crumb);
+                        crumbs[id]=crumb;
+                        replaceNode(restore,original);
+                        if (classname!==original.className) {
+                            if ((original.className)&&
+                                (typeof original.className === "string"))
+                                original.setAttribute(
+                                    "data-oldclass",original.className);
+                            original.className=classname;}
+                        if (style!==ostyle) {
+                            if (ostyle) original.setAttribute(
+                                "data-oldstyle",ostyle);
+                            original.style=style;}}
+                    else if (original) {
                         saved_ids[id]=original;
                         original.id=null;}}
                 var cur=container.childNodes;
@@ -1225,6 +1256,59 @@ fdjt.CodexLayout=
                 this.page=addpages[0];
                 this.pagenum=parseInt(this.page.getAttribute("data-pagenum"));}
             this.setContent=setContent;
+
+            function prepForRestore(node){
+                if (node.nodeType!==1) return;
+                if (node.id) {
+                    var classname=node.className;
+                    if (!((classname)&&
+                          (typeof classname === "string")&&
+                          (classname.search(/\bcodexdup/g)>=0))) {
+                        var justref=document.createElement(node.tagName);
+                        justref.id=node.id;
+                        justref.className=node.className+" codexrestore";
+                        justref.style=node.style;
+                        node.parentNode.replaceChild(justref,node);
+                        return;}}
+                var children=node.childNodes;
+                var i=0, n=children.length;
+                while (i<n) {
+                    var child=children[i++];
+                    if (child.nodeType===1) prepForRestore(child);}}
+            
+            function saveLayout(layout_id){
+                if (!(layout_id)) layout_id=
+                    this.layout_id||
+                    (this.layout_id=
+                     fdjtString("%dx%d:%s",
+                                this.width,this.height,fdjtState.getUUID()));
+                var copy=container.cloneNode(true);
+                var pages=copy.childNodes, i=0, npages=pages.length;
+                while (i<npages) {
+                    var page=pages[i++];
+                    if (page.nodeType===1) {
+                        var content=page.childNodes;
+                        var j=0, n=content.length;
+                        while (j<n) {
+                            var node=content[j++];
+                            if (node.nodeType===1) prepForRestore(node);}}}
+                fdjt.State.setLocal(layout_id,copy.innerHTML);
+                return layout_id;}
+            this.saveLayout=saveLayout;
+            function restoreLayout(layout_key){
+                this.setContent(fdjtState.getLocal(layout_key));}
+
+            layout.savePages=function(){
+                var pages=this.pages; var i=0, npages=pages.length;
+                while (i<npages) {
+                    var page=pages[i++].cloneNode(true);
+                    var content=page.childNodes;
+                    var j=0, lim=content.length;
+                    while (j<lim) {
+                        var node=content[j++];
+                        if (node.nodeType===1) prepForRestore(node);}
+                    fdjtState.setLocal(layout_key+"#"+page.id,page.outerHTML);};}
+
 
             // This is for setting individual page content, assuming
             // the page node already exists
@@ -1435,9 +1519,22 @@ fdjt.CodexLayout=
                     //  so we just need to restore the saved ids and clear
                     //  out the container to revert.
                     var saved=this.saved_ids, allids=saved._allids;
+                    var crumbs=this.crumbs;
                     i=0, lim=allids.length; while (i<lim) {
-                        var id=allids[i++], original=saved[id];
-                        original.id=id;}
+                        var id=allids[i++];
+                        if (crumbs[id]) {
+                            var original=document.getElementById(id);
+                            var oclass=original.getAttribute("data-oldclass");
+                            var ostyle=original.getAttribute("data-oldstyle");
+                            var crumb=crumbs[i];
+                            if (oclass) {
+                                original.className=oclass;
+                                original.removeAttribute("data-oldclass");}
+                            if (ostyle) {
+                                original.setAttribute("style",ostyle);
+                                original.removeAttribute("data-oldstyle");}
+                            crumb.parentNode.replaceChild(original,crumb);}
+                        else {original=saved[id]; original.id=id;}}
                     this.saved_ids={}; this.dups={};
                     return;}
                 // Remove any scaleboxes (save the children)
