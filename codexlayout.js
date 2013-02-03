@@ -1201,7 +1201,7 @@ fdjt.CodexLayout=
              especially the dups for split nodes and the saved_ids
              for restoring unique IDs.
             */
-            function setContent(content){
+            function setLayout(content){
                 var frag=document.createElement("div");
                 frag.innerHTML=content;
                 var all_ids=[], saved_ids={}, restoremap={};
@@ -1255,7 +1255,7 @@ fdjt.CodexLayout=
                 this.saved_ids=saved_ids;
                 this.page=addpages[0];
                 this.pagenum=parseInt(this.page.getAttribute("data-pagenum"));}
-            this.setContent=setContent;
+            this.setLayout=setLayout;
 
             function prepForRestore(node){
                 if (node.nodeType!==1) return;
@@ -1292,13 +1292,29 @@ fdjt.CodexLayout=
                         while (j<n) {
                             var node=content[j++];
                             if (node.nodeType===1) prepForRestore(node);}}}
-                fdjt.State.setLocal(layout_id,copy.innerHTML);
+                var layouts=fdjtState.getLocal("fdjtCodexLayout.layouts",true);
+                if (layouts) {
+                    if (layouts.indexOf(layout_id)<0) {
+                        layouts.push(layout_id);}}
+                else layouts=[layout_id];
+                fdjtState.setLocal("fdjtCodexLayout.layouts",layouts,true);
+                fdjtState.setLocal(layout_id,copy.innerHTML,false);
                 return layout_id;}
             this.saveLayout=saveLayout;
-            function restoreLayout(layout_key){
-                this.setContent(fdjtState.getLocal(layout_key));}
+            function restoreLayout(arg){
+                if (layout_key.indexOf("<")>=0) {
+                    this.setLayout(arg); return true;}
+                var layout=fdjtState.getLocal(arg);
+                if (layout) {
+                    this.setLayout(layout);
+                    return true;}
+                else return false;}
+            this.restorLayout=restoreLayout;
 
             layout.savePages=function(){
+                // This is a version which could be used if restore
+                // the entire layout takes too long, which doesn't
+                // seem to be the case.
                 var pages=this.pages; var i=0, npages=pages.length;
                 while (i<npages) {
                     var page=pages[i++].cloneNode(true);
