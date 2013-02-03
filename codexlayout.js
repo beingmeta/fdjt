@@ -1282,6 +1282,15 @@ fdjt.CodexLayout=
                     (this.layout_id=
                      fdjtString("%dx%d:%s",
                                 this.width,this.height,fdjtState.getUUID()));
+                if (!(CodexLayout.cache)) return;
+                var layouts=fdjtState.getLocal("fdjtCodexLayout.layouts",true);
+                if ((layouts)&&(layouts.length>=CodexLayout.cache)) {
+                    var k=0, klim=(layouts.length)-(CodexLayout.cache-1);
+                    while (k<klim) {
+                        var id=layouts[k++];
+                        fdjtLog("Discarding layout %s",id);
+                        fdjtState.dropLocal(id);}
+                    layouts=layouts.slice(klim);}
                 var copy=container.cloneNode(true);
                 var pages=copy.childNodes, i=0, npages=pages.length;
                 while (i<npages) {
@@ -1292,7 +1301,6 @@ fdjt.CodexLayout=
                         while (j<n) {
                             var node=content[j++];
                             if (node.nodeType===1) prepForRestore(node);}}}
-                var layouts=fdjtState.getLocal("fdjtCodexLayout.layouts",true);
                 if (layouts) {
                     if (layouts.indexOf(layout_id)<0) {
                         layouts.push(layout_id);}}
@@ -1302,14 +1310,17 @@ fdjt.CodexLayout=
                 return layout_id;}
             this.saveLayout=saveLayout;
             function restoreLayout(arg){
-                if (layout_key.indexOf("<")>=0) {
-                    this.setLayout(arg); return true;}
+                if (arg.indexOf("<")>=0) {
+                    this.setLayout(arg);
+                    this.done=fdjtTime();
+                    return true;}
                 var layout=fdjtState.getLocal(arg);
                 if (layout) {
                     this.setLayout(layout);
+                    this.done=fdjtTime();
                     return true;}
                 else return false;}
-            this.restorLayout=restoreLayout;
+            this.restoreLayout=restoreLayout;
 
             layout.savePages=function(){
                 // This is a version which could be used if restore
@@ -1534,7 +1545,7 @@ fdjt.CodexLayout=
                     // This means that the content was explicitly set,
                     //  so we just need to restore the saved ids and clear
                     //  out the container to revert.
-                    var saved=this.saved_ids, allids=saved._allids;
+                    var saved=this.saved_ids, allids=saved._all_ids;
                     var crumbs=this.crumbs;
                     i=0, lim=allids.length; while (i<lim) {
                         var id=allids[i++];
@@ -1542,7 +1553,7 @@ fdjt.CodexLayout=
                             var original=document.getElementById(id);
                             var oclass=original.getAttribute("data-oldclass");
                             var ostyle=original.getAttribute("data-oldstyle");
-                            var crumb=crumbs[i];
+                            var crumb=crumbs[id];
                             if (oclass) {
                                 original.className=oclass;
                                 original.removeAttribute("data-oldclass");}
@@ -1550,7 +1561,9 @@ fdjt.CodexLayout=
                                 original.setAttribute("style",ostyle);
                                 original.removeAttribute("data-oldstyle");}
                             crumb.parentNode.replaceChild(original,crumb);}
-                        else {original=saved[id]; original.id=id;}}
+                        else if (saved[id]) {
+                            original=saved[id]; original.id=id;}
+                        else {}}
                     this.saved_ids={}; this.dups={};
                     return;}
                 // Remove any scaleboxes (save the children)
@@ -1627,6 +1640,8 @@ fdjt.CodexLayout=
                     height: this.height, width: this.width,
                     break_blocks: this.break_blocks};};
 
+        CodexLayout.cache=2;
+        
         return CodexLayout;})();
 
 
