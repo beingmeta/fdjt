@@ -1227,7 +1227,7 @@ fdjt.CodexLayout=
                         var classname=restore.className;
                         var style=restore.getAttribute("style");
                         var ostyle=original.getAttribute("style");
-                        var crumb=document.createTextNode();
+                        var crumb=document.createTextNode("");
                         replaceNode(original,crumb);
                         crumbs[id]=crumb;
                         replaceNode(restore,original);
@@ -1240,7 +1240,7 @@ fdjt.CodexLayout=
                         if (style!==ostyle) {
                             if (ostyle) original.setAttribute(
                                 "data-oldstyle",ostyle);
-                            original.style=style;}}
+                            original.setAttribute("style",style);}}
                     else if (original) {
                         saved_ids[id]=original;
                         original.id=null;}}
@@ -1266,8 +1266,11 @@ fdjt.CodexLayout=
                           (classname.search(/\bcodexdup/g)>=0))) {
                         var justref=document.createElement(node.tagName);
                         justref.id=node.id;
-                        justref.className=node.className+" codexrestore";
-                        justref.style=node.style;
+                        if (typeof node.className === "string")
+                            justref.className=node.className+" codexrestore";
+                        else justref.className="codexrestore";
+                        if (node.getAttribute("style"))
+                            justref.setAttribute("style",node.getAttribute("style"));
                         node.parentNode.replaceChild(justref,node);
                         return;}}
                 var children=node.childNodes;
@@ -1277,11 +1280,8 @@ fdjt.CodexLayout=
                     if (child.nodeType===1) prepForRestore(child);}}
             
             function saveLayout(layout_id){
-                if (!(layout_id)) layout_id=
-                    this.layout_id||
-                    (this.layout_id=
-                     fdjtString("%dx%d:%s",
-                                this.width,this.height,fdjtState.getUUID()));
+                if (!(layout_id)) layout_id=this.layout_id||
+                    (this.layout_id=this.width+"x"+this.height+fdjtState.getUUID());
                 if (!(CodexLayout.cache)) return;
                 var layouts=fdjtState.getLocal("fdjtCodexLayout.layouts",true);
                 if ((layouts)&&(layouts.length>=CodexLayout.cache)) {
