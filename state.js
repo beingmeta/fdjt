@@ -144,25 +144,71 @@ fdjt.State=
 
         /* Local storage (persists between sessions) */
 
-        function setLocal(name,val,unparse){
+        function setLocal(name,val,unparse,unique){
             if (!(name)) throw { error: "bad name",name: name};
             if (unparse) val=JSON.stringify(val);
-            if (window.localStorage)
-                window.localStorage[name]=val;}
+            if (window.localStorage) {
+                if (name instanceof RegExp) {
+                    var keys=[]; var count=0;
+                    var storage=window.localStorage;
+                    var i=0; var lim=storage.length;
+                    while (i<lim) {
+                        var key=storage.key(i++);
+                        if (key.search(name)>=0) keys.push(key);}
+                    i=0, lim=keys.length; while (i<lim) {
+                        storage[keys[i++]]=val;}}
+                else window.localStorage[name]=val;}}
         fdjtState.setLocal=setLocal;
 
         function getLocal(name,parse){
-            if (window.localStorage) {
-                var val=window.localStorage[name];
-                if (val)
-                    if (parse) return JSON.parse(val); else return val;
-                else return false;}
+            if (!(name)) throw { error: "bad name",name: name};
+            else if (window.localStorage) {
+                if (name instanceof RegExp) {
+                    var result={}; var count=0;
+                    var storage=window.localStorage;
+                    var i=0; var lim=storage.length;
+                    while (i<lim) {
+                        var key=storage.key(i++);
+                        if (key.search(name)>=0) {
+                            return ((parse)?(JSON.parse(storage[key])):(storage[key]));}}
+                    return false;}
+                else {
+                    var val=window.localStorage[name];
+                    if (val)
+                        if (parse) return JSON.parse(val); else return val;
+                    else return false;}}
             else return false;}
         fdjtState.getLocal=getLocal;
 
+        function findLocal(name,val,parse){
+            if (window.localStorage) {
+                var result={};
+                var storage=window.localStorage;
+                var i=0; var lim=storage.length;
+                while (i<lim) {
+                    var key=storage.key(i++);
+                    if ((!(name))||(key.search(name)>=0)) {
+                        var v=storage[key];
+                        if ((!(val))||(v.search(val)>=0)) {
+                            if (parse) {
+                                try {v=JSON.parse(v);} catch (ex) {}}
+                            result[key]=v;}}}
+                return result;}
+            else return false;}
+        fdjtState.findLocal=findLocal;
+
         function dropLocal(name){
-            if (window.localStorage)
-                return window.localStorage.removeItem(name);
+            if (window.localStorage) {
+                if (name instanceof RegExp) {
+                    var drop=[]; var count=0;
+                    var storage=window.localStorage;
+                    var i=0; var lim=storage.length;
+                    while (i<lim) {
+                        var key=storage.key(i++);
+                        if (key.search(name)>=0) drop.push(key);}
+                    i=0, lim=drop.length; while (i<lim) {
+                        storage.removeItem(drop[i++]);}}
+                else return window.localStorage.removeItem(name);}
             else return false;}
         fdjtState.dropLocal=dropLocal;
         
