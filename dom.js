@@ -244,7 +244,7 @@ fdjt.DOM=
                     if (node.alt) output=output+"[alt="+node.alt+"]";
                     else if (node.src) output=output+"[src="+node.src+"]";}
                 else {}
-                if (node.className)
+                if (typeof node.className === "string")
                     output=output+"."+node.className.replace(/\s+/g,'.');
                 return output+">";}
             else return node.toString();}
@@ -286,7 +286,7 @@ fdjt.DOM=
                     return;}
             var classinfo=((attrib) ? (elt.getAttribute(attrib)||"") :
                            (elt.className));
-            if (!(classinfo)) return false;
+            if ((typeof classinfo !== "string")||(classinfo==="")) return false;
             else if (classname===true) return true;
             else if (classinfo===classname) return true;
             else if (typeof classname === 'string')
@@ -311,7 +311,10 @@ fdjt.DOM=
                 return;}
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
-            if (!(classinfo)) {
+            if ((classinfo)&&(typeof classinfo !== "string")) {
+                fdjtLog.warn("Non string classname for %o",elt);
+                return false;}
+            else if (!(classinfo)) {
                 elt.className=classname; return true;}
             var class_regex=classpats[classname]||classPat(classname);
             var newinfo=classinfo;
@@ -345,7 +348,8 @@ fdjt.DOM=
                 return;}
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
-            if (!(classinfo)) return false;
+            if ((typeof classinfo !== "string")||(classinfo===""))
+                return false;
             var class_regex=
                 ((typeof classname === 'string')?
                  (classpats[classname]||classPat(classname)):
@@ -403,7 +407,7 @@ fdjt.DOM=
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :
                   (elt.className))||null);
-            if (!(classinfo)) {
+            if ((typeof classinfo !== "string")||(classinfo==="")) {
                 if (attrib) elt.setAttribute(attrib,classname);
                 else elt.className=classname;
                 return true;}
@@ -499,7 +503,7 @@ fdjt.DOM=
             if ((this.tag)&&(this.tag!==elt.tagName)) return false;
             else if ((this.id)&&(this.id!==elt.id)) return false;
             if (this.classes)
-                if (elt.className) {
+                if (typeof elt.className === "string") {
                     var classname=elt.className; var classes=this.classes;
                     i=0, lim=classes.length;
                     while (i<lim) if (classname.search(classes[i++])<0) return false;}
@@ -577,7 +581,8 @@ fdjt.DOM=
 
         function gatherByClass(node,pat,results){
             if (node.nodeType===1) {
-                if ((node.className)&&(node.className.search(pat)>=0))
+                var classname=node.className;
+                if ((typeof classname === "string")&&(classname.search(pat)>=0))
                     results.push(node);
                 var children=node.childNodes;
                 if (children) {
@@ -693,7 +698,8 @@ fdjt.DOM=
 
         function regexp_filter_children(node,rx,results){
             if (node.nodeType===1) {
-                if ((node.className)&&(node.className.search(rx)>=0))
+                var classname=node.className;
+                if ((typeof classname === "string")&&(classname.search(rx)>=0))
                     results.push(node);
                 var children=node.childNodes;
                 if (children) {
@@ -1001,7 +1007,7 @@ fdjt.DOM=
                     var string=""; var suffix="";
                     if (whitespace!=="normal") flat=false;
                     if (display_type==='none') return "";
-                    else if ((classname)&&
+                    else if ((typeof classname === "string")&&
                              ((classname==='fdjtskiptext')||
                               (classname.search(/\bfdjtskiptext\b/)>=0)))
                         return "";
@@ -1174,6 +1180,7 @@ fdjt.DOM=
         function textwidth(node){
             if (node.nodeType===3) return node.nodeValue.length;
             else if (node.nodeType!==1) return 0;
+            else if (typeof node.className!=="string") return 0;
             else if ((node.className==="fdjtskiptext")||
                      (node.className.search(/\bfdjtskiptext/)>=0))
                 return 0;
@@ -1201,29 +1208,28 @@ fdjt.DOM=
             else return 0;}
         fdjtDOM.countBreaks=countBreaks;
      
-        function hasContent(node,recur,test){
-            if (node===recur) return false;
+        var nontext_content=/(img|object|svg|hr)/i;
+
+        function hasContent(node,recur,test,limit){
+            if (node===limit) return false;
             else if (node.nodeType===3)
                 return (child.nodeValue.search(/\w/g)>=0);
             else if (node.nodeType!==1) return false;
             else if ((test)&&(test.match)&&(test.match(node)))
                 return true;
-            else if ((test===true)&&
-                     ((node.tagName==='IMG')||
-                      (node.tagName==='OBJECT')||
-                      (node.tagName==='HR')))
+            else if (node.tagName.search(nontext_content)===0)
                 return true;
-            else if (node.childNodes) {
+            else if ((node.childNodes)&&(node.childNodes.length)) {
                 var children=node.childNodes;
                 var i=0; while (i<children.length) {
                     var child=children[i++];
-                    if (child===recur) return false;
+                    if (child===limit) return false;
                     else if (child.nodeType===3) {
                         if (child.nodeValue.search(/\w/g)>=0) return true;
                         else continue;}
                     else if (child.nodeType!==1) continue;
                     else if (recur) {
-                        if (hasContent(child,recur,test)) return true;
+                        if (hasContent(child,recur,test,limit)) return true;
                         else continue;}
                     else continue;}
                 return false;}
@@ -1335,8 +1341,9 @@ fdjt.DOM=
         function adjustInside(elt,container,step,min,pad){
             var trace_adjust=(elt.traceadjust)||
                 (container.traceadjust)||fdjtDOM.trace_adjust||
-                ((elt.className)&&(elt.className.search(/\btraceadjust\b/)>=0))||
-                ((container.className)&&
+                ((typeof elt.className === "string")&&
+                 (elt.className.search(/\btraceadjust\b/)>=0))||
+                ((typeof container.className === "string")&&
                  (container.className.search(/\btraceadjust\b/)>=0))||
                 default_trace_adjust;
             if (!(step)) step=5;
@@ -1377,7 +1384,7 @@ fdjt.DOM=
         function adjustToFit(container,threshold,padding){
             var trace_adjust=(container.traceadjust)||
                 fdjtDOM.trace_adjust||
-                ((container.className)&&
+                ((typeof container.className === "string")&&
                  (container.className.search(/\btraceadjust\b/)>=0))||
                 default_trace_adjust;
             var style=getStyle(container);

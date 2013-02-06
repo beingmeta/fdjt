@@ -293,14 +293,16 @@ fdjt.String=
                 ((num<10)?(1):(num<100)?(2):(num<1000)?(3):(num<10000)?(4):
                  (num<100000)?(5):(num<1000000)?(6):(num<1000000)?(7):
                  (num<100000000)?(8):(num<1000000000)?(9):(num<10000000000)?(10):(11));
+            if ((!(prec))&&(digits<0)) {prec=-digits; digits=0;}
             var nzeroes=digits-ndigits; var numstring=num.toString();
+            var point=numstring.indexOf('.');
             var prefix=""; var suffix=""; var j;
             if (prec) {
-                var point=numstring.indexOf('.');
                 if ((point>=0)&&((point+prec)<numstring.length))
                     numstring=numstring.slice(0,point+prec+1);
                 else if ((point<0)||(numstring.length<(point+prec+1))) {
                     j=0; var pad=(point+prec+1)-numstring.length;
+                    if (point<0) suffix=suffix+".";
                     while (j<pad) {suffix=suffix+"0"; j++;}}}
             switch (nzeroes) {
             case 0: prefix=""; break;
