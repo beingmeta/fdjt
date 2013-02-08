@@ -328,6 +328,14 @@ fdjt.UI.Selecting=
             var preselected=this.getString(this.words[0],this.end);
             return preselected.length-selected.length;};
         
+        fdjtSelecting.prototype.getInfo=function(){
+            if (!(this.start)) return false;
+            var selected=this.getString();
+            var preselected=this.getString(this.words[0],this.end);
+            return { start: this.start, end: this.end,
+                     off: preselected.length-selected.length,
+                     string: selected};};
+        
         fdjtSelecting.prototype.setAdjust=function(val){
             // fdjt.Log("setAdjust %o",val);
             if (val) {
