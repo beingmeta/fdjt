@@ -1174,7 +1174,6 @@ fdjt.CodexLayout=
 
             function gatherLayoutInfo(node,ids,dups,restoremap){
                 if (node.nodeType!==1) return;
-                if (node.id) ids.push(node.id);
                 var classname=node.className;
                 if (typeof classname === "string") {
                     if (classname.search(/\b(codexdup|codexdupend)\b/)>=0) {
@@ -1184,7 +1183,9 @@ fdjt.CodexLayout=
                         else dups[baseid]=[node];}
                     else if ((node.id)&&
                              (classname.search(/\bcodexrestore\b/)>=0)) {
-                        restoremap[node.id]=node;}}
+                        if (!(restoremap[node.id])) {
+                            ids.push(node.id);
+                            restoremap[node.id]=node;}}}
                 if ((node.childNodes)&&(node.childNodes.length)) {
                     var children=node.childNodes;
                     var i=0, lim=children.length;
