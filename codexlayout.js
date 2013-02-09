@@ -1184,9 +1184,10 @@ fdjt.CodexLayout=
                             dupids.push(node.id);}}
                     else if (classname.search(/\b(codexdup|codexdupend)\b/)>=0) {
                         var baseid=node.getAttribute("data-baseid");
-                        if (!(baseid)) {}
-                        else if (dups[baseid]) dups[baseid].push(node);
-                        else dups[baseid]=[node];}
+                        if (baseid) {
+                            node.codexbaseid=baseid;
+                            if (dups[baseid]) dups[baseid].push(node);
+                            else dups[baseid]=[node];}}
                     else if ((node.id)&&
                              (classname.search(/\bcodexrestore\b/)>=0)) {
                         if (!(restoremap[node.id])) {
