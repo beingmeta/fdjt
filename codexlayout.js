@@ -1616,11 +1616,11 @@ fdjt.CodexLayout=
                         else if (saved[id]) {
                             original=saved[id]; original.id=id;}
                         else {}}
-                    var lost=this.lost_ids, lostids=lost._all_ids;
+                    var lost=this.lostids, lostids=lost._all_ids;
                     i=0, lim=lostids.length; while (i<lim) {
                         var lostid=lostids[i++];
                         lost[lostid].id=lostid;}
-                    this.saved_ids={}; this.dups={}; this.lost_ids;
+                    this.saved_ids={}; this.dups={}; this.lostids={};
                     return;}
                 // Remove any scaleboxes (save the children)
                 if (this.scaledpages) {
