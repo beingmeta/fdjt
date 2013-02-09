@@ -446,6 +446,8 @@ fdjt.CodexLayout=
             else {}
             this.atomic=atomic;
 
+            this.dontsave=init.dontsave||false;
+
             var use_scaling=
                 ((typeof init.use_scaling === 'undefined')?(true):
                  (init.use_scaling));
@@ -1172,11 +1174,15 @@ fdjt.CodexLayout=
                 return this;}
             this.addContent=addContent;
 
-            function gatherLayoutInfo(node,ids,dups,restoremap){
+            function gatherLayoutInfo(node,ids,dups,dupids,dupstarts,restoremap){
                 if (node.nodeType!==1) return;
                 var classname=node.className;
                 if (typeof classname === "string") {
-                    if (classname.search(/\b(codexdup|codexdupend)\b/)>=0) {
+                    if (classname.search(/\bcodexdupstart\b/)>=0) {
+                        if (!(dupstarts[node.id])) {
+                            dupstarts[node.id]=node;
+                            dupids.push(node.id);}}
+                    else if (classname.search(/\b(codexdup|codexdupend)\b/)>=0) {
                         var baseid=node.getAttribute("data-baseid");
                         if (!(baseid)) {}
                         else if (dups[baseid]) dups[baseid].push(node);
@@ -1191,8 +1197,8 @@ fdjt.CodexLayout=
                     var i=0, lim=children.length;
                     while (i<lim) {
                         var child=children[i++];
-                        if (child.nodeType===1)
-                            gatherLayoutInfo(child,ids,dups,restoremap);}}}
+                        if (child.nodeType===1) gatherLayoutInfo(
+                            child,ids,dups,dupids,dupstarts,restoremap);}}}
 
             var replaceNode=fdjtDOM.replace;
 
@@ -1205,7 +1211,7 @@ fdjt.CodexLayout=
             function setLayout(content){
                 var frag=document.createElement("div");
                 frag.innerHTML=content;
-                var all_ids=[], saved_ids={}, restoremap={};
+                var all_ids=[], saved_ids={}, dupids=[], dupstarts={}, restoremap={};
                 var curnodes=[], newdups={};
                 var newpages=frag.childNodes, addpages=[];
                 var i=0, lim=newpages.length; while (i<lim) {
@@ -1215,7 +1221,8 @@ fdjt.CodexLayout=
                         if ((page.className)&&
                             (page.className.search(/\bcurpage\b/)>=0))
                             dropClass(page,"curpage");
-                        gatherLayoutInfo(page,all_ids,newdups,restoremap);}}
+                        gatherLayoutInfo(page,all_ids,newdups,
+                                         dupids,dupstarts,restoremap);}}
                 i=0, lim=all_ids.length; while (i<lim) {
                     var id=all_ids[i++];
                     var original=document.getElementById(id);
@@ -1245,6 +1252,12 @@ fdjt.CodexLayout=
                     else if (original) {
                         saved_ids[id]=original;
                         original.id=null;}}
+                var lostids=this.lostids={}; lostids._all_ids=dupids;
+                i=0, lim=dupids.length; while (i<lim) {
+                    var dupid=dupids[i++];
+                    var orig=document.getElementById(dupid);
+                    if (orig) {
+                        lostids[dupid]=orig; orig.id=null;}}
                 var cur=container.childNodes;
                 i=0, lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
                 i=0; while (i<lim) container.removeChild(curnodes[i++]);
@@ -1258,13 +1271,28 @@ fdjt.CodexLayout=
                 this.pagenum=parseInt(this.page.getAttribute("data-pagenum"));}
             this.setLayout=setLayout;
 
-            function prepForRestore(node){
+            function dropSelected(node,dropsel){
+                if (!(dropsel)) return;
+                else if (node.nodeType!==1) return;
+                else {
+                    var children=node.childNodes; var todrop=[];
+                    if (!(children)) return;
+                    var i=0, lim=children.length;
+                    while (i<lim) {
+                        var child=children[i++];
+                        if (child.nodeType!==1) continue;
+                        if (dropsel.match(child)) todrop.push(child);}
+                    i=0, lim=todrop.length; while (i<lim) {
+                        node.removeChild(todrop[i++]);}}}
+
+            function prepForRestore(node,dropsel){
                 if (node.nodeType!==1) return;
                 if (node.id) {
                     var classname=node.className;
-                    if (!((classname)&&
+                    if ((!((classname)&&
                           (typeof classname === "string")&&
-                          (classname.search(/\bcodexdup/g)>=0))) {
+                          (classname.search(/\bcodexdup/g)>=0)))&&
+                        (node.id)&&(node.id.search("CODEXTMP")!==0)) {
                         var justref=document.createElement(node.tagName);
                         justref.id=node.id;
                         if (typeof node.className === "string")
@@ -1273,12 +1301,17 @@ fdjt.CodexLayout=
                         if (node.getAttribute("style"))
                             justref.setAttribute("style",node.getAttribute("style"));
                         node.parentNode.replaceChild(justref,node);
-                        return;}}
-                var children=node.childNodes;
+                        if (dropsel) return dropSelected(node,dropsel);
+                        else return;}}
+                var children=node.childNodes; var todrop=[];
                 var i=0, n=children.length;
                 while (i<n) {
                     var child=children[i++];
-                    if (child.nodeType===1) prepForRestore(child);}}
+                    if (child.nodeType!==1) continue;
+                    else if ((dropsel)&&(dropsel.match(child))) todrop.push(child);
+                    else prepForRestore(child,dropsel);}
+                i=0, n=todrop.length; while (i<n) {
+                    node.removeChild(todrop[i++]);}}
             
             function saveLayout(layout_id){
                 if (!(layout_id)) layout_id=this.layout_id||
@@ -1303,7 +1336,8 @@ fdjt.CodexLayout=
                         var j=0, n=content.length;
                         while (j<n) {
                             var node=content[j++];
-                            if (node.nodeType===1) prepForRestore(node);}}}
+                            if (node.nodeType===1)
+                                prepForRestore(node,this.dontsave||false);}}}
                 if (layouts) {
                     if (layouts.indexOf(layout_id)<0) {
                         layouts.push(layout_id);}}
@@ -1579,7 +1613,11 @@ fdjt.CodexLayout=
                         else if (saved[id]) {
                             original=saved[id]; original.id=id;}
                         else {}}
-                    this.saved_ids={}; this.dups={};
+                    var lost=this.lost_ids, lostids=lost._all_ids;
+                    i=0, lim=lostids.length; while (i<lim) {
+                        var lostid=lostids[i++];
+                        lost[lostid].id=lostid;}
+                    this.saved_ids={}; this.dups={}; this.lost_ids;
                     return;}
                 // Remove any scaleboxes (save the children)
                 if (this.scaledpages) {
@@ -1607,7 +1645,7 @@ fdjt.CodexLayout=
             var base=fdjtID(id);
             var dups=this.dups[id];
             if (dups) return [base].concat(dups);
-            else return base;};
+            else return false;};
         
         CodexLayout.prototype.getLayoutInfo=function getLayoutInfo(){
             var allblocks=this.allmoves;
@@ -1654,6 +1692,13 @@ fdjt.CodexLayout=
             return {blocks: blockinfo, npages: this.pages.length,
                     height: this.height, width: this.width,
                     break_blocks: this.break_blocks};};
+
+        CodexLayout.clearLayouts=function(){
+            var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
+            if (!(layouts)) return;
+            var i=0, lim=layouts.length; while (i<lim) {
+                fdjtState.dropLocal(layouts[i++]);}
+            fdjtState.dropLocal("fdjtCodex.layouts");}
 
         CodexLayout.cache=2;
         
