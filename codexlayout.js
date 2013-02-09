@@ -1252,12 +1252,14 @@ fdjt.CodexLayout=
                     else if (original) {
                         saved_ids[id]=original;
                         original.id=null;}}
-                var lostids=this.lostids={}; lostids._all_ids=dupids;
+                var lostids=this.lostids={}; var really_lost=lostids._all_ids=[];
                 i=0, lim=dupids.length; while (i<lim) {
                     var dupid=dupids[i++];
                     var orig=document.getElementById(dupid);
                     if (orig) {
-                        lostids[dupid]=orig; orig.id=null;}}
+                        lostids[dupid]=orig;
+                        really_lost.push(dupid);
+                        orig.id=null;}}
                 var cur=container.childNodes;
                 i=0, lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
                 i=0; while (i<lim) container.removeChild(curnodes[i++]);
