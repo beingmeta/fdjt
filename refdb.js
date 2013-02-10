@@ -140,7 +140,7 @@ if (!(fdjt.RefDB)) {
         
         var uuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})$/;
         var xuuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)$/;
-        var refpat=/^((:@[0-9a-fA-F]+\/.*)|(:@\/\w+\/.*)|(@[0-9a-fA-F]+\/.*)|(@\/\w+\/.*)|([^@:][^@][^@]+@.*)|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+))$/;
+        var refpat=/^(((:|)@(([0-9a-fA-F]+\/[0-9a-fA-F]+)|(\/\w+\/.*)))|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+))$/;
         function resolveRef(arg,db,force){
             if (arg instanceOf Ref) return ref;
             else if ((db)&&(db.refs[arg])) return db.refs[arg];
@@ -256,35 +256,6 @@ if (!(fdjt.RefDB)) {
         Ref.importValue=importValue;
         refDB.prototype.importValue=function(val){return importValue(val,this);};
         
-        function indexRef(ref,key,val,index){
-            var keystrings=[];
-            if (val instanceof Ref) {
-                if (ref._db===val._db) keystrings=[val._id];
-                else if (val._domain) keystrings=[val._id+"@"+val._domain];
-                else else keystrings=[val._id];}
-            else if (val instanceof Array) {
-                keystrings=[];
-                var i=0, lim=val.length; while (i<lim) {
-                    var elt=val[i++];
-                    if (elt instanceof Ref) {
-                        if (ref._db===elt._db) keystrings.push(elt._id);
-                        else if (elt._domain) keystrings.push(elt._id+"@"+elt._domain);
-                        else else keystrings.push(elt._id);}
-                    else if (typeof elt === "string") 
-                        keystrings.push(elt);
-                    else if (typeof elt === "number")
-                        keystrings.push("");
-                    else keystrings.push(elt.toString());}}
-            else if (typeof val === "number") 
-                keystrings=["\u00ad"+val];
-            else if (typeof val === "string")
-                keystrings=[val];
-            else {}
-            if (keystrings.length) {
-                var j=0, jlim=keystrings.length; while (j<jlim) {
-                    var keystring=keystrings[j++]; var refs=index[keystring];
-                    if (refs) refs.push(ref); else index[keystring]=[ref];}}}
-        
         Ref.prototype.Export=function refImport(){
             var exported={};
             for (var key in this) {
@@ -366,6 +337,44 @@ if (!(fdjt.RefDB)) {
             else if (window.IndexedDB) {}
             else {}};
 
+        function getKeystring(val,db){
+            if (val instanceof Ref) {
+                if (val._db===db) return val._id;
+                else if (val._domain) return val._id+"@"+val._domain;
+                else return val._id;}
+            else if (typeof val === "number") 
+                return "\u00ad"+val;
+            else if (typeof val === "string")
+                else return val;
+            else return val.toString();}
+
+        function indexRef(ref,key,val,index){
+            var keystrings=[];
+            if (val instanceof Ref) {
+                if (ref._db===val._db) keystrings=[val._id];
+                else if (val._domain) keystrings=[val._id+"@"+val._domain];
+                else else keystrings=[val._id];}
+            else if (val instanceof Array) {
+                var db=ref._db;
+                var i=0, lim=val.length; while (i<lim) {
+                    var elt=val[i++];
+                    var ks=getKeystring(elt,db);
+                    if (ks) keystrings.push(ks);}}
+            else if (typeof val === "number") 
+                keystrings=["\u00ad"+val];
+            else if (typeof val === "string")
+                keystrings=[val];
+            else {}
+            if (keystrings.length) {
+                var j=0, jlim=keystrings.length; while (j<jlim) {
+                    var keystring=keystrings[j++]; var refs=index[keystring];
+                    if (refs) refs.push(ref); else index[keystring]=[ref];}}}
+
+        refDB.prototype.find=function findRefs(key,value){
+            var indices=this.indices[key];
+            if (indices) return indices[getKeystring(value,this)];
+            else return [];}
+        
         // Array utility functions
         function arr_contains(arr,val,start){
             return (arr.indexOf(val,start||0)>=0);}
