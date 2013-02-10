@@ -64,7 +64,7 @@ fdjt.CodexLayout=
         
         var floor=Math.floor;
 
-        var layoutDB=false;
+        var layoutDB;
 
         function appendChildren(node,children,start){
             var lim=children.length; var i=(start)||0;
@@ -1700,24 +1700,37 @@ fdjt.CodexLayout=
 
         CodexLayout.cache=2;
 
+        var ondbinit=false;
+
         if (window.indexedDB) {
             var req=window.indexedDB.open("codexlayout",1);
             req.onerror=function(event){
-                CodexLayout.layoutDB=layoutDB=false;};
+                fdjtLog("Error initializing indexedDB layout cache: %o",
+                        event.errorCode);
+                CodexLayout.layoutDB=layoutDB=window.localStorage;};
             req.onsuccess=function(event) {
                 var db=event.target.result;
-                CodexLayout.layoutDB=layoutDB=db;};
+                fdjtLog("Using existing indexedDB layout cache");
+                CodexLayout.layoutDB=layoutDB=db;
+                if (ondbinit) ondbinit();};
             req.onupgradeneeded=function(event) {
                 var db=event.target.result;
                 db.onerror=function(event){
                     fdjtLog("Unexpected error caching layouts: %d",
                             event.target.errorCode);
-                    CodexLayout.layoutDB=layoutDB=db;};
-                CodexLayout.layoutDB=layoutDB=db;
+                    CodexLayout.layoutDB=layoutDB=window.localStorage;};
+                db.onsuccess=function(event){
+                    fdjtLog("Successfull initialized indexedDB layout cache");};
+                CodexLayout.layoutDB=layoutDB=window.localStorage;
                 db.createObjectStore("layouts",{keyPath: "layout_id"});};}
 
         function cacheLayout(layout_id,content){
-            if (layoutDB) {
+            if (typeof layoutDB === "undefined") 
+                ondbinit=function(){cacheLayout(layout_id,content);};
+            else if (!(layoutDB)) return;
+            else if ((window.Storage)&&(layoutDB instanceof window.Storage))
+                fdjtState.setLocal(layout_id,content);
+            else if (window.indexedDB) {
                 var txn=layoutDB.transaction(["layouts"],"readwrite");
                 var storage=txn.objectStore("layouts");
                 var req=storage.add({layout_id: layout_id,layout: content});
@@ -1726,7 +1739,7 @@ fdjt.CodexLayout=
                             layout_id,event.target.errorCode);};
                 req.onsuccess=function(event){
                     fdjtLog("Layout %s cached",layout_id);};}
-            else fdjtState.setLocal(layout_id,content);}
+            else Codex.layoutDB=layoutDB=window.localStorage||false;}
         CodexLayout.cacheLayout=cacheLayout;
         function dropLayout(layout_id,content){
             if (layoutDB) {
@@ -1737,13 +1750,19 @@ fdjt.CodexLayout=
             else fdjtState.setLocal(layout_id,content);}
         CodexLayout.dropLayout=dropLayout;
         function fetchLayout(layout_id,callback){
-            if (layoutDB) {
+            if (typeof layoutDB === "undefined") 
+                ondbinit=function(){fetchLayout(layout_id,callback);};
+            else if (!(layoutDB)) callback(false);
+            else if ((window.Storage)&&(layoutDB instanceof window.Storage)) {
+                var content=fdjtState.getLocal(layout_id)||false;
+                setTimeout(function(){callback(content);},0);}
+            else if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"]);
                 var storage=txn.objectStore("layouts");
                 var req=storage.get(layout_id);
                 req.onsuccess=function(event){
                     callback(((req.result)&&(req.result.layout)));};}
-            else {
+            else if (window.localStorage) {
                 var content=fdjtState.getLocal(layout_id)||false;
                 setTimeout(function(){callback(content);},0);}}
         CodexLayout.fetchLayout=fetchLayout;
