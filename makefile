@@ -3,10 +3,12 @@
 
 ECHO=/bin/echo
 CLEAN=/bin/rm -f
-FDJT_FILES=header.js string.js time.js log.js init.js state.js \
-	dom.js kb.js json.js hash.js wsn.js ui.js \
-	completions.js taphold.js adjustfont.js selecting.js \
-	iscroll.js scrollever.js syze.js ajax.js \
+FDJT_FILES=header.js string.js time.js \
+	log.js init.js state.js dom.js \
+	kb.js json.js ajax.js hash.js wsn.js \
+	ui.js completions.js taphold.js selecting.js \
+	adjustfont.js scrollever.js \
+	syze.js iscroll.js indexed.js \
 	globals.js
 BUILDUUID:=`uuidgen`
 BUILDTIME:=`date`
