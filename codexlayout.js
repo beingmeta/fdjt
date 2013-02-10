@@ -64,6 +64,8 @@ fdjt.CodexLayout=
         
         var floor=Math.floor;
 
+        var layoutDB=false;
+
         function appendChildren(node,children,start){
             var lim=children.length; var i=(start)||0;
             var frag=document.createDocumentFragment();
@@ -1347,16 +1349,16 @@ fdjt.CodexLayout=
                 else layouts=[layout_id];
                 var pages=copy.innerHTML;
                 try {
-                    setLocal(layout_id,pages,false);
+                    cacheLayout(layout_id,pages);
                     setLocal("fdjtCodex.layouts",layouts,true);}
                 catch (ex) {
                     i=0; var lim=layouts.length; while (i<lim) {
                         id=layouts[i++];
                         fdjtLog("Discarding layout %s",id);
-                        fdjtState.dropLocal(id);}
+                        dropLayout(id);}
                     setLocal("fdjtCodex.layouts","[]");
                     try {
-                        setLocal(layout_id,copy.innerHTML,false);
+                        cacheLayout(layout_id,copy.innerHTML);
                         setLocal("fdjtCodex.layouts",[layout_id],true);}
                     catch (ex) {}}
                 return layout_id;}
@@ -1696,15 +1698,66 @@ fdjt.CodexLayout=
                     height: this.height, width: this.width,
                     break_blocks: this.break_blocks};};
 
-        CodexLayout.clearLayouts=function(){
+        CodexLayout.cache=2;
+
+        if (window.indexedDB) {
+            var req=window.indexedDB.open("codexlayout",1);
+            req.onerror=function(event){
+                CodexLayout.layoutDB=layoutDB=false;};
+            req.onsuccess=function(event) {
+                var db=event.target.result;
+                CodexLayout.layoutDB=layoutDB=db;};
+            req.onupgradeneeded=function(event) {
+                var db=event.target.result;
+                db.onerror=function(event){
+                    fdjtLog("Unexpected error caching layouts: %d",
+                            event.target.errorCode);
+                    CodexLayout.layoutDB=layoutDB=db;};
+                CodexLayout.layoutDB=layoutDB=db;
+                db.createObjectStore("layouts",{keyPath: "layout_id"});};}
+
+        function cacheLayout(layout_id,content){
+            if (layoutDB) {
+                var txn=layoutDB.transaction(["layouts"],"readwrite");
+                var storage=txn.objectStore("layouts");
+                var req=storage.add({layout_id: layout_id,layout: content});
+                req.onerror=function(event){
+                    fdjtLog("Error saving layout %s: %o",
+                            layout_id,event.target.errorCode);};
+                req.onsuccess=function(event){
+                    fdjtLog("Layout %s cached",layout_id);};}
+            else fdjtState.setLocal(layout_id,content);}
+        CodexLayout.cacheLayout=cacheLayout;
+        function dropLayout(layout_id,content){
+            if (layoutDB) {
+                var txn=layoutDB.transaction(["layouts"],"readwrite");
+                var storage=txn.objectStore("layouts");
+                var req=storage.delete(layout_id);
+                req.onsuccess=function(event){fdjtLog("Layout %s removed",layout_id);};}
+            else fdjtState.setLocal(layout_id,content);}
+        CodexLayout.dropLayout=dropLayout;
+        function fetchLayout(layout_id,callback){
+            if (layoutDB) {
+                var txn=layoutDB.transaction(["layouts"]);
+                var storage=txn.objectStore("layouts");
+                var req=storage.get(layout_id);
+                req.onsuccess=function(event){
+                    callback(((req.result)&&(req.result.layout)));};}
+            else {
+                var content=fdjtState.getLocal(layout_id)||false;
+                setTimeout(function(){callback(content);},0);}}
+        CodexLayout.fetchLayout=fetchLayout;
+        
+        CodexLayout.clearLayouts=function(keepidb){
             var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
             if (!(layouts)) return;
             var i=0, lim=layouts.length; while (i<lim) {
-                fdjtState.dropLocal(layouts[i++]);}
+                dropLayout(layouts[i++]);}
+            if ((layoutDB)&&(!(keepidb))) {
+                var req=window.indexedDB.open("codexlayout",1);
+                req.deleteDatabase();}
             fdjtState.dropLocal("fdjtCodex.layouts");}
 
-        CodexLayout.cache=2;
-        
         return CodexLayout;})();
 
 
