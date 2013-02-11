@@ -366,8 +366,10 @@ if (!(fdjt.RefDB)) {
                 return val;
             else return val.toString();}
 
-        function indexRef(ref,key,val,index){
+        function indexRef(ref,key,val,index,db){
             var keystrings=[];
+            var refstring=(((!(db))||(ref._db===db))?(ref._id):
+                           ((ref._domain)?(ref._id+"@"+ref._domain):(ref._id)));
             if (val instanceof Ref) {
                 if (ref._db===val._db) keystrings=[val._id];
                 else if (val._domain) keystrings=[val._id+"@"+val._domain];
@@ -386,7 +388,8 @@ if (!(fdjt.RefDB)) {
             if (keystrings.length) {
                 var j=0, jlim=keystrings.length; while (j<jlim) {
                     var keystring=keystrings[j++]; var refs=index[keystring];
-                    if (refs) refs.push(ref); else index[keystring]=[ref];}}}
+                    if (refs) refs.push(refstring);
+                    else index[keystring]=[refstring];}}}
 
         RefDB.prototype.find=function findRefs(key,value){
             var indices=this.indices[key];
