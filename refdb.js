@@ -22,14 +22,6 @@
 
 */
 
-/*
-  _fdjtid: unique integer assigned to objects
-  fdjtKB.register (assigns unique ID)
-  fdjtKB.Pool (creates a pool of named objects)
-  fdjtKB.Set (creates a sorted array for set operations)
-  fdjtKB.Ref (objects created within a pool)
-*/
-
 var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 if (!(fdjt.RefDB)) {
@@ -43,7 +35,11 @@ if (!(fdjt.RefDB)) {
         var warn=fdjt.Log.warn;
         var log=fdjt.Log;
 
-        var refdbs={}, all_refdbs[];
+        /* Whether exported representations may include strings
+           referring to Refs */
+        var string_refs=true;
+
+        var refdbs={}, all_refdbs=[];
         var aliases={}, atmaps={};
 
         function refDB(name,init){
@@ -90,6 +86,13 @@ if (!(fdjt.RefDB)) {
                 for (var methname in onload) {
                     if (onload.hasOwnProperty(methname)) 
                         db.onLoader(oload[methname],methname);}}
+            if (init.indices) {
+                var index_specs=init.indices;
+                var j=0, jlim=index_specs.length; while (j<jlim) {
+                    var ix=index_specs[j++];
+                    if (typeof ix !== "string") 
+                        warn("Complex indices not yet handled!");
+                    else this.indices[ix]={};}}
             
             return this;}
 
@@ -141,8 +144,9 @@ if (!(fdjt.RefDB)) {
         var uuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})$/;
         var xuuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)$/;
         var refpat=/^(((:|)@(([0-9a-fA-F]+\/[0-9a-fA-F]+)|(\/\w+\/.*)))|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+))$/;
+    
         function resolveRef(arg,db,force){
-            if (arg instanceOf Ref) return ref;
+            if (arg instanceof Ref) return ref;
             else if ((db)&&(db.refs[arg])) return db.refs[arg];
             else if ((typeof arg === "string")&&(refpat.exec(string))) {
                 var at=arg.indexOf('@');
@@ -195,6 +199,7 @@ if (!(fdjt.RefDB)) {
                 db.refs[id]=this;
                 db.all_refs.push(this);
                 return this;}}
+        refDB.Ref=Ref;
 
         Ref.prototype.Import=function refImport(data,index){
             var indices=this._db.indices;
@@ -203,7 +208,7 @@ if (!(fdjt.RefDB)) {
                     var value=data[key];
                     if ((typeof value === "number")||
                         ((typeof value === "string")&&
-                         (!(refpat.exec(value))))) 
+                         ((!(string_refs))||(!(refpat.exec(value))))))
                         this[key]=value;
                     else this[key]=value=importValue(value,this._db);
                     if ((index)&&(indices[key])) 
@@ -326,7 +331,7 @@ if (!(fdjt.RefDB)) {
         refDB.prototype.save=function saveRefs(refs,callback){
             if (!(this.storage)) return;
             else if (this.storage instanceof window.Storage) {
-                var storage.this.storage;
+                var storage=this.storage;
                 var i=0, lim=refs.length; while (i<lim) {
                     var ref=refs[i++];
                     if (typeof ref === "string") ref=this.ref(ref);
@@ -345,7 +350,7 @@ if (!(fdjt.RefDB)) {
             else if (typeof val === "number") 
                 return "\u00ad"+val;
             else if (typeof val === "string")
-                else return val;
+                return val;
             else return val.toString();}
 
         function indexRef(ref,key,val,index){
@@ -353,7 +358,7 @@ if (!(fdjt.RefDB)) {
             if (val instanceof Ref) {
                 if (ref._db===val._db) keystrings=[val._id];
                 else if (val._domain) keystrings=[val._id+"@"+val._domain];
-                else else keystrings=[val._id];}
+                else keystrings=[val._id];}
             else if (val instanceof Array) {
                 var db=ref._db;
                 var i=0, lim=val.length; while (i<lim) {
@@ -392,7 +397,7 @@ if (!(fdjt.RefDB)) {
                 else if (typeof a === "string") {
                     if (a<b) return -1;
                     else return 1;}
-                else if (a._sortkey<b._sortkey) return -1;
+                else if (a._qid<b._qid) return -1;
                 else return 1;}
             else if (typeof a < typeof b) return -1;
             else return 1;}
@@ -421,7 +426,7 @@ if (!(fdjt.RefDB)) {
             results._allstrings=new_allstrings;
             results._sortlen=results.length;
             return results;}
-        fdjtKB.intersection=intersection;
+        refDB.intersection=intersection;
 
         function difference(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -448,7 +453,7 @@ if (!(fdjt.RefDB)) {
             results._allstrings=new_allstrings;
             results._sortlen=results.length;
             return results;}
-        fdjtKB.difference=difference;
+        refDB.difference=difference;
         
         function union(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -473,7 +478,7 @@ if (!(fdjt.RefDB)) {
             results._allstrings=allstrings;
             results._sortlen=results.length;
             return results;}
-        fdjtKB.union=union;
+        refDB.union=union;
 
         function merge(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -501,7 +506,7 @@ if (!(fdjt.RefDB)) {
             results._allstrings=allstrings;
             results._sortlen=results.length;
             return results;}
-        fdjtKB.merge=merge;
+        refDB.merge=merge;
 
         function overlaps(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -519,7 +524,7 @@ if (!(fdjt.RefDB)) {
                      (set_sortfn(set1[i],set2[j])<0)) i++;
             else j++;
             return false;}
-        fdjtKB.overlaps=overlaps;
+        refDB.overlaps=overlaps;
 
         /* Sets */
         /* sets are really arrays that are sorted to simplify set operations.
@@ -546,7 +551,7 @@ if (!(fdjt.RefDB)) {
                 else if (arg instanceof Array) result.concat(arg);
                 else result.push(arg);
                 return setify(result);}}
-        fdjtKB.Set=fdjtSet;
+        refDB.Set=fdjtSet;
         fdjt.Set=fdjtSet;
 
         function setify(array) {
@@ -559,11 +564,11 @@ if (!(fdjt.RefDB)) {
                 array._sortlen=1;
                 array._allstrings=(typeof elt === 'string');
                 if (typeof elt === "object") {
-                    if (elt._sortkey) return array;
+                    if (elt._qid) return array;
                     var sortkey=((elt._id)&&(elt._db)&&
                                  ((elt._db.absrefs)?(elt._id):(elt._id+"@"+elt._db.name)))||
                         elt._fdjtid||(elt._fdjtid=++id_counter);
-                    elt._sortkey=sortkey;}
+                    elt._qid=sortkey;}
                 return array;}
             else {
                 var allstrings=true;
@@ -572,11 +577,11 @@ if (!(fdjt.RefDB)) {
                     var elt=array[i++];
                     if ((allstrings)&&(typeof elt !== 'string')) allstrings=false;
                     if (typeof elt === "object") {
-                        if (elt._sortkey) continue;
+                        if (elt._qid) continue;
                         var sortkey=((elt._id)&&(elt._db)&&
                                      ((elt._db.absrefs)?(elt._id):(elt._id+"@"+elt._db.name)))||
                             elt._fdjtid||(elt._fdjtid=++id_counter);
-                        elt._sortkey=sortkey;}}
+                        elt._qid=sortkey;}}
                 array._allstrings=allstrings;
                 if (lim===1) return array;
                 if (allstrings) array.sort();
@@ -630,87 +635,176 @@ if (!(fdjt.RefDB)) {
                 else i++;
                 return false;}}
         
+        /* Refs */
+
+        Ref.prototype.get=function(prop){
+            if (this.hasOwnProperty(prop)) return this[prop];
+            else if (this._live) return false;
+            else return undefined;};
+        Ref.prototype.getSet=function(prop){
+            if (this.hasOwnProperty(prop)) {
+                var val=this[prop];
+                if (val instanceof Array) {
+                    if (val._sortlen===val.length) return val;
+                    else return setify(val);}
+                else return setify([val]);}
+            else if (this._live) return [];
+            else return undefined;};
+        Ref.prototype.getArray=function(prop){
+            if (this.hasOwnProperty(prop)) {
+                var val=this[prop];
+                if (val instanceof Array) return val;
+                else return [val];}
+            else if (this._live) return [];
+            else return undefined;};
+        Ref.prototype.add=function(prop,val,restore){
+            if (this.hasOwnProperty(prop)) {
+                var cur=this[prop];
+                if (cur===val) return false;
+                else if (cur instanceof Array) {
+                    if (val instanceof Array)
+                        return set_add(cur,[val]);
+                    else return set_add(cur,val);}
+                else if (val instanceof Array)
+                    this[prop]=fdjtSet([cur,[val]]);
+                else this[prop]=fdjtSet([cur,val]);}
+            else if (val instanceof Array)
+                this[prop]=[val];
+            else this[prop]=val;
+            if (!(this._changed)) {
+                this._changed=fdjtTime();
+                this._db.changed.push(this);}
+            return true;};
+        Ref.prototype.drop=function(prop,val){
+            if (prop==='_id') return false;
+            else if (!(this._live)) return undefined;
+            else if (this.hasOwnProperty(prop)) {
+                var cur=this[prop];
+                if (cur===val) delete this[prop];
+                else if (cur instanceof Array) {
+                    if (!(set_drop(cur,val))) return false;
+                    if (cur.length===0) delete this[prop];
+                    return true;}
+                else return false;}
+            else return false;};
+        Ref.prototype.test=function(prop,val){
+            if (this.hasOwnProperty(prop)) {
+                if (typeof val === 'undefined') return true;
+                var cur=this[prop];
+                if (cur===val) return true;
+                else if (cur instanceof Array) {
+                    if (arr_contains(cur,val)) return true;
+                    else if (this._live) return false;
+                    else return undefined;}
+                else if (this._live) return false;
+                else return undefined;}
+            else if (this._live) return false;
+            else return undefined;};
+        Ref.prototype.store=function(prop,val,restore){
+            var toadd=[], todrop=[];
+            if (this.hasOwnProperty(prop)) {
+                var cur=this[prop];
+                if (cur===val) return false;
+                else {
+                    toadd=difference(val,cur);
+                    todrop=difference(cur,val);}}
+            else if (val instanceof Array)
+                toadd=val;
+            else toadd=[val];
+            var i=0, lim=todrop.length;
+            while (i<lim) this.drop(prop,todrop[i++]);
+            i=0, lim=toadd.length; while (i<lim) this.add(prop,toadd[i++]);
+            return true;};
+
+        Ref.prototype.toHTML=function(){
+            var dom=false;
+            return ((this.pool.forHTML)&&(this.pool.forHTML(this)))||
+                ((this.pool.forDOM)&&(dom=this.pool.forDOM(this))&&
+                 (dom.outerHTML))||
+                this._id||this.oid||this.uuid;};
+        Ref.prototype.toDOM=function(){
+            return ((this.pool.forDOM)&&(this.pool.forDOM(this)))||
+                ((this.pool.forHTML)&&(fdjtDOM(this.pool.forHTML(this))))||
+                (fdjtDOM("span.fdjtref",this._id||this.oid||this.uuid));};
+
         /* Maps */
-        function Map() {
-            this.scalar_map={}; this.object_map={};
+        function fdjtMap() {
+            this.string_map={};
+            this.object_map={};
+            this.other_map={};
             return this;}
-        Map.prototype.get=function(key) {
-            if (isobject(key))
-                return this.object_map
-            [key._id||key.oid||key.uuid||key._fdjtid||register(key)];
-            else return this.scalar_map[key];};
-        Map.prototype.set=function(key,val) {
-            if (isobject(key))
-                this.object_map
-            [key._id||key.oid||key.uuid||key._fdjtid||register(key)]=val;
-            else this.scalar_map[key]=val;};
-        Map.prototype.add=function(key,val) {
-            var cur;
-            if (isobject(key)) {
-                var objkey=key._id||key.oid||key.uuid||key._fdjtid||
-                    register(key);
-                cur=this.object_map[objkey];
-                if (!(cur)) {
-                    this.object_map[objkey]=[val];
-                    return true;}
-                else if (!(cur instanceof Array)) {
-                    if (cur===val) return false;
-                    else {
-                        this.object_map[objkey]=[cur,val];
-                        return true;}}
-                else if (arr_contains(cur,val)) return false;
-                else {
-                    cur.push(val); return true;}}
-            else  {
-                cur=this.scalar_map[key];
-                if (!(cur)) {
-                    this.scalar_map[key]=[val];
-                    return true;}
-                else if (!(cur instanceof Array)) {
-                    if (cur===val) return false;
-                    else {
-                        this.scalar_map[key]=[cur,val];
-                        return true;}}
-                else if (arr_contains(cur,val)) return false;
-                else {
-                    cur.push(val); return true;}}};
-        Map.prototype.drop=function(key,val) {
-            var cur;
-            if (!(val)) {
-                if (isobject(key))
-                    delete this.object_map
-                [key._id||key.oid||key.uuid||key._fdjtid||register(key)];
-                else delete this.scalar_map[key];}
-            else if (isobject(key)) {
-                var objkey=key._id||key.oid||key.uuid||key._fdjtid||
-                    register(key);
-                cur=this.object_map[key];
-                if (!(cur)) return false;
-                else if (!(cur instanceof Array)) {
-                    if (cur===val) {
-                        delete this.object_map[objkey];
-                        return true;}
-                    else return false;}
-                else if ((pos=arr_position(val,cur))>=0) {
-                    if (cur.length===1) delete this.object_map[objkey];
-                    else cur.splice(pos);
+        fdjtMap.prototype.get=function(key) {
+            if (typeof key === "string")
+                return this.string_map[key];
+            else if (typeof key === "object") {
+                var keystring=key._qid||
+                    ((key._id)&&
+                     ((key._domain)?(key._id+"@"+key._domain):(key._id)))||
+                    (key._fdjtid)||(key._fdjtid=++id_counter);
+                return this.object_map[keystring];}
+            else return this.other_map[key];};
+        fdjtMap.prototype.set=function(key,val) {
+            if (typeof key === "string")
+                this.string_map[key]=val;
+            else if (typeof key === "object") {
+                var keystring=key._qid||
+                    ((key._id)&&
+                     ((key._domain)?(key._id+"@"+key._domain):(key._id)))||
+                    (key._fdjtid)||(key._fdjtid=++idcount);
+                this.object_map[keystring]=val;}
+            else this.other_map[key]=val;};
+        fdjtMap.prototype.add=function(key,val) {
+            var cur, toset, keystring;
+            if (typeof key === "string") cur=this.string_map[key];
+            else if (typeof key === "object") {
+                keystring=key._qid||
+                    ((key._id)&&
+                     ((key._domain)?(key._id+"@"+key._domain):(key._id)))||
+                    (key._fdjtid)||(key._fdjtid=++idcount);
+                cur=this.object_map[keystring];}
+            else cur=this.other_map[key];
+            if (!(cur)) {
+                if (val instanceof Array) toset=[val];
+                else toset=val;}
+            else if (!(cur instanceof Array)) {
+                if (cur===val) return false;
+                else if (val instanceof Array)
+                    toset=setify([cur,[val]]);
+                else toset=setify([cur,val]);}
+            else if (arr_contains(cur,val)) return false;
+            else {cur.push(val); return true;}
+            if (typeof toset!=="undefined") {
+                if (typeof key === "string")
+                    this.string_map[key]=val;
+                else if (typeof key === "object") 
+                    this.object_map[keystring]=val;
+                else this.other_map[key]=val;
+                return true;}
+            else return false;};
+        fdjtMap.prototype.drop=function(key,val) {
+            var cur, toset, keystring=false, map;
+            if (typeof key === "string") {
+                map=this.string_map; cur=map[key];}
+            else if (typeof key === "object") {
+                keystring=key._qid||
+                    ((key._id)&&
+                     ((key._domain)?(key._id+"@"+key._domain):(key._id)))||
+                    (key._fdjtid)||(key._fdjtid=++idcount);
+                map=this.object_map; cur=map[keystring];}
+            else {map=this.other_map; cur=map[key];}
+            if (typeof cur === "undefined") return false;
+            else if (!(cur instanceof Array)) {
+                if (cur===val) {
+                    delete map[keystring||key];
                     return true;}
                 else return false;}
             else {
-                cur=this.scalar_map[key]; var pos=-1;
-                if (!(cur)) return false;
-                else if (!(cur instanceof Array)) {
-                    if (cur===val) {
-                        delete this.scalar_map[key];
-                        return true;}
-                    else return false;}
-                else if ((pos=arr_position(val,cur))>=0) {
-                    if (cur.length===1)
-                        delete this.scalar_map[key];
-                    else cur.splice(pos);
-                    return true;}
-                else return false;}};
-        fdjtKB.Map=Map;
+                var pos=cur.indexOf(val);
+                if (pos<0) return false;
+                cur.splice(pos); if (cur._sortlen) cur._sortlen--;
+                return true;}};
+        fdjt.Map=fdjtMap;
+        refDB.fdjtMap=fdjtMap;
 
         /* Indices */
 
@@ -769,330 +863,11 @@ if (!(fdjt.RefDB)) {
                     return true;}
                 else return false;};
             return index;}
-        fdjtKB.Index=Index;
+        refDB.Index=Index;
 
-        /* Refs */
-
-        function Ref(pool,qid) {
-            if (pool) this.pool=pool;
-            if (qid) this._id=qid;
-            return this;}
-        fdjtKB.Ref=Ref;
-        Pool.prototype.cons=function(qid){
-            return new Ref(this,qid);};
-
-        Ref.prototype.load=function(){
-            if (this._init) return this;
-            else if (this.pool.storage) 
-                return this.pool.storage.load(this);
-            else return undefined;};
-        Ref.prototype.get=function(prop){
-            if (this.hasOwnProperty(prop)) return this[prop];
-            else if (this.pool.storage) {
-                var fetched=this.pool.storage.get(this,prop);
-                if (typeof fetched !== 'undefined') {
-                    this[prop]=fetched;
-                    return fetched;}
-                else if (this.hasOwnProperty(prop))
-                    return this[prop];
-                else return fetched;}
-            else return undefined;};
-        Ref.prototype.getSet=function(prop){
-            if (this.hasOwnProperty(prop)) {
-                var val=this[prop];
-                if (val instanceof Array) {
-                    if (val._sortlen===val.length) return val;
-                    else return setify(val);}
-                else return [val];}
-            else if (this.pool.storage) {
-                var fetched=this.pool.storage.get(this,prop);
-                if (typeof fetched !== 'undefined')
-                    this[prop]=fetched;
-                else fetched=this[prop]||[];
-                return setify(fetched);}
-            else return [];};
-        Ref.prototype.getArray=function(prop){
-            if (this.hasOwnProperty(prop)) {
-                var val=this[prop];
-                if (val instanceof Array) return val;
-                else return [val];}
-            else if (this.pool.storage) {
-                var fetched=this.pool.storage.get(this,prop);
-                if (typeof fetched !== 'undefined')
-                    this[prop]=fetched;
-                return [fetched];}
-            else return [];};
-        Ref.prototype.add=function(prop,val,restore){
-            if (this.pool.xforms[prop])
-                val=this.pool.xforms[prop](val)||val;
-            if (this.hasOwnProperty(prop)) {
-                var cur=this[prop];
-                if (cur===val) return false;
-                else if (cur instanceof Array)
-                    if (!(set_add(cur,val))) return false;
-                else {}
-                else this[prop]=fdjtSet([cur,val]);}
-            else this[prop]=val;
-            if ((this.pool.storage)&&(!(restore)))
-                this.pool.storage.add(this,prop,val);
-            if ((this.pool.effects)&&(this.pool.effects[prop]))
-                this.pool.effects[prop](this,prop,val);
-            if (this.pool.index)
-                this.pool.index(this,prop,val,true);
-            return true;};
-        Ref.prototype.drop=function(prop,val){
-            if (typeof val === 'undefined') val=this[prop];
-            if (this.pool.xforms[prop])
-                val=this.pool.xforms[prop](val)||val;
-            if (prop==='_id') {}
-            else if (this.hasOwnProperty(prop)) {
-                var cur=this[prop];
-                if (cur===val) delete this[prop];
-                else if (cur instanceof Array) {
-                    if (!(set_drop(cur,val))) return false;
-                    if (cur.length===0) delete this[prop];}
-                else return false;
-                if (this.pool.storage)
-                    this.pool.storage.drop(this,prop,val);
-                if (this.pool.index)
-                    this.pool.index(this,prop,val,false);
-                return true;}
-            else return false;};
-        Ref.prototype.test=function(prop,val){
-            if (this.pool.xforms[prop])
-                val=this.pool.xforms[prop](val)||val;
-            if (this.hasOwnProperty(prop)) {
-                if (typeof val === 'undefined') return true;
-                var cur=this[prop];
-                if (cur===val) return true;
-                else if (cur instanceof Array)
-                    if (arr_contains(cur,val)) return true;
-                else return false;
-                else return false;}
-            else if (this.pool.storage) {
-                var fetched=this.pool.storage.get(this,prop);
-                if (typeof fetched !== 'undefined')
-                    this[prop]=fetched;
-                else return false;
-                if (typeof val === 'undefined') return true;
-                else return this.test(prop,val);}
-            else return false;};
-        Ref.prototype.store=function(prop,val,restore){
-            var toadd=[], todrop=[];
-            if (this.hasOwnProperty(prop)) {
-                var cur=this[prop];
-                if (cur===val) return false;
-                else {
-                    toadd=difference(val,cur);
-                    todrop=difference(cur,val);}}
-            else if (val instanceof Array)
-                toadd=val;
-            else toadd=[val];
-            var i=0, lim=todrop.length;
-            while (i<lim) this.drop(prop,todrop[i++]);
-            i=0, lim=toadd.length; while (i<lim) this.add(prop,toadd[i++]);
-            return true;};
-        Ref.prototype.ondrop=function(){
-            for (var prop in this)
-                if ((prop!=='pool')&&(prop!=='qid'))
-                    this.drop(prop,this[prop]);};
-        function init_ref(data){
-            // If it's already been initialized, we're updating
-            if (this._init) return this.update(data);
-            // This is called initialize a reference the first time we
-            //  get data for it
-            var pool=this.pool; var map=pool.map; var value, i, lim;
-            this._init=fdjtTime();
-            if (((debug)&&(pool.traceref))||(debug>1))
-                log("Initial reference to %o <== %o @%d",
-                    this,data,this._init);
-            for (var key in data) {
-                // We assume that data doesn't inherit anything,
-                //  so we don't need a 'hasOwnProperty' check
-                if ((key==='qid')||(key==='pool')) {}
-                else if ((key==='_id')||(key==='oid')||(key==='oid')) {
-                    value=data[key];
-                    if (!(map[value])) map[value]=this;
-                    else if (map[value]!==this)
-                        warn("identifier conflict %o=%o for %o and %o",
-                             key,value,map[value],this);
-                    else {}}
-                else if (key[0]==='_') {}
-                else {
-                    // We use the .add method to get any side effects
-                    value=data[key]; var qid;
-                    if (typeof value === "undefined") {
-                        this.drop(key);}
-                    else if (value instanceof Array) {
-                        i=0, lim=value.length;
-                        while (i<lim) {
-                            var v=value[i++]; /* back to here */
-                            if ((!(v))&&(v!==false)&&(v!==0)) {}
-                            else if ((qid=((v._qid)||(v._id)))) {
-                                pool=getPool(qid);
-                                if (pool) this.add(key,pool.Import(v),true);
-                                else this.store(key,v,true);}
-                            else this.store(key,v,true);}}
-                    else if ((qid=((value._qid)||(value._id)))) {
-                        pool=getPool(qid);
-                        if (pool) this.store(key,pool.Import(value),true);
-                        else this.store(key,value,true);}
-                    else this.store(key,value,true);}}
-            // Now we run the init procedures for the pool
-            var inits=pool.inits;
-            if (inits) {
-                if (((debug)&&(pool.traceinit))||(debug>2))
-                    log("Running pool inits for %o: %o",this,inits);
-                i=0, lim=inits.length;
-                while (i<lim) inits[i++](this);}
-            // We now run local delayed inits
-            inits=this._inits; delete this._inits;
-            if (inits) {
-                if (((debug)&&(pool.traceinit))||(debug>2))
-                    log("Running delayed inits for %o: %o",this,inits);
-                delete this._inits;
-                i=0, lim=inits.length;
-                while (i<lim) inits[i++](this);}
-            return this;}
-        Ref.prototype.init=init_ref;
-
-        function update_ref(data){
-            var i, lim;
-            if (!(this._init)) return this.init(data);
-            if ((this._modified)&&(data._modified)&&
-                (this._modified>data._modified))
-                return this;
-            for (var key in data)
-                if (data.hasOwnProperty(key)) {
-                    if ((key==="pool")||(key==="init")) continue;
-                    var val=data[key], cur=this[key];
-                    if (val===cur) continue;
-                    else if (!(cur)) {
-                        if (val instanceof Array) {
-                            i=0, lim=val.length;
-                            while (i<lim) this.add(key,val[i++],true);}
-                        else this.add(key,val);}
-                    else if ((val instanceof Array)||
-                             (cur instanceof Array)) {
-                        var toadd=difference(val,cur);
-                        var todrop=difference(cur,val);
-                        i=0, lim=todrop.length;
-                        while (i<lim) this.drop(key,todrop[i++],true);
-                        i=0, lim=toadd.length;
-                        while (i<lim) this.add(key,toadd[i++],true);}
-                    else {
-                        this.drop(key,cur,true);
-                        this.add(key,val,true);}}
-            return this;}
-        Ref.prototype.update=update_ref;
-        Ref.prototype.oninit=function(fcn,name){
-            var pool=this.pool;
-            var debugging=(((debug)&&(pool.traceinit))||(debug>2));
-            if (this._init) {
-                // If it's already been initialized, just call the function
-                if (debugging) {
-                    if (name) 
-                        log("Init/%s current %o with %o",name,this,fcn);
-                    else log("Init current %o with %o",this,fcn);}
-                fcn(this);
-                return true;}
-            else if (this._inits) {
-                // Save up the init functions
-                if (!(name)) {
-                    if (this._inits.indexOf(fcn)<0) {
-                        if (debugging) log("Delay init on %o: %o",this,fcn);
-                        this._inits.push(fcn);}}
-                // Don't do anything if the named init has already been added
-                    /* Note that name can't be anything that an array object
-                       might inherit (like 'length'). */ 
-                else if (this._inits[name]===fcn) {
-                    if (debugging)
-                        log("Already added %s init on %o: %o",this,fcn);}
-                else if (this._inits[name]) {
-                    var oldfcn=this._inits[name];
-                    var oldpos=this._inits.indexOf(oldfcn);
-                    warn("Replacing existing %s init on %o with %o, old=%o",
-                         name,this,fcn,oldfcn);
-                    this._inits[name]=fcn;
-                    if (oldpos<0) this._inits.push(fcn);
-                    else this._inits[oldpos]=fcn;}
-                else {
-                    if (debugging)
-                        fdjtLog("Delay %s init on %o: %o",name,this,fcn);
-                    this._inits[name]=fcn;
-                    this._inits.push(fcn);}}
-            else if (name) {
-                if (debugging)
-                    fdjtLog("Delay %s init on %o: %o",name,this,fcn);
-                this._inits=[fcn];
-                this._inits[name]=fcn;}
-            else {
-                fdjtLog("Delay init on %o: %o",this,fcn);
-                this._inits=[fcn];}
-            return false;};
-
-        Ref.prototype.toHTML=function(){
-            var dom=false;
-            return ((this.pool.forHTML)&&(this.pool.forHTML(this)))||
-                ((this.pool.forDOM)&&(dom=this.pool.forDOM(this))&&
-                 (dom.outerHTML))||
-                this._id||this.oid||this.uuid;};
-        Ref.prototype.toDOM=function(){
-            return ((this.pool.forDOM)&&(this.pool.forDOM(this)))||
-                ((this.pool.forHTML)&&(fdjtDOM(this.pool.forHTML(this))))||
-                (fdjtDOM("span.fdjtref",this._id||this.oid||this.uuid));};
-
-
-        /* Using offline storage to back up pools
-           In the simplest model, the QID is just used as a key
-           in local storage to store a JSON version of the object. */
-
-        var getLocal=fdjtState.getLocal;
-        var setLocal=fdjtState.setLocal;
-        var dropLocal=fdjtState.dropLocal;
-        var jsonString=JSON.stringify;
-
-        function OfflineKB(pool){
-            this.pool=pool; var map=pool.map;
-            for (var key in map) {
-                if (map.hasOwnProperty(key)) {
-                    var obj=map[key];
-                    var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-                    if (qid) {
-                        var objpool=obj.pool;
-                        obj.pool="@@"+(objpool.absref||objpool.name);
-                        setLocal(qid,jsonString(obj));
-                        obj.pool=objpool;}}}
-            return this;}
-        function offline_get(obj,prop){
-            var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-            var data=getLocal(qid);
-            if (data) obj.init(data);
-            return obj[prop];}
-        OfflineKB.prototype.load=function(obj){
-            var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-            var data=getLocal(qid,true);
-            if (data) return obj.init(data);
-            else return undefined;};
-        OfflineKB.prototype.probe=function(qid){
-            return getLocal(qid,true);};
-        OfflineKB.prototype.get=offline_get;
-        OfflineKB.prototype.add=function(obj,slotid,val){
-            var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-            if ((slotid)&&(val))
-                setLocal(qid,jsonString(obj));};
-        OfflineKB.prototype.drop=function(obj,slotid,val){
-            var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-            if (!(slotid)) dropLocal(qid);
-            else setLocal(qid,jsonString(obj));};
-        OfflineKB.prototype.Import=function(obj){
-            var qid=obj._qid||obj.uuid||obj.oid||obj._id;
-            setLocal(qid,obj,true);};
-        fdjtKB.OfflineKB=OfflineKB;
-        
         /* Miscellaneous array and table functions */
 
-        fdjtKB.add=function(obj,field,val,nodup){
+        refDB.add=function(obj,field,val,nodup){
             if (arguments.length===2)
                 return set_add(obj,field);
             else if (obj instanceof Ref)
@@ -1109,7 +884,7 @@ if (!(fdjt.RefDB)) {
             if ((obj._all) && (!(arr_contains(obj._all,field))))
                 obj._all.push(field);};
 
-        fdjtKB.drop=function(obj,field,val){
+        refDB.drop=function(obj,field,val){
             if (arguments.length===2)
                 return set_drop(obj,field);
             else if (obj instanceof Ref)
@@ -1124,7 +899,7 @@ if (!(fdjt.RefDB)) {
                 else vals.splice(pos,1);}
             else {}};
 
-        fdjtKB.test=function(obj,field,val){
+        refDB.test=function(obj,field,val){
             if (arguments.length===2)
                 return arr_contains(obj,field);
             else if (obj instanceof Ref)
@@ -1139,10 +914,10 @@ if (!(fdjt.RefDB)) {
                 else return true;}
             else return false;};
 
-        fdjtKB.insert=function(array,value){
+        refDB.insert=function(array,value){
             if (arr_position(array,value)<0) array.push(value);};
 
-        fdjtKB.remove=function(array,value,count){
+        refDB.remove=function(array,value,count){
             var pos=arr_position(array,value);
             if (pos<0) return array;
             array.splice(pos,1);
@@ -1153,14 +928,14 @@ if (!(fdjt.RefDB)) {
                     array.splice(pos,1); count--;}}
             return array;};
 
-        fdjtKB.indexOf=function(array,elt,pos){
+        refDB.indexOf=function(array,elt,pos){
             if (pos) return array.indexOf(elt,pos);
             else return array.indexOf(elt);};
 
-        fdjtKB.contains=arr_contains;
-        fdjtKB.position=arr_position;
+        refDB.contains=arr_contains;
+        refDB.position=arr_position;
 
-        return fdjtKB;})();}
+        return refDB;})();}
 
 /* Emacs local variables
    ;;;  Local variables: ***
