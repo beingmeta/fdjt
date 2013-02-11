@@ -143,7 +143,7 @@ if (!(fdjt.RefDB)) {
         
         var uuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})$/;
         var xuuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)$/;
-        var refpat=/^(((:|)@(([0-9a-fA-F]+\/[0-9a-fA-F]+)|(\/\w+\/.*)))|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+))$/;
+        var refpat=/^(((:|)@(([0-9a-fA-F]+\/[0-9a-fA-F]+)|(\/\w+\/.*)|(@\d+\/.*)))|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+))$/;
     
         function resolveRef(arg,db,force){
             if (arg instanceof Ref) return ref;
@@ -168,6 +168,17 @@ if (!(fdjt.RefDB)) {
                         db=new RefDB(type||tail);
                         if (type) db.addAlias(tail);}
                     else db=false;}
+                else if (arg[1]==='@') {
+                    // Double at is a "local ref"
+                    var idstart=art.indexOf('/');
+                    var atid=arg.slice(0,idstart);
+                    var atdb=aliases[atid];
+                    if (atdb) db=atdb;
+                    else {
+                        var domain=getLocal(arg.slice(0,idstart),true);
+                        if (!(domain)) {
+                            db=new RefDB(domain,{aliases: [atid]});}
+                        else return false;}}
                 else {
                     var atprefix, slash;
                     if (arg[1]==='/') {
@@ -328,14 +339,19 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.load=function loadRefs(refs,callback){
             if (!(this.storage)) return;
             else if (this.storage instanceof window.Storage) {
-                var storage=this.storage;
+                var storage=this.storage; var atid=false;
                 var i=0, lim=refs.length; while (i<lim) {
                     var ref=refs[i++];
                     if (typeof ref === "string") ref=this.ref(ref);
                     if (ref._live) continue;
-                    var key=((this.absrefs)?(ref._id):(ref._id+"@"+this.name));
-                    var stringval=this.storage[key];
-                    ref.Import(JSON.parse(stringval));}
+                    if (this.absrefs)
+                        ref.Import(JSON.parse(storage[ref._id]));
+                    else if (atid)
+                        ref.Import(JSON.parse(storage[atid+"("+ref._id+")"]));
+                    else {
+                        if (this.atid) atid=this.atid;
+                        else atid=this.atid=getatid(this.name);
+                        ref.Import(JSON.parse(storage[atid+"("+ref._id+")"]));}}
                 if (callback) callback();}
             else if (window.IndexedDB) {}
             else {}};
@@ -344,17 +360,39 @@ if (!(fdjt.RefDB)) {
             else if (!(refs))
                 return this.save(this.all_refs,callback);
             else if (this.storage instanceof window.Storage) {
-                var storage=this.storage;
+                var storage=this.storage; var atid=this.atid;
                 var i=0, lim=refs.length; while (i<lim) {
                     var ref=refs[i++];
                     if (typeof ref === "string") ref=this.ref(ref);
                     if (!(ref._live)) continue;
-                    var key=((this.absrefs)?(ref._id):(ref._id+"@"+this.name));
-                    this.storage.setItem(key,JSON.stringify(ref.Export()));}
+                    if (this.absrefs) 
+                        this.storage.setItem(
+                            this._id,JSON.stringify(ref.Export()));
+                    else {
+                        if (atid) {}
+                        else if (this.atid) atid=this.atid;
+                        else atid=this.atid=getatid(db);
+                        this.storage.setItem(
+                            atid+"("+this._id+")",
+                            JSON.stringify(ref.Export()));}}
                 if (callback) callback();}
             else if (window.IndexedDB) {}
             else {}};
 
+        function getatid(storage,db){
+            if (db.atid) return db.atid;
+            var atid=storage["atid("+this.name+")"];
+            if (atid) return (db.atid=atid);
+            else {
+                var count=storage["atid.count"];
+                if (!(count)) {
+                    atid=count=1; this.storage["atid.count"]="2";}
+                else {
+                    count=parseInt(count);
+                    atid=this.atid="@@"+count;
+                    this.storage["atid("+this.name+")"]=atid;
+                    this.storage["atid.count"]=count+1;}}}
+        
         function getKeystring(val,db){
             if (val instanceof Ref) {
                 if (val._db===db) return val._id;
