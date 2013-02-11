@@ -42,7 +42,7 @@ if (!(fdjt.RefDB)) {
         var refdbs={}, all_refdbs=[];
         var aliases={}, atmaps={};
 
-        function refDB(name,init){
+        function RefDB(name,init){
             var db=this;
             if (refdbs[name]) {
                 db=refdbs[name];
@@ -94,7 +94,7 @@ if (!(fdjt.RefDB)) {
                         warn("Complex indices not yet handled!");
                     else this.indices[ix]={};}}
             
-            return this;}
+            return db;}
 
         function checkAliases(aliases){
             var i=0, lim=aliases.length;
@@ -104,15 +104,15 @@ if (!(fdjt.RefDB)) {
                 if (db) return db;}
             return false;}
 
-        refDB.open=function refDBOpen(name){
-            return refdbs[name]||aliases[name]||(new refDB(name));};
+        RefDB.open=function RefDBOpen(name){
+            return refdbs[name]||aliases[name]||(new RefDB(name));};
 
-        refDB.prototype.ref=function DBref(id){
+        RefDB.prototype.ref=function DBref(id){
             return (this.refs[id])||
                 ((this.refclass)&&(new (this.refclass)(id)))||
                 (new Ref(id,this));};
-        refDB.prototype.probe=function DBprobe(id){return (this.refs[id]);};
-        refDB.prototype.addAlias=function DBaddAlias(alias){
+        RefDB.prototype.probe=function DBprobe(id){return (this.refs[id]);};
+        RefDB.prototype.addAlias=function DBaddAlias(alias){
             if (aliases[alias]) {
                 if (aliases[alias]!==this) 
                     warn("Alias %s for %o already associated with %o",
@@ -121,13 +121,13 @@ if (!(fdjt.RefDB)) {
                 aliases[alias]=this;
                 this.aliases.push(alias);}};
 
-        refDB.prototype.onLoader=function(method,name,noupdate){
+        RefDB.prototype.onLoader=function(method,name,noupdate){
             if ((name)&&(this.onloadnames[name])) {
                 var cur=this.onloadnames[name];
                 if (cur===method) return;
                 var pos=this.onload.indexOf(cur);
                 if (cur<0) {
-                    warn("Couldn't replace named onload method %s for <refDB %s>",
+                    warn("Couldn't replace named onload method %s for <RefDB %s>",
                          name,this.name);
                     return;}
                 else {
@@ -151,7 +151,7 @@ if (!(fdjt.RefDB)) {
             else if ((typeof arg === "string")&&(refpat.exec(string))) {
                 var at=arg.indexOf('@');
                 if ((at===1)&&(at[0]===':')) {arg=arg.slice(1); at=0;}
-                if (at>0) db=refDB.open(arg.slice(at+1));
+                if (at>0) db=RefDB.open(arg.slice(at+1));
                 else if (at<0) {
                     var uuid;
                     if (arg.search(":#U")===0) uuid=arg.slice(3);
@@ -165,7 +165,7 @@ if (!(fdjt.RefDB)) {
                         ((tail)&&(refdbs[tail]||aliases[tail]));
                     if (known_db) db=known_db;
                     else if ((force)&&(tail)) {
-                        db=new refDB(type||tail);
+                        db=new RefDB(type||tail);
                         if (type) db.addAlias(tail);}
                     else db=false;}
                 else {
@@ -175,15 +175,17 @@ if (!(fdjt.RefDB)) {
                         if (slash>0) slash=slash+2;}
                     else slash=arg.indexOf('/');
                     atprefix=arg.slice(at,slash+1);
-                    db=refdbs[atprefix]||aliases[atprefix]||((force)&&(new refDB(atprefix)));}}
+                    db=refdbs[atprefix]||aliases[atprefix]||((force)&&(new RefDB(atprefix)));}}
             else {}
             if (!(db)) return false;
             if (db.refs[arg]) return (db.refs[arg])
             else if (force) return db.ref(arg);
             else return false;}
-        refDB.resolve=resolveRef;
+        RefDB.resolve=resolveRef;
 
         function Ref(id,db,instance){
+            // Just called for the prototype
+            if (arguments.length===0) return this;
             if (db.refs[id]) return db.refs[id];
             else if (instance) {
                 instance._id=id; instance._db=db;
@@ -191,7 +193,7 @@ if (!(fdjt.RefDB)) {
                 db.refs[id]=instance;
                 db.all_refs.push(instance);
                 return instance;}
-            else if (db.refclass)
+            else if ((db.refclass)&&(!(this instanceof db.refclass)))
                 return new (db.refclass)(id,db);
             else {
                 this._id=id; this._db=db;
@@ -199,7 +201,7 @@ if (!(fdjt.RefDB)) {
                 db.refs[id]=this;
                 db.all_refs.push(this);
                 return this;}}
-        refDB.Ref=Ref;
+        RefDB.Ref=Ref;
 
         Ref.prototype.Import=function refImport(data,index){
             var indices=this._db.indices;
@@ -218,8 +220,8 @@ if (!(fdjt.RefDB)) {
             if (value instanceof Ref) return value;
             else if ((typeof value === "object")&&(value._id)) {
                 var ref;
-                if (value._domain) ref=refDB(value._domain).ref(value._id);
-                else ref=refDB.resolve(value._id,db,true);
+                if (value._domain) ref=RefDB(value._domain).ref(value._id);
+                else ref=RefDB.resolve(value._id,db,true);
                 for (var slot in value) {
                     if (value.hasOwnProperty(slot))
                         ref[slot]=importValue(value[slot],db);}
@@ -232,7 +234,7 @@ if (!(fdjt.RefDB)) {
                     if (elt!==imported) {
                         if (imports) imports.push(imported);
                         else {
-                            imports=value.slice(0,i);
+                            imports=value.slice(0,i-1);
                             imports.push(imported);}}
                     else if (imports) imports.push(elt);
                     else {}}
@@ -259,36 +261,43 @@ if (!(fdjt.RefDB)) {
                 return copied||value;}
             else return value;}
         Ref.importValue=importValue;
-        refDB.prototype.importValue=function(val){return importValue(val,this);};
+        RefDB.prototype.importValue=function(val){return importValue(val,this);};
         
-        Ref.prototype.Export=function refImport(){
-            var exported={};
+        Ref.prototype.Export=function refExport(){
+            var exported={_id: this._id};
+            if (!(this._db.absrefs)) this._domain=this._db.name;
             for (var key in this) {
-                if (this.hasOwnProperty(key)) {
-                    var value=data[key];
-                    if ((typeof value === "number")||(typeof value === "string"))
+                if (key[0]==="_") continue;
+                else if (this.hasOwnProperty(key)) {
+                    var value=this[key];
+                    if ((typeof value === "number")||
+                        (typeof value === "string"))
                         exported[key]=value;
                     else if (value instanceof Ref) {
-                        if (ref.db.absrefs)
-                            exported[key]={_id: ref._id};
-                        else exported[key]={_id: ref._id, _domain: ref._domain||ref.db.name};}
+                        if (value._db.absrefs)
+                            exported[key]={_id: value._id};
+                        else exported[key]={
+                            _id: value._id,
+                            _domain: value._domain||value._db.name};}
                     else exported[key]=exportValue(value,this._db);}}
             return exported;};
         function exportValue(value,db){
             if (value instanceof Ref) {
-                if (ref._db===db) return {_id: ref._id};
-                else if (ref._db.absrefs) return {_id: ref._id};
-                else return {_id: ref._id, _domain: ref._domain||ref._db.name};}
+                if (value._db===db) return {_id: value._id};
+                else if (value._db.absrefs) return {_id: value._id};
+                else return {
+                    _id: value._id,
+                    _domain: value._domain||value._db.name};}
             else if (value instanceof Array) {
                 var i=0, lim=value.length; var exports=false;
                 while (i<lim) {
                     var elt=value[i++];
                     var exported=exportValue(elt,db);
-                    if (elt!==imported) {
+                    if (elt!==exported) {
                         if (exports) exports.push(exported);
                         else {
-                            exports=value.slice(0,i);
-                            exprots.push(exported);}}
+                            exports=value.slice(0,i-1);
+                            exports.push(exported);}}
                     else if (exports) exports.push(elt);
                     else {}}
                 if (typeof value._sortlen === "number")
@@ -305,16 +314,18 @@ if (!(fdjt.RefDB)) {
                                 copied={};
                                 if (fields.length) {
                                     var j=0, jlim=fields.length;
-                                    while (j<jlim) { var f=fields[j++]; copied[f]=value[f];}}}
+                                    while (j<jlim) {
+                                        var f=fields[j++];
+                                        copied[f]=value[f];}}}
                             copied[field]=exportval;}
                         else if (copied) copied[name]=fieldval;
                         else fields.push(field);}}
                 return copied||value;}
             else return value;}
         Ref.exportValue=exportValue;
-        refDB.prototype.exportValue=function(val){return exportValue(val,this);};
+        RefDB.prototype.exportValue=function(val){return exportValue(val,this);};
         
-        refDB.prototype.load=function loadRefs(refs,callback){
+        RefDB.prototype.load=function loadRefs(refs,callback){
             if (!(this.storage)) return;
             else if (this.storage instanceof window.Storage) {
                 var storage=this.storage;
@@ -328,8 +339,10 @@ if (!(fdjt.RefDB)) {
                 if (callback) callback();}
             else if (window.IndexedDB) {}
             else {}};
-        refDB.prototype.save=function saveRefs(refs,callback){
+        RefDB.prototype.save=function saveRefs(refs,callback){
             if (!(this.storage)) return;
+            else if (!(refs))
+                return this.save(this.all_refs,callback);
             else if (this.storage instanceof window.Storage) {
                 var storage=this.storage;
                 var i=0, lim=refs.length; while (i<lim) {
@@ -375,7 +388,7 @@ if (!(fdjt.RefDB)) {
                     var keystring=keystrings[j++]; var refs=index[keystring];
                     if (refs) refs.push(ref); else index[keystring]=[ref];}}}
 
-        refDB.prototype.find=function findRefs(key,value){
+        RefDB.prototype.find=function findRefs(key,value){
             var indices=this.indices[key];
             if (indices) return indices[getKeystring(value,this)];
             else return [];}
@@ -426,7 +439,7 @@ if (!(fdjt.RefDB)) {
             results._allstrings=new_allstrings;
             results._sortlen=results.length;
             return results;}
-        refDB.intersection=intersection;
+        RefDB.intersection=intersection;
 
         function difference(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -453,7 +466,7 @@ if (!(fdjt.RefDB)) {
             results._allstrings=new_allstrings;
             results._sortlen=results.length;
             return results;}
-        refDB.difference=difference;
+        RefDB.difference=difference;
         
         function union(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -478,7 +491,7 @@ if (!(fdjt.RefDB)) {
             results._allstrings=allstrings;
             results._sortlen=results.length;
             return results;}
-        refDB.union=union;
+        RefDB.union=union;
 
         function merge(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -506,7 +519,7 @@ if (!(fdjt.RefDB)) {
             results._allstrings=allstrings;
             results._sortlen=results.length;
             return results;}
-        refDB.merge=merge;
+        RefDB.merge=merge;
 
         function overlaps(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -524,7 +537,7 @@ if (!(fdjt.RefDB)) {
                      (set_sortfn(set1[i],set2[j])<0)) i++;
             else j++;
             return false;}
-        refDB.overlaps=overlaps;
+        RefDB.overlaps=overlaps;
 
         /* Sets */
         /* sets are really arrays that are sorted to simplify set operations.
@@ -551,7 +564,7 @@ if (!(fdjt.RefDB)) {
                 else if (arg instanceof Array) result.concat(arg);
                 else result.push(arg);
                 return setify(result);}}
-        refDB.Set=fdjtSet;
+        RefDB.Set=fdjtSet;
         fdjt.Set=fdjtSet;
 
         function setify(array) {
@@ -804,7 +817,7 @@ if (!(fdjt.RefDB)) {
                 cur.splice(pos); if (cur._sortlen) cur._sortlen--;
                 return true;}};
         fdjt.Map=fdjtMap;
-        refDB.fdjtMap=fdjtMap;
+        RefDB.fdjtMap=fdjtMap;
 
         /* Indices */
 
@@ -863,11 +876,11 @@ if (!(fdjt.RefDB)) {
                     return true;}
                 else return false;};
             return index;}
-        refDB.Index=Index;
+        RefDB.Index=Index;
 
         /* Miscellaneous array and table functions */
 
-        refDB.add=function(obj,field,val,nodup){
+        RefDB.add=function(obj,field,val,nodup){
             if (arguments.length===2)
                 return set_add(obj,field);
             else if (obj instanceof Ref)
@@ -884,7 +897,7 @@ if (!(fdjt.RefDB)) {
             if ((obj._all) && (!(arr_contains(obj._all,field))))
                 obj._all.push(field);};
 
-        refDB.drop=function(obj,field,val){
+        RefDB.drop=function(obj,field,val){
             if (arguments.length===2)
                 return set_drop(obj,field);
             else if (obj instanceof Ref)
@@ -899,7 +912,7 @@ if (!(fdjt.RefDB)) {
                 else vals.splice(pos,1);}
             else {}};
 
-        refDB.test=function(obj,field,val){
+        RefDB.test=function(obj,field,val){
             if (arguments.length===2)
                 return arr_contains(obj,field);
             else if (obj instanceof Ref)
@@ -914,10 +927,10 @@ if (!(fdjt.RefDB)) {
                 else return true;}
             else return false;};
 
-        refDB.insert=function(array,value){
+        RefDB.insert=function(array,value){
             if (arr_position(array,value)<0) array.push(value);};
 
-        refDB.remove=function(array,value,count){
+        RefDB.remove=function(array,value,count){
             var pos=arr_position(array,value);
             if (pos<0) return array;
             array.splice(pos,1);
@@ -928,14 +941,14 @@ if (!(fdjt.RefDB)) {
                     array.splice(pos,1); count--;}}
             return array;};
 
-        refDB.indexOf=function(array,elt,pos){
+        RefDB.indexOf=function(array,elt,pos){
             if (pos) return array.indexOf(elt,pos);
             else return array.indexOf(elt);};
 
-        refDB.contains=arr_contains;
-        refDB.position=arr_position;
+        RefDB.contains=arr_contains;
+        RefDB.position=arr_position;
 
-        return refDB;})();}
+        return RefDB;})();}
 
 /* Emacs local variables
    ;;;  Local variables: ***
