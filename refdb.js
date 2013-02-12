@@ -568,7 +568,7 @@ if (!(fdjt.RefDB)) {
             var indices=this.indices[key];
             if (indices) {
                 var keystring=getKeystring(value,this);
-                if (keystring) return indices[keystring];
+                if (keystring) return indices[keystring]||[];
                 else return [];}
             else return [];}
         RefDB.prototype.count=function countRefs(key,value){
@@ -941,13 +941,13 @@ if (!(fdjt.RefDB)) {
 
         Ref.prototype.toHTML=function(){
             var dom=false;
-            return ((this.pool.forHTML)&&(this.pool.forHTML(this)))||
-                ((this.pool.forDOM)&&(dom=this.pool.forDOM(this))&&
+            return ((this._db.forHTML)&&(this._db.forHTML(this)))||
+                ((this._db.forDOM)&&(dom=this._db.forDOM(this))&&
                  (dom.outerHTML))||
                 this._id||this.oid||this.uuid;};
         Ref.prototype.toDOM=function(){
-            return ((this.pool.forDOM)&&(this.pool.forDOM(this)))||
-                ((this.pool.forHTML)&&(fdjtDOM(this.pool.forHTML(this))))||
+            return ((this._db.forDOM)&&(this._db.forDOM(this)))||
+                ((this._db.forHTML)&&(fdjtDOM(this._db.forHTML(this))))||
                 (fdjtDOM("span.fdjtref",this._id||this.oid||this.uuid));};
 
         /* Maps */
