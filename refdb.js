@@ -336,12 +336,17 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.importValue=function(val){
             return importValue(val,this);};
         RefDB.prototype.Import=function refDBImport(data){
+            var refs=[];
             if (!(data instanceof Array)) data=[data];
             var i=0, lim=data.length; while (i<lim) {
                 var item=data[i++];
                 var ref=resolveRef(item._id,item._domain,true);
                 if (!(ref)) warn("Couldn't resolve ref %o",item._id);
-                else ref.Import(item);}};
+                else {
+                    refs.push(ref);
+                    ref.Import(item);};}
+            if (data.length===1) return refs[0];
+            else return refs;};
 
         Ref.prototype.Export=function refExport(){
             var exported={_id: this._id};
