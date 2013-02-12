@@ -64,11 +64,13 @@ if (!(fdjt.RefDB)) {
                 this.name=name; refdbs[name]=this; all_refdbs.push(this);
                 this.aliases=[]; this.refclass=false;
                 this.refs={}; this.altrefs={};
-                this.all_refs=[]; this.changed=[];
+                this.all_refs=[]; this.changed=[]; this.loaded=[];
                 this.storage=init.storage||false;
                 this.absrefs=init.absrefs||false;
-                this.onload=init.onload||[]; this.onloadnames={};
-                this.onadd={}; this.ondrop={}; this.indices={};}
+                this.onload=[]; this.onloadnames={};
+                this.onadd=[]; this.onaddnames={};
+                this.ondrop=[]; this.ondropnames={};
+                this.indices={};}
             if (init.hasOwnProperty("absrefs")) db.absrefs=init.absrefs;
             if (init.aliases) {
                 var aliases=init.aliases;
@@ -85,7 +87,7 @@ if (!(fdjt.RefDB)) {
                 var onload=init.onload;
                 for (var methname in onload) {
                     if (onload.hasOwnProperty(methname)) 
-                        db.onLoader(oload[methname],methname);}}
+                        db.onLoad(oload[methname],methname);}}
             if (init.indices) {
                 var index_specs=init.indices;
                 var j=0, jlim=index_specs.length; while (j<jlim) {
@@ -121,7 +123,7 @@ if (!(fdjt.RefDB)) {
                 (new Ref(id,this));};
         RefDB.prototype.probe=function DBprobe(id){return (this.refs[id]);};
 
-        RefDB.prototype.onLoader=function(method,name,noupdate){
+        RefDB.prototype.onLoad=function(method,name,noupdate){
             if ((name)&&(this.onloadnames[name])) {
                 var cur=this.onloadnames[name];
                 if (cur===method) return;
@@ -131,15 +133,38 @@ if (!(fdjt.RefDB)) {
                          name,this.name);
                     return;}
                 else {
-                    this.onload[pos]=method;
-                    newmeths.push(method);}}
+                    this.onload[pos]=method;}}
             else this.onload.push(method);
             if (name) this.onloadnames[name]=method;
-            var loaded=[].concat(db.all_loaded);
-            fdjtTime.slowMap(function(ref){
-                var methn=0, methlim=newmeths.length; while (methn<methlim) {
-                    if (ref._live) newmeths[methn](ref);}},
-                             loaded);};
+            if (!(noupdate)) {
+                var loaded=[].concat(this.loaded);
+                fdjtTime.slowmap(method,loaded);}};
+
+        RefDB.prototype.onAdd=function(method,name,noupdate){
+            if ((name)&&(this.onaddnames[name])) {
+                var cur=this.onaddnames[name];
+                if (cur===method) return;
+                var pos=this.onadd.indexOf(cur);
+                if (cur<0) {
+                    warn("Couldn't replace named onadd method %s for <RefDB %s>",
+                         name,this.name);
+                    return;}
+                else this.onadd[pos]=method;}
+            else this.onadd.push(method);
+            if (name) this.onaddnames[name]=method;};
+
+        RefDB.prototype.onDrop=function(method,name,noupdate){
+            if ((name)&&(this.ondropnames[name])) {
+                var cur=this.ondropnames[name];
+                if (cur===method) return;
+                var pos=this.ondrop.indexOf(cur);
+                if (cur<0) {
+                    warn("Couldn't replace named ondrop method %s for <RefDB %s>",
+                         name,this.name);
+                    return;}
+                else this.ondrop[pos]=method;}
+            else this.ondrop.push(method);
+            if (name) this.ondropnames[name]=method;};
         
         var uuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})$/;
         var xuuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)$/;
@@ -193,6 +218,7 @@ if (!(fdjt.RefDB)) {
             else if (force) return db.ref(arg);
             else return false;}
         RefDB.resolve=resolveRef;
+        RefDB.ref=resolveRef;
 
         function Ref(id,db,instance){
             // Just called for the prototype
@@ -212,7 +238,7 @@ if (!(fdjt.RefDB)) {
                 db.refs[id]=this;
                 db.all_refs.push(this);
                 return this;}}
-        RefDB.Ref=Ref;
+        fdjt.Ref=RefDB.Ref=Ref;
 
         Ref.prototype.addAlias=function addRefAlias(term){
             if (this._db.refs[term]) {
@@ -305,7 +331,13 @@ if (!(fdjt.RefDB)) {
         Ref.importValue=importValue;
         RefDB.prototype.importValue=function(val){
             return importValue(val,this);};
-        
+        RefDB.prototype.Import=function refDBImport(data){
+            if (!(data instanceof Array)) data=[data];
+            var i=0, lim=data.length; while (i<lim) {
+                var item=data[i++];
+                var ref=resolveRef(item._id,item._domain);
+                ref.Import(item);}};
+
         Ref.prototype.Export=function refExport(){
             var exported={_id: this._id};
             if (!(this._db.absrefs)) this._domain=this._db.name;
@@ -372,18 +404,20 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.load=function loadRefs(refs,callback){
             if (!(this.storage)) return;
             else if (this.storage instanceof window.Storage) {
-                var storage=this.storage; var atid=false;
+                var storage=this.storage; var loaded=this.loaded;
+                var atid=false;
                 var i=0, lim=refs.length; while (i<lim) {
                     var ref=refs[i++];
                     if (typeof ref === "string") ref=this.ref(ref);
                     if (ref._live) continue;
+                    loaded.push(ref);
                     if (this.absrefs)
                         ref.Import(JSON.parse(storage[ref._id]));
                     else if (atid)
                         ref.Import(JSON.parse(storage[atid+"("+ref._id+")"]));
                     else {
                         if (this.atid) atid=this.atid;
-                        else atid=this.atid=getatid(this.name);
+                        else atid=this.atid=getatid(storage,this);
                         ref.Import(JSON.parse(storage[atid+"("+ref._id+")"]));}}
                 if (callback) callback();}
             else if (window.IndexedDB) {}
@@ -404,7 +438,7 @@ if (!(fdjt.RefDB)) {
                     else {
                         if (atid) {}
                         else if (this.atid) atid=this.atid;
-                        else atid=this.atid=getatid(db);
+                        else atid=this.atid=getatid(storage,this);
                         this.storage.setItem(
                             atid+"("+this._id+")",
                             JSON.stringify(ref.Export()));}}
@@ -414,17 +448,17 @@ if (!(fdjt.RefDB)) {
 
         function getatid(storage,db){
             if (db.atid) return db.atid;
-            var atid=storage["atid("+this.name+")"];
+            var atid=storage["atid("+db.name+")"];
             if (atid) return (db.atid=atid);
             else {
                 var count=storage["atid.count"];
                 if (!(count)) {
-                    atid=count=1; this.storage["atid.count"]="2";}
+                    atid=count=1; storage["atid.count"]="2";}
                 else {
                     count=parseInt(count);
-                    atid=this.atid="@@"+count;
-                    this.storage["atid("+this.name+")"]=atid;
-                    this.storage["atid.count"]=count+1;}}}
+                    atid=db.atid="@@"+count;
+                    storage["atid("+db.name+")"]=atid;
+                    storage["atid.count"]=count+1;}}}
         
         function getKeystring(val,db){
             if (val instanceof Ref) {
@@ -808,7 +842,7 @@ if (!(fdjt.RefDB)) {
             if (this._db.onadd.hasOwnProperty(prop))
                 (this._db.onadd[prop])(this,prop,val);
             if ((!(dontindex))&&(this._db.indices[prop])) 
-                indexRef(this,prop,indices[prop]);
+                indexRef(this,prop,this._db.indices[prop]);
             return true;};
         Ref.prototype.drop=function refDrop(prop,val,leaveindex){
             if (prop==='_id') return false;
@@ -827,7 +861,7 @@ if (!(fdjt.RefDB)) {
                 if (this._db.ondrop.hasOwnProperty(prop)) 
                     this._db.ondrop[prop](this,prop,val);
                 if ((!(leaveindex))&&(this._db.indices[prop])) 
-                    indexRefdrop(this,prop,indices[prop]);
+                    indexRefdrop(this,prop,this._db.indices[prop]);
                 return true;}
             else return false;};
         Ref.prototype.test=function(prop,val){
@@ -1077,6 +1111,43 @@ if (!(fdjt.RefDB)) {
 
         RefDB.contains=arr_contains;
         RefDB.position=arr_position;
+
+        function Query(dbs,pattern,biases){
+            this.dbs=dbs;
+            this.pattern=pattern;
+            this.biases=biases||false;
+            var scores=this.scores={};
+            var results=this.results=[];
+            var scored=this.scored=[];
+            var freqs=this.freqs={};
+            for (var field in pattern) {
+                if (pattern.hasOwnProperty(field)) {
+                    var vfreqs=freqs[field]||(freqs[field]={});
+                    var values=pattern[field];
+                    if (!(values instanceof Array)) values=[values];
+                    var bias=((biases)&&(biases[field]));
+                    var score=bias||1;
+                    var i=0, lim=dbs.length;
+                    while (i<lim) {
+                        var db=dbs[i++];
+                        var vi=0, vlim=values.length; while (vi<vlim) {
+                            var val=values[vi++];
+                            items=db.find(field,val);
+                            var valstring=getKeystring(val);
+                            if ((items)&&(items.length)) {
+                                if (vfreqs[val]) vfreqs[val]+=items.length;
+                                else vfreqs[val]=items.length;
+                                var ii=0, nitems=items.length;
+                                while (ii<nitems) {
+                                    var item=items[ii++];
+                                    if (scores[item])
+                                        scores[item]=scores[item]+score;
+                                    else {
+                                        if (bias) scored.push(item);
+                                        results.push(item);
+                                        scores[item]=score;}}}}}}}
+            return this;}
+        RefDB.Query=Query;
 
         return RefDB;})();}
 
