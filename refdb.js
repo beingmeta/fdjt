@@ -255,7 +255,7 @@ if (!(fdjt.RefDB)) {
                 this._db.altrefs[term]=this;
                 return true;}};
 
-        Ref.prototype.Import=function refImport(data,index){
+        Ref.prototype.Import=function refImport(data,dontindex){
             var db=this._db;
             var indices=db.indices; var onload=db.onload;
             var aliases=data.aliases;
@@ -275,9 +275,9 @@ if (!(fdjt.RefDB)) {
                         ((typeof value === "string")&&
                          ((!(string_refs))||(!(refpat.exec(value))))))
                         this[key]=value;
-                    else this[key]=value=importValue(value,this._db);
-                    if ((index)&&(indices[key])) 
-                        indexRef(this,key,indices[key]);}}
+                    else this[key]=value=importValue(value,this._db,dontindex);
+                    if ((!(dontindex))&&(indices[key])) 
+                        indexRef(this,key,this[key],indices[key],db);}}
             if (!(this._live)) {
                 this._live=fdjtTime();
                 if (onload) {
@@ -288,7 +288,7 @@ if (!(fdjt.RefDB)) {
                 var j=0, jlim=inits.length; while (j<jlim) {
                     inits[j++](this);}
                 delete this._onload;}};
-        function importValue(value,db,index){
+        function importValue(value,db,dontindex){
             if (value instanceof Ref) return value;
             else if ((typeof value === "object")&&(value._id)) {
                 var ref;
@@ -439,6 +439,29 @@ if (!(fdjt.RefDB)) {
                 if (callback) callback();}
             else if (window.IndexedDB) {}
             else {}};
+        Ref.prototype.load=function loadRef() {
+            if (this._live) return this;
+            else {
+                this._db.load(this);
+                return this;}};
+        RefDB.load=function RefDBload(spec){
+            if (typeof spec === "string") {
+                var ref=RefDB.ref(spec,false,true);
+                if (ref) return ref.load();
+                else throw {error: "Couldn't resolve "+spec};}
+            else if (spec instanceof Ref)
+                return ref.load();
+            else if (spec instanceof Array) {
+                var loads=[]; var i=0, lim=spec.length;
+                while (i<lim) {
+                    var s=spec[i++]; var r;
+                    if (typeof s === "string") r=RefDB.ref(s,false,true);
+                    else if (s instanceof Ref) r=s;
+                    else s=false;
+                    if (r) loads.push(r.load());
+                    else loads.push(false);}
+                return loads;}};
+        
         RefDB.prototype.save=function saveRefs(refs,callback){
             if (!(this.storage)) return;
             else if (!(refs))
@@ -859,7 +882,7 @@ if (!(fdjt.RefDB)) {
             if (this._db.onadd.hasOwnProperty(prop))
                 (this._db.onadd[prop])(this,prop,val);
             if ((!(dontindex))&&(this._db.indices[prop])) 
-                indexRef(this,prop,this._db.indices[prop]);
+                indexRef(this,prop,this[prop],this._db.indices[prop]);
             return true;};
         Ref.prototype.drop=function refDrop(prop,val,leaveindex){
             if (prop==='_id') return false;
