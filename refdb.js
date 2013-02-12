@@ -118,10 +118,13 @@ if (!(fdjt.RefDB)) {
                 this.aliases.push(alias);}};
 
         RefDB.prototype.ref=function DBref(id){
+            // if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             return (this.refs[id])||
                 ((this.refclass)&&(new (this.refclass)(id)))||
                 (new Ref(id,this));};
-        RefDB.prototype.probe=function DBprobe(id){return (this.refs[id]);};
+        RefDB.prototype.probe=function DBprobe(id){
+            if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
+            return (this.refs[id]);};
 
         RefDB.prototype.onLoad=function(method,name,noupdate){
             if ((name)&&(this.onloadnames[name])) {
@@ -173,7 +176,7 @@ if (!(fdjt.RefDB)) {
         function resolveRef(arg,db,force){
             if (arg instanceof Ref) return ref;
             else if ((db)&&(db.refs[arg])) return db.refs[arg];
-            else if ((typeof arg === "string")&&(refpat.exec(string))) {
+            else if ((typeof arg === "string")&&(refpat.exec(arg))) {
                 var at=arg.indexOf('@');
                 if ((at===1)&&(at[0]===':')) {arg=arg.slice(1); at=0;}
                 if (at>0) db=RefDB.open(arg.slice(at+1));
@@ -183,15 +186,16 @@ if (!(fdjt.RefDB)) {
                     else if (arg.search("#U")===0) uuid=arg.slice(2);
                     else if (arg.search("U")===0) uuid=arg.slice(1);
                     else uuid=arg;
-                    var type=uuid.indexOf('t'), tail=uuid.rindexOf('-');
+                    var type=uuid.indexOf('t'), tail=arg.length-2;
                     if (type>0) type="UUID"+uuid.slice(type); else type=false;
-                    if (tail>0) tail="UUID"+uuid.slice(tail); else tail=false;
+                    if (tail>0) tail="-UUIDTYPE="+uuid.slice(tail);
+                    else tail=false;
                     var known_db=((type)&&(refdbs[type]||aliases[type]))||
                         ((tail)&&(refdbs[tail]||aliases[tail]));
                     if (known_db) db=known_db;
-                    else if ((force)&&(tail)) {
-                        db=new RefDB(type||tail);
-                        if (type) db.addAlias(tail);}
+                    else if ((force)&&(type)) {
+                        db=new RefDB(type);
+                        if (type) db.addAlias(type);}
                     else db=false;}
                 else if (arg[1]==='@') {
                     // Double at is a "local ref"
@@ -335,8 +339,9 @@ if (!(fdjt.RefDB)) {
             if (!(data instanceof Array)) data=[data];
             var i=0, lim=data.length; while (i<lim) {
                 var item=data[i++];
-                var ref=resolveRef(item._id,item._domain);
-                ref.Import(item);}};
+                var ref=resolveRef(item._id,item._domain,true);
+                if (!(ref)) warn("Couldn't resolve ref %o",item._id);
+                else ref.Import(item);}};
 
         Ref.prototype.Export=function refExport(){
             var exported={_id: this._id};
@@ -402,23 +407,30 @@ if (!(fdjt.RefDB)) {
             return exportValue(val,this);};
         
         RefDB.prototype.load=function loadRefs(refs,callback){
+            if (!(refs instanceof Array)) refs=[refs];
             if (!(this.storage)) return;
             else if (this.storage instanceof window.Storage) {
                 var storage=this.storage; var loaded=this.loaded;
                 var atid=false;
                 var i=0, lim=refs.length; while (i<lim) {
-                    var ref=refs[i++];
-                    if (typeof ref === "string") ref=this.ref(ref);
-                    if (ref._live) continue;
+                    var arg=refs[i++], ref=arg, content;
+                    if (typeof ref === "string")
+                        ref=this.ref(ref,false,true);
+                    if (!(ref)) {
+                        warn("Couldn't resolve ref to %s",arg);
+                        continue;}
+                    else if (ref._live) continue;
                     loaded.push(ref);
-                    if (this.absrefs)
-                        ref.Import(JSON.parse(storage[ref._id]));
+                    if (this.absrefs) content=storage[ref._id];
                     else if (atid)
-                        ref.Import(JSON.parse(storage[atid+"("+ref._id+")"]));
+                        content=storage[atid+"("+ref._id+")"];
                     else {
                         if (this.atid) atid=this.atid;
                         else atid=this.atid=getatid(storage,this);
-                        ref.Import(JSON.parse(storage[atid+"("+ref._id+")"]));}}
+                        content=storage[atid+"("+ref._id+")"];}
+                    if (!(content))
+                        warn("No item stored for %s",ref._id);
+                    else ref.Import(JSON.parse(content));}
                 if (callback) callback();}
             else if (window.IndexedDB) {}
             else {}};
