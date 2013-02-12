@@ -354,6 +354,7 @@ fdjt.UI.Selecting=
         fdjtSelecting.prototype.clear=function(){
             var wrappers=this.wrappers;
             var orig=this.orig, wrapped=this.wrapped;
+            if (!(orig)) return; // already cleared
             var i=orig.length-1;
             while (i>=0) {
                 var o=orig[i], w=wrapped[i]; i--;
