@@ -486,7 +486,7 @@ if (!(fdjt.RefDB)) {
             else if (window.IndexedDB) {}
             else {}};
         Ref.prototype.save=function(callback){
-            if (!(this._changed)) return ref;
+            if (!(this._changed)) return this;
             else this._db.save([this],callback);}
 
         function getatid(storage,db){
@@ -566,7 +566,10 @@ if (!(fdjt.RefDB)) {
 
         RefDB.prototype.find=function findRefs(key,value){
             var indices=this.indices[key];
-            if (indices) return indices[getKeystring(value,this)];
+            if (indices) {
+                var keystring=getKeystring(value,this);
+                if (keystring) return indices[keystring];
+                else return [];}
             else return [];}
         RefDB.prototype.count=function countRefs(key,value){
             var indices=this.indices[key];
