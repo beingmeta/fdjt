@@ -485,6 +485,9 @@ if (!(fdjt.RefDB)) {
                 if (callback) callback();}
             else if (window.IndexedDB) {}
             else {}};
+        Ref.prototype.save=function(callback){
+            if (!(this._changed)) return ref;
+            else this._db.save([this],callback);}
 
         function getatid(storage,db){
             if (db.atid) return db.atid;
