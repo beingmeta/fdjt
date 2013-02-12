@@ -469,7 +469,7 @@ fdjt.UI.TapHold=(function(){
         fdjtDOM.addListener(elt,"touchstart",md);
         var mu=((taptapthresh)?(get_up_handler(taptapthresh)):(taphold_up));
         if (!(fortouch)) fdjtDOM.addListener(elt,"mouseup",mu);
-        fdjtDOM.addListener(elt,"click",taphold_click);
+        // fdjtDOM.addListener(elt,"click",taphold_click);
         fdjtDOM.addListener(elt,"touchend",mu);
         fdjtDOM.addListener(elt,"touchcancel",abortpress);        
         if (!(window_setup)) {
