@@ -30,6 +30,7 @@ fdjt.UI.TapHold=(function(){
     "use strict";
     var fdjtLog=fdjt.Log;
     var fdjtDOM=fdjt.DOM;
+    var fdjtTime=fdjt.Time;
     var fdjtUI=fdjt.UI;
     var fdjtET=fdjt.ET;
 
@@ -38,6 +39,7 @@ fdjt.UI.TapHold=(function(){
     
     var touched=false;
     var pressed=false;
+    var pressed_at=false;
     var tap_target=false;
     var th_target=false;
     var th_targets=[];
@@ -158,7 +160,7 @@ fdjt.UI.TapHold=(function(){
                     var elt=targets[i++];
                     if ((i===lim)&&(elt===th_target)) break;
                     held(elt); slipped(elt);}}
-            pressed=th_target; th_targets=[];
+            pressed=th_target; pressed_at=fdjtTime(); th_targets=[];
             if (tap_target) {tapheld(th_target,evt); tap_target=false;}
             else held(th_target,evt);
             th_timer=false;
@@ -309,6 +311,7 @@ fdjt.UI.TapHold=(function(){
         else if ((pressed)&&(th_target!==pressed)) {
             slipped(pressed);
             pressed=th_target;
+            pressed_at=fdjtTime();
             held(pressed);}
         else {}}
     
@@ -419,6 +422,11 @@ fdjt.UI.TapHold=(function(){
             endpress(evt,taptapthresh);}
         else {}}
 
+    function taphold_click(evt){
+        if ((pressed_at)&&((fdjtTime()-pressed_at)>500))
+            fdjt.UI.cancel(evt);
+        else return;}
+
     function get_down_handler(holdthresh){
         return function(evt){
             return taphold_down(evt,holdthresh);};}
@@ -461,6 +469,7 @@ fdjt.UI.TapHold=(function(){
         fdjtDOM.addListener(elt,"touchstart",md);
         var mu=((taptapthresh)?(get_up_handler(taptapthresh)):(taphold_up));
         if (!(fortouch)) fdjtDOM.addListener(elt,"mouseup",mu);
+        // fdjtDOM.addListener(elt,"click",taphold_click);
         fdjtDOM.addListener(elt,"touchend",mu);
         fdjtDOM.addListener(elt,"touchcancel",abortpress);        
         if (!(window_setup)) {
