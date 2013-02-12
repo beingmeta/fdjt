@@ -64,7 +64,7 @@ if (!(fdjt.RefDB)) {
                 this.name=name; refdbs[name]=this; all_refdbs.push(this);
                 this.aliases=[]; this.refclass=false;
                 this.refs={}; this.altrefs={};
-                this.all_refs=[]; this.changed=[]; this.loaded=[];
+                this.allrefs=[]; this.changed=[]; this.loaded=[];
                 this.storage=init.storage||false;
                 this.absrefs=init.absrefs||false;
                 this.onload=[]; this.onloadnames={};
@@ -232,7 +232,7 @@ if (!(fdjt.RefDB)) {
                 instance._id=id; instance._db=db;
                 if (!(db.absrefs)) instance._domain=db.name;
                 db.refs[id]=instance;
-                db.all_refs.push(instance);
+                db.allrefs.push(instance);
                 return instance;}
             else if ((db.refclass)&&(!(this instanceof db.refclass)))
                 return new (db.refclass)(id,db);
@@ -240,7 +240,7 @@ if (!(fdjt.RefDB)) {
                 this._id=id; this._db=db;
                 if (!(db.absrefs)) this._domain=db.name;
                 db.refs[id]=this;
-                db.all_refs.push(this);
+                db.allrefs.push(this);
                 return this;}}
         fdjt.Ref=RefDB.Ref=Ref;
 
@@ -412,9 +412,17 @@ if (!(fdjt.RefDB)) {
             return exportValue(val,this);};
         
         RefDB.prototype.load=function loadRefs(refs,callback){
-            if (!(refs instanceof Array)) refs=[refs];
             if (!(this.storage)) return;
             else if (this.storage instanceof window.Storage) {
+                if (!(refs)) refs=[].concat(this.allrefs);
+                else if (refs===true) {
+                    var all=this.storage["allids("+this.name+")"];
+                    if (all) refs=JSON.parse(all).concat(this.allrefs);
+                    else refs=[].concat(this.allrefs);}
+                else if (refs instanceof Ref) refs=[refs];
+                else if (typeof refs === "string") refs=[refs];
+                else if (typeof refs.length === "undefined") refs=[refs];
+                else {}
                 var storage=this.storage; var loaded=this.loaded;
                 var atid=false;
                 var i=0, lim=refs.length; while (i<lim) {
@@ -465,23 +473,34 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.save=function saveRefs(refs,callback){
             if (!(this.storage)) return;
             else if (!(refs))
-                return this.save(this.all_refs,callback);
+                return this.save(this.changed,function(){
+                    this.changed=[]; callback();});
             else if (this.storage instanceof window.Storage) {
-                var storage=this.storage; var atid=this.atid;
+                var storage=this.storage;
+                var atid=this.atid;
+                var ids=[];
                 var i=0, lim=refs.length; while (i<lim) {
                     var ref=refs[i++];
                     if (typeof ref === "string") ref=this.ref(ref);
                     if (!(ref._live)) continue;
-                    if (this.absrefs) 
-                        this.storage.setItem(
-                            this._id,JSON.stringify(ref.Export()));
+                    if (!(ref._changed)) continue;
+                    if (this.absrefs) {
+                        ids.push(this._id);
+                        storage.setItem(this._id,JSON.stringify(ref.Export()));}
                     else {
                         if (atid) {}
                         else if (this.atid) atid=this.atid;
                         else atid=this.atid=getatid(storage,this);
-                        this.storage.setItem(
-                            atid+"("+this._id+")",
-                            JSON.stringify(ref.Export()));}}
+                        var id=atid+"("+this._id+")";
+                        ids.push(id);
+                        storage.setItem(id,JSON.stringify(ref.Export()));}}
+                var allids=storage["allids("+this.name+")"];
+                if (allids) allids=JSON.parse(allids); else allids=[];
+                var n=allids.length;
+                allids=merge(allids,ids)
+                if (allids.length!==n) 
+                    storage.setItem("allids("+this.name+")",
+                                    JSON.stringify(allids));
                 if (callback) callback();}
             else if (window.IndexedDB) {}
             else {}};
