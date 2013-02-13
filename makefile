@@ -8,7 +8,7 @@ FDJT_FILES=header.js string.js time.js \
 	refdb.js kb.js json.js ajax.js hash.js wsn.js \
 	ui.js completions.js taphold.js selecting.js \
 	adjustfont.js scrollever.js \
-	syze.js iscroll.js \
+	syze.js iscroll.js indexed.js \
 	globals.js
 BUILDUUID:=`uuidgen`
 BUILDTIME:=`date`
