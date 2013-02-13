@@ -2308,8 +2308,11 @@ fdjt.DOM=
             var handler = function(e) {
                 fdjtDOM.transitionEnd = e.type;
                 var i=0, lim=transition_events.length;
-                while (i<lim) 
-                    div.removeEventListener(transition_events[i++],handler);};
+                while (i<lim) {
+                    if (div)
+                        div.removeEventListener(
+                            transition_events[i++],handler);
+                    else i++;}};
             div.setAttribute("style","position:absolute;top:0px;transition:top 1ms ease;-webkit-transition:top 1ms ease;-moz-transition:top 1ms ease;-o-transition:top 1ms ease;-ms-transition:top 1ms ease;");
             var i=0, lim=transition_events.length;
             while (i<lim) div.addEventListener(
