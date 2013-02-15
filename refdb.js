@@ -1212,7 +1212,7 @@ if (!(fdjt.RefDB)) {
                 warn("No dbs for query %o!",this);
                 return false;}
             var weights=this.weights;
-            var ambig=this.ambigrefs;
+            var ambigrefs=((dbs.length>1)&&(this.ambigrefs));
             var scores=this.scores={};
             var results=this.results=[];
             var scored=this.scored=[];
@@ -1248,7 +1248,7 @@ if (!(fdjt.RefDB)) {
                                     allfreqs[valstring]+=items.length;
                                 else allfreqs[valstring]+=allfreqs.length;}
                             var itemi=0, nitems=items.length;
-                            if (this.ambigrefs) {
+                            if (ambigrefs) {
                                 while (itemi<nitems) {
                                     var item=items[itemi++];
                                     var ref=db.ref(item);
