@@ -117,6 +117,9 @@ if (!(fdjt.RefDB)) {
                 aliases[alias]=this;
                 this.aliases.push(alias);}};
 
+        RefDB.prototype.toString=function (){
+            return "RefDB("+this.name+")";};
+
         RefDB.prototype.ref=function DBref(id){
             // if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             return (this.refs[id])||
@@ -243,6 +246,12 @@ if (!(fdjt.RefDB)) {
                 db.allrefs.push(this);
                 return this;}}
         fdjt.Ref=RefDB.Ref=Ref;
+
+        Ref.prototype.toString=function(){
+            if (this.__id) return this.__id;
+            else if (this._domain) return this._id+"@"+this._domain;
+            else if (this._db.absrefs) return this._id;
+            else return this._id+"@"+this._db.name;}
 
         Ref.prototype.addAlias=function addRefAlias(term){
             if (this._db.refs[term]) {
@@ -1214,7 +1223,11 @@ if (!(fdjt.RefDB)) {
                         var db=dbs[i++];
                         var vi=0, vlim=values.length; while (vi<vlim) {
                             var val=values[vi++];
-                            items=db.find(field,val);
+                            var items=db.find(field,val);
+                            if ((this.tracelevel)&&
+                                ((items.length)||(this.tracelevel>2)))
+                                fdjtLog("Got %d items for %s=%o from %o",
+                                        items.length,field,val,db);
                             var valstring=getKeystring(val);
                             if ((items)&&(items.length)) {
                                 if (vfreqs) {
@@ -1227,12 +1240,11 @@ if (!(fdjt.RefDB)) {
                                 var itemi=0, nitems=items.length;
                                 while (itemi<nitems) {
                                     var item=items[itemi++];
-                                    if (scores[item])
-                                        scores[item]=scores[item]+weight;
+                                    if (scores[item]) scores[item]+=weight;
                                     else {
                                         if (weight) scored.push(item);
                                         results.push(item);
-                                        scores[item]+=weight;}}}}}}}
+                                        scores[item]=weight;}}}}}}}
         
             return this;};
 
