@@ -248,10 +248,25 @@ if (!(fdjt.RefDB)) {
         fdjt.Ref=RefDB.Ref=Ref;
 
         Ref.prototype.toString=function(){
-            if (this.__id) return this.__id;
+            if (this._qid) return this._qid;
             else if (this._domain) return this._id+"@"+this._domain;
             else if (this._db.absrefs) return this._id;
             else return this._id+"@"+this._db.name;}
+        Ref.prototype.getQID=function getQID(){
+            if (this._qid) return this._qid;
+            else if (this._domain)
+                return (this._qid=(this._id+"@"+this._domain));
+            else if (this._db.absrefs)
+                return (this._qid=this._id);
+            else return (this._qid=(this._id+"@"+this._db.name));};
+        
+        function getQID(obj){
+            if (obj._qid) return obj._qid;
+            else if (obj._domain)
+                return (obj._qid=(obj._id+"@"+obj._domain));
+            else if (obj._db.absrefs)
+                return (obj._qid=obj._id);
+            else return (obj._qid=(obj._id+"@"+obj._db.name));}
 
         Ref.prototype.addAlias=function addRefAlias(term){
             if (this._db.refs[term]) {
@@ -531,36 +546,47 @@ if (!(fdjt.RefDB)) {
                     storage["atid("+db.name+")"]=atid;
                     storage["atid.count"]=count+1;}}}
         
-        function getKeystring(val,db){
+        function getKeyString(val,db){
             if (val instanceof Ref) {
-                if (val._db===db) return val._id;
-                else if (val._domain) return val._id+"@"+val._domain;
-                else return val._id;}
+                if (val._db===db) return "@"+val._id;
+                else if (val._domain) return "@"+val._id+"@"+val._domain;
+                else return "@"+val._id;}
             else if (typeof val === "number") 
-                return "\u00ad"+val;
+                return "#"+val;
             else if (typeof val === "string")
-                return val;
-            else return val.toString();}
-        RefDB.getKeystring=getKeystring;
+                return "\""+val;
+            else if (val.toJSON)
+                return "{"+val.toJSON();
+            else return "&"+val.toString();}
+        RefDB.getKeyString=getKeyString;
         
         function indexRef(ref,key,val,index,db){
             var keystrings=[];
-            var refstring=(((!(db))||(ref._db===db))?(ref._id):
-                           ((ref._domain)?(ref._id+"@"+ref._domain):(ref._id)));
+            var refstring=
+                (((!(db))||(ref._db===db)||(ref._db.absrefs))?(ref._id):
+                 ((ref._qid)||((ref.getQID)&&(ref.getQID()))));
             if (val instanceof Ref) {
-                if (ref._db===val._db) keystrings=[val._id];
-                else if (val._domain) keystrings=[val._id+"@"+val._domain];
-                else keystrings=[val._id];}
+                if (ref._db===val._db) keystrings=["@"+val._id];
+                else keystrings=["@"+(val._qid||val.getQID())];}
             else if (val instanceof Array) {
                 var db=ref._db;
                 var i=0, lim=val.length; while (i<lim) {
                     var elt=val[i++];
-                    var ks=getKeystring(elt,db);
-                    if (ks) keystrings.push(ks);}}
+                    if (elt instanceof Ref) 
+                        keystrings.push("@"+(elt._qid||elt.getQID()));
+                    else if (typeof elt === "number") 
+                        keystrings=["#"+val];
+                    else if (typeof elt === "string")
+                        keystrings=["\""+val];
+                    else if (elt._qid)
+                        keystrings.push("@"+(elt._qid||elt.getQID()));
+                    else if (elt.getQID)
+                        keystrings.push("@"+(elt.getQID()));
+                    else {}}}
             else if (typeof val === "number") 
-                keystrings=["\u00ad"+val];
+                keystrings=["#"+val];
             else if (typeof val === "string")
-                keystrings=[val];
+                keystrings=["\""+val];
             else {}
             if (keystrings.length) {
                 var j=0, jlim=keystrings.length; while (j<jlim) {
@@ -580,7 +606,7 @@ if (!(fdjt.RefDB)) {
                 var db=ref._db;
                 var i=0, lim=val.length; while (i<lim) {
                     var elt=val[i++];
-                    var ks=getKeystring(elt,db);
+                    var ks=getKeyString(elt,db);
                     if (ks) keystrings.push(ks);}}
             else if (typeof val === "number") 
                 keystrings=["\u00ad"+val];
@@ -596,14 +622,14 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.find=function findRefs(key,value){
             var indices=this.indices[key];
             if (indices) {
-                var keystring=getKeystring(value,this);
+                var keystring=getKeyString(value,this);
                 if (keystring) return indices[keystring]||[];
                 else return [];}
             else return [];}
         RefDB.prototype.count=function countRefs(key,value){
             var indices=this.indices[key];
             if (indices)
-                return indices[getKeystring(value,this)].length;
+                return indices[getKeyString(value,this)].length;
             else return 0;}
         
         // Array utility functions
@@ -623,8 +649,16 @@ if (!(fdjt.RefDB)) {
                 else if (typeof a === "string") {
                     if (a<b) return -1;
                     else return 1;}
-                else if (a._qid<b._qid) return -1;
-                else return 1;}
+                else if (a._qid) {
+                    if (b._qid) {
+                        if (a._qid<b._qid) return -1;
+                        else return 1;}
+                    else return -1;}
+                else if (b._qid) return 1;
+                else if ((a._fdjtid)&&(b._fdjtid)) {
+                    if ((a._fdjtid)<(b._fdjtid)) return -1;
+                    else return 1;}
+                else return 0;}
             else if (typeof a < typeof b) return -1;
             else return 1;}
 
@@ -790,24 +824,21 @@ if (!(fdjt.RefDB)) {
                 array._sortlen=1;
                 array._allstrings=(typeof elt === 'string');
                 if (typeof elt === "object") {
-                    if (elt._qid) return array;
-                    var sortkey=((elt._id)&&(elt._db)&&
-                                 ((elt._db.absrefs)?(elt._id):(elt._id+"@"+elt._db.name)))||
-                        elt._fdjtid||(elt._fdjtid=++id_counter);
-                    elt._qid=sortkey;}
+                    if ((elt._qid)||(elt._fdjtid)) {}
+                    else if (elt.getQID) elt._qid=elt.getQID();
+                    else elt._fdjtid=++id_counter;}
                 return array;}
             else {
                 var allstrings=true;
                 var i=0, lim=array.length;
                 while (i<lim) {
                     var elt=array[i++];
-                    if ((allstrings)&&(typeof elt !== 'string')) allstrings=false;
-                    if (typeof elt === "object") {
-                        if (elt._qid) continue;
-                        var sortkey=((elt._id)&&(elt._db)&&
-                                     ((elt._db.absrefs)?(elt._id):(elt._id+"@"+elt._db.name)))||
-                            elt._fdjtid||(elt._fdjtid=++id_counter);
-                        elt._qid=sortkey;}}
+                    if ((allstrings)&&(typeof elt !== 'string')) {
+                        allstrings=false;
+                        if (typeof elt === "object") {
+                            if ((elt._qid)||(elt._fdjtid)) {}
+                            else if (elt.getQID) elt._qid=elt.getQID();
+                            else elt._fdjtid=++id_counter;}}}
                 array._allstrings=allstrings;
                 if (lim===1) return array;
                 if (allstrings) array.sort();
@@ -981,80 +1012,53 @@ if (!(fdjt.RefDB)) {
 
         /* Maps */
         function fdjtMap() {
-            this.string_map={};
-            this.object_map={};
-            this.other_map={};
+            this.mapping={};
             return this;}
         fdjtMap.prototype.get=function(key) {
-            if (typeof key === "string")
-                return this.string_map[key];
-            else if (typeof key === "object") {
-                var keystring=key._qid||
-                    ((key._id)&&
-                     ((key._domain)?(key._id+"@"+key._domain):(key._id)))||
-                    (key._fdjtid)||(key._fdjtid=++id_counter);
-                return this.object_map[keystring];}
-            else return this.other_map[key];};
+            var keystring=getKeyString(key); var mapping=this.mapping;
+            if (mapping.hasOwnProperty(keystring))
+                return mapping[keystring];};
         fdjtMap.prototype.set=function(key,val) {
-            if (typeof key === "string")
-                this.string_map[key]=val;
-            else if (typeof key === "object") {
-                var keystring=key._qid||
-                    ((key._id)&&
-                     ((key._domain)?(key._id+"@"+key._domain):(key._id)))||
-                    (key._fdjtid)||(key._fdjtid=++idcount);
-                this.object_map[keystring]=val;}
-            else this.other_map[key]=val;};
+            var keystring=getKeyString(key);
+            if (val instanceof Array)
+                this.mapping[keystring]=[val];
+            else this.mapping[keystring]=val;};
         fdjtMap.prototype.add=function(key,val) {
-            var cur, toset, keystring;
-            if (typeof key === "string") cur=this.string_map[key];
-            else if (typeof key === "object") {
-                keystring=key._qid||
-                    ((key._id)&&
-                     ((key._domain)?(key._id+"@"+key._domain):(key._id)))||
-                    (key._fdjtid)||(key._fdjtid=++idcount);
-                cur=this.object_map[keystring];}
-            else cur=this.other_map[key];
-            if (!(cur)) {
-                if (val instanceof Array) toset=[val];
-                else toset=val;}
-            else if (!(cur instanceof Array)) {
+            var keystring=getKeyString(key);
+            var mapping=this.mapping;
+            if (mapping.hasOwnProperty(keystring)) {
+                var cur=mapping[keystring];
                 if (cur===val) return false;
-                else if (val instanceof Array)
-                    toset=setify([cur,[val]]);
-                else toset=setify([cur,val]);}
-            else if (arr_contains(cur,val)) return false;
-            else {cur.push(val); return true;}
-            if (typeof toset!=="undefined") {
-                if (typeof key === "string")
-                    this.string_map[key]=val;
-                else if (typeof key === "object") 
-                    this.object_map[keystring]=val;
-                else this.other_map[key]=val;
-                return true;}
-            else return false;};
+                else if (cur instanceof Array) {
+                    if (arr_contains(cur,val)) return false;
+                    else {cur.push(val); return true;}}
+                else if (val instanceof Array) {
+                    mapping[keystring]=setify([cur,val]);
+                    return true;}
+                else {
+                    mapping[keystring]=setify([cur,val]);
+                    return true;}}
+            else if (val instanceof Array) 
+                mapping[keystring]=setify([val]);
+            else mapping[keystring]=val;};
         fdjtMap.prototype.drop=function(key,val) {
-            var cur, toset, keystring=false, map;
-            if (typeof key === "string") {
-                map=this.string_map; cur=map[key];}
-            else if (typeof key === "object") {
-                keystring=key._qid||
-                    ((key._id)&&
-                     ((key._domain)?(key._id+"@"+key._domain):(key._id)))||
-                    (key._fdjtid)||(key._fdjtid=++idcount);
-                map=this.object_map; cur=map[keystring];}
-            else {map=this.other_map; cur=map[key];}
-            if (typeof cur === "undefined") return false;
-            else if (!(cur instanceof Array)) {
+            var mapping=this.mapping;
+            var keystring=getKeyString(key);
+            if (mapping.hasOwnProperty(keystring)) {
+                var cur=mapping[keystring];
                 if (cur===val) {
-                    delete map[keystring||key];
+                    delete mapping[keystring];
+                    return true;}
+                else if (cur instanceof Array) {
+                    var pos=cur.indexOf(val);
+                    if (pos<0) return false;
+                    cur.splice(pos); if (cur._sortlen) cur._sortlen--;
+                    if (cur.length===1) {
+                        if (!(cur[0] instanceof Array))
+                            mapping[keystring]=cur[0];}
                     return true;}
                 else return false;}
-            else {
-                var pos=cur.indexOf(val);
-                if (pos<0) return false;
-                cur.splice(pos); if (cur._sortlen) cur._sortlen--;
-                return true;}};
+            else return false;};
         fdjt.Map=fdjtMap;
         RefDB.fdjtMap=fdjtMap;
 
@@ -1195,6 +1199,7 @@ if (!(fdjt.RefDB)) {
 
             return this;}
         RefDB.Query=Query;
+        Query.prototype.ambigrefs=true;
 
         Query.prototype.execute=function executeQuery(){
             if (this.scores) return this;
@@ -1207,46 +1212,62 @@ if (!(fdjt.RefDB)) {
                 warn("No dbs for query %o!",this);
                 return false;}
             var weights=this.weights;
+            var ambig=this.ambigrefs;
             var scores=this.scores={};
             var results=this.results=[];
             var scored=this.scored=[];
             var freqs=this.freqs;
             var allfreqs=this.allfreqs;
             for (var field in pattern) {
-                if (pattern.hasOwnProperty(field)) {
-                    var vfreqs=((freqs)&&(freqs[field]||(freqs[field]={})));
-                    var values=pattern[field];
-                    if (!(values instanceof Array)) values=[values];
-                    var weight=((weights)&&(weights[field]));
-                    var score=weight||1;
-                    var i=0, lim=dbs.length;
-                    while (i<lim) {
-                        var db=dbs[i++];
-                        var vi=0, vlim=values.length; while (vi<vlim) {
-                            var val=values[vi++];
-                            var items=db.find(field,val);
-                            if ((this.tracelevel)&&
-                                ((items.length)||(this.tracelevel>2)))
-                                fdjtLog("Got %d items for %s=%o from %o",
-                                        items.length,field,val,db);
-                            var valstring=getKeystring(val);
-                            if ((items)&&(items.length)) {
-                                if (vfreqs) {
-                                    if (vfreqs[val]) vfreqs[val]+=items.length;
-                                    else vfreqs[val]=items.length;}
-                                if (allfreqs) {
-                                    if (allfreqs[val])
-                                        allfreqs[val]+=items.length;
-                                    else allfreqs[val]+=allfreqs.length;}
-                                var itemi=0, nitems=items.length;
+                if (!(pattern.hasOwnProperty(field))) continue;
+                var vfreqs=((freqs)&&(freqs[field]||(freqs[field]={})));
+                var values=pattern[field];
+                if (!(values instanceof Array)) values=[values];
+                var weight=((weights)&&(weights[field]));
+                var score=weight||1;
+                var i=0, lim=dbs.length;
+                while (i<lim) {
+                    var db=dbs[i++];
+                    var vi=0, vlim=values.length; while (vi<vlim) {
+                        var val=values[vi++];
+                        var items=db.find(field,val);
+                        if ((this.tracelevel)&&
+                            ((items.length)||(this.tracelevel>2)))
+                            fdjtLog("Got %d items for %s=%o from %o",
+                                    items.length,field,val,db);
+                        var valstring=((vfreqs)||(allfreqs))&&
+                            ((val._qid)||(val._fdjtid)||
+                             (getKeyString(val)));
+                        if ((items)&&(items.length)) {
+                            if (vfreqs) {
+                                if (vfreqs[valstring])
+                                    vfreqs[valstring]+=items.length;
+                                else vfreqs[valstring]=items.length;}
+                            if (allfreqs) {
+                                if (allfreqs[valstring])
+                                    allfreqs[valstring]+=items.length;
+                                else allfreqs[valstring]+=allfreqs.length;}
+                            var itemi=0, nitems=items.length;
+                            if (this.ambigrefs) {
                                 while (itemi<nitems) {
                                     var item=items[itemi++];
-                                    if (scores[item]) scores[item]+=weight;
+                                    var ref=db.ref(item);
+                                    var id=ref._qid||
+                                        ((ref.getQID)&&(ref.getQID()));
+                                    if (!(id)) {}
+                                    else if (scores[id]) scores[id]+=weight;
                                     else {
-                                        var ref=db.ref(item);
                                         if (weight) scored.push(ref);
                                         results.push(ref);
-                                        scores[item]=weight;}}}}}}}
+                                        scores[id]=weight;}}}
+                            else while (itemi<nitems) {
+                                var item=items[itemi++];
+                                if (scores[item]) scores[item]+=weight;
+                                else {
+                                    var ref=db.ref(item);
+                                    if (weight) scored.push(ref);
+                                    results.push(ref);
+                                    scores[item]=weight;}}}}}}
         
             return this;};
 
