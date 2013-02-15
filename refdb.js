@@ -541,7 +541,8 @@ if (!(fdjt.RefDB)) {
             else if (typeof val === "string")
                 return val;
             else return val.toString();}
-
+        RefDB.getKeystring=getKeystring;
+        
         function indexRef(ref,key,val,index,db){
             var keystrings=[];
             var refstring=(((!(db))||(ref._db===db))?(ref._id):
@@ -1242,8 +1243,9 @@ if (!(fdjt.RefDB)) {
                                     var item=items[itemi++];
                                     if (scores[item]) scores[item]+=weight;
                                     else {
-                                        if (weight) scored.push(item);
-                                        results.push(item);
+                                        var ref=db.ref(item);
+                                        if (weight) scored.push(ref);
+                                        results.push(ref);
                                         scores[item]=weight;}}}}}}}
         
             return this;};
