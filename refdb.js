@@ -1177,21 +1177,38 @@ if (!(fdjt.RefDB)) {
         RefDB.contains=arr_contains;
         RefDB.position=arr_position;
 
-        function Query(dbs,pattern,biases){
-            this.dbs=dbs;
-            this.pattern=pattern;
-            this.biases=biases||false;
+        function Query(dbs,pattern,weights){
+            if (arguments.length===0) return this;
+            if (dbs) this.dbs=dbs;
+            if (pattern) this.pattern=pattern;
+            if (weights) this.weights=weights||false;
+
+            return this;}
+        RefDB.Query=Query;
+
+        Query.prototype.execute=function executeQuery(){
+            if (this.scores) return this;
+            var dbs=this.dbs;
+            var pattern=this.pattern;
+            if (!(pattern)) {
+                warn("No pattern for query %o!",this);
+                return false;}
+            if (!(dbs)) {
+                warn("No dbs for query %o!",this);
+                return false;}
+            var weights=this.weights;
             var scores=this.scores={};
             var results=this.results=[];
             var scored=this.scored=[];
-            var freqs=this.freqs={};
+            var freqs=this.freqs;
+            var allfreqs=this.allfreqs;
             for (var field in pattern) {
                 if (pattern.hasOwnProperty(field)) {
-                    var vfreqs=freqs[field]||(freqs[field]={});
+                    var vfreqs=((freqs)&&(freqs[field]||(freqs[field]={})));
                     var values=pattern[field];
                     if (!(values instanceof Array)) values=[values];
-                    var bias=((biases)&&(biases[field]));
-                    var score=bias||1;
+                    var weight=((weights)&&(weights[field]));
+                    var score=weight||1;
                     var i=0, lim=dbs.length;
                     while (i<lim) {
                         var db=dbs[i++];
@@ -1200,19 +1217,24 @@ if (!(fdjt.RefDB)) {
                             items=db.find(field,val);
                             var valstring=getKeystring(val);
                             if ((items)&&(items.length)) {
-                                if (vfreqs[val]) vfreqs[val]+=items.length;
-                                else vfreqs[val]=items.length;
-                                var ii=0, nitems=items.length;
-                                while (ii<nitems) {
-                                    var item=items[ii++];
+                                if (vfreqs) {
+                                    if (vfreqs[val]) vfreqs[val]+=items.length;
+                                    else vfreqs[val]=items.length;}
+                                if (allfreqs) {
+                                    if (allfreqs[val])
+                                        allfreqs[val]+=items.length;
+                                    else allfreqs[val]+=allfreqs.length;}
+                                var itemi=0, nitems=items.length;
+                                while (itemi<nitems) {
+                                    var item=items[itemi++];
                                     if (scores[item])
-                                        scores[item]=scores[item]+score;
+                                        scores[item]=scores[item]+weight;
                                     else {
-                                        if (bias) scored.push(item);
+                                        if (weight) scored.push(item);
                                         results.push(item);
-                                        scores[item]=score;}}}}}}}
-            return this;}
-        RefDB.Query=Query;
+                                        scores[item]+=weight;}}}}}}}
+        
+            return this;};
 
         return RefDB;})();}
 
