@@ -174,7 +174,7 @@ if (!(fdjt.RefDB)) {
         var refpat=/^(((:|)@(([0-9a-fA-F]+\/[0-9a-fA-F]+)|(\/\w+\/.*)|(@\d+\/.*)))|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+))$/;
     
         function resolveRef(arg,db,force){
-            if (arg instanceof Ref) return ref;
+            if (arg instanceof Ref) return arg;
             else if ((db)&&(db.refs[arg])) return db.refs[arg];
             else if ((typeof arg === "string")&&(refpat.exec(arg))) {
                 var at=arg.indexOf('@');
