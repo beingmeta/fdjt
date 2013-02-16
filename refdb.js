@@ -121,7 +121,7 @@ if (!(fdjt.RefDB)) {
             return "RefDB("+this.name+")";};
 
         RefDB.prototype.ref=function DBref(id){
-            // if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
+            if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             return (this.refs[id])||
                 ((this.refclass)&&(new (this.refclass)(id)))||
                 (new Ref(id,this));};
