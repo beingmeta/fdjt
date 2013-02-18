@@ -179,6 +179,8 @@ if (!(fdjt.RefDB)) {
         function resolveRef(arg,db,force){
             if (arg instanceof Ref) return arg;
             else if ((db)&&(db.refs[arg])) return db.refs[arg];
+            // These are generally the same but don't have to be 
+            else if ((db)&&(db.probe(arg))) return db.probe(arg);
             else if ((typeof arg === "string")&&(refpat.exec(arg))) {
                 var at=arg.indexOf('@');
                 if ((at===1)&&(at[0]===':')) {arg=arg.slice(1); at=0;}
