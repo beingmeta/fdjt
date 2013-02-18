@@ -151,6 +151,7 @@ fdjt.UI.TapHold=(function(){
         if (trace_taphold) fdjtLog("TapHold/startpress %o",evt);
         if (reticle.live) reticle.highlight(true);
         noDefault(evt);
+        pressed_at=fdjtTime(); 
         th_timer=setTimeout((function(){
             if (trace_taphold) fdjtLog("TapHold/startpress/timeout %o",evt);
             if (th_targets.length>0) {
@@ -160,7 +161,7 @@ fdjt.UI.TapHold=(function(){
                     var elt=targets[i++];
                     if ((i===lim)&&(elt===th_target)) break;
                     held(elt); slipped(elt);}}
-            pressed=th_target; pressed_at=fdjtTime(); th_targets=[];
+            pressed=th_target; th_targets=[];
             if (tap_target) {tapheld(th_target,evt); tap_target=false;}
             else held(th_target,evt);
             th_timer=false;
@@ -423,7 +424,8 @@ fdjt.UI.TapHold=(function(){
         else {}}
 
     function taphold_click(evt){
-        if ((pressed_at)&&((fdjtTime()-pressed_at)>500))
+        var now=fdjtTime();
+        if ((pressed_at)&&((now-pressed_at)<700))
             fdjt.UI.cancel(evt);
         else return;}
 
@@ -483,6 +485,7 @@ fdjt.UI.TapHold=(function(){
             window_setup=window;}}
     TapHold.mouseup=TapHold.up=taphold_up;
     TapHold.mousedown=TapHold.down=taphold_down;
+    TapHold.taphold_click=TapHold.click=taphold_click;
     TapHold.keydown=taphold_keydown;
     TapHold.holdkey=16;
     TapHold.fakePress=fakePress;
