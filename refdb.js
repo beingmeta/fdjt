@@ -174,7 +174,7 @@ if (!(fdjt.RefDB)) {
         
         var uuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})$/;
         var xuuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)$/;
-        var refpat=/^(((:|)@(([0-9a-fA-F]+\/[0-9a-fA-F]+)|(\/\w+\/.*)|(@\d+\/.*)))|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+))$/;
+        var refpat=/^(((:|)@(([0-9a-fA-F]+\/[0-9a-fA-F]+)|(\/\w+\/.*)|(@\d+\/.*)))|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)|([^@]+@.+))$/;
     
         function resolveRef(arg,db,force){
             if (arg instanceof Ref) return arg;
@@ -182,7 +182,9 @@ if (!(fdjt.RefDB)) {
             else if ((typeof arg === "string")&&(refpat.exec(arg))) {
                 var at=arg.indexOf('@');
                 if ((at===1)&&(at[0]===':')) {arg=arg.slice(1); at=0;}
-                if (at>0) db=RefDB.open(arg.slice(at+1));
+                if (at>0) {
+                    db=RefDB.open(arg.slice(at+1));
+                    arg=arg.slice(0,at);}
                 else if (at<0) {
                     var uuid;
                     if (arg.search(":#U")===0) uuid=arg.slice(3);
@@ -661,6 +663,7 @@ if (!(fdjt.RefDB)) {
                 else return 0;}
             else if (typeof a < typeof b) return -1;
             else return 1;}
+        RefDB.compare=set_sortfn;
 
         function intersection(set1,set2){
             if (typeof set1 === 'string') set1=[set1];
@@ -1014,15 +1017,18 @@ if (!(fdjt.RefDB)) {
         function fdjtMap() {
             this.mapping={};
             return this;}
-        fdjtMap.prototype.get=function(key) {
+        fdjtMap.prototype.get=function fdjtMapGet(key) {
             var keystring=getKeyString(key); var mapping=this.mapping;
             if (mapping.hasOwnProperty(keystring))
-                return mapping[keystring];};
+                return mapping[keystring];
+            else return undefined;};
+        fdjtMap.prototype.getItem=fdjtMap.prototype.get;
         fdjtMap.prototype.set=function(key,val) {
             var keystring=getKeyString(key);
             if (val instanceof Array)
                 this.mapping[keystring]=[val];
             else this.mapping[keystring]=val;};
+        fdjtMap.prototype.setItem=fdjtMap.prototype.set;
         fdjtMap.prototype.add=function(key,val) {
             var keystring=getKeyString(key);
             var mapping=this.mapping;
