@@ -61,16 +61,16 @@ if (!(fdjt.RefDB)) {
                 else init={}}
             else {
                 if (!(init)) init={};
-                this.name=name; refdbs[name]=this; all_refdbs.push(this);
-                this.aliases=[]; this.refclass=false;
-                this.refs={}; this.altrefs={};
-                this.allrefs=[]; this.changed=[]; this.loaded=[];
-                this.storage=init.storage||false;
-                this.absrefs=init.absrefs||false;
-                this.onload=[]; this.onloadnames={};
-                this.onadd=[]; this.onaddnames={};
-                this.ondrop=[]; this.ondropnames={};
-                this.indices={};}
+                db.name=name; refdbs[name]=db; all_refdbs.push(db);
+                db.aliases=[];
+                db.refs={}; db.altrefs={};
+                db.allrefs=[]; db.changed=[]; db.loaded=[];
+                db.storage=init.storage||false;
+                db.absrefs=init.absrefs||false;
+                db.onload=[]; db.onloadnames={};
+                db.onadd=[]; db.onaddnames={};
+                db.ondrop=[]; db.ondropnames={};
+                db.indices={};}
             if (init.hasOwnProperty("absrefs")) db.absrefs=init.absrefs;
             if (init.aliases) {
                 var aliases=init.aliases;
@@ -108,6 +108,8 @@ if (!(fdjt.RefDB)) {
 
         RefDB.open=function RefDBOpen(name){
             return refdbs[name]||aliases[name]||(new RefDB(name));};
+        RefDB.probe=function RefDBProbe(name){
+            return refdbs[name]||aliases[name]||false;};
         RefDB.prototype.addAlias=function DBaddAlias(alias){
             if (aliases[alias]) {
                 if (aliases[alias]!==this) 
@@ -123,7 +125,7 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.ref=function DBref(id){
             if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             return (this.refs[id])||
-                ((this.refclass)&&(new (this.refclass)(id)))||
+                ((this.refclass)&&(new (this.refclass)(id,this)))||
                 (new Ref(id,this));};
         RefDB.prototype.probe=function DBprobe(id){
             if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
@@ -183,7 +185,7 @@ if (!(fdjt.RefDB)) {
             else if ((db)&&(db.probe(arg))) return db.probe(arg);
             else if ((typeof arg === "string")&&(refpat.exec(arg))) {
                 var at=arg.indexOf('@');
-                if ((at===1)&&(at[0]===':')) {arg=arg.slice(1); at=0;}
+                if ((at===1)&&(arg[0]===':')) {arg=arg.slice(1); at=0;}
                 if (at>0) {
                     db=RefDB.open(arg.slice(at+1));
                     arg=arg.slice(0,at);}
@@ -234,6 +236,13 @@ if (!(fdjt.RefDB)) {
         function Ref(id,db,instance){
             // Just called for the prototype
             if (arguments.length===0) return this;
+            var at=id.indexOf('@');
+            if ((at>1)&&(id[at-1]!=='\\')) {
+                var domain=id.slice(at+1);
+                if ((domain!==db.name)&&
+                    (db.aliases.indexOf(domain)<0))
+                    warn("Reference to %s being handled by %s",id,db);
+                id=id.slice(0,at);}
             if (db.refs[id]) return db.refs[id];
             else if (instance) {
                 instance._id=id; instance._db=db;
@@ -322,8 +331,11 @@ if (!(fdjt.RefDB)) {
         function importValue(value,db,dontindex){
             if (value instanceof Ref) return value;
             else if ((typeof value === "object")&&(value._id)) {
-                var ref;
-                if (value._domain) ref=RefDB(value._domain).ref(value._id);
+                var ref, dbref=false; 
+                if (value._domain)
+                    dbref=RefDB.probe(value._domain)||
+                    (new RefDB(value._domain));
+                if (dbref) ref=dbref.ref(value._id);
                 else ref=RefDB.resolve(value._id,db,true);
                 for (var slot in value) {
                     if (value.hasOwnProperty(slot))
@@ -357,7 +369,9 @@ if (!(fdjt.RefDB)) {
                                 copied={};
                                 if (fields.length) {
                                     var j=0, jlim=fields.length;
-                                    while (j<jlim) { var f=fields[j++]; copied[f]=value[f];}}}
+                                    while (j<jlim) {
+                                        var f=fields[j++];
+                                        copied[f]=value[f];}}}
                             copied[field]=importval;}
                         else if (copied) copied[name]=fieldval;
                         else fields.push(field);}}
