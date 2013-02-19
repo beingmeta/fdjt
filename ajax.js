@@ -25,7 +25,7 @@ var fdjt=((window.fdjt)||{});
 fdjt.Ajax=
     (function(){
         "use strict";
-        var fdjtDOM=fdjt.DOM, fdjtUI=fdjt.UI, fdjtLog=fdjt.Log;
+        var fdjtDOM=fdjt.DOM, fdjtLog=fdjt.Log;
         var $ID=fdjt.ID;
 
         function compose_uri(base_uri,args){
@@ -101,7 +101,7 @@ fdjt.Ajax=
                 name+"="+encodeURIComponent(value);}
 
         function formParams(form) {
-            fdjtUI.AutoPrompt.cleanup(form);
+            fdjt.UI.AutoPrompt.cleanup(form);
             var parameters=false;
             var inputs=fdjtDOM.getChildren(form,"INPUT");
             var i=0; while (i<inputs.length) {
@@ -138,7 +138,7 @@ fdjt.Ajax=
             else result[name]=value;}
 
         function formJSON(form,downcase) {
-            fdjtUI.AutoPrompt.cleanup(form);
+            fdjt.UI.AutoPrompt.cleanup(form);
             var result={};
             var inputs=fdjtDOM.getChildren(form,"INPUT");
             var i=0; while (i<inputs.length) {
@@ -251,8 +251,8 @@ fdjt.Ajax=
 
         function form_submit(evt,callback){
             evt=evt||event||null;
-            var form=((evt.nodeType)?(evt):(fdjtUI.T(evt)));
-            fdjtUI.AutoPrompt.cleanup(form);
+            var form=((evt.nodeType)?(evt):(fdjt.UI.T(evt)));
+            fdjt.UI.AutoPrompt.cleanup(form);
             if (fdjtDOM.hasClass(form,"submitting")) {
                 fdjtDOM.dropClass(form,"submitting");
                 form.fdjtsubmit=false;
@@ -262,11 +262,11 @@ fdjt.Ajax=
             fdjtDOM.addClass(form,"submitting");
             if (ajaxSubmit(form,callback)) {
                 // fdjtLog("Ajax commit worked");
-                fdjtUI.cancel(evt);
+                fdjt.UI.cancel(evt);
                 return true;}
             else if (jsonpSubmit(form)) {
                 // fdjtLog("Json commit worked");
-                fdjtUI.cancel(evt);
+                fdjt.UI.cancel(evt);
                 return true;}
             else return false;}
 
