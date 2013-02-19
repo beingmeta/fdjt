@@ -283,7 +283,7 @@ if (!(fdjt.RefDB)) {
                 this._db.altrefs[term]=this;
                 return true;}};
 
-        Ref.prototype.Import=function refImport(data,dontindex){
+        Ref.prototype.Import=function refImport(data,dontindex,unchanged){
             var db=this._db;
             var indices=db.indices; var onload=db.onload;
             var aliases=data.aliases;
@@ -311,6 +311,9 @@ if (!(fdjt.RefDB)) {
                 if (onload) {
                     var i=0, lim=onload.length; while (i<lim) {
                         onload[i++](this);}}};
+            if ((!(this._changed))&&(!(unchanged))) {
+                this._changed=fdjtTime();
+                db.changed.push(this);}
             if (this._onload) {
                 var inits=this._onload;
                 var j=0, jlim=inits.length; while (j<jlim) {
@@ -499,10 +502,11 @@ if (!(fdjt.RefDB)) {
                 return loads;}};
         
         RefDB.prototype.save=function saveRefs(refs,callback){
+            var that=this;
             if (!(this.storage)) return;
             else if (!(refs))
                 return this.save(this.changed,function(){
-                    this.changed=[]; callback();});
+                    that.changed=[]; if (callback) callback();});
             else if (this.storage instanceof window.Storage) {
                 var storage=this.storage;
                 var atid=this.atid;
@@ -513,13 +517,13 @@ if (!(fdjt.RefDB)) {
                     if (!(ref._live)) continue;
                     if (!(ref._changed)) continue;
                     if (this.absrefs) {
-                        ids.push(this._id);
-                        storage.setItem(this._id,JSON.stringify(ref.Export()));}
+                        ids.push(ref._id);
+                        storage.setItem(ref._id,JSON.stringify(ref.Export()));}
                     else {
                         if (atid) {}
-                        else if (this.atid) atid=this.atid;
-                        else atid=this.atid=getatid(storage,this);
-                        var id=atid+"("+this._id+")";
+                        else if (ref.atid) atid=ref.atid;
+                        else atid=ref.atid=getatid(storage,ref);
+                        var id=atid+"("+ref._id+")";
                         ids.push(id);
                         storage.setItem(id,JSON.stringify(ref.Export()));}}
                 var allids=storage["allids("+this.name+")"];
