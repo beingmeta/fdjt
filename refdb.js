@@ -393,14 +393,17 @@ if (!(fdjt.RefDB)) {
             if (data.length===1) return refs[0];
             else return refs;};
 
-        Ref.prototype.Export=function refExport(){
+        function refExport(xforms){
             var exported={_id: this._id};
             if (!(this._db.absrefs)) this._domain=this._db.name;
             for (var key in this) {
                 if (key[0]==="_") continue;
                 else if (this.hasOwnProperty(key)) {
                     var value=this[key];
-                    if ((typeof value === "number")||
+                    var xform=((xforms)&&(xforms[key]));
+                    if (xform) value=xform(value,key,exported);
+                    if (typeof value === "undefined") {}
+                    else if ((typeof value === "number")||
                         (typeof value === "string"))
                         exported[key]=value;
                     else if (value instanceof Ref) {
@@ -410,7 +413,8 @@ if (!(fdjt.RefDB)) {
                             _id: value._id,
                             _domain: value._domain||value._db.name};}
                     else exported[key]=exportValue(value,this._db);}}
-            return exported;};
+            return exported;}
+        Ref.Export=Ref.prototype.Export=refExport;
         function exportValue(value,db){
             if (value instanceof Ref) {
                 if (value._db===db) return {_id: value._id};
