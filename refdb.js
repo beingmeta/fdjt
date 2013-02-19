@@ -319,7 +319,8 @@ if (!(fdjt.RefDB)) {
                 this._live=fdjtTime();
                 if (onload) {
                     var i=0, lim=onload.length; while (i<lim) {
-                        onload[i++](this);}}};
+                        var loadfn=onload[i++];
+                        loadfn(this);}}};
             if ((!(this._changed))&&(!(unchanged))) {
                 this._changed=fdjtTime();
                 db.changed.push(this);}
@@ -356,7 +357,7 @@ if (!(fdjt.RefDB)) {
                 if (imports) {
                     if (imports.length===1) return imports[0];
                     else return fdjtSet(imports);}
-                else if (value.length===1) return value[1];
+                else if (value.length===1) return value[0];
                 else return fdjtSet(value);}
             else if (typeof value === "object") {
                 var copied=false, fields=[];
