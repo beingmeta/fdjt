@@ -68,8 +68,7 @@ if (!(fdjt.RefDB)) {
                 db.storage=init.storage||false;
                 db.absrefs=init.absrefs||false;
                 db.onload=[]; db.onloadnames={};
-                db.onadd=[]; db.onaddnames={};
-                db.ondrop=[]; db.ondropnames={};
+                db.onadd=[]; db.ondrop=[]; 
                 db.indices={};}
             if (init.hasOwnProperty("absrefs")) db.absrefs=init.absrefs;
             if (init.aliases) {
@@ -148,31 +147,11 @@ if (!(fdjt.RefDB)) {
                 var loaded=[].concat(this.loaded);
                 fdjtTime.slowmap(method,loaded);}};
 
-        RefDB.prototype.onAdd=function(method,name,noupdate){
-            if ((name)&&(this.onaddnames[name])) {
-                var cur=this.onaddnames[name];
-                if (cur===method) return;
-                var pos=this.onadd.indexOf(cur);
-                if (cur<0) {
-                    warn("Couldn't replace named onadd method %s for <RefDB %s>",
-                         name,this.name);
-                    return;}
-                else this.onadd[pos]=method;}
-            else this.onadd.push(method);
-            if (name) this.onaddnames[name]=method;};
+        RefDB.prototype.onAdd=function(name,method){
+            this.onadd[name]=method;};
 
-        RefDB.prototype.onDrop=function(method,name,noupdate){
-            if ((name)&&(this.ondropnames[name])) {
-                var cur=this.ondropnames[name];
-                if (cur===method) return;
-                var pos=this.ondrop.indexOf(cur);
-                if (cur<0) {
-                    warn("Couldn't replace named ondrop method %s for <RefDB %s>",
-                         name,this.name);
-                    return;}
-                else this.ondrop[pos]=method;}
-            else this.ondrop.push(method);
-            if (name) this.ondropnames[name]=method;};
+        RefDB.prototype.onDrop=function(name,method){
+            this.ondrop[name]=method;};
         
         var uuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})$/;
         var xuuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)$/;
@@ -993,7 +972,7 @@ if (!(fdjt.RefDB)) {
                     if (cur.length===0) delete this[prop];}
                 else return false;
                 if (this._db.ondrop.hasOwnProperty(prop)) 
-                    this._db.ondrop[prop](this,prop,val);
+                    (this._db.ondrop[prop])(this,prop,val);
                 if ((!(leaveindex))&&(this._db.indices[prop])) 
                     indexRefdrop(this,prop,this._db.indices[prop]);
                 return true;}
