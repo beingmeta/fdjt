@@ -515,7 +515,7 @@ if (!(fdjt.RefDB)) {
                         content=storage[atid+"("+ref._id+")"];}
                     if (!(content))
                         warn("No item stored for %s",ref._id);
-                    else ref.Import(JSON.parse(content));}
+                    else ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);}
                 if (callback) callback();}
             else if (window.IndexedDB) {}
             else {}};
@@ -545,6 +545,9 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.save=function saveRefs(refs,callback){
             var that=this;
             if (!(this.storage)) return;
+            else if (refs===true) 
+                return this.save(this.allrefs,function(){
+                    that.changed=[]; if (callback) callback();});
             else if (!(refs))
                 return this.save(this.changed,function(){
                     that.changed=[]; if (callback) callback();});
@@ -556,17 +559,18 @@ if (!(fdjt.RefDB)) {
                     var ref=refs[i++];
                     if (typeof ref === "string") ref=this.ref(ref);
                     if (!(ref._live)) continue;
-                    if (!(ref._changed)) continue;
+                    if ((ref._saved)&&(!(ref._changed))) continue;
+                    var exported=ref.Export();
+                    exported._saved=fdjtTime.tick();
                     if (this.absrefs) {
                         ids.push(ref._id);
-                        storage.setItem(ref._id,JSON.stringify(ref.Export()));}
+                        storage.setItem(ref._id,JSON.stringify(exported));}
                     else {
                         if (atid) {}
                         else if (ref.atid) atid=ref.atid;
                         else atid=ref.atid=getatid(storage,ref);
-                        var id=atid+"("+ref._id+")";
-                        ids.push(id);
-                        storage.setItem(id,JSON.stringify(ref.Export()));}}
+                        var id=atid+"("+ref._id+")"; ids.push(id);
+                        storage.setItem(id,JSON.stringify(exported));}}
                 var allids=storage["allids("+this.name+")"];
                 if (allids) allids=JSON.parse(allids); else allids=[];
                 var n=allids.length;
