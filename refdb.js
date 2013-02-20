@@ -24,6 +24,21 @@
 
 var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
+/* There are three stores (at least):
+   1. the in-memory store
+   2. the local (not in-memory) store
+   3. the external store (over the network)
+
+   Import takes data and updates a ref.
+   Export takes a ref and updates a serializable object
+   Load takes a ref and hooks it into the application
+
+   Import and Export takes a set of rules for particular slot/values.
+   Import also takes some flags: 
+  
+
+*/
+
 if (!(fdjt.RefDB)) {
     fdjt.RefDB=(function(){
         "use strict";
@@ -96,6 +111,11 @@ if (!(fdjt.RefDB)) {
                     else this.indices[ix]={};}}
             
             return db;}
+
+        var REFINDEX=RefDB.REFINDEX=2;
+        var REFLOAD=RefDB.REFLOAD=4;
+        var REFSTRINGS=RefDB.REFSTRINGS=8;
+        var default_flags=REFINDEX|REFSTRINGS;
 
         function checkAliases(aliases){
             var i=0, lim=aliases.length;
@@ -288,91 +308,92 @@ if (!(fdjt.RefDB)) {
                 this._db.altrefs[term]=this;
                 return true;}};
 
-        Ref.prototype.Import=function refImport(data,dontindex,unchanged){
+        function object2ref(value,db) {
+            var ref, dbref=false; 
+            if (value._domain)
+                dbref=RefDB.probe(value._domain)||(new RefDB(value._domain));
+            if (dbref) ref=dbref.ref(value._id);
+            else ref=RefDB.resolve(value._id,db,true);
+            return ref;}
+
+        Ref.prototype.Import=function refImport(data,rules,flags){
             var db=this._db;
             var indices=db.indices; var onload=db.onload;
             var aliases=data.aliases;
+            if (typeof flags === "undefined") flags=default_flags;
+            if (typeof rules === "undefined") rules=ref.import_rules||db.import_rules;
+            var indexing=((flags&REFINDEX)!==0);
+            var loading=((flags&REFLOAD)!==0);
+            var refstrings=((flags&REFSTRINGS)!==0);
             if (aliases) {
                 var ai=0, alim=aliases.length; while (ai<alim) {
                     var alias=aliases[ai++];
                     var cur=db.refs[alias]||db.altrefs[alias];
                     if ((cur)&&(!(cur===this)))
-                        warn("Ambiguous %s in %s refers to both %o and %o",
-                             alias,db.name,cur.name,this.name);
+                        warn("Ambiguous ref %s in %s refers to both %o and %o",
+                             alias,db,cur.name,this.name);
                     else aliases[alias]=this;}}
             for (var key in data) {
                 if (key==="aliases") {}
                 else if (data.hasOwnProperty(key)) {
-                    var value=data[key];
-                    if ((typeof value === "number")||
-                        ((typeof value === "string")&&
-                         ((!(string_refs))||(!(refpat.exec(value))))))
-                        this[key]=value;
-                    else this[key]=value=importValue(value,this._db,dontindex);
-                    if ((!(dontindex))&&(indices[key])) 
-                        indexRef(this,key,this[key],indices[key],db);}}
+                    var value=data[key]; var rule=((rules)&&(rules[key]));
+                    if (rule) value=(rule)(this,key,value,data,indexing);
+                    value=this.importValue(value,refstrings);
+                    if ((indexing)&&(indices[key])) 
+                        this.indexRef(key,value,indices[key],db);}}
+            // These are run-once inits loaded on initial import
             if (!(this._live)) {
                 this._live=fdjtTime();
-                if (onload) {
+                if ((loading)&&(onload)) {
                     var i=0, lim=onload.length; while (i<lim) {
                         var loadfn=onload[i++];
                         loadfn(this);}}};
-            if ((!(this._changed))&&(!(unchanged))) {
-                this._changed=fdjtTime();
-                db.changed.push(this);}
+            // These are custom per-instance inits recorded on the
+            // instance
             if (this._onload) {
                 var inits=this._onload;
                 var j=0, jlim=inits.length; while (j<jlim) {
                     inits[j++](this);}
-                delete this._onload;}};
-        function importValue(value,db,dontindex){
-            if (value instanceof Ref) return value;
+                delete this._onload;}
+            if ((!(loading))&&(!(this._changed))) {
+                this._changed=fdjtTime();
+                db.changed.push(this);}};
+        function importValue(value,refstrings){
+            var db=this._db;
+            if ((typeof value === "undefined")||
+                (typeof value === "number") ) return value;
+            else if (value instanceof Ref) return value;
+            else if (value instanceof Array) {
+                var i=0, lim=value.length; var copied=false;
+                while (i<lim) {
+                    var v=value[i++], nv=v;
+                    if ((typeof value === "object")&&(value._id)) {
+                        var ref=object2ref(value,db);
+                        if (ref) {
+                            for (var slot in value) {
+                                if ((value.hasOwnProperty(slot))&&
+                                    (value!="_id")&&(value!="_db"))
+                                    ref[slot]=this.importValue(value[slot],db);}
+                            nv=ref;}}
+                    else if ((refstrings)&&(typeof value === "string")&&
+                             (refpat.exec(value))) {
+                        nv=resolve_ref(v,db)||v;}
+                    if (copied) copied.push(nv);
+                    else if if (nv!==v) {
+                        copied=value.slice(0,i-1);
+                        copied.push(nv);}
+                    else {}}
+                if (copied) return copied; else return value;}
             else if ((typeof value === "object")&&(value._id)) {
-                var ref, dbref=false; 
-                if (value._domain)
-                    dbref=RefDB.probe(value._domain)||
-                    (new RefDB(value._domain));
-                if (dbref) ref=dbref.ref(value._id);
-                else ref=RefDB.resolve(value._id,db,true);
+                var ref=object2ref(value,db);
                 for (var slot in value) {
-                    if (value.hasOwnProperty(slot))
+                    if ((value.hasOwnProperty(slot))&&
+                        (value!="_id")&&(value!="_db"))
                         ref[slot]=importValue(value[slot],db);}
                 return ref;}
-            else if (value instanceof Array) {
-                var i=0, lim=value.length; var imports=false;
-                while (i<lim) {
-                    var elt=value[i++];
-                    var imported=importValue(elt,db);
-                    if (elt!==imported) {
-                        if (imports) imports.push(imported);
-                        else {
-                            imports=value.slice(0,i-1);
-                            imports.push(imported);}}
-                    else if (imports) imports.push(elt);
-                    else {}}
-                if (imports) {
-                    if (imports.length===1) return imports[0];
-                    else return fdjtSet(imports);}
-                else if (value.length===1) return value[0];
-                else return fdjtSet(value);}
-            else if (typeof value === "object") {
-                var copied=false, fields=[];
-                for (var field in value) {
-                    if (value.hasOwnProperty(field)) {
-                        var fieldval=value[field];
-                        var importval=importValue(fieldval,db);
-                        if (fieldval!==importval) {
-                            if (!(copied)) {
-                                copied={};
-                                if (fields.length) {
-                                    var j=0, jlim=fields.length;
-                                    while (j<jlim) {
-                                        var f=fields[j++];
-                                        copied[f]=value[f];}}}
-                            copied[field]=importval;}
-                        else if (copied) copied[name]=fieldval;
-                        else fields.push(field);}}
-                return copied||value;}
+            else if ((refstrings)&&(typeof value === "string")&&
+                     (refpat.exec(value)))
+                return resolve_ref(value,db)||value;
             else return value;}
         Ref.importValue=importValue;
         RefDB.prototype.importValue=function(val){
@@ -391,8 +412,10 @@ if (!(fdjt.RefDB)) {
             else return refs;};
 
         function refExport(xforms){
+            var db=this._id;
             var exported={_id: this._id};
-            if (!(this._db.absrefs)) this._domain=this._db.name;
+            if (!(xforms)) xforms=this.export_rules||db.export_rules;
+            if (!(db.absrefs)) this._domain=db.name;
             for (var key in this) {
                 if (key[0]==="_") continue;
                 else if (this.hasOwnProperty(key)) {
@@ -583,16 +606,56 @@ if (!(fdjt.RefDB)) {
             else return "&"+val.toString();}
         RefDB.getKeyString=getKeyString;
         
-        function indexRef(ref,key,val,index,db){
-            var keystrings=[];
+        Ref.prototype.indexRef=function indexRef(key,val,index,db){
+            var keystrings=[]; var rdb=this._db;
             var refstring=
-                (((!(db))||(ref._db===db)||(ref._db.absrefs))?(ref._id):
-                 ((ref._qid)||((ref.getQID)&&(ref.getQID()))));
+                (((!(db))||(rdb===db)||(rdb.absrefs))?(this._id):
+                 ((this._qid)||((this.getQID)&&(this.getQID()))));
+            if (!(index)) index=db.indices[key];
+            if (!(db)) db=rdb;
+            if (!(index)) {
+                warn("No index on %s for %o in %o",key,this,db);
+                return false;}
             if (val instanceof Ref) {
-                if (ref._db===val._db) keystrings=["@"+val._id];
+                if (rdb===val._db) keystrings=["@"+val._id];
                 else keystrings=["@"+(val._qid||val.getQID())];}
             else if (val instanceof Array) {
-                var db=ref._db;
+                var db=this._db;
+                var i=0, lim=val.length; while (i<lim) {
+                    var elt=val[i++];
+                    if (elt instanceof Ref) 
+                        keystrings.push("@"+(elt._qid||elt.getQID()));
+                    else if (typeof elt === "number") 
+                        keystrings=["#"+val];
+                    else if (typeof elt === "string")
+                        keystrings=["\""+val];
+                    else if (elt._qid)
+                        keystrings.push("@"+(elt._qid||elt.getQID()));
+                    else if (elt.getQID)
+                        keystrings.push("@"+(elt.getQID()));
+                    else {}}}
+            else if (typeof val === "number") 
+                keystrings=["#"+val];
+            else if (typeof val === "string")
+                keystrings=["\""+val];
+            else keystrings=["?"+val.toString()];
+            if (keystrings.length) {
+                var j=0, jlim=keystrings.length; while (j<jlim) {
+                    var keystring=keystrings[j++]; var refs=index[keystring];
+                    if (refs) refs.push(refstring);
+                    else index[keystring]=[refstring];}
+                return keystrings.length;}
+            else return false;}
+        Ref.prototype.dropIndexRef=function dropIndexRef(key,val,index,db){
+            var keystrings=[];
+            var refstring=
+                (((!(db))||(this._db===db)||(this._db.absrefs))?(this._id):
+                 ((this._qid)||((this.getQID)&&(this.getQID()))));
+            if (val instanceof Ref) {
+                if (this._db===val._db) keystrings=["@"+val._id];
+                else keystrings=["@"+(val._qid||val.getQID())];}
+            else if (val instanceof Array) {
+                var db=this._db;
                 var i=0, lim=val.length; while (i<lim) {
                     var elt=val[i++];
                     if (elt instanceof Ref) 
@@ -938,7 +1001,8 @@ if (!(fdjt.RefDB)) {
                 else return [val];}
             else if (this._live) return [];
             else return undefined;};
-        Ref.prototype.add=function refAdd(prop,val,dontindex){
+        Ref.prototype.add=function refAdd(prop,val,index){
+            if (typeof index === "undefined") index=true;
             if ((!(this._live))&&(this._db.storage)) {
                 if (this._db.storage instanceof window.Storage) {
                     this.load(); return this.add(prop,val);}
@@ -971,8 +1035,8 @@ if (!(fdjt.RefDB)) {
                 this._db.changed.push(this);}
             if (this._db.onadd.hasOwnProperty(prop))
                 (this._db.onadd[prop])(this,prop,val);
-            if ((!(dontindex))&&(this._db.indices[prop])) 
-                indexRef(this,prop,this[prop],this._db.indices[prop]);
+            if ((index)&&(this._db.indices[prop]))
+                this.indexRef(prop,this[prop],this._db.indices[prop]);
             return true;};
         Ref.prototype.drop=function refDrop(prop,val,leaveindex){
             if (prop==='_id') return false;
@@ -991,7 +1055,7 @@ if (!(fdjt.RefDB)) {
                 if (this._db.ondrop.hasOwnProperty(prop)) 
                     (this._db.ondrop[prop])(this,prop,val);
                 if ((!(leaveindex))&&(this._db.indices[prop])) 
-                    indexRefdrop(this,prop,this._db.indices[prop]);
+                    this.indexRefDrop(prop,this._db.indices[prop]);
                 return true;}
             else return false;};
         Ref.prototype.test=function(prop,val){
