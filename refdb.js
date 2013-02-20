@@ -165,23 +165,40 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.probe=function DBprobe(id){
             if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             return (this.refs[id]);};
-        RefDB.prototype.drop=function DBdrop(id){
-            var ref=((id instanceof Ref)?(id):(this.probe(id)));
-            if (id instanceof Ref) id=this._id;
-            if (!(ref)) return false;
-            var aliases=ref.aliases;
-            var pos=this.allrefs.indexOf(ref);
-            if (pos>=0) this.allrefs.splice(pos);
-            pos=this.changes.indexOf(ref);
-            if (pos>=0) this.changes.splice(pos);
-            pos=this.loaded.indexOf(ref);
-            if (pos>=0) this.loaded.splice(pos);
-            delete this.refs[id];
-            if (aliases) {
-                var i=0, lim=aliases.length;
-                while (i<lim) {delete altrefs[aliases[i++]];}}
-            return true;};
-
+        RefDB.prototype.drop=function DBdrop(refs){
+            var count=0;
+            if (!(id instanceof Array)) refs=[refs];
+            var i=0, nrefs=refs.length; while (i<nrefs) {
+                var ref=refs[i++]; var id;
+                if (ref instanceof Ref) id=ref._id;
+                else {id=ref; ref=this.probe(id);}
+                if (!(ref)) continue; else count++;
+                var aliases=ref.aliases;
+                var pos=this.allrefs.indexOf(ref);
+                if (pos>=0) this.allrefs.splice(pos);
+                pos=this.changes.indexOf(ref);
+                if (pos>=0) this.changes.splice(pos);
+                pos=this.loaded.indexOf(ref);
+                if (pos>=0) this.loaded.splice(pos);
+                delete this.refs[id];
+                if (aliases) {
+                    var i=0, lim=aliases.length;
+                    while (i<lim) {delete altrefs[aliases[i++]];}}}
+            return count;};
+        RefDB.prototype.clearOffline=function refDBclear(callback){
+            if (!(this.storage)) return false;
+            else if ((window.Storage)&&(this.storage instanceof window.Storage)) {
+                var storage=this.storage;
+                var key="allids("+this.name+")";
+                var allids=this.storage[key];
+                var allids=JSON.parse(allids);
+                var i=0, lim=allids.length;
+                while (i<lim) delete storage[allids[i++]];
+                delete storage[key];
+                if (callback) setTimeout(callback,5);}
+            else if ((window.indexedDB)&&
+                     (this.storage instanceof window.indexedDB)) {}
+            else return false;};
 
         RefDB.prototype.onLoad=function(method,name,noupdate){
             if ((name)&&(this.onloadnames[name])) {
@@ -375,8 +392,11 @@ if (!(fdjt.RefDB)) {
                     inits[j++](this);}
                 delete this._onload;}
             if ((!(loading))&&(!(this._changed))) {
-                this._changed=fdjtTime();
-                db.changes.push(this);}};
+                var now=fdjtTime();
+                this._changed=now;
+                db.changes.push(this);
+                if (!(db.changed)) {
+                    db.changed=now; db.changes.push(db);}}};
         function importValue(value,db,refstrings){
             if ((typeof value === "undefined")||
                 (typeof value === "number") ) return value;
@@ -859,31 +879,36 @@ if (!(fdjt.RefDB)) {
         RefDB.union=union;
 
         function merge(set1,set2){
+            var merged=[];
             if (typeof set1 === 'string') set1=[set1];
             if (typeof set2 === 'string') set2=[set2];
             if ((!(set1))||(set1.length===0)) {
-                set1.concat(set2);
-                set1._sortlen=set2._sortlen;
-                set1._allstrings=set2._allstrings;
-                return set1;}
-            if ((!(set2))||(set2.length===0)) return set1;
-            var results=set1;
-            set1=[].concat(results);
+                if ((!(set2))||(set2.length===0)) return [];
+                merged=[].concat(set2);
+                if (set2._sortlen) {
+                    merged._sortlen=set2._sortlen;
+                    merged._allstrings=set2._allstrings;
+                    return merged;}
+                else return setify(merged);}
+            else if ((!(set2))||(set2.length===0))
+                return merge(set2,set1);
+            if (set1._sortlen!==set1.length) set1=setify(set1);
+            if (set2._sortlen!==set2.length) set2=setify(set2);
             var i=0; var j=0; var len1=set1.length; var len2=set2.length;
             var allstrings=set1._allstrings&&set2._allstrings;
             while ((i<len1) && (j<len2))
                 if (set1[i]===set2[j]) {
-                    results.push(set1[i]); i++; j++;}
+                    merged.push(set1[i]); i++; j++;}
             else if ((allstrings)?
                      (set1[i]<set2[j]):
                      (set_sortfn(set1[i],set2[j])<0))
-                results.push(set1[i++]);
-            else results.push(set2[j++]);
-            while (i<len1) results.push(set1[i++]);
-            while (j<len2) results.push(set2[j++]);
-            results._allstrings=allstrings;
-            results._sortlen=results.length;
-            return results;}
+                merged.push(set1[i++]);
+            else merged.push(set2[j++]);
+            while (i<len1) merged.push(set1[i++]);
+            while (j<len2) merged.push(set2[j++]);
+            merged._allstrings=allstrings;
+            merged._sortlen=merged.length;
+            return merged;}
         RefDB.merge=merge;
 
         function overlaps(set1,set2){
@@ -926,7 +951,8 @@ if (!(fdjt.RefDB)) {
                 result=[];
                 for (arg in arguments)
                     if (!(arg)) {}
-                else if (arg instanceof Array) result.concat(arg);
+                else if (arg instanceof Array)
+                    result=result.concat(arg);
                 else result.push(arg);
                 return setify(result);}}
         RefDB.Set=fdjtSet;
