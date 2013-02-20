@@ -129,6 +129,23 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.probe=function DBprobe(id){
             if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             return (this.refs[id]);};
+        RefDB.prototype.drop=function DBdrop(id){
+            var ref=((id instanceof Ref)?(id):(this.probe(id)));
+            if (id instanceof Ref) id=this._id;
+            if (!(ref)) return false;
+            var aliases=ref.aliases;
+            var pos=this.allrefs.indexOf(ref);
+            if (pos>=0) this.allrefs.splice(pos);
+            pos=this.changed.indexOf(ref);
+            if (pos>=0) this.changed.splice(pos);
+            pos=this.loaded.indexOf(ref);
+            if (pos>=0) this.loaded.splice(pos);
+            delete this.refs[id];
+            if (aliases) {
+                var i=0, lim=aliases.length;
+                while (i<lim) {delete altrefs[aliases[i++]];}}
+            return true;};
+
 
         RefDB.prototype.onLoad=function(method,name,noupdate){
             if ((name)&&(this.onloadnames[name])) {
@@ -629,7 +646,7 @@ if (!(fdjt.RefDB)) {
             var indices=this.indices[key];
             if (indices) {
                 var keystring=getKeyString(value,this);
-                if (keystring) return indices[keystring]||[];
+                if (keystring) return setify(indices[keystring]||[]);
                 else return [];}
             else return [];}
         RefDB.prototype.count=function countRefs(key,value){
