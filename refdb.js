@@ -54,7 +54,7 @@ if (!(fdjt.RefDB)) {
            referring to Refs */
         var string_refs=true;
 
-        var refdbs={}, all_refdbs=[];
+        var refdbs={}, all_refdbs=[], changed_dbs=[];
         var aliases={}, atmaps={};
 
         function RefDB(name,init){
@@ -78,12 +78,28 @@ if (!(fdjt.RefDB)) {
                 if (!(init)) init={};
                 db.name=name; refdbs[name]=db; all_refdbs.push(db);
                 db.aliases=[];
-                db.refs={}; db.altrefs={};
-                db.allrefs=[]; db.changed=[]; db.loaded=[];
+                db.complete=false; // Whether all valid refs are loaded
+                db.refs={}; // Mapping _ids to refs (unique within the DB)
+                db.altrefs={}; // Alternate unique IDs
+                // An array of all references to this DB
+                db.allrefs=[];
+                // All loaded refs. This is used when declaring an onLoad
+                //  method after some references have already been loaded
+                db.loaded=[];
+                // An array of changed references, together with the
+                //  timestamp of the earliest change
+                db.changes=[]; db.changed=false; 
+                // Where to persist the data from this database
                 db.storage=init.storage||false;
+                // Whether _id fields for this database are globally unique
                 db.absrefs=init.absrefs||false;
+                // Handlers for loading refs from memory or network
                 db.onload=[]; db.onloadnames={};
-                db.onadd=[]; db.ondrop=[]; 
+                // Rules to run when adding or dropping fields of references
+                //  This doesn't happen on import, though.
+                db.onadd={}; db.ondrop={}; 
+                // This maps from field names to tables which map from
+                //  keys to reference ids.
                 db.indices={};}
             if (init.hasOwnProperty("absrefs")) db.absrefs=init.absrefs;
             if (init.aliases) {
@@ -101,7 +117,7 @@ if (!(fdjt.RefDB)) {
                 var onload=init.onload;
                 for (var methname in onload) {
                     if (onload.hasOwnProperty(methname)) 
-                        db.onLoad(oload[methname],methname);}}
+                        db.onLoad(onload[methname],methname);}}
             if (init.indices) {
                 var index_specs=init.indices;
                 var j=0, jlim=index_specs.length; while (j<jlim) {
@@ -156,8 +172,8 @@ if (!(fdjt.RefDB)) {
             var aliases=ref.aliases;
             var pos=this.allrefs.indexOf(ref);
             if (pos>=0) this.allrefs.splice(pos);
-            pos=this.changed.indexOf(ref);
-            if (pos>=0) this.changed.splice(pos);
+            pos=this.changes.indexOf(ref);
+            if (pos>=0) this.changes.splice(pos);
             pos=this.loaded.indexOf(ref);
             if (pos>=0) this.loaded.splice(pos);
             delete this.refs[id];
@@ -240,7 +256,8 @@ if (!(fdjt.RefDB)) {
                         if (slash>0) slash=slash+2;}
                     else slash=arg.indexOf('/');
                     atprefix=arg.slice(at,slash+1);
-                    db=refdbs[atprefix]||aliases[atprefix]||((force)&&(new RefDB(atprefix)));}}
+                    db=refdbs[atprefix]||aliases[atprefix]||
+                        ((force)&&(new RefDB(atprefix)));}}
             else {}
             if (!(db)) return false;
             if (db.refs[arg]) return (db.refs[arg])
@@ -359,7 +376,7 @@ if (!(fdjt.RefDB)) {
                 delete this._onload;}
             if ((!(loading))&&(!(this._changed))) {
                 this._changed=fdjtTime();
-                db.changed.push(this);}};
+                db.changes.push(this);}};
         function importValue(value,db,refstrings){
             if ((typeof value === "undefined")||
                 (typeof value === "number") ) return value;
@@ -516,13 +533,14 @@ if (!(fdjt.RefDB)) {
                     if (!(content))
                         warn("No item stored for %s",ref._id);
                     else ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);}
-                if (callback) callback();}
-            else if (window.IndexedDB) {}
+                if (callback) setTimeout(callback,5);}
+            else if ((window.IndexedDB)&&
+                     (this.storage instanceof IndexedDB)) {}
             else {}};
-        Ref.prototype.load=function loadRef() {
+        Ref.prototype.load=function loadRef(callback) {
             if (this._live) return this;
             else {
-                this._db.load(this);
+                this._db.load(this,callback);
                 return this;}};
         RefDB.load=function RefDBload(spec){
             if (typeof spec === "string") {
@@ -542,15 +560,23 @@ if (!(fdjt.RefDB)) {
                     else loads.push(false);}
                 return loads;}};
         
-        RefDB.prototype.save=function saveRefs(refs,callback){
+        RefDB.prototype.save=function saveRefs(refs,callback,updatechanges){
             var that=this;
             if (!(this.storage)) return;
             else if (refs===true) 
                 return this.save(this.allrefs,function(){
-                    that.changed=[]; if (callback) callback();});
+                    that.changed=false;
+                    that.changes=[];
+                    var pos=changed_dbs.indexOf(that);
+                    if (pos>=0) changed_dbs.splice(pos);
+                    if (callback) callback();});
             else if (!(refs))
-                return this.save(this.changed,function(){
-                    that.changed=[]; if (callback) callback();});
+                return this.save(this.changes,function(){
+                    that.changed=false;
+                    that.changes=[];
+                    var pos=changed_dbs.indexOf(that);
+                    if (pos>=0) changed_dbs.splice(pos);
+                    if (callback) callback();});
             else if (this.storage instanceof window.Storage) {
                 var storage=this.storage;
                 var atid=this.atid;
@@ -570,7 +596,19 @@ if (!(fdjt.RefDB)) {
                         else if (ref.atid) atid=ref.atid;
                         else atid=ref.atid=getatid(storage,ref);
                         var id=atid+"("+ref._id+")"; ids.push(id);
-                        storage.setItem(id,JSON.stringify(exported));}}
+                        storage.setItem(id,JSON.stringify(exported));}
+                    ref._changed=false;}
+                if (updatechanges) {
+                    var changes=this.changes, new_changes=[];
+                    var j=0, n_changed=changes.length;
+                    while (j<n_changed) {
+                        var c=changes[j++];
+                        if (c._changed) new_changes.push(c);}
+                    this.changes=new_changes;
+                    if (new_changes.length===0) {
+                        this.changed=false;
+                        var pos=changed_dbs.indexOf(that);
+                        if (pos>=0) changed_dbs.splice(pos);}}
                 var allids=storage["allids("+this.name+")"];
                 if (allids) allids=JSON.parse(allids); else allids=[];
                 var n=allids.length;
@@ -578,8 +616,9 @@ if (!(fdjt.RefDB)) {
                 if (allids.length!==n) 
                     storage.setItem("allids("+this.name+")",
                                     JSON.stringify(allids));
-                if (callback) callback();}
-            else if (window.IndexedDB) {}
+                if (callback) setTimeout(callback,5);}
+            else if ((window.IndexedDB)&&
+                     (this.storage instanceof IndexedDB)) {}
             else {}};
         Ref.prototype.save=function(callback){
             if (!(this._changed)) return this;
@@ -654,6 +693,9 @@ if (!(fdjt.RefDB)) {
                 return keystrings.length;}
             else return false;}
         Ref.prototype.dropIndexRef=function dropIndexRef(key,val,index,db){
+            if (!(db)) db=this._db;
+            if (!(index)) index=db.indices[key];
+            if (!(index)) return false;
             var keystrings=[];
             var refstring=
                 (((!(db))||(this._db===db)||(this._db.absrefs))?(this._id):
@@ -682,35 +724,17 @@ if (!(fdjt.RefDB)) {
                 keystrings=["\""+val];
             else {}
             if (keystrings.length) {
+                var deleted=0;
                 var j=0, jlim=keystrings.length; while (j<jlim) {
                     var keystring=keystrings[j++]; var refs=index[keystring];
-                    if (refs) refs.push(refstring);
-                    else index[keystring]=[refstring];}}}
-
-        function indexRefdrop(ref,key,val,index,db){
-            var keystrings=[];
-            var refstring=(((!(db))||(ref._db===db))?(ref._id):
-                           ((ref._domain)?(ref._id+"@"+ref._domain):(ref._id)));
-            if (val instanceof Ref) {
-                if (ref._db===val._db) keystrings=[val._id];
-                else if (val._domain) keystrings=[val._id+"@"+val._domain];
-                else keystrings=[val._id];}
-            else if (val instanceof Array) {
-                var db=ref._db;
-                var i=0, lim=val.length; while (i<lim) {
-                    var elt=val[i++];
-                    var ks=getKeyString(elt,db);
-                    if (ks) keystrings.push(ks);}}
-            else if (typeof val === "number") 
-                keystrings=["\u00ad"+val];
-            else if (typeof val === "string")
-                keystrings=[val];
-            else {}
-            if (keystrings.length) {
-                var j=0, jlim=keystrings.length; while (j<jlim) {
-                    var keystring=keystrings[j++]; var refs=index[keystring];
-                    if (refs) refs.push(refstring);
-                    else index[keystring]=[refstring];}}}
+                    if (!(refs)) continue;
+                    var pos=refs.indexOf(this._id);
+                    if (pos<0) continue;
+                    else refs.splice(pos);
+                    if (refs.length===0) delete index[keystring];
+                    deleted++;}
+                return deleted;}
+            else return false;};
 
         RefDB.prototype.find=function findRefs(key,value){
             var indices=this.indices[key];
@@ -1009,14 +1033,14 @@ if (!(fdjt.RefDB)) {
             else if (this._live) return [];
             else return undefined;};
         Ref.prototype.add=function refAdd(prop,val,index){
+            var db=this._db;
             if (typeof index === "undefined") index=true;
             if ((!(this._live))&&(this._db.storage)) {
-                if (this._db.storage instanceof window.Storage) {
+                if (db.storage instanceof window.Storage) {
                     this.load(); return this.add(prop,val);}
                 else {
                     return undefined;}}
             else if (prop==="aliases") {
-                var db=this._db;
                 if (db.refs[val]===this) return false;
                 else if (db.altrefs[val]===this) return false;
                 else {
@@ -1037,18 +1061,28 @@ if (!(fdjt.RefDB)) {
             else if (val instanceof Array)
                 this[prop]=[val];
             else this[prop]=val;
+            // If we've gotten through to here, we've made a change,
+            //  so we update the change structures, run any add methods
+            //  and index if appropriate
             if (!(this._changed)) {
-                this._changed=fdjtTime();
-                this._db.changed.push(this);}
-            if (this._db.onadd.hasOwnProperty(prop))
-                (this._db.onadd[prop])(this,prop,val);
-            if ((index)&&(this._db.indices[prop]))
-                this.indexRef(prop,this[prop],this._db.indices[prop]);
+                var now=fdjtTime();
+                if (db.changed) {
+                    db.changed=now;
+                    changed_dbs.push(db);}
+                this._changed=now;
+                db.changes.push(this);}
+            if (db.onadd.hasOwnProperty(prop))
+                (db.onadd[prop])(this,prop,val);
+            if ((index)&&(db.indices[prop]))
+                this.indexRef(prop,this[prop],db.indices[prop]);
             return true;};
-        Ref.prototype.drop=function refDrop(prop,val,leaveindex){
+        Ref.prototype.drop=function refDrop(prop,val,dropindex){
+            var db=this._db;
+            if (typeof dropindex === "undefined")
+                dropindex=true;
             if (prop==='_id') return false;
             else if ((!(this._live))&&(this._db.storage)) {
-                if (this._db.storage instanceof window.Storage) {
+                if (db.storage instanceof window.Storage) {
                     this.load(); return this.drop(prop,val);}
                 else {
                     return undefined;}}
@@ -1059,10 +1093,15 @@ if (!(fdjt.RefDB)) {
                     if (!(set_drop(cur,val))) return false;
                     if (cur.length===0) delete this[prop];}
                 else return false;
-                if (this._db.ondrop.hasOwnProperty(prop)) 
-                    (this._db.ondrop[prop])(this,prop,val);
-                if ((!(leaveindex))&&(this._db.indices[prop])) 
-                    this.indexRefDrop(prop,this._db.indices[prop]);
+                if (db.ondrop.hasOwnProperty(prop)) 
+                    (db.ondrop[prop])(this,prop,val);
+                if (!(this._changed)) {
+                    var now=fdjtTime();
+                    if (db.changed) {db.changed=now; changed_dbs.push(db);}
+                    this._changed=now;
+                    db.changes.push(this);}
+                if ((dropindex)&&(db.indices[prop])) 
+                    this.indexRefDrop(prop,db.indices[prop]);
                 return true;}
             else return false;};
         Ref.prototype.test=function(prop,val){
