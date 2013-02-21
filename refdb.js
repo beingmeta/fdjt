@@ -229,6 +229,8 @@ if (!(fdjt.RefDB)) {
     
         function resolveRef(arg,db,force){
             if (arg instanceof Ref) return arg;
+            else if ((typeof arg === "object")&&(arg.id))
+                return object2ref(arg,db);
             else if ((db)&&(db.refs[arg])) return db.refs[arg];
             // These are generally the same but don't have to be 
             else if ((db)&&(db.probe(arg))) return db.probe(arg);
@@ -410,11 +412,10 @@ if (!(fdjt.RefDB)) {
                         if (ref) {
                             for (var slot in v) {
                                 if ((v.hasOwnProperty(slot))&&
-                                    (slot!="_id")&&(slot!="_db"))
+                                    (slot!=="_id")&&(slot!=="_db"))
                                     ref[slot]=importValue(v[slot],db,refstrings);}
                             nv=ref;}}
-                    else if ((refstrings)&&(typeof v === "string")&&
-                             (refpat.exec(v))) {
+                    else if ((refstrings)&&(typeof v === "string")&&(refpat.exec(v))) {
                         nv=resolveRef(v,db)||v;}
                     if (copied) copied.push(nv);
                     else if (nv!==v) {
@@ -426,7 +427,7 @@ if (!(fdjt.RefDB)) {
                 var ref=object2ref(value,db);
                 for (var slot in value) {
                     if ((value.hasOwnProperty(slot))&&
-                        (value!="_id")&&(value!="_db"))
+                        (slot!="_id")&&(slot!="_db"))
                         ref[slot]=importValue(value[slot],db,refstrings);}
                 return ref;}
             else if ((refstrings)&&(typeof value === "string")&&
@@ -443,7 +444,7 @@ if (!(fdjt.RefDB)) {
             var i=0, lim=data.length; while (i<lim) {
                 var item=data[i++];
                 var ref=resolveRef(item._id,item._domain,true);
-                if (!(ref)) warn("Couldn't resolve ref %o",item._id);
+                if (!(ref)) warn("Couldn't resolve database for %o",item._id);
                 else {
                     refs.push(ref);
                     ref.Import(item,rules||false,flags);};}
@@ -493,9 +494,7 @@ if (!(fdjt.RefDB)) {
                             exports.push(exported);}}
                     else if (exports) exports.push(elt);
                     else {}}
-                if (typeof value._sortlen === "number")
-                    return exports||value;
-                else return [exports||value];}
+                return exports||value;}
             else if (typeof value === "object") {
                 var copied=false, fields=[];
                 for (var field in value) {
@@ -1078,8 +1077,6 @@ if (!(fdjt.RefDB)) {
                 else if (cur instanceof Array) {
                     if (!(set_add(cur,val))) return false;
                     else {}}
-                else if (val instanceof Array)
-                    this[prop]=fdjtSet([cur,[val]]);
                 else this[prop]=fdjtSet([cur,val]);}
             else if (val instanceof Array)
                 this[prop]=fdjtSet([val]);
