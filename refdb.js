@@ -405,17 +405,16 @@ if (!(fdjt.RefDB)) {
                 var i=0, lim=value.length; var copied=false;
                 while (i<lim) {
                     var v=value[i++], nv=v;
-                    if ((typeof value === "object")&&(value._id)) {
-                        var ref=object2ref(value,db);
+                    if ((typeof v === "object")&&(v._id)) {
+                        var ref=object2ref(v,db);
                         if (ref) {
-                            for (var slot in value) {
-                                if ((value.hasOwnProperty(slot))&&
-                                    (value!="_id")&&(value!="_db"))
-                                    ref[slot]=importValue(
-                                        value[slot],db,refstrings);}
+                            for (var slot in v) {
+                                if ((v.hasOwnProperty(slot))&&
+                                    (slot!="_id")&&(slot!="_db"))
+                                    ref[slot]=importValue(v[slot],db,refstrings);}
                             nv=ref;}}
-                    else if ((refstrings)&&(typeof value === "string")&&
-                             (refpat.exec(value))) {
+                    else if ((refstrings)&&(typeof v === "string")&&
+                             (refpat.exec(v))) {
                         nv=resolveRef(v,db)||v;}
                     if (copied) copied.push(nv);
                     else if (nv!==v) {
@@ -1077,15 +1076,13 @@ if (!(fdjt.RefDB)) {
                 var cur=this[prop];
                 if (cur===val) return false;
                 else if (cur instanceof Array) {
-                    if (val instanceof Array) {
-                        if (!(set_add(cur,[val]))) return false;}
-                    else if (!(set_add(cur,val))) return false;
+                    if (!(set_add(cur,val))) return false;
                     else {}}
                 else if (val instanceof Array)
                     this[prop]=fdjtSet([cur,[val]]);
                 else this[prop]=fdjtSet([cur,val]);}
             else if (val instanceof Array)
-                this[prop]=[val];
+                this[prop]=fdjtSet([val]);
             else this[prop]=val;
             // If we've gotten through to here, we've made a change,
             //  so we update the change structures, run any add methods
