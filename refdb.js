@@ -141,8 +141,8 @@ if (!(fdjt.RefDB)) {
                 if (db) return db;}
             return false;}
 
-        RefDB.open=function RefDBOpen(name){
-            return refdbs[name]||aliases[name]||(new RefDB(name));};
+        RefDB.open=function RefDBOpen(name,cons){
+            return refdbs[name]||aliases[name]||(new (cons||RefDB)(name));};
         RefDB.probe=function RefDBProbe(name){
             return refdbs[name]||aliases[name]||false;};
         RefDB.prototype.addAlias=function DBaddAlias(alias){
@@ -227,7 +227,9 @@ if (!(fdjt.RefDB)) {
         var xuuid_pat=/^((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)$/;
         var refpat=/^(((:|)@(([0-9a-fA-F]+\/[0-9a-fA-F]+)|(\/\w+\/.*)|(@\d+\/.*)))|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})|((U|#U|:#U|)[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}t[0-9a-zA-Z]+)|([^@]+@.+))$/;
     
-        function resolveRef(arg,db,force){
+        function resolveRef(arg,db,dbtype,force){
+            if (typeof dbtype !== "function") force=RefDB;
+            if ((force)&&(typeof force !== "function")) force=dbtype;
             if (arg instanceof Ref) return arg;
             else if ((typeof arg === "object")&&(arg.id))
                 return object2ref(arg,db);
@@ -238,7 +240,7 @@ if (!(fdjt.RefDB)) {
                 var at=arg.indexOf('@');
                 if ((at===1)&&(arg[0]===':')) {arg=arg.slice(1); at=0;}
                 if (at>0) {
-                    db=RefDB.open(arg.slice(at+1));
+                    db=RefDB.open(arg.slice(at+1),dbtype);
                     arg=arg.slice(0,at);}
                 else if (at<0) {
                     var uuid;
@@ -254,7 +256,7 @@ if (!(fdjt.RefDB)) {
                         ((tail)&&(refdbs[tail]||aliases[tail]));
                     if (known_db) db=known_db;
                     else if ((force)&&(type)) {
-                        db=new RefDB(type);
+                        db=new (force)(type);
                         if (type) db.addAlias(type);}
                     else db=false;}
                 else if (arg[1]==='@') {
@@ -276,7 +278,7 @@ if (!(fdjt.RefDB)) {
                     else slash=arg.indexOf('/');
                     atprefix=arg.slice(at,slash+1);
                     db=refdbs[atprefix]||aliases[atprefix]||
-                        ((force)&&(new RefDB(atprefix)));}}
+                        ((force)&&(new (force)(atprefix)));}}
             else {}
             if (!(db)) return false;
             if (db.refs[arg]) return (db.refs[arg])
@@ -344,17 +346,18 @@ if (!(fdjt.RefDB)) {
                 this._db.altrefs[term]=this;
                 return true;}};
 
-        function object2ref(value,db) {
+        function object2ref(value,db,dbtype) {
             var ref, dbref=false; 
             if (value._domain)
                 dbref=RefDB.probe(value._domain)||(new RefDB(value._domain));
             if (dbref) ref=dbref.ref(value._id);
-            else ref=RefDB.resolve(value._id,db,true);
+            else ref=RefDB.resolve(value._id,db,(dbtype||RefDB),true);
             return ref;}
 
         Ref.prototype.Import=function refImport(data,rules,flags){
-            var db=this._db;
+            var db=this._db; var live=this._live;
             var indices=db.indices; var onload=db.onload;
+            var onadd=((live)&&(db.onadd)), ondrop=((live)&&(db.ondrop));
             var aliases=data.aliases;
             if (typeof flags === "undefined") flags=default_flags;
             if (typeof rules === "undefined")
@@ -375,9 +378,27 @@ if (!(fdjt.RefDB)) {
                 else if (data.hasOwnProperty(key)) {
                     var value=data[key]; var rule=((rules)&&(rules[key]));
                     if (rule) value=(rule)(this,key,value,data,indexing);
-                    value=importValue(value,db,refstrings);
+                    if (typeof value !== "undefined")
+                        value=importValue(value,db,refstrings);
+                    var oldval=((live)&&(this[key]));
                     this[key]=value;
-                    if ((indexing)&&(indices[key])) 
+                    if (oldval) {
+                        var drops=difference(oldval,value);
+                        var adds=difference(value,oldval);
+                        if ((indexing)&&(indices[key])) { 
+                            if (adds.length)
+                                this.indexRef(key,adds,indices[key],db);
+                            if (drops.length)
+                                this.dropIndexRef(key,drops,indices[key],db);}
+                        if ((adds.length)&&(onadd[key])) {
+                            var addfn=onadd[key];
+                            var addi=0, addlen=adds.length; while (addi<addlen) {
+                                addfn(adds[addi++]);}}
+                        if ((drops.length)&&(ondrop[key])) {
+                            var dropfn=ondrop[key];
+                            var dropi=0, droplen=drops.length; while (dropi<droplen) {
+                                dropfn(drops[dropi++]);}}}
+                    else if ((indexing)&&(indices[key])) 
                         this.indexRef(key,value,indices[key],db);}}
             // These are run-once inits loaded on initial import
             if (!(this._live)) {
@@ -401,13 +422,17 @@ if (!(fdjt.RefDB)) {
                     db.changed=now; db.changes.push(db);}}};
         function importValue(value,db,refstrings){
             if ((typeof value === "undefined")||
-                (typeof value === "number") ) return value;
+                (typeof value === "number")||
+                (value=== null))
+                return value;
             else if (value instanceof Ref) return value;
             else if (value instanceof Array) {
                 var i=0, lim=value.length; var copied=false;
                 while (i<lim) {
                     var v=value[i++], nv=v;
-                    if ((typeof v === "object")&&(v._id)) {
+                    if (v===null) nv=undefined;
+                    else if (v instanceof Ref) nv=v;
+                    else if ((typeof v === "object")&&(v._id)) {
                         var ref=object2ref(v,db);
                         if (ref) {
                             for (var slot in v) {
@@ -417,7 +442,9 @@ if (!(fdjt.RefDB)) {
                             nv=ref;}}
                     else if ((refstrings)&&(typeof v === "string")&&(refpat.exec(v))) {
                         nv=resolveRef(v,db)||v;}
-                    if (copied) copied.push(nv);
+                    if (typeof nv === "undefined") {
+                        if (!(copied)) copied=value.slice(0,i-1);}
+                    else if (copied) copied.push(nv);
                     else if (nv!==v) {
                         copied=value.slice(0,i-1);
                         copied.push(nv);}
@@ -560,9 +587,9 @@ if (!(fdjt.RefDB)) {
             else {
                 this._db.load(this,callback);
                 return this;}};
-        RefDB.load=function RefDBload(spec){
+        RefDB.load=function RefDBload(spec,dbtype){
             if (typeof spec === "string") {
-                var ref=RefDB.ref(spec,false,true);
+                var ref=RefDB.resolve(spec,false,(dbtype||RefDB),true);
                 if (ref) return ref.load();
                 else throw {error: "Couldn't resolve "+spec};}
             else if (spec instanceof Ref)
@@ -571,7 +598,8 @@ if (!(fdjt.RefDB)) {
                 var loads=[]; var i=0, lim=spec.length;
                 while (i<lim) {
                     var s=spec[i++]; var r;
-                    if (typeof s === "string") r=RefDB.ref(s,false,true);
+                    if (typeof s === "string")
+                        r=RefDB.resolve(s,false,dbtype||RefDB,true);
                     else if (s instanceof Ref) r=s;
                     else s=false;
                     if (r) loads.push(r.load());
@@ -1060,10 +1088,11 @@ if (!(fdjt.RefDB)) {
             var db=this._db;
             if (typeof index === "undefined") index=true;
             if ((!(this._live))&&(this._db.storage)) {
-                if (db.storage instanceof window.Storage) {
-                    this.load(); return this.add(prop,val);}
-                else {
-                    return undefined;}}
+                var that=this;
+                if (this._onload)
+                    this._onload.push(function(){that.add(prop,val);});
+                else this._onload=[function(){that.add(prop,val);}];
+                return this;}
             else if (prop==="aliases") {
                 if (db.refs[val]===this) return false;
                 else if (db.altrefs[val]===this) return false;
