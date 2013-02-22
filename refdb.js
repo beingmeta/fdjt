@@ -142,9 +142,13 @@ if (!(fdjt.RefDB)) {
             return false;}
 
         RefDB.open=function RefDBOpen(name,cons){
-            return refdbs[name]||aliases[name]||(new (cons||RefDB)(name));};
+            return ((refdbs.hasOwnProperty(name))&&(refdbs[name]))||
+                ((aliases.hasOwnProperty(name))&&(aliases[name]))||
+                (new (cons||RefDB)(name));};
         RefDB.probe=function RefDBProbe(name){
-            return refdbs[name]||aliases[name]||false;};
+            return ((refdbs.hasOwnProperty(name))&&(refdbs[name]))||
+                ((aliases.hasOwnProperty(name))&&(aliases[name]))||
+                false;};
         RefDB.prototype.addAlias=function DBaddAlias(alias){
             if (aliases[alias]) {
                 if (aliases[alias]!==this) 
@@ -159,12 +163,14 @@ if (!(fdjt.RefDB)) {
 
         RefDB.prototype.ref=function DBref(id){
             if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
-            return (this.refs[id])||
+            var refs=this.refs;
+            return ((refs.hasOwnProperty(id))&&(refs[id]))||
                 ((this.refclass)&&(new (this.refclass)(id,this)))||
                 (new Ref(id,this));};
         RefDB.prototype.probe=function DBprobe(id){
+            var refs=this.refs;
             if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
-            return (this.refs[id]);};
+            return ((refs.hasOwnProperty(id))&&(refs[id]));};
         RefDB.prototype.drop=function DBdrop(refs){
             var count=0;
             if (!(id instanceof Array)) refs=[refs];
@@ -233,7 +239,8 @@ if (!(fdjt.RefDB)) {
             if (arg instanceof Ref) return arg;
             else if ((typeof arg === "object")&&(arg.id))
                 return object2ref(arg,db);
-            else if ((db)&&(db.refs[arg])) return db.refs[arg];
+            else if ((db)&&(db.refs.hasOwnProperty(arg)))
+                return db.refs[arg];
             // These are generally the same but don't have to be 
             else if ((db)&&(db.probe(arg))) return db.probe(arg);
             else if ((typeof arg === "string")&&(refpat.exec(arg))) {
@@ -281,7 +288,7 @@ if (!(fdjt.RefDB)) {
                         ((force)&&(new (force)(atprefix)));}}
             else {}
             if (!(db)) return false;
-            if (db.refs[arg]) return (db.refs[arg])
+            if (db.refs.hasOwnProperty(arg)) return (db.refs[arg])
             else if (force) return db.ref(arg);
             else return false;}
         RefDB.resolve=resolveRef;
@@ -297,7 +304,7 @@ if (!(fdjt.RefDB)) {
                     (db.aliases.indexOf(domain)<0))
                     warn("Reference to %s being handled by %s",id,db);
                 id=id.slice(0,at);}
-            if (db.refs[id]) return db.refs[id];
+            if (db.refs.hasOwnProperty(id)) return db.refs[id];
             else if (instance) {
                 instance._id=id; instance._db=db;
                 if (!(db.absrefs)) instance._domain=db.name;
@@ -336,10 +343,11 @@ if (!(fdjt.RefDB)) {
             else return (obj._qid=(obj._id+"@"+obj._db.name));}
 
         Ref.prototype.addAlias=function addRefAlias(term){
-            if (this._db.refs[term]) {
-                if (this._db.refs[term]===this) return false;
+            var refs=this._db.refs;
+            if (refs.hasOwnProperty(term)) {
+                if (refs[term]===this) return false;
                 else throw {error: "Ref alias conflict"};}
-            else if (this._db.altrefs[term]) {
+            else if (this._db.altrefs.hasOwnProperty(term)) {
                 if (this._db.altrefs[term]===this) return false;
                 else throw {error: "Ref alias conflict"};}
             else {
@@ -368,11 +376,13 @@ if (!(fdjt.RefDB)) {
             if (aliases) {
                 var ai=0, alim=aliases.length; while (ai<alim) {
                     var alias=aliases[ai++];
-                    var cur=db.refs[alias]||db.altrefs[alias];
+                    var cur=((db.refs.hasOwnProperty(alias))&&(db.refs[alias]))||
+                        ((db.altrefs.hasOwnProperty(alias))&&(db.altrefs[alias]));
                     if ((cur)&&(!(cur===this)))
                         warn("Ambiguous ref %s in %s refers to both %o and %o",
                              alias,db,cur.name,this.name);
                     else aliases[alias]=this;}}
+            var run_inits=(!(this._live)); this._live=true;
             for (var key in data) {
                 if ((key==="aliases")||(key==="_id")) {}
                 else if (data.hasOwnProperty(key)) {
@@ -401,7 +411,7 @@ if (!(fdjt.RefDB)) {
                     else if ((indexing)&&(indices[key])) 
                         this.indexRef(key,value,indices[key],db);}}
             // These are run-once inits loaded on initial import
-            if (!(this._live)) {
+            if (run_inits) {
                 this._live=fdjtTime();
                 if ((loading)&&(onload)) {
                     var i=0, lim=onload.length; while (i<lim) {
@@ -988,7 +998,9 @@ if (!(fdjt.RefDB)) {
             var len;
             if (array._sortlen===(len=array.length)) return array;
             // else if ((array._sortlen)&&(array._sortlen>1))
-            else if (len===0) return array;
+            else if (len===0) {
+                array._sortlen=0;
+                return array;}
             else if (len===1) {
                 var elt=array[0];
                 array._sortlen=1;
@@ -1087,12 +1099,18 @@ if (!(fdjt.RefDB)) {
         Ref.prototype.add=function refAdd(prop,val,index){
             var db=this._db;
             if (typeof index === "undefined") index=true;
-            if ((!(this._live))&&(this._db.storage)) {
+            if ((val instanceof Array)&&(val._sortlen===0))
+                return;
+            else if ((!(this._live))&&(this._db.storage)) {
                 var that=this;
                 if (this._onload)
                     this._onload.push(function(){that.add(prop,val);});
                 else this._onload=[function(){that.add(prop,val);}];
                 return this;}
+            else if ((val instanceof Array)&&(typeof val._sortlen === "number")) {
+                var i=0, lim=val.length; while (i<lim) {
+                    this.add(prop,val[i++],index);}
+                return;}
             else if (prop==="aliases") {
                 if (db.refs[val]===this) return false;
                 else if (db.altrefs[val]===this) return false;
@@ -1107,7 +1125,8 @@ if (!(fdjt.RefDB)) {
                     if (!(set_add(cur,val))) return false;
                     else {}}
                 else this[prop]=fdjtSet([cur,val]);}
-            else if (val instanceof Array)
+            else if ((val instanceof Array)&&
+                     (typeof val._sortlen !== "number"))
                 this[prop]=fdjtSet([val]);
             else this[prop]=val;
             // If we've gotten through to here, we've made a change,
