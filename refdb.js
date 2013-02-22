@@ -915,12 +915,12 @@ if (!(fdjt.RefDB)) {
         RefDB.union=union;
 
         function merge(set1,set2){
-            var merged=[];
-            if (typeof set1 === 'string') set1=[set1];
-            if (typeof set2 === 'string') set2=[set2];
+            var merged=[]; merged._sortlen=0;
+            if (!(set1 instanceof Array)) set1=[set1];
+            if (!(set2 instanceof Array)) set2=[set2];
             if ((!(set1))||(set1.length===0)) {
-                if ((!(set2))||(set2.length===0)) return [];
-                merged=[].concat(set2);
+                if ((!(set2))||(set2.length===0)) return merged;
+                merged=merged.concat(set2);
                 if (set2._sortlen) {
                     merged._sortlen=set2._sortlen;
                     merged._allstrings=set2._allstrings;
@@ -969,14 +969,15 @@ if (!(fdjt.RefDB)) {
         /* sets are really arrays that are sorted to simplify set operations.
            the ._sortlen property tells how much of the array is sorted */
         function fdjtSet(arg){
-            var result;
-            if (arguments.length===0) return [];
+            var result=[]; result._sortlen=0;
+            if (arguments.length===0) return result;
             else if (arguments.length===1) {
-                if (!(arg)) return [];
+                if (!(arg)) return result;
                 else if (arg instanceof Array) {
                     if ((!(arg.length))||(arg._sortlen===arg.length))
                         return arg;
-                    else if (arg._sortlen) return setify(arg);
+                    else if (typeof arg._sortlen === "number")
+                        return setify(arg);
                     else return setify([].concat(arg));}
                 else {
                     result=[arg]; 
