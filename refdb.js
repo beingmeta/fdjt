@@ -197,9 +197,10 @@ if (!(fdjt.RefDB)) {
                 var storage=this.storage;
                 var key="allids("+this.name+")";
                 var allids=this.storage[key];
-                var allids=JSON.parse(allids);
-                var i=0, lim=allids.length;
-                while (i<lim) delete storage[allids[i++]];
+                var allids=((allids)&&(JSON.parse(allids)));
+                if (allids) {
+                    var i=0, lim=allids.length;
+                    while (i<lim) delete storage[allids[i++]];}
                 delete storage[key];
                 if (callback) setTimeout(callback,5);}
             else if ((window.indexedDB)&&
@@ -382,7 +383,8 @@ if (!(fdjt.RefDB)) {
                         warn("Ambiguous ref %s in %s refers to both %o and %o",
                              alias,db,cur.name,this.name);
                     else aliases[alias]=this;}}
-            var run_inits=(!(this._live)); this._live=true;
+            var run_inits=((loading)&&(!(this._live)));
+            if (run_inits) this._live=fdjtTime();
             for (var key in data) {
                 if ((key==="aliases")||(key==="_id")) {}
                 else if (data.hasOwnProperty(key)) {
@@ -412,18 +414,18 @@ if (!(fdjt.RefDB)) {
                         this.indexRef(key,value,indices[key],db);}}
             // These are run-once inits loaded on initial import
             if (run_inits) {
-                this._live=fdjtTime();
-                if ((loading)&&(onload)) {
+                // Run the db-specific inits for each reference
+                if (onload) {
                     var i=0, lim=onload.length; while (i<lim) {
                         var loadfn=onload[i++];
-                        loadfn(this);}}};
-            // These are custom per-instance inits recorded on the
-            // instance
-            if (this._onload) {
-                var inits=this._onload;
-                var j=0, jlim=inits.length; while (j<jlim) {
-                    inits[j++](this);}
-                delete this._onload;}
+                        loadfn(this);}}
+                // Run per-instance delayed inits
+                if (this._onload) {
+                    var inits=this._onload;
+                    var j=0, jlim=inits.length; while (j<jlim) {
+                        inits[j++](this);}
+                    delete this._onload;}}
+            // Record a change if we're not loading and not already changed.
             if ((!(loading))&&(!(this._changed))) {
                 var now=fdjtTime();
                 this._changed=now;
@@ -488,6 +490,16 @@ if (!(fdjt.RefDB)) {
             if (data.length===1) return refs[0];
             else return refs;};
 
+        Ref.prototype.onLoad=function(fn,name){
+            if (this._live) fn(this);
+            else if (this._onload) {
+                if (this._onload[name]) return;
+                if (name) this._onload[name]=fn;
+                this._onload.fns.push(fn);}
+            else {
+                this._onload={fns:[fn]};
+                if (name) this._onload[name]=fn;}}
+        
         function refExport(xforms){
             var db=this._id;
             var exported={_id: this._id};
@@ -605,16 +617,23 @@ if (!(fdjt.RefDB)) {
             else if (spec instanceof Ref)
                 return spec.load();
             else if (spec instanceof Array) {
-                var loads=[]; var i=0, lim=spec.length;
+                var loads={}, dbs=[]; var i=0, lim=spec.length;
                 while (i<lim) {
-                    var s=spec[i++]; var r;
+                    var s=spec[i++]; var r=false;
                     if (typeof s === "string")
                         r=RefDB.resolve(s,false,dbtype||RefDB,true);
                     else if (s instanceof Ref) r=s;
-                    else s=false;
-                    if (r) loads.push(r.load());
-                    else loads.push(false);}
-                return loads;}};
+                    if (!(r)||(r._live)) continue;
+                    var db=r._db, name=db.name;
+                    if (loads[name]) loads[name].push(r);
+                    else {
+                        loads[name]=[r];
+                        dbs.push(db);}}
+                i=0, lim=dbs.length; while (i<lim) {
+                    var loadfrom=dbs[i++];
+                    loadfrom.load(loads[loadfrom.name]);}
+                return loads;}
+            else return false;};
         
         RefDB.prototype.save=function saveRefs(refs,callback,updatechanges){
             var that=this;
