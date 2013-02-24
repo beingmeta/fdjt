@@ -1248,6 +1248,11 @@ if (!(fdjt.RefDB)) {
                 this.mapping[keystring]=[val];
             else this.mapping[keystring]=val;};
         fdjtMap.prototype.setItem=fdjtMap.prototype.set;
+        fdjtMap.prototype.increment=function(key,delta) {
+            var keystring=getKeyString(key);
+            if (this.mapping[keystring])
+                this.mapping[keystring]+=delta;
+            else this.mapping[keystring]=delta;};
         fdjtMap.prototype.add=function(key,val) {
             var keystring=getKeyString(key);
             var mapping=this.mapping;
@@ -1287,6 +1292,30 @@ if (!(fdjt.RefDB)) {
         fdjt.Map=fdjtMap;
         RefDB.fdjtMap=fdjtMap;
 
+        function RefMap(db) {this._db=db; return this;}
+        RefMap.prototype.get=function(key){
+            if (typeof key === "string") {
+                if (this.hasOwnProperty(key)) return this[key];
+                else return undefined;}
+            else if (key instanceof Ref)
+                return this[key._qid||key.getQID()];
+            else return undefined;}
+        RefMap.prototype.set=function(key,val){
+            if (typeof key === "string") this[key]=val;
+            else if (key instanceof Ref)
+                this[key._qid||key.getQID()]=val;
+            else return false;}
+        RefMap.prototype.increment=function(key,delta){
+            if (typeof key === "string") {
+                if (this.hasOwnProperty(key))
+                    this[key]=this[key]+delta;
+                else this[key]=delta;}
+            else if (key instanceof Ref) {
+                var id=key._qid||key.getQID();
+                this[id]=(this[id]||0)+delta;}
+            else return false;}
+        fdjt.RefMap=RefDB.RefMap=RefMap;
+        
         /* Indices */
 
         function Index() {
@@ -1460,25 +1489,25 @@ if (!(fdjt.RefDB)) {
                             ((items.length)||(this.tracelevel>2)))
                             fdjtLog("Got %d items for %s=%o from %o",
                                     items.length,field,val,db);
-                        var valstring=((vfreqs)||(allfreqs))&&
-                            ((val._qid)||(val._fdjtid)||
-                             (getKeyString(val)));
                         if ((items)&&(items.length)) {
-                            if (vfreqs) {
-                                if (vfreqs[valstring])
-                                    vfreqs[valstring]+=items.length;
-                                else vfreqs[valstring]=items.length;}
-                            if (allfreqs) {
-                                if (allfreqs[valstring])
-                                    allfreqs[valstring]+=items.length;
-                                else allfreqs[valstring]+=allfreqs.length;}
+                            if ((vfreqs)||(allfreqs)) {
+                                var valstring=((vfreqs)||(allfreqs))&&
+                                    ((val._qid)||(val._fdjtid)||
+                                     (getKeyString(val)));
+                                if (vfreqs) {
+                                    if (vfreqs[valstring])
+                                        vfreqs[valstring]+=items.length;
+                                    else vfreqs[valstring]=items.length;}
+                                if (allfreqs) {
+                                    if (allfreqs[valstring])
+                                        allfreqs[valstring]+=items.length;
+                                    else allfreqs[valstring]+=allfreqs.length;}}
                             var itemi=0, nitems=items.length;
                             if (ambigrefs) {
                                 while (itemi<nitems) {
                                     var item=items[itemi++];
                                     var ref=db.ref(item);
-                                    var id=ref._qid||
-                                        ((ref.getQID)&&(ref.getQID()));
+                                    var id=ref._qid||((ref.getQID)&&(ref.getQID()));
                                     if (!(id)) {}
                                     else if (scores[id]) scores[id]+=weight;
                                     else {
