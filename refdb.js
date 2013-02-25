@@ -1251,8 +1251,8 @@ if (!(fdjt.RefDB)) {
         fdjtMap.prototype.increment=function(key,delta) {
             var keystring=getKeyString(key);
             if (this.mapping[keystring])
-                this.mapping[keystring]+=delta;
-            else this.mapping[keystring]=delta;};
+                return this.mapping[keystring]+=delta;
+            else return this.mapping[keystring]=delta;};
         fdjtMap.prototype.add=function(key,val) {
             var keystring=getKeyString(key);
             var mapping=this.mapping;
@@ -1467,7 +1467,7 @@ if (!(fdjt.RefDB)) {
                 return false;}
             var weights=this.weights;
             var ambigrefs=((dbs.length>1)&&(this.ambigrefs));
-            var scores=this.scores={};
+            var scores=this.scores=new RefMap();
             var results=this.results=[];
             var scored=this.scored=[];
             var freqs=this.freqs;
