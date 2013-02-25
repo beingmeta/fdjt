@@ -1297,23 +1297,25 @@ if (!(fdjt.RefDB)) {
             if (typeof key === "string") {
                 if (this.hasOwnProperty(key)) return this[key];
                 else return undefined;}
-            else if (key instanceof Ref)
-                return this[key._qid||key.getQID()];
-            else return undefined;}
+            else if (key instanceof Ref) {
+                var id=key._qid||((!(this.ambigrefs))&&key._id)||key.getQID();
+                return this[id];}
+            else return undefined;};
         RefMap.prototype.set=function(key,val){
             if (typeof key === "string") this[key]=val;
-            else if (key instanceof Ref)
-                this[key._qid||key.getQID()]=val;
-            else return false;}
+            else if (key instanceof Ref) {
+                var id=key._qid||((!(this.ambigrefs))&&key._id)||key.getQID();
+                this[id]=val;}
+            else return false;};
         RefMap.prototype.increment=function(key,delta){
             if (typeof key === "string") {
                 if (this.hasOwnProperty(key))
                     this[key]=this[key]+delta;
                 else this[key]=delta;}
             else if (key instanceof Ref) {
-                var id=key._qid||key.getQID();
+                var id=key._qid||((!(this.ambigrefs))&&key._id)||key.getQID();
                 this[id]=(this[id]||0)+delta;}
-            else return false;}
+            else return false;};
         fdjt.RefMap=RefDB.RefMap=RefMap;
         
         /* Indices */
@@ -1472,6 +1474,7 @@ if (!(fdjt.RefDB)) {
             var scored=this.scored=[];
             var freqs=this.freqs;
             var allfreqs=this.allfreqs;
+            scores.ambigrefs=ambigrefs;
             for (var field in pattern) {
                 if (!(pattern.hasOwnProperty(field))) continue;
                 var vfreqs=((freqs)&&(freqs[field]||(freqs[field]={})));
