@@ -732,8 +732,8 @@ if (!(fdjt.RefDB)) {
             var refstring=
                 (((!(db))||(rdb===db)||(rdb.absrefs))?(this._id):
                  ((this._qid)||((this.getQID)&&(this.getQID()))));
-            if (!(index)) index=db.indices[key];
             if (!(db)) db=rdb;
+            if (!(index)) index=db.indices[key];
             if (!(index)) {
                 warn("No index on %s for %o in %o",key,this,db);
                 return false;}
