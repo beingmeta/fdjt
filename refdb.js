@@ -1474,6 +1474,7 @@ if (!(fdjt.RefDB)) {
             var scored=this.scored=[];
             var freqs=this.freqs;
             var allfreqs=this.allfreqs;
+            var log=this.log;
             scores.uniqueids=uniqueids;
             for (var field in pattern) {
                 if (!(pattern.hasOwnProperty(field))) continue;
@@ -1508,23 +1509,31 @@ if (!(fdjt.RefDB)) {
                             var itemi=0, nitems=items.length;
                             if (uniqueids) while (itemi<nitems) {
                                 var item=items[itemi++];
+                                if (log) {
+                                    var entries=log[item]||(log[item]=[]);
+                                    entries.push(
+                                        {field: field, val: val,weight: weight});}
                                 if (scores[item]) scores[item]+=weight;
                                 else {
                                     var ref=db.ref(item);
                                     if (weight) scored.push(ref);
                                     results.push(ref);
                                     scores[item]=weight;}}
-                            else {
-                                while (itemi<nitems) {
-                                    var item=items[itemi++];
-                                    var ref=db.ref(item);
-                                    var id=ref._qid||((ref.getQID)&&(ref.getQID()));
-                                    if (!(id)) {}
-                                    else if (scores[id]) scores[id]+=weight;
-                                    else {
-                                        if (weight) scored.push(ref);
-                                        results.push(ref);
-                                        scores[id]=weight;}}}}}}}
+                            else while (itemi<nitems) {
+                                var item=items[itemi++];
+                                var ref=db.ref(item);
+                                var id=ref._qid||((ref.getQID)&&(ref.getQID()));
+                                if (log) {
+                                    var entries=log[id]||(log[id]=[]);
+                                    entries.push(
+                                        {field: field, val:
+                                         val,weight: weight});}
+                                if (!(id)) {}
+                                else if (scores[id]) scores[id]+=weight;
+                                else {
+                                    if (weight) scored.push(ref);
+                                    results.push(ref);
+                                    scores[id]=weight;}}}}}}
             
             return this;};
 
