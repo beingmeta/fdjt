@@ -1298,13 +1298,13 @@ if (!(fdjt.RefDB)) {
                 if (this.hasOwnProperty(key)) return this[key];
                 else return undefined;}
             else if (key instanceof Ref) {
-                var id=key._qid||((!(this.ambigrefs))&&key._id)||key.getQID();
+                var id=key._qid||((this.uniqueids)&&key._id)||key.getQID();
                 return this[id];}
             else return undefined;};
         RefMap.prototype.set=function(key,val){
             if (typeof key === "string") this[key]=val;
             else if (key instanceof Ref) {
-                var id=key._qid||((!(this.ambigrefs))&&key._id)||key.getQID();
+                var id=key._qid||((this.uniqueid)&&key._id)||key.getQID();
                 this[id]=val;}
             else return false;};
         RefMap.prototype.increment=function(key,delta){
@@ -1313,7 +1313,7 @@ if (!(fdjt.RefDB)) {
                     this[key]=this[key]+delta;
                 else this[key]=delta;}
             else if (key instanceof Ref) {
-                var id=key._qid||((!(this.ambigrefs))&&key._id)||key.getQID();
+                var id=key._qid||((this.uniqueids)&&key._id)||key.getQID();
                 this[id]=(this[id]||0)+delta;}
             else return false;};
         fdjt.RefMap=RefDB.RefMap=RefMap;
@@ -1455,7 +1455,7 @@ if (!(fdjt.RefDB)) {
 
             return this;}
         RefDB.Query=Query;
-        Query.prototype.ambigrefs=true;
+        Query.prototype.uniqueids=false;
 
         Query.prototype.execute=function executeQuery(){
             if (this.scores) return this;
@@ -1468,13 +1468,13 @@ if (!(fdjt.RefDB)) {
                 warn("No dbs for query %o!",this);
                 return false;}
             var weights=this.weights;
-            var ambigrefs=((dbs.length>1)&&(this.ambigrefs));
+            var uniqueids=((dbs.length===1)||(this.uniqueids));
             var scores=this.scores=new RefMap();
             var results=this.results=[];
             var scored=this.scored=[];
             var freqs=this.freqs;
             var allfreqs=this.allfreqs;
-            scores.ambigrefs=ambigrefs;
+            scores.uniqueids=uniqueids;
             for (var field in pattern) {
                 if (!(pattern.hasOwnProperty(field))) continue;
                 var vfreqs=((freqs)&&(freqs[field]||(freqs[field]={})));
@@ -1506,7 +1506,15 @@ if (!(fdjt.RefDB)) {
                                         allfreqs[valstring]+=items.length;
                                     else allfreqs[valstring]+=allfreqs.length;}}
                             var itemi=0, nitems=items.length;
-                            if (ambigrefs) {
+                            if (uniqueids) while (itemi<nitems) {
+                                var item=items[itemi++];
+                                if (scores[item]) scores[item]+=weight;
+                                else {
+                                    var ref=db.ref(item);
+                                    if (weight) scored.push(ref);
+                                    results.push(ref);
+                                    scores[item]=weight;}}
+                            else {
                                 while (itemi<nitems) {
                                     var item=items[itemi++];
                                     var ref=db.ref(item);
@@ -1516,16 +1524,8 @@ if (!(fdjt.RefDB)) {
                                     else {
                                         if (weight) scored.push(ref);
                                         results.push(ref);
-                                        scores[id]=weight;}}}
-                            else while (itemi<nitems) {
-                                var item=items[itemi++];
-                                if (scores[item]) scores[item]+=weight;
-                                else {
-                                    var ref=db.ref(item);
-                                    if (weight) scored.push(ref);
-                                    results.push(ref);
-                                    scores[item]=weight;}}}}}}
-        
+                                        scores[id]=weight;}}}}}}}
+            
             return this;};
 
         return RefDB;})();}
