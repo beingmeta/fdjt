@@ -124,7 +124,7 @@ if (!(fdjt.RefDB)) {
                     var ix=index_specs[j++];
                     if (typeof ix !== "string") 
                         warn("Complex indices not yet handled!");
-                    else this.indices[ix]={};}}
+                    else this.indices[ix]=new fdjtMap();}}
             
             return db;}
 
@@ -733,7 +733,9 @@ if (!(fdjt.RefDB)) {
                 (((!(db))||(rdb===db)||(rdb.absrefs))?(this._id):
                  ((this._qid)||((this.getQID)&&(this.getQID()))));
             if (!(db)) db=rdb;
-            if (!(index)) index=db.indices[key];
+            var indices=db.indices;
+            if (!(index))
+                index=((indices.hasOwnProperty(key))&&(indices[key]));
             if (!(index)) {
                 warn("No index on %s for %o in %o",key,this,db);
                 return false;}
@@ -823,6 +825,9 @@ if (!(fdjt.RefDB)) {
             if (indices)
                 return indices[getKeyString(value,this)].length;
             else return 0;}
+        RefDB.prototype.addIndex=function addIndex(key){
+            if ((this.indices.hasOwnProperty(key)))
+                this.indices[key]=new fdjtMap();}
         
         // Array utility functions
         function arr_contains(arr,val,start){
@@ -1118,7 +1123,13 @@ if (!(fdjt.RefDB)) {
             else return undefined;};
         Ref.prototype.add=function refAdd(prop,val,index){
             var db=this._db;
-            if (typeof index === "undefined") index=true;
+            if (typeof index === "undefined") {
+                if (db.indices.hasOwnProperty(prop)) index=true;
+                else index=false;}
+            else if ((index)&&(!(db.indices.hasOwnProperty(prop)))) {
+                warn("Creating index on %s for %o",prop,db);
+                db.addIndex(prop);}
+            else {}
             if ((val instanceof Array)&&(val._sortlen===0))
                 return;
             else if ((!(this._live))&&(this._db.storage)) {
@@ -1454,8 +1465,8 @@ if (!(fdjt.RefDB)) {
                 if (clauses instanceof Array)
                     this.clauses=clauses;
                 else this.clauses=[clauses];}
-            if (weights) this.weights=weights||false;
-
+            if (weights) this.weights=weights;
+            // Figure out if references can be unique IDs
             var i_db=0, n_dbs=dbs.length;
             if (n_dbs>1) while (i_db<n_dbs) {
                 if (!(dbs[i_db].absrefs)) return this;
@@ -1464,18 +1475,22 @@ if (!(fdjt.RefDB)) {
             return this;}
         RefDB.Query=Query;
         Query.prototype.uniqueids=false;
-
+        
         Query.prototype.execute=function executeQuery(){
             if (this.scores) return this;
             var dbs=this.dbs;
             var clauses=this.clauses;
-            if (!((clauses)&&(clauses.length))) {
-                warn("No clauses for query %o!",this);
-                return false;}
             if (!((dbs)&&(dbs.length))) {
                 warn("No dbs for query %o!",this);
-                return false;}
-            var query_weights=this.weights;
+                return (this.results=new fdjtSet());}
+            else if (!((clauses)&&(clauses.length))) {
+                var results=new fdjtSet();
+                var i=0, lim=dbs.length;
+                while (i<lim) results=
+                    merge(results,setify(dbs[i++].allrefs));
+                this.results=results;
+                return results;}
+            var query_weights=this._weights||this.weights;
             var uniqueids=((dbs.length===1)||(this.uniqueids));
             var scores=new RefMap();
             var counts=new RefMap();
