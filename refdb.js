@@ -1447,12 +1447,20 @@ if (!(fdjt.RefDB)) {
         RefDB.contains=arr_contains;
         RefDB.position=arr_position;
 
-        function Query(dbs,pattern,weights){
+        function Query(dbs,clauses,weights){
             if (arguments.length===0) return this;
             if (dbs) this.dbs=dbs;
-            if (pattern) this.pattern=pattern;
+            if (clauses) {
+                if (clauses instanceof Array)
+                    this.clauses=clauses;
+                else this.clauses=[clauses];}
             if (weights) this.weights=weights||false;
 
+            var i_db=0, n_dbs=dbs.length;
+            if (n_dbs>1) while (i_db<n_dbs) {
+                if (!(dbs[i_db].absrefs)) return this;
+                else i++;}
+            this.uniqueids=true;
             return this;}
         RefDB.Query=Query;
         Query.prototype.uniqueids=false;
@@ -1460,80 +1468,86 @@ if (!(fdjt.RefDB)) {
         Query.prototype.execute=function executeQuery(){
             if (this.scores) return this;
             var dbs=this.dbs;
-            var pattern=this.pattern;
-            if (!(pattern)) {
-                warn("No pattern for query %o!",this);
+            var clauses=this.clauses;
+            if (!((clauses)&&(clauses.length))) {
+                warn("No clauses for query %o!",this);
                 return false;}
-            if (!(dbs)) {
+            if (!((dbs)&&(dbs.length))) {
                 warn("No dbs for query %o!",this);
                 return false;}
-            var weights=this.weights;
+            var query_weights=this.weights;
             var uniqueids=((dbs.length===1)||(this.uniqueids));
-            var scores=this.scores=new RefMap();
+            var scores=new RefMap();
+            var counts=new RefMap();
             var results=this.results=[];
             var scored=this.scored=[];
             var freqs=this.freqs;
             var allfreqs=this.allfreqs;
             var log=this.log;
-            scores.uniqueids=uniqueids;
-            for (var field in pattern) {
-                if (!(pattern.hasOwnProperty(field))) continue;
-                var vfreqs=((freqs)&&(freqs[field]||(freqs[field]={})));
-                var values=pattern[field];
+            counts.uniqueids=scores.uniqueids=uniqueids;
+            var i_clause=0, n_clauses=clauses.length;
+            while (i_clause<n_clauses) {
+                var clause=clauses[i_clause++];
+                var fields=clause.fields;
+                var values=clause.values;
+                var clause_weights=clause.weights;
+                var findings=[], matches=fdjtSet();
+                if (!(fields instanceof Array)) fields=[fields];
                 if (!(values instanceof Array)) values=[values];
-                var weight=((weights)&&(weights[field]));
-                var score=weight||1;
-                var i=0, lim=dbs.length;
-                while (i<lim) {
-                    var db=dbs[i++];
-                    var vi=0, vlim=values.length; while (vi<vlim) {
-                        var val=values[vi++];
-                        var items=db.find(field,val);
-                        if ((this.tracelevel)&&
-                            ((items.length)||(this.tracelevel>2)))
-                            fdjtLog("Got %d items for %s=%o from %o",
-                                    items.length,field,val,db);
-                        if ((items)&&(items.length)) {
-                            if ((vfreqs)||(allfreqs)) {
-                                var valstring=((vfreqs)||(allfreqs))&&
-                                    ((val._qid)||(val._fdjtid)||
-                                     (getKeyString(val)));
-                                if (vfreqs) {
-                                    if (vfreqs[valstring])
-                                        vfreqs[valstring]+=items.length;
-                                    else vfreqs[valstring]=items.length;}
-                                if (allfreqs) {
-                                    if (allfreqs[valstring])
-                                        allfreqs[valstring]+=items.length;
-                                    else allfreqs[valstring]+=allfreqs.length;}}
-                            var itemi=0, nitems=items.length;
-                            if (uniqueids) while (itemi<nitems) {
-                                var item=items[itemi++];
-                                if (log) {
-                                    var entries=log[item]||(log[item]=[]);
-                                    entries.push(
-                                        {field: field, val: val,weight: weight});}
-                                if (scores[item]) scores[item]+=weight;
-                                else {
-                                    var ref=db.ref(item);
-                                    if (weight) scored.push(ref);
-                                    results.push(ref);
-                                    scores[item]=weight;}}
-                            else while (itemi<nitems) {
-                                var item=items[itemi++];
-                                var ref=db.ref(item);
-                                var id=ref._qid||((ref.getQID)&&(ref.getQID()));
-                                if (log) {
-                                    var entries=log[id]||(log[id]=[]);
-                                    entries.push(
-                                        {field: field, val:
-                                         val,weight: weight});}
-                                if (!(id)) {}
-                                else if (scores[id]) scores[id]+=weight;
-                                else {
-                                    if (weight) scored.push(ref);
-                                    results.push(ref);
-                                    scores[id]=weight;}}}}}}
+                var i_field=0; var n_fields=fields.length;
+                while (i_field<n_fields) {
+                    var field=fields[i_field++];
+                    var weight=((clause_weights)&&(clause_weights[field]))||
+                        ((query_weights)&&(query_weights[field]))||
+                        (query.default_weight)||1;
+                    var i_value=0, n_values=values.length;
+                    while (i_value<n_values) {
+                        var value=values[i_value++];
+                        var i_db=0, n_dbs=dbs.length;
+                        while (i_db<n_dbs) {
+                            var db=dbs[i_db++];
+                            var hits=db.find(field,value);
+                            if ((hits)&&(hits.length)) {
+                                findings.push({
+                                    field: field, hits: setify(hits),
+                                    weight: weight, value: value,
+                                    db: db});}}}}
+                // Sort so the highest scoring findings go first
+                findings.sort(function(f1,f2){return f1.weight-f2.weight;});
+                var finding_i=0, n_findings=findings.length, seen={};
+                while (finding_i<n_findings) {
+                    var finding=findings[finding_i++];
+                    var hitids=finding.hits, db=finding.db, abs=db.absrefs;
+                    var i_hit=0, n_hits=hitids.length, hitid, ref;
+                    if ((uniqueids)||(abs)) while (i_hit<n_hits) {
+                        hitid=hitids[i_hit++];
+                        if (seen[hitid]) continue;
+                        matches.push=db.ref(hitid); seen[hitid]=hitid;
+                        counts[hitid]=(counts[hitid])||0+1;
+                        scores[hitid]=(scores[hitid])||0+finding.weight;}
+                    else {
+                        var hitid=hitids[i_hit++]; var ref=db.ref(hitid);
+                        var fullid=ref._qid||((abs)&&(ref._id))||ref.getQID();
+                        if (seen[fullid]) continue;
+                        counts[fullid]=(counts[fullid])||0+1;
+                        scores[fullid]=(scores[fullid])||0+finding.weight;
+                        matches.push=ref; seen[fullid]=fullid;}}}
+            var results=[], new_scores=new RefMap();
+            if (n_clauses>1) {
+                var i_matches=0, n_matches=matches.length;
+                while (i_matches<n_matches) {
+                    var match=matches[i_matches++];
+                    if (counts.get(match)>=2) {
+                        var score=scores.get(match);
+                        new_scores.set(match,score);
+                        results.push(match);}}
+                results._allstrings=false;
+                results._sortlen=results.length;
+                this.results=results;
+                this.scores=new_scores;}
+            else {
+                this.results=setify(matches);
+                this.scores=scores;}
             
             return this;};
 
