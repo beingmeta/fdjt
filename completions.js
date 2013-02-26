@@ -170,7 +170,8 @@ if (!(fdjt.UI)) fdjt.UI={};
         return result;}
 
     function addCompletion(c,completion,key,value) {
-        if (!(key)) key=completion.key||getKey(completion);
+        if (typeof key === "undefined")
+            key=completion.key||getKey(completion);
         if (!(value))
             value=(completion.value)||(completion.getAttribute('value'))||key;
         var pos=position(c.nodes,completion);
@@ -180,7 +181,7 @@ if (!(fdjt.UI)) fdjt.UI={};
                 c.values.push(value);
                 c.byvalue.add(value,completion);}}
         else return;
-        addCompletionKeys(c,completion,key);}
+        if (key) addCompletionKeys(c,completion,key);}
 
     function addCompletionKeys(c,completion,key) {
         if (!(key)) key=completion.key||getKey(completion);
