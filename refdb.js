@@ -746,12 +746,12 @@ if (!(fdjt.RefDB)) {
                 var db=this._db;
                 var i=0, lim=val.length; while (i<lim) {
                     var elt=val[i++];
-                    if (elt instanceof Ref) 
+                    if (elt instanceof Ref)
                         keystrings.push("@"+(elt._qid||elt.getQID()));
                     else if (typeof elt === "number") 
-                        keystrings=["#"+val];
+                        keystrings=["#"+elt];
                     else if (typeof elt === "string")
-                        keystrings=["\""+val];
+                        keystrings=["\""+elt];
                     else if (elt._qid)
                         keystrings.push("@"+(elt._qid||elt.getQID()));
                     else if (elt.getQID)
@@ -764,7 +764,8 @@ if (!(fdjt.RefDB)) {
             else keystrings=["?"+val.toString()];
             if (keystrings.length) {
                 var j=0, jlim=keystrings.length; while (j<jlim) {
-                    var keystring=keystrings[j++]; var refs=index[keystring];
+                    var keystring=keystrings[j++];
+                    var refs=index[keystring];
                     if (refs) refs.push(refstring);
                     else index[keystring]=[refstring];}
                 return keystrings.length;}
@@ -814,16 +815,16 @@ if (!(fdjt.RefDB)) {
             else return false;};
 
         RefDB.prototype.find=function findRefs(key,value){
-            var indices=this.indices[key];
-            if (indices) {
+            var index=this.indices[key];
+            if (index) {
                 var keystring=getKeyString(value,this);
-                if (keystring) return setify(indices[keystring]||[]);
+                if (keystring) return setify(index[keystring]||[]);
                 else return [];}
             else return [];}
         RefDB.prototype.count=function countRefs(key,value){
-            var indices=this.indices[key];
-            if (indices)
-                return indices[getKeyString(value,this)].length;
+            var index=this.indices[key];
+            if (index)
+                return index[getKeyString(value,this)].length;
             else return 0;}
         RefDB.prototype.addIndex=function addIndex(key){
             if (!(this.indices.hasOwnProperty(key)))
@@ -1138,7 +1139,8 @@ if (!(fdjt.RefDB)) {
                     this._onload.push(function(){that.add(prop,val);});
                 else this._onload=[function(){that.add(prop,val);}];
                 return this;}
-            else if ((val instanceof Array)&&(typeof val._sortlen === "number")) {
+            else if ((val instanceof Array)&&
+                     (typeof val._sortlen === "number")) {
                 var i=0, lim=val.length; while (i<lim) {
                     this.add(prop,val[i++],index);}
                 return;}
@@ -1245,50 +1247,47 @@ if (!(fdjt.RefDB)) {
 
         /* Maps */
         function fdjtMap() {
-            this.mapping={};
             return this;}
         fdjtMap.prototype.get=function fdjtMapGet(key) {
-            var keystring=getKeyString(key); var mapping=this.mapping;
-            if (mapping.hasOwnProperty(keystring))
-                return mapping[keystring];
+            var keystring=getKeyString(key);
+            if (this.hasOwnProperty(keystring))
+                return this[keystring];
             else return undefined;};
         fdjtMap.prototype.getItem=fdjtMap.prototype.get;
         fdjtMap.prototype.set=function(key,val) {
             var keystring=getKeyString(key);
             if (val instanceof Array)
-                this.mapping[keystring]=[val];
-            else this.mapping[keystring]=val;};
+                this[keystring]=[val];
+            else this[keystring]=val;};
         fdjtMap.prototype.setItem=fdjtMap.prototype.set;
         fdjtMap.prototype.increment=function(key,delta) {
             var keystring=getKeyString(key);
-            if (this.mapping[keystring])
-                return this.mapping[keystring]+=delta;
-            else return this.mapping[keystring]=delta;};
+            if (this[keystring])
+                return this[keystring]+=delta;
+            else return this[keystring]=delta;};
         fdjtMap.prototype.add=function(key,val) {
             var keystring=getKeyString(key);
-            var mapping=this.mapping;
-            if (mapping.hasOwnProperty(keystring)) {
-                var cur=mapping[keystring];
+            if (this.hasOwnProperty(keystring)) {
+                var cur=this[keystring];
                 if (cur===val) return false;
                 else if (cur instanceof Array) {
                     if (arr_contains(cur,val)) return false;
                     else {cur.push(val); return true;}}
                 else if (val instanceof Array) {
-                    mapping[keystring]=setify([cur,val]);
+                    this[keystring]=setify([cur,val]);
                     return true;}
                 else {
-                    mapping[keystring]=setify([cur,val]);
+                    this[keystring]=setify([cur,val]);
                     return true;}}
             else if (val instanceof Array) 
-                mapping[keystring]=setify([val]);
-            else mapping[keystring]=val;};
+                this[keystring]=setify([val]);
+            else this[keystring]=val;};
         fdjtMap.prototype.drop=function(key,val) {
-            var mapping=this.mapping;
             var keystring=getKeyString(key);
-            if (mapping.hasOwnProperty(keystring)) {
-                var cur=mapping[keystring];
+            if (this.hasOwnProperty(keystring)) {
+                var cur=this[keystring];
                 if (cur===val) {
-                    delete mapping[keystring];
+                    delete this[keystring];
                     return true;}
                 else if (cur instanceof Array) {
                     var pos=cur.indexOf(val);
@@ -1296,7 +1295,7 @@ if (!(fdjt.RefDB)) {
                     cur.splice(pos); if (cur._sortlen) cur._sortlen--;
                     if (cur.length===1) {
                         if (!(cur[0] instanceof Array))
-                            mapping[keystring]=cur[0];}
+                            this[keystring]=cur[0];}
                     return true;}
                 else return false;}
             else return false;};
