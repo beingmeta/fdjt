@@ -1186,6 +1186,7 @@ fdjt.UI.ProgressBar=(function(){
 
 (function(){
     
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtLog=fdjt.Log;
     var fdjtUI=fdjt.UI;
