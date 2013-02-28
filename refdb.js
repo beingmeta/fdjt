@@ -231,21 +231,28 @@ if (!(fdjt.RefDB)) {
     
         var getLocal=fdjtState.getLocal;
 
-        function resolveRef(arg,db,dbtype,DBClass){
-            if (typeof DBClass !== "function") DBClass=RefDB;
-            if ((DBClass)&&(typeof DBClass !== "function")) DBClass=dbtype;
+        function resolveRef(arg,db,DBType,force){
+            if (typeof DBType !== "function") DBType=RefDB;
             if (arg instanceof Ref) return arg;
             else if ((typeof arg === "object")&&(arg.id))
                 return object2ref(arg,db);
             else if ((db)&&(db.refs.hasOwnProperty(arg)))
                 return db.refs[arg];
-            // These are generally the same but don't have to be 
+            // The case above catches direct references inline; the
+            // case below does a function call (probe) and catches
+            // aliases
             else if ((db)&&(db.probe(arg))) return db.probe(arg);
             else if ((typeof arg === "string")&&(refpat.exec(arg))) {
                 var at=arg.indexOf('@');
                 if ((at===1)&&(arg[0]===':')) {arg=arg.slice(1); at=0;}
                 if (at>0) {
-                    db=RefDB.open(arg.slice(at+1),dbtype);
+                    // this is the term@domain form
+                    var dbname=arg.slice(at+1);
+                    arg=arg.slice(0,at);
+                    if (force) {
+                        warn("Creating forced RefDB %s for %s",dbname,arg);
+                        db=RefDB.open(dbname,DBType);}
+                    else db=RefDB.probe(dbname);
                     arg=arg.slice(0,at);}
                 else if (at<0) {
                     var uuid;
@@ -260,33 +267,37 @@ if (!(fdjt.RefDB)) {
                     var known_db=((type)&&(refdbs[type]||aliases[type]))||
                         ((tail)&&(refdbs[tail]||aliases[tail]));
                     if (known_db) db=known_db;
-                    else if ((DBClass)&&(type)) {
-                        db=new DBClass(type);
+                    else if ((force)&&(type)&&(DBType)) {
+                        warn("Creating forced RefDB %s for %s",type,arg);
+                        db=new DBType(type);
                         if (type) db.addAlias(type);}
                     else db=false;}
                 else if (arg[1]==='@') {
-                    // Double at is a "local ref"
+                    // This is for local references
                     var idstart=at.indexOf('/');
                     var atid=arg.slice(0,idstart);
                     var atdb=aliases[atid];
                     if (atdb) db=atdb;
                     else {
                         var domain=getLocal(arg.slice(0,idstart),true);
-                        if (!(domain)) {
+                        if (domain) {
                             db=new RefDB(domain,{aliases: [atid]});}
-                        else return false;}}
+                        else {
+                            warn("Can't find domain for atid %s when resolving %s",atid,arg);
+                            db=false;}}}
                 else {
                     var atprefix, slash;
+                    // Find the slash before the ID
                     if (arg[1]==='/') {
                         slash=arg.slice(2).indexOf('/');
                         if (slash>0) slash=slash+2;}
                     else slash=arg.indexOf('/');
                     atprefix=arg.slice(at,slash+1);
                     db=refdbs[atprefix]||aliases[atprefix]||
-                        ((DBClass)&&(new DBClass(atprefix)));}}
+                        ((DBType)&&(new DBType(atprefix)));}}
             if (!(db)) return false;
             if (db.refs.hasOwnProperty(arg)) return (db.refs[arg]);
-            else if (DBClass) return db.ref(arg);
+            else if (force) return db.ref(arg);
             else return false;}
         RefDB.resolve=resolveRef;
         RefDB.ref=resolveRef;
@@ -475,7 +486,7 @@ if (!(fdjt.RefDB)) {
             if (!(data instanceof Array)) data=[data];
             var i=0, lim=data.length; while (i<lim) {
                 var item=data[i++];
-                var ref=resolveRef(item._id,item._domain,true);
+                var ref=resolveRef(item._id,item._domain,this.constructor,true);
                 if (!(ref)) warn("Couldn't resolve database for %o",item._id);
                 else {
                     refs.push(ref);
