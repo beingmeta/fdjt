@@ -32,7 +32,7 @@ fdjt.useGlobals=function(){
     if (!(window.fdjtHash)) window.fdjtHash=fdjt.Hash;
     if (!(window.fdjtAjax)) window.fdjtAjax=fdjt.Ajax;
     if (!(window.CodexLayout)) window.CodexLayout=fdjt.CodexLayout;
-    if (!(window.fdjtKB)) window.fdjtKB=fdjt.KB;};
+    if (!(window.RefDB)) window.RefDB=fdjt.RefDB;};
 
     
 /*
@@ -46,6 +46,6 @@ var fdjtDOM=fdjt.DOM;
     var fdjtHash=fdjt.Hash;
     var fdjtAjax=fdjt.Ajax;
     var CodexLayout=fdjt.CodexLayout;
-    var fdjtKB=fdjt.KB;}
+    var RefDB=fdjt.RefDB;}
 
 */
