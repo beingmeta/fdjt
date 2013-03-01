@@ -1442,6 +1442,8 @@ if (!(fdjt.RefDB)) {
             var scores=new RefMap();
             var counts=new RefMap();
             var matches=fdjtSet();
+            // This makes these go faster because they don't bother
+            // disambiguting _id fields.
             counts.uniqueids=scores.uniqueids=uniqueids;
             var i_clause=0, n_clauses=clauses.length;
             while (i_clause<n_clauses) {
@@ -1491,21 +1493,26 @@ if (!(fdjt.RefDB)) {
                         scores[fullid]=(scores[fullid]||0)+finding.weight;
                         matches.push(ref); seen[fullid]=fullid;}}}
             if (n_clauses>1) {
-                var results=this.results=[], new_scores=new RefMap();
+                var results=this.results=[];
+                var new_scores=new RefMap(), new_counts=new RefMap();
                 var i_matches=0, n_matches=matches.length;
                 while (i_matches<n_matches) {
                     var match=matches[i_matches++];
-                    if (counts.get(match)>=2) {
+                    var count=counts.get(match);
+                    if (count>=2) {
                         var score=scores.get(match);
                         new_scores.set(match,score);
+                        new_counts.set(match,count);
                         results.push(match);}}
                 results._allstrings=false;
                 results._sortlen=results.length;
                 this.results=results;
-                this.scores=new_scores;}
+                this.scores=new_scores;
+                this.counts=new_counts;}
             else {
                 this.results=setify(matches);
-                this.scores=scores;}
+                this.scores=scores;
+                this.counts=counts;}
             
             return this;};
 
