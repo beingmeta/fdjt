@@ -82,7 +82,7 @@ if (!(fdjt.UI)) fdjt.UI={};
         this.nodes=[]; this.values=[]; this.serial=++serial;
         this.cues=[]; this.displayed=[];
         this.prefixtree={strings: []}; this.bykey={};
-        this.byvalue=new (window.Map||fdjt.Map||RefDB.Map)();
+        this.byvalue=new (fdjt.Map||RefDB.Map)();
         this.selected=false; this.selclass=false;
         if (!((options)&(FDJT_COMPLETE_MATCHCASE))) this.stringmap={};
         this.initialized=false;
