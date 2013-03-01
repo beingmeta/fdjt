@@ -26,8 +26,8 @@
 var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
-fdjt.UI.TapHold=(function(){
-    "use strict";
+fdjt.TapHold=fdjt.UI.TapHold=(function(){
+    // "use strict";
     var fdjtLog=fdjt.Log;
     var fdjtDOM=fdjt.DOM;
     var fdjtTime=fdjt.Time;
@@ -93,22 +93,31 @@ fdjt.UI.TapHold=(function(){
        too small to pick up events (in some browsers), so we kludge
        around it. */
     function getRealTarget(target,x,y){
-        if (hasClass(target,"tapholdcontainer")) {
-            var geom=getGeometry(target);
-            y=y-geom.top; x=x-geom.left;
-            var children=target.childNodes;
-            var i=0, lim=children.length;
-            while (i<lim) {
-                if (children[i].nodeType===1) {
-                    var child=children[i++];
-                    if ((x>child.offsetLeft)&&(y>child.offsetTop))
-                        return child;}
-                else i++;}
-            return target;}
-        else return target;}
+        var geom=getGeometry(target);
+        y=y-geom.top; x=x-geom.left;
+        var children=target.childNodes;
+        var i=0, lim=children.length;
+        while (i<lim) {
+            if (children[i].nodeType===1) {
+                var child=children[i++];
+                var left=child.offsetLeft, top=child.offsetTop;
+                var right=child.offsetRight, bot=child.offsetBottom;
+                if (typeof left !== "number") continue;
+                else if ((((right-left)<=1)?
+                          ((x>=left)&&(y<=right)):
+                          ((x>=left)&&(y<right)))&&
+                         (((bot-top)<=1)?
+                          ((y>=top)&&(y<=bot)):
+                          ((x>=top)&&(y<bot)))) {
+                    var deeper=getRealTarget(child,x,y);
+                    if (deeper) return deeper;
+                    else return target;}}
+            else i++;}
+        return target;}
 
-    function dispatchEvent(target,etype,orig){
-        if (!(target)) target=fdjtUI.T(orig);
+    function dispatchEvent(target,etype,orig,also){
+        var orig_target=(orig)&&(fdjtUI.T(orig));
+        if (!(target)) target=orig_target;
         var evt = document.createEvent("UIEvent");
         var event_arg=
             (((orig)&&(orig.touches)&&(orig.touches.length))||
@@ -116,16 +125,19 @@ fdjt.UI.TapHold=(function(){
              0);
         evt.initUIEvent(etype, true, true,window,event_arg);
         evt.clientX=touch_x; evt.clientY=touch_y;
+        if (also) {
+            for (var prop in also) {
+                if (also.hasOwnProperty(prop)) {
+                    evt[prop]=also[prop];}}}
         if (trace_taphold)
             fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o",
                     etype,target,touch_x,touch_y,orig||"scratch");
         if (holdkey_down) evt.holdKey=true;
-        if (orig) {
-            cancel(orig);
-            if (!(hasParent(target,document.body)))
-                target=fdjtUI.T(orig);}
+        if (orig) cancel(orig);
         if ((!target)||(!(hasParent(target,document.body))))
             target=document.elementFromPoint(touch_x,touch_y);
+        if (orig_target!==target)
+            evt.relatedTarget=orig_target;
         target.dispatchEvent(evt);}
     
     function tapped(target,evt){
@@ -199,7 +211,7 @@ fdjt.UI.TapHold=(function(){
         if (reticle.live) reticle.highlight(false);
         if (evt) noDefault(evt);
         start_x=false; start_y=false; start_t=false;
-        touched=false; pressed=false;
+        touched=false; pressed=false; th_target=false;
         th_targets=[];}
     function abortpress(evt){
         if (trace_taphold)
@@ -207,17 +219,18 @@ fdjt.UI.TapHold=(function(){
                     evt,th_target,touched,pressed);
         if (th_timer) {
             clearTimeout(th_timer); th_timer=false;}
-        else if (pressed) {released(pressed,evt);}
+        else if (pressed) {slipped(pressed,evt);}
         if (reticle.live) reticle.highlight(false);
-        touched=false; pressed=false; tap_target=false;
+        th_target=touched=pressed=tap_target=false;
+        start_x=start_y=start_t=touch_x=touch_y=false;
         th_targets=[];}
     var mouseout_timer=false; var mouseout_parent=false;
     function taphold_mouseout(evt){
         var to=evt.toElement||evt.relatedTarget;
         if (mouseout_timer) return;
-        if ((pressed)&&(!(hasParent(to,".fdjtaphold")))) {
+        if ((pressed)&&(!(hasParent(to,".tapholder")))) {
             if (!(holdkey_down)) {
-                mouseout_parent=getParent(to,".fdjtaphold");
+                mouseout_parent=getParent(to,".tapholder");
                 mouseout_timer=setTimeout(function(){
                     slipped(pressed,evt);
                     touched=pressed=th_target=false;
@@ -229,7 +242,7 @@ fdjt.UI.TapHold=(function(){
         if (mouseout_timer) {
             clearTimeout(mouseout_timer);
             mouseout_timer=false;
-            var parent=getParent(to,".fdjtaphold");
+            var parent=getParent(to,".tapholder");
             if ((parent)&&(parent!==mouseout_parent)) {
                 slipped(pressed,evt);
                 touched=pressed=th_target=false;
@@ -245,9 +258,9 @@ fdjt.UI.TapHold=(function(){
             target=document.elementFromPoint(x,y);}
         else target=fdjtUI.T(evt);
         // If it doesn't have a parent, it's been removed from the DOM,
-        //  so we can't tell if it *was* in a .fdjtaphold region, so we punt.
+        //  so we can't tell if it *was* in a .tapholder region, so we punt.
         if ((!(target))||(!(target.parentNode))) return;
-        if ((pressed)&&(!(hasParent(target,".fdjtaphold")))) {
+        if ((pressed)&&(!(hasParent(target,".tapholder")))) {
             if ((pressed)&&(trace_taphold))
                 fdjtLog("TapHold/slipout %o: t=%o p=%o",
                         evt,th_target,pressed);
@@ -272,7 +285,7 @@ fdjt.UI.TapHold=(function(){
         if (evt.touches)
             target=document.elementFromPoint(touch_x,touch_y);
         else target=fdjtUI.T(evt);
-        if (hasClass(target,"tapholdcontainer")) 
+        if (hasClass(target,"tapholder")) 
             target=getRealTarget(target,touch_x,touch_y);
 
         if (trace_taphold)
@@ -297,7 +310,7 @@ fdjt.UI.TapHold=(function(){
                 fdjtLog("TapHold/moved s=%d,%d t=%d,%d d=%d thresh=%o",
                         start_x,start_y,touch_x,touch_y,
                         distance,movethresh);}
-        if (hasParent(target,".fdjtaphold")) th_target=target;
+        if (hasParent(target,".tapholder")) th_target=target;
         if ((evt.touches)&&(touched)&&(!(pressed))&&
             (th_targets[th_targets.length-1]!==th_target))
             th_targets.push(th_target);
@@ -351,10 +364,30 @@ fdjt.UI.TapHold=(function(){
             ((evt.which)&&(evt.which>1)))
             return;
         mouse_down=true;
-        th_target=fdjtUI.T(evt); th_targets=[th_target];
-        start_x=touch_x=evt.clientX||getClientX(evt);
-        start_y=touch_y=evt.clientY||getClientY(evt);
-        if (hasClass(th_target,"tapholdcontainer")) 
+        var new_event=false;
+        var target=fdjtUI.T(evt), holder=getParent(target,".tapholder");
+        if ((evt.touches)&&(th_target)) {
+            var cur_holder=getParent(th_target,".tapholder");
+            if (trace_taphold) 
+                fdjtLog("Second touch on %o (in %o) after %o (in %o)",
+                        target,holder,th_target,cur_holder);
+            if ((cur_holder)&&(cur_holder !== holder)) {
+                var touch=evt.changedTouches[0];
+                if (trace_taphold) 
+                    fdjtLog("Clearing taphold on %o, redispatching to %o",
+                            th_target,target);
+                new_event=document.createEvent('TouchEvent');
+                new_event.initTouchEvent(
+                    evt.type,true,true,window,0,
+                    touch.screenX,touch.screenY,touch.clientX,touch.clientY,
+                    evt.ctrlKey,evt.altKey,evt.shiftKey,evt.metaKey,
+                    [touch],[touch],[touch]);}}
+        if (new_event) {
+            abortpress(evt);
+            target.dispatchEvent(new_event);
+            return;}
+        else {th_target=target; th_targets=[];}
+        if (hasClass(th_target,"tapholder")) 
             th_target=getRealTarget(th_target,touch_x,touch_y);
         start_t=fdjtET();
         if (trace_taphold)
@@ -405,9 +438,11 @@ fdjt.UI.TapHold=(function(){
         evt=evt||event;
         if (!(mouse_down)) return;
         mouse_down=false;
+        var target=fdjtUI.T(evt), holder=getParent(target,".tapholder");
+        if (!(holder)) return;
         touch_x=evt.clientX||getClientX(evt)||touch_x;
         touch_y=evt.clientY||getClientY(evt)||touch_y;
-        if (hasClass(th_target,"tapholdcontainer")) 
+        if (hasClass(th_target,"tapholder")) 
             th_target=getRealTarget(th_target,touch_x,touch_y);
         if (trace_taphold)
             fdjtLog("TapHold/up %o tht=%o s=%o,%o,%o t=%o,%o m=%o k=%o ttt=%o",
@@ -460,7 +495,7 @@ fdjt.UI.TapHold=(function(){
         if (typeof movethresh !== "number") 
         if ((taptapthresh)&&(typeof taptapthresh !== "number"))
             taptapthresh=TapHold.taptapthresh||200;
-        addClass(elt,"fdjtaphold");
+        addClass(elt,"tapholder");
         var mm=((movethresh)?(get_move_handler(movethresh)):(taphold_move));
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousemove",mm);
         fdjtDOM.addListener(elt,"touchmove",mm);
@@ -489,8 +524,9 @@ fdjt.UI.TapHold=(function(){
     TapHold.keydown=taphold_keydown;
     TapHold.holdkey=16;
     TapHold.fakePress=fakePress;
+    TapHold.endPress=endpress;
 
-    TapHold.traceTaps=function(flag){
+    TapHold.Trace=function(flag){
         if (typeof flag === "undefined")
             trace_taphold=(!(trace_taphold));
         else trace_taphold=flag;};
@@ -501,7 +537,7 @@ fdjt.UI.TapHold=(function(){
     TapHold.clear=function(){
         if (pressed) slipped(pressed);
         touched=pressed=th_target=tap_target=false;
-        touch_x=start_x=touch_y=start_y=false;
+        touch_x=start_x=touch_y=start_y=start_t=false;
         if (th_timer) {clearTimeout(th_timer); th_timer=false;}
         th_targets=[];};
 
