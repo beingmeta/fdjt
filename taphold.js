@@ -381,7 +381,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     evt.type,true,true,window,0,
                     touch.screenX,touch.screenY,touch.clientX,touch.clientY,
                     evt.ctrlKey,evt.altKey,evt.shiftKey,evt.metaKey,
-                    [touch],[touch],[touch]);}}
+                    document.createTouchList(touch),
+                    document.createTouchList(touch),
+                    document.createTouchList(touch));}}
         if (new_event) {
             abortpress(evt);
             target.dispatchEvent(new_event);
