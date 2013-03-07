@@ -656,6 +656,7 @@ table.backtrace tbody.error span.exception {
     font-weight: bold; color: purple;}
 table.backtrace tbody.error span.context {
     font-weight: bold; font-family: fixed;}
+table.backtrace tr > th:first-child { width: 7em;}
 table.backtrace tbody.error tr.details td { font-style: italic;}
 table.backtrace tbody.error tr.irritant td {
     background-color: white; font-family: fixed; color: black;} 
