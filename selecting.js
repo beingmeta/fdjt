@@ -30,6 +30,7 @@ fdjt.UI.Selecting=
     (function(){
         "use strict";
         var fdjtDOM=fdjt.DOM;
+        var fdjtLog=fdjt.Log;
         var fdjtUI=fdjt.UI;
         
         var getStyle=fdjtDOM.getStyle;
@@ -45,6 +46,7 @@ fdjt.UI.Selecting=
 
         var selectors={}; // Maps DOM ids to instances
         var serialnum=0;  // Tracks instances
+        var trace=false;
 
         function fdjtSelecting(nodes,opts){
             if (!(this instanceof fdjtSelecting))
@@ -105,7 +107,22 @@ fdjt.UI.Selecting=
                 else return false;};
             
             return this;}
-        
+
+        fdjtSelecting.prototype.toString=function(){
+            var wrappers=this.wrappers; 
+            var output="fdjtSelecting(["+
+                (this.min)+((this.adjust==="start")?("*"):(""))+","+
+                (this.max)+((this.adjust==="end")?("*"):(""))+"],";
+            
+            var i=0, lim=wrappers.length;
+            while (i<lim) {
+                var id=wrappers[i].id;
+                if (id) output=output+((i>0)?(","):(""))+
+                    "'"+wrappers[i].id+"'";
+                i++;}
+            output=output+")";
+            return output;}
+
         function wrapText(node,orig,wrapped,words,prefix){
             var i, lim;
             if (node.nodeType===3) {
@@ -165,6 +182,8 @@ fdjt.UI.Selecting=
                 words[i++].className="fdjtword";}
 
         fdjtSelecting.prototype.setRange=function(start,end){
+            if (trace) fdjtLog("fdjtSelecting.setRange %o %o for %o",
+                               start,end,this);
             if (!(start)) {
                 if ((this.start)&&(this.end)) {
                     deselectWords(this.words,this.min,this.max);}
@@ -225,6 +244,8 @@ fdjt.UI.Selecting=
                 if (!(container)) return false;
                 else sel=selectors[container.id];}
             if (!(sel)) return false;
+            if (trace) fdjtLog("overWord %o, sel=%o, tapped=%o, adjust=%o",
+                               word,sel,tapped,sel.adjust);
             if (!(sel.start))
                 // We could have some smarts here to include quoted
                 //  phrases, capitalization runs, etc.
@@ -337,7 +358,7 @@ fdjt.UI.Selecting=
                      string: selected};};
         
         fdjtSelecting.prototype.setAdjust=function(val){
-            // fdjt.Log("setAdjust %o",val);
+            if (trace) fdjtLog("fdjtSelecting.setAdjust %o for %o",val,this);
             if (val) {
                 this.adjust=val;
                 fdjt.DOM.swapClass(
@@ -376,8 +397,8 @@ fdjt.UI.Selecting=
             var target=fdjtUI.T(evt);
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
             if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
-                (target.id.search("fdjtSel")===0))
-                if (overWord(target)) fdjtUI.cancel(evt);}
+                (target.id.search("fdjtSel")===0)) {
+                if (overWord(target)) fdjtUI.cancel(evt);}}
         fdjtSelecting.hold_handler=hold_handler;
         fdjtSelecting.handler=hold_handler;
         function tap_handler(evt){
@@ -436,6 +457,11 @@ fdjt.UI.Selecting=
                     get_release_handler(opts.onrelease));
             else fdjtDOM.addListener(container,"release",release_handler);}
 
+        fdjtSelecting.Trace=function(flag){
+            if (typeof flag === "undefined")
+                trace=(!(trace));
+            else trace=flag;};;
+        
         // Return the constructor
         return fdjtSelecting;})();
 
