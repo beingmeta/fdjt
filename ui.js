@@ -62,6 +62,7 @@ if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
             var elts=document.getElementsByName(newname);
             n=elts.length, i=0;
             while (i<n) fdjtDOM.addClass(elts[i++],classname);}}
+    fdjtUI.CoHi.highlight=highlight;
     
     fdjtUI.CoHi.onmouseover=function cohi_onmouseover(evt,classname_arg){
         var target=fdjtDOM.T(evt);
