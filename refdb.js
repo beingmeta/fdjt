@@ -1312,7 +1312,7 @@ if (!(fdjt.RefDB)) {
                 if (this.hasOwnProperty(key)) return this[key];
                 else return undefined;}
             else if (key instanceof Ref) {
-                var id=key._qid||((this.uniqueids)&&key._id)||key.getQID();
+                var id=((this.uniqueids)&&key._id)||key._qid||key.getQID();
                 return this[id];}
             else return undefined;};
         RefMap.prototype.set=function(key,val){
