@@ -584,42 +584,57 @@ if (!(fdjt.RefDB)) {
                 else if (typeof refs.length === "undefined") refs=[refs];
                 else {}
                 var storage=this.storage; var loaded=this.loaded;
-                var atid=false;
+                var db=this, absrefs=this.absrefs, refmap=this.refs;
+                var atid=false; var needrefs=[];
                 var i=0, lim=refs.length; while (i<lim) {
-                    var arg=refs[i++], ref=arg, content;
-                    if (typeof ref === "string")
-                        ref=this.ref(ref,false,true);
-                    if (!(ref)) {
-                        warn("Couldn't resolve ref to %s",arg);
-                        continue;}
-                    else if (ref._live) continue;
-                    loaded.push(ref);
-                    if (this.absrefs) content=storage[ref._id];
-                    else if (atid)
-                        content=storage[atid+"("+ref._id+")"];
-                    else {
-                        if (this.atid) atid=this.atid;
-                        else atid=this.atid=getatid(storage,this);
-                        content=storage[atid+"("+ref._id+")"];}
-                    if (!(content))
-                        warn("No item stored for %s",ref._id);
-                    else ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);}
-                if (callback) setTimeout(callback,5);}
+                    var refid=refs[i++], ref=refid;
+                    if (typeof refid === "string") ref=refmap[refid];
+                    if (!((ref instanceof Ref)&&(ref._live)))
+                        needrefs.push(refid);}
+                if (needrefs.length) {
+                    fdjtTime.slowmap(function(arg){
+                        var ref=arg, content;
+                        if (typeof ref === "string")
+                            ref=db.ref(ref,false,true);
+                        if (!(ref)) {
+                            warn("Couldn't resolve ref to %s",arg);
+                            return;}
+                        else if (ref._live) return;
+                        loaded.push(ref);
+                        if (absrefs) content=storage[ref._id];
+                        else if (atid)
+                            content=storage[atid+"("+ref._id+")"];
+                        else {
+                            if (db.atid) atid=db.atid;
+                            else atid=db.atid=getatid(storage,db);
+                            content=storage[atid+"("+ref._id+")"];}
+                        if (!(content))
+                            warn("No item stored for %s",ref._id);
+                        else ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);},
+                                     needrefs,false,
+                                     function(){if (callback) callback();});}
+                else if (callback) callback();
+                else {}}
             else if ((window.IndexedDB)&&
                      (this.storage instanceof window.IndexedDB)) {}
             else {}};
+        RefDB.prototype.loadref=function loadRef(ref,callback){
+            if (typeof ref === "string") ref=this.ref(ref);
+            if (ref._live) {if (callback) callback();}
+            else this.load(ref,callback);
+            return ref;};
         Ref.prototype.load=function loadRef(callback) {
             if (this._live) return this;
             else {
                 this._db.load(this,callback);
                 return this;}};
-        RefDB.load=function RefDBload(spec,dbtype){
+        RefDB.load=function RefDBload(spec,dbtype,callback){
             if (typeof spec === "string") {
                 var ref=RefDB.resolve(spec,false,(dbtype||RefDB),true);
-                if (ref) return ref.load();
+                if (ref) return ref.load(callback);
                 else throw {error: "Couldn't resolve "+spec};}
             else if (spec instanceof Ref)
-                return spec.load();
+                return spec.load(callback);
             else if (spec instanceof Array) {
                 var loads={}, dbs=[]; var i=0, lim=spec.length;
                 while (i<lim) {
