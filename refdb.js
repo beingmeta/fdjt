@@ -1442,6 +1442,7 @@ if (!(fdjt.RefDB)) {
             var scores=new RefMap();
             var counts=new RefMap();
             var matches=fdjtSet();
+            var match_seen={};
             // This makes these go faster because they don't bother
             // disambiguting _id fields.
             counts.uniqueids=scores.uniqueids=uniqueids;
@@ -1474,7 +1475,7 @@ if (!(fdjt.RefDB)) {
                                     db: db});}}}}
                 // Sort so the highest scoring findings go first
                 findings.sort(sortbyweight);
-                var finding_i=0, n_findings=findings.length, seen={};
+                var finding_i=0, n_findings=findings.length; var seen={};
                 while (finding_i<n_findings) {
                     var finding=findings[finding_i++];
                     var hitids=finding.hits, fdb=finding.db, abs=fdb.absrefs;
@@ -1482,16 +1483,22 @@ if (!(fdjt.RefDB)) {
                     if ((uniqueids)||(abs)) while (i_hit<n_hits) {
                         hitid=hitids[i_hit++];
                         if (seen[hitid]) continue;
-                        matches.push(fdb.ref(hitid)); seen[hitid]=hitid;
+                        else seen[hitid]=hitid;
+                        if (!(match_seen[hitid])) {
+                            matches.push(fdb.ref(hitid));
+                            match_seen[hitid]=hitid;}
                         counts[hitid]=(counts[hitid]||0)+1;
                         scores[hitid]=(scores[hitid]||0)+finding.weight;}
                     else {
                         hitid=hitids[i_hit++]; ref=fdb.ref(hitid);
                         var fullid=ref._qid||((abs)&&(ref._id))||ref.getQID();
                         if (seen[fullid]) continue;
+                        else seen[fullid]=fullid;
+                        if (!(match_seen[fullid])) {
+                            matches.push(ref);
+                            match_seen[fullid]=fullid;}
                         counts[fullid]=(counts[fullid]||0)+1;
-                        scores[fullid]=(scores[fullid]||0)+finding.weight;
-                        matches.push(ref); seen[fullid]=fullid;}}}
+                        scores[fullid]=(scores[fullid]||0)+finding.weight;}}}
             if (n_clauses>1) {
                 var results=this.results=[];
                 var new_scores=new RefMap(), new_counts=new RefMap();
