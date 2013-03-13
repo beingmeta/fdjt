@@ -34,6 +34,7 @@ fdjt.UI.Selecting=
         var fdjtUI=fdjt.UI;
         
         var getStyle=fdjtDOM.getStyle;
+        var hasParent=fdjtDOM.hasParent;
 
         function position(elt,arr){
             if (arr.indexOf) return arr.indexOf(elt);
@@ -316,7 +317,7 @@ fdjt.UI.Selecting=
             else return;
             if ((start)&&(end)) this.setRange(start,end);};
 
-        fdjtSelecting.prototype.getString=function(start,end){
+        fdjtSelecting.prototype.getString=function(start,end,under){
             if (!(start)) start=this.start; if (!(end)) end=this.end;
             var wrappers=this.wrappers; 
             var combine=[]; var prefix=this.prefix; var wpos=-1;
@@ -343,16 +344,32 @@ fdjt.UI.Selecting=
                 if (!(scan)) break;}
             return combine.join("");};
 
-        fdjtSelecting.prototype.getOffset=function(){
+        fdjtSelecting.prototype.getOffset=function(under){
             if (!(this.start)) return false;
+            var first_word=this.words[0]; 
+            if (under) {
+                var words=this.words; var i=0, lim=words.length;
+                if (!((hasParent(this.start,under))&&
+                      (hasParent(this.end,under))))
+                    return false;
+                while ((i<lim)&&(!(hasParent(first_word,under))))
+                    first_word=words[i++];}
             var selected=this.getString();
-            var preselected=this.getString(this.words[0],this.end);
+            var preselected=this.getString(first_word,this.end);
             return preselected.length-selected.length;};
         
-        fdjtSelecting.prototype.getInfo=function(){
+        fdjtSelecting.prototype.getInfo=function(under){
             if (!(this.start)) return false;
             var selected=this.getString();
-            var preselected=this.getString(this.words[0],this.end);
+            var first_word=this.words[0]; 
+            if (under) {
+                var words=this.words; var i=0, lim=words.length;
+                if (!((hasParent(this.start,under))&&
+                      (hasParent(this.end,under))))
+                    return false;
+                while ((i<lim)&&(!(hasParent(first_word,under))))
+                    first_word=words[i++];}
+            var preselected=this.getString(first_word,this.end);
             return { start: this.start, end: this.end,
                      off: preselected.length-selected.length,
                      string: selected};};
