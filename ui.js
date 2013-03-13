@@ -994,7 +994,8 @@ fdjt.UI.ProgressBar=(function(){
             return false;}
         var counter=0;
         return setInterval(function(){
-            img.src=images[counter++];
+            if (img.src===images[counter]) counter++;
+            else img.src=images[counter++];
             if (counter>=images.length) counter=0;},
                            interval);}
             
