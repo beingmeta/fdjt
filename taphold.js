@@ -159,12 +159,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
     
     function startpress(evt,holdthresh){
         evt=evt||event;
+        if (trace_taphold)
+            fdjtLog("TapHold/startpress %o tht=%o timer=%o tt=%o touched=%o pressed=%o pressed_at=%o",
+                    evt,th_target,th_timer,tap_target,touched,pressed);
         if ((tap_target)&&(th_timer)) {
             clearTimeout(th_timer); th_timer=false;}
         if ((touched)||(pressed)||(th_timer)) return;
         else if (!(th_target)) return;
         else {touched=th_target; pressed=false;}
-        if (trace_taphold) fdjtLog("TapHold/startpress %o",evt);
         if (reticle.live) reticle.highlight(true);
         noDefault(evt);
         pressed_at=fdjtTime(); 
