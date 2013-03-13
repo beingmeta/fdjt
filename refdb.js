@@ -393,14 +393,14 @@ if (!(fdjt.RefDB)) {
                 if ((key==="aliases")||(key==="_id")) {}
                 else if (data.hasOwnProperty(key)) {
                     var value=data[key]; var rule=((rules)&&(rules[key]));
-                    if (rule) value=(rule)(this,key,value,data,indexing);
-                    if (typeof value !== "undefined")
-                        value=importValue(value,db,refstrings);
+                    if (typeof value !== "undefined") {
+                        if (rule) value=(rule)(this,key,value,data,indexing);
+                        value=importValue(value,db,refstrings);}
                     var oldval=((live)&&(this[key]));
                     this[key]=value;
                     if (oldval) {
-                        var drops=difference(oldval,value);
-                        var adds=difference(value,oldval);
+                        var drops=difference(oldval,value||[]);
+                        var adds=((value)?(difference(value,oldval)):([]));
                         if ((indexing)&&(indices[key])) { 
                             if (adds.length)
                                 this.indexRef(key,adds,indices[key],db);
@@ -414,7 +414,7 @@ if (!(fdjt.RefDB)) {
                             var dropfn=ondrop[key];
                             var dropi=0, droplen=drops.length; while (dropi<droplen) {
                                 dropfn(drops[dropi++]);}}}
-                    else if ((indexing)&&(indices[key])) 
+                    else if ((value)&&(indexing)&&(indices[key])) 
                         this.indexRef(key,value,indices[key],db);}}
             // These are run-once inits loaded on initial import
             if (run_inits) {
