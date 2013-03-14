@@ -21,8 +21,9 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 var _fdjt_init;
 
 fdjt.DOM=

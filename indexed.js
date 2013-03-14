@@ -1,4 +1,6 @@
 /* From https://github.com/axemclion/IndexedDBShim, BSD License */
+/* jshint strict: false, evil: true, expr: true, browser: true */
+/* globals console: false, DOMException: false */
 var idbModules = {};
 (function(idbModules) {
   function callback(fn, context, event, func) {

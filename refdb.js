@@ -22,7 +22,7 @@
 
 */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+//var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 /* There are three stores (at least):
    1. the in-memory store
@@ -45,7 +45,7 @@ if (!(fdjt.RefDB)) {
         var fdjtState=fdjt.State;
         var fdjtTime=fdjt.Time;
         var fdjtDOM=fdjt.DOM;
-        var JSON=(window.JSON)||(fdjt.JSON);
+        var JSON=fdjt.JSON;
         var warn=fdjt.Log.warn;
 
         var refdbs={}, all_refdbs=[], changed_dbs=[], aliases={};
@@ -188,7 +188,7 @@ if (!(fdjt.RefDB)) {
             return count;};
         RefDB.prototype.clearOffline=function refDBclear(callback){
             if (!(this.storage)) return false;
-            else if ((window.Storage)&&(this.storage instanceof window.Storage)) {
+            else if ((Storage)&&(this.storage instanceof Storage)) {
                 var storage=this.storage;
                 var key="allids("+this.name+")";
                 var allids=this.storage[key];
@@ -198,8 +198,7 @@ if (!(fdjt.RefDB)) {
                     while (i<lim) delete storage[allids[i++]];}
                 delete storage[key];
                 if (callback) setTimeout(callback,5);}
-            else if ((window.indexedDB)&&
-                     (this.storage instanceof window.indexedDB)) {
+            else if (this.storage instanceof indexedDB) {
                 // Not yet implemented
                 return;}
             else return false;};
@@ -563,7 +562,7 @@ if (!(fdjt.RefDB)) {
                                         var f=fields[j++];
                                         copied[f]=value[f];}}}
                             copied[field]=exportval;}
-                        else if (copied) copied[name]=fieldval;
+                        else if (copied) copied[field]=fieldval;
                         else fields.push(field);}}
                 return copied||value;}
             else return value;}
@@ -573,7 +572,7 @@ if (!(fdjt.RefDB)) {
         
         RefDB.prototype.load=function loadRefs(refs,callback){
             if (!(this.storage)) return;
-            else if (this.storage instanceof window.Storage) {
+            else if (this.storage instanceof Storage) {
                 if (!(refs)) refs=[].concat(this.allrefs);
                 else if (refs===true) {
                     var all=this.storage["allids("+this.name+")"];
@@ -615,8 +614,7 @@ if (!(fdjt.RefDB)) {
                                      function(){if (callback) callback();});}
                 else if (callback) callback();
                 else {}}
-            else if ((window.IndexedDB)&&
-                     (this.storage instanceof window.IndexedDB)) {}
+            else if (this.storage instanceof indexedDB) {}
             else {}};
         RefDB.prototype.loadref=function loadRef(ref,callback){
             if (typeof ref === "string") ref=this.ref(ref);
@@ -671,7 +669,7 @@ if (!(fdjt.RefDB)) {
                     var pos=changed_dbs.indexOf(that);
                     if (pos>=0) changed_dbs.splice(pos);
                     if (callback) callback();});}
-            else if (this.storage instanceof window.Storage) {
+            else if (this.storage instanceof Storage) {
                 var storage=this.storage;
                 var atid=this.atid;
                 var ids=[];
@@ -711,8 +709,7 @@ if (!(fdjt.RefDB)) {
                     storage.setItem("allids("+this.name+")",
                                     JSON.stringify(allids));
                 if (callback) setTimeout(callback,5);}
-            else if ((window.IndexedDB)&&
-                     (this.storage instanceof window.IndexedDB)) {}
+            else if (this.storage instanceof indexedDB) {}
             else {}};
         Ref.prototype.save=function(callback){
             if (!(this._changed)) return this;
@@ -1201,7 +1198,7 @@ if (!(fdjt.RefDB)) {
                 dropindex=true;
             if (prop==='_id') return false;
             else if ((!(this._live))&&(this._db.storage)) {
-                if (db.storage instanceof window.Storage) {
+                if (db.storage instanceof Storage) {
                     this.load(); return this.drop(prop,val);}
                 else {
                     return undefined;}}

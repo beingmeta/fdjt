@@ -1,5 +1,6 @@
 /*! syze v1.1.1 MIT/GPL2 @rezitech */
 (function (win, docEl) {
+     /* jshint browser: true, evil: true */
      "use strict";
      // syze variables
      var
@@ -31,7 +32,7 @@
          currentSize = 
              /^device$/i.test(String(_from)) ? !win.orientation || win.orientation === 180 ? screen.width : screen.height
          : /^browser$/i.test(String(_from)) ? docEl.clientWidth
-             : (_from instanceof String) ? Function('return ' + _from)()
+             : (_from instanceof String) ? (new Function('return ' + _from)())
              : parseInt(_from, 10) || 0,
          docElClassNames = docEl.className.replace(/^\s+|(^|\s)(gt|is|lt)[^\s]+|\s+$/g, '').split(/\s+/),
          classNames = [], i = -1, arr = _sizes, len = arr.length;

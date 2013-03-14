@@ -20,8 +20,9 @@
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
@@ -130,7 +131,8 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
             if (((page_height-(scroll_pos+client_height))<thresh)||
                 (page_height<client_height))
                 getMoreResults();}
-        return (timer=setInterval(scrollChecker,interval));}
+        timer=setInterval(scrollChecker,interval);
+        return timer;}
     return fdjtScrollEver;})();
 
 // fdjtScrollEver.debug=true;

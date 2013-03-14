@@ -19,8 +19,9 @@
       http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
+/* jshint browser: true */
 
-var fdjt=((window.fdjt)||{});
+// var fdjt=((window.fdjt)||{});
 
 fdjt.Ajax=
     (function(){
@@ -164,6 +165,7 @@ fdjt.Ajax=
         fdjtAjax.formJSON=formJSON;
 
         function ajaxSubmit(form,callback,cbctype){
+            /* jshint evil: true */
             var ajax_uri=form.getAttribute("ajaxaction")||form.action;
             if (!(ajax_uri)) return false;
             // Whether to do AJAX synchronously or not.

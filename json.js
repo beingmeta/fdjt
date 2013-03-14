@@ -144,6 +144,7 @@
     NOT CONTROL.
 */
 
+/*jshint browser: true */
 /*jslint evil: true */
 
 /*members "", "\b", "\t", "\n", "\f", "\r", "\"", JSON, "\\", apply,
@@ -476,11 +477,6 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
         };
     }
 }());
-
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
 
 if (!(fdjt.JSON)) fdjt.JSON=JSON;
 

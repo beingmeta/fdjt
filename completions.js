@@ -21,8 +21,9 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
 (function(){
@@ -76,13 +77,15 @@ if (!(fdjt.UI)) fdjt.UI={};
     fdjtUI.FDJT_COMPLETE_MATCHCASE=FDJT_COMPLETE_MATCHCASE;
     fdjtUI.FDJT_COMPLETE_EAGER=FDJT_COMPLETE_EAGER;
 
+    var ValueMap=fdjt.Map||RefDB.Map;
+
     function Completions(dom,input,options) {
         this.dom=dom||false; this.input=input||false;
         this.options=options||default_options;
         this.nodes=[]; this.values=[]; this.serial=++serial;
         this.cues=[]; this.displayed=[];
         this.prefixtree={strings: []}; this.bykey={};
-        this.byvalue=new (fdjt.Map||RefDB.Map)();
+        this.byvalue=new ValueMap();
         this.selected=false; this.selclass=false;
         if (!((options)&(FDJT_COMPLETE_MATCHCASE))) this.stringmap={};
         this.initialized=false;

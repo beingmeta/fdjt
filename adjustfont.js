@@ -25,13 +25,14 @@
    http:://charlipark.org/hatchshow/
 
 */
+/* jshint browser: true */
 
 /* To do:
    add maxheight constraints
    more documentation
 */
 
-var fdjt=((window.fdjt)||{});
+// var fdjt=((window.fdjt)||{});
 if (!(fdjt.UI)) fdjt.UI={};
 
 fdjt.UI.adjustFont=

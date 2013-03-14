@@ -21,8 +21,9 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 if (!(fdjt.UI.CoHi)) fdjt.UI.CoHi={classname: "cohi"};
 if (!(fdjt.UI.AutoPrompt)) fdjt.UI.AutoPrompt={};
@@ -848,10 +849,10 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
 
     fdjt.UI.Delay=function(interval,name,fcn){
-        window.setTimeout(fcn,interval);};
+        setTimeout(fcn,interval);};
     fdjt.UI.Delayed=function(fcn,interval){
         if (!(interval)) interval=25;
-        window.setTimeout(fcn,interval);};})();
+        setTimeout(fcn,interval);};})();
 
 /* Triggering submit events */
 
@@ -976,6 +977,7 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
+    /* global setInterval, false, clearInterval: false */
 
     function ImageSwap(img,interval){
         if (typeof img==='string') img=fdjtID(img);

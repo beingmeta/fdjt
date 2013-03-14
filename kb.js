@@ -30,7 +30,7 @@
   fdjtKB.Ref (objects created within a pool)
 */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 if (!(fdjt.KB)) {
     fdjt.KB=(function(){

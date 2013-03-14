@@ -24,11 +24,12 @@
 
 /* Time functions */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.Time=
     (function (){
         "use strict";
+        /* global setTimeout: false, clearTimeout: false */
 
         function _(x){ return x; }
 

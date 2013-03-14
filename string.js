@@ -22,7 +22,7 @@
 
 */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.String=
     (function(){
