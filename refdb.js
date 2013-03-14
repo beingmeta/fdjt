@@ -22,6 +22,8 @@
 
 */
 
+/* global setTimeout: false, clearTimeout: false */
+
 //var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 /* There are three stores (at least):
