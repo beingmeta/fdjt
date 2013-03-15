@@ -143,9 +143,8 @@
     USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
     NOT CONTROL.
 */
-
-/*jshint browser: true */
-/*jslint evil: true */
+/* jslint evil: true */
+/* jshint unused: false */
 
 /*members "", "\b", "\t", "\n", "\f", "\r", "\"", JSON, "\\", apply,
     call, charCodeAt, getUTCDate, getUTCFullYear, getUTCHours,
@@ -171,7 +170,6 @@ var JSON = JSON || {};
     if (typeof Date.prototype.toJSON !== 'function') {
 
         Date.prototype.toJSON = function (key) {
-
             return isFinite(this.valueOf()) ?
                    this.getUTCFullYear()   + '-' +
                  f(this.getUTCMonth() + 1) + '-' +
