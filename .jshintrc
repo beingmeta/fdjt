@@ -4,5 +4,6 @@
     "strict": true,
     "eqeqeq": true,
     "noempty": false,
-    "undef": true
+    "undef": true,
+    "unused": true
 }
