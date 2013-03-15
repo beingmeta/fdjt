@@ -145,6 +145,7 @@
 */
 /* jslint evil: true */
 /* jshint unused: false */
+/* global window: false */
 
 /*members "", "\b", "\t", "\n", "\f", "\r", "\"", JSON, "\\", apply,
     call, charCodeAt, getUTCDate, getUTCFullYear, getUTCHours,
@@ -156,7 +157,7 @@
 // Create a JSON object only if one does not already exist. We create the
 // methods in a closure to avoid creating global variables.
 
-var JSON = JSON || {};
+if ((typeof window !== "undefined")&&(!(window.JSON))) window.JSON={};
 
 (function () {
 
