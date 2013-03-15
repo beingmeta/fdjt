@@ -1273,7 +1273,7 @@ fdjt.CodexLayout=
                 saved_ids._all_ids=all_ids;
                 this.saved_ids=saved_ids;
                 this.page=addpages[0];
-                this.pagenum=parseInt(this.page.getAttribute("data-pagenum"));}
+                this.pagenum=parseInt(this.page.getAttribute("data-pagenum"),10);}
             this.setLayout=setLayout;
 
             function dropSelected(node,dropsel){
@@ -1406,7 +1406,7 @@ fdjt.CodexLayout=
                     if (original) {
                         saved_ids[id]=original;
                         original.id=null;}}
-                var pagenum=parseInt(newpage.getAttribute("data-pagenum"));
+                var pagenum=parseInt(newpage.getAttribute("data-pagenum"),10);
                 var curpage=document.getElementById(newpage.id);
                 fdjtDOM.replace(curpage,newpage);
                 if (this.page===curpage) this.page=newpage;
@@ -1661,7 +1661,7 @@ fdjt.CodexLayout=
                 var block=allblocks[bn++];
                 var page=getParent(block,".codexpage");
                 if (page) {
-                    var num=parseInt(page.getAttribute("data-pagenum"));
+                    var num=parseInt(page.getAttribute("data-pagenum"),10);
                     if (!(pages[num]))
                         fdjtLog.warn("weird page number: %o",num);
                     else {
@@ -1681,7 +1681,7 @@ fdjt.CodexLayout=
             while (i<lim) {
                 var block=allblocks[i++];
                 var page=getParent(block,".codexpage");
-                var num=parseInt(page.getAttribute("data-pagenum"));
+                var num=parseInt(page.getAttribute("data-pagenum"),10);
                 var info={pagenum: num};
                 var classname=block.className;
                 if (block.id) info.id=block.id;
