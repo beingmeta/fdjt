@@ -141,10 +141,11 @@ if (!(fdjt.RefDB)) {
             return ((refdbs.hasOwnProperty(name))&&(refdbs[name]))||
                 ((aliases.hasOwnProperty(name))&&(aliases[name]))||
                 (new DBClass(name));};
-        RefDB.probe=function RefDBProbe(name){
+        function refDBProbe(name){
             return ((refdbs.hasOwnProperty(name))&&(refdbs[name]))||
                 ((aliases.hasOwnProperty(name))&&(aliases[name]))||
-                false;};
+                false;}
+        RefDB.probe=refDBProbe;
         RefDB.prototype.addAlias=function DBaddAlias(alias){
             if (aliases[alias]) {
                 if (aliases[alias]!==this) 
@@ -248,12 +249,24 @@ if (!(fdjt.RefDB)) {
                 if ((at===1)&&(arg[0]===':')) {arg=arg.slice(1); at=0;}
                 if (at>0) {
                     // this is the term@domain form
-                    var dbname=arg.slice(at+1);
+                    var usedb=false, dbname=arg.slice(at), origin;
+                    if ((usedb=refDBProbe(dbname))) {}
+                    else if (refpat.exec(dbname)) {
+                        origin=resolveRef(dbname);
+                        if (origin) force=true;
+                        else dbname=arg.slice(at+1);}
+                    else dbname=arg.slice(at+1);
+                    if ((db)&&(db.name===dbname)) usedb=db;
+                    else usedb=refDBProbe(dbname);
                     arg=arg.slice(0,at);
-                    if (force) {
+                    if (usedb) db=usedb;
+                    else if (force) {
                         warn("Creating forced RefDB %s for %s",dbname,arg);
                         db=RefDB.open(dbname,DBType);}
-                    else db=RefDB.probe(dbname);
+                    else db=refDBProbe(dbname);
+                    if ((db)&&(origin)) {
+                        db.origin=origin;
+                        if (origin.name) db.fullname=origin.name;}
                     arg=arg.slice(0,at);}
                 else if (at<0) {
                     var uuid;
@@ -275,7 +288,7 @@ if (!(fdjt.RefDB)) {
                     else db=false;}
                 else if (arg[1]==='@') {
                     // This is for local references
-                    var idstart=at.indexOf('/');
+                    var idstart=arg.indexOf('/');
                     var atid=arg.slice(0,idstart);
                     var atdb=aliases[atid];
                     if (atdb) db=atdb;
