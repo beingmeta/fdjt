@@ -48,7 +48,7 @@
  * See http://pajhome.org.uk/crypt/md5 for more info.
  */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 if (!(fdjt.Hash))
     fdjt.Hash=(function(){

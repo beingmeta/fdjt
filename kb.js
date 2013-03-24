@@ -30,7 +30,7 @@
   fdjtKB.Ref (objects created within a pool)
 */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 if (!(fdjt.KB)) {
     fdjt.KB=(function(){
@@ -130,7 +130,7 @@ if (!(fdjt.KB)) {
             else throw {error: "pool alias conflict"};
             else pools[name]=this;};
 
-        Pool.prototype.addEffect=function(prop,handler) {
+        Pool.prototype.addInit=function(prop,handler) {
             var effects;
             if (!(effects=this.effects)) effects=this.effects={};
             effects[prop]=handler;};

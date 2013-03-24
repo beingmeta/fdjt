@@ -21,8 +21,9 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 var _fdjt_init;
 
 fdjt.DOM=
@@ -114,9 +115,10 @@ fdjt.DOM=
                 return domappend(node,content.toDOM());
             else if (content.toHTML)
                 return domappend(node,content.toHTML());
-            else if (content.length) {
-                var frag=(((window.DocumentFragment)&&(node instanceof window.DocumentFragment))?
-                    (node):(document.createDocumentFragment()));
+            else if ((content.length)&&(i<content.length)) {
+                var frag=(((window.DocumentFragment)&&
+                           (node instanceof window.DocumentFragment))?
+                          (node):(document.createDocumentFragment()));
                 // We copy node lists because they're prone to change
                 // underneath us as we're moving DOM nodes around.
                 var elts=((window.NodeList)&&(content instanceof window.NodeList))?
@@ -140,6 +142,7 @@ fdjt.DOM=
                             elt.toString()));
                     else frag.appendChild(document.createTextNode(""+elt));}
                 if (node!==frag) node.appendChild(frag);}
+            else if (content.length) {}
             else node.appendChild(document.createTextNode(""+content));
             return node;}
         function dominsert(before,content,i) {
@@ -2306,11 +2309,15 @@ fdjt.DOM=
 
         function checkTransitionEvents(){
             var div = document.createElement('div');
+            if (!(div.removeEventListener)) return;
             var handler = function(e) {
                 fdjtDOM.transitionEnd = e.type;
                 var i=0, lim=transition_events.length;
-                while (i<lim) 
-                    div.removeEventListener(transition_events[i++],handler);};
+                while (i<lim) {
+                    if (div)
+                        div.removeEventListener(
+                            transition_events[i++],handler);
+                    else i++;}};
             div.setAttribute("style","position:absolute;top:0px;transition:top 1ms ease;-webkit-transition:top 1ms ease;-moz-transition:top 1ms ease;-o-transition:top 1ms ease;-ms-transition:top 1ms ease;");
             var i=0, lim=transition_events.length;
             while (i<lim) div.addEventListener(

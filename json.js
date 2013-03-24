@@ -143,8 +143,9 @@
     USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
     NOT CONTROL.
 */
-
-/*jslint evil: true */
+/* jslint evil: true */
+/* jshint unused: false */
+/* global window: false */
 
 /*members "", "\b", "\t", "\n", "\f", "\r", "\"", JSON, "\\", apply,
     call, charCodeAt, getUTCDate, getUTCFullYear, getUTCHours,
@@ -156,7 +157,7 @@
 // Create a JSON object only if one does not already exist. We create the
 // methods in a closure to avoid creating global variables.
 
-var JSON = JSON || {};
+if ((typeof window !== "undefined")&&(!(window.JSON))) window.JSON={};
 
 (function () {
 
@@ -170,7 +171,6 @@ var JSON = JSON || {};
     if (typeof Date.prototype.toJSON !== 'function') {
 
         Date.prototype.toJSON = function (key) {
-
             return isFinite(this.valueOf()) ?
                    this.getUTCFullYear()   + '-' +
                  f(this.getUTCMonth() + 1) + '-' +
@@ -476,11 +476,6 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
         };
     }
 }());
-
-if (window) {
-    if (!(window.fdjt)) window.fdjt={};}
-else if (typeof fdjt === "undefined") fdjt={};
-else {}
 
 if (!(fdjt.JSON)) fdjt.JSON=JSON;
 

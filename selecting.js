@@ -22,17 +22,20 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
-fdjt.UI.Selecting=
+fdjt.UI.Selecting=fdjt.UI.TextSelect=
     (function(){
         "use strict";
         var fdjtDOM=fdjt.DOM;
+        var fdjtLog=fdjt.Log;
         var fdjtUI=fdjt.UI;
         
         var getStyle=fdjtDOM.getStyle;
+        var hasParent=fdjtDOM.hasParent;
 
         function position(elt,arr){
             if (arr.indexOf) return arr.indexOf(elt);
@@ -45,10 +48,11 @@ fdjt.UI.Selecting=
 
         var selectors={}; // Maps DOM ids to instances
         var serialnum=0;  // Tracks instances
+        var trace=false;
 
-        function fdjtSelecting(nodes,opts){
-            if (!(this instanceof fdjtSelecting))
-                return new fdjtSelecting(nodes,opts);
+        function TextSelect(nodes,opts){
+            if (!(this instanceof TextSelect))
+                return new TextSelect(nodes,opts);
             else this.serial=++serialnum;
             if (typeof nodes==='string') {
                 var elt=document.getElementById(nodes);
@@ -105,7 +109,22 @@ fdjt.UI.Selecting=
                 else return false;};
             
             return this;}
-        
+
+        TextSelect.prototype.toString=function(){
+            var wrappers=this.wrappers; 
+            var output="TextSelect(["+
+                (this.min)+((this.adjust==="start")?("*"):(""))+","+
+                (this.max)+((this.adjust==="end")?("*"):(""))+"],";
+            
+            var i=0, lim=wrappers.length;
+            while (i<lim) {
+                var id=wrappers[i].id;
+                if (id) output=output+((i>0)?(","):(""))+
+                    "'"+wrappers[i].id+"'";
+                i++;}
+            output=output+")";
+            return output;};
+
         function wrapText(node,orig,wrapped,words,prefix){
             var i, lim;
             if (node.nodeType===3) {
@@ -164,7 +183,9 @@ fdjt.UI.Selecting=
             var i=start; while (i<=end)
                 words[i++].className="fdjtword";}
 
-        fdjtSelecting.prototype.setRange=function(start,end){
+        TextSelect.prototype.setRange=function(start,end){
+            if (trace) fdjtLog("TextSelect.setRange %o %o for %o",
+                               start,end,this);
             if (!(start)) {
                 if ((this.start)&&(this.end)) {
                     deselectWords(this.words,this.min,this.max);}
@@ -225,6 +246,8 @@ fdjt.UI.Selecting=
                 if (!(container)) return false;
                 else sel=selectors[container.id];}
             if (!(sel)) return false;
+            if (trace) fdjtLog("overWord %o, sel=%o, tapped=%o, adjust=%o",
+                               word,sel,tapped,sel.adjust);
             if (!(sel.start))
                 // We could have some smarts here to include quoted
                 //  phrases, capitalization runs, etc.
@@ -269,11 +292,11 @@ fdjt.UI.Selecting=
                     return selectors[id.slice(0,split)]||false;
                 else return false;}
             else return false;}
-        fdjtSelecting.getSelector=getSelector;
+        TextSelect.getSelector=getSelector;
 
         // Getting the selection text
         // This tries to be consistent with textify functions in fdjtDOM
-        fdjtSelecting.prototype.setString=function(string){
+        TextSelect.prototype.setString=function(string){
             var wrappers=this.wrappers;
             var whole=((wrappers.length===1)&&(wrappers[0]));
             if (!(whole)) {
@@ -295,7 +318,7 @@ fdjt.UI.Selecting=
             else return;
             if ((start)&&(end)) this.setRange(start,end);};
 
-        fdjtSelecting.prototype.getString=function(start,end){
+        TextSelect.prototype.getString=function(start,end,under){
             if (!(start)) start=this.start; if (!(end)) end=this.end;
             var wrappers=this.wrappers; 
             var combine=[]; var prefix=this.prefix; var wpos=-1;
@@ -322,14 +345,38 @@ fdjt.UI.Selecting=
                 if (!(scan)) break;}
             return combine.join("");};
 
-        fdjtSelecting.prototype.getOffset=function(){
+        TextSelect.prototype.getOffset=function(under){
             if (!(this.start)) return false;
+            var first_word=this.words[0]; 
+            if (under) {
+                var words=this.words; var i=0, lim=words.length;
+                if (!((hasParent(this.start,under))&&
+                      (hasParent(this.end,under))))
+                    return false;
+                while ((i<lim)&&(!(hasParent(first_word,under))))
+                    first_word=words[i++];}
             var selected=this.getString();
-            var preselected=this.getString(this.words[0],this.end);
+            var preselected=this.getString(first_word,this.end);
             return preselected.length-selected.length;};
         
-        fdjtSelecting.prototype.setAdjust=function(val){
-            // fdjt.Log("setAdjust %o",val);
+        TextSelect.prototype.getInfo=function(under){
+            if (!(this.start)) return false;
+            var selected=this.getString();
+            var first_word=this.words[0]; 
+            if (under) {
+                var words=this.words; var i=0, lim=words.length;
+                if (!((hasParent(this.start,under))&&
+                      (hasParent(this.end,under))))
+                    return false;
+                while ((i<lim)&&(!(hasParent(first_word,under))))
+                    first_word=words[i++];}
+            var preselected=this.getString(first_word,this.end);
+            return { start: this.start, end: this.end,
+                     off: preselected.length-selected.length,
+                     string: selected};};
+        
+        TextSelect.prototype.setAdjust=function(val){
+            if (trace) fdjtLog("TextSelect.setAdjust %o for %o",val,this);
             if (val) {
                 this.adjust=val;
                 fdjt.DOM.swapClass(
@@ -343,9 +390,10 @@ fdjt.UI.Selecting=
 
         // Life span functions
 
-        fdjtSelecting.prototype.clear=function(){
+        TextSelect.prototype.clear=function(){
             var wrappers=this.wrappers;
             var orig=this.orig, wrapped=this.wrapped;
+            if (!(orig)) return; // already cleared
             var i=orig.length-1;
             while (i>=0) {
                 var o=orig[i], w=wrapped[i]; i--;
@@ -367,10 +415,10 @@ fdjt.UI.Selecting=
             var target=fdjtUI.T(evt);
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
             if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
-                (target.id.search("fdjtSel")===0))
-                if (overWord(target)) fdjtUI.cancel(evt);}
-        fdjtSelecting.hold_handler=hold_handler;
-        fdjtSelecting.handler=hold_handler;
+                (target.id.search("fdjtSel")===0)) {
+                if (overWord(target)) fdjtUI.cancel(evt);}}
+        TextSelect.hold_handler=hold_handler;
+        TextSelect.handler=hold_handler;
         function tap_handler(evt){
             evt=evt||event;
             var target=fdjtUI.T(evt);
@@ -395,7 +443,7 @@ fdjt.UI.Selecting=
                     else sel.adjust=false;
                     fdjtUI.cancel(evt);}
                 else if (sel) sel.adjust=false;}}
-        fdjtSelecting.tap_handler=tap_handler;
+        TextSelect.tap_handler=tap_handler;
         function release_handler(evt){
             evt=evt||event;
             var target=fdjtUI.T(evt);
@@ -404,14 +452,14 @@ fdjt.UI.Selecting=
                 (target.id.search("fdjtSel")===0)) {
                 var sel=getSelector(target);
                 sel.setAdjust(false);}}
-        fdjtSelecting.release_handler=release_handler;
+        TextSelect.release_handler=release_handler;
         function get_release_handler(also){
             return function(evt){release_handler(evt); also(evt);};}
         
         function addHandlers(container,sel,opts){
             var fortouch=((typeof opts.fortouch !== "undefined")?
                           (opts.fortouch):
-                          (fdjtSelecting.fortouch||false));
+                          (TextSelect.fortouch||false));
             fdjtUI.TapHold(container,fortouch,
                            ((opts)&&(opts.holdthresh)),
                            ((opts)&&(opts.movethresh)));
@@ -427,8 +475,13 @@ fdjt.UI.Selecting=
                     get_release_handler(opts.onrelease));
             else fdjtDOM.addListener(container,"release",release_handler);}
 
+        TextSelect.Trace=function(flag){
+            if (typeof flag === "undefined")
+                trace=(!(trace));
+            else trace=flag;};
+        
         // Return the constructor
-        return fdjtSelecting;})();
+        return TextSelect;})();
 
 
 /* Emacs local variables

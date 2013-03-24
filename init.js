@@ -22,7 +22,7 @@
 
 */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+//var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 (function(){
     "use strict";
@@ -69,12 +69,16 @@ var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
         inits_run=true;};
 
     var device_info=(fdjt.device)||(fdjt.device={});
-    if ((window)&&(window.navigator)&&(navigator.appVersion)) {
-        device_info.isAndroid = (/android/gi).test(navigator.appVersion);
-        device_info.isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
-        device_info.isTouchPad = (/hp-tablet/gi).test(navigator.appVersion);
-        device_info.hasTouch = ('ontouchstart' in window) &&
-            (!(device_info.isTouchPad));}
+    (function(){
+        /* global window: false, navigator: false */
+        if ((typeof window !=="undefined")&&(window.navigator)&&
+            (window.navigator.appVersion)) {
+            var navigator=window.navigator;
+            device_info.isAndroid = (/android/gi).test(navigator.appVersion);
+            device_info.isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
+            device_info.isTouchPad = (/hp-tablet/gi).test(navigator.appVersion);
+            device_info.hasTouch = ('ontouchstart' in window) &&
+                (!(device_info.isTouchPad));}})();
 })();
 
 

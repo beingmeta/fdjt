@@ -39,7 +39,7 @@
 
 */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 var WSN=(function(){
     "use strict";
@@ -118,17 +118,13 @@ var WSN=(function(){
             else if (sortfn)
                 return dedupfn(words.sort(sorter)).join(" ");
             else return words.join(" ");}
-        else if (!(arg.nodeType)) {
-            if (window.Exception) 
-                throw new (window.Exception)("bad arg to WSN");
-            else return false;}
+        else if (!(arg.nodeType))
+            throw new Error("bad arg to WSN");
         else if (arg.nodeType===3)
             return WSN(arg.nodeValue);
         else if (arg.nodeType===1)
             return WSN(textify(arg));
-        else if (window.Exception)
-            throw new (window.Exception)("bad arg to WSN");
-        else return false;}
+        else throw new Error("bad arg to WSN");}
     
     function dedupfn(arr){
         var i=0; var lim=arr.length; var last=false;
@@ -161,6 +157,7 @@ var WSN=(function(){
     WSN.nativesort=nativesort;
 
     function textify(arg,text){
+        /* global window: false */
         if (!(arg.nodeType)) return text||"";
         else if (arg.nodeType===3)
             if (text) return text+arg.nodeValue; else return arg.nodeValue;
@@ -192,9 +189,7 @@ var WSN=(function(){
         if (WSN.md5) return WSN.md5(wsn);
         else if ((fdjtHash)&&(fdjtHash.hex_md5))
             return fdjtHash.hex_md5(wsn);
-        else if (window.Exception)
-            throw new (window.Exception)("No MD5 implementation");
-        else return false;}
+        else throw new Error("No MD5 implementation");}
     WSN.md5ID=md5ID;
     
     function sha1ID(){
@@ -202,9 +197,7 @@ var WSN=(function(){
         if (WSN.sha1) return WSN.md5(wsn);
         else if ((fdjtHash)&&(fdjtHash.hex_sha1))
             return fdjtHash.hex_sha1(wsn);
-        else if (window.Exception)
-            throw new (window.Exception)("No SHA1 implementation");
-        else return false;}
+        else throw new Error("No SHA1 implementation");}
     WSN.sha1ID=sha1ID;
 
     function hash(arg,hashfn,sortfn,wordfn,keepdups){

@@ -33,25 +33,25 @@ fdjt_versions.decl=function(name,num){
 // Some augmentations
 if (!(Array.prototype.indexOf))
     Array.prototype.indexOf=function(elt,i){
-	if (!(i)) i=0; var len=this.length;
-	while (i<len) if (this[i]===elt) return i; else i++;
-	return -1;};
+        if (!(i)) i=0; var len=this.length;
+        while (i<len) if (this[i]===elt) return i; else i++;
+        return -1;};
 // https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Object/keys
 if (!Object.keys) {
     Object.keys = function(o){
-	if (o !== Object(o))
+        if (o !== Object(o))
             throw new TypeError('Object.keys called on non-object');
-	var ret=[], p;
-	for (p in o) if (Object.prototype.hasOwnProperty.call(o,p)) ret.push(p);
-	return ret;}};
+        var ret=[], p;
+        for (p in o) if (Object.prototype.hasOwnProperty.call(o,p)) ret.push(p);
+        return ret;}};
 
 if (!String.prototype.trim) {
     String.prototype.trim = (function () {
-	var trimLeft  = /^\s+/, trimRight = /\s+$/;
-	    
-	return function () {
-	    return this.replace(trimLeft, "").replace(trimRight, "")
-	}
+        var trimLeft  = /^\s+/, trimRight = /\s+$/;
+            
+        return function () {
+            return this.replace(trimLeft, "").replace(trimRight, "")
+        }
     })()};
 
 var fdjt=((typeof fdjt === "undefined")?({}):(fdjt));

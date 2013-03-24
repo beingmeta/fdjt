@@ -2,7 +2,9 @@
  * iScroll v4.2.5 ~ Copyright (c) 2012 Matteo Spinelli, http://cubiq.org
  * Released under MIT license, http://cubiq.org/license
  */
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+/* jshint browser: true */
+
+//var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 (function(window, doc){
      "use strict";

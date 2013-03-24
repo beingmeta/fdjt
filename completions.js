@@ -21,8 +21,9 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
 (function(){
@@ -30,7 +31,7 @@ if (!(fdjt.UI)) fdjt.UI={};
     var fdjtString=fdjt.String;
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
-    var fdjtKB=fdjt.KB, fdjtID=fdjt.ID;
+    var RefDB=fdjt.RefDB, fdjtID=fdjt.ID;
 
     var serial=0;
 
@@ -62,7 +63,7 @@ if (!(fdjt.UI)) fdjt.UI={};
     var getChildren=fdjtDOM.getChildren;
     var getParent=fdjtDOM.getParent;
     var getStyle=fdjtDOM.getStyle;
-    var position=fdjtKB.position;
+    var position=RefDB.position;
 
     var isEmpty=fdjtString.isEmpty;
     var hasPrefix=fdjtString.hasPrefix;
@@ -76,13 +77,15 @@ if (!(fdjt.UI)) fdjt.UI={};
     fdjtUI.FDJT_COMPLETE_MATCHCASE=FDJT_COMPLETE_MATCHCASE;
     fdjtUI.FDJT_COMPLETE_EAGER=FDJT_COMPLETE_EAGER;
 
+    var ValueMap=fdjt.Map||RefDB.Map;
+
     function Completions(dom,input,options) {
         this.dom=dom||false; this.input=input||false;
         this.options=options||default_options;
         this.nodes=[]; this.values=[]; this.serial=++serial;
         this.cues=[]; this.displayed=[];
-        this.prefixtree={strings: []};
-        this.bykey={}; this.byvalue=new fdjtKB.Map();
+        this.prefixtree={strings: []}; this.bykey={};
+        this.byvalue=new ValueMap();
         this.selected=false; this.selclass=false;
         if (!((options)&(FDJT_COMPLETE_MATCHCASE))) this.stringmap={};
         this.initialized=false;
@@ -170,14 +173,21 @@ if (!(fdjt.UI)) fdjt.UI={};
         return result;}
 
     function addCompletion(c,completion,key,value) {
-        if (!(key)) key=completion.key||getKey(completion);
+        if (typeof key === "undefined")
+            key=completion.key||getKey(completion);
         if (!(value))
             value=(completion.value)||(completion.getAttribute('value'))||key;
         var pos=position(c.nodes,completion);
         if (pos<0) {
-            c.nodes.push(completion); c.values.push(value);
-            c.byvalue.add(value,completion);}
+            c.nodes.push(completion);
+            if (value) {
+                c.values.push(value);
+                c.byvalue.add(value,completion);}}
         else return;
+        if (key) addCompletionKeys(c,completion,key);}
+
+    function addCompletionKeys(c,completion,key) {
+        if (!(key)) key=completion.key||getKey(completion);
         var opts=c.options;
         var container=c.dom;
         var ptree=c.prefixtree;
@@ -214,6 +224,12 @@ if (!(fdjt.UI)) fdjt.UI={};
     Completions.prototype.addCompletion=function(completion,key,value) {
         if (!(this.initialized)) initCompletions(this);
         addCompletion(this,completion,key,value);
+        if (this.visible) this.visible=false;};
+    Completions.prototype.addKeys=function(completion,key) {
+        if (!(this.initialized)) {
+            initCompletions(this);
+            addCompletion(this,completion,key);}
+        else addCompletionKeys(this,completion,key);
         if (this.visible) this.visible=false;};
 
     function updateDisplay(c,todisplay){
@@ -322,6 +338,8 @@ if (!(fdjt.UI)) fdjt.UI={};
             var value=values[i++];
             var completions=byvalue.get(value);
             if (completions) {
+                if (!(completions instanceof Array))
+                    completions=[completions];
                 if (spec) {
                     var j=0; var jlim=completions.length;
                     while (j<jlim) {
@@ -341,6 +359,8 @@ if (!(fdjt.UI)) fdjt.UI={};
             var key=keys[i++];
             var completions=bykey.get(key);
             if (completions) {
+                if (!(completions instanceof Array))
+                    completions=[completions];
                 if (spec) {
                     var j=0; var jlim=completions.length;
                     while (j<jlim) {
@@ -360,6 +380,8 @@ if (!(fdjt.UI)) fdjt.UI={};
             var value=values[i++];
             var completions=byvalue.get(value);
             if (completions) {
+                if (!(completions instanceof Array))
+                    completions=[completions];
                 var j=0; var jlim=completions.length;
                 while (j<jlim) {
                     var c=completions[j++];
@@ -380,6 +402,8 @@ if (!(fdjt.UI)) fdjt.UI={};
             var value=values[i++];
             var completions=byvalue.get(value);
             if (completions) {
+                if (!(completions instanceof Array))
+                    completions=[completions];
                 var j=0; var jlim=completions.length;
                 while (j<jlim) {
                     var c=completions[j++];
@@ -396,6 +420,8 @@ if (!(fdjt.UI)) fdjt.UI={};
             var value=values[i++];
             var completions=byvalue.get(value);
             if (completions) {
+                if (!(completions instanceof Array))
+                    completions=[completions];
                 var j=0; var jlim=completions.length;
                 while (j<jlim) {
                     var c=completions[j++];

@@ -21,8 +21,9 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 if (!(fdjt.UI.CoHi)) fdjt.UI.CoHi={classname: "cohi"};
 if (!(fdjt.UI.AutoPrompt)) fdjt.UI.AutoPrompt={};
@@ -62,6 +63,7 @@ if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
             var elts=document.getElementsByName(newname);
             n=elts.length, i=0;
             while (i<n) fdjtDOM.addClass(elts[i++],classname);}}
+    fdjtUI.CoHi.highlight=highlight;
     
     fdjtUI.CoHi.onmouseover=function cohi_onmouseover(evt,classname_arg){
         var target=fdjtDOM.T(evt);
@@ -847,10 +849,10 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
 
     fdjt.UI.Delay=function(interval,name,fcn){
-        window.setTimeout(fcn,interval);};
+        setTimeout(fcn,interval);};
     fdjt.UI.Delayed=function(fcn,interval){
         if (!(interval)) interval=25;
-        window.setTimeout(fcn,interval);};})();
+        setTimeout(fcn,interval);};})();
 
 /* Triggering submit events */
 
@@ -975,6 +977,7 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
+    /* global setInterval, false, clearInterval: false */
 
     function ImageSwap(img,interval){
         if (typeof img==='string') img=fdjtID(img);
@@ -988,12 +991,10 @@ fdjt.UI.ProgressBar=(function(){
         if (!(img.defaultsrc)) img.defaultsrc=img.src;
         var images=(img.getAttribute('data-images')).split(';');
         if (images.length===0) return false;
-        else if (images.length===1) {
-            img.src=images[0];
-            return false;}
         var counter=0;
         return setInterval(function(){
-            img.src=images[counter++];
+            if (img.src===images[counter]) counter++;
+            else img.src=images[counter++];
             if (counter>=images.length) counter=0;},
                            interval);}
             
@@ -1186,6 +1187,7 @@ fdjt.UI.ProgressBar=(function(){
 
 (function(){
     
+    "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtLog=fdjt.Log;
     var fdjtUI=fdjt.UI;
