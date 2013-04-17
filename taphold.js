@@ -157,6 +157,11 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         return dispatchEvent(target,"taptap",evt);}
     function tapheld(target,evt){
         return dispatchEvent(target,"taphold",evt);}
+    function swiped(target,evt,sx,sy,cx,cy){
+        var dx=cx-sx, dy=cy-sy;
+        return dispatchEvent(target,"swipe",evt,{
+            startX: sx,startY: sy,endX: cx,endY: cy,
+            deltaX: dx,deltaY: dy});}
     
     function startpress(evt,holdthresh){
         evt=evt||event;
@@ -313,6 +318,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 abortpress(evt);
                 touched=th_timer=pressed=th_target=false;
                 th_targets=[];
+                swiped(target,evt,start_x,start_y,touch_x,touch_y);
                 return;}
             else if (trace_taphold)
                 fdjtLog("TapHold/moved s=%d,%d t=%d,%d d=%d thresh=%o",

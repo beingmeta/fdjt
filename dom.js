@@ -115,7 +115,7 @@ fdjt.DOM=
                 return domappend(node,content.toDOM());
             else if (content.toHTML)
                 return domappend(node,content.toHTML());
-            else if ((content.length)&&(i<content.length)) {
+            else if ((content.length)&&((!(i))||(i<content.length))) {
                 var frag=(((window.DocumentFragment)&&
                            (node instanceof window.DocumentFragment))?
                           (node):(document.createDocumentFragment()));
