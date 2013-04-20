@@ -1779,13 +1779,16 @@ fdjt.CodexLayout=
         
         CodexLayout.clearLayouts=function(keepidb){
             var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
-            if (!(layouts)) return;
-            var i=0, lim=layouts.length; while (i<lim) {
-                dropLayout(layouts[i++]);}
+            if (layouts) {
+                var i=0, lim=layouts.length; while (i<lim) {
+                    dropLayout(layouts[i++]);}
+                fdjtState.dropLocal("fdjtCodex.layouts");}
             if ((layoutDB)&&(!(keepidb))) {
-                var req=window.indexedDB.open("codexlayout",1);
-                req.deleteDatabase();}
-            fdjtState.dropLocal("fdjtCodex.layouts");}
+                if (window.indexedDB.deleteDatabase)
+                    window.indexedDB.deleteDatabase("codexlayout");
+                else {
+                    var req=window.indexedDB.open("codexlayout",1);
+                    req.deleteDatabase();}}};
 
         return CodexLayout;})();
 
