@@ -2310,7 +2310,7 @@ fdjt.DOM=
                 fdjtDOM.transitionEnd = e.type;
                 var i=0, lim=transition_events.length;
                 while (i<lim) {
-                    if (div)
+                    if ((div)&&(div.removeEventListener))
                         div.removeEventListener(
                             transition_events[i++],handler);
                     else i++;}};
