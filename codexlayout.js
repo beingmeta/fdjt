@@ -834,7 +834,17 @@ fdjt.CodexLayout=
                                              blocks,terminals,styles);}
                             if (blocks.length===total_blocks)
                                 terminals[loc]=true;}
-                        else terminals[loc]=true;}}
+                        else terminals[loc]=true;}
+                    else if ((style.position==='static')&&(node.tagName==='A')) {
+                        var anchor_elts=node.childNodes;
+                        var j=0; var n_elts=anchor_elts.length;
+                        while (j<n_elts) {
+                            var child=anchor_elts[j++];
+                            if (child.nodeType!==1) continue;
+                            var style=getStyle(child);
+                            if (style.display!=='inline')
+                                gatherBlocks(child,blocks,terminals,styles);}}
+                    else {}}
 
                 
                 function firstGChild(ancestor,descendant){
