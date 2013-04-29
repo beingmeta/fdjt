@@ -385,8 +385,8 @@ fdjt.CodexLayout=
                 layout.container.getElementsByClassName("codexrelocated"));
             if ((moved)&&(moved.length)) {
                 layout.logfn(
-                    "Restoring original layout of %d nodes and %d texts",
-                    moved.length);
+                    "Reverting layout of %d nodes and %d split texts",
+                    moved.length,textsplits.length);
                 i=0, lim=moved.length;
                 while (i<lim)
                     restoreNode(moved[i++],layout,crumbs,textsplits);}
@@ -1722,6 +1722,7 @@ fdjt.CodexLayout=
                 var db=event.target.result;
                 fdjtLog("Using existing indexedDB layout cache");
                 CodexLayout.layoutDB=layoutDB=db;
+                CodexLayout.cache=7;
                 if (ondbinit) ondbinit();};
             req.onupgradeneeded=function(event) {
                 var db=event.target.result;
@@ -1761,13 +1762,13 @@ fdjt.CodexLayout=
                     fdjtLog("Layout %s cached",layout_id);};}
             else Codex.layoutDB=layoutDB=window.localStorage||false;}
         CodexLayout.cacheLayout=cacheLayout;
-        function dropLayout(layout_id,content){
+        function dropLayout(layout_id){
             if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"],"readwrite");
                 var storage=txn.objectStore("layouts");
                 var req=storage.delete(layout_id);
                 req.onsuccess=function(event){fdjtLog("Layout %s removed",layout_id);};}
-            else fdjtState.setLocal(layout_id,content);}
+            else fdjtState.dropLocal(layout_id);}
         CodexLayout.dropLayout=dropLayout;
         function fetchLayout(layout_id,callback){
             if (typeof layoutDB === "undefined") 
