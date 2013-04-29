@@ -184,12 +184,13 @@ fdjt.Time=
             return slicefn();}
         fdjtTime.timeslice=timeslice;
 
-        function slowmap(fn,vec,watch,done,slice,space){
+        function slowmap(fn,vec,watch,done,slice,space,watch_slice){
             var i=0; var lim=vec.length; var chunks=0;
             var used=0; var zerostart=fdjtTime();
             var timer=false;
             if (!(slice)) slice=100;
             if (!(space)) space=slice;
+            if (!(watch_slice)) watch_slice=0;
             var stepfn=function(){
                 var started=fdjtTime(); var now=started;
                 var stopat=started+slice;
@@ -197,9 +198,10 @@ fdjt.Time=
                                  zerostart);
                 while ((i<lim)&&((now=fdjtTime())<stopat)) {
                     var elt=vec[i];
-                    if (watch) watch('element',i,lim,elt,used,now-zerostart);
+                    if ((watch)&&(watch_slice)&&((i%watch_slice)===0))
+                        watch('element',i,lim,elt,used,now-zerostart);
                     fn(elt);
-                    if (watch)
+                    if ((watch)&&(watch_slice)&&((i%watch_slice)===0))
                         watch('after',i,lim,elt,used+(fdjtTime()-started),
                               zerostart,fdjtTime()-now);
                     i++;}
