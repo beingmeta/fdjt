@@ -318,7 +318,7 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
             else return;
             if ((start)&&(end)) this.setRange(start,end);};
 
-        TextSelect.prototype.getString=function(start,end,under){
+        TextSelect.prototype.getString=function(start,end){
             if (!(start)) start=this.start; if (!(end)) end=this.end;
             var wrappers=this.wrappers; 
             var combine=[]; var prefix=this.prefix; var wpos=-1;

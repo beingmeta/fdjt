@@ -22,7 +22,7 @@
 
 */
 
-/* global setTimeout: false, clearTimeout: false */
+/* global setTimeout: false */
 
 //var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
@@ -585,7 +585,7 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.exportValue=function(val){
             return exportValue(val,this);};
         
-        RefDB.prototype.load=function loadRefs(refs,callback){
+        RefDB.prototype.load=function loadRefs(refs,callback,args){
             if (!(this.storage)) return;
             else if (this.storage instanceof Storage) {
                 if (!(refs)) refs=[].concat(this.allrefs);
@@ -626,28 +626,35 @@ if (!(fdjt.RefDB)) {
                             warn("No item stored for %s",ref._id);
                         else ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);},
                                      needrefs,false,
-                                     function(){if (callback) callback();});}
-                else if (callback) callback();
+                                     function(){if (callback) {
+                                         if (args) callback.apply(null,args);
+                                         else callback();}});}
+                else if (callback) {
+                    if (args) callback.apply(null,args);
+                    else callback();}
                 else {}}
             else if (this.storage instanceof indexedDB) {}
             else {}};
-        RefDB.prototype.loadref=function loadRef(ref,callback){
+        RefDB.prototype.loadref=function loadRef(ref,callback,args){
             if (typeof ref === "string") ref=this.ref(ref);
-            if (ref._live) {if (callback) callback();}
-            else this.load(ref,callback);
+            if (ref._live) {
+                if (callback) {
+                    if (args) callback.call(null,args);
+                    else callback();}}
+            else this.load(ref,callback,args);
             return ref;};
-        Ref.prototype.load=function loadRef(callback) {
+        Ref.prototype.load=function loadRef(callback,args) {
             if (this._live) return this;
             else {
-                this._db.load(this,callback);
+                this._db.load(this,callback,args);
                 return this;}};
-        RefDB.load=function RefDBload(spec,dbtype,callback){
+        RefDB.load=function RefDBload(spec,dbtype,callback,args){
             if (typeof spec === "string") {
                 var ref=RefDB.resolve(spec,false,(dbtype||RefDB),true);
-                if (ref) return ref.load(callback);
+                if (ref) return ref.load(callback,args);
                 else throw {error: "Couldn't resolve "+spec};}
             else if (spec instanceof Ref)
-                return spec.load(callback);
+                return spec.load(callback,args);
             else if (spec instanceof Array) {
                 var loads={}, dbs=[]; var i=0, lim=spec.length;
                 while (i<lim) {
@@ -663,7 +670,7 @@ if (!(fdjt.RefDB)) {
                         dbs.push(db);}}
                 i=0, lim=dbs.length; while (i<lim) {
                     var loadfrom=dbs[i++];
-                    loadfrom.load(loads[loadfrom.name]);}
+                    loadfrom.load(loads[loadfrom.name],args);}
                 return loads;}
             else return false;};
         

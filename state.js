@@ -145,12 +145,12 @@ fdjt.State=
 
         /* Local storage (persists between sessions) */
 
-        function setLocal(name,val,unparse,unique){
+        function setLocal(name,val,unparse){
             if (!(name)) throw { error: "bad name",name: name};
             if (unparse) val=JSON.stringify(val);
             if (window.localStorage) {
                 if (name instanceof RegExp) {
-                    var keys=[]; var count=0;
+                    var keys=[];
                     var storage=window.localStorage;
                     var i=0; var lim=storage.length;
                     while (i<lim) {
@@ -165,7 +165,6 @@ fdjt.State=
             if (!(name)) throw { error: "bad name",name: name};
             else if (window.localStorage) {
                 if (name instanceof RegExp) {
-                    var result={}; var count=0;
                     var storage=window.localStorage;
                     var i=0; var lim=storage.length;
                     while (i<lim) {
@@ -201,7 +200,7 @@ fdjt.State=
         function dropLocal(name){
             if (window.localStorage) {
                 if (name instanceof RegExp) {
-                    var drop=[]; var count=0;
+                    var drop=[];
                     var storage=window.localStorage;
                     var i=0; var lim=storage.length;
                     while (i<lim) {
