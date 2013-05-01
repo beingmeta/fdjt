@@ -31,7 +31,6 @@ fdjt.DOM=
         "use strict";
         var usenative=true;
         var fdjtString=fdjt.String;
-        var isEmpty=fdjtString.isEmpty;
         var fdjtLog=fdjt.Log;
 
         function fdjtDOM(spec){

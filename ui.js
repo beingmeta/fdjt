@@ -977,7 +977,7 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
-    /* global setInterval, false, clearInterval: false */
+    /* global setInterval: false, clearInterval: false */
 
     function ImageSwap(img,interval){
         if (typeof img==='string') img=fdjtID(img);
