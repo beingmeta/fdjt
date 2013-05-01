@@ -385,8 +385,8 @@ fdjt.CodexLayout=
                 layout.container.getElementsByClassName("codexrelocated"));
             if ((moved)&&(moved.length)) {
                 layout.logfn(
-                    "Restoring original layout of %d nodes and %d texts",
-                    moved.length);
+                    "Reverting layout of %d nodes and %d split texts",
+                    moved.length,textsplits.length);
                 i=0, lim=moved.length;
                 while (i<lim)
                     restoreNode(moved[i++],layout,crumbs,textsplits);}
@@ -834,7 +834,17 @@ fdjt.CodexLayout=
                                              blocks,terminals,styles);}
                             if (blocks.length===total_blocks)
                                 terminals[loc]=true;}
-                        else terminals[loc]=true;}}
+                        else terminals[loc]=true;}
+                    else if ((style.position==='static')&&(node.tagName==='A')) {
+                        var anchor_elts=node.childNodes;
+                        var j=0; var n_elts=anchor_elts.length;
+                        while (j<n_elts) {
+                            var child=anchor_elts[j++];
+                            if (child.nodeType!==1) continue;
+                            var style=getStyle(child);
+                            if (style.display!=='inline')
+                                gatherBlocks(child,blocks,terminals,styles);}}
+                    else {}}
 
                 
                 function firstGChild(ancestor,descendant){
@@ -1712,6 +1722,7 @@ fdjt.CodexLayout=
                 var db=event.target.result;
                 fdjtLog("Using existing indexedDB layout cache");
                 CodexLayout.layoutDB=layoutDB=db;
+                CodexLayout.cache=7;
                 if (ondbinit) ondbinit();};
             req.onupgradeneeded=function(event) {
                 var db=event.target.result;
@@ -1751,13 +1762,13 @@ fdjt.CodexLayout=
                     fdjtLog("Layout %s cached",layout_id);};}
             else Codex.layoutDB=layoutDB=window.localStorage||false;}
         CodexLayout.cacheLayout=cacheLayout;
-        function dropLayout(layout_id,content){
+        function dropLayout(layout_id){
             if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"],"readwrite");
                 var storage=txn.objectStore("layouts");
                 var req=storage.delete(layout_id);
                 req.onsuccess=function(event){fdjtLog("Layout %s removed",layout_id);};}
-            else fdjtState.setLocal(layout_id,content);}
+            else fdjtState.dropLocal(layout_id);}
         CodexLayout.dropLayout=dropLayout;
         function fetchLayout(layout_id,callback){
             if (typeof layoutDB === "undefined") 
@@ -1779,13 +1790,16 @@ fdjt.CodexLayout=
         
         CodexLayout.clearLayouts=function(keepidb){
             var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
-            if (!(layouts)) return;
-            var i=0, lim=layouts.length; while (i<lim) {
-                dropLayout(layouts[i++]);}
+            if (layouts) {
+                var i=0, lim=layouts.length; while (i<lim) {
+                    dropLayout(layouts[i++]);}
+                fdjtState.dropLocal("fdjtCodex.layouts");}
             if ((layoutDB)&&(!(keepidb))) {
-                var req=window.indexedDB.open("codexlayout",1);
-                req.deleteDatabase();}
-            fdjtState.dropLocal("fdjtCodex.layouts");}
+                if (window.indexedDB.deleteDatabase)
+                    window.indexedDB.deleteDatabase("codexlayout");
+                else {
+                    var req=window.indexedDB.open("codexlayout",1);
+                    req.deleteDatabase();}}};
 
         return CodexLayout;})();
 

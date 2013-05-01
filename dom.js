@@ -115,7 +115,7 @@ fdjt.DOM=
                 return domappend(node,content.toDOM());
             else if (content.toHTML)
                 return domappend(node,content.toHTML());
-            else if ((content.length)&&(i<content.length)) {
+            else if ((content.length)&&((!(i))||(i<content.length))) {
                 var frag=(((window.DocumentFragment)&&
                            (node instanceof window.DocumentFragment))?
                           (node):(document.createDocumentFragment()));
@@ -2314,7 +2314,7 @@ fdjt.DOM=
                 fdjtDOM.transitionEnd = e.type;
                 var i=0, lim=transition_events.length;
                 while (i<lim) {
-                    if (div)
+                    if ((div)&&(div.removeEventListener))
                         div.removeEventListener(
                             transition_events[i++],handler);
                     else i++;}};
