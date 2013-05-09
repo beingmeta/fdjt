@@ -198,10 +198,12 @@ fdjt.Time=
                                  zerostart);
                 while ((i<lim)&&((now=fdjtTime())<stopat)) {
                     var elt=vec[i];
-                    if ((watch)&&(watch_slice)&&((i%watch_slice)===0))
+                    if ((watch)&&
+                        (((watch_slice)&&((i%watch_slice)===0))||(i+1===lim)))
                         watch('element',i,lim,elt,used,now-zerostart);
                     fn(elt);
-                    if ((watch)&&(watch_slice)&&((i%watch_slice)===0))
+                    if ((watch)&&
+                        (((watch_slice)&&((i%watch_slice)===0))||(i+1===lim)))
                         watch('after',i,lim,elt,used+(fdjtTime()-started),
                               zerostart,fdjtTime()-now);
                     i++;}
@@ -214,14 +216,11 @@ fdjt.Time=
                 else {
                     now=fdjtTime(); used=used+(now-started);
                     clearTimeout(timer); timer=false;
-                    if (done) {
-                        if (watch) watch('finishing',i,lim,chunks,used,
-                                         zerostart);
-                        done();}
+                    if (watch) watch('finishing',i,lim,chunks,used,zerostart);
+                    if (done) done();
                     var donetime=((done)&&(fdjtTime()-now));
                     now=fdjtTime(); used=used+(now-started);
-                    if (watch) watch('done',i,lim,chunks,used,
-                                     zerostart,donetime);}};
+                    if (watch) watch('done',i,lim,chunks,used,zerostart,donetime);}};
             timer=setTimeout(stepfn,space);}
         fdjtTime.slowmap=slowmap;
 
