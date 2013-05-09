@@ -897,8 +897,8 @@ fdjt.CodexLayout=
                         // If we really need to create a new page, do so,
                         //  starting by dropping the curpage class from the
                         //  current page
-                        if (page) dropClass(page,"curpage");
-                        layout.page=page=fdjtDOM("div.codexpage.curpage");
+                        if (page) dropClass(page,"codexshowpage");
+                        layout.page=page=fdjtDOM("div.codexpage.codexshowpage");
                         if (!(pagerule)) {
                             page.style.height=page_height+'px';
                             page.style.width=page_width+'px';}
@@ -1458,7 +1458,7 @@ fdjt.CodexLayout=
                     addClass(completed,"codexoversizepage");
                 else {}
                 if (this.pagedone) this.pagedone(completed);
-                dropClass(completed,"curpage");}
+                dropClass(completed,"codexshowpage");}
             this.finishPage=finishPage;
 
             /* Finishing the overall layout */
@@ -1469,9 +1469,12 @@ fdjt.CodexLayout=
                         var dup=dups[dupid];
                         dup.className=dup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
-                dropClass(page,"curpage");
+                if (page) dropClass(page,"codexshowpage");
                 var i=0; var lim= pages.length;
-                while (i<lim) this.finishPage(pages[i++]);
+                while (i<lim) {
+                    var p=pages[i++];
+                    addClass(p,"codexshowpage");
+                    this.finishPage(p);}
                 layout.done=fdjtTime();}
             this.Finish=Finish;
 
