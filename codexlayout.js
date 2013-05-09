@@ -823,9 +823,8 @@ fdjt.CodexLayout=
                         var loc=blocks.length;
                         blocks.push(node);
                         styles.push(style);
-                        if (avoidBreakInside(node,style))
-                            terminals[loc]=true;
-                        else if ((disp==='block')||(disp==='table')) {
+                        // if (avoidBreakInside(node,style)) terminals[loc]=true; else
+                        if ((disp==='block')||(disp==='table')) {
                             var children=node.childNodes;
                             var total_blocks=blocks.length;
                             var i=0; var len=children.length;
@@ -897,8 +896,8 @@ fdjt.CodexLayout=
                         // If we really need to create a new page, do so,
                         //  starting by dropping the curpage class from the
                         //  current page
-                        if (page) dropClass(page,"curpage");
-                        layout.page=page=fdjtDOM("div.codexpage.curpage");
+                        if (page) dropClass(page,"codexshowpage");
+                        layout.page=page=fdjtDOM("div.codexpage.codexshowpage");
                         if (!(pagerule)) {
                             page.style.height=page_height+'px';
                             page.style.width=page_width+'px';}
@@ -1425,40 +1424,37 @@ fdjt.CodexLayout=
             /* Finishing the page */
 
             function finishPage(completed) {
-                var bounds=insideBounds(completed);
                 var fullpage=hasClass(completed,"codexfullpage");
-                if (!((page_width)&&(page_height))) {
-                    var geom=getGeom(completed);
-                    if (!(page_width)) page_width=geom.width;
-                    if (!(page_height)) page_height=geom.height;}
-                var oversize=((bounds.right>page_width)||
-                              (bounds.bottom>page_height));
-                var undersize=((fullpage)&&
-                               ((bounds.right<(page_width*0.95))&&
-                                (bounds.bottom<(page_height*0.95))));
-                
-                if (((oversize)||(undersize))&&(scale_pages)) {
-                    var boxed=fdjtDOM("div.codexscalebox",completed.childNodes);
-                    completed.appendChild(boxed);
-                    var scalex=page_width/bounds.right;
-                    var scaley=page_height/bounds.bottom;
-                    var scale=((scalex<scaley)?(scalex):(scaley));
-                    if ((scale<1)||(fullpage)) {
-                        var transform='scale('+scale+','+scale+')';
-                        this.scaledpages.push(boxed);
-                        boxed.style.transform=transform;
-                        boxed.style[fdjtDOM.transform]=transform;
-                        boxed.style.transformOrigin='center top';
-                        boxed.style[fdjtDOM.transformOrigin]='center top';
-                        addClass(completed,"codexscaledpage");}
-                    else if (oversize)
-                        addClass(completed,"codexoversizepage");
+                var oversize=hasClass(completed,"codexoversize");
+                var undersize=false, bounds=false;
+                if (((oversize)||(fullpage))&&(scale_pages)) {
+                    var bounds=insideBounds(completed);
+                    if (!((page_width)&&(page_height))) {
+                        var geom=getGeom(completed);
+                        if (!(page_width)) page_width=geom.width;
+                        if (!(page_height)) page_height=geom.height;}
+                    if ((oversize)||
+                        ((bounds.right<(page_width*0.95))&&
+                         (bounds.bottom<(page_height*0.95)))) {
+                        var boxed=fdjtDOM("div.codexscalebox",completed.childNodes);
+                        completed.appendChild(boxed);
+                        var scalex=page_width/bounds.right;
+                        var scaley=page_height/bounds.bottom;
+                        var scale=((scalex<scaley)?(scalex):(scaley));
+                        scale=Math.floor(scale*10)/10;
+                        if ((scale<1)||(fullpage)) {
+                            var transform='scale('+scale+','+scale+')';
+                            this.scaledpages.push(boxed);
+                            boxed.style.transform=transform;
+                            boxed.style[fdjtDOM.transform]=transform;
+                            boxed.style.transformOrigin='center top';
+                            boxed.style[fdjtDOM.transformOrigin]='center top';
+                           addClass(completed,"codexscaledpage");}
+                        else {}}
                     else {}}
-                else if (oversize)
-                    addClass(completed,"codexoversizepage");
                 else {}
                 if (this.pagedone) this.pagedone(completed);
-                dropClass(completed,"curpage");}
+                dropClass(completed,"codexshowpage");}
             this.finishPage=finishPage;
 
             /* Finishing the overall layout */
@@ -1469,9 +1465,12 @@ fdjt.CodexLayout=
                         var dup=dups[dupid];
                         dup.className=dup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
-                dropClass(page,"curpage");
+                if (page) dropClass(page,"codexshowpage");
                 var i=0; var lim= pages.length;
-                while (i<lim) this.finishPage(pages[i++]);
+                while (i<lim) {
+                    var p=pages[i++];
+                    addClass(p,"codexshowpage");
+                    this.finishPage(p);}
                 layout.done=fdjtTime();}
             this.Finish=Finish;
 
