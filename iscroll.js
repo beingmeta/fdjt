@@ -1063,6 +1063,14 @@
              that.scrollTo(x, y, time);
          },
 
+         getScrollX: function () {
+             var that=this;
+             return -that.x;},
+
+         getScrollY: function () {
+             var that=this;
+             return -that.y;},
+
          disable: function () {
              this.stop();
              this._resetPos(0);
