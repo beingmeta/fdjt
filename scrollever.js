@@ -79,6 +79,7 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
             if (busy) return;
             if ((!(url))||(!(container))||(off>=limit)) {
                 if (timer) clearTimeout(timer);
+                fdjtDOM.addClass(document.body,"scrolleverdone");
                 return;}
             else busy=true;
             var call=url.replace("-off-",fdjtString(off+win));
