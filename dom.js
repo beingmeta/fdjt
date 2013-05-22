@@ -748,7 +748,7 @@ fdjt.DOM=
             
         /* Manipulating the DOM */
 
-        fdjtDOM.replace=function(existing,replacement){
+        fdjtDOM.replace=function(existing,replacement,leaveids){
             var cur=existing;
             if (typeof existing === 'string')
                 if (existing[0]==='#')
@@ -756,7 +756,9 @@ fdjt.DOM=
             else cur=document.getElementById(existing);
             if (cur) {
                 cur.parentNode.replaceChild(replacement,cur);
-                if ((cur.id)&&(!(replacement.id))) replacement.id=cur.id;}
+                if (!(leaveids)) {
+                    if ((cur.id)&&(!(replacement.id)))
+                        replacement.id=cur.id;}}
             else fdjtLog.uhoh("Can't find %o to replace it with %o",
                               existing,replacement);};
         function remove_node(node){

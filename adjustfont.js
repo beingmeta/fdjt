@@ -212,6 +212,7 @@ fdjt.UI.adjustFont=
             var classes=adjustFont.classes, spec;
             if (classes.length===0) return [];
             if (!(elt)) elt=document.body;
+            if (!(elt)) return [];
             if (elt.querySelectorAll) {
                 spec=classes2spec(classes);
                 return elt.querySelectorAll(spec);}
