@@ -51,6 +51,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
     // (where we do tap and hold)
     var noDefault=fdjtUI.noDefault;
 
+    var cleared=0;
+
     var keynums={
         shift: 16, alt: 18, control: 17, meta: 224,
         os: 91, altgr: 225, fn: -1,
@@ -61,59 +63,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             var akeynum=keynums[akeyname];
             if ((typeof akeynum === 'number')&&(akeynum>0))
                 keynames[akeynum]=akeyname;}
-    var holdkey_down=false;
-    var onhold=[], onrelease=[];
-    
-    function taphold_keyup(evt){
-        evt=evt||event;
-        if (!(TapHold.holdkey)) return;
-        var holdkey=TapHold.holdkey, holdkeynum, holdkeyname;
-        if (!(holdkey)) return;
-        else if (holdkey===true) holdkey="Shift";
-        if (typeof holdkey === 'number') {
-            holdkeyname=keynames[holdkey];
-            holdkeynum=holdkey;}
-        else if (typeof holdkey === 'string') {
-            holdkeynum=keynums[holdkey.toLowerCase()];
-            holdkeyname=holdkey.toLowerCase();}
-        else {
-            fdjtLog.warn("Invalid holdkey specification %s",holdkey);
-            return;}
-        if ((evt.key===holdkeyname)||
-            (evt.keyCode===holdkeynum)||
-            ((evt.getModifierState)&&
-             (evt.getModifierState(holdkeyname)))) {
-            holdkey_down=false;
-            if ((!(holdkey_down))&&(!(mouse_down)))
-                endpress();}}
-
-    function taphold_keydown(evt){
-        evt=evt||event;
-        if (!(TapHold.holdkey)) return;
-        var holdkey=TapHold.holdkey, holdkeynum, holdkeyname;
-        if (!(holdkey)) return;
-        else if (holdkey===true) holdkey="Shift";
-        if (typeof holdkey === 'number') {
-            holdkeyname=keynames[holdkey];
-            holdkeynum=holdkey;}
-        else if (typeof holdkey === 'string') {
-            holdkeynum=keynums[holdkey.toLowerCase()];
-            holdkeyname=holdkey.toLowerCase();}
-        else {
-            fdjtLog.warn("Invalid holdkey specification %s",holdkey);
-            return;}
-        if ((evt.key===holdkeyname)||
-            (evt.keyCode===holdkeynum)||
-            ((evt.getModifierState)&&
-             (evt.getModifierState(holdkeyname)))) {
-            holdkey_down=true;
-            var target=fdjtUI.T(evt);
-            if ((target)&&(target.tagName)&&
-                ((target.tagName==='INPUT')||
-                 (target.tagName==='TEXTAREA')||
-                 (hasParent(target,"input,textarea"))))
-                return;
-            else if (!(touched)) startpress(evt);}}
     
     function getClientX(evt){
         if (typeof evt.clientX === "number") return evt.clientX;
@@ -191,6 +140,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var start_t=false;
         var touch_x=false;
         var touch_y=false;
+        var touch_t=0;
         
         var touchable=elt.getAttribute("data-touchable");
         if (touchable) touchable=fdjtDOM.Selector(touchable);
@@ -297,12 +247,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else if (pressed) {slipped(pressed,evt);}
             if (reticle.live) reticle.highlight(false);
             touched=pressed=tap_target=false;
-            start_x=start_y=start_t=touch_x=touch_y=false;
+            start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
             th_targets=[];
             setTarget(false);}
+
         var mouseout_timer=false;
 
         function taphold_mouseout(evt){
+            evt=evt||event;
             var to=evt.toElement||evt.relatedTarget;
             if (mouseout_timer) return;
             if (!(th_target)) return;
@@ -315,6 +267,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     setTarget(false);},
                                           200);}}
         function taphold_mouseover(evt){
+            evt=evt||event;
             var to=fdjtUI.T(evt);
             if (mouseout_timer) {
                 clearTimeout(mouseout_timer);
@@ -328,9 +281,13 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function taphold_move(evt){
             evt=evt||event;
             var target;
+            if (cleared>start_t) {
+                abortpress(evt);
+                return;}
             // if (target!==th_target) fdjtLog("New target %o",target);
             touch_x=evt.clientX||getClientX(evt);
             touch_y=evt.clientY||getClientY(evt);
+            touch_t=fdjtTime();
             // If touched is false, the tap/hold was aborted somehow
             // fdjtLog("taphold_move touched=%o touch_x=%o touch_y=%o",touched,touch_x,touch_y);
             if (!((touched)||(pressed))) return;
@@ -339,8 +296,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             
             if ((th.trace)||(trace_taphold))
                 fdjtLog("TapHold/move(%s) %o %o -> %o s=%d,%d t=%d,%d, thresh=%o",
-                        (((mouse_down)&&(holdkey_down))?("mk"):
-                         (mouse_down)?("m"):(holdkey_down)?("k"):("")),
+                        ((mouse_down)?("m"):("")),
                         evt,th_target,target,start_x,start_y,
                         touch_x,touch_y,movethresh);
             if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)) {
@@ -372,7 +328,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else {
                 if (reticle.live) reticle.onmousemove(evt);
                 if (th_target) noDefault(evt);}
-            if (!((mouse_down)||(holdkey_down))) {
+            if (!(mouse_down)) {
                 slipped(pressed,evt,{relatedTarget: target});
                 pressed=false;}
             else if ((pressed)&&(th_target!==pressed)) {
@@ -395,6 +351,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (target) target=getParent(target,touchable);
             touch_x=evt.clientX||getClientX(evt)||touch_x;
             touch_y=evt.clientY||getClientY(evt)||touch_y;
+            touch_t=fdjtTime();
             if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
             if ((evt.touches)&&(th_target)) {
                 var cur_holder=getParent(th_target,".tapholder");
@@ -429,37 +386,29 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (fdjtUI.isClickable(evt)) return;
             if (!(touched)) startpress(evt,holdthresh);
             noDefault(evt);}
-        function fakePress(evt,holdthresh){
-            start_x=touch_x=evt.clientX||getClientX(evt);
-            start_y=touch_y=evt.clientY||getClientY(evt);
-            start_t=fdjtET();
-            var target=document.elementFromPoint(start_x,start_y);
-            setTarget(target); th_targets=[target];
-            mouse_down=true;
-            if ((th.trace)||(trace_taphold))
-                fdjtLog("TapHold/fakePress t=%o x=%o y=%o t=%o",
-                        th_target,start_x,start_y,start_t);
-            startpress(evt,holdthresh);}
-        
+
         function taphold_up(evt){
             evt=evt||event;
             if (!(mouse_down)) return;
             mouse_down=false;
+            if (cleared>start_t) {
+                abortpress(evt);
+                return;}
             var target=fdjtUI.T(evt);
             if (target) target=getParent(target,touchable);
             touch_x=evt.clientX||getClientX(evt)||touch_x;
             touch_y=evt.clientY||getClientY(evt)||touch_y;
+            touch_t=fdjtTime();
             if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
             if ((th.trace)||(trace_taphold))
-                fdjtLog("TapHold/up %o tht=%o s=%o,%o,%o t=%o,%o m=%o k=%o ttt=%o",
+                fdjtLog("TapHold/up %o tht=%o s=%o,%o,%o t=%o,%o m=%o ttt=%o",
                         evt,th_target,start_x,start_y,start_t,touch_x,touch_y,
-                        mouse_down,holdkey_down,
-                        taptapthresh||false);
+                        mouse_down,taptapthresh||false);
             if ((evt.touches)&&(evt.touches.length)&&
                 (evt.touches.length>1))
                 return;
             if (fdjtUI.isClickable(evt)) return;
-            if ((!(holdkey_down))&&(!(mouse_down))&&((touched)||(pressed))) {
+            if ((!(mouse_down))&&((touched)||(pressed))) {
                 fdjtUI.cancel(evt);
                 endpress(evt,taptapthresh);}
             else {}}
@@ -508,21 +457,31 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         this.clear=function(){
             if (pressed) slipped(pressed);
             touched=pressed=tap_target=false;
-            touch_x=start_x=touch_y=start_y=start_t=false;
+            touch_t=touch_x=start_x=touch_y=start_y=start_t=false;
             if (th_timer) {clearTimeout(th_timer); th_timer=false;}
             setTarget(false);
             th_targets=[];};
-        
+        this.fakePress=function fakePress(evt,holdthresh){
+            start_x=touch_x=evt.clientX||getClientX(evt);
+            start_y=touch_y=evt.clientY||getClientY(evt);
+            touch_t=start_t=fdjtET();
+            var target=document.elementFromPoint(start_x,start_y);
+            setTarget(target); th_targets=[target];
+            mouse_down=true;
+            if ((th.trace)||(trace_taphold))
+                fdjtLog("TapHold/fakePress t=%o x=%o y=%o t=%o",
+                        th_target,start_x,start_y,start_t);
+            startpress(evt,holdthresh);};
+
         return this;}
-    TapHold.holdkey=16;
+
+    TapHold.clear=function(){
+        cleared=fdjtET();};
 
     TapHold.Trace=function(flag){
         if (typeof flag === "undefined")
             trace_taphold=(!(trace_taphold));
         else trace_taphold=flag;};
-
-    TapHold.keyup=taphold_keyup;
-    TapHold.keydown=taphold_keydown;
 
     return TapHold;})();
 

@@ -47,6 +47,7 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 return -1;}}
 
         var selectors={}; // Maps DOM ids to instances
+        var tapholds={}; // Maps DOM ids to taphold objects
         var serialnum=0;  // Tracks instances
         var trace=false;
 
@@ -82,7 +83,7 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     "Tap or hold/drag to move the ends of the text range";
                 selectors[wrapper.id]=sel;
                 wrappers.push(wrapper);
-                addHandlers(wrapper,sel,opts);
+                tapholds[wrapper.id]=addHandlers(wrapper,sel,opts);
                 // Replace the node with the wrapper and then update
                 // the node (replacing words with spans) while it's
                 // outside of the DOM for performance.
@@ -108,6 +109,15 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     return parseInt(id.slice(stripid),10);
                 else return false;};
             
+            this.startEvent=function startEvent(evt){
+                var target=fdjtUI.T(evt);
+                var j=0, n_wrappers=wrappers.length; while (j<n_wrappers) {
+                    var wrapper=wrappers[j++];
+                    if ((hasParent(wrapper,target))||(hasParent(target,wrapper))) {
+                        var taphold=tapholds[wrapper.id];
+                        taphold.fakePress(evt);
+                        return;}}};
+
             return this;}
 
         TextSelect.prototype.toString=function(){
@@ -460,9 +470,10 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var fortouch=((typeof opts.fortouch !== "undefined")?
                           (opts.fortouch):
                           (TextSelect.fortouch||false));
-            fdjtUI.TapHold(container,fortouch,
-                           ((opts)&&(opts.holdthresh)),
-                           ((opts)&&(opts.movethresh)));
+            var taphold=
+                fdjtUI.TapHold(container,fortouch,
+                               ((opts)&&(opts.holdthresh)),
+                               ((opts)&&(opts.movethresh)));
             fdjtDOM.addListener(container,"tap",
                                 ((opts)&&(opts.ontap))||
                                 tap_handler);
@@ -473,7 +484,8 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 fdjtDOM.addListener(
                     container,"release",
                     get_release_handler(opts.onrelease));
-            else fdjtDOM.addListener(container,"release",release_handler);}
+            else fdjtDOM.addListener(container,"release",release_handler);
+            return taphold;}
 
         TextSelect.Trace=function(flag){
             if (typeof flag === "undefined")
