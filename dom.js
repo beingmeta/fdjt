@@ -2284,8 +2284,10 @@ fdjt.DOM=
                 var end=get_text_pos(node,absloc+match[0].length,0);
                 if ((!start)||(!end)) return false;
                 var range=document.createRange();
-                range.setStart(start.node,start.off);
-                range.setEnd(end.node,end.off);
+                if (typeof start === "number") range.setStart(node,start);
+                else range.setStart(start.node,start.off);
+                if (typeof end === "number") range.setEnd(node,end);
+                else range.setEnd(end.node,end.off);
                 results.push(range);
                 count--;
                 off=match.index+match[0].length;
