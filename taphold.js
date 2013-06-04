@@ -281,7 +281,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function taphold_move(evt){
             evt=evt||event;
             var target;
-            if (cleared>start_t) {
+            if ((pressed)&&(cleared>start_t)) {
                 abortpress(evt);
                 return;}
             // if (target!==th_target) fdjtLog("New target %o",target);
