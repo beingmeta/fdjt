@@ -1995,10 +1995,17 @@ fdjt.DOM=
             else fdjtLog.warn('This node never listens: %o',node);}
         fdjtDOM.addListener=addListener;
 
+        function defListeners(handlers,defs){
+            if ((handlers)&&(defs))
+                for (var evtype in defs) {
+                    if (defs.hasOwnProperty(evtype))
+                        handlers[evtype]=defs[evtype];}}
+        fdjtDOM.defListeners=defListeners;
+
         function addListeners(node,handlers){
             if (handlers) 
                 for (var evtype in handlers) {
-                    if (handlers[evtype])
+                    if (handlers.hasOwnProperty(evtype))
                         addListener(node,evtype,handlers[evtype]);}}
         fdjtDOM.addListeners=addListeners;
 
