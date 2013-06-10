@@ -814,7 +814,8 @@ fdjt.CodexLayout=
                     if (node.nodeType!==1) return;
                     if (node.codexui) return;
                     var style=getStyle(node); 
-                    if ((atomic)&&(atomic.match(node))) {
+                    if (((atomic)&&(atomic.match(node)))||
+                        (avoidBreakInside(node,style))) {
                         blocks.push(node); styles.push(node);
                         terminals.push(node);
                         return;}
@@ -823,7 +824,6 @@ fdjt.CodexLayout=
                         var loc=blocks.length;
                         blocks.push(node);
                         styles.push(style);
-                        // if (avoidBreakInside(node,style)) terminals[loc]=true; else
                         if ((disp==='block')||(disp==='table')) {
                             var children=node.childNodes;
                             var total_blocks=blocks.length;
@@ -844,12 +844,12 @@ fdjt.CodexLayout=
                             if (style.display!=='inline')
                                 gatherBlocks(child,blocks,terminals,styles);}}
                     else {}}
-
                 
                 function firstGChild(ancestor,descendant){
                     var first=ancestor.firstChild;
                     while (first) {
-                        if ((first.nodeType===3)&&(first.nodeValue.search(/\S/)>=0))
+                        if ((first.nodeType===3)&&
+                            (first.nodeValue.search(/\S/)>=0))
                             return false;
                         else if (first.nodeType===1) break;
                         else first=first.nextSibling;}
@@ -1032,6 +1032,7 @@ fdjt.CodexLayout=
                         if (i===1) return node;
                         else return children.slice(i-1);}
                     else if ((childtype===1)&&
+                             (!(isTextyNode(child)))&&
                              (!((hasContent(node,true,false,child)))))
                         // If there isn't any content between the node
                         // and the child, we just push the whole node
@@ -1675,7 +1676,7 @@ fdjt.CodexLayout=
                         fdjtLog.warn("weird page number: %o",num);
                     else {
                         var info={block: block};
-                        if (block.id) info.ID=block.id;
+                        if (block.id) info.id=block.id;
                         if (block.className) info.className=block.className;
                         if (block.getAttribute("data-baseid"))
                             info.baseid=block.getAttribute("data-baseid");
