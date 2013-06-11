@@ -55,7 +55,8 @@ fdjt.Ajax=
 
         var trace_ajax=false;
         
-        function fdjtAjax(success_callback,base_uri,args,other_callback){
+        function fdjtAjax(success_callback,base_uri,args,other_callback,
+                          headers){
             var req=new XMLHttpRequest();
             var uri=((args)?(compose_uri(base_uri,args)):(base_uri));
             req.withCredentials=true;
@@ -64,6 +65,10 @@ fdjt.Ajax=
                     success_callback(req);}
                 else if (other_callback) other_callback(req);};
             req.open("GET",uri);
+            if (headers) {
+                for (var key in headers)
+                    if (headers.hasOwnProperty(key))
+                        req.setRequestHeader(key,headers[key]);}
             req.send(null);
             return req;}
 
