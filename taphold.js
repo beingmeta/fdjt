@@ -204,7 +204,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 touched=false;}),
                                 holdthresh||TapHold.interval||100);}
         function endpress(evt){
-            if ((!(pressed))&&(!(touched))&&(!(th_timer))) return;
+            if ((!(pressed))&&(!(touched))&&(!(th_timer))) {
+                start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
+                return;}
             if ((th.trace)||(trace_taphold))
                 fdjtLog("TapHold/endpress %o t=%o p=%o tch=%o tm=%o ttt=%o/%o",
                         evt,th_target,pressed,touched,th_timer,
@@ -413,7 +415,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((!(mouse_down))&&((touched)||(pressed))) {
                 fdjtUI.cancel(evt);
                 endpress(evt,taptapthresh);}
-            else {}}
+            else {}
+            start_x=start_y=start_t=touch_x=touch_y=touch_t=false;}
 
         function taphold_click(evt){
             var now=fdjtTime();
