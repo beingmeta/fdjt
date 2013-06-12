@@ -94,8 +94,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 if (also.hasOwnProperty(prop)) {
                     evt[prop]=also[prop];}}}
         if (trace_taphold)
-            fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o",
-                    etype,target,tx,ty,orig||"scratch");
+            fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o given %o",
+                    etype,target,tx,ty,orig||"scratch",also);
         if (orig) cancel(orig);
         if ((!target)||(!(hasParent(target,document.body))))
             target=document.elementFromPoint(tx,ty);
@@ -169,7 +169,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             return dispatchEvent(target,"taphold",evt,touch_x,touch_y);}
         function swiped(target,evt,sx,sy,cx,cy){
             var dx=cx-sx, dy=cy-sy;
-            return dispatchEvent(target,"swipe",evt,touch_x,touch_y,
+            return dispatchEvent(target,"swipe",evt,cx,cy,
                                  {startX: sx,startY: sy,endX: cx,endY: cy,
                                   deltaX: dx,deltaY: dy});}
         
@@ -247,7 +247,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else if (pressed) {slipped(pressed,evt);}
             if (reticle.live) reticle.highlight(false);
             touched=pressed=tap_target=false;
-            start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
+            // start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
             th_targets=[];
             setTarget(false);}
 
@@ -351,6 +351,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (target) target=getParent(target,touchable);
             touch_x=evt.clientX||getClientX(evt)||touch_x;
             touch_y=evt.clientY||getClientY(evt)||touch_y;
+            if (!(start_x)) {start_x=touch_x; start_y=touch_y;}
             touch_t=fdjtTime();
             if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
             if ((evt.touches)&&(th_target)) {
