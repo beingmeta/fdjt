@@ -354,6 +354,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             touch_t=fdjtTime();
             if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
             if ((evt.touches)&&(th_target)) {
+                var holder=getParent(target,".tapholder");
                 var cur_holder=getParent(th_target,".tapholder");
                 if ((th.trace)||(trace_taphold) )
                     fdjtLog("Second touch on %o (in %o) after %o (in %o)",
