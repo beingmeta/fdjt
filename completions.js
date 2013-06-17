@@ -83,7 +83,7 @@ if (!(fdjt.UI)) fdjt.UI={};
         this.dom=dom||false; this.input=input||false;
         this.options=options||default_options;
         this.nodes=[]; this.values=[]; this.serial=++serial;
-        this.cues=[]; this.displayed=[];
+        this.cues=[]; this.displayed=[]; this.known={};
         this.prefixtree={strings: []}; this.bykey={};
         this.byvalue=new ValueMap();
         this.selected=false; this.selclass=false;
@@ -177,9 +177,9 @@ if (!(fdjt.UI)) fdjt.UI={};
             key=completion.key||getKey(completion);
         if (!(value))
             value=(completion.value)||(completion.getAttribute('value'))||key;
-        var pos=position(c.nodes,completion);
-        if (pos<0) {
+        if (completion._seen) {
             c.nodes.push(completion);
+            completion._seen=true;
             if (value) {
                 c.values.push(value);
                 c.byvalue.add(value,completion);}}
