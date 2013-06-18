@@ -204,7 +204,9 @@ fdjt.Ajax=
             req.onreadystatechange=function () {
                 if (trace_ajax)
                     fdjtLog("Got callback (%d,%d) %o for %o, callback=%o",
-                            req.readyState,req.status,req,ajax_uri,callback);
+                            req.readyState,
+                            ((req.readyState===4)&&(req.status)),
+                            req,ajax_uri,callback);
                 if ((req.readyState === 4) && (req.status>=200) &&
                     (req.status<300)) {
                     if ((callback)&&(trace_ajax))
@@ -217,7 +219,8 @@ fdjt.Ajax=
                 else {
                     if (trace_ajax)
                         fdjtLog("Got callback (%d,%d) %o for %o, not calling %o",
-                                req.readyState,req.status,req,ajax_uri,callback);
+                                req.readyState,((req.readyState===4)&&(req.status)),
+                                req,ajax_uri,callback);
                     callback_run=false;}};
             if (cbctype) req.setRequestHeader("Accept",cbctype);
             req.withCredentials=true;
@@ -232,7 +235,8 @@ fdjt.Ajax=
             if ((syncp) && (!(callback_run))) {
                 if (trace_ajax)
                     fdjtLog("Running callback (rs=%d,status=%d) %o for %o, calling %o",
-                            req.readyState,req.status,req,ajax_uri,callback);
+                            req.readyState,((req.readyState===4)&&(req.status)),
+                            req,ajax_uri,callback);
                 if ((req.readyState === 4) && (req.status>=200) &&
                     (req.status<300)) {
                     fdjtDOM.dropClass(form,"submitting");
