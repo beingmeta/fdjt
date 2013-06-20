@@ -2037,7 +2037,8 @@ fdjt.DOM=
                     nosvg=false;
                 else nosvg=true;}
             if (nosvg) addClass(document.body,"NOSVG");
-            else dropClass(document.body,"NOSVG");}
+            else dropClass(document.body,"NOSVG");
+            return (!(nosvg));}
         
         function checkChildren(){
             havechildren=((document)&&
@@ -2075,6 +2076,7 @@ fdjt.DOM=
         function prefSVG(){
             if (!(nosvg)) useSVG();}
         fdjtDOM.prefSVG=prefSVG;
+        fdjtDOM.checkSVG=checkSVG;
 
         fdjtDOM.init=fdjt.Init;
         fdjtDOM.addInit=fdjt.addInit;

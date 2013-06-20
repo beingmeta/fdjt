@@ -235,8 +235,8 @@ fdjt.CodexLayout=
                 //  classes
                 return dupContext(node.parentNode,page,dups,crumbs);
             // Now we actually duplicate it.  
-            var id=node.id;
-            if (!(id)) id=node.getAttribute("data-baseid");
+            var id=node.id, baseid=node.getAttribute("data-baseid");
+            if (!(id)) id=baseid;
             // If it doesn't have an ID, we give it one, because we'll want
             //  to refer to it later while wanting to avoid DOM cycles
             if (!(id)) id=node.id="CODEXTMPID"+(tmpid_count++);
@@ -249,6 +249,7 @@ fdjt.CodexLayout=
             var parent=dupContext(node.parentNode,page,dups,crumbs);
             var nodeclass=node.className||"";
             var duplicated=(nodeclass.search(/\bcodexdup.*\b/)>=0);
+            if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
             copy.className=
                 ((nodeclass.replace(/\b(codexrelocated|codexdup.*)\b/,""))+
