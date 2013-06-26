@@ -177,7 +177,7 @@ if (!(fdjt.UI)) fdjt.UI={};
             key=completion.key||getKey(completion);
         if (!(value))
             value=(completion.value)||(completion.getAttribute('value'))||key;
-        if (completion._seen) {
+        if (!(completion._seen)) {
             c.nodes.push(completion);
             completion._seen=true;
             if (value) {
