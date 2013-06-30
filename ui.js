@@ -1399,6 +1399,25 @@ fdjt.UI.ProgressBar=(function(){
 })();
 
 
+(function(){
+    "use strict";
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+
+    function selectSubmit(evt){
+        evt=evt||event;
+        var target=fdjtUI.T(evt);
+        if (target.value==="") return;
+        else {
+            var form=fdjtDOM.getParent(target,"FORM");
+            if (form) form.submit();}}
+    function setupSelectSubmit(){
+        var setup=fdjtDOM.$(".fdjtselectsubmit");
+        var i=0, lim=setup.length;
+        while (i<lim)
+            fdjtDOM.addListener(setup[i++],"change",selectSubmit);}
+    fdjt.addInit(setupSelectSubmit,"selectsubmit");})();
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
