@@ -2046,6 +2046,8 @@ fdjt.DOM=
                           (document.body.childNodes)&&
                           (document.body.children));}
 
+        var kludge_svg=true;
+
         function useBMP(){
             var hasSuffix=fdjtString.hasSuffix;
             var images=fdjt.$("IMG");
@@ -2069,7 +2071,10 @@ fdjt.DOM=
                     (image.getAttribute('svg'))) {
                     var svg=image.getAttribute('svg');
                     image.setAttribute('bmp',image.src);
-                    image.src=svg;}}}
+                    image.src=svg;
+                    if (kludge_svg) {
+                        image.style.display='none';
+                        image.style.display='';}}}}
         fdjtDOM.useSVG=useSVG;
         fdjtDOM.useBMP=useBMP;
 
