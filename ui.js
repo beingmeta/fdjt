@@ -1403,6 +1403,21 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
+    
+    function submitOnEnter(evt){
+        evt=evt||event;
+        var kc=evt.keyCode||evt.charCode;
+        if (kc===13) {
+            var target=fdjtUI.T(evt);
+            var form=fdjtDOM.getParent(target,'FORM');
+            fdjtUI.cancel(evt);
+            form.submit();}}
+    fdjtUI.submitOnEnter=submitOnEnter;})();
+
+(function(){
+    "use strict";
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
 
     function selectSubmit(evt){
         evt=evt||event;
@@ -1417,6 +1432,28 @@ fdjt.UI.ProgressBar=(function(){
         while (i<lim)
             fdjtDOM.addListener(setup[i++],"change",selectSubmit);}
     fdjt.addInit(setupSelectSubmit,"selectsubmit");})();
+
+(function(){
+    "use strict";
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    
+    function updatePasswordVisibility(evt,input){
+        evt=evt||event;
+        if (typeof input === "string")
+            input=document.getElementById(input);
+        if (!(input)) return;
+        var target=fdjtUI.T(evt);
+        if (target.checked) input.type="PASSWORD";
+        else input.type="TEXT";}
+    fdjtUI.updatePasswordVisibility=updatePasswordVisibility;
+
+    function uploadSelected(evt){
+        evt=evt||event;
+        var target=fdjtUI.T(evt);
+        var tbody=fdjtDOM.getParent(target,".upload");
+        if (tbody) fdjtDOM.addClass(tbody,"uploading");}
+    fdjtUI.uploadSelected=uploadSelected;})();
 
 /* Emacs local variables
    ;;;  Local variables: ***

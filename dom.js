@@ -2065,7 +2065,8 @@ fdjt.DOM=
                     (image.getAttribute('svg'))) {
                     var svg=image.getAttribute('svg');
                     image.setAttribute('bmp',image.src);
-                    image.src=svg;}}}
+                    image.src=svg;
+                    image.className=image.className;}}}
         fdjtDOM.useSVG=useSVG;
         fdjtDOM.useBMP=useBMP;
 
