@@ -878,9 +878,13 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.forceSubmit=forceSubmit;
 
     function submitOnEnter(evt){
-        if ((evt.keyCode===13)||(evt.charCode===13)) {
+        evt=evt||event;
+        var kc=evt.keyCode||evt.charCode;
+        if (kc===13) {
+            var target=fdjtUI.T(evt);
+            var form=fdjtDOM.getParent(target,'FORM');
             fdjtUI.cancel(evt);
-            dosubmit(evt);}}
+            form.submit();}}
     fdjtUI.submitOnEnter=submitOnEnter;}());
 
 /* Looking for vertical box overflow */
@@ -1404,15 +1408,7 @@ fdjt.UI.ProgressBar=(function(){
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
     
-    function submitOnEnter(evt){
-        evt=evt||event;
-        var kc=evt.keyCode||evt.charCode;
-        if (kc===13) {
-            var target=fdjtUI.T(evt);
-            var form=fdjtDOM.getParent(target,'FORM');
-            fdjtUI.cancel(evt);
-            form.submit();}}
-    fdjtUI.submitOnEnter=submitOnEnter;})();
+})();
 
 (function(){
     "use strict";

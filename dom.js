@@ -2023,7 +2023,11 @@ fdjt.DOM=
 
         function checkSVG(){
             if (typeof nosvg === "undefined") {
-                if ((document.implementation)&&
+                if (navigator.appName==="Microsoft Internet Explorer")
+                    // SVG (or at least SVGZ) images don't seem to
+                    // obey CSS scaling in IE.
+                    nosvg=true;
+                else if ((document.implementation)&&
                     (document.implementation.hasFeature)&&
                     (document.implementation.hasFeature(
                         "http://www.w3.org/TR/SVG11/feature#BasicStructure",
@@ -2041,6 +2045,8 @@ fdjt.DOM=
                           (document.body)&&
                           (document.body.childNodes)&&
                           (document.body.children));}
+
+        var kludge_svg=true;
 
         function useBMP(){
             var hasSuffix=fdjtString.hasSuffix;
@@ -2066,7 +2072,9 @@ fdjt.DOM=
                     var svg=image.getAttribute('svg');
                     image.setAttribute('bmp',image.src);
                     image.src=svg;
-                    image.className=image.className;}}}
+                    if (kludge_svg) {
+                        image.style.display='none';
+                        image.style.display='';}}}}
         fdjtDOM.useSVG=useSVG;
         fdjtDOM.useBMP=useBMP;
 
