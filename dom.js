@@ -2071,10 +2071,9 @@ fdjt.DOM=
                     (image.getAttribute('svg'))) {
                     var svg=image.getAttribute('svg');
                     image.setAttribute('bmp',image.src);
+                    image.style.display='none';
                     image.src=svg;
-                    if (kludge_svg) {
-                        image.style.display='none';
-                        image.style.display='';}}}}
+                    setTimeout(function(){image.style.display='';},10);}}}
         fdjtDOM.useSVG=useSVG;
         fdjtDOM.useBMP=useBMP;
 
