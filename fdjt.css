@@ -1107,6 +1107,16 @@ span.adjustfont_wrapper {
     border: 0px !important;
     display: block;}
 
+/* email input background image */
+
+input.fdjtemailinput, input[TYPE='EMAIL'] {
+    background-image: url(emailbg.png);
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+    background-position: right;}
+body.USESVG input.fdjtemailinput,body.USESVG input[TYPE='EMAIL'] { 
+    background-image: url(emailbg.svgz);}
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
