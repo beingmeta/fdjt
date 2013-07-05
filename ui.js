@@ -1433,6 +1433,9 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
+    var getParent=fdjtDOM.getParent;
+    var addClass=fdjtDOM.addClass;
+    var dropClass=fdjtDOM.dropClass;
     
     function updatePasswordVisibility(evt,input){
         evt=evt||event;
@@ -1449,7 +1452,25 @@ fdjt.UI.ProgressBar=(function(){
         var target=fdjtUI.T(evt);
         var tbody=fdjtDOM.getParent(target,".upload");
         if (tbody) fdjtDOM.addClass(tbody,"uploading");}
-    fdjtUI.uploadSelected=uploadSelected;})();
+    fdjtUI.uploadSelected=uploadSelected;
+
+    if (!(fdjtUI.FocusBox)) fdjtUI.FocusBox={};
+    function focusBox_onfocus(evt){
+        evt=evt||event;
+        var target=fdjtUI.T(evt);
+        var box=getParent(target,'.focusbox');
+        if (box) addClass(box,"focused");}
+    fdjtUI.FocusBox.focus=focusBox_onfocus;
+    function focusBox_onblur(evt){
+        evt=evt||event;
+        var target=fdjtUI.T(evt);
+        var box=getParent(target,'.focusbox');
+        if (box)
+            setTimeout(function(){dropClass(box,"focused");},
+                       200);}
+    fdjtUI.FocusBox.blur=focusBox_onblur;
+
+})();
 
 /* Emacs local variables
    ;;;  Local variables: ***
