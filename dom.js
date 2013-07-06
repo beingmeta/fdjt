@@ -2036,8 +2036,12 @@ fdjt.DOM=
                 else if (navigator.mimeTypes["image/svg+xml"])
                     nosvg=false;
                 else nosvg=true;}
-            if (nosvg) addClass(document.body,"NOSVG");
-            else dropClass(document.body,"NOSVG");
+            if (nosvg) {
+                addClass(document.body,"NOSVG");
+                dropClass(document.body,"USESVG");}
+            else {
+                dropClass(document.body,"NOSVG");
+                addClass(document.body,"USESVG");}
             return (!(nosvg));}
         
         function checkChildren(){
@@ -2071,9 +2075,7 @@ fdjt.DOM=
                     (image.getAttribute('svg'))) {
                     var svg=image.getAttribute('svg');
                     image.setAttribute('bmp',image.src);
-                    image.style.display='none';
-                    image.src=svg;
-                    setTimeout(function(){image.style.display='';},10);}}}
+                    image.src=svg;}}}
         fdjtDOM.useSVG=useSVG;
         fdjtDOM.useBMP=useBMP;
 

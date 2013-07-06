@@ -760,6 +760,7 @@ body.NOSVG .inline.nosvg { display: inline;}
 
 img.hires { display: none !important;}
 img.svg { display: none !important;}
+body.USESVG img.svg { display: inline !important;}
 img.stdres {}
 
 /* Progress boxes */
