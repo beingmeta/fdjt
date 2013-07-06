@@ -825,6 +825,7 @@ fdjt.CodexLayout=
                         var loc=blocks.length;
                         blocks.push(node);
                         styles.push(style);
+                        terminals.push(false);
                         if ((disp==='block')||(disp==='table')) {
                             var children=node.childNodes;
                             var total_blocks=blocks.length;
