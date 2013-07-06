@@ -34,8 +34,7 @@ if (!(fdjt.UI.Collapsible)) fdjt.UI.Collapsible={};
 if (!(fdjt.UI.Tabs)) fdjt.UI.Tabs={};
 if (!(fdjt.UI.MultiText)) fdjt.UI.MultiText={};
 if (!(fdjt.UI.Reticle)) fdjt.UI.Reticle={};
-if (!(fdjt.UI.FocusBlock)) fdjt.UI.FocusBlock={};
-
+if (!(fdjt.UI.FocusBox)) fdjt.UI.FocusBox={};
 
 /* Co-highlighting */
 
@@ -482,44 +481,6 @@ fdjt.UI.ProgressBar=(function(){
     fdjt.UI.InputHelp.onblur=hide_help_onblur;})();
 
 
-
-/* Focus blocks */
-
-(function(){
-    "use strict";
-
-    var fdjtDOM=fdjt.DOM;
-    var fdjtUI=fdjt.UI;
-
-    var getParent=fdjtDOM.getParent;
-    var addClass=fdjtDOM.addClass;
-    var dropClass=fdjtDOM.dropClass;
-
-    var blur_timeout=false;
-    var blur_target=false;
-
-    function focusblock_onfocus(evt){
-        evt=evt||event;
-        var target=fdjtUI.T(evt);
-        var block=getParent(target,".focusblock");
-        if (block) {
-            if (blur_target===block) {
-                clearTimeout(blur_timeout);
-                blur_target=false; blur_timeout=false;}
-            addClass(block,'fdjtfocus');}}
-    function focusblock_onblur(evt){
-        evt=evt||event;
-        var target=fdjtUI.T(evt);
-        var block=getParent(target,".focusblock");
-        if (block) {
-            blur_target=block;
-            blur_timeout=setTimeout(function(){
-                dropClass(block,'fdjtfocus');
-                blur_target=false; blur_timeout=false;},
-                                    2000);}}
-
-    fdjt.UI.FocusBlock.onfocus=focusblock_onfocus;
-    fdjt.UI.FocusBlock.onblur=focusblock_onblur;})();
 
 /* Text input boxes which create checkspans on enter. */
 
@@ -1454,7 +1415,6 @@ fdjt.UI.ProgressBar=(function(){
         if (tbody) fdjtDOM.addClass(tbody,"uploading");}
     fdjtUI.uploadSelected=uploadSelected;
 
-    if (!(fdjtUI.FocusBox)) fdjtUI.FocusBox={};
     function focusBox_onfocus(evt){
         evt=evt||event;
         var target=fdjtUI.T(evt);
