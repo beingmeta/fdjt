@@ -724,9 +724,12 @@ fdjt.CodexLayout=
                     // NOTE that dragged blocks have already been
                     // placed, so the previous page will end up short.
                     // Them's the breaks.
-                    if ((block)&&(terminal)&&(prev)&&
-                        ((avoidBreakBefore(block,style))||
-                         (avoidBreakAfter(prev,prevstyle)))) {
+                    if ((block)&&(terminal)&&
+                        (avoidBreakBefore(block,style))) {
+                        if (tracing) logfn("Possibly dragging %o",prev);
+                        drag.push(prev);}
+                    else if ((block)&&(prev)&&
+                             (avoidBreakAfter(prev,prevstyle))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
                         drag.push(prev);}
                     else if ((block)&&(terminal)&&(drag)&&(drag.length)) {
@@ -817,8 +820,9 @@ fdjt.CodexLayout=
                     var style=getStyle(node); 
                     if (((atomic)&&(atomic.match(node)))||
                         (avoidBreakInside(node,style))) {
-                        blocks.push(node); styles.push(node);
+                        blocks.push(node); styles.push(style);
                         terminals.push(node);
+                        checkTerminal(node);
                         return;}
                     var disp=style.display;
                     if ((style.position==='static')&&(disp!=='inline')) {
@@ -834,8 +838,9 @@ fdjt.CodexLayout=
                                 gatherBlocks(children[i++],
                                              blocks,terminals,styles);}
                             if (blocks.length===total_blocks)
-                                terminals[loc]=true;}
-                        else terminals[loc]=true;}
+                                terminals[loc]=node;}
+                        else terminals[loc]=node;
+                        if (terminals[loc]) checkTerminal(node);}
                     else if ((style.position==='static')&&(node.tagName==='A')) {
                         var anchor_elts=node.childNodes;
                         var j=0; var n_elts=anchor_elts.length;
@@ -846,6 +851,90 @@ fdjt.CodexLayout=
                             if (style.display!=='inline')
                                 gatherBlocks(child,blocks,terminals,styles);}}
                     else {}}
+
+                function checkAvoidBreakBefore(scan,root){
+                    if (scan.nodeType===1) {
+                        if (avoidBreakBefore(scan)) {
+                            addClass(root,"avoidbreakbefore");
+                            return true;}
+                        var children=scan.childNodes;
+                        var i=0, lim=children.length;
+                        while (i<lim) {
+                            var child=children[i++];
+                            if (child.nodeType===3) {
+                                if (isEmpty(scan.value)) {}
+                                else return true;}
+                            else if ((child.nodeType===1)&&
+                                     (checkAvoidBreakBefore(child,root)))
+                                return true;
+                            else {}}
+                        return false;}
+                    else return false;}
+
+                function checkForceBreakBefore(scan,root){
+                    if (scan.nodeType===1) {
+                        if (forcedBreakBefore(scan)) {
+                            addClass(root,"forcebreakbefore");
+                            return true;}
+                        var children=scan.childNodes;
+                        var i=0, lim=children.length;
+                        while (i<lim) {
+                            var child=children[i++];
+                            if (child.nodeType===3) {
+                                if (isEmpty(scan.value)) {}
+                                else return true;}
+                            else if ((child.nodeType===1)&&
+                                     (checkForceBreakBefore(child,root)))
+                                return true;
+                            else {}}
+                        return false;}
+                    else return false;}
+
+                function checkAvoidBreakAfter(scan,root){
+                    if (scan.nodeType===1) {
+                        if (avoidBreakAfter(scan)) {
+                            addClass(root,"avoidbreakafter");
+                            return true;}
+                        var children=scan.childNodes;
+                        var i=children.length-1;
+                        while (i>=0) {
+                            var child=children[i++];
+                            if (child.nodeType===3) {
+                                if (isEmpty(scan.value)) {}
+                                else return true;}
+                            else if ((child.nodeType===1)&&
+                                     (checkAvoidBreakAfter(child,root)))
+                                return true;
+                            else {}}
+                        return false;}
+                    else return false;}
+
+                function checkForceBreakAfter(scan,root){
+                    if (scan.nodeType===1) {
+                        if (forcedBreakAfter(scan)) {
+                            addClass(root,"forcebreakafter");
+                            return true;}
+                        var children=scan.childNodes;
+                        var i=children.length-1;
+                        while (i>=0) {
+                            var child=children[i++];
+                            if (child.nodeType===3) {
+                                if (isEmpty(scan.value)) {}
+                                else return true;}
+                            else if ((child.nodeType===1)&&
+                                     (checkForceBreakAfter(child,root)))
+                                return true;
+                            else {}}
+                        return false;}
+                    else return false;}
+
+                function checkTerminal(node){
+                    if (hasClass(node,"codexterminal")) return;
+                    checkAvoidBreakBefore(node,node);
+                    checkForceBreakBefore(node,node);
+                    checkAvoidBreakAfter(node,node);
+                    checkForceBreakAfter(node,node);
+                    addClass(node,"codexterminal");}
                 
                 function firstGChild(ancestor,descendant){
                     var first=ancestor.firstChild;
