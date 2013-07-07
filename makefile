@@ -56,3 +56,7 @@ fresh:
 	make clean
 	make all
 
+publish:
+	s3commit --exclude="*.svgz"
+	s3commit --exclude="*.(js|css|png|gif)" --add-header=Content-encoding:gzip
+
