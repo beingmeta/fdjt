@@ -805,6 +805,7 @@ fdjt.CodexLayout=
                     // We fit on the page, so we'll look at the next block.
                     else {
                         if (tracing) logfn("Fits on page: %o",block);
+                        drag=[];
                         ni++;}
                     // Update the prev pointer for terminals
                     if (terminal) {
