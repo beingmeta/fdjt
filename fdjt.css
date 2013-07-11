@@ -1111,20 +1111,24 @@ span.adjustfont_wrapper {
 /* input background images */
 
 input.fdjtemailinput, input[TYPE='EMAIL'] {
-    background-image: url(emailbg.png);
+    background-image: url(email_bg.png);
     background-repeat: no-repeat;
     background-size: auto 100%;
     background-position: right;}
 body.USESVG input.fdjtemailinput,body.USESVG input[TYPE='EMAIL'] { 
-    background-image: url(emailbg.svgz);}
+    background-image: url(email_bg.svgz);}
 
 input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
-    background-image: url(markdown.png);
+    background-image: url(markdown_bg.png);
     background-repeat: no-repeat;
-    background-size: 20% auto;
     background-position: top right;}
 body.USESVG input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
-    background-image: url(markdown.svg);}
+    background-image: url(markdown_bg.svg);}
+input[TYPE="TEXT"].markdowninput {
+    background-size: 20% auto;}
+textarea.markdowninput {
+    background-size: auto 2em;}
+
 
 /* Emacs local variables
    ;;;  Local variables: ***
