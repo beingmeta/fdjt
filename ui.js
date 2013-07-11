@@ -1368,13 +1368,6 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
-    
-})();
-
-(function(){
-    "use strict";
-    var fdjtDOM=fdjt.DOM;
-    var fdjtUI=fdjt.UI;
 
     function selectSubmit(evt){
         evt=evt||event;
@@ -1431,6 +1424,71 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.FocusBox.blur=focusBox_onblur;
 
 })();
+
+(function(){
+    "use strict";
+    var fdjtDOM=fdjt.DOM;
+    var fdjtUI=fdjt.UI;
+    var hasClass=fdjtDOM.hasClass;
+    
+    function fixTimeElement(elt){
+        var tstring=elt.getAttribute('datetime')||
+            elt.getAttribute('data-datetime')||
+            elt.getAttribute('data-time');
+        var parsed=((tstring)&&(new Date(tstring)));
+        var good=((parsed)&&(((parsed.getYear())||"nogood")!=="nogood"));
+        if (!(tstring)) {
+            tstring=elt.innerText;
+            parsed=new Date(tstring);
+            good=((parsed)&&(((parsed.getYear())||"nogood")!=="nogood"));
+            if (good) {
+                if (elt.tagName==='time')
+                    elt.setAttribute('datetime',tstring);
+                else elt.setAttribute('data-datetime',tstring);}}
+        if (!(good)) return;
+        if (hasClass(elt,"fdjtkeeptext")) {}
+        else if (hasClass(elt,"fdjtisotime")) {
+            if (parsed.toISOString) elt.innerHTML=parsed.toISOString();}
+        else if (hasClass(elt,"fdjtutctime")) {
+            if (parsed.toUTCString) elt.innerHTML=parsed.toUTCString();}
+        else if (hasClass(elt,"fdjtdate")) {
+            if (parsed.toDateString) elt.innerHTML=parsed.toDateString();}
+        else if (hasClass(elt,"fdjtdateortime")) {
+            if ((parsed.toDateString)&&(parsed.toTimeString)) {
+                if ((parsed.toDateString())===((new Date()).toDateString))
+                    elt.innerHTML=parsed.toTimeString();
+                else elt.innerHTML=parsed.toDateString();}}
+        else if (hasClass(elt,"fdjtlocaletime")) {
+            if (parsed.toLocaleString) elt.innerHTML=parsed.toLocaleString();}
+        else if (hasClass(elt,"fdjtlocaledate")) {
+            if (parsed.toLocaleDate) elt.innerHTML=parsed.toLocaleDate();}
+        else if (hasClass(elt,"fdjtlocaledateortime")) {
+            if ((parsed.toLocaleDateString)&&(parsed.toTimeString)) {
+                if ((parsed.toDateString())===((new Date()).toDateString))
+                    elt.innerHTML=parsed.toLocaleTimeString();
+                else elt.innerHTML=parsed.toLocaleDateString();}
+            if (parsed.toLocaleDate) elt.innerHTML=parsed.toLocaleDate();}
+        else {}}
+
+    function initTimeElementsUnder(node){
+        var elts=((fdjt.keeptime)?
+                  (fdjtDOM.getChildren(node,".fdjtime")):
+                  (fdjtDOM.getChildren(node,"time,.fdjtime")));
+        var i=0, lim=elts.length;
+        while (i<lim) fixTimeElement(elts[i++]);}
+
+    function initTimeElements(){
+        var elts=((fdjt.keeptime)?(fdjtDOM.$(".fdjtime")):(fdjtDOM.$("time,.fdjtime")));
+        var i=0, lim=elts.length;
+        while (i<lim) fixTimeElement(elts[i++]);
+        fdjtDOM.addListener(document.body,"DOMNodeInserted",
+                            function(evt){
+                                evt=evt||event;
+                                initTimeElementsUnder(fdjtUI.T(evt));});}
+    
+    fdjt.addInit(initTimeElements,"TimeElements",false);})();
+
+
 
 /* Emacs local variables
    ;;;  Local variables: ***
