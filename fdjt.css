@@ -1108,7 +1108,7 @@ span.adjustfont_wrapper {
     border: 0px !important;
     display: block;}
 
-/* email input background image */
+/* input background images */
 
 input.fdjtemailinput, input[TYPE='EMAIL'] {
     background-image: url(emailbg.png);
@@ -1117,6 +1117,14 @@ input.fdjtemailinput, input[TYPE='EMAIL'] {
     background-position: right;}
 body.USESVG input.fdjtemailinput,body.USESVG input[TYPE='EMAIL'] { 
     background-image: url(emailbg.svgz);}
+
+input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
+    background-image: url(markdown.png);
+    background-repeat: no-repeat;
+    background-size: 20% auto;
+    background-position: top right;}
+body.USESVG input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
+    background-image: url(markdown.svg);}
 
 /* Emacs local variables
    ;;;  Local variables: ***
