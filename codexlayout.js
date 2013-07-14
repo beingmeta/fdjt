@@ -1570,7 +1570,7 @@ fdjt.CodexLayout=
             /* page break predicates */
             
             function forcedBreakBefore(elt,style){
-                if (!(elt)) return false;
+                if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakBefore==='always')||
                     ((elt.className)&&
@@ -1580,7 +1580,7 @@ fdjt.CodexLayout=
             this.forcedBreakBefore=forcedBreakBefore;
             
             function forcedBreakAfter(elt,style){ 
-                if (!(elt)) return false;
+                if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
                 var force=(style.pageBreakAfter==='always')||
                     ((elt.className)&&
@@ -1605,7 +1605,7 @@ fdjt.CodexLayout=
             //  represent (or handle) page-break 'avoid' values.  Sigh.
             var page_block_classes=/\b(avoidbreakinside)|(sbookpage)\b/;
             function avoidBreakInside(elt,style){
-                if (!(elt)) return false;
+                if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (elt.tagName==='IMG') return true;
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakInside==='avoid')||
@@ -1615,7 +1615,7 @@ fdjt.CodexLayout=
             this.avoidBreakInside=avoidBreakInside;
             
             function avoidBreakBefore(elt,style){
-                if (!(elt)) return false;
+                if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
                 return ((style.pageBreakBefore==='avoid')||
                         ((elt.className)&&(elt.className.search(/\bavoidbreakbefore\b/)>=0))||
@@ -1624,7 +1624,7 @@ fdjt.CodexLayout=
 
             function avoidBreakAfter(elt,style){
                 var avoid=false;
-                if (!(elt)) return false;
+                if ((!(elt))||(elt.nodeType!==1)) return false;
                 // Avoid breaks after headings
                 if (/H\d/.exec(elt.tagName)) return true;
                 if (!(style)) style=getStyle(elt);
