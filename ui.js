@@ -846,7 +846,20 @@ fdjt.UI.ProgressBar=(function(){
             var form=fdjtDOM.getParent(target,'FORM');
             fdjtUI.cancel(evt);
             form.submit();}}
-    fdjtUI.submitOnEnter=submitOnEnter;}());
+    fdjtUI.submitOnEnter=submitOnEnter;
+
+    function checkFileInputs(evt){
+        evt=evt||event;
+        var form=fdjtUI.T(evt);
+        var file_inputs=fdjtDOM.getInputs(form,false,"file");
+        var i=0, lim=file_inputs.length; while (i<lim) {
+            var input=file_inputs[i++];
+            if ((!(input.value))||(input.value==="")) {
+                fdjtUI.cancel(evt);
+                (fdjt.UI.alert||window.alert)("You need to specify a file!");}}}
+    fdjtUI.checkFileInputs=checkFileInputs;
+
+}());
 
 /* Looking for vertical box overflow */
 
