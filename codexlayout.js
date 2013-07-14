@@ -970,8 +970,9 @@ fdjt.CodexLayout=
                     if ((float_pages)&&(float_pages.length)) {
                         // First add any floating pages that may have
                         // accumulated
-                        i=0, lim=float_pages.length;
-                        while (i<lim) newPage(float_pages[i++]);
+                        var floaters=float_pages; float_pages=[];
+                        i=0, lim=floaters.length;
+                        while (i<lim) newPage(floaters[i++]);
                         float_pages=[];
                         forcepage=true;}
                     var newpage="pagetop";
