@@ -539,6 +539,7 @@ table.fdjtform tr.mainbuttons td, table.fdjtform tr.mainbuttons th {
 table.fdjtform tr.mainbuttons button,
 table.fdjtform tr.mainbuttons input[TYPE="SUBMIT"] {
     font-variant: small-caps; font-size: 150%; float: right;}
+table.fdjtform tr.mainbuttons span.note { font-size: 120%; color: red; }
 
 th button, td button { white-space: nowrap;}
 
@@ -1128,6 +1129,14 @@ input[TYPE="TEXT"].markdowninput {
     background-size: 20% auto;}
 textarea.markdowninput {
     background-size: auto 2em;}
+
+td.usebaseline, th.usebaseline, .usebaseline th, .usebaseline td {
+    vertical-align: baseline;}
+table.fdjtform td.usebaseline,
+table.fdjtform th.usebaseline,
+table.fdjtform .usebaseline th,
+table.fdjtform .usebaseline td {
+    vertical-align: baseline;}
 
 
 /* Emacs local variables
