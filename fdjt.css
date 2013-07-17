@@ -488,6 +488,8 @@ table.fdjtdata td ul, table.fdjtdata td ol {
 
 table.fdjtform { }
 table.fdjtform th, table.fdjtform td { vertical-align: top;}
+table.fdjtform th span.type {
+   font-size: 80%; font-weight: normal; font-style: italic;}
 
 table.fdjtform th { text-align: right;}
 
@@ -1108,6 +1110,15 @@ span.adjustfont_wrapper {
     padding: 0px !important;
     border: 0px !important;
     display: block;}
+
+/* For printing */
+
+@media screen {
+  .forprinting { display: none; }
+}
+@media print {
+  .unprintable { display: none; }
+}
 
 /* input background images */
 
