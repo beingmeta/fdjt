@@ -899,7 +899,7 @@ fdjt.CodexLayout=
                         var children=scan.childNodes;
                         var i=children.length-1;
                         while (i>=0) {
-                            var child=children[i++];
+                            var child=children[i--];
                             if (child.nodeType===3) {
                                 if (isEmpty(scan.value)) {}
                                 else return true;}
@@ -918,7 +918,7 @@ fdjt.CodexLayout=
                         var children=scan.childNodes;
                         var i=children.length-1;
                         while (i>=0) {
-                            var child=children[i++];
+                            var child=children[i--];
                             if (child.nodeType===3) {
                                 if (isEmpty(scan.value)) {}
                                 else return true;}
