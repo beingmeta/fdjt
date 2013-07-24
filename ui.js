@@ -654,7 +654,12 @@ fdjt.UI.ProgressBar=(function(){
         var target=fdjtUI.T(evt);
         var wrapper=fdjtDOM.getParent(target,".collapsible");
         if (wrapper) {
-            fdjtDOM.toggleClass(wrapper,"expanded");}};})();
+            fdjtDOM.toggleClass(wrapper,"expanded");}};
+    
+    fdjtUI.toggleParent=function toggleParent(evt,spec,classname){
+        var target=fdjtUI.T(evt);
+        var parent=fdjtDOM.getParent(target,spec);
+        if (parent) fdjtDOM.toggleClass(parent,classname);};})();
 
 
 /* Temporary Scrolling */
