@@ -92,16 +92,14 @@ textarea.autoprompt.isempty { font-style: italic; color: gray;}
 
 /* Input help classes */
 
-.helptext { color: purple;}
-span.helptext { display: none; }
-div.helptext { display: none; }
-td.helptext { display: none; }
-p.helptext { display: none; }
+.helptext { display: none;}
 
-body.showhelp span.helptext { display: block;}
-body.showhelp div.helptext { display: block;}
-body.showhelp td.helptext { display: table-cell;}
-body.showhelp p.helptext { display: block;}
+.showhelp span.helptext { display: block;}
+.showhelp div.helptext { display: block;}
+.showhelp td.helptext { display: table-cell;}
+.showhelp tr.helptext { display: table-row;}
+.showhelp tbody.helptext { display: table-row-group;}
+.showhelp p.helptext { display: block;}
 
 img.helpicon { 
   padding-right: 2px; padding-left: 2px;
@@ -109,6 +107,7 @@ img.helpicon {
   color: yellow; background-color: gray;
   font-size: 80%; vertical-align: middle;
   font-weight: bold; font-style: normal;}
+td img.helpicon { background-color: transparent; }
 
 /* Utility classes */
 
@@ -550,14 +549,13 @@ form.evalform input[name='EXPR'] {
 
 /* Twisties */
 
-div.twisties {}
-div.twisties span.twisty { 
-  vertical-align: top; cursor: pointer;}
-div.twisties span.twisty img { font-weight: bold;}
-div.twisties span.twisty img[alt='-'] { display: none;}
-div.twisties.expanded span.twisty img[alt='-'] { display: inline;}
-div.twisties.expanded span.twisty img[alt='+'] { display: none;}
-div.twisties.expanded span.twisty { font-weight: bold;}
+.twisties {}
+.twisties span.twisty { cursor: pointer; }
+.twisties span.twisty img { font-weight: bold; }
+.twisties span.twisty img[alt='-'] { display: none;}
+.twisties .expanded span.twisty img[alt='-'] { display: inline;}
+.twisties .expanded span.twisty img[alt='+'] { display: none;}
+.twisties .expanded span.twisty { font-weight: bold;}
 
 /* Displaying deadlinks as red, Wikipedia style */
 
