@@ -38,11 +38,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
     var trace_taphold=false;
     var window_setup=false;
     
-    var getGeometry=fdjtDOM.getGeometry;
     var getChildren=fdjtDOM.getChildren;
     var addClass=fdjtDOM.addClass;
     var dropClass=fdjtDOM.dropClass;
-    var hasClass=fdjtDOM.hasClass;
     var getParent=fdjtDOM.getParent;
     var hasParent=fdjtDOM.hasParent;
     var reticle=fdjtUI.Reticle;
@@ -105,7 +103,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
     
     /* This gets the target based on geometry. */
     function getRealTarget(holder,touchable,x,y){
-        var children=getChildren(holder,touchable); var found=false;
+        var children=getChildren(holder,touchable);
         var i=0, lim=children.length;
         while (i<lim) {
             var child=children[i++];
@@ -417,12 +415,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 endpress(evt,taptapthresh);}
             else {}
             start_x=start_y=start_t=touch_x=touch_y=touch_t=false;}
-
-        function taphold_click(evt){
-            var now=fdjtTime();
-            if ((pressed_at)&&((now-pressed_at)<700))
-                fdjt.UI.cancel(evt);
-            else return;}
 
         if ((fortouch)&&(fortouch.hasOwnProperty)) {
             var opts=fortouch;

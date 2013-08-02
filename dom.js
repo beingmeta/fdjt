@@ -2050,8 +2050,6 @@ fdjt.DOM=
                           (document.body.childNodes)&&
                           (document.body.children));}
 
-        var kludge_svg=true;
-
         function useBMP(){
             var hasSuffix=fdjtString.hasSuffix;
             var images=fdjt.$("IMG");

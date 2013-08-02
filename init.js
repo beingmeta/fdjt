@@ -71,7 +71,7 @@
 
     var device_info=(fdjt.device)||(fdjt.device={});
     (function(){
-        /* global window: false, navigator: false */
+        /* global window: false */
         if ((typeof window !=="undefined")&&(window.navigator)&&
             (window.navigator.appVersion)) {
             var navigator=window.navigator;
