@@ -507,15 +507,10 @@ fdjt.CodexLayout=
             // nobreak constraints.
             var drag=this.drag=[];
 
-            // this.float_pages contains fully-assembled page nodes to
+            // this.floating contains fully-assembled page nodes to
             // placed in pages after this one; it is intended for
             // out-of-flow or 'too bit to fit' content
-            var float_pages=this.float_pages=[];
-
-            // this.float_blocks is an array of blocks to place into
-            // the flow there is a chance.  This is intended for use
-            // by figures/tables/etc which we don't want to embed
-            var float_blocks=this.float_blocks=[];
+            var floating=this.floating=[];
 
             if (init.layout_id) this.layout_id=init.layout_id;
 
@@ -635,6 +630,7 @@ fdjt.CodexLayout=
                 // If we can use layout properties of the root, we do
                 // so immediately, and synchronously
                 if ((hasClass(root,/\b(codexfullpage|codexsinglepage)\b/))||
+                    (checkSinglePage(root))||
                     ((fullpages)&&(testNode(root,fullpages)))||
                     ((singlepages)&&(testNode(root,singlepages)))) {
                     if (newpage) moveNode(root); else newPage(root);
@@ -724,7 +720,7 @@ fdjt.CodexLayout=
                     // NOTE that dragged blocks have already been
                     // placed, so the previous page will end up short.
                     // Them's the breaks.
-                    if ((block)&&(terminal)&&
+                    if ((block)&&(terminal)&&ls -
                         (avoidBreakBefore(block,style))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
                         drag.push(prev);}
@@ -746,8 +742,8 @@ fdjt.CodexLayout=
                              ((floatpages)&&(testNode(block,floatpages)))) {
                         // Float pages just get pushed (until newPage below)
                         if (tracing) logfn("Pushing float page %o",block);
-                        float_pages.push(block); ni++; return;}
-                    else if ((hasClass(block,/\b(codexfullpage|codexsinglepage)\b/))||
+                        floating.push(block); ni++; return;}
+                    else if ((checkSinglePage(block,style))||
                              ((fullpages)&&(testNode(block,fullpages)))||
                              ((singlepages)&&(testNode(block,singlepages)))) {
                         // Full pages automatically get their own page
@@ -795,6 +791,9 @@ fdjt.CodexLayout=
                                 if (geom.bottom>page_height)
                                     addClass(page,"codexoversize");
                                 ni++;}}
+                        else if ((hasClass(block,"codexfloat"))||
+                                 ((codexfloat)&&(codexflat.match(block)))) {
+                            floating.push(block); ni++;}
                         else {
                             // Now we try to split the block, we store
                             // the 'split block' back in the blocks
@@ -967,14 +966,28 @@ fdjt.CodexLayout=
                 // If node is passed, it is the first element on the new page
                 function newPage(node,forcepage){
                     var i, lim;
-                    if ((float_pages)&&(float_pages.length)) {
+                    if ((floating)&&(floating.length)) {
                         // First add any floating pages that may have
                         // accumulated
-                        var floaters=float_pages; float_pages=[];
+                        var floaters=floating; floating=[];
+                        var closed_page=page;
                         i=0, lim=floaters.length;
-                        while (i<lim) newPage(floaters[i++]);
-                        float_pages=[];
-                        forcepage=true;}
+                        while (i<lim) {
+                            var floater=floaters[i++];
+                            if (checkSinglePage(floater)) {
+                                newPage(floater);
+                                closed_page=page;
+                                forcepage=true;}
+                            else if (closed_page===page) {
+                                newPage(floater);
+                                var geom=getGeom(floater,page);
+                                if (geom.bottom>page_height) {
+                                    addClass(page,"codexoversize");
+                                    closed_page=page;}}
+                            else {                                
+                                moveNodeToPage(floater,page);
+                                var geom=getGeom(floater,newpage);
+                                if (geom.bottom>=page_height) newPage(floater);}}}
                     var newpage="pagetop";
                     if ((node)&&(node.nodeType===3)) {
                         var parent=node.parentNode;
@@ -1648,6 +1661,17 @@ fdjt.CodexLayout=
                 else return false;}
             this.avoidBreakAfter=avoidBreakAfter;
             
+            function checkSinglePage(elt,style){
+                if ((!(elt))||(elt.nodeType!==1)) return false;
+                if ((hasClass("codexsinglepage"))||(hasClass("codexfullpage")))
+                    return true;
+                else {
+                    if (!(style)) style=getStyle(elt);
+                    return ((style.pageBreakBefore==='always')&&
+                            (style.pageBreakAfter==='always')&&
+                            (style.pageBreakInside==='avoid'));}}
+            this.checkSinglePage=checkSinglePage;
+
             function getPage(spec) {
                 if (!(spec)) return false;
                 else if (typeof spec === 'number')
