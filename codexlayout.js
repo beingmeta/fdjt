@@ -427,6 +427,8 @@ fdjt.CodexLayout=
                 optimizeLayoutRule(init.singlepages||false);
             var floatpages=this.floatpages=
                 optimizeLayoutRule(init.floatpages||false);
+            var floatblocks=this.floatblocks=
+                optimizeLayoutRule(init.floatblocks||false);
 
             var pageprefix=this.pageprefix=init.pageprefix||"CODEXPAGE";
 
@@ -720,8 +722,7 @@ fdjt.CodexLayout=
                     // NOTE that dragged blocks have already been
                     // placed, so the previous page will end up short.
                     // Them's the breaks.
-                    if ((block)&&(terminal)&&ls -
-                        (avoidBreakBefore(block,style))) {
+                    if ((block)&&(terminal)&&(avoidBreakBefore(block,style))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
                         drag.push(prev);}
                     else if ((block)&&(prev)&&
@@ -739,7 +740,7 @@ fdjt.CodexLayout=
                     // If a block is false, continue
                     if (!(block)) {ni++; return;}
                     else if ((hasClass(block,/\bcodexfloatpage\b/))||
-                             ((floatpages)&&(testNode(block,floatpages)))) {
+                             ((floatblocks)&&(testNode(block,floatblocks)))) {
                         // Float pages just get pushed (until newPage below)
                         if (tracing) logfn("Pushing float page %o",block);
                         floating.push(block); ni++; return;}
@@ -792,7 +793,7 @@ fdjt.CodexLayout=
                                     addClass(page,"codexoversize");
                                 ni++;}}
                         else if ((hasClass(block,"codexfloat"))||
-                                 ((codexfloat)&&(codexflat.match(block)))) {
+                                 ((floatblocks)&&(floatblocks.match(block)))) {
                             floating.push(block); ni++;}
                         else {
                             // Now we try to split the block, we store
