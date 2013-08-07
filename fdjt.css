@@ -477,6 +477,8 @@ div.richtip .maximize { display: none; }
 .floatleft { float: left;}
 .floatright { float: right;}
 
+input[TYPE="FILE"].floatright { text-align: right; }
+
 table.fdjtdata table { border: solid silver 2px;}
 table.fdjtdata table.fdjtdata { width: auto;}
 table.fdjtdata td ul, table.fdjtdata td ol {
