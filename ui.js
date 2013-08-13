@@ -1409,14 +1409,19 @@ fdjt.UI.ProgressBar=(function(){
     var addClass=fdjtDOM.addClass;
     var dropClass=fdjtDOM.dropClass;
     
-    function updatePasswordVisibility(evt,input){
+    function updatePasswordVisibility(evt,input,visible){
         evt=evt||event;
         if (typeof input === "string")
             input=document.getElementById(input);
         if (!(input)) return;
         var target=fdjtUI.T(evt);
-        if (target.checked) input.type="PASSWORD";
-        else input.type="TEXT";}
+        if (visible) {
+            if (target.checked) input.type="PASSWORD";
+            else input.type="TEXT";}
+        else {
+            if (target.checked) input.type="TEXT";
+            else input.type="PASSWORD";}}
+
     fdjtUI.updatePasswordVisibility=updatePasswordVisibility;
 
     function uploadSelected(evt){
