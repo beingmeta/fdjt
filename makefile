@@ -7,7 +7,7 @@ FDJT_FILES=header.js string.js time.js \
 	syze.js iscroll.js indexed.js \
 	log.js init.js state.js dom.js \
 	json.js refdb.js ajax.js \
-	hash.js wsn.js \
+	hash.js wsn.js template.js \
 	ui.js completions.js taphold.js selecting.js \
 	adjustfont.js scrollever.js \
 	globals.js
@@ -15,7 +15,7 @@ FDJT_HINTS=string.hint time.hint \
 	syze.hint iscroll.hint indexed.hint \
 	log.hint init.hint state.hint dom.hint \
 	refdb.hint json.hint ajax.hint \
-	hash.hint wsn.hint \
+	hash.hint wsn.hint template.hint \
 	ui.hint completions.hint taphold.hint selecting.hint \
 	adjustfont.hint scrollever.hint
 BUILDUUID:=`uuidgen`
