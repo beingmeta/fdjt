@@ -51,11 +51,16 @@ fdjt.Template=(function(){
     fdjt.Templates=templates;
     Template.localTemplates={};
 
-    function toDOM(text,data){
+    function toDOM(text,data,dom_arg){
 	var output=Template(text,data);
-	var dom=document.createElement("div");
+	var dom=((!(dom_arg))?(document.createElement("div")):
+		 (dom_arg.nodeType)?(dom_arg):
+		 (typeof dom_arg === "string")?
+		 (document.createElement(dom_arg)):
+		 (document.createElement("div")));
 	dom.innerHTML=output;
-	if (!(dom.childNodes)) return false;
+	if ((dom_arg)&&(dom_arg.nodeType)) return dom;
+	else if (!(dom.childNodes)) return false;
 	else if (dom.childNodes.length===1)
 	    return dom.childNodes[0];
 	else {
