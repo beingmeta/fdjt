@@ -105,18 +105,17 @@ fdjt.State=
                 fdjtLog.warn("Error setting cookie %s",name);}}
         fdjtState.setCookie=setCookie;
         
-        function clearCookie(name,domain,path){
+        function clearCookie(name){
             try {
-                var valuestring="ignoreme";
-                var cookietext=name+"="+encodeURIComponent(valuestring)+
-                    "; expires=Sun 1 Jan 2000 00:00:00 UTC";
-                if (path) cookietext=cookietext+"; path="+path;
-                // This certainly doesn't work generally and might not work ever
-                if (domain) cookietext=cookietext+"; domain="+domain;
+                var cookietext=encodeURIComponent(name)+
+                    "=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                //This doesn't seem to work
+                //if (path) cookietext=cookietext+"; path="+path;
                 // fdjtTrace("Clearing cookie %o: text=%o",name,cookietext);
                 document.cookie=cookietext;}
             catch (ex) {
-                fdjtLog.warn("Error clearing cookie %s",name);}}
+                fdjtLog.warn("Error clearing cookie %s: %s",
+                             name,ex);}}
         fdjtState.clearCookie=clearCookie;
 
         /* Session storage */
