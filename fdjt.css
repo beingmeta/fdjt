@@ -987,7 +987,7 @@ table.fdcompound.table th.key {
 
 /* Alerts */
 
-div.fdjtalert {
+div.fdjtdialog {
     position: fixed;
     background-color: slategray; color: black;
     font-size: 200%; font-family: helvetica,sans,sans-serif;
@@ -1026,8 +1026,8 @@ div.fdjtalert {
     -khtml-border-radius: 12px;
     -moz-border-radius: 12px;
     -o-border-radius: 12px;}
-div.fdjtalert#FDJTALERT { z-index: 250;}
-div.fdjtalert.closing {
+div.fdjtdialog#FDJTALERT { z-index: 250;}
+div.fdjtdialog.closing {
     opacity: .05;
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter: alpha(opacity=50);
@@ -1035,28 +1035,28 @@ div.fdjtalert.closing {
     -khtml-opacity: .05;
     -moz-opacity: .05;
     -o-opacity: .05;}
-div.fdjtalert.closing { cursor: pointer;}
+div.fdjtdialog.closing { cursor: pointer;}
 
-div.fdjtalert > div, div.fdjtalert > span { vertical-align: middle;}
+div.fdjtdialog > div, div.fdjtdialog > span { vertical-align: middle;}
 
-div.fdjtalert .countdown {
+div.fdjtdialog .countdown {
     color: lightred; font-weight: bold; font-size: 50%;
     position: absolute; height: 1em; top: 4px; left: 0.5ex;
     font-variant: small-caps;}
-div.fdjtalert .countdown { display: none;}
-div.fdjtalert.closing .countdown { display: block;}
+div.fdjtdialog .countdown { display: none;}
+div.fdjtdialog.closing .countdown { display: block;}
 
-div.fdjtalert .closebutton {
+div.fdjtdialog .closebutton {
     position: absolute;
     width: 1em; height: 1em;
     top: 4px; right: 0.5ex;
     cursor: pointer;}
 
-div.fdjtalert.fdjtconfirm div.message {}
-div.fdjtalert.fdjtconfirm div.message .smaller { font-size: 50%;}
-div.fdjtalert.fdjtconfirm div.choices {
+div.fdjtdialog.fdjtconfirm div.message {}
+div.fdjtdialog.fdjtconfirm div.message .smaller { font-size: 50%;}
+div.fdjtdialog.fdjtconfirm div.choices {
     padding-bottom: 1em; padding-top: 1em; text-align: center;}
-div.fdjtalert.fdjtconfirm div.choices button {
+div.fdjtdialog.fdjtconfirm div.choices button {
     padding: 1ex; font-size: 70%;
     border: solid silver 3px;
     background-color: silver;
@@ -1066,12 +1066,12 @@ div.fdjtalert.fdjtconfirm div.choices button {
     -khtml-border-radius: 1ex;
     -moz-border-radius: 1ex;
     -o-border-radius: 1ex;}
-div.fdjtalert.fdjtconfirm div.choices button.selected,
-div.fdjtalert.fdjtconfirm div.choices button:focus {
+div.fdjtdialog.fdjtconfirm div.choices button.selected,
+div.fdjtdialog.fdjtconfirm div.choices button:focus {
     color: black; border: solid black 3px;}
 
 @media screen and (max-height: 400px) {
-    div.fdjtalert { top: 10%; }
+    div.fdjtdialog { top: 10%; }
 }
 
 /* Text selection */
