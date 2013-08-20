@@ -1161,7 +1161,7 @@ body.USESVG input.fdjtemailinput,body.USESVG input[TYPE='EMAIL'] {
 input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
     background-image: url(markdown-solid_bg.png);
     background-repeat: no-repeat;
-    background-position: top right;}
+    background-position: bottom right;}
 body.USESVG input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
     background-image: url(markdown-solid_bg.svg);}
 input[TYPE="TEXT"].markdowninput {
