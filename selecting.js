@@ -140,7 +140,7 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (node.nodeType===3) {
                 var text=node.nodeValue, span;
                 var sliced=text.split(/\b/), wordspans=[];
-                i=0, lim=sliced.length;
+                i=0; lim=sliced.length;
                 while (i<lim) {
                     var word=sliced[i++];
                     if (word.length===0) continue;
@@ -174,7 +174,7 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 else if (children.length===0) return node;
                 else if (node.className==='fdjtselectwrap') return node;
                 else {
-                    i=0, lim=children.length;
+                    i=0; lim=children.length;
                     while (i<lim) {
                         var child=children[i++];
                         var wrap=wrapText(child,orig,wrapped,words,prefix);

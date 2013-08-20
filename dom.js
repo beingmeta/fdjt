@@ -477,7 +477,7 @@ fdjt.DOM=
                 return Selector.call(new Selector(),spec);
             if (spec.indexOf(',')>0) { // compound selectors
                 var specs=spec.split(','); var compound=[];
-                i=0, lim=specs.length;
+                i=0; lim=specs.length;
                 while (i<lim) {
                     var sub=string_trim(specs[i++]);
                     compound.push(new Selector(sub));}
@@ -486,7 +486,7 @@ fdjt.DOM=
                 return this;}
             // Otherwise, parse and set up this
             var elts=spec.match(css_selector_regex);
-            i=0, lim=elts.length;
+            i=0; lim=elts.length;
             var classes=[]; var classnames=[]; var attribs=false;
             if (!((elts[0][0]==='.')||(elts[0][0]==='#')||(elts[0][0]==='['))) {
                 this.tag=((tagcs)?(elts[0]):(elts[0].toUpperCase()));
@@ -516,7 +516,7 @@ fdjt.DOM=
         Selector.prototype.match=function(elt){
             var i, lim;
             if (this.compound) {
-                var compound=this.compound; i=0, lim=compound.length;
+                var compound=this.compound; i=0; lim=compound.length;
                 while (i<lim) if (compound[i++].match(elt)) return true;
                 return false;} 
             if ((this.tag)&&(this.tag!==elt.tagName)) return false;
@@ -524,7 +524,7 @@ fdjt.DOM=
             if (this.classes)
                 if (typeof elt.className === "string") {
                     var classname=elt.className; var classes=this.classes;
-                    i=0, lim=classes.length;
+                    i=0; lim=classes.length;
                     while (i<lim) if (classname.search(classes[i++])<0) return false;}
             else return false;
             if (this.attribs) {
@@ -544,7 +544,7 @@ fdjt.DOM=
             if (!(results)) results=[];
             if (this.compound) {
                 var compound=this.compound;
-                i=0, lim=compound.length;
+                i=0; lim=compound.length;
                 while (i<lim) compound[i++].find(elt,results);
                 return results;}
             if (this.id) {
@@ -579,7 +579,7 @@ fdjt.DOM=
             else if (candidates instanceof Array)
                 return candidates;
             else return toArray(candidates);
-            i=0, lim=candidates.length;
+            i=0; lim=candidates.length;
             while (i<lim) {
                 var candidate=candidates[i++];
                 if (this.match(candidate)) results.push(candidate);}
@@ -878,7 +878,7 @@ fdjt.DOM=
                 else i++;}
             if ((!type)||(type==='textarea')||(type==='text')) {
                 inputs=root.getElementsByTagName('textarea');
-                i=0, lim=inputs.length;
+                i=0; lim=inputs.length;
                 while (i<lim) {
                     if (((!(name))||(inputs[i].name===name))&&
                         ((!(type))||(inputs[i].type===type)))
@@ -886,7 +886,7 @@ fdjt.DOM=
                     else i++;}}
             if ((!type)||(type==='button')||(type==='submit')) {
                 inputs=root.getElementsByTagName('button');
-                i=0, lim=inputs.length;
+                i=0; lim=inputs.length;
                 while (i<lim) {
                     if (((!(name))||(inputs[i].name===name))&&
                         ((!(type))||(inputs[i].type===type)))
@@ -894,7 +894,7 @@ fdjt.DOM=
                     else i++;}}
             if ((!type)||(type==='select')) {
                 inputs=root.getElementsByTagName('select');
-                i=0, lim=inputs.length;
+                i=0; lim=inputs.length;
                 while (i<lim) {
                     if ((!(name))||(inputs[i].name===name))
                         results.push(inputs[i++]); 
@@ -1733,7 +1733,7 @@ fdjt.DOM=
                 return false;}
             else {
                 if (node.childNodes) {
-                    var children=node.childNodes; i=0, lim=children.length;
+                    var children=node.childNodes; i=0; lim=children.length;
                     while (i<lim)
                         if (((scan=children[i++]))&&((scan.nodeType===1))) return scan;}
                 while ((scan=node.nextSibling)) if (scan.nodeType===1) return scan;
@@ -2030,7 +2030,7 @@ fdjt.DOM=
                         var match=false;
                         if (events_pat.exec(evtype))
                             addListener(node,evtype,handlers[evtype]);
-                        else if (match=spec_events_pat.exec(evtype)) {
+                        else if ((match=spec_events_pat.exec(evtype))) {
                             var ev=match[2];
                             var handler=handlers[evtype];
                             var elts=node.querySelectorAll(match[1]);
@@ -2182,7 +2182,7 @@ fdjt.DOM=
             var i, lim;
             if (!(accum)) accum="";
             if ((!(node.nodeType))&&(node.length)) {
-                i=0, lim=node.length;
+                i=0; lim=node.length;
                 while (i<lim) accum=node2text(node[i++],accum);
                 return accum;}
             else if (node.nodeType===3) {
@@ -2191,7 +2191,7 @@ fdjt.DOM=
                 return accum;}
             else if (node.nodeType===1) {
                 var children=node.childNodes;
-                i=0, lim=children.length;
+                i=0; lim=children.length;
                 while (i<lim) {
                     accum=node2text(children[i++],accum);}
                 return accum;}
@@ -2202,7 +2202,7 @@ fdjt.DOM=
             var i, lim;
             if (cur>pos) return false;
             else if ((!(node.nodeType))&&(node.length)) {
-                i=0, lim=node.length;
+                i=0; lim=node.length;
                 while (i<lim) {
                     cur=get_text_pos(node[i++],pos,cur,starting);
                     if (typeof cur !== "number") return cur;}
@@ -2216,7 +2216,7 @@ fdjt.DOM=
                 else return cur+stringval.length;}
             else if (node.nodeType===1) {
                 var children=node.childNodes;
-                i=0, lim=children.length;
+                i=0; lim=children.length;
                 while (i<lim) {
                     cur=get_text_pos(children[i++],pos,cur,starting);
                     if (typeof cur !== 'number') {

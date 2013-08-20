@@ -84,20 +84,20 @@ var WSN=(function(){
                 words[nwords-1]=words[nwords-1].replace(/\W+$/,"");
             if (wordfn) {
                 if (typeof wordfn === 'number') {
-                    i=0, lim=words.length;
+                    i=0; lim=words.length;
                     while (i<lim) {
                         xword=words[i++];
                         if (word.length>wordfn) xwords.push(xword);}
                     if (xwords.length) words=xwords;}
                 else if (wordfn.call) {
-                    i=0, lim=words.length;
+                    i=0; lim=words.length;
                     while (i<lim) {
                         xword=wordfn(words[i++]);
                         if (xword) xwords.push(xword);
                         i++;}
                     if (xwords.length) words=xwords;}
                 else  {
-                    i=0, lim=words.length;
+                    i=0; lim=words.length;
                     while (i<lim) {
                         word=words[i++];
                         xword=wordfn[word];

@@ -57,7 +57,7 @@ fdjt.Log=(function(){
                 var found=document.getElementById(domconsole);
                 if (found) {
                     domconsole=fdjtLog.console=found;
-                    i=0, lim=backlog.length;
+                    i=0; lim=backlog.length;
                     while (i<lim) fdjt.DOM(domconsole,backlog[i++]);
                     backlog=[];}
                 else domconsole=false;}
@@ -82,7 +82,7 @@ fdjt.Log=(function(){
                     var newargs=new Array(arguments.length+1);
                     newargs[0]="[%fs] "+string;
                     newargs[1]=now;
-                    i=1, lim=arguments.length;
+                    i=1; lim=arguments.length;
                     while (i<lim) {newargs[i+1]=arguments[i]; i++;}
                     window.console.log.apply(window.console,newargs);}}}}
     fdjtLog.console=null;

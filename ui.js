@@ -55,12 +55,12 @@ if (!(fdjt.UI.FocusBox)) fdjt.UI.FocusBox={};
         if (cur===newname) return;
         if (cur) {
             var drop=document.getElementsByName(cur);
-            i=0, n=drop.length;
+            i=0; n=drop.length;
             while (i<n) fdjtDOM.dropClass(drop[i++],classname);}
         highlights[classname]=newname||false;
         if (newname) {
             var elts=document.getElementsByName(newname);
-            n=elts.length, i=0;
+            n=elts.length; i=0;
             while (i<n) fdjtDOM.addClass(elts[i++],classname);}}
     fdjtUI.CoHi.highlight=highlight;
     
@@ -218,7 +218,7 @@ fdjt.UI.Highlight=(function(){
         var i, lim;
         if (typeof target === 'string') target=fdjtID(target);
         else if (target.length) {
-            i=0, lim=target.length;
+            i=0; lim=target.length;
             while (i<lim) checkspan_set(target[i++],checked);
             return;}
         if ((!(target))||(!(target.nodeType))) return;
@@ -251,7 +251,7 @@ fdjt.UI.Highlight=(function(){
             var form=checkbox.form;
             var name=checkbox.name;
             var tosync=getChildren(form,'input');
-            i=0, lim=tosync.length;
+            i=0; lim=tosync.length;
             while (i<lim) {
                 var input=tosync[i++];
                 if (input===checkbox) continue;
@@ -268,7 +268,7 @@ fdjt.UI.Highlight=(function(){
             evt.initEvent("change",false,true);
             checkbox.dispatchEvent(evt);}
         if (unchecked.length) {
-            i=0, lim=unchecked.length;
+            i=0; lim=unchecked.length;
             while (i<lim) {
                 var uncheck=unchecked[i++];
                 var altspan=getParent(uncheck,".checkspan");
@@ -960,7 +960,7 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
-    /* global setInterval: false, clearInterval: false */
+    /* global setInterval: false */
 
     function ImageSwap(img,interval){
         if (typeof img==='string') img=fdjtID(img);
@@ -1294,8 +1294,6 @@ fdjt.UI.ProgressBar=(function(){
                                 initTimeElementsUnder(fdjtUI.T(evt));});}
     
     fdjt.addInit(initTimeElements,"TimeElements",false);})();
-
-
 
 /* Emacs local variables
    ;;;  Local variables: ***

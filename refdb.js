@@ -668,7 +668,7 @@ if (!(fdjt.RefDB)) {
                     else {
                         loads[name]=[r];
                         dbs.push(db);}}
-                i=0, lim=dbs.length; while (i<lim) {
+                i=0; lim=dbs.length; while (i<lim) {
                     var loadfrom=dbs[i++];
                     loadfrom.load(loads[loadfrom.name],args);}
                 return loads;}
@@ -1268,7 +1268,7 @@ if (!(fdjt.RefDB)) {
             else toadd=[val];
             var i=0, lim=todrop.length;
             while (i<lim) this.drop(prop,todrop[i++]);
-            i=0, lim=toadd.length; while (i<lim) this.add(prop,toadd[i++]);
+            i=0; lim=toadd.length; while (i<lim) this.add(prop,toadd[i++]);
             return true;};
 
         Ref.prototype.toHTML=function(){

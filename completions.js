@@ -236,12 +236,12 @@ if (!(fdjt.UI)) fdjt.UI={};
         var displayed=c.displayed;
         var i, lim;
         if (displayed) {
-            i=0, lim=displayed.length;
+            i=0; lim=displayed.length;
             while (i<lim) dropClass(displayed[i++],"displayed");
             c.displayed=displayed=[];}
         else c.displayed=displayed=[];
         if (todisplay) {
-            i=0, lim=todisplay.length;
+            i=0; lim=todisplay.length;
             while (i<lim) {
                 var node=todisplay[i++];
                 if (hasClass(node,"completion")) {

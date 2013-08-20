@@ -30,9 +30,11 @@ fdjt.Dialog=(function(){
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
     var Template=fdjt.Template;
+    var template=fdjt.Template;
     var Templates=fdjt.Templates;
 
     var hasClass=fdjtDOM.hasClass;
+    var addToClass=fdjtDOM.addToClass;
 
     var countdown_serial=1; var countdown_tickers={};
 
@@ -60,7 +62,7 @@ fdjt.Dialog=(function(){
         if (spec.title) {
             if (spec.title.nodeType) elts.push(spec.title);
             else {
-                var title_text=Template(spec.title,spec,spec.data);
+                var title_text=template(spec.title,spec,spec.data);
                 box.title=title_text;
                 box.appendChild(fdjtDOM("div.title",title_text));}}
         var elts=[]; var i=1, lim=arguments.length;
@@ -76,12 +78,13 @@ fdjt.Dialog=(function(){
                 else if (ishtml)
                     fdjtDOM.append(box,arg);
                 else if (istemplate)
-                    box.appendChild(document.createTextNode(Template(arg,spec)));
+                    box.appendChild(document.createTextNode(template(arg,spec)));
                 else box.appendChild(document.createTextNode(arg));}
             else box.appendChild(document.createTextNode(arg.toString));}
-        if ((spec.id)&&(!(dom.id))) box.id=spec.id;
+        if ((spec.id)&&(!(box.id))) box.id=spec.id;
         fdjtDOM.addListeners(box,spec);
         return box;}
+    var makeDialog=Dialog;
 
     function remove_dialog(evt){
         evt=evt||event;
@@ -252,9 +255,9 @@ fdjt.Dialog=(function(){
                 selection=i;}
             i++;}
         if (selection<0) selection=0; 
-        box=Dialog({},
-                   fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
-                   fdjtDOM("div.choices",buttons));
+        box=makeDialog(
+            {},fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
+            fdjtDOM("div.choices",buttons));
         close_button=fdjtDOM.getChild(box,".closebutton");
         if (spec.cancel) close_button.onclick=close_choice;
         else fdjtDOM.remove(close_button);

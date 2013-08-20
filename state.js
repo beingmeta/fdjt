@@ -158,7 +158,7 @@ fdjt.State=
                     while (i<lim) {
                         var key=storage.key(i++);
                         if (key.search(name)>=0) keys.push(key);}
-                    i=0, lim=keys.length; while (i<lim) {
+                    i=0; lim=keys.length; while (i<lim) {
                         storage[keys[i++]]=val;}}
                 else window.localStorage[name]=val;}}
         fdjtState.setLocal=setLocal;
@@ -208,7 +208,7 @@ fdjt.State=
                     while (i<lim) {
                         var key=storage.key(i++);
                         if (key.search(name)>=0) drop.push(key);}
-                    i=0, lim=drop.length; while (i<lim) {
+                    i=0; lim=drop.length; while (i<lim) {
                         storage.removeItem(drop[i++]);}}
                 else return window.localStorage.removeItem(name);}
             else return false;}
