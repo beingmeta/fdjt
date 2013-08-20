@@ -105,17 +105,20 @@ fdjt.State=
                 fdjtLog.warn("Error setting cookie %s",name);}}
         fdjtState.setCookie=setCookie;
         
-        function clearCookie(name){
+        function clearCookie(name,path,domain){
             try {
                 var cookietext=encodeURIComponent(name)+
                     "=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-                //This doesn't seem to work
-                //if (path) cookietext=cookietext+"; path="+path;
-                // fdjtTrace("Clearing cookie %o: text=%o",name,cookietext);
+                if (path) cookietext=cookietext=cookietext+"; path="+path;
+                if (domain) cookietext=cookietext=cookietext+"; domain="+domain;
                 document.cookie=cookietext;}
             catch (ex) {
                 fdjtLog.warn("Error clearing cookie %s: %s",
-                             name,ex);}}
+                             name,ex);}
+            if (getCookie(name)) {
+                var altcookietext=encodeURIComponent(name)+
+                    "=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                document.cookie=altcookietext;}}
         fdjtState.clearCookie=clearCookie;
 
         /* Session storage */
