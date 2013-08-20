@@ -133,7 +133,7 @@ div.fdjtclearfloats {
     display: table; /* 2 */
 }
 
-fdjtfloats.after {
+.fdjtfloats:after {
     clear: both;
 }
 
