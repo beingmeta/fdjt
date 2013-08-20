@@ -22,7 +22,7 @@
 
 /* Non-blocking alerts and messages */
 
-var fdjt.Dialog=(function(){
+fdjt.Dialog=(function(){
     
     "use strict";
     var fdjtDOM=fdjt.DOM;
@@ -47,37 +47,37 @@ var fdjt.Dialog=(function(){
               (hasClass(box,"fdjtkeep")))) {
             var countdown=fdjtDOM("div.countdown","Closing…");
             countdown.id="FDJTCOUNTDOWN"+(countdown_serial++);
-            elts.push(countdown);}
+            box.appendChild(countdown);}
         if (!((spec.modal)||(spec.noclose)||(hasClass(box,"fdjtmodal")))) {
             var close_button=fdjtDOM.Image(
                 "https://s3.amazonaws.com/static.beingmeta.com/g/codex/redx40x40.png",
                 "closebutton","Close");
             close_button.onclick=close_dialog_handler;
             close_button.title="click to close";
-            elts.push(close_button);}
+            box.appendChild(close_button);}
         if (spec.title) {
             if (spec.title.nodeType) elts.push(spec.title);
             else {
                 var title_text=Template(spec.title,spec,spec.data);
                 box.title=title_text;
-                elts.push(fdjtDOM("div.title",title_text);}}}
+                box.appendChild(fdjtDOM("div.title",title_text));}}
         var elts=[]; var i=1, lim=arguments.length;
         while (i<lim) {
             var arg=arguments[i++];
-            if (arg.nodeType) dom.appendChild(arg);
+            if (arg.nodeType) box.appendChild(arg);
             else if (typeof arg === "string") {
                 arg=Template.Templates[arg]||arg;
                 if ((ishtml)&&(istemplate))
-                    dom.appendChild(Template.toDOM(arg,spec));
+                    box.appendChild(Template.toDOM(arg,spec));
                 else if (ishtml)
-                    fdjtDOM.append(dom,arg);
+                    fdjtDOM.append(box,arg);
                 else if (istemplate)
-                    dom.appendChild(document.createTextNode(Template(arg,spec)));
-                else dom.appendChild(document.createTextNode(arg));}
-            else dom.appendChild(document.createTextNode(arg.toString));}
-        if ((spec.id)&&(!(dom.id))) dom.id=spec.id;
-        fdjtDOM.addListeners(dom,spec);
-        return dom;}
+                    box.appendChild(document.createTextNode(Template(arg,spec)));
+                else box.appendChild(document.createTextNode(arg));}
+            else box.appendChild(document.createTextNode(arg.toString));}
+        if ((spec.id)&&(!(dom.id))) box.id=spec.id;
+        fdjtDOM.addListeners(box,spec);
+        return box;}
 
     function remove_dialog(evt){
         evt=evt||event;
@@ -130,6 +130,7 @@ var fdjt.Dialog=(function(){
     function alertBox(){
         var box=Dialog.apply(null,{},arguments);
         addToClass(box,"fdjtalert");}
+    Dialog.alertBox=alertBox;
     fdjtUI.alertBox=alertBox;
 
     function alertfn(){
@@ -138,9 +139,10 @@ var fdjt.Dialog=(function(){
             curbox.id="";
             fdjtDOM.dropClass(curbox,"closing");
             remove_dialog(curbox);}
-        var box=dialogBox(arguments);
+        var box=Dialog.apply(null,{},arguments);
         box.id="FDJTALERT"; fdjtDOM.prepend(document.body,box);
         return box;}
+    Dialog.alert=alertfn;
     fdjtUI.alert=alertfn;
     fdjt.alert=alertfn;
 
@@ -162,6 +164,7 @@ var fdjt.Dialog=(function(){
         fdjtDOM.addListener(box,"click",stop_countdown_onclick);
         setTimeout(function(){fdjtDOM.addClass(box,"closing");},10);
         return box;}
+    Dialog.setCountdown=setCountdown;
     fdjtUI.setCountdown=setCountdown;
 
     function alertFor(timeout){
@@ -170,10 +173,11 @@ var fdjt.Dialog=(function(){
             curbox.id="";
             fdjtDOM.dropClass(curbox,"closing");
             remove_dialog(curbox);}
-        var box=dialogBox(fdjtDOM.slice(arguments,1));
+        var box=Dialog(fdjtDOM.slice(arguments,1));
         box.id="FDJTALERT"; fdjtDOM.prepend(document.body,box);
         setCountdown(box,timeout);
         return box;}
+    Dialog.alertFor=alertFor;
     fdjtUI.alertFor=alertFor;
 
     function makeChoice(spec,close_choice,i){
@@ -243,8 +247,9 @@ var fdjt.Dialog=(function(){
                 selection=i;}
             i++;}
         if (selection<0) selection=0; 
-        box=dialogBox(fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
-                      fdjtDOM("div.choices",buttons));
+        box=Dialog({},
+                   fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
+                   fdjtDOM("div.choices",buttons));
         close_button=fdjtDOM.getChild(box,".closebutton");
         if (spec.cancel) close_button.onclick=close_choice;
         else fdjtDOM.remove(close_button);
@@ -276,6 +281,8 @@ var fdjt.Dialog=(function(){
                 if (choices[selection].handler) choices[selection].handler();});
         buttons[selection].focus();
         return box;}
+    Dialog.Choice=choose;
+    Dialog.choose=choose;
     fdjtUI.choose=choose;
     fdjt.Choice=choose;
 

@@ -2027,11 +2027,12 @@ fdjt.DOM=
             if (handlers) {
                 for (var evtype in handlers) {
                     if (handlers.hasOwnProperty(evtype)) {
-                        if (events_pat.exec(key))
+                        var match=false;
+                        if (events_pat.exec(evtype))
                             addListener(node,evtype,handlers[evtype]);
-                        else if (match=spec_events_pat.exec(key)) {
+                        else if (match=spec_events_pat.exec(evtype)) {
                             var ev=match[2];
-                            var handler=handlers[key];
+                            var handler=handlers[evtype];
                             var elts=node.querySelectorAll(match[1]);
                             addListener(elts,ev,handler);}}}}}
         fdjtDOM.addListeners=addListeners;

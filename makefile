@@ -7,7 +7,7 @@ FDJT_FILES=header.js string.js time.js  template.js hash.js \
 	syze.js iscroll.js indexed.js \
 	log.js init.js state.js dom.js \
 	json.js refdb.js ajax.js wsn.js \
-	dialog.js ui.js completions.js taphold.js selecting.js \
+	ui.js dialog.js completions.js taphold.js selecting.js \
 	adjustfont.js scrollever.js \
 	globals.js
 FDJT_HINTS=string.hint time.hint \
