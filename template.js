@@ -27,26 +27,44 @@
 fdjt.Template=(function(){
     var templates={};
 
-    function Template(text,data){ /* Filling in templates */
+    function Template(text,data,xdata){ /* Filling in templates */
+	var dom=false;
 	if (typeof data === "string") {
 	    var tmp=data; data=text; text=tmp;}
 	if ((!(text))&&(data)&&(data.template)) text=data.template;
 	// Maybe a warning?
-	if (typeof text !== "string") return;
+	if (typeof text === "string") {}
+	else if (text.nodeType===3) {
+	    dom=text; text=dom.nodeValue;}
+	else if (text.nodeType===1) {
+	    dom=text; text=dom.innerHTML;}
+	else {
+	    fdjtLog.warn("Bad argument %o to Template",text);
+	    return;}
 	if (Template.localTemplates.hasOwnProperty(text))
 	    text=Template.localTemplates[text];
 	else if (templates.hasOwnProperty(text))
 	    text=templates[text];
 	else {}
-	var substs=text.match(/{{\w+}}/gm);
+	var substs=text.match(/{{\w+}}/gm), done={};
 	if (substs) {
 	    var i=0, n=substs.length; while (i<n) {
 		var match=substs[i++];
 		var prop=match.slice(2,-2);
-		var val=((data.hasOwnProperty(prop))&&(data[prop]));
-		if (val) text=
-		    text.replace(new RegExp(match,"g"),val.toString());}}
-	return text;}
+		if (done[prop]) continue;
+		if (!((data.hasOwnProperty(prop))||
+		      ((xdata)&&(xdata.hasOwnProperty(prop))))) {
+		    fdjtLog.warn("No data for %s in %s to use in %s",prop,data,text);
+		    done[prop]=prop;
+		    continue;}
+		var val=data[prop]||((xdata)&&(xdata[prop]))||"";
+		done[prop]=prop;
+		text=text.replace(new RegExp(match,"g"),val.toString());}}
+	if (dom) {
+	    if (dom.nodeType===3) dom.nodeValue=text;
+	    else dom.innerHTML=text;
+	    return dom;}
+	else return text;}
 
     fdjt.Templates=templates;
     Template.localTemplates={};
