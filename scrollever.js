@@ -101,13 +101,15 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
                         tbl=span.childNodes[0];}
                     var add=[];
                     var children=tbl.childNodes;
-                    var i=0; var lim=children.length;
+                    var i=0; var lim=children.length, seenids={};
                     while (i<lim) {
                         var child=children[i++];
                         if ((child.nodeType===1)&&(child.id)) {
-                            if (document.getElementById(child.id)) {}
+                            if ((document.getElementById(child.id))||
+                                (seenids[child.id])) {}
                             else add.push(child);}
-                        else add.push(child);}
+                        else add.push(child);
+                        if (child.id) seenids[child.id]=child.id;}
                     fdjtDOM(container,add);
                     off=off+win;
                     var iscroll=spec.iscroll||window.iscroller||false;
