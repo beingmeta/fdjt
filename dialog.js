@@ -30,13 +30,15 @@ fdjt.Dialog=(function(){
     var fdjtUI=fdjt.UI;
     var fdjtID=fdjt.ID;
     var Template=fdjt.Template;
+    var Templates=fdjt.Templates;
 
     var hasClass=fdjtDOM.hasClass;
 
     var countdown_serial=1; var countdown_tickers={};
 
     function Dialog(spec){
-        if (typeof spec === "string") spec={spec: spec};
+        if (!(spec)) spec={};
+        else if (typeof spec === "string") spec={spec: spec};
         var box=fdjtDOM((spec.spec)||("div.fdjtdialog"));
         if (spec.classes) {
             box.className=(box.className||"")+
@@ -66,7 +68,9 @@ fdjt.Dialog=(function(){
             var arg=arguments[i++];
             if (arg.nodeType) box.appendChild(arg);
             else if (typeof arg === "string") {
-                arg=Template.Templates[arg]||arg;
+                arg=Templates[arg]||arg;
+                var ishtml=(arg.indexOf('<')>=0);
+                var istemplate=(arg.search("{{")>=0);
                 if ((ishtml)&&(istemplate))
                     box.appendChild(Template.toDOM(arg,spec));
                 else if (ishtml)
@@ -173,7 +177,8 @@ fdjt.Dialog=(function(){
             curbox.id="";
             fdjtDOM.dropClass(curbox,"closing");
             remove_dialog(curbox);}
-        var box=Dialog(fdjtDOM.slice(arguments,1));
+        var args=[{timeout: timeout}].concat(fdjtDOM.slice(arguments,1));
+        var box=Dialog.apply(null,args);
         box.id="FDJTALERT"; fdjtDOM.prepend(document.body,box);
         setCountdown(box,timeout);
         return box;}
