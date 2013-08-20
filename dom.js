@@ -252,6 +252,23 @@ fdjt.DOM=
             else return node.toString();}
         fdjtDOM.nodeString=nodeString;
         
+        /* Another way of making DOM elements which uses templates */
+
+        function make(spec,content,data,init){
+            var dom=fdjtDOM(spec);
+            if (!(init)) init=data;
+            if (data) content=fdjt.Template(content,data);
+            if ((init.id)&&(!(dom.id))) dom.id=init.id;
+            if ((init.title)&&(!(dom.title))) dom.title=init.title;
+            if ((init.name)&&(!(dom.name))) dom.name=init.name;
+            if ((init.href)&&(!(dom.href))) dom.href=init.href;
+            if ((init.value)&&(!(dom.value))) dom.value=init.value;
+            if ((init.src)&&(!(dom.src))) dom.src=init.src;
+            if ((init.alt)&&(!(dom.alt))) dom.alt=init.alt;
+            addListeners(dom,init);
+            return dom;}
+        fdjtDOM.make=make;
+
         /* Getting "values" of elements */
         function getElementValues(elt,spec,parse,multiple){
             var candidates=[];
@@ -2002,13 +2019,23 @@ fdjt.DOM=
                         handlers[evtype]=defs[evtype];}}
         fdjtDOM.defListeners=defListeners;
 
-        function addListeners(node,handlers){
-            if (handlers) 
-                for (var evtype in handlers) {
-                    if (handlers.hasOwnProperty(evtype))
-                        addListener(node,evtype,handlers[evtype]);}}
-        fdjtDOM.addListeners=addListeners;
+        var events_pat=/^(click|keyup|keydown|keypress|change|touchstart|touchmove|touchend|mousedown|mouseup|mousemove|focus|blur)$/;
+        var spec_events_pat=
+            /^([^:]+):(click|keyup|keydown|keypress|change|touchstart|touchmove|touchend|mousedown|mouseup|mousemove|focus|blur)$/;
 
+        function addListeners(node,handlers){
+            if (handlers) {
+                for (var evtype in handlers) {
+                    if (handlers.hasOwnProperty(evtype)) {
+                        if (events_pat.exec(key))
+                            addListener(node,evtype,handlers[evtype]);
+                        else if (match=spec_events_pat.exec(key)) {
+                            var ev=match[2];
+                            var handler=handlers[key];
+                            var elts=node.querySelectorAll(match[1]);
+                            addListener(elts,ev,handler);}}}}}
+        fdjtDOM.addListeners=addListeners;
+        
         fdjtDOM.T=function(evt) {
             evt=evt||event; return (evt.target)||(evt.srcElement);};
 
