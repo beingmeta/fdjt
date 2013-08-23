@@ -461,8 +461,16 @@ fdjt.DOM=
         fdjtDOM.toggleClass=toggleClass;
         fdjtDOM.tC=toggleClass;
         
+        function toggleParent(node,spec,classname,attrib,keep){
+            var parent=getParent(node,spec);
+            if (parent) toggleClass(parent,classname,attrib,keep);}
+        fdjtDOM.toggleParent=toggleParent;
+        fdjtDOM.tP=toggleParent;
+
         fdjtDOM.isTextInput=function(target){
-            return ((target.tagName==='INPUT')||(target.tagName==='TEXTAREA'));};
+            return (((target.tagName==='INPUT')&&
+                     (target.type.search(/text|url|email|search|password/i)===0))
+                    (target.tagName==='TEXTAREA'));};
 
         /* Simple CSS selectors */
 
