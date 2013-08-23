@@ -45,6 +45,7 @@ span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
 .checkspan.ischecked img.checked { display: inline;} 
 .checkspan.ischecked div.checked { display: block;}
 .checkspan.ischecked li.checked { display: list-item;}
+.checkspan.ischecked input {  font-size: 111%; font-weight: normal; }
 
 .checkspan[checked] { font-weight: bold; }
 .checkspan[checked] .alt { font-size: 80%; font-weight: normal;}
@@ -129,21 +130,18 @@ span[onclick] { cursor: pointer;}
  * 2. The use of `table` rather than `block` is only necessary if using
  *    `:before` to contain the top-margins of child elements.
  */
-.fdjtfloats:before,
-.fdjtfloats:after {
+.fdjtfloats:before, .cf:before,
+.fdjtfloats:after, .cf:after {
     content: " "; /* 1 */
     display: table; /* 2 */
 }
 
-.fdjtfloats:after {
+.fdjtfloats:after, .cf:after {
     clear: both;
 }
 
-/**
- * For IE 6/7 only
- * Include this rule to trigger hasLayout and contain floats.
- */
-.fdjtfloats {
+/* For IE 6/7 only (triggers hasLayout) */
+.fdjtfloats, .cf {
     *zoom: 1;
 }
 
@@ -255,7 +253,7 @@ table.fdjt {font-family: sans,sans-serif;}
 table.fdjt.full { width: 100%; }
 table.fdjt th { vertical-align: top; text-align: right;}
 table.fdjt td { vertical-align: top; text-align: left;}
-table.fdjt td input.fullwidth[type='TEXT'] { width: 100%;}
+table.fdjt td input.fullwidth[type="TEXT"] { width: 100%;}
 table.fdjt td textarea.fullwidth { width: 100%;}
 
 /* Auto completion */
@@ -527,11 +525,11 @@ table.fdjtform th { text-align: right;}
 table.fdjtform td { text-align: left;}
 table.fdjtform td.rightalign { text-align: right;}
 
-table.fdjtform td input[TYPE='URL'],
-table.fdjtform td input[TYPE='EMAIL'],
-table.fdjtform td input[TYPE='PASSWORD'],
-table.fdjtform td input[TYPE='SEARCH'],
-table.fdjtform td input[TYPE='TEXT'],
+table.fdjtform td input[TYPE="URL"],
+table.fdjtform td input[TYPE="EMAIL"],
+table.fdjtform td input[TYPE="PASSWORD"],
+table.fdjtform td input[TYPE="SEARCH"],
+table.fdjtform td input[TYPE="TEXT"],
 table.fdjtform td textarea {
     width: 100%;}
 table.fdjtform td p {
@@ -576,7 +574,7 @@ table.fdjtform tr.mainbuttons span.note { font-size: 120%; color: red; }
 
 th button, td button { white-space: nowrap;}
 
-form.evalform input[name='EXPR'] {
+form.evalform input[name="EXPR"] {
     font-family: fixed; width: 100%;}
 
 /* Twisties */
@@ -584,9 +582,9 @@ form.evalform input[name='EXPR'] {
 .twisties {}
 .twisties span.twisty { cursor: pointer; }
 .twisties span.twisty img { font-weight: bold; }
-.twisties span.twisty img[alt='-'] { display: none;}
-.twisties .expanded span.twisty img[alt='-'] { display: inline;}
-.twisties .expanded span.twisty img[alt='+'] { display: none;}
+.twisties span.twisty img[alt="-"] { display: none;}
+.twisties .expanded span.twisty img[alt="-"] { display: inline;}
+.twisties .expanded span.twisty img[alt="+"] { display: none;}
 .twisties .expanded span.twisty { font-weight: bold;}
 
 /* Displaying deadlinks as red, Wikipedia style */
@@ -1152,12 +1150,12 @@ span.adjustfont_wrapper {
 
 /* input background images */
 
-input.fdjtemailinput, input[TYPE='EMAIL'] {
+input.fdjtemailinput, input[TYPE="EMAIL"] {
     background-image: url(email_bg.png);
     background-repeat: no-repeat;
     background-size: auto 100%;
     background-position: right;}
-body.USESVG input.fdjtemailinput,body.USESVG input[TYPE='EMAIL'] { 
+body.USESVG input.fdjtemailinput,body.USESVG input[TYPE="EMAIL"] { 
     background-image: url(email_bg.svgz);}
 
 input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
