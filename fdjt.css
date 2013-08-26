@@ -81,6 +81,13 @@ div.checkblock.ischecked > table { display: table; }
 ul.checkblock.ischecked >  li { display: list-item; }
 ol.checkblock.ischecked >  li { display: list-item; }
 
+/* Utility classes */
+
+.hidetext {
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;}
+
 /* Autoprompt classes */
 
 input.autoprompt { font-family: sans,sans-serif; }
@@ -133,17 +140,12 @@ span[onclick] { cursor: pointer;}
 .fdjtfloats:before, .cf:before,
 .fdjtfloats:after, .cf:after {
     content: " "; /* 1 */
-    display: table; /* 2 */
-}
+    display: table; /* 2 */}
 
-.fdjtfloats:after, .cf:after {
-    clear: both;
-}
+.fdjtfloats:after, .cf:after { clear: both; }
 
 /* For IE 6/7 only (triggers hasLayout) */
-.fdjtfloats, .cf {
-    *zoom: 1;
-}
+.fdjtfloats, .cf { zoom: 1; }
 
 /* Tabs */
 
@@ -604,12 +606,6 @@ div.fdjtlog span.time {
 .fdjtexpands.closed span.controller { display: inline;}
 .fdjtexpands.closed div.controller { display: block;}
 
-/* Emacs local variables
-;;;  Local variables: ***
-;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
-;;;  End: ***
-*/
-
 .fdjtexpands .whenexpanded { display: none;}
 .fdjtexpands.fdjtexpanded .whencollapsed { display: none;}
 
@@ -808,78 +804,6 @@ div.fdjtprogress div.message {
     position: absolute; left: 0px; top: 0px; z-index: 100;
     width: 100%; height: 100%;
     text-align: center; vertical-align: middle;}
-
-/* Human libnotify CSS */
-
-/* recommended base settings */
-.humane {
-  filter                : progid:DXImageTransform.Microsoft.alpha(opacity=100);
-  -ms-filter            : "progid:DXImageTransform.Microsoft.alpha(opacity=100)";
-  position              : fixed;
-  _position             : absolute; /* ie6 */
-  -moz-transition       : all .5s;  /* .5s transition */
-  -webkit-transition    : all .5s;
-  -o-transition         : all .5s;
-  -ms-transition        : all .5s;
-  transition            : all .5s;
-  visibility            : hidden;
-  z-index               : -100;
-}
-.humane.humane-show { visibility : visible;
-		      z-index    : 100000;}
-/* ie hover state, recommended */
-.humane:hover {
-  filter                : progid:DXImageTransform.Microsoft.alpha(opacity=20);
-  -ms-filter            : "progid:DXImageTransform.Microsoft.alpha(opacity=20)";
-}
-/* standards hover state, recommended */
-div.humane.humane-show:hover { opacity: 0.2; }
-
-/* custom settings */
-.humane {
-  font-family           : Verdana, sans-serif;
-  font-size             : 15px;
-  letter-spacing        : -1px;
-  bottom                : 10px;
-  right                 : 30px;
-  opacity               : 0;
-  width                 : 150px;
-  color                 : #fff;
-  padding               : 10px;
-  text-align            : center;
-  background-color      : #000;
-  background-color      : rgba(0,0,0,0.8);
-  background-image      : -moz-linear-gradient(top, rgba(0,0,0,.5), rgba(50,50,50,.5));
-  background-image      : -ms-linear-gradient(top,  rgba(0,0,0,.5), rgba(50,50,50,.5));
-  background-image      : -o-linear-gradient(top,   rgba(0,0,0,.5), rgba(50,50,50,.5));
-  background-image      : -webkit-gradient(linear, left top, left bottom, from(rgba(0,0,0,.8)), to(rgba(50,50,50,.8)));
-  background-image      : -webkit-linear-gradient(top, rgba(0,0,0,.8), rgba(50,50,50,.8));
-  background-image      : linear-gradient(top, rgba(0,0,0,.8), rgba(50,50,50,.8));;
-  -moz-border-radius    : 5px;
-  -webkit-border-radius : 5px;
-  -o-border-radius      : 5px;
-  border-radius         : 5px;
-  -moz-box-shadow       : 0 4px 4px -4px #000;
-  -webkit-box-shadow    : 0 4px 4px -4px #000;
-  box-shadow            : 0 4px 4px -4px #000;
-}
-
-/* custom animation for css transition supported browsers */
-.humane.humane-show { opacity: 1; }
-
-/* other customizations */
-.humane p {
-  margin                : 5px;
-  display               : inline;
-}
-.humane ul {
-  list-style            : none;
-  margin                : 0;
-  padding               : 0;
-}
-.humane .error {
-  color                 : red;
-}
 
 /* File upload affirmations */
 
@@ -1116,7 +1040,6 @@ body.cxTOUCH .fdjtselecting .fdjtselectstart:hover,
 body.cxTOUCH .fdjtselecting .fdjtselectend:hover {
     text-decoration: none;}
 
-
 .fdjtselecting .fdjtadjuststart .fdjtselectstart,
 .fdjtselecting .fdjtadjustend .fdjtselectend {
     background-color: gold;}
@@ -1176,7 +1099,6 @@ table.fdjtform th.usebaseline,
 table.fdjtform .usebaseline th,
 table.fdjtform .usebaseline td {
     vertical-align: baseline;}
-
 
 /* Emacs local variables
    ;;;  Local variables: ***
