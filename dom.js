@@ -467,11 +467,12 @@ fdjt.DOM=
         fdjtDOM.toggleParent=toggleParent;
         fdjtDOM.tP=toggleParent;
 
-        fdjtDOM.isTextInput=function(target){
+        function isTextInput(target){
             return (((target.tagName==='INPUT')&&
-                     (target.type.search(/text|url|email|search|password/i)===0))
-                    (target.tagName==='TEXTAREA'));};
-
+                     (target.type.search(/text|url|email|search|password/i)===0))||
+                    (target.tagName==='TEXTAREA'));}
+        fdjtDOM.isTextInput=isTextInput;
+        
         /* Simple CSS selectors */
 
         var selectors={};
