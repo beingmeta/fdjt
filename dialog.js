@@ -135,7 +135,8 @@ fdjt.Dialog=(function(){
         fdjtUI.cancel(evt);}
 
     function alertBox(){
-        var box=Dialog.apply(null,{},arguments);
+        var args=fdjtDOM.toArray(arguments);
+        var box=Dialog.apply(null,[{}].concat(args));
         addToClass(box,"fdjtalert");}
     Dialog.alertBox=alertBox;
     fdjtUI.alertBox=alertBox;
@@ -146,7 +147,8 @@ fdjt.Dialog=(function(){
             curbox.id="";
             fdjtDOM.dropClass(curbox,"closing");
             remove_dialog(curbox);}
-        var box=Dialog.apply(null,{},arguments);
+        var args=fdjtDOM.toArray(arguments);
+        var box=Dialog.apply(null,[{}].concat(args));
         box.id="FDJTALERT"; fdjtDOM.prepend(document.body,box);
         return box;}
     Dialog.alert=alertfn;
