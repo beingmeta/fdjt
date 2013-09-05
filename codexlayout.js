@@ -263,7 +263,8 @@ fdjt.CodexLayout=
                 copy.setAttribute("data-baseid",id);
                 copy.id=null;}
             // Record the copy you've made (to avoid recreation)
-            dups[id]=copy;
+            if (dups[id]) dups[id].push(copy);
+            else dups[id]=[copy];
             // If it's got a copied context, append it to the context;
             //   otherwise, just append it to the page
             if (parent) parent.appendChild(copy);
@@ -1570,8 +1571,9 @@ fdjt.CodexLayout=
             function Finish(){
                 for (var dupid in dups)
                     if (dups.hasOwnProperty(dupid)) {
-                        var dup=dups[dupid];
-                        dup.className=dup.className.replace(
+                        var alldups=dups[dupid];
+                        var lastdup=alldups[alldups.length-1];
+                        lastdup.className=lastdup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
                 if (page) dropClass(page,"codexshowpage");
                 var i=0; var lim= pages.length;
