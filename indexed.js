@@ -1012,4 +1012,4 @@ var idbModules = {};
     window.IDBTransaction.READ_WRITE = window.IDBTransaction.READ_WRITE || "readwrite";
   }
 }(window, idbModules));
-//@ sourceMappingURL=IndexedDBShim.min.js.map
+
