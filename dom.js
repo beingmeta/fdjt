@@ -2028,9 +2028,8 @@ fdjt.DOM=
                         handlers[evtype]=defs[evtype];}}
         fdjtDOM.defListeners=defListeners;
 
-        var events_pat=/^(click|keyup|keydown|keypress|change|touchstart|touchmove|touchend|mousedown|mouseup|mousemove|focus|blur)$/;
-        var spec_events_pat=
-            /^([^:]+):(click|keyup|keydown|keypress|change|touchstart|touchmove|touchend|mousedown|mouseup|mousemove|focus|blur)$/;
+        var events_pat=/^([^:]+)$/;
+        var spec_events_pat=/^([^: ]+):([^: ]+)$/;
 
         function addListeners(node,handlers){
             if (handlers) {
