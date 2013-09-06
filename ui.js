@@ -1008,7 +1008,7 @@ fdjt.UI.ProgressBar=(function(){
         return false;};
 
     fdjtUI.isClickable=function(target){
-        if ((window.event)&&(target instanceof window.Event))
+        if ((window.Event)&&(target instanceof window.Event))
             target=fdjtUI.T(target);
         while (target) {
             if (((target.tagName==='A')&&(target.href))||
