@@ -145,6 +145,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         else touchable=function(e){return hasParent(e,elt);};
         
         function setTarget(t){
+            if ((th.trace)||(trace_taphold))
+                fdjtLog("TapHold/setTarget %o cur=%o",t,th_target);
             if (th_target) dropClass(th_target,"tapholdtarget");
             if (t) addClass(t,"tapholdtarget");
             th_target=t;}
@@ -185,7 +187,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             noDefault(evt);
             pressed_at=fdjtTime(); 
             th_timer=setTimeout((function(){
-                if ((th.trace)||(trace_taphold)) fdjtLog("TapHold/startpress/timeout %o",evt);
+                if ((th.trace)||(trace_taphold))
+                    fdjtLog("TapHold/startpress/timeout %o",evt);
                 if (th_targets.length>0) {
                     var targets=th_targets;
                     var i=0, lim=targets.length;
@@ -354,6 +357,13 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (!(start_x)) {start_x=touch_x; start_y=touch_y;}
             touch_t=fdjtTime();
             if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
+            if ((th.trace)||(trace_taphold))
+                fdjtLog("TapHold/down %o tht=%o target=%o s=%o,%o,%o t=%o,%o m=%o touched=%o pressed=%o ttt=%o",
+                        evt,th_target,target,
+                        start_x,start_y,start_t,touch_x,touch_y,mouse_down,
+                        touched,pressed,
+                        taptapthresh||false);
+
             if ((evt.touches)&&(th_target)) {
                 var holder=getParent(target,".tapholder");
                 var cur_holder=getParent(th_target,".tapholder");
@@ -380,11 +390,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else {setTarget(target); th_targets=[];}
             start_t=fdjtET();
             if ((th.trace)||(trace_taphold))
-                fdjtLog("TapHold/down %o t=%o x=%o y=%o t=%o",
-                        evt,th_target,start_x,start_y,start_t);
-            if ((evt.touches)&&(evt.touches.length)&&
-                (evt.touches.length>1))
-                return;
+                fdjtLog("TapHold/down %o t=%o x=%o y=%o t=%o touched=%o",
+                        evt,th_target,start_x,start_y,start_t,touched);
             if (fdjtUI.isClickable(evt)) return;
             if (!(touched)) startpress(evt,holdthresh);
             noDefault(evt);}
@@ -403,9 +410,11 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             touch_t=fdjtTime();
             if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
             if ((th.trace)||(trace_taphold))
-                fdjtLog("TapHold/up %o tht=%o s=%o,%o,%o t=%o,%o m=%o ttt=%o",
-                        evt,th_target,start_x,start_y,start_t,touch_x,touch_y,
-                        mouse_down,taptapthresh||false);
+                fdjtLog("TapHold/up %o tht=%o s=%o,%o,%o t=%o,%o m=%o touched=%o pressed=%o ttt=%o",
+                        evt,th_target,
+                        start_x,start_y,start_t,touch_x,touch_y,mouse_down,
+                        touched,pressed,
+                        taptapthresh||false);
             if ((evt.touches)&&(evt.touches.length)&&
                 (evt.touches.length>1))
                 return;
