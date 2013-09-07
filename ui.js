@@ -66,14 +66,17 @@ if (!(fdjt.UI.FocusBox)) fdjt.UI.FocusBox={};
     
     fdjtUI.CoHi.onmouseover=function cohi_onmouseover(evt,classname_arg){
         var target=fdjtDOM.T(evt);
-        while (target)
+        while (target) {
+            if (target.nodeType===3) target=target.parentNode;
+            else if (target.nodeType!==1) {target=false; break;}
             if ((target.tagName==='INPUT') || (target.tagName==='TEXTAREA') ||
                 ((target.tagName==='A') && (target.href)))
                 return;
-        else if (target.name) break;  
-        else target=target.parentNode;
+            else if ((target.name)||(target.getAttribute("name")))
+                break;  
+            else target=target.parentNode;}
         if (!(target)) return;
-        highlight(target.name,classname_arg);};
+        highlight(target.name||target.getAttribute("name"),classname_arg);};
     fdjtUI.CoHi.onmouseout=function cohi_onmouseout(evt,classname_arg){
         highlight(false,((classname_arg) || (fdjtUI.CoHi.classname)));};
 })();
