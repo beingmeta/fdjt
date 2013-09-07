@@ -1921,6 +1921,18 @@ fdjt.DOM=
                 return id;}}
         fdjtDOM.getNodeID=getNodeID;
                 
+        /* Removing IDs */
+
+        function stripIDs(node,nametoo){
+            if (node.id) node.id=null;
+            if ((nametoo)&&(node.name)) node.name=null;
+            if ((node.childNodes)&&(node.childNodes.length)) {
+                var children=node.childNodes, i=0, lim=children.length;
+                while (i<lim) {
+                    var child=children[i++];
+                    if (child.nodeType===1) stripIDs(child,nametoo||false);}}}
+        fdjtDOM.stripIDs=stripIDs;
+
         /* Stylesheet manipulation */
 
         // Adapted from 
