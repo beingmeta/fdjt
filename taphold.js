@@ -186,6 +186,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (reticle.live) reticle.highlight(true);
             noDefault(evt);
             pressed_at=fdjtTime(); 
+            if (th_timer) clearTimeout(th_timer);
             th_timer=setTimeout((function(){
                 if ((th.trace)||(trace_taphold))
                     fdjtLog("TapHold/startpress/timeout %o",evt);
@@ -201,17 +202,18 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 pressed=th_target; th_targets=[];
                 if (tap_target) {tapheld(th_target,evt); tap_target=false;}
                 else held(th_target,evt);
+                if (th_timer) clearTimeout(th_timer);
                 th_timer=false;
                 touched=false;}),
                                 holdthresh||TapHold.interval||100);}
         function endpress(evt){
-            if ((!(pressed))&&(!(touched))&&(!(th_timer))) {
-                start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
-                return;}
             if ((th.trace)||(trace_taphold))
                 fdjtLog("TapHold/endpress %o t=%o p=%o tch=%o tm=%o ttt=%o/%o",
                         evt,th_target,pressed,touched,th_timer,
                         tap_target,taptapthresh||false);
+            if ((!(pressed))&&(!(touched))&&(!(th_timer))) {
+                start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
+                return;}
             if (th_timer) {
                 clearTimeout(th_timer); th_timer=false;
                 if (reticle.live) 
@@ -225,6 +227,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         if ((th.trace)||(trace_taphold))
                             fdjtLog("TapHold/taptap waiting %d on %o",
                                     taptapthresh,tap_target);
+                        if (th_timer) clearTimeout(th_timer);
                         th_timer=setTimeout(function(){
                             var tmp=tap_target; tap_target=false;
                             th_timer=false;
@@ -311,6 +314,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                                 start_x,start_y,touch_x,touch_y,
                                 distance,movethresh);
                     abortpress(evt);
+                    if (th_timer) clearTimeout(th_timer);
                     touched=th_timer=pressed=false; th_targets=[];
                     setTarget(false);
                     swiped(target,evt,start_x,start_y,touch_x,touch_y);
@@ -364,6 +368,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         touched,pressed,
                         taptapthresh||false);
 
+            fdjtUI.cancel(evt);
             if ((evt.touches)&&(th_target)) {
                 var holder=getParent(target,".tapholder");
                 var cur_holder=getParent(th_target,".tapholder");
