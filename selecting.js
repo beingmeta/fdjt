@@ -274,7 +274,9 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if ((sel.adjust==='start')&&(off>sel.max)) return;
                 if ((sel.adjust==='end')&&(off<sel.min)) return;
                 // Figure out whether you're moving the beginning or end
-                if (sel.adjust==='start') start=word;
+                if (start===word) sel.setAdjust('start');
+                else if (end===word) sel.setAdjust('end');
+                else if (sel.adjust==='start') start=word;
                 else if (sel.adjust==='end') end=word;
                 else if (off<=sel.min) {
                     start=word; sel.setAdjust('start');}
@@ -454,17 +456,16 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     fdjtUI.cancel(evt);}
                 else if (sel) sel.adjust=false;}}
         TextSelect.tap_handler=tap_handler;
-        function release_handler(evt){
+        function release_handler(evt,sel){
             evt=evt||event;
             var target=fdjtUI.T(evt);
-            while ((target)&&(target.nodeType!==1)) target=target.parentNode;
-            if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
-                (target.id.search("fdjtSel")===0)) {
-                var sel=getSelector(target);
-                sel.setAdjust(false);}}
+            fdjtLog("release %o t=%o sel=%o",evt,target,sel);
+            if (sel) sel.setAdjust(false);}
         TextSelect.release_handler=release_handler;
-        function get_release_handler(also){
-            return function(evt){release_handler(evt); also(evt);};}
+        function get_release_handler(sel,also){
+            return function(evt){
+                release_handler(evt,sel);
+                if (also) also(evt,sel);};}
         
         function addHandlers(container,sel,opts){
             var fortouch=((typeof opts.fortouch !== "undefined")?
@@ -480,11 +481,9 @@ fdjt.UI.Selecting=fdjt.UI.TextSelect=
             fdjtDOM.addListener(container,"hold",
                                 ((opts)&&(opts.onhold))||
                                 hold_handler);
-            if ((opts)&&(opts.onrelease))
-                fdjtDOM.addListener(
-                    container,"release",
-                    get_release_handler(opts.onrelease));
-            else fdjtDOM.addListener(container,"release",release_handler);
+            fdjtDOM.addListener(
+                container,"release",
+                get_release_handler(sel,opts.onrelease||false));
             return taphold;}
 
         TextSelect.Trace=function(flag){
