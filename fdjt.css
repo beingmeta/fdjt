@@ -29,7 +29,7 @@ span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
 .checkspan .checked { display: none;}
 
 .checkspan input[TYPE="CHECKBOX"], .checkspan input[TYPE="RADIO"] {
-    font-size: inherit;}
+    font-size: inherit; height: 1.5ex; width: 1.5ex;}
 
 .fontsize_wrapper .checkspan input[TYPE="CHECKBOX"],
 .checkspan .fontsize_wrapper input[TYPE="CHECKBOX"],
