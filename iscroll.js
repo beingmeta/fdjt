@@ -8,6 +8,7 @@
 
 (function(window, doc){
      "use strict";
+     var debug_iscroll=false;
      function isClickable(evt){
          evt=evt||event;
          var target=evt.target||evt.srcElement;
@@ -223,8 +224,9 @@
              switch(e.type) {
              case START_EV:
                  if (((!(hasTouch))&&(e.button !== 0))||(isClickable(e))) {
-                     fdjt.Log("punting, e.button=%o, clickable=%o",
-                              e.button,isClickable(e));
+                     if (debug_iscroll)
+                         fdjt.Log("punting, e.button=%o, clickable=%o",
+                                  e.button,isClickable(e));
                      return;}
                  that._start(e);
                  break;
