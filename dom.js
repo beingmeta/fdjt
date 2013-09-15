@@ -1125,6 +1125,10 @@ fdjt.DOM=
                         right:left+width,bottom:top+height,
                         top_margin: t_margin, bottom_margin: b_margin,
                         left_margin: l_margin, right_margin: r_margin,
+                        top_border: t_border, bottom_border: b_border,
+                        left_border: l_border, right_border: r_border,
+                        top_padding: t_padding, bottom_padding: b_padding,
+                        left_padding: l_padding, right_padding: r_padding,
                         outer_height: outer_height,outer_width: outer_width,
                         inner_height: inner_height,inner_width: inner_width,
                         line_height: lhpx,stack:withstack};}
@@ -1971,7 +1975,7 @@ fdjt.DOM=
             return getCSSRule(ruleName,'delete');}
         fdjtDOM.dropCSSRule=dropCSSRule;
 
-        function addCSSRule(selector,text,sheet) {// Create a new css rule
+        function addCSSRule(selector,style,sheet) {// Create a new css rule
             if (!(sheet)) {
                 var styles=fdjtID("FDJTSTYLES");
                 if (!(styles)) {
@@ -1980,25 +1984,14 @@ fdjt.DOM=
                     styles=fdjtDOM("style#FDJTSTYLES");
                     head.appendChild(styles);}
                 sheet=styles.sheet;}
-            if (sheet.insertRule) {
+            if (!(sheet)) return false;
+            else if ((sheet.insertRule)||(sheet.addRule)) {
                 var rules=sheet.cssRules||sheet.rules;
-                var i=0; var lim=rules.length;
-                while (i<lim) {
-                    var rule=rules[i];
-                    if (rule.selectorText===selector) break;
-                    else i++;}
-                if (i<lim) {
-                    if (sheet.deleteRule) sheet.deleteRule(i);
-                    else if (sheet.removeRule) sheet.removeRule(i);
-                    else {}}
-                rules=sheet.cssRules||sheet.rules;
-                var ruletext=selector+' {'+text+'}';
+                var at=rules.length;
                 if (sheet.insertRule)
-                    sheet.insertRule(ruletext, rules.length);
-                else if (sheet.addRule)
-                    sheet.addRule(selector,text);
-                else return false;
-                return ruletext;}
+                    sheet.insertRule(selector+' {'+style+'}',at);
+                else sheet.addRule(selector,style,at);
+                return rules[at];}
             else return false;}
         fdjtDOM.addCSSRule=addCSSRule;
 
