@@ -27,7 +27,7 @@
 // var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 if (!(fdjt.UI)) fdjt.UI={};
 
-fdjt.UI.Selecting=fdjt.UI.TextSelect=
+fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
     (function(){
         "use strict";
         var fdjtDOM=fdjt.DOM;
