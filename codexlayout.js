@@ -1000,6 +1000,10 @@ fdjt.CodexLayout=
                             (!(hasClass(parent,"codexroot")))
                             (!(hasClass(parent,"codexpage"))))
                             node=parent;}
+                    if ((!(node))&&(!(force))&&
+                        (page.childNodes.length===0)) {
+                        logfn("Call for new page ignored on empty page");
+                        return false;}
                     if ((!(node))||(forcepage)||(needNewPage(node))) {
                         // If we really need to create a new page, do so,
                         //  starting by dropping the curpage class from the
