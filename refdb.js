@@ -285,7 +285,7 @@ if (!(fdjt.RefDB)) {
                         warn("Creating forced RefDB %s for %s",type,arg);
                         db=new DBType(type);
                         if (type) db.addAlias(type);}
-                    else db=false;}
+                    else {}}
                 else if (arg[1]==='@') {
                     // This is for local references
                     var idstart=arg.indexOf('/');
@@ -500,7 +500,8 @@ if (!(fdjt.RefDB)) {
             if (!(data instanceof Array)) data=[data];
             var i=0, lim=data.length; while (i<lim) {
                 var item=data[i++];
-                var ref=resolveRef(item._id,item._domain,this.constructor,true);
+                var ref=resolveRef(item._id,item._domain||this,
+                                   this.constructor,true);
                 if (!(ref)) warn("Couldn't resolve database for %o",item._id);
                 else {
                     refs.push(ref);
