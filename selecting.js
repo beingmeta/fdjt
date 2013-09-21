@@ -33,6 +33,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         var fdjtDOM=fdjt.DOM;
         var fdjtLog=fdjt.Log;
         var fdjtUI=fdjt.UI;
+        var hasClass=fdjtDOM.hasClass;
+        var hasParent=fdjtDOM.hasParent;
         
         var getStyle=fdjtDOM.getStyle;
         var hasParent=fdjtDOM.hasParent;
@@ -66,6 +68,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var orig=this.orig=[], wrapped=this.wrapped=[];
             var words=this.words=[], wrappers=this.wrappers=[];
             var prefix=this.prefix="fdjtSel0"+this.serial;
+            this.loupe=fdjtDOM("span.fdjtselectloupe");
             this.adjust=false; /* This will be 'start' or 'end' */
             selectors[prefix]=sel;
             var stripid=prefix.length+1;
@@ -242,6 +245,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         function overWord(word,tapped){
             var sel=false, id=false;
             while ((word)&&(word.nodeType!==1)) word=word.parentNode;
+            if (hasParent(word,".fdjtselectloupe")) return;
             if ((word)&&((id=word.id))&&
                 (word.tagName==='SPAN')&&
                 (id.search("fdjtSel")===0)) {
@@ -292,6 +296,18 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 else {
                     start=word; sel.setAdjust('start');}
                 sel.setRange(start,end);}
+            if (sel.loupe) {
+                var parent=word.parentNode;
+                var loupe=sel.loupe, text=word.innerHTML;
+                var cxt_fwd=3, cxt_back=3, scan, cxt, count=0;
+                loupe.innerHTML=""; loupe.style.display="";
+                loupe.appendChild(fdjtDOM.clone(word));
+                if (word.nextSibling)
+                    parent.insertBefore(loupe,word.nextSibling);
+                else parent.appendChild(loupe);
+                if (tapped) {
+                    setTimeout(function(){loupe.style.display="none";},
+                               1000);}}
             return true;}
 
         function getSelector(word){
@@ -460,7 +476,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             evt=evt||event;
             var target=fdjtUI.T(evt);
             fdjtLog("release %o t=%o sel=%o",evt,target,sel);
-            if (sel) sel.setAdjust(false);}
+            if (sel) {
+                sel.setAdjust(false);
+                if (sel.loupe) sel.loupe.style.display='none';}}
         TextSelect.release_handler=release_handler;
         function get_release_handler(sel,also){
             return function(evt){
