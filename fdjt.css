@@ -1054,7 +1054,7 @@ body.cxTOUCH .fdjtselecting .fdjtselectend:hover {
     bottom: 1.5em;
     display: none;}
 /* Use this rule for the select loupe, e.g. on touch platforms. */
-.fdjtselecting .fdjtselectloupe { display: inline-block; }
+/* .fdjtselecting .fdjtselectloupe { display: inline-block; } */
 
 /* Page break classes */
 
