@@ -301,7 +301,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 var parent=word.parentNode;
                 var loupe=sel.loupe, text=word.innerHTML;
                 var cxt_fwd=12, cxt_back=12, last, scan, count=0;
-                loupe.innerHTML=""; loupe.style.display="";
+                var left=0, width=0;
+                loupe.innerHTML=""; loupe.style.display=""; loupe.style.left="";
                 last=word; scan=word.previousSibling;
                 while ((scan)&&(count<cxt_back)) {
                     last=scan; scan=scan.previousSibling;
@@ -309,19 +310,29 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 scan=last; while ((scan)&&(scan!==word)) {
                     if (!(hasClass(scan,"fdjtselectloupe"))) {
                         var before=fdjtDOM.clone(scan); stripIDs(before);
-                        loupe.appendChild(before);}
+                        loupe.appendChild(before);
+                        left=left+fdjtDOM.getGeometry(before).width;}
                     scan=scan.nextSibling;}
                 var clone=fdjtDOM.clone(word); stripIDs(clone);
                 loupe.appendChild(clone);
+                width=left+fdjtDOM.getGeometry(clone).width;
                 scan=word.nextSibling; count=0; while ((scan)&&(count<cxt_fwd)) {
                     if (!(hasClass(scan,"fdjtselectloupe"))) {
                         var after=fdjtDOM.clone(scan); stripIDs(after);
                         loupe.appendChild(after);
-                        count=count+textWidth(scan);}
+                        count=count+textWidth(scan);
+                        width=width+fdjtDOM.getGeometry(after).width;}
                     scan=scan.nextSibling;}
                 if (word.nextSibling)
                     parent.insertBefore(loupe,word.nextSibling);
                 else parent.appendChild(loupe);
+                var right=fdjtDOM.getGeometry(word,document.body,true).right;
+                var vwidth=fdjtDOM.viewWidth();
+                /* fdjtLog("right=%o, left=%o, vw=%o, w=%o, t=%o",
+                   right,left,vwidth,width,((right+width)>vwidth)); */
+                if ((right+width)>vwidth)
+                    loupe.style.left=(-((right+width)-vwidth))+"px";
+                else loupe.style.left=(-left)+"px";
                 if (tapped) {
                     setTimeout(function(){loupe.style.display="none";},
                                1000);}}
