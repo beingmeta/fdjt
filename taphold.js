@@ -119,7 +119,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 return child;}}
         return false;}
 
-    function TapHold(elt,fortouch,holdthresh,movethresh,taptapthresh){
+    function TapHold(elt,fortouch,holdthresh,movethresh,taptapthresh,docancel){
         if (!(elt)) {
             fdjtLog.warn("TapHold with no argument!");
             return;}
@@ -368,7 +368,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         touched,pressed,
                         taptapthresh||false);
 
-            fdjtUI.cancel(evt);
+            if (docancel) fdjtUI.cancel(evt);
+            
             if ((evt.touches)&&(th_target)) {
                 var holder=getParent(target,".tapholder");
                 var cur_holder=getParent(th_target,".tapholder");
@@ -425,7 +426,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 return;
             if (fdjtUI.isClickable(evt)) return;
             if ((!(mouse_down))&&((touched)||(pressed))) {
-                fdjtUI.cancel(evt);
+                if (docancel) fdjtUI.cancel(evt);
                 endpress(evt,taptapthresh);}
             else {}
             start_x=start_y=start_t=touch_x=touch_y=touch_t=false;}
