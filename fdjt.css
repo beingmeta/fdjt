@@ -243,6 +243,10 @@ div.flexbox_expanded { max-height: inherit;}
 div.fdjtdata {
   font-family: fixed; width: 100%; white-space: pre;}
 
+/* Generic table stuff */
+
+tr.padding { height: 1ex;}
+
 /* Data tables */
 
 table.fdjtdata {width: 100%; font-family: fixed;}
