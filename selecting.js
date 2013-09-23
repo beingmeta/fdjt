@@ -453,6 +453,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var j=0, lim=wrappers.length;
             while (j<lim) {
                 var wrapper=wrappers[j++];
+                delete tapholds[wrapper.id];
                 delete selectors[wrapper.id];}
             delete selectors[this.prefix];
             delete this.wrapped; delete this.orig;
@@ -510,6 +511,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             return function(evt){
                 release_handler(evt,sel);
                 if (also) also(evt,sel);};}
+        function get_slip_handler(sel,also){
+            return function(evt){
+                release_handler(evt,sel);
+                if (also) also(evt,sel);};}
         
         function addHandlers(container,sel,opts){
             var fortouch=((typeof opts.fortouch !== "undefined")?
@@ -518,7 +523,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var taphold=
                 fdjtUI.TapHold(container,fortouch,
                                ((opts)&&(opts.holdthresh)),
-                               ((opts)&&(opts.movethresh)));
+                               ((opts)&&(opts.movethresh)),
+                               ((opts)&&(opts.taptapthresh)),
+                               true);
             fdjtDOM.addListener(container,"tap",
                                 ((opts)&&(opts.ontap))||
                                 tap_handler);
@@ -528,6 +535,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             fdjtDOM.addListener(
                 container,"release",
                 get_release_handler(sel,opts.onrelease||false));
+            fdjtDOM.addListener(
+                container,"slip",
+                get_slip_handler(sel,opts.onslip||false));
             return taphold;}
 
         TextSelect.Trace=function(flag){
