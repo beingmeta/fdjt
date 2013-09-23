@@ -362,7 +362,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             touch_y=evt.clientY||getClientY(evt)||touch_y;
             if (!(start_x)) {start_x=touch_x; start_y=touch_y;}
             touch_t=fdjtTime();
-            if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
+            if (evt.touches) {
+                target=document.elementFromPoint(touch_x,touch_y);}
+            // if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
             if ((th.trace)||(trace_taphold))
                 fdjtLog("TapHold/down %o tht=%o target=%o s=%o,%o,%o t=%o,%o m=%o touched=%o pressed=%o ttt=%o",
                         evt,th_target,target,
