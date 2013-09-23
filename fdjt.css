@@ -1047,11 +1047,11 @@ body.cxTOUCH .fdjtselecting .fdjtselectend:hover {
 
 .fdjtselectloupe {
     display: inline-block; position: relative;
-    font-size: 150%; outline: solid silver 1px;
+    font-size: 200%; outline: solid silver 1px;
     width: 0px; height: 0px; overflow: visible; z-index: 200;
     white-space: nowrap; pointer-events: none;
     background-color: gold;
-    bottom: 1.5em;
+    bottom: 60px;
     display: none;}
 /* Use this rule for the select loupe, e.g. on touch platforms. */
 /* .fdjtselecting .fdjtselectloupe { display: inline-block; } */

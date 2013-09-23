@@ -33,11 +33,11 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         var fdjtDOM=fdjt.DOM;
         var fdjtLog=fdjt.Log;
         var fdjtUI=fdjt.UI;
+        var hasParent=fdjtDOM.hasParent;
         var hasClass=fdjtDOM.hasClass;
-        var hasParent=fdjtDOM.hasParent;
-        
+        var textWidth=fdjtDOM.textWidth;
+        var stripIDs=fdjtDOM.stripIDs;        
         var getStyle=fdjtDOM.getStyle;
-        var hasParent=fdjtDOM.hasParent;
 
         function position(elt,arr){
             if (arr.indexOf) return arr.indexOf(elt);
@@ -245,7 +245,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         function overWord(word,tapped){
             var sel=false, id=false;
             while ((word)&&(word.nodeType!==1)) word=word.parentNode;
-            if (hasParent(word,".fdjtselectloupe")) return;
+            if (hasParent(word,".fdjtselectloupe"))
+                return;
             if ((word)&&((id=word.id))&&
                 (word.tagName==='SPAN')&&
                 (id.search("fdjtSel")===0)) {
@@ -299,9 +300,25 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (sel.loupe) {
                 var parent=word.parentNode;
                 var loupe=sel.loupe, text=word.innerHTML;
-                var cxt_fwd=3, cxt_back=3, scan, cxt, count=0;
+                var cxt_fwd=12, cxt_back=12, last, scan, count=0;
                 loupe.innerHTML=""; loupe.style.display="";
-                loupe.appendChild(fdjtDOM.clone(word));
+                last=word; scan=word.previousSibling;
+                while ((scan)&&(count<cxt_back)) {
+                    last=scan; scan=scan.previousSibling;
+                    count=count+textWidth(last);}
+                scan=last; while ((scan)&&(scan!==word)) {
+                    if (!(hasClass(scan,"fdjtselectloupe"))) {
+                        var before=fdjtDOM.clone(scan); stripIDs(before);
+                        loupe.appendChild(before);}
+                    scan=scan.nextSibling;}
+                var clone=fdjtDOM.clone(word); stripIDs(clone);
+                loupe.appendChild(clone);
+                scan=word.nextSibling; count=0; while ((scan)&&(count<cxt_fwd)) {
+                    if (!(hasClass(scan,"fdjtselectloupe"))) {
+                        var after=fdjtDOM.clone(scan); stripIDs(after);
+                        loupe.appendChild(after);
+                        count=count+textWidth(scan);}
+                    scan=scan.nextSibling;}
                 if (word.nextSibling)
                     parent.insertBefore(loupe,word.nextSibling);
                 else parent.appendChild(loupe);
