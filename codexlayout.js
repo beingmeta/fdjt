@@ -358,7 +358,9 @@ fdjt.CodexLayout=
             dropClass(node,"codexrelocated");}
         
         function revertLayout(layout) {
-            var crumbs=layout.crumbs;
+            var crumbs=layout.crumbs; var now=fdjtTime();
+            if ((layout.reverting)&&((now-layout.reverting)<10000)) return;
+            else layout.reverting=now;
             var textsplits=layout.textsplits;
             var i=0, lim, node;
             var pagescaled=TOA(
