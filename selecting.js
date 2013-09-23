@@ -297,7 +297,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 else {
                     start=word; sel.setAdjust('start');}
                 sel.setRange(start,end);}
-            if (sel.loupe) {
+            if ((sel.loupe)&&(!(tapped))) {
                 var parent=word.parentNode;
                 var loupe=sel.loupe, last, scan;
                 var cxt_fwd=12, cxt_back=12, count=0, left=0, width=0;
