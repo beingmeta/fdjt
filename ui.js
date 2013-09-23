@@ -975,7 +975,7 @@ fdjt.UI.ProgressBar=(function(){
         if (!(img.getAttribute("data-images"))) {
             img.setAttribute("data-images",img.src);}
         if (!(img.defaultsrc)) img.defaultsrc=img.src;
-        var images=(img.getAttribute('data-images')).split(';');
+        var images=(img.getAttribute('data-images')).split('|');
         if (images.length===0) return false;
         var counter=0;
         return setInterval(function(){
