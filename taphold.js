@@ -116,6 +116,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                      (((bot-top)<=1)?
                       ((y>=top)&&(y<=bot)):
                       ((x>=top)&&(y<bot)))) {
+                // fdjtLog("Got %o at %d,%d ltrb=%d,%d,%d,%d",child,x,y,left,top,right,bot);
                 return child;}}
         return false;}
 
@@ -297,7 +298,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             // If touched is false, the tap/hold was aborted somehow
             // fdjtLog("taphold_move touched=%o touch_x=%o touch_y=%o",touched,touch_x,touch_y);
             if (!((touched)||(pressed))) return;
-            if (evt.touches) target=document.elementFromPoint(touch_x,touch_y);
+            if (evt.touches) {
+                target=document.elementFromPoint(touch_x,touch_y);}
             else target=fdjtUI.T(evt);
             
             if ((th.trace)||(trace_taphold))
