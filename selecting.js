@@ -461,6 +461,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
             if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
                 (target.id.search("fdjtSel")===0)) {
+                if (trace) fdjtLog("hold %o t=%o",evt,target);
                 if (overWord(target)) fdjtUI.cancel(evt);}}
         TextSelect.hold_handler=hold_handler;
         TextSelect.handler=hold_handler;
@@ -471,6 +472,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
                 (target.id.search("fdjtSel")===0)) {
                 var sel=getSelector(target);
+                if (trace) fdjtLog("tap %o t=%o sel=%o",evt,target,sel);
                 // Tapping on a single word selection clears it
                 if (sel.n_words===1) sel.setRange(false);
                 else if ((target.className==="fdjtselectstart")||
@@ -492,7 +494,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         function release_handler(evt,sel){
             evt=evt||event;
             var target=fdjtUI.T(evt);
-            fdjtLog("release %o t=%o sel=%o",evt,target,sel);
+            if (trace) fdjtLog("release %o t=%o sel=%o",evt,target,sel);
             if (sel) {
                 sel.setAdjust(false);
                 if (sel.loupe) sel.loupe.style.display='none';}}
