@@ -299,9 +299,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 sel.setRange(start,end);}
             if (sel.loupe) {
                 var parent=word.parentNode;
-                var loupe=sel.loupe, text=word.innerHTML;
-                var cxt_fwd=12, cxt_back=12, last, scan, count=0;
-                var left=0, width=0;
+                var loupe=sel.loupe, last, scan;
+                var cxt_fwd=12, cxt_back=12, count=0, left=0, width=0;
                 loupe.innerHTML=""; loupe.style.display=""; loupe.style.left="";
                 last=word; scan=word.previousSibling;
                 while ((scan)&&(count<cxt_back)) {
@@ -332,10 +331,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                    right,left,vwidth,width,((right+width)>vwidth)); */
                 if ((right+width)>vwidth)
                     loupe.style.left=(-((right+width)-vwidth))+"px";
-                else loupe.style.left=(-left)+"px";
-                if (tapped) {
-                    setTimeout(function(){loupe.style.display="none";},
-                               1000);}}
+                else loupe.style.left=(-left)+"px";}
             return true;}
 
         function getSelector(word){
