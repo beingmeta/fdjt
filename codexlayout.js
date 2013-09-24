@@ -1848,7 +1848,8 @@ fdjt.CodexLayout=
                 CodexLayout.layoutDB=layoutDB=window.localStorage;};
             req.onsuccess=function(event) {
                 var db=event.target.result;
-                fdjtLog("Using existing indexedDB layout cache");
+                if (CodexLayout.trace)
+                    fdjtLog("Using existing indexedDB layout cache");
                 CodexLayout.layoutDB=layoutDB=db;
                 CodexLayout.cache=7;
                 if (ondbinit) ondbinit();};
@@ -1860,7 +1861,8 @@ fdjt.CodexLayout=
                     CodexLayout.layoutDB=layoutDB=window.localStorage;
                     if (ondbinit) ondbinit();};
                 db.onsuccess=function(event){
-                    fdjtLog("Successfully initialized indexedDB layout cache");
+                    if (CodexLayout.trace)
+                        fdjtLog("Initialized indexedDB layout cache");
                     if (ondbinit) ondbinit();};
                 CodexLayout.layoutDB=layoutDB=window.localStorage;
                 db.createObjectStore("layouts",{keyPath: "layout_id"});};}
@@ -1887,7 +1889,8 @@ fdjt.CodexLayout=
                     fdjtLog("Error saving layout %s: %o",
                             layout_id,event.target.errorCode);};
                 req.onsuccess=function(event){
-                    fdjtLog("Layout %s cached",layout_id);};}
+                    if (CodexLayout.trace)
+                        fdjtLog("Layout %s cached",layout_id);};}
             else Codex.layoutDB=layoutDB=window.localStorage||false;}
         CodexLayout.cacheLayout=cacheLayout;
         function dropLayout(layout_id){
@@ -1895,7 +1898,9 @@ fdjt.CodexLayout=
                 var txn=layoutDB.transaction(["layouts"],"readwrite");
                 var storage=txn.objectStore("layouts");
                 var req=storage.delete(layout_id);
-                req.onsuccess=function(event){fdjtLog("Layout %s removed",layout_id);};}
+                req.onsuccess=function(event){
+                    if (CodexLayout.trace)
+                        fdjtLog("Layout %s removed",layout_id);};}
             else fdjtState.dropLocal(layout_id);}
         CodexLayout.dropLayout=dropLayout;
         function fetchLayout(layout_id,callback){
