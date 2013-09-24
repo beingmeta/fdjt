@@ -1016,7 +1016,7 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
     -webkit-user-select: none;
     -webkit-touch-callout: none;}
 .fdjtselectwrap {}
-.fdjtselectdebug .fdjtselectwrap {background-color: lightyellow;}
+.fdjtselectwrap {background-color: rgba(247, 247, 124, 0.25);}
 .fdjtselectwrap > span {
     transition-property: background-color;
     transition-duration: 1s;
