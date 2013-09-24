@@ -299,12 +299,14 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 var parent=word.parentNode, loupe=sel.loupe;
                 loupe.innerHTML=""; loupe.style.display="";
                 if ((word.previousSibling)&&
-                    (word.previousSibling.nodeType===1)) {
+                    (word.previousSibling.nodeType===1)&&
+                    (word.previousSibling!==loupe)) {
                     var before=fdjtDOM.clone(word.previousSibling);
                     loupe.appendChild(before);}
                 var clone=fdjtDOM.clone(word); stripIDs(clone);
                 loupe.appendChild(clone);
-                if ((word.nextSibling)&&(word.nextSibling.nodeType===1)) {
+                if ((word.nextSibling)&&(word.nextSibling.nodeType===1)&&
+                    (word.nextSibling!==loupe)) {
                     var after=fdjtDOM.clone(word.nextSibling);
                     loupe.appendChild(after);}
                 if (word.nextSibling)
