@@ -297,41 +297,24 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 else {
                     start=word; sel.setAdjust('start');}
                 sel.setRange(start,end);}
-            if ((sel.loupe)&&(!(tapped))) {
+            if (sel.loupe) {
                 var parent=word.parentNode;
+                var text=fdjtDOM.textify(word);
                 var loupe=sel.loupe, last, scan;
-                var cxt_fwd=12, cxt_back=12, count=0, left=0, width=0;
-                loupe.innerHTML=""; loupe.style.display=""; loupe.style.left="";
-                last=word; scan=word.previousSibling;
-                while ((scan)&&(count<cxt_back)) {
-                    last=scan; scan=scan.previousSibling;
-                    count=count+textWidth(last);}
-                scan=last; while ((scan)&&(scan!==word)) {
-                    if (!(hasClass(scan,"fdjtselectloupe"))) {
-                        var before=fdjtDOM.clone(scan); stripIDs(before);
-                        loupe.appendChild(before);
-                        left=left+fdjtDOM.getGeometry(before).width;}
-                    scan=scan.nextSibling;}
+                loupe.innerHTML=""; loupe.style.display="";
+                if ((text.length===1)&&(word.previousSibling.nodeType===1)) {
+                    var before=fdjtDOM.clone(word.previousSibling);
+                    loupe.appendChild(before);}
                 var clone=fdjtDOM.clone(word); stripIDs(clone);
                 loupe.appendChild(clone);
-                width=left+fdjtDOM.getGeometry(clone).width;
-                scan=word.nextSibling; count=0; while ((scan)&&(count<cxt_fwd)) {
-                    if (!(hasClass(scan,"fdjtselectloupe"))) {
-                        var after=fdjtDOM.clone(scan); stripIDs(after);
-                        loupe.appendChild(after);
-                        count=count+textWidth(scan);
-                        width=width+fdjtDOM.getGeometry(after).width;}
-                    scan=scan.nextSibling;}
+                if ((text.length===1)&&(word.nextSibling.nodeType===1)) {
+                    var after=fdjtDOM.clone(word.previousSibling);
+                    loupe.appendChild(after);}
                 if (word.nextSibling)
                     parent.insertBefore(loupe,word.nextSibling);
-                else parent.appendChild(loupe);
-                var right=fdjtDOM.getGeometry(word,document.body,true).right;
-                var vwidth=fdjtDOM.viewWidth();
-                /* fdjtLog("right=%o, left=%o, vw=%o, w=%o, t=%o",
-                   right,left,vwidth,width,((right+width)>vwidth)); */
-                if ((right+width)>vwidth)
-                    loupe.style.left=(-((right+width)-vwidth))+"px";
-                else loupe.style.left=(-left)+"px";}
+                else parent.appendChild(loupe);}
+            if (tapped) setTimeout(1000,function(){
+                loupe.display='none';});
             return true;}
 
         function getSelector(word){
