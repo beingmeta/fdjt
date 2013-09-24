@@ -272,7 +272,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     mouse_down=false;
                     mouseout_timer=false;
                     setTarget(false);},
-                                          200);}}
+                                          300);}}
         function taphold_mouseover(evt){
             evt=evt||event;
             var to=fdjtUI.T(evt);
