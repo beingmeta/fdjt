@@ -34,8 +34,6 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         var fdjtLog=fdjt.Log;
         var fdjtUI=fdjt.UI;
         var hasParent=fdjtDOM.hasParent;
-        var hasClass=fdjtDOM.hasClass;
-        var textWidth=fdjtDOM.textWidth;
         var stripIDs=fdjtDOM.stripIDs;        
         var getStyle=fdjtDOM.getStyle;
 
@@ -298,17 +296,16 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     start=word; sel.setAdjust('start');}
                 sel.setRange(start,end);}
             if (sel.loupe) {
-                var parent=word.parentNode;
-                var text=fdjtDOM.textify(word);
-                var loupe=sel.loupe, last, scan;
+                var parent=word.parentNode, loupe=sel.loupe;
                 loupe.innerHTML=""; loupe.style.display="";
-                if ((text.length===1)&&(word.previousSibling.nodeType===1)) {
+                if ((word.previousSibling)&&
+                    (word.previousSibling.nodeType===1)) {
                     var before=fdjtDOM.clone(word.previousSibling);
                     loupe.appendChild(before);}
                 var clone=fdjtDOM.clone(word); stripIDs(clone);
                 loupe.appendChild(clone);
-                if ((text.length===1)&&(word.nextSibling.nodeType===1)) {
-                    var after=fdjtDOM.clone(word.previousSibling);
+                if ((word.nextSibling)&&(word.nextSibling.nodeType===1)) {
+                    var after=fdjtDOM.clone(word.nextSibling);
                     loupe.appendChild(after);}
                 if (word.nextSibling)
                     parent.insertBefore(loupe,word.nextSibling);
