@@ -989,7 +989,7 @@ div.fdjtdialog.fdjtconfirm div.choices button {
     border: solid silver 3px;
     background-color: silver;
     border-radius: 1ex;
-    margin-left: 0.5ex; margin-right: 0.5ex;
+    margin-left: 0.5ex; margin-right: 0.5ex; margin-bottom: 1ex;
     -webkit-border-radius: 1ex;
     -khtml-border-radius: 1ex;
     -moz-border-radius: 1ex;
