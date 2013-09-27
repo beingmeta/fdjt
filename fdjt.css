@@ -982,6 +982,7 @@ div.fdjtdialog .closebutton {
 
 div.fdjtdialog.fdjtconfirm div.message {}
 div.fdjtdialog.fdjtconfirm div.message .smaller { font-size: 50%;}
+div.fdjtdialog.fdjtconfirm div.message p { text-align: left;}
 div.fdjtdialog.fdjtconfirm div.choices {
     padding-bottom: 1em; padding-top: 1em; text-align: center;}
 div.fdjtdialog.fdjtconfirm div.choices button {
