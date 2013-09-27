@@ -4,7 +4,7 @@
 ECHO=/bin/echo
 CLEAN=/bin/rm -f
 FDJT_FILES=header.js string.js time.js  template.js hash.js \
-	syze.js iscroll.js indexed.js \
+	syze.js iscroll.js \
 	log.js init.js state.js dom.js \
 	json.js refdb.js ajax.js wsn.js \
 	ui.js dialog.js completions.js taphold.js selecting.js \
