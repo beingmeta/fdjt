@@ -961,6 +961,13 @@ fdjt.DOM=
             else return false;};
 
 
+        function setInputs(selector,value){
+            if (!(value)) return;
+            var inputs=fdjtDOM.$(selector);
+            var i=0, lim=inputs.length; while (i<lim) {
+                inputs[i++].value=value;}}
+        fdjtDOM.setInputs=setInputs;
+
         /* Getting style information generally */
 
         function getStyle(elt,prop){
