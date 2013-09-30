@@ -668,6 +668,12 @@ fdjt.DOM=
                     if (parent.match(elt)) return elt;
                     else elt=elt.parentNode;}
                 return false;}
+            else if (parent instanceof RegExp) {
+                while (elt) {
+                    if ((elt.className)&&(parent.test(elt.className)))
+                        return elt;
+                    else elt=elt.parentNode;}
+                return false;}
             else if (typeof parent === 'string')
                 return getParent(elt,new Selector(parent));
             else throw { error: 'invalid parent spec'};}
