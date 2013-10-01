@@ -19,7 +19,55 @@
 
 @charset "UTF-8";
 
-/* New simplified display classes */
+/* Generally useful */
+
+.centered { text-align: center; }
+.flushleft { text-align: left; }
+.flushright { text-align: right; }
+.justified { text-align: justify; }
+.nowrap { white-space: nowrap;}
+
+.fullwidth { width: 100%;}
+.floatleft { float: left;}
+.floatright { float: right;}
+input[TYPE="FILE"].floatright { text-align: right; }
+
+.fdjtinvisible { display: none;}
+.fdjthidden { visibility: hidden;}
+span[onclick] { cursor: pointer;}
+
+.hidetext {
+    text-indent: 100%;
+    white-space: nowrap;
+    overflow: hidden;}
+
+/* Clearing floats in various ways */
+
+div.fdjtclearfloats {
+    width: 100%; height: 0px; clear: both;
+    margin: 0px; padding: 0px; border: 0px;}
+
+/**
+ * From: http://nicolasgallagher.com/micro-clearfix-hack/
+ * For modern browsers
+ * 1. The space content is one way to avoid an Opera bug when the
+ *    contenteditable attribute is included anywhere else in the document.
+ *    Otherwise it causes space to appear at the top and bottom of elements
+ *    that are clearfixed.
+ * 2. The use of `table` rather than `block` is only necessary if using
+ *    `:before` to contain the top-margins of child elements.
+ */
+.fdjtfloats:before, .cf:before,
+.fdjtfloats:after, .cf:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */}
+
+.fdjtfloats:after, .cf:after { clear: both; }
+
+/* For IE 6/7 only (triggers hasLayout) */
+.fdjtfloats, .cf { zoom: 1; }
+
+/* Checkspans */
 
 .checkspan { cursor: pointer;}
 .checkspan.disabled { opacity: 0.5; cursor: auto;}
@@ -81,13 +129,6 @@ div.checkblock.ischecked > table { display: table; }
 ul.checkblock.ischecked >  li { display: list-item; }
 ol.checkblock.ischecked >  li { display: list-item; }
 
-/* Utility classes */
-
-.hidetext {
-    text-indent: 100%;
-    white-space: nowrap;
-    overflow: hidden;}
-
 /* Autoprompt classes */
 
 input.autoprompt { font-family: sans,sans-serif; }
@@ -116,36 +157,6 @@ img.helpicon {
   font-size: 80%; vertical-align: middle;
   font-weight: bold; font-style: normal;}
 td img.helpicon { background-color: transparent; }
-
-/* Utility classes */
-
-.fdjtinvisible { display: none;}
-
-div.fdjtclearfloats {
-    width: 100%; height: 0px; clear: both;
-    margin: 0px; padding: 0px; border: 0px;}
-
-span[onclick] { cursor: pointer;}
-
-/**
- * From: http://nicolasgallagher.com/micro-clearfix-hack/
- * For modern browsers
- * 1. The space content is one way to avoid an Opera bug when the
- *    contenteditable attribute is included anywhere else in the document.
- *    Otherwise it causes space to appear at the top and bottom of elements
- *    that are clearfixed.
- * 2. The use of `table` rather than `block` is only necessary if using
- *    `:before` to contain the top-margins of child elements.
- */
-.fdjtfloats:before, .cf:before,
-.fdjtfloats:after, .cf:after {
-    content: " "; /* 1 */
-    display: table; /* 2 */}
-
-.fdjtfloats:after, .cf:after { clear: both; }
-
-/* For IE 6/7 only (triggers hasLayout) */
-.fdjtfloats, .cf { zoom: 1; }
 
 /* Tabs */
 
@@ -500,18 +511,6 @@ div.richtip.minimized .maximize { display: inline; }
 div.richtip.minimized .minimize { display: none; }
 div.richtip .minimize { display: inline; }
 div.richtip .maximize { display: none; }
-
-/* Some utility definitions */
-
-.fullwidth { width: 100%;}
-.abstopright { position: absolute; top: 2px; right: 2px;}
-.abstopleft { position: absolute; top: 2px; left: 2px;}
-.abstopleft img {border: 0px;}
-.abstopright img {border: 0px;}
-.floatleft { float: left;}
-.floatright { float: right;}
-
-input[TYPE="FILE"].floatright { text-align: right; }
 
 table.fdjtdata table { border: solid silver 2px;}
 table.fdjtdata table.fdjtdata { width: auto;}
