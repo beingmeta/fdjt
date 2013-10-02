@@ -1005,7 +1005,8 @@ fdjt.CodexLayout=
 
                     if ((!(node))&&(!(forcepage))&&(page)&&
                         (page.childNodes.length===0)) {
-                        logfn("Call for new page ignored on empty page");
+                        logfn("Call for new page ignored on empty page %d",
+                              pagenum);
                         return false;}
                     
                     if ((!(node))||(forcepage)||(needNewPage(node))) {
