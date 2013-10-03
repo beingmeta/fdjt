@@ -280,10 +280,20 @@ div.completions {font-family: sans,sans-serif;}
 .completions img.completionslabel { height: 5ex;}
 
 .completions .nocompletemsg { display: none;}
-.completions.noresults span.nocompletemsg { display: inline;}
-.completions.noresults li.nocompletemsg { display: list-item;}
-.completions.noresults div.nocompletemsg { display: block;}
-.completions.noresults p.nocompletemsg { display: block;}
+.completions.nomatches span.nocompletemsg { display: inline;}
+.completions.nomatches li.nocompletemsg { display: list-item;}
+.completions.nomatches div.nocompletemsg { display: block;}
+.completions.nomatches p.nocompletemsg { display: block;}
+.completions.nomatches tr.nocompletemsg { display: table-row;}
+.completions.nomatches tbody.nocompletemsg { display: table-row-group;}
+
+.completions .nomatchmsg { display: none;}
+.completions.nomatches span.nomatchmsg { display: inline;}
+.completions.nomatches li.nomatchmsg { display: list-item;}
+.completions.nomatches div.nomatchmsg { display: block;}
+.completions.nomatches p.nomatchmsg { display: block;}
+.completions.nomatches tr.nomatchmsg { display: table-row;}
+.completions.nomatches tbody.nomatchmsg { display: table-row-group;}
 
 .completions .completion { display: none; }
 .completions .completion .variation { display: none; }

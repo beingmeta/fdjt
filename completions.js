@@ -313,18 +313,18 @@ if (!(fdjt.UI)) fdjt.UI={};
         if (isEmpty(string)) {
             if (this.displayed) updateDisplay(this,false);
             addClass(this.dom,"noinput");
-            dropClass(this.dom,"noresults");
+            dropClass(this.dom,"nomatches");
             return [];}
         var result=this.getCompletions(string);
         if ((!(result))||(result.length===0)) {
             updateDisplay(this,false);
             dropClass(this.dom,"noinput");
-            addClass(this.dom,"noresults");
+            addClass(this.dom,"nomatches");
             return [];}
         else {
             updateDisplay(this,result.matches);
             dropClass(this.dom,"noinput");
-            dropClass(this.dom,"noresults");}
+            dropClass(this.dom,"nomatches");}
         return result;};
 
     Completions.prototype.getByValue=function(values,spec){

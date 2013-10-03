@@ -249,7 +249,7 @@ if (!(fdjt.RefDB)) {
                 if ((at===1)&&(arg[0]===':')) {arg=arg.slice(1); at=0;}
                 if (at>0) {
                     // this is the term@domain form
-                    var usedb=false, dbname=arg.slice(at), origin;
+                    var usedb=false, dbname=arg.slice(at+1), origin;
                     if ((usedb=refDBProbe(dbname))) {}
                     else if (refpat.exec(dbname)) {
                         origin=resolveRef(dbname);
