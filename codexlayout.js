@@ -1440,14 +1440,16 @@ fdjt.CodexLayout=
                 while (i<n) {
                     var child=children[i++];
                     if (child.nodeType!==1) continue;
-                    else if ((dropsel)&&(dropsel.match(child))) todrop.push(child);
+                    else if ((dropsel)&&(dropsel.match(child)))
+                        todrop.push(child);
                     else prepForRestore(child,dropsel);}
                 i=0, n=todrop.length; while (i<n) {
                     node.removeChild(todrop[i++]);}}
             
             function saveLayout(layout_id){
                 if (!(layout_id)) layout_id=this.layout_id||
-                    (this.layout_id=this.width+"x"+this.height+fdjtState.getUUID());
+                    (this.layout_id=this.width+"x"+
+                     this.height+fdjtState.getUUID());
                 if (!(CodexLayout.cache)) return;
                 var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
                 var dropLocal=fdjtState.dropLocal;
