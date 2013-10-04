@@ -1256,6 +1256,7 @@ fdjt.UI.ProgressBar=(function(){
                     elt.setAttribute('datetime',tstring);
                 else elt.setAttribute('data-datetime',tstring);}}
         if (!(good)) return;
+        if (!(elt.title)) elt.title=parsed.toGMTString();
         if (hasClass(elt,"fdjtkeeptext")) {}
         else if (hasClass(elt,"fdjtisotime")) {
             if (parsed.toISOString) elt.innerHTML=parsed.toISOString();}
@@ -1278,7 +1279,18 @@ fdjt.UI.ProgressBar=(function(){
                     elt.innerHTML=parsed.toLocaleTimeString();
                 else elt.innerHTML=parsed.toLocaleDateString();}
             if (parsed.toLocaleDate) elt.innerHTML=parsed.toLocaleDate();}
-        else {}}
+        else if (hasClass(elt,"fdjthumantime")) {
+            if ((parsed.toDateString)&&(parsed.toLocaleTimeString)) 
+                elt.innerHTML=parsed.toDateString()+" ("+parsed.toLocaleTimeString()+")";
+            else if (parsed.toLocaleString)
+                elt.innerHTML=parsed.toLocaleString();
+            else elt.innerHTML=parsed.toString();}
+        else {
+            if ((parsed.toDateString)&&(parsed.toLocaleTimeString)) 
+                elt.innerHTML=parsed.toDateString()+" ("+parsed.toLocaleTimeString()+")";
+            else if (parsed.toLocaleString)
+                elt.innerHTML=parsed.toLocaleString();
+            else elt.innerHTML=parsed.toString();}}
 
     function initTimeElementsUnder(node){
         var elts=((fdjt.keeptime)?
