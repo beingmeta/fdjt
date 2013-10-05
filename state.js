@@ -233,24 +233,23 @@ fdjt.State=
         fdjtState.clearLocal=clearLocal;
 
         /* Gets arguments from the query string */
-        function getQuery(name,multiple,matchcase,verbatim){
-            if (!(location.search))
-                if (multiple) return [];
-            else return false;
+        function getParam(from,name,multiple,matchcase,verbatim,start){
             var results=[];
             var ename=encodeURIComponent(name);
             var namepat=new RegExp("(&|^|\\?)"+ename+"(=|&|$)",
                                    ((matchcase)?"g":"gi"));
-            var query=location.search;
-            var start=query.search(namepat);
+            if (!(start)) start=0;
             while (start>=0) {
                 // Skip over separator if non-initial
-                if ((query[start]==='?')||(query[start]==='&')) start++;
+                if ((from[start]==='?')||
+                    (from[start]==='#')||
+                    (from[start]==='&'))
+                    start++;
                 // Skip over the name
                 var valstart=start+ename.length;
-                var valstring=query.slice(valstart+1);
+                var valstring=from.slice(valstart+1);
                 var end=valstring.search(/(&|$)/g);
-                if (query[valstart]==="=") {
+                if (from[valstart]==="=") {
                     if (end<=0) {
                         results.push("");
                         if (!(multiple)) break;}
@@ -259,13 +258,13 @@ fdjt.State=
                         end=end+valstart+1;
                         if (!(multiple)) break;}}
                 else if (multiple) 
-                    results.push(query.slice(start,end));
+                    results.push(from.slice(start,end));
                 else if (verbatim) 
-                    return query.slice(start,end);
-                else return querydecode(query.slice(start,end));
+                    return from.slice(start,end);
+                else return querydecode(from.slice(start,end));
                 if (end>0) {
-                    query=query.slice(end);
-                    start=query.search(namepat);}}
+                    from=from.slice(end);
+                    start=from.search(namepat);}}
             if (!(verbatim)) {
                 var i=0; var lim=results.length;
                 while (i<lim) {results[i]=querydecode(results[i]); i++;}}
@@ -273,8 +272,22 @@ fdjt.State=
             else if (results.length)
                 return results[0];
             else return false;}
+        fdjtState.getParam=getParam;
+
+        function getQuery(name,multiple,matchcase,verbatim){
+            if (!(location.search))
+                if (multiple) return [];
+            else return false;
+            return getParam(location.search,name,multiple,matchcase,verbatim);}
         fdjtState.getQuery=getQuery;
         
+        function getHash(name,multiple,matchcase,verbatim){
+            if (!(location.hash))
+                if (multiple) return [];
+            else return false;
+            return getParam(location.hash,name,multiple,matchcase,verbatim);}
+        fdjtState.getHash=getHash;
+
         function querydecode(string){
             if (decodeURIComponent)
                 return decodeURIComponent(string);
