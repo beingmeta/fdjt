@@ -236,16 +236,11 @@ fdjt.State=
         function getParam(from,name,multiple,matchcase,verbatim,start){
             var results=[];
             var ename=encodeURIComponent(name);
-            var namepat=new RegExp("(&|^|\\?)"+ename+"(=|&|$)",
+            var namepat=new RegExp("(&|^)"+ename+"(=|&|$)",
                                    ((matchcase)?"g":"gi"));
-            if (!(start)) start=0;
+            start=from.search(namepat);
             while (start>=0) {
                 // Skip over separator if non-initial
-                if ((from[start]==='?')||
-                    (from[start]==='#')||
-                    (from[start]==='&'))
-                    start++;
-                // Skip over the name
                 var valstart=start+ename.length;
                 var valstring=from.slice(valstart+1);
                 var end=valstring.search(/(&|$)/g);
@@ -278,13 +273,17 @@ fdjt.State=
             if (!(location.search))
                 if (multiple) return [];
             else return false;
-            return getParam(location.search,name,multiple,matchcase,verbatim);}
+            var from=location.search;
+            if (from[0]==="?") from=from.slice(1);
+            return getParam(from,name,multiple,matchcase,verbatim);}
         fdjtState.getQuery=getQuery;
         
         function getHash(name,multiple,matchcase,verbatim){
             if (!(location.hash))
                 if (multiple) return [];
             else return false;
+            var from=location.hash;
+            if (from[0]==="#") from=from.slice(1);
             return getParam(location.hash,name,multiple,matchcase,verbatim);}
         fdjtState.getHash=getHash;
 
