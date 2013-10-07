@@ -2053,8 +2053,9 @@ fdjt.DOM=
             if (handlers) {
                 for (var evtype in handlers) {
                     if (handlers.hasOwnProperty(evtype)) {
-                        var match=false;
-                        if (events_pat.exec(evtype))
+                        var match=false, val=handlers[evtype];
+                        if (!(val.call)) {}
+                        else if (events_pat.exec(evtype))
                             addListener(node,evtype,handlers[evtype]);
                         else if ((match=spec_events_pat.exec(evtype))) {
                             var ev=match[2];
