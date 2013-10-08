@@ -386,7 +386,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (docancel) fdjtUI.cancel(evt);
             
             if ((evt.touches)&&(th_target)) {
-                var cur_holder=getParent(th_target,".tapholder");
+                var cur_holder=getParent(elt,".tapholder");
                 if ((th.trace)||(trace_taphold) )
                     fdjtLog("TapHold(%d) second touch on %o (in %o) after %o (in %o)",
                             serial,target,holder,th_target,cur_holder);
