@@ -44,7 +44,7 @@ fdjt.DOM=
                 if (children.length===1) return children[0];
                 else return container;}
             else if ((typeof spec==='string')&&(spec[0]==='#')&&
-                    (node=document.getElementById(spec.slice(1)))) {}
+                     (node=document.getElementById(spec.slice(1)))) {}
             else if (typeof spec==='string') {
                 var elts=spec.match(css_selector_regex);
                 var classname=false;
@@ -777,7 +777,7 @@ fdjt.DOM=
                 return node.children[node.children.length-1];
             else return false;}
         fdjtDOM.getLastElement=getLastElement;
-            
+        
         /* Manipulating the DOM */
 
         fdjtDOM.replace=function(existing,replacement,leaveids){
@@ -1254,7 +1254,7 @@ fdjt.DOM=
                 return arg.nodeValue.match(/\W*\s+\W*/g).length;
             else return 0;}
         fdjtDOM.countBreaks=countBreaks;
-     
+        
         var nontext_content=/(img|object|svg|hr)/i;
 
         function hasContent(node,recur,test,limit){
@@ -1937,7 +1937,7 @@ fdjt.DOM=
                 elt.id=id;
                 return id;}}
         fdjtDOM.getNodeID=getNodeID;
-                
+        
         /* Removing IDs */
 
         function stripIDs(node,nametoo){
@@ -2073,6 +2073,83 @@ fdjt.DOM=
             else evt.returnValue=false;
             evt.cancelBubble=true;};
 
+        /* Scaling to fit using CSS transforms */
+
+        function scale_node(node,fudge,origin,shrink){
+            if (!(origin)) origin=node.getAttribute("data-origin");
+            if (!(shrink)) shrink=node.getAttribute("data-shrink");
+            if (!(fudge)) fudge=node.getAttribute("data-fudge");
+
+            // Clear any existing adjustments
+            var wrapper=((node.firstChild.className==="fdjtadjusted")?
+                         (node.firstChild):(getChild(node,"fdjtadjusted")));
+            if (wrapper) wrapper.style="";
+
+            var geom=getGeometry(node,false,true), inside=getInsideBounds(node);
+            var avail_width=((fudge)?(fudge*geom.inner_width):
+                             (geom.inner_width));
+            var avail_height=((fudge)?(fudge*geom.inner_height):
+                              (geom.inner_height));
+
+            if ((inside.height<=avail_height)&&(inside.width<=avail_width)) {
+                // Everything is inside
+                if (!(shrink)) return;
+                // If you fit closely in any dimension, don't try scaling
+                if (((inside.height<avail_height)&&
+                     (inside.height>=(avail_height*0.9)))||
+                    ((inside.width<geom.inner_width)&&
+                     (inside.width>=(avail_height*0.9))))
+                    return;}
+            if (!(wrapper)) {
+                var nodes=[], children=node.childNodes;
+                var i=0, lim=children.length;
+                while (i<lim) nodes.push(children[i++]);
+                wrapper=fdjtDOM("div.fdjtadjusted");
+                i=0; lim=nodes.length; while (i<lim)
+                    wrapper.appendChild(nodes[i++]);
+                node.appendChild(wrapper);}
+            var w_scale=avail_width/inside.width;
+            var h_scale=avail_height/inside.height;
+            var scale=((w_scale<h_scale)?(w_scale):(h_scale));
+            wrapper.style[fdjtDOM.transform]="scale("+scale+","+scale+")";
+            wrapper.style[fdjtDOM.transformOrigin]=origin||"50% 0%";}
+
+        function adjustAll(){
+            var all=fdjtDOM.$(".fdjtadjustfit");
+            var i=0, lim=all.length; while (i<lim)
+	        scale_node(all[i++]);}
+        
+        function scaleToFit(node,fudge,origin){
+            fdjtDOM.addClass(node,"fdjtadjustfit");
+            if ((fudge)&&(typeof fudge !== "number")) fudge=0.9;
+            if (fudge) node.setAttribute("data-fudge",fudge);
+            if (origin) node.setAttribute("data-origin",origin);
+            scale_node(node,fudge,origin);
+            return node;}
+        scaleToFit.adjust=adjust;
+        
+        function scale_revert(node,wrapper){
+            if (!(wrapper)) {
+                if (hasClass(node,"fdjtadjusted")) {
+                    wrapper=node; node=wrapper.parentNode;}
+                else wrapper=
+                    ((node.firstChild.className==="fdjtadjusted")?
+                     (node.firstChild):(getChild(node,"fdjtadjusted")));}
+            if ((node)&&(wrapper)) {
+                var nodes=[], children=wrapper.childNodes;
+                var i=0, lim=children.length;
+                while (i<lim) nodes.push(children[i++]);
+                var frag=document.createDocumentFragment();
+                i=0, lim=nodes.length; while (i<lim) {
+                    frag.appendChild(nodes[i++]);}
+                node.replaceChild(frag,wrapper);
+                return node;}
+            else return false;}
+        scaleToFit.revert=scale_revert;
+
+        fdjtDOM.addInit(adjustAll);
+        fdjtDOM.addListener(window,"resize",adjustAll);
+
         /* Check for SVG */
         var nosvg;
 
@@ -2083,10 +2160,10 @@ fdjt.DOM=
                     // obey CSS scaling in IE.
                     nosvg=true;
                 else if ((document.implementation)&&
-                    (document.implementation.hasFeature)&&
-                    (document.implementation.hasFeature(
-                        "http://www.w3.org/TR/SVG11/feature#BasicStructure",
-                        "1.1")))
+                         (document.implementation.hasFeature)&&
+                         (document.implementation.hasFeature(
+                             "http://www.w3.org/TR/SVG11/feature#BasicStructure",
+                             "1.1")))
                     nosvg=false;
                 else if (navigator.mimeTypes["image/svg+xml"])
                     nosvg=false;
@@ -2369,7 +2446,7 @@ fdjt.DOM=
 
         /* Paragraph hashes */
 
-     // fdjtDOM.getParaHash=function(node){return paraHash(textify(node,true,false,false));};
+        // fdjtDOM.getParaHash=function(node){return paraHash(textify(node,true,false,false));};
 
         /* Getting transition event names */
 

@@ -1310,64 +1310,6 @@ fdjt.UI.ProgressBar=(function(){
     
     fdjt.addInit(initTimeElements,"TimeElements",false);})();
 
-fdjt.UI.adjustFit=fdjt.UI.AdjustFit=(function(){
-    "use strict";
-    var fdjtDOM=fdjt.DOM;
-    var getGeometry=fdjtDOM.getGeometry;
-    var getInsideBounds=fdjtDOM.getInsideBounds;
-    var getChild=fdjtDOM.getChild;
-
-    function adjust(node,fudge,origin,shrink){
-        if (!(origin)) origin=node.getAttribute("data-origin");
-        if (!(shrink)) shrink=node.getAttribute("data-shrink");
-        if (!(fudge)) fudge=node.getAttribute("data-fudge");
-
-        // Clear any existing adjustments
-        var wrapper=((node.firstChild.className==="fdjtadjusted")?
-                     (node.firstChild):(getChild(node,"fdjtadjusted")));
-        if (wrapper) wrapper.style="";
-
-        var geom=getGeometry(node,false,true), inside=getInsideBounds(node);
-        var avail_width=((fudge)?(fudge*geom.inner_width):(geom.inner_width));
-        var avail_height=((fudge)?(fudge*geom.inner_height):(geom.inner_height));
-
-        if ((inside.height<=avail_height)&&(inside.width<=avail_width)) {
-            // Everything is inside
-            if (!(shrink)) return;
-            // If you fit closely in any dimension, don't try scaling
-            if (((inside.height<avail_height)&&
-                 (inside.height>=(avail_height*0.9)))||
-                ((inside.width<geom.inner_width)&&
-                 (inside.width>=(avail_height*0.9))))
-                return;}
-        if (!(wrapper)) {
-            var nodes=[], children=node.childNodes;
-            var i=0, lim=children.length; while (i<lim) nodes.push(children[i++]);
-            wrapper=fdjtDOM("div.fdjtadjusted");
-            i=0; lim=nodes.length; while (i<lim) wrapper.appendChild(nodes[i++]);
-            node.appendChild(wrapper);}
-        var w_scale=avail_width/inside.width, h_scale=avail_height/inside.height;
-        var scale=((w_scale<h_scale)?(w_scale):(h_scale));
-        wrapper.style[fdjtDOM.transform]="scale("+scale+","+scale+")";
-        wrapper.style[fdjtDOM.transformOrigin]=origin||"50% 0%";}
-
-    function adjustAll(){
-        var all=fdjtDOM.$(".fdjtadjustfit");
-        var i=0, lim=all.length; while (i<lim) adjust(all[i++]);}
-    fdjtDOM.addInit(adjustAll);
-    fdjtDOM.addListener(window,"resize",adjustAll);
-            
-    function adjustFit(node,fudge,origin){
-        fdjtDOM.addClass(node,"fdjtadjustfit");
-        if ((fudge)&&(typeof fudge !== "number")) fudge=0.9;
-        if (fudge) node.setAttribute("data-fudge",fudge);
-        if (origin) node.setAttribute("data-origin",origin);
-        adjust(node,fudge,origin);
-        return node;}
-    adjustFit.adjust=adjust;
-
-    return adjustFit;})();
-
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
