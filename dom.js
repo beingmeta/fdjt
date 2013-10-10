@@ -717,10 +717,10 @@ fdjt.DOM=
         fdjtDOM.getChildren=getChildren;
         fdjt.$=fdjtDOM.$=function(spec,root){
             return toArray(getChildren(root||document,spec));};
-        fdjt.$1=fdjtDOM.getFirstChild=function(elt,spec){
+        function getFirstChild(elt,spec){
             var children=getChildren(elt,spec);
-            if (children.length) return children[0]; else return false;};
-        fdjtDOM.getChild=fdjtDOM.getFirstChild;
+            if (children.length) return children[0]; else return false;}
+        fdjt.$1=fdjtDOM.getChild=fdjtDOM.getFirstChild=getFirstChild;
 
         function filter_children(node,filter,results){
             if (node.nodeType===1) {
@@ -2082,7 +2082,7 @@ fdjt.DOM=
 
             // Clear any existing adjustments
             var wrapper=((node.firstChild.className==="fdjtadjusted")?
-                         (node.firstChild):(getChild(node,"fdjtadjusted")));
+                         (node.firstChild):(getFirstChild(node,"fdjtadjusted")));
             if (wrapper) wrapper.style="";
 
             var geom=getGeometry(node,false,true), inside=getInsideBounds(node);
@@ -2117,7 +2117,7 @@ fdjt.DOM=
         function adjustAll(){
             var all=fdjtDOM.$(".fdjtadjustfit");
             var i=0, lim=all.length; while (i<lim)
-	        scale_node(all[i++]);}
+                scale_node(all[i++]);}
         
         function scaleToFit(node,fudge,origin){
             fdjtDOM.addClass(node,"fdjtadjustfit");
@@ -2126,7 +2126,8 @@ fdjt.DOM=
             if (origin) node.setAttribute("data-origin",origin);
             scale_node(node,fudge,origin);
             return node;}
-        scaleToFit.adjust=adjust;
+        scaleToFit.scaleNode=scaleToFit.adjust=scale_node;
+        fdjtDOM.scaleToFit=scaleToFit;
         
         function scale_revert(node,wrapper){
             if (!(wrapper)) {
@@ -2134,7 +2135,7 @@ fdjt.DOM=
                     wrapper=node; node=wrapper.parentNode;}
                 else wrapper=
                     ((node.firstChild.className==="fdjtadjusted")?
-                     (node.firstChild):(getChild(node,"fdjtadjusted")));}
+                     (node.firstChild):(getFirstChild(node,"fdjtadjusted")));}
             if ((node)&&(wrapper)) {
                 var nodes=[], children=wrapper.childNodes;
                 var i=0, lim=children.length;
@@ -2147,7 +2148,7 @@ fdjt.DOM=
             else return false;}
         scaleToFit.revert=scale_revert;
 
-        fdjtDOM.addInit(adjustAll);
+        fdjt.addInit(adjustAll);
         fdjtDOM.addListener(window,"resize",adjustAll);
 
         /* Check for SVG */
