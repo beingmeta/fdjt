@@ -126,6 +126,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             fdjtLog.warn("TapHold with no argument!");
             return;}
         
+        if (!(this instanceof TapHold))
+            return new TapHold(
+                elt,fortouch,holdthresh,movethresh,taptapthresh,docancel);
+        
         var th=this;
         var touched=false;
         var pressed=false;
