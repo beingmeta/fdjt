@@ -1016,6 +1016,7 @@ fdjt.UI.ProgressBar=(function(){
         while (target) {
             if (((target.tagName==='A')&&(target.href))||
                 (target.tagName==="INPUT") ||
+                (target.tagName==="BUTTON") ||
                 (target.tagName==="TEXTAREA") ||
                 (target.tagName==="SELECT") ||
                 (target.tagName==="OPTION") ||
