@@ -85,6 +85,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 selectors[wrapper.id]=sel;
                 wrappers.push(wrapper);
                 tapholds[wrapper.id]=addHandlers(wrapper,sel,opts);
+                fdjtLog("Created TapHold handler (#%d) for wrapper %s around %o",
+                        tapholds[wrapper.id].serial,wrapper.id,node);
                 // Replace the node with the wrapper and then update
                 // the node (replacing words with spans) while it's
                 // outside of the DOM for performance.
@@ -112,10 +114,16 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             
             this.startEvent=function startEvent(evt){
                 var target=fdjtUI.T(evt);
+                if (trace)
+                    fdjtLog("startEvent %o, target=%o, wrappers=%o",
+                            evt,target,wrappers);
                 var j=0, n_wrappers=wrappers.length; while (j<n_wrappers) {
                     var wrapper=wrappers[j++];
                     if ((hasParent(wrapper,target))||(hasParent(target,wrapper))) {
                         var taphold=tapholds[wrapper.id];
+                        if (trace)
+                            fdjtLog("Using TapHold handler @%d for wrapper %s (#%d)",
+                                    j-1,wrapper.id,taphold.serial);
                         taphold.fakePress(evt);
                         return;}}};
 
@@ -503,11 +511,11 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                           (opts.fortouch):
                           (TextSelect.fortouch||false));
             var taphold=
-                fdjtUI.TapHold(container,fortouch,
-                               ((opts)&&(opts.holdthresh)),
-                               ((opts)&&(opts.movethresh)),
-                               ((opts)&&(opts.taptapthresh)),
-                               true);
+                new fdjtUI.TapHold(container,fortouch,
+                                   ((opts)&&(opts.holdthresh)),
+                                   ((opts)&&(opts.movethresh)),
+                                   ((opts)&&(opts.taptapthresh)),
+                                   true);
             fdjtDOM.addListener(container,"tap",
                                 ((opts)&&(opts.ontap))||
                                 tap_handler);
