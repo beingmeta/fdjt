@@ -496,6 +496,12 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (sel) {
                 sel.setAdjust(false);
                 if (sel.loupe) sel.loupe.style.display='none';}}
+        function slip_handler(evt,sel){
+            evt=evt||event;
+            var target=fdjtUI.T(evt);
+            if (trace) fdjtLog("slip %o t=%o sel=%o",evt,target,sel);
+            if (sel) {
+                if (sel.loupe) sel.loupe.style.display='none';}}
         TextSelect.release_handler=release_handler;
         function get_release_handler(sel,also){
             return function(evt){
@@ -503,7 +509,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if (also) also(evt,sel);};}
         function get_slip_handler(sel,also){
             return function(evt){
-                release_handler(evt,sel);
+                slip_handler(evt,sel);
                 if (also) also(evt,sel);};}
         
         function addHandlers(container,sel,opts){
