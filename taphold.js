@@ -508,6 +508,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         serial,th_target,start_x,start_y,start_t);
             startpress(evt,holdthresh);};
 
+        if (trace_taphold)
+            fdjtLog("TapHold listener (#%d) for %o",serial,elt);
+        
         return this;}
 
     TapHold.clear=function(){
