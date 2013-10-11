@@ -42,10 +42,20 @@ fdjt.String=
                         output=output+"'"+arg+"'";
                     else if (typeof arg === 'number')
                         output=output+arg;
+                    else if (Array.isArray(arg)) {
+                        var j=0, len=arg.length;
+                        output=output+"[";
+                        while (j<len) {
+                            output=output+((j>0)?(","):(""))+stringify(arg[j++]);}}
                     else output=output+stringify(arg);}
                 else if (string[cmd+1]==='j') {
                     arg=arguments[i++];
-                    output=output+JSON.stringify(arg);}
+                    if (Array.isArray(arg)) {
+                        var k=0, lim=arg.length;
+                        output=output+"[";
+                        while (k<lim) {
+                            output=output+((k>0)?(","):(""))+JSON.stringify(arg[k++]);}}
+                    else output=output+JSON.stringify(arg);}
                 else if ((string[cmd+1]==='x')&&
                          (typeof arguments[i] === 'number')&&
                          (arguments[i]>=0)&&
