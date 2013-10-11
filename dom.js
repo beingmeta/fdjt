@@ -2114,7 +2114,7 @@ fdjt.DOM=
             wrapper.style[fdjtDOM.transform]="scale("+scale+","+scale+")";
             wrapper.style[fdjtDOM.transformOrigin]=origin||"50% 0%";}
 
-        function adjustAll(){
+        function scaleAll(){
             var all=fdjtDOM.$(".fdjtadjustfit");
             var i=0, lim=all.length; while (i<lim)
                 scale_node(all[i++]);}
@@ -2148,8 +2148,15 @@ fdjt.DOM=
             else return false;}
         scaleToFit.revert=scale_revert;
 
-        fdjt.addInit(adjustAll);
-        fdjtDOM.addListener(window,"resize",adjustAll);
+        function revertAll(){
+            var all=fdjtDOM.$(".fdjtadjusted");
+            var i=0, lim=all.length; while (i<lim) {
+                var wrapper=all[i++];
+                scale_revert(wrapper.parentNode,wrapper);}}
+        scaleToFit.revertAll=revertAll;
+
+        fdjt.addInit(scaleAll);
+        fdjtDOM.addListener(window,"resize",scaleAll);
 
         /* Check for SVG */
         var nosvg;
