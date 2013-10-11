@@ -28,8 +28,13 @@
 .nowrap { white-space: nowrap;}
 
 .fullwidth { width: 100%;}
-.floatleft { float: left;}
-.floatright { float: right;}
+.floatleft, .leftfloat { float: left;}
+.floatright, .rightfloat { float: right;}
+.clearleft, .leftclear { clear: left;}
+.clearright, .rightclear { clear: right;}
+.leftclearfloat { float: left; clear: left;}
+.rightclearfloat { float: right; clear: right;}
+
 input[TYPE="FILE"].floatright { text-align: right; }
 
 .fdjtinvisible { display: none;}
