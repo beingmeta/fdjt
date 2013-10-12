@@ -326,6 +326,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 if ((th.trace)||(trace_taphold)) {
                     trace_ignore_move(evt,serial,elt,holder,th_target,target,
                                       start_x,start_y,touch_x,touch_y);}
+                if (pressed) slipped(pressed,evt,{relatedTarget: target});
                 return;}
             touch_x=x; touch_y=y; touch_t=fdjtTime();
             // If touched is false, the tap/hold was aborted somehow
