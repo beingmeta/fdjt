@@ -157,7 +157,7 @@ fdjt.Dialog=(function(){
 
     function setCountdown(box,timeout,whendone){
         var countdown=fdjtDOM.getChild(box,".countdown");
-        countdown.innerHTML="Closing in "+timeout+"…";
+        countdown.innerHTML="…"+timeout+"…";
         var n=timeout;
         box.style[fdjtDOM.transitionDelay]=(n/2)+"s";
         box.style[fdjtDOM.transitionDuration]=(n/2)+"s";
@@ -167,7 +167,7 @@ fdjt.Dialog=(function(){
                 delete countdown_tickers[countdown.id];
                 if (whendone) whendone();
                 fdjtDOM.remove(box);}
-            else countdown.innerHTML="Closing in "+(n--)+"…";},
+            else countdown.innerHTML="…"+(n--)+"…";},
                                1000);
         countdown_tickers[countdown.id]=ticker;
         fdjtDOM.addListener(box,"click",stop_countdown_onclick);
