@@ -121,6 +121,25 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 return child;}}
         return false;}
 
+    var mouse_down=false;
+    function global_mouseup(evt){
+        evt=evt||event;
+        if (trace_taphold) fdjtLog("TapHold/global/mouseup %o",evt);
+        if (evt.button===1) mouse_down=false;}
+    function global_mousedown(evt){
+        evt=evt||event;
+        if (trace_taphold) fdjtLog("TapHold/global/mousedown %o",evt);
+        if (evt.button===1) mouse_down=true;}
+    function global_mouseout(evt){
+        evt=evt||event;
+        var target=fdjtUI.T(evt), rel=evt.relatedTarget||evt.toElement;
+        if (trace_taphold)
+            fdjtLog("TapHold/global/mouseout %o %o==>%o",
+                    evt,target,rel);
+        if (target===document.documentElement)
+            mouse_down=false;}
+
+
     function TapHold(elt,fortouch,holdthresh,movethresh,taptapthresh,docancel){
         if (!(elt)) {
             fdjtLog.warn("TapHold with no argument!");
@@ -138,7 +157,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var th_target=false;
         var th_targets=[];
         var th_timer=false;
-        var mouse_down=false;
         var start_x=false;
         var start_y=false;
         var start_t=false;
@@ -261,13 +279,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 clearTimeout(th_timer); th_timer=false;}
             else if (pressed) {slipped(pressed,evt);}
             if (reticle.live) reticle.highlight(false);
-            touched=pressed=tap_target=false; mouse_down=false;
+            touched=pressed=tap_target=false;
             // start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
             th_targets=[];
             setTarget(false);}
 
         var mouseout_timer=false;
 
+        /*
         function taphold_mouseout(evt){
             evt=evt||event;
             var to=evt.toElement||evt.relatedTarget;
@@ -277,7 +296,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 mouseout_timer=setTimeout(function(){
                     slipped(pressed,evt,{relatedTarget: to});
                     abortpress(evt,"taphold_mouseout");},
-                                          300);}}
+                                          2000);}}
+        function taphold_mouseout(evt){}
+        */
         function taphold_mouseover(evt){
             evt=evt||event;
             if (mouseout_timer) {
@@ -290,6 +311,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((pressed)&&(cleared>start_t)) {
                 abortpress(evt,"move/cleared");
                 return;}
+            if (!(mouse_down)) {
+                abortpress(evt,"mousemove/up");
+                return;}
+            
             // if (target!==th_target) fdjtLog("New target %o",target);
             var x=evt.clientX||getClientX(evt);
             var y=evt.clientY||getClientY(evt);
@@ -299,11 +324,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             var holder=getParent(target,".tapholder");
             if (holder!==elt) {
                 if ((th.trace)||(trace_taphold)) {
-                    fdjtLog("TapHold/move%s/ignore(%d) %o %o -> %o s=%d,%d t=%d,%d, thresh=%o, md=%o",
-                            ((mouse_down)?("/md"):("")),serial,
-                            evt,th_target,target,start_x,start_y,
-                            touch_x,touch_y,movethresh,mouse_down);
-                    fdjtLog("TapHold/move/ignore(%d) target in %o, elt is %o",serial,holder,elt);}
+                    trace_ignore_move(evt,serial,elt,holder,th_target,target,
+                                      start_x,start_y,touch_x,touch_y);}
                 return;}
             touch_x=x; touch_y=y; touch_t=fdjtTime();
             // If touched is false, the tap/hold was aborted somehow
@@ -354,6 +376,16 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 pressed_at=fdjtTime();
                 held(pressed);}
             else {}}
+        function trace_ignore_move(evt,serial,elt,holder,th_target,target,
+                                   start_x,start_y,touch_x,touch_y) {
+            fdjtLog(
+                "TapHold/move%s/farout(%d) %o %o -> %o s=%d,%d t=%d,%d",
+                ((mouse_down)?("/md"):("")),serial,
+                evt,th_target,target,start_x,start_y,
+                touch_x,touch_y);
+            fdjtLog("TapHold/move/farout(%d) target in %o, elt is %o",
+                    serial,holder,elt);}
+
         
         function taphold_down(evt,holdthresh){
             evt=evt||event;
@@ -474,7 +506,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousemove",taphold_move);
         fdjtDOM.addListener(elt,"touchmove",taphold_move);
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousedown",taphold_down);
-        if (!(fortouch)) fdjtDOM.addListener(elt,"mouseout",taphold_mouseout);
+        // if (!(fortouch)) fdjtDOM.addListener(elt,"mouseout",taphold_mouseout);
         if (!(fortouch)) fdjtDOM.addListener(elt,"mouseover",taphold_mouseover);
         fdjtDOM.addListener(elt,"touchstart",taphold_down);
         if (!(fortouch)) fdjtDOM.addListener(elt,"mouseup",taphold_up);
@@ -482,6 +514,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         fdjtDOM.addListener(elt,"touchend",taphold_up);
         fdjtDOM.addListener(elt,"touchcancel",abortpress);        
         if (!(window_setup)) {
+            fdjtDOM.addListener(window,"mousedown",global_mousedown);
+            fdjtDOM.addListener(window,"mouseup",global_mouseup);
+            fdjtDOM.addListener(window,"mouseout",global_mouseout);
             // fdjtDOM.addListener(document,"keydown",taphold_keydown);
             // fdjtDOM.addListener(document,"keyup",taphold_keyup);
             window_setup=window;}
@@ -506,7 +541,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 fdjtLog("TapHold(%d): No target from %o,%o",
                         serial,start_x,start_y);
             setTarget(target); th_targets=[target];
-            mouse_down=true;
             if ((th.trace)||(trace_taphold))
                 fdjtLog("TapHold/fakePress(%d) t=%o x=%o y=%o t=%o",
                         serial,th_target,start_x,start_y,start_t);
