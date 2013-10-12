@@ -55,4 +55,6 @@ body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 .forcebreakbefore { page-break-before: always;}
 .forcebreakafter { page-break-after: always;}
 
-
+.codexpage .codexpagefoot {
+    position: absolute; bottom: 0px; left: 0px; right: 0px;
+    width: 100%; margin: 0px; border: 0px; padding: 0px;}
