@@ -536,9 +536,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 get_slip_handler(sel,opts.onslip||false));
             return taphold;}
 
-        TextSelect.Trace=function(flag){
-            if (typeof flag === "undefined")
-                trace=(!(trace));
+        TextSelect.Trace=function(flag,thtoo){
+            if ((flag)&&(thtoo)) fdjt.TapHold.Trace(true);
+            if (typeof flag === "undefined") {
+                trace=(!(trace));}
             else trace=flag;};
         
         // Return the constructor
