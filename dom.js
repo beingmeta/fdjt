@@ -2514,6 +2514,21 @@ fdjt.DOM=
         fdjtDOM.text_types=
             /\b(text|email|number|range|tel|url|datetime|datetime-local|date|time|week|month)\b/i;
 
+        /* Checking media types */
+        function checkMedia(){
+            var media="media";
+            if (window.matchMedia) {
+                var mm=window.matchMedia("handheld");
+                if (mm.match) media=media+" handheld";
+                mm=window.matchMedia("(max-width:500px)");
+                if (mm.match) media=media+" narrow";
+                mm=window.matchMedia("(min-width:1000px)");
+                if (mm.match) media=media+" wide";
+                mm=window.matchMedia("(-webkit-min-device-pixel-ratio:1.5),(-min-resolution:15dp)");
+                if (mm.match) media=media+" hires";}
+            fdjt.media=media;}
+        fdjt.addInit(checkMedia,"matchMedia");
+
         /* Inserting text in an text field or textarea */
         function insertText(target,text,off){
             var pos=target.selectionStart;
