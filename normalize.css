@@ -141,6 +141,7 @@ dfn {
  */
 
 hr {
+    -webkit-box-sizing: content-box;
     -moz-box-sizing: content-box;
     box-sizing: content-box;
     height: 0;
@@ -336,6 +337,7 @@ html input[disabled] {
 
 input[type="checkbox"],
 input[type="radio"] {
+    -webkit-box-sizing: border-box;
     box-sizing: border-box; /* 1 */
     padding: 0; /* 2 */
 }
