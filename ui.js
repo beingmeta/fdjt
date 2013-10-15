@@ -107,21 +107,23 @@ fdjt.UI.Highlight=(function(){
                 fdjtDOM.replace(hnode,hnode.firstChild);}}
     function highlight_node(node,hclass,htitle){
         if (!(hclass)) hclass=highlight_class;
-        var hispan;
+        var hispan=false;
         if (node.nodeType===3) 
             hispan=fdjtDOM("span."+hclass);
         else if ((node.nodeType!==1)||(hasClass(node,hclass)))
             return node;
         else {
             var display=getStyle(node).display;
-            var hispan=((display==="block")?(fdjtDOM("div."+hclass)):
-                        (display==="inline")?(fdjtDOM("span."+hclass)):
-                        (false));
-            if (!(hispan)) return node;
-            if (htitle) hispan.title=htitle;
-            fdjtDOM.replace(node,hispan);
-            hispan.appendChild(node);
-            return hispan;}}
+            if (display==="block")
+                hispan=(fdjtDOM("div."+hclass));
+            else if (display==="inline")
+                hispan=fdjtDOM("span."+hclass);
+            else {}}
+        if (!(hispan)) return node;
+        if (htitle) hispan.title=htitle;
+        fdjtDOM.replace(node,hispan);
+        hispan.appendChild(node);
+        return hispan;}
     function highlight_text(text,hclass,htitle){
         var tnode=fdjtDOM("span."+(hclass||highlight_class),text);
         if (htitle) tnode.title=htitle;
@@ -167,10 +169,12 @@ fdjt.UI.Highlight=(function(){
                 else if (hasParent(ends_in,scan))
                     scan=scan.firstChild;
                 else {
+                    var next=scan;
+                    while ((next)&&(!(next.nextSibling)))
+                        next=next.parentNode;
+                    next=next.nextSibling;
                     highlights.push(highlight_node(scan,hclass,htitle));
-                    while ((scan)&&(!(scan.nextSibling)))
-                        scan=scan.parentNode;
-                    scan=scan.nextSibling;}}
+                    scan=next;}}
             // Do the ends
             highlights.push(
                 highlight_node_range(
