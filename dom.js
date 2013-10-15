@@ -2406,7 +2406,7 @@ fdjt.DOM=
             var fulltext=node2text(node);
             var scan=((off===0)?(fulltext):(fulltext.slice(off)));
             var pat=((typeof needle === 'string')?
-                     (new RegExp(needle.replace(/\s+/g,"(\\s+)"),"gm")):
+                     (new RegExp(needle.replace(/\s+/g,"\\(\\s+\\)"),"gm")):
                      (needle));
             while ((match=pat.exec(scan))) {
                 if (count===1) {
