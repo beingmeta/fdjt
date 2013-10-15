@@ -91,6 +91,7 @@ fdjt.UI.Highlight=(function(){
     var highlight_class="fdjthighlight";
     var hasClass=fdjtDOM.hasClass;
     var hasParent=fdjtDOM.getParent;
+    var getStyle=fdjtDOM.getStyle;
 
     function textnode(s){
         return document.createTextNode(s);}
@@ -106,11 +107,21 @@ fdjt.UI.Highlight=(function(){
                 fdjtDOM.replace(hnode,hnode.firstChild);}}
     function highlight_node(node,hclass,htitle){
         if (!(hclass)) hclass=highlight_class;
-        if (hasClass(node,hclass)) return node;
-        var hispan=fdjtDOM("span."+hclass);
-        if (htitle) hispan.title=htitle;
-        fdjtDOM.replace(node,hispan);
-        hispan.appendChild(node);}
+        var hispan;
+        if (node.nodeType===3) 
+            hispan=fdjtDOM("span."+hclass);
+        else if ((node.nodeType!==1)||(hasClass(node,hclass)))
+            return node;
+        else {
+            var display=getStyle(node).display;
+            var hispan=((display==="block")?(fdjtDOM("div."+hclass)):
+                        (display==="inline")?(fdjtDOM("span."+hclass)):
+                        (false));
+            if (!(hispan)) return node;
+            if (htitle) hispan.title=htitle;
+            fdjtDOM.replace(node,hispan);
+            hispan.appendChild(node);
+            return hispan;}}
     function highlight_text(text,hclass,htitle){
         var tnode=fdjtDOM("span."+(hclass||highlight_class),text);
         if (htitle) tnode.title=htitle;
