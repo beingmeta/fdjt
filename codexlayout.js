@@ -574,7 +574,8 @@ fdjt.CodexLayout=
                             psh=parseScale(psv[1]);}
                         else psh=psw=parseScale(psv[0]);}
                     var pw=page_width*psw, ph=page_height*psh;
-                    var w=elt.offsetWidth, h=elt.offsetHeight;
+                    var w=elt.offsetWidth+elt.offsetLeft;
+                    var h=elt.offsetHeight+elt.offsetTop;
                     var sw=pw/w, sh=ph/h;
                     var scale=((sw<sh)?(sw):(sh));
                     if ((elt.tagName==="IMG")&&
