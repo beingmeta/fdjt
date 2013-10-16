@@ -85,8 +85,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 selectors[wrapper.id]=sel;
                 wrappers.push(wrapper);
                 tapholds[wrapper.id]=addHandlers(wrapper,sel,opts);
-                fdjtLog("Created TapHold handler (#%d) for wrapper %s around %o",
-                        tapholds[wrapper.id].serial,wrapper.id,node);
+                if (trace)
+                    fdjtLog("Created TapHold handler (#%d) for wrapper %s around %o",
+                            tapholds[wrapper.id].serial,wrapper.id,node);
                 // Replace the node with the wrapper and then update
                 // the node (replacing words with spans) while it's
                 // outside of the DOM for performance.
