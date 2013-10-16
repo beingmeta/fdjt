@@ -439,7 +439,7 @@ if (!(fdjt.RefDB)) {
                         loadfn(this);}}
                 // Run per-instance delayed inits
                 if (this._onload) {
-                    var inits=this._onload;
+                    var inits=this._onload.fns;
                     var j=0, jlim=inits.length; while (j<jlim) {
                         inits[j++](this);}
                     delete this._onload;}}
