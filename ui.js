@@ -96,15 +96,29 @@ fdjt.UI.Highlight=(function(){
     function textnode(s){
         return document.createTextNode(s);}
 
+    function gatherHighlights(node,classpat,into){
+        if (node.nodeType!==1) return;
+        if (node.childNodes) {
+            var children=node.childNodes;
+            var i=0, lim=children.length;
+            while (i<lim) gatherHighlights(children[i++],classpat,into);}
+        if ((node.className)&&(node.className.search(classpat)>=0)) {
+            into.push(node);}}
+
     function clear_highlights(node,hclass){
-        var h=fdjtDOM.getChildren(
-            node||document.body,"."+(hclass||highlight_class));
-        h=fdjtDOM.toArray(h);
+        var h=[]; gatherHighlights(node,new RegExp("\\b"+hclass+"\\b","g"),h);
         var i=0 , lim=h.length;
         while (i<lim) {
             var hnode=h[i++];
-            if (hnode.firstChild)
-                fdjtDOM.replace(hnode,hnode.firstChild);}}
+            var ch=hnode.childNodes;
+            if (ch) {
+                var frag=document.createDocumentFragment();
+                var tomove=[], j=0, n=((ch)&&(ch.length));
+                while (j<n) tomove.push(ch[j++]);
+                j=0; n=tomove.length;
+                while (j<n) frag.appendChild(tomove[j++]);
+                fdjtDOM.replace(hnode,frag);}
+            else fdjtDOM.remove(hnode);}}
     function highlight_node(node,hclass,htitle){
         if (!(hclass)) hclass=highlight_class;
         var hispan=false;
