@@ -61,7 +61,7 @@ fdjt.Template=(function(){
                     continue;}
                 var val=data[prop]||((xdata)&&(xdata[prop]))||"";
                 done[prop]=prop;
-                text=text.replace(new RegExp(match,"g"),val.toString());}}
+                text=text.replace(new RegExp(match,"gm"),val.toString());}}
         if (dom) {
             if (dom.nodeType===3) dom.nodeValue=text;
             else dom.innerHTML=text;
