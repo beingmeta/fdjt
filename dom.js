@@ -2399,6 +2399,11 @@ fdjt.DOM=
                     starts_in: within.id,ends_in: ends_in.id,
                     end: end_edge+range.endOffset};};
 
+        function getRegexString(needle){
+            return needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
+                /\s+/g,"(\\s+)");}
+        fdjtDOM.textRegExp=getRegexString;
+
         function findString(node,needle,off,count){
             if (typeof off === 'undefined') off=0;
             if (typeof count === 'undefined') count=1;
@@ -2406,7 +2411,7 @@ fdjt.DOM=
             var fulltext=node2text(node);
             var scan=((off===0)?(fulltext):(fulltext.slice(off)));
             var pat=((typeof needle === 'string')?
-                     (new RegExp(needle.replace(/\s+/g,"\\(\\s+\\)"),"gm")):
+                     (new RegExp(getRegexString(needle),"gm")):
                      (needle));
             while ((match=pat.exec(scan))) {
                 if (count===1) {
@@ -2432,7 +2437,7 @@ fdjt.DOM=
             var fulltext=node2text(node);
             var scan=((off===0)?(fulltext):(fulltext.slice(off)));
             var pat=((typeof needle === 'string')?
-                     (new RegExp(needle.replace(/\s+/g,"(\\s+)"),"gm")):
+                     (new RegExp(getRegexString(needle),"gm")):
                      (needle));
             while ((count!==0)&&(match=pat.exec(scan))) {
                 var loc=match.index;
