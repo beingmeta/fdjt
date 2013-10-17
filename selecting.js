@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; -*- */
 
-/* ######################### fdjt/textselect.js ###################### */
+/* ######################### fdjt/selecting.js ###################### */
 
 /* Copyright (C) 2009-2013 beingmeta, inc.
 
@@ -286,10 +286,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if ((sel.adjust==='start')&&(off>sel.max)) return;
                 if ((sel.adjust==='end')&&(off<sel.min)) return;
                 // Figure out whether you're moving the beginning or end
-                if (start===word) sel.setAdjust('start');
-                else if (end===word) sel.setAdjust('end');
-                else if (sel.adjust==='start') start=word;
+                if (sel.adjust==='start') start=word;
                 else if (sel.adjust==='end') end=word;
+                else if (start===word) sel.setAdjust('start');
+                else if (end===word) sel.setAdjust('end');
                 else if (off<=sel.min) {
                     start=word; sel.setAdjust('start');}
                 else if (off>=sel.max) {
@@ -373,7 +373,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     (scan.id)&&(scan.id.search(prefix)===0)) {
                     combine.push(scan.firstChild.nodeValue);
                     if (scan===end) break;}
-                if ((scan.firstChild)&&(scan.firstChild.nodeType!==3))
+                if ((scan.firstChild)&&
+                    (scan.className!=="fdjtselectloupe")&&
+                    (scan.firstChild.nodeType!==3))
                     scan=scan.firstChild;
                 else if (scan.nextSibling) scan=scan.nextSibling;
                 else {
@@ -414,6 +416,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 while ((i<lim)&&(!(hasParent(first_word,under))))
                     first_word=words[i++];}
             var preselected=this.getString(first_word,this.end);
+            if (trace) 
+                fdjtLog("GetInfo %o: start=%o, end=%o, off=%o, string=%o",
+                        this,this.start,this.end,
+                        preselected.length-selected.length,selected);
             return { start: this.start, end: this.end,
                      off: preselected.length-selected.length,
                      string: selected};};
