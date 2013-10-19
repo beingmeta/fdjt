@@ -240,10 +240,12 @@ fdjt.CodexLayout=
             // If it doesn't have an ID, we give it one, because we'll want
             //  to refer to it later while wanting to avoid DOM cycles
             if (!(id)) id=node.id="CODEXTMPID"+(tmpid_count++);
-            else {
+            else if (dups[id]) {
                 // See if it's already been duplicated
-                var dup=dups[id];
-                if ((dup)&&(hasParent(dup,page))) return dup;}
+                var scan_dups=dups[id]; var d=scan_dups.length-1;
+                while (d>=0) {
+                    if (hasParent(scan_dups[d],page)) return scan_dups[d];
+                    else d--;}}
             // Duplicate it's parent
             var copy=node.cloneNode(false);
             var parent=dupContext(node.parentNode,page,dups,crumbs);
@@ -1341,7 +1343,8 @@ fdjt.CodexLayout=
             function setLayout(content){
                 var frag=document.createElement("div");
                 frag.innerHTML=content;
-                var all_ids=[], saved_ids={}, dupids=[], dupstarts={}, restoremap={};
+                var all_ids=[], saved_ids={};
+                var dupids=[], dupstarts={}, restoremap={};
                 var curnodes=[], newdups={};
                 var newpages=frag.childNodes, addpages=[];
                 var i=0, lim=newpages.length; while (i<lim) {
