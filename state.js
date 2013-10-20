@@ -418,6 +418,18 @@ fdjt.State=
             return result;}
         fdjtState.versionInfo=versionInfo;
 
+        function getStyleTag() {
+            // This is a trick for making a tag value visible to Javascript from CSS
+            // From: http://tech.particulate.me/javascript/2013/10/10/how-to-conveniently-check-for-responsive-breakpoints-in-javascript/
+            var tag = window.getComputedStyle(document.body,':after').getPropertyValue('content');
+            tag = tag.replace(/"/g,'');   // Firefox bugfix
+            return tag;}
+        // To use it, define:
+        //    body:after { content: 'styletag'; }
+        // in your CSS.  This is typically done inside the @media rules which define
+        // adaptive design breakpoints
+        fdjtState.getStyleTag=getStyleTag;
+
         return fdjtState;})();
 
 /* Emacs local variables
