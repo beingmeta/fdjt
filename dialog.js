@@ -68,7 +68,8 @@ fdjt.Dialog=(function(){
         var elts=[]; var i=1, lim=arguments.length;
         while (i<lim) {
             var arg=arguments[i++];
-            if (arg.nodeType) box.appendChild(arg);
+            if (!(arg)) {}
+            else if (arg.nodeType) box.appendChild(arg);
             else if (typeof arg === "string") {
                 arg=Templates[arg]||arg;
                 var ishtml=(arg.indexOf('<')>=0);
@@ -189,6 +190,20 @@ fdjt.Dialog=(function(){
         return box;}
     Dialog.alertFor=alertFor;
     fdjtUI.alertFor=alertFor;
+
+    function message(spec){
+        var curbox=fdjtID("FDJTMESSAGE");
+        if (curbox) {
+            curbox.id="";
+            fdjtDOM.dropClass(curbox,"closing");
+            remove_dialog(curbox);}
+        var args=fdjtDOM.toArray(arguments);
+        var box=Dialog.apply(null,args);
+        if (spec.timeout) setCountdown(box,spec.timeout);
+        box.id="FDJTMESSAGE"; fdjtDOM.prepend(document.body,box);
+        return box;}
+    Dialog.message=message;
+    fdjt.message=message;
 
     function makeChoice(spec,close_choice,i){
         var dom=spec.dom||
