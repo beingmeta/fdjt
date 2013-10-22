@@ -980,6 +980,12 @@ div.fdjtdialog.closing {
     -o-opacity: .05;}
 div.fdjtdialog.closing { cursor: pointer;}
 
+div.fdjtdialog div.title {
+  text-align: center; font-weight: bold; font-size: 150%;}
+div.fdjtdialog p {
+  margin-top: 1ex; margin-bottom: 0.5ex;
+  text-align: left; text-indent: 0px;}
+
 div.fdjtdialog > div, div.fdjtdialog > span { vertical-align: middle;}
 
 div.fdjtdialog .countdown {
