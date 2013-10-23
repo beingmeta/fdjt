@@ -180,8 +180,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function tapped(target,evt){
             return dispatchEvent(target,"tap",evt,touch_x,touch_y);}
         function held(target,evt){
+            addClass(elt,"tapholding");
             return dispatchEvent(target,"hold",evt,touch_x,touch_y);}
         function released(target,evt){
+            dropClass(elt,"tapholding");
             return dispatchEvent(target,"release",evt,touch_x,touch_y);}
         function slipped(target,evt,also){
             if ((evt)&&(!(also))) {
@@ -269,6 +271,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             start_x=false; start_y=false; start_t=false;
             touched=false; pressed=false;
             setTarget(false);
+            dropClass(elt,"tapholding");
             th_targets=[];}
         function abortpress(evt,why){
             if ((th.trace)||(trace_taphold))
@@ -281,12 +284,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (reticle.live) reticle.highlight(false);
             touched=pressed=tap_target=false;
             // start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
+            dropClass(elt,"tapholding");
             th_targets=[];
             setTarget(false);}
 
         var mouseout_timer=false;
 
-        /*
         function taphold_mouseout(evt){
             evt=evt||event;
             var to=evt.toElement||evt.relatedTarget;
@@ -297,8 +300,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     slipped(pressed,evt,{relatedTarget: to});
                     abortpress(evt,"taphold_mouseout");},
                                           2000);}}
-        function taphold_mouseout(evt){}
-        */
+
         function taphold_mouseover(evt){
             evt=evt||event;
             if (mouseout_timer) {
@@ -507,7 +509,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousemove",taphold_move);
         fdjtDOM.addListener(elt,"touchmove",taphold_move);
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousedown",taphold_down);
-        // if (!(fortouch)) fdjtDOM.addListener(elt,"mouseout",taphold_mouseout);
+        if (!(fortouch)) fdjtDOM.addListener(elt,"mouseout",taphold_mouseout);
         if (!(fortouch)) fdjtDOM.addListener(elt,"mouseover",taphold_mouseover);
         fdjtDOM.addListener(elt,"touchstart",taphold_down);
         if (!(fortouch)) fdjtDOM.addListener(elt,"mouseup",taphold_up);
