@@ -426,14 +426,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             
             if ((evt.touches)&&(th_target)) {
                 var cur_holder=getParent(elt,".tapholder");
-                if ((th.trace)||(trace_taphold) )
+                if ((th.trace)||(trace_taphold))
                     fdjtLog("TapHold(%d) second touch on %o (in %o) after %o (in %o)",
-                            serial,target,holder,th_target,cur_holder);
-                if ((cur_holder)&&(cur_holder !== holder)) {
+                            serial,target,holder,th_target,cur_holder,(cur_holder===holder));
+                if ((cur_holder)&&(holder)) {
                     var touch=evt.changedTouches[0];
                     if ((th.trace)||(trace_taphold))
-                        fdjtLog("TapHold(%d) Clearing taphold on %o, redispatching to %o",
-                                serial,th_target,target);
+                        fdjtLog("TapHold(%d) Clearing taphold on %o, redispatching %o to %o",
+                                serial,th_target,evt,target);
                     new_event=document.createEvent('TouchEvent');
                     new_event.initTouchEvent(
                         evt.type,true,true,window,0,
