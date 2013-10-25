@@ -147,8 +147,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             return;}
         
         if (!(this instanceof TapHold))
-            return new TapHold(
-                elt,fortouch,holdthresh,movethresh,taptapthresh,nodefault,nobubble);
+            return new TapHold(elt,opts);
         
         var th=this;
         var touched=false;
@@ -491,23 +490,23 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         else if (!(opts.hasOwnProperty)) opts={touch: true};
         else {}
 
-        fortouch=((opts.hasOwnProperty(opts,'touch'))?(opts.touch):
-                  (default_opts.hasOwnProperty(opts,'touch'))?
+        fortouch=((opts.hasOwnProperty('touch'))?(opts.touch):
+                  (default_opts.hasOwnProperty('touch'))?
                   (default_opts.touch):(false));
-        holdthresh=((opts.hasOwnProperty(opts,'holdthresh'))?(opts.holdthresh):
-                    (default_opts.hasOwnProperty(opts,'holdthresh'))?
+        holdthresh=((opts.hasOwnProperty('holdthresh'))?(opts.holdthresh):
+                    (default_opts.hasOwnProperty('holdthresh'))?
                     (default_opts.holdthresh):(300));
-        movethresh=((opts.hasOwnProperty(opts,'movethresh'))?(opts.movethresh):
-                    (default_opts.hasOwnProperty(opts,'movethresh'))?
+        movethresh=((opts.hasOwnProperty('movethresh'))?(opts.movethresh):
+                    (default_opts.hasOwnProperty('movethresh'))?
                     (default_opts.movethresh):(20));
-        taptapthresh=((opts.hasOwnProperty(opts,'taptapthresh'))?(opts.taptapthresh):
-                      (default_opts.hasOwnProperty(opts,'taptapthresh'))?
+        taptapthresh=((opts.hasOwnProperty('taptapthresh'))?(opts.taptapthresh):
+                      (default_opts.hasOwnProperty('taptapthresh'))?
                       (default_opts.taptapthresh):(200));
-        nodefault=((opts.hasOwnProperty(opts,'nodefault'))?(opts.nodefault):
-                   (default_opts.hasOwnProperty(opts,'nodefault'))?
+        nodefault=((opts.hasOwnProperty('nodefault'))?(opts.nodefault):
+                   (default_opts.hasOwnProperty('nodefault'))?
                    (default_opts.nodefault):(false));
-        nobubble=((opts.hasOwnProperty(opts,'nobubble'))?(opts.nobubble):
-                  (default_opts.hasOwnProperty(opts,'nobubble'))?
+        nobubble=((opts.hasOwnProperty('nobubble'))?(opts.nobubble):
+                  (default_opts.hasOwnProperty('nobubble'))?
                   (default_opts.nobubble):(false));
         addClass(elt,"tapholder");
         
