@@ -449,6 +449,8 @@
 
              if (that.options.onBeforeScrollMove) that.options.onBeforeScrollMove.call(that, e);
 
+             e.preventDefault();
+
              // Zoom
              if (that.options.zoom && hasTouch && e.touches.length > 1) {
                  c1 = m.abs(e.touches[0].pageX - e.touches[1].pageX);
