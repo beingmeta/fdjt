@@ -520,15 +520,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if (also) also(evt,sel);};}
         
         function addHandlers(container,sel,opts){
-            var fortouch=((typeof opts.fortouch !== "undefined")?
-                          (opts.fortouch):
-                          (TextSelect.fortouch||false));
-            var taphold=
-                new fdjtUI.TapHold(container,fortouch,
-                                   ((opts)&&(opts.holdthresh)),
-                                   ((opts)&&(opts.movethresh)),
-                                   ((opts)&&(opts.taptapthresh)),
-                                   true);
+            var taphold=new fdjtUI.TapHold(container,opts);
             fdjtDOM.addListener(container,"tap",
                                 ((opts)&&(opts.ontap))||
                                 tap_handler);
