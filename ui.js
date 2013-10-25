@@ -1039,6 +1039,17 @@ fdjt.UI.ProgressBar=(function(){
         else evt.returnValue=false;
         return false;};
 
+    fdjtUI.noBubble=function(evt){
+        evt=evt||event;
+        evt.cancelBubble=true;};
+
+    fdjtUI.cancel=function(evt){
+        evt=evt||event;
+        if (evt.preventDefault) evt.preventDefault();
+        else evt.returnValue=false;
+        evt.cancelBubble=true;
+        return false;};
+
     fdjtUI.isClickable=function(target){
         if ((window.Event)&&(target instanceof window.Event))
             target=fdjtUI.T(target);
@@ -1071,16 +1082,6 @@ fdjt.UI.ProgressBar=(function(){
                 return true;
             else target=target.parentNode;}
         return false;};
-
-    fdjtUI.cancel=function(evt){
-        evt=evt||event;
-        if (evt.preventDefault) evt.preventDefault();
-        else evt.returnValue=false;
-        evt.cancelBubble=true;
-        return false;};
-    fdjtUI.noBubble=function(evt){
-        evt=evt||event;
-        evt.cancelBubble=true;};
 
     function submitEvent(arg){
         var form=((arg.nodeType)?(arg):(fdjtUI.T(arg)));
