@@ -94,8 +94,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 if (also.hasOwnProperty(prop)) {
                     evt[prop]=also[prop];}}}
         if (trace_taphold)
-            fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o given %o",
-                    etype,target,tx,ty,orig||"scratch",also);
+            fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o%s%o",
+                    etype,target,tx,ty,orig||"scratch",
+                    ((also)?(" given "):("")),
+                    ((also)?(also):("")));
         if ((!target)||(!(hasParent(target,document.body))))
             target=document.elementFromPoint(tx,ty);
         if (orig_target!==target)
@@ -177,14 +179,20 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (t) addClass(t,"tapholdtarget");
             th_target=t;}
 
-        function tapped(target,evt){
-            return dispatchEvent(target,"tap",evt,touch_x,touch_y);}
-        function held(target,evt){
+        function tapped(target,evt,x,y){
+            if (typeof x === "undefined") x=touch_x;
+            if (typeof y === "undefined") y=touch_y;
+            return dispatchEvent(target,"tap",evt,x,y);}
+        function held(target,evt,x,y){
+            if (typeof x === "undefined") x=touch_x;
+            if (typeof y === "undefined") y=touch_y;
             addClass(elt,"tapholding");
-            return dispatchEvent(target,"hold",evt,touch_x,touch_y);}
-        function released(target,evt){
+            return dispatchEvent(target,"hold",evt,x,y);}
+        function released(target,evt,x,y){
+            if (typeof x === "undefined") x=touch_x;
+            if (typeof y === "undefined") y=touch_y;
             dropClass(elt,"tapholding");
-            return dispatchEvent(target,"release",evt,touch_x,touch_y);}
+            return dispatchEvent(target,"release",evt,x,y);}
         function slipped(target,evt,also){
             if ((evt)&&(!(also))) {
                 var rel=evt.relatedTarget||fdjtUI.T(evt);
@@ -241,6 +249,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((!(pressed))&&(!(touched))&&(!(th_timer))) {
                 start_x=start_y=start_t=touch_x=touch_y=touch_t=false;
                 return;}
+            var x=touch_x, y=touch_y;
             if (th_timer) {
                 clearTimeout(th_timer); th_timer=false;
                 if (reticle.live) 
@@ -260,11 +269,11 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                             th_timer=false;
                             if ((th.trace)||(trace_taphold))
                                 fdjtLog("TapHold/singletap(%d) on %o",serial,tmp);
-                            tapped(tmp,evt);},
+                            tapped(tmp,evt,x,y);},
                                             taptapthresh);}
-                    else tapped(th_target,evt);}
+                    else tapped(th_target,evt,x,y);}
                 else slipped(th_target,evt);}
-            else if (pressed) released(pressed,evt);
+            else if (pressed) released(pressed,evt,x,y);
             if (reticle.live) reticle.highlight(false);
             start_x=false; start_y=false; start_t=false;
             touched=false; pressed=false;
