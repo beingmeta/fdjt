@@ -495,6 +495,19 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else {}
             start_x=start_y=start_t=touch_x=touch_y=touch_t=false;}
 
+        function taphold_cancel(evt){
+            if ((th.trace)||(trace_taphold))
+                fdjtLog("TapHold/cancel(%d) %o: th=%o t=%o p=%o",
+                        serial,evt,th_target,touched,pressed);
+            if (th_timer) {
+                clearTimeout(th_timer); th_timer=false;}
+            else if (pressed) {released(pressed,evt);}
+            if (reticle.live) reticle.highlight(false);
+            touched=pressed=tap_target=false;
+            dropClass(elt,"tapholding");
+            th_targets=[];
+            setTarget(false);}
+
         if (!(opts)) opts={};
         else if (!(opts.hasOwnProperty)) opts={touch: true};
         else {}
@@ -530,7 +543,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         if (!(fortouch)) fdjtDOM.addListener(elt,"mouseup",taphold_up);
         // fdjtDOM.addListener(elt,"click",taphold_click);
         fdjtDOM.addListener(elt,"touchend",taphold_up);
-        fdjtDOM.addListener(elt,"touchcancel",abortpress);        
+        fdjtDOM.addListener(elt,"touchcancel",taphold_cancel);        
         if (!(window_setup)) {
             fdjtDOM.addListener(window,"mousedown",global_mousedown);
             fdjtDOM.addListener(window,"mouseup",global_mouseup);
