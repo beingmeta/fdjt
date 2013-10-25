@@ -545,9 +545,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         fdjtDOM.addListener(elt,"touchend",taphold_up);
         fdjtDOM.addListener(elt,"touchcancel",taphold_cancel);        
         if (!(window_setup)) {
-            fdjtDOM.addListener(window,"mousedown",global_mousedown);
-            fdjtDOM.addListener(window,"mouseup",global_mouseup);
-            fdjtDOM.addListener(window,"mouseout",global_mouseout);
+            if (!(default_opts.touch)) {
+                fdjtDOM.addListener(window,"mousedown",global_mousedown);
+                fdjtDOM.addListener(window,"mouseup",global_mouseup);
+                fdjtDOM.addListener(window,"mouseout",global_mouseout);}
             // fdjtDOM.addListener(document,"keydown",taphold_keydown);
             // fdjtDOM.addListener(document,"keyup",taphold_keyup);
             window_setup=window;}
