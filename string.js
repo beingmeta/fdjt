@@ -106,7 +106,10 @@ fdjt.String=
                      ((arg.ctrlKey===true)?"c":"")+
                      ((arg.metaKey===true)?"m":"")+
                      ((arg.altKey===true)?"a":"")+
-                     "b="+(arg.button)+",w="+(arg.which));
+                     ((typeof arg.button !== "undefined")?
+                      (",b="+(arg.button)):(""))+
+                     ((typeof arg.which !== "undefined")?
+                      (",w="+(arg.which)):("")));
                 if ((typeof ox === "number")||(typeof oy === "number"))
                     result=result+",cx="+ox+",cy="+oy;
                 if (arg.touches) result=result+",touches="+arg.touches.length;
