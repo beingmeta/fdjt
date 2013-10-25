@@ -510,13 +510,15 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     (default_opts.movethresh):(20));
         taptapthresh=((opts.hasOwnProperty('taptapthresh'))?(opts.taptapthresh):
                       (default_opts.hasOwnProperty('taptapthresh'))?
-                      (default_opts.taptapthresh):(200));
+                      (default_opts.taptapthresh):(false));
         override=((opts.hasOwnProperty('override'))?(opts.override):
                    (default_opts.hasOwnProperty('override'))?
                    (default_opts.override):(false));
         bubble=((opts.hasOwnProperty('bubble'))?(opts.bubble):
                   (default_opts.hasOwnProperty('bubble'))?
                   (default_opts.bubble):(false));
+        if ((taptapthresh)&&(typeof taptapthresh !== "number"))
+            taptapthresh=200;
         addClass(elt,"tapholder");
         
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousemove",taphold_move);
