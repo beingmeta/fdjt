@@ -302,11 +302,12 @@ fdjt.String=
         fdjtString.unEntify=unEntify;
 
         var numpat=/^\d+(\.\d+)$/;
-        function getMatch(string,rx,i){
+        function getMatch(string,rx,i,literal){
             var match=rx.exec(string);
             if (typeof i === "undefined") i=0;
             if ((match)&&(match.length>i)) {
-                if (numpat.test(match[i]))
+                if (literal) return match[i];
+                else if (numpat.test(match[i]))
                     return parseFloat(match[i]);
                 else return match[i];}
             else return false;}
