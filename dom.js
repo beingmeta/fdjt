@@ -2534,6 +2534,36 @@ fdjt.DOM=
             fdjt.media=media;}
         fdjt.addInit(checkMedia,"matchMedia");
 
+        /* Setting up media info */
+        var getMatch=fdjtString.getMatch;
+        function deviceCheck(){
+            var appversion=navigator.appVersion;
+
+            var isAndroid = getMatch(appversion,/\bAndroid +(\d+\.\d+);/g,1);
+            var isChrome = getMatch(appversion,/\Chrome\/(\d+\.\d+);/g,1);
+            var isWebKit = getMatch(appversion,/\AppleWebKit\/(\d+\.\d+);/g,1);
+
+            var isiPhone = (/iphone/gi).test(navigator.appVersion);
+            var isTouchPad = (/Touchpad/gi).test(navigator.appVersion);
+            var isiPad = (/ipad/gi).test(navigator.appVersion);
+            var isTouch = isiPhone || isiPad || isAndroid ||
+                isTouchPad;
+            
+            var opt_string=
+                fdjtString.stdspace(((isAndroid)?(" Android/"+isAndroid):(""))+
+                                    ((isChrome)?(" Chrome/"+isChrome):(""))+
+                                    ((isWebKit)?(" WebKit/"+isWebKit):(""))+
+                                    ((isTouch)?(" touch"):(" mouse"))+
+                                    ((isiPhone)?(" iPhone"):(""))+
+                                    ((isTouchPad)?(" TouchPad"):(""))+
+                                    ((isiPad)?(" iPad"):("")));
+            var devspec=fdjt.device={string:opt_string};
+            if (isAndroid) devspec.android=isAndroid;
+            if (isChrome) devspec.chrome=isChrome;
+            if (isWebKit) devspec.webkit=isWebKit;
+            if (isTouch) devspec.touch=true;}
+        fdjt.addInit(deviceCheck,"deviceCheck");
+
         /* Inserting text in an text field or textarea */
         function insertText(target,text,off){
             var pos=target.selectionStart;
