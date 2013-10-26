@@ -2537,30 +2537,65 @@ fdjt.DOM=
         /* Setting up media info */
         var getMatch=fdjtString.getMatch;
         function deviceCheck(){
-            var appversion=navigator.appVersion;
+            var devspec=fdjt.device={};
+            var appversion=navigator.userAgent;
 
-            var isAndroid = getMatch(appversion,/\bAndroid +(\d+\.\d+);/g,1);
-            var isChrome = getMatch(appversion,/\Chrome\/(\d+\.\d+);/g,1);
-            var isWebKit = getMatch(appversion,/\AppleWebKit\/(\d+\.\d+);/g,1);
+            var isAndroid = getMatch(appversion,/\bAndroid +(\d+\.\d+)\b/g,1);
+            var isWebKit = getMatch(appversion,/\bAppleWebKit\/(\d+\.\d+)\b/g,1);
+            var isGecko = getMatch(appversion,/\bGecko\/(\d+)\b/gi,1,true);
+            var isChrome = getMatch(appversion,/\bChrome\/(\d+\.\d+)\b/g,1);
+            var isFirefox = getMatch(appversion,/\bFirefox\/(\d+\.\d+)\b/gi,1);
+            var isSafari = getMatch(appversion,/\bSafari\/(\d+\.\d+)\b/gi,1);
+            var isOSX = getMatch(appversion,/\bMac OS X \/(\d+\_\d+)\b/gi,1,true);
+            var isMobileSafari = (isSafari)&&(getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
+            var isMobile = (getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
+            var hasVersion = getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1);
 
-            var isiPhone = (/iphone/gi).test(navigator.appVersion);
-            var isTouchPad = (/Touchpad/gi).test(navigator.appVersion);
-            var isiPad = (/ipad/gi).test(navigator.appVersion);
-            var isTouch = isiPhone || isiPad || isAndroid ||
-                isTouchPad;
+            var isUbuntu = (/ubuntu/gi).test(appversion);
+            var isLinux = (/linux/gi).test(appversion);
+            var isMacintosh = (/Macintosh/gi).test(appversion);
+
+            var isTouchPad = (/Touchpad/gi).test(appversion);
+            var iPhone = (/iphone/gi).test(appversion);
+            var iPad = (/ipad/gi).test(appversion);
+            var isTouch = iPhone || iPad || isAndroid || isTouchPad;
+            var isIOS=((iPhone)||(iPad))&&(getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1));
             
             var opt_string=
                 fdjtString.stdspace(((isAndroid)?(" Android/"+isAndroid):(""))+
-                                    ((isChrome)?(" Chrome/"+isChrome):(""))+
                                     ((isWebKit)?(" WebKit/"+isWebKit):(""))+
-                                    ((isTouch)?(" touch"):(" mouse"))+
-                                    ((isiPhone)?(" iPhone"):(""))+
+                                    ((isGecko)?(" Gecko/"+isGecko):(""))+
+                                    ((isChrome)?(" Chrome/"+isChrome):(""))+
+                                    ((isFirefox)?(" Firefox/"+isFirefox):(""))+
+                                    ((isSafari)?(" Safari/"+isSafari):(""))+
+                                    ((isMobileSafari)?(" MobileSafari/"+isMobileSafari):(""))+
+                                    ((isIOS)?(" IOS/"+isIOS):(""))+
+                                    ((isOSX)?(" OSX/"+isOSX):(""))+
+                                    ((navigator.platform)?(" "+navigator.platform):(""))+
+                                    ((iPhone)?(" iPhone"):(""))+
+                                    ((iPad)?(" iPad"):(""))+
                                     ((isTouchPad)?(" TouchPad"):(""))+
-                                    ((isiPad)?(" iPad"):("")));
-            var devspec=fdjt.device={string:opt_string};
+                                    ((isTouch)?(" touch"):(" mouse")));
+            if (navigator.vendor) devspec.vendor=navigator.vendor;
+            if (navigator.platform) devspec.platform=navigator.platform;
+            if (navigator.oscpu) devspec.oscpu=navigator.oscpu;
+            if (navigator.cookieEnabled) devspec.cookies=navigator.cookies;
+            if (navigator.doNotTrack) devspec.notrack=navigator.doNotTrack;
+            devspec.string=opt_string;
             if (isAndroid) devspec.android=isAndroid;
+            if (isIOS) {
+                devspec.ios=isIOS;
+                if (iPhone) devspec.iphone=isIOS;
+                if (iPad) devspec.ipad=isIOS;}
             if (isChrome) devspec.chrome=isChrome;
             if (isWebKit) devspec.webkit=isWebKit;
+            if (isSafari) devspec.safari=isSafari;
+            if (isMobileSafari) devspec.mobilesafari=isMobileSafari;
+            if (isMobile) devspec.mobile=isMobile;
+            if (hasVersion) devspec.version=hasVersion;
+            if (isMacintosh) devspec.isMacintosh=true;
+            if (isUbuntu) devspec.ubuntu=true;
+            if (isLinux) devspec.linux=true;
             if (isTouch) devspec.touch=true;}
         fdjt.addInit(deviceCheck,"deviceCheck");
 
