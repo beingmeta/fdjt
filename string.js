@@ -301,6 +301,17 @@ fdjt.String=
                                       return String.fromCharCode(+paren);});}
         fdjtString.unEntify=unEntify;
 
+        var numpat=/^\d+(\.\d+)$/;
+        function getMatch(string,rx,i){
+            var match=rx.exec(string);
+            if (typeof i === "undefined") i=0;
+            if ((match)&&(match.length>i)) {
+                if (numpat.test(match[i]))
+                    return parseFloat(match[i]);
+                else return match[i];}
+            else return false;}
+        fdjtString.getMatch=getMatch;
+
         function padNum(num,digits,prec){
             var ndigits=
                 ((num<10)?(1):(num<100)?(2):(num<1000)?(3):(num<10000)?(4):
