@@ -143,7 +143,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
 
 
     function TapHold(elt,opts,fortouch,holdthresh,movethresh,taptapthresh,
-                     override,bubble){
+                     override,bubble,scrolling){
         if (!(elt)) {
             fdjtLog.warn("TapHold with no argument!");
             return;}
@@ -159,6 +159,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var th_target=false;
         var th_targets=[];
         var th_timer=false;
+        var scroll_x=0, scroll_y=0;
         var start_x=false;
         var start_y=false;
         var start_t=false;
@@ -318,6 +319,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             var target;
             if ((!(bubble))) noBubble(evt);
             if (override) noDefault(evt);
+            if ((scrolling)&&(evt.touches)) {
+                var pos;
+                if (scroll_x>=0) 
+                    scrolling.scrollLeft=scroll_x-evt.touches[0].pageX;
+                if (scroll_y>=0)
+                    scrolling.scrollTop=scroll_y-evt.touches[0].pageY;}
             if ((pressed)&&(cleared>start_t)) {
                 abortpress(evt,"move/cleared");
                 return;}
@@ -416,6 +423,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 return;}
 
             if (target) target=getParent(target,touchable);
+            if ((scrolling)&&(evt.touches)) {
+                if (scroll_x>=0) scroll_x=scrolling.scrollLeft+evt.touches[0].pageX;
+                if (scroll_y>=0) scroll_y=scrolling.scrollLeft+evt.touches[0].pageY;}
             touch_x=evt.clientX||getClientX(evt)||touch_x;
             touch_y=evt.clientY||getClientY(evt)||touch_y;
             start_x=touch_x; start_y=touch_y;
@@ -528,10 +538,18 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                    (default_opts.hasOwnProperty('override'))?
                    (default_opts.override):(false));
         bubble=((opts.hasOwnProperty('bubble'))?(opts.bubble):
-                  (default_opts.hasOwnProperty('bubble'))?
-                  (default_opts.bubble):(false));
+                (default_opts.hasOwnProperty('bubble'))?
+                (default_opts.bubble):(false));
         if ((taptapthresh)&&(typeof taptapthresh !== "number"))
             taptapthresh=200;
+        scrolling=((opts.hasOwnProperty('scrolling'))?(opts.touch):(false));
+        if (scrolling) {
+            if (!(scrolling.nodeType)) scrolling=elt;
+            if ((opts.hasOwProperty('scrollx'))?(opts.scrollx):(false))
+                scroll_x=0; else scroll_x=-1;
+            if ((opts.hasOwProperty('scrolly'))?(opts.scrolly):(true))
+                scroll_y=0; else scroll_y=-1;}
+
         addClass(elt,"tapholder");
         
         if (!(fortouch)) fdjtDOM.addListener(elt,"mousemove",taphold_move);
