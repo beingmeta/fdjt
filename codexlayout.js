@@ -1847,22 +1847,34 @@ fdjt.CodexLayout=
         CodexLayout.cache=2;
 
         var ondbinit=false;
+        var dbinit_timeout=false;
+
+        function indexedDB_timeout(){
+            fdjtLog("Error initializing indexedDB");
+            if (!(layoutDB)) {
+                CodexLayout.layoutDB=layoutDB=window.localStorage;
+                dbinit_timeout=false;
+                if (ondbinit) ondbinit();}}
 
         if (window.indexedDB) {
             var req=window.indexedDB.open("codexlayout",1);
+            dbinit_timeout=setTimeout(indexedDB_timeout,5000);
             req.onerror=function(event){
                 fdjtLog("Error initializing indexedDB layout cache: %o",
                         event.errorCode);
+                if (dbinit_timeout) clearTimeout(dbinit_timeout);
                 CodexLayout.layoutDB=layoutDB=window.localStorage;};
             req.onsuccess=function(event) {
                 var db=event.target.result;
                 if (CodexLayout.trace)
                     fdjtLog("Using existing indexedDB layout cache");
+                if (dbinit_timeout) clearTimeout(dbinit_timeout);
                 CodexLayout.layoutDB=layoutDB=db;
                 CodexLayout.cache=7;
                 if (ondbinit) ondbinit();};
             req.onupgradeneeded=function(event) {
                 var db=event.target.result;
+                if (dbinit_timeout) clearTimeout(dbinit_timeout);
                 db.onerror=function(event){
                     fdjtLog("Unexpected error caching layouts: %d",
                             event.target.errorCode);
@@ -1935,12 +1947,13 @@ fdjt.CodexLayout=
                 var i=0, lim=layouts.length; while (i<lim) {
                     dropLayout(layouts[i++]);}
                 fdjtState.dropLocal("fdjtCodex.layouts");}
-            if ((layoutDB)&&(!(keepidb))) {
-                if (window.indexedDB.deleteDatabase)
-                    window.indexedDB.deleteDatabase("codexlayout");
-                else {
-                    var req=window.indexedDB.open("codexlayout",1);
-                    req.deleteDatabase();}}};
+            if (layoutDB) {
+                var txn=layoutDB.transaction(["layouts"]);
+                var storage=txn.objectStore("layouts");
+                var cursor=storage.openCursor(); layouts=[];
+                cursor.onSuccess=function(evt){
+                    var cursor=evt.target.result; if (cursor) {
+                        storage.delete(cursor.key); cursor.continue();}};}};
 
         return CodexLayout;})();
 
