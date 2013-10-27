@@ -22,12 +22,15 @@
 /* These classes attempt to inhibit inappropriate block styling when a
    block is spread across pages. */
 
-div.codexdupstart {
+div.codexdupstart, section.codexdupstart, blockquote.codexdupstart,
+ul.codexdupstart, ol.codexdupstart, dl.codexdupstart {
     padding-bottom: 0px; border-bottom-width: 0px; margin-bottom: 0px;}
-div.codexdup {
+div.codexdup, section.codexdup, blockquote.codexdup,
+ul.codexdup, ol.codexdup, dl.codexdup {
     padding-top: 0px;    border-top-width: 0px;    margin-top: 0px;
     padding-bottom: 0px; border-bottom-width: 0px; margin-bottom: 0px;}
-div.codexdupend {
+div.codexdupend, section.codexdupend, blockquote.codexdupend,
+ul.codexdupend, ol.codexdupend, dl.codexdupend {
     padding-top: 0px;    border-top-width: 0px;    margin-top: 0px;}
 p.codexdupend, p.codexdup { text-indent: 0px;}
 
@@ -35,6 +38,16 @@ p.codexdupend, p.codexdup { text-indent: 0px;}
 
 div.codexpage {}
 div.codexpage.codexshowpage { display: block !important; }
+
+div.codexpage h1.codexpagetop, div.codexpage h2.codexpagetop,
+div.codexpage h3.codexpagetop, div.codexpage h4.codexpagetop,
+div.codexpage p.codexpagetop,
+div.codexpage .codexpagetop > h1:first-child,
+div.codexpage .codexpagetop > h2:first-child,
+div.codexpage .codexpagetop > h3:first-child,
+div.codexpage .codexpagetop > h4:first-child,
+div.codexpage .codexpagetop > p:first-child {
+    margin-top: 0px;}
 
 body.codexfixed div.codexpage {
     position: fixed; text-align: left;
