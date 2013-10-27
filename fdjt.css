@@ -211,7 +211,7 @@ span.dterm {
     -khtml-opacity: .95;
     -moz-opacity: .95;
     -o-opacity: .95;}
-span.dterm.long { white-space: wrap;}
+span.dterm.long { white-space: normal;}
 span.dterm span.disambig {
   color: red;}
 span.dterm .langid {
@@ -242,8 +242,7 @@ span.font_sizer {
   text-align: center; cursor: pointer; margin: 2px;
   background: gray; color: white;
   opacity: .75;
-  ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)";
-  filter: alpha(opacity=75);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)";
   -webkit-opacity: .75;
   -khtml-opacity: .75;
   -moz-opacity: .75;
@@ -989,7 +988,7 @@ div.fdjtdialog p {
 div.fdjtdialog > div, div.fdjtdialog > span { vertical-align: middle;}
 
 div.fdjtdialog .countdown {
-    color: lightred; font-weight: bold; font-size: 50%;
+    color: rgb(128,0,0); font-weight: bold; font-size: 50%;
     position: absolute; height: 1em; top: 4px; left: 0.5ex;
     font-variant: small-caps;}
 div.fdjtdialog .countdown { display: none;}
@@ -1027,16 +1026,15 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
 /* Text selection */
 
 .fdjtselecting {
-    margin: 0px important!;
-    padding: 0px important!;
-    border: 0px important!;}
+    margin: 0px !important;
+    padding: 0px !important;
+    border: 0px !important;}
 .fdjtselecting {
      user-select: none;
     -o-user-select: none;
     -moz-user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0);
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;}
+    -webkit-tap-highlight-color: rgba(0,0,0,0.5);
+    -webkit-user-select: none;}
 .fdjtselectwrap {}
 .fdjtselectwrap {background-color: rgba(247, 247, 124, 0.25);}
 .fdjtselectwrap > span {
@@ -1050,9 +1048,9 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
     -webkit-transition-duration: 1s;}
 
 .fdjtselecting .fdjtselected {
-    margin: 0px important!;
-    padding: 0px important!;
-    border: 0px important!;
+    margin: 0px !important;
+    padding: 0px !important;
+    border: 0px !important;
     background-color: yellow; }
 .fdjtselecting .fdjtselectstart, .fdjtselecting .fdjtselectend {
     background-color: gold; }
