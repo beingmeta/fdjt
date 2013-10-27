@@ -125,6 +125,8 @@ fdjt.CodexLayout=
             else return {left: left, top: top, width: width,height: height,
                          right:left+width,bottom:top+height};}
 
+        var getChildren=fdjtDOM.getChildren;
+
         /* Node testing */
 
         var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
@@ -218,6 +220,103 @@ fdjt.CodexLayout=
             return { left: left, top: top, right: right, bottom: bottom,
                      width: right-left, height: bottom-top};}
         
+        /* Tweaking fonts */
+
+        function scaleToPage(elt,width,height,leavefont){
+            if (typeof elt === "string") elt=fdjtID(elt);
+            if ((!(elt))||(elt.length===0)) return;
+            else if (elt.nodeType) {
+                if (elt.nodeType!==1) return;
+                if ((hasClass(elt,"codexpagescaled"))||(elt.getAttribute("style")))
+                    return;
+                var ps=elt.getAttribute("data-pagescale")||
+                    elt.getAttribute("pagescale")||
+                    getElementValue(elt,"xdatapagescale");
+                var psw=1, psh=1;
+                var style=elt.style;
+                var cstyle=getStyle(elt);
+                // If it has an individual transform, don't mess it up
+                if ((style[fdjtDOM.transform])&&
+                    (style[fdjtDOM.transform]!=="none")&&
+                    (style[fdjtDOM.transform]!==""))
+                    return;
+                if (ps) {
+                    var psv=ps.split(/ |,|x/g);
+                    if (psv.length===2) {
+                        psw=parseScale(psv[0]);
+                        psh=parseScale(psv[1]);}
+                    else psh=psw=parseScale(psv[0]);}
+                // Target width and height
+                var tw=width*psw, th=height*psh;
+                var w=elt.offsetWidth, h=elt.offsetHeight;
+                // Scale factors for width and height
+                var sw=tw/w, sh=th/h;
+                if (elt.tagName==="IMG") {
+                    style.maxHeight=style.minHeight="inherit";
+                    style.maxWidth=style.minWidth="inherit";
+                    // Get width and height again, with the constraints off
+                    //  This means that pagescaling trumps CSS constraints,
+                    //  but we'll accept that for now
+                    w=elt.offsetWidth, h=elt.offsetHeight, sw=tw/w, sh=th/h;
+                    if (sw<sh) {style.width=Math.round(w*sw)+"px"; style.height="auto";}
+                    else {style.height=Math.round(h*sh)+"px"; style.width="auto";}}
+                else {
+                    if (!(leavefont)) tweakFont(elt,tw,th);
+                    if (cstyle.display==="inline") style.display="inline-block";
+                    style.width=tw+"px"; style.height=th+"px";}
+                addClass(elt,"codexpagescaled");}
+            else if (elt.length) {
+                var i=0, lim=elt.length;
+                while (i<lim) scaleToPage(elt[i++],width,height,leavefont||false);}
+            else {}}
+
+        function tweakFont(node,width,height){
+            if (!(width)) width=node.offsetWidth;
+            if (!(height)) height=node.offsetHeight;
+            var max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
+            var min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
+            if (max_font) max_font=parseFloat(max_font); 
+            if (min_font) min_font=parseFloat(min_font); 
+            var wrapper=fdjtDOM("div"); {
+                // Set up the inline-block wrapper we'll use for sizing
+                wrapper.style.display="inline-block";
+                wrapper.style.maxWidth=width+"px";
+                var nodes=[], children=node.childNodes;
+                var i=0, lim=children.length; while (i<lim) nodes.push(children[i++]);
+                i=0, lim=nodes.length; while (i<lim) wrapper.appendChild(nodes[i++]);
+                node.appendChild(wrapper);}
+            // Now we actually tweak font sizes
+            var font_pct=100, count=0, delta=8, best_fit=false;
+            node.style.fontSize=font_pct+"%";
+            var ih=wrapper.offsetHeight, iw=wrapper.offsetWidth;
+            var hr=ih/height, wr=iw/width; 
+            while (((hr>1)||(wr>1)||((hr<(0.9*height))&&(wr<(0.9*width))))&&
+                   (count<20)&&(delta>1)) {
+                if ((hr<=1)&&(wr<=1)) {
+                    if (!(best_fit)) best_fit=font_pct;
+                    else if (font_pct>best_fit) best_fit=font_pct;}
+                if (((hr>1)||(wr>1))&&(delta>0)) {
+                    delta=delta/-2; font_size=font_pct+delta;}
+                else if (((hr<1)&&(wr<1))&&(delta<0)) {
+                    delta=delta/-2; font_size=font_pct+delta;}
+                else font_pct=font_pct+delta;
+                if ((max_font)&&(font_pct>max_font)) break;
+                if ((min_font)&&(font_pct<min_font)) break;                
+                node.style.fontSize=font_pct+"%";
+                ih=wrapper.offsetHeight; iw=wrapper.offsetWidth;
+                hr=ih/height, wr=iw/width; 
+                count++;}
+            if ((hr>1)||(wr>1)&&(best_fit)) node.style.fontSize=best_fit+"%";
+            node.removeChild(wrapper);
+            i=0, lim=nodes.length; while (i<lim) node.appendChild(nodes[i++]);
+            return node;}
+
+        function parseScale(s){
+            if (s.search(/%$/g)>0) {
+                var pct=parseFloat(s.slice(0,s.length-1));
+                return pct/100;}
+            else return parseFloat(s);}
+
         /* Duplicating nodes */
 
         var tmpid_count=1;
@@ -369,7 +468,8 @@ fdjt.CodexLayout=
                 layout.container.getElementsByClassName("codexpagescaled"));
             i=0, lim=pagescaled.length; while (i<lim) {
                 var elt=pagescaled[i++];
-                swapClass(elt,"codexpagescaled","codexpagescale");}
+                dropClass(elt,"codexpagescaled");
+                elt.setAttribute("style","");}
             var cantsplit=TOA(
                 layout.container.getElementsByClassName("codexcantsplit"));
             dropClass(cantsplit,"codexcantsplit");
@@ -546,70 +646,6 @@ fdjt.CodexLayout=
                 // if (lastmove!==node) {allmoves.push(node); lastmove=node;}
                 return moveNodeToPage(node,page,dups,crumbs);}
 
-            function parseScale(s){
-                if (s.search(/%$/g)>0) {
-                    var pct=parseFloat(s.slice(0,s.length-1));
-                    return pct/100;}
-                else return parseFloat(s);}
-
-            function scaleToPage(elt){
-                if (typeof elt === "string") elt=fdjtID(elt);
-                if ((!(elt))||(elt.length===0)) return;
-                else if (elt.nodeType) {
-                    if (elt.nodeType!==1) return;
-                    if (hasClass(elt,"codexpagescaled")) return;
-                    var ps=elt.getAttribute("data-pagescale")||
-                        elt.getAttribute("data-pagescale")||
-                        getElementValue(elt,"xdatapagescale");
-                    var psw=1, psh=1;
-                    var style=elt.style;
-                    var cstyle=getStyle(elt);
-                    // If it has an individual transform, don't mess it up
-                    if ((style[fdjtDOM.transform])&&
-                        (style[fdjtDOM.transform]!=="none")&&
-                        (style[fdjtDOM.transform]!==""))
-                        return;
-                    if (ps) {
-                        var psv=ps.split(/ |,|x/g);
-                        if (psv.length===2) {
-                            psw=parseScale(psv[0]);
-                            psh=parseScale(psv[1]);}
-                        else psh=psw=parseScale(psv[0]);}
-                    var pw=page_width*psw, ph=page_height*psh;
-                    var w=elt.offsetWidth+elt.offsetLeft;
-                    var h=elt.offsetHeight+elt.offsetTop;
-                    var sw=pw/w, sh=ph/h;
-                    var scale=((sw<sh)?(sw):(sh));
-                    if ((elt.tagName==="IMG")&&
-                        (!((style.height)||(style.width)||
-                           (style.maxHeight)||(style.maxWidth)||
-                           (style.minHeight)||(style.minWidth)))) {
-                        style.maxHeight=style.minHeight="inherit";
-                        style.maxWidth=style.minWidth="inherit";
-                        // Get width and height again, with the constraints off
-                        //  This means that pagescaling trumps CSS constraints,
-                        //  but we'll accept that for now
-                        w=elt.offsetWidth, h=elt.offsetHeight;
-                        sw=pw/w, sh=ph/h; scale=((sw<sh)?(sw):(sh));
-                        var nw=w*scale, nh=h*scale;
-                        style.width=nw+"px";
-                        style.height=nh+"px";}
-                    else {
-                        var scalestring="scale("+scale+","+scale+")";
-                        var current=(style.transform)||style[fdjtDOM.transform];
-                        if ((!current)||(current==="none")||(current.length===0)) {
-                            style.transformOrigin="center top";
-                            style[fdjtDOM.transformOrigin]="center top";
-                            style.transform=scalestring;
-                            style[fdjtDOM.transform]=scalestring;}}
-                    scaled.push(elt);
-                    addClass(elt,"codexpagescaled");}
-                else if (elt.length) {
-                    var i=0, lim=elt.length;
-                    while (i<lim) scaleToPage(elt[i++]);}
-                else {}}
-
-
             //  addContent calls loop() exactly once to set up the
             //   actual loop to be timesliced with repeated calls
             //   setTimeout and a final call to doneFn.  The real
@@ -634,33 +670,32 @@ fdjt.CodexLayout=
                 layout.roots.push(root);
                 layout.root_count++;
 
-                // If we can use layout properties of the root, we do
-                // so immediately, and synchronously
-                if ((hasClass(root,/\b(codexfullpage|codexsinglepage)\b/))||
-                    (checkSinglePage(root))||
-                    ((fullpages)&&(testNode(root,fullpages)))||
-                    ((singlepages)&&(testNode(root,singlepages)))) {
-                    if (newpage) moveNode(root); else newPage(root);
-                    // if (lastblock!==root) {allblocks.push(root); lastblock=root;}
-                    // Scale any embedded items
-                    scaleToPage(fdjtDOM.getChildren(root,scaletopage));
-                    scaleToPage(fdjtDOM.getChildren(root,/\bcodexpagescale\b/));
-                    // Now scale the root
-                    scaleToPage(root);
-                    newPage();
-                    prev=this.prev=root;
-                    prevstyle=this.prevstyle=getStyle(root);
+                var fullpage=hasClass(root,"codexfullpage")||
+                    ((fullpages)&&(testNode(root,fullpages)));
+                var singlepage=
+                    (fullpage)||
+                    (hasClass(root,"codexsinglepage"))||
+                    (checkSinglePage(root));
+                if (newpage) moveNode(root);
+                else if (singlepage) newPage(root);
+                else if ((forcedBreakBefore(root))||
+                         ((prev)&&(forcedBreakAfter(prev)))) {
+                    root=newPage(root); newpage=true;}
+                else moveNode(root)
+                var scale_elts=getChildren(root,"[data-pagescale],[pagescale]");
+                scaleToPage(scale_elts,page_width,page_height);
+                if (singlepage) {
+                    var pw=page.offsetWidth, ph=page.offsetHeight;
+                    if ((pw>page_width)||(ph>page_height))
+                        addClass(page,"codexoversize");
+                    else if ((fullpage)&&((pw<(0.9*page_width))&&(ph<(0.9*page_height))))
+                        addClass(page,"codexundersize");
+                    else {}
+                    // Start a new page and update the loop state
+                    newPage(); prev=this.prev=root; prevstyle=this.prevstyle=getStyle(root);
                     if (donefn) donefn(layout);
                     return;}
                 else {
-                    if ((forcedBreakBefore(root))||
-                        ((prev)&&(forcedBreakAfter(prev)))) {
-                        root=newPage(root); newpage=true;}
-                    else root=moveNode(root);
-                    // Scale any embedded items
-                    if (testNode(root,scaletopage)) scaleToPage(root);
-                    scaleToPage(fdjtDOM.getChildren(root,scaletopage));
-                    scaleToPage(fdjtDOM.getChildren(root,/\bcodexpagescale\b/));
                     var geom=getGeom(root,page);
                     if (geom.bottom<=page_height) {
                         // if (lastblock!==root) {allblocks.push(root); lastblock=root;}
@@ -1547,10 +1582,10 @@ fdjt.CodexLayout=
             /* Finishing the page */
 
             function finishPage(completed) {
-                var fullpage=hasClass(completed,"codexfullpage");
+                var growpage=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
                 var undersize=false, bounds=false;
-                if (((oversize)||(fullpage))&&(scale_pages)) {
+                if (((oversize)||(growpage))&&(scale_pages)) {
                     fdjtDOM.scaleToFit(completed);}
                 if (this.pagedone) this.pagedone(completed);
                 dropClass(completed,"codexshowpage");}
