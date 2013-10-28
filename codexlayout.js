@@ -752,7 +752,8 @@ fdjt.CodexLayout=
                             ni++;}
                         // If we get here, we're a terminal node
                         // extending below the bottom of the page
-                        else if (geom.top>page_height)
+                        else if ((geom.top>page_height)&&(drag.length===0)&&
+                                 (!(avoidBreakBefore(block.style))))
                             // Our top is also over the bottom of the page,
                             block=newPage(block);
                         else if ((hasClass(block,"codexfloat"))||
@@ -771,11 +772,16 @@ fdjt.CodexLayout=
                             // the 'split block' back in the blocks
                             // variable because we might need to split
                             // it again.
-                            if (tracing) logfn("Splitting block %o",block);
+                            if (tracing) logfn("Splitting block %o @ %o",block,page);
                             blocks[ni]=splitBlock(block);}}
                     // We fit on the page, so we'll look at the next block.
                     else {
-                        drag=[];
+                        if ((block)&&(drag.length)&&(terminal)) {
+                            if ((drag.length===1)||
+                                (avoidBreakBefore(block))||
+                                (avoidBreakAfter(drag[drag.length-1]))) {
+                                if (drag.indexOf(block)<0) drag.push(block);}
+                            else layout.drag=drag=[];}
                         ni++;}
                     // Update the prev pointer for terminals
                     if (terminal) {
@@ -834,17 +840,11 @@ fdjt.CodexLayout=
                     // Them's the breaks.
                     if ((block)&&(terminal)&&(avoidBreakBefore(block,style))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
-                        drag.push(prev);}
+                        if ((prev)&&(drag.indexOf(prev)<0)) drag.push(prev);}
                     else if ((block)&&(prev)&&
                              (avoidBreakAfter(prev,prevstyle))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
-                        drag.push(prev);}
-                    else if ((block)&&(terminal)&&(drag)&&(drag.length)) {
-                        // Otherwise, we don't have to worry about
-                        // what we've been dragging along so far,
-                        // so we clear it.
-                        if (tracing) logfn("Dropping %d drags",layout.drag.length);
-                        layout.drag=drag=[];}
+                        if ((prev)&&(drag.indexOf(prev)<0)) drag.push(prev);}
                     else {}}
 
                 function handle_standalone(block,style,tracing){
@@ -871,6 +871,7 @@ fdjt.CodexLayout=
                         // force a page break if the current page is
                         // empty.
                         if (tracing) logfn("Forced new page for %o",block);
+                        // We clear the drags because we're following a force rule
                         layout.drag=drag=[];
                         return newPage(block)||block;}
                     else return moveNode(block);}
@@ -892,11 +893,11 @@ fdjt.CodexLayout=
                             //   a break after the block is okay AND
                             //    the page would be less than 20% oversize
                             addClass(page,"codexoversize");
-                            drag=[]; newPage();
+                            layout.drag=drag=[]; newPage();
                             return false;}
                         else {
                             // We need to leave the dragged elements behind
-                            drag=[]; block=newPage(block)||block;
+                            layout.drag=drag=[]; block=newPage(block)||block;
                             if (page===curpage) {
                                 addClass(page,"codexoversize");
                                 return false;}
@@ -1024,7 +1025,7 @@ fdjt.CodexLayout=
                 // If node is passed, it is the first element on the new page
                 function newPage(node,forcepage){
                     var i, lim;
-                    if ((drag)&&(drag.length)&&(atPageTop(drag[0]))) {
+                    if ((drag)&&(drag.length)&&(drag.length===1)&&(atPageTop(drag[0]))) {
                         logfn("Ignored call for new page @%d due to excessive drag",
                               pagenum);
                         if (node) moveNode(node);
@@ -1036,6 +1037,17 @@ fdjt.CodexLayout=
                         else logfn("Ignored call for new page on empty page %d",
                                    node,pagenum);
                         return false;}
+
+                    if ((node)&&(node.nodeType===3)) {
+                        var parent=node.parentNode;
+                        if ((parent)&&(parent.childNodes.length===1)&&
+                            (parent!==document.body)&&
+                            (parent!==root)&&
+                            (!(hasClass(parent,"codexpage"))))
+                            node=parent;}
+
+                    if ((node)&&(!(forcepage))&&(!(needNewPage(node)))) {
+                        return moveNode(node);}
 
                     if ((floating)&&(floating.length)) {
                         // First add any floating pages that may have
@@ -1058,14 +1070,6 @@ fdjt.CodexLayout=
                                 moveNodeToPage(floater,page);
                                 fg=getGeom(floater,newpage);
                                 if (fg.bottom>=page_height) newPage(floater);}}}
-
-                    if ((node)&&(node.nodeType===3)) {
-                        var parent=node.parentNode;
-                        if ((parent)&&(parent.childNodes.length===1)&&
-                            (parent!==document.body)&&
-                            (parent!==root)&&
-                            (!(hasClass(parent,"codexpage"))))
-                            node=parent;}
 
                     if ((!(node))||(forcepage)||(needNewPage(node))) {
                         // If we really need to create a new page, do so,
@@ -1095,9 +1099,17 @@ fdjt.CodexLayout=
                     if ((drag)&&(drag.length)) {
                         i=0, lim=drag.length;
                         while (i<lim) moveNode(drag[i++],crumbs);
-                        layout.prev=prev=drag[drag.length-1];
-                        layout.drag=drag=[];}
-                    // Finally, move the node to the page
+                        if (node) { /* node */
+                            var block=node, terminal=((terminals)&&(terminals[ni]));
+                            if ((block)&&(drag.length)&&(terminal)) {
+                                if ((drag.length===1)||
+                                    (avoidBreakBefore(block))||
+                                    (avoidBreakAfter(drag[drag.length-1]))) {
+                                    if (drag.indexOf(block)<0) drag.push(block);}
+                                else layout.drag=drag=[];}}
+                        else {
+                            layout.prev=prev=drag[drag.length-1];
+                            layout.drag=drag=[];}}
                     if (node) return moveNode(node);
                     else return false;}
 
@@ -1118,7 +1130,7 @@ fdjt.CodexLayout=
                     // make this work.
                     var init_geom=getGeom(node,page,true);
                     var line_height=init_geom.line_height||12;
-                    if ((init_geom.top+init_geom.top_margin+(line_height*2))>page_height) {
+                    if (((init_geom.top+init_geom.top_margin+(line_height*2))>page_height)) {
                         // If the top is too close to the bottom of the page, just push it over.
                         return newPage(node);}
                     var children=TOA(node.childNodes);
@@ -1150,6 +1162,9 @@ fdjt.CodexLayout=
                         return node;}
                     else { 
                         var page_break=push[0]; i=1; n=push.length;
+                        // Since we left something behind on this page, we
+                        //  can clear anything we're dragging
+                        layout.drag=drag=[];
                         // Finally, we create a new page
                         newPage(page_break);
                         var dup=page_break.parentNode;
