@@ -317,6 +317,18 @@ fdjt.CodexLayout=
                 return pct/100;}
             else return parseFloat(s);}
 
+        function atPageTop(node){
+            var scan=node, body=Codex.body||document.body;
+            while (scan) {
+                if (scan===body) return false;
+                else if (!(scan.previousSibling)) scan=scan.parentNode;
+                else if ((scan.previousSibling.nodeType===3)&&
+                         (isEmpty(scan.previousSibling.nodeValue)))
+                    scan=scan.previousSibling;
+                else break;}
+            return ((scan.nodeType==1)&&(scan.className)&&
+                    (scan.className.search(/\bcodexpage\b/g)>=0));}
+
         /* Duplicating nodes */
 
         var tmpid_count=1;
@@ -353,7 +365,7 @@ fdjt.CodexLayout=
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
             copy.className=
-                ((nodeclass.replace(/\b(codexrelocated|codexdup.*)\b/,""))+
+                ((nodeclass.replace(/\b((codexrelocated)|(codexdup.*))\b/g,""))+
                  " codexdup").replace(/\s+/," ").trim();
             if (!(duplicated)) {
                 if (nodeclass.search(/\bcodexdupstart\b/)<0)
@@ -816,22 +828,40 @@ fdjt.CodexLayout=
                     if ((trace)&&((trace>3)||((track)&&(track.match(block)))))
                         logfn("Layout/geom %o %j",block,geom);
                     if ((terminal)&&(geom.bottom>page_height)) {
-                        // We're a terminal node and we extend
-                        // below the bottom of the page
+                        // We're a terminal node extending below the bottom of the page
                         if (geom.top>page_height)
-                            // If our top is also over the bottom of the page,
-                            //  we just start a new page
+                            // Our top is also over the bottom of the page,
                             block=newPage(block);
                         else if (((!(break_blocks))||
                                   ((atomic)&&(atomic.match(block)))||
                                   (avoidBreakInside(block,style))||
                                   (hasClass(block,"codexcantsplit")))) {
-                            var curpage=page;
-                            block=newPage(block);
-                            if (page===curpage) {
-                                if (geom.bottom>page_height)
+                            // We can't break this block (many reasons)
+                            if ((drag.length)&&(atPageTop(drag[0]))) {
+                                // A new page won't make a difference because
+                                //  we're dragging the rest of the current page anyway
+                                var oversize_limit=0.2;
+                                if ((!(avoidBreakAfter(block,style)))&&
+                                    (((geom.bottom-page_height)/page_height)<oversize_limit)) {
+                                    // We leave the block where it is and create an oversize page
+                                    // We do this if:
+                                    //   a break after the block is okay AND
+                                    //    the page would be less than 20% oversize
                                     addClass(page,"codexoversize");
-                                ni++;}}
+                                    drag=[]; newPage();}
+                                else {
+                                    // We need to leave the dragged elements behind
+                                    var curpage=page; drag=[];
+                                    block=newPage(block);
+                                    if (page===curpage)
+                                        addClass(page,"codexoversize");}}
+                            else {
+                                // We just make a new page for the block
+                                var curpage=page;
+                                block=newPage(block);
+                                if (page===curpage)
+                                    addClass(page,"codexoversize");}
+                            ni++;}
                         else if ((hasClass(block,"codexfloat"))||
                                  ((floatblocks)&&(floatblocks.match(block)))) {
                             floating.push(block); ni++;}
@@ -1007,6 +1037,19 @@ fdjt.CodexLayout=
                 // If node is passed, it is the first element on the new page
                 function newPage(node,forcepage){
                     var i, lim;
+                    if ((drag)&&(drag.length)&&(atPageTop(drag[0]))) {
+                        logfn("Ignored call for new page @%d due to excessive drag",
+                              pagenum);
+                        if (node) moveNode(node);
+                        return false;}
+                    if ((!(node))&&(!(forcepage))&&(page)&&(page.childNodes.length===0)) {
+                        if (node)
+                            logfn("Ignored call for new page for %o on empty page %d",
+                                  node,pagenum);
+                        else logfn("Ignored call for new page on empty page %d",
+                                   node,pagenum);
+                        return false;}
+
                     if ((floating)&&(floating.length)) {
                         // First add any floating pages that may have
                         // accumulated
@@ -1040,12 +1083,6 @@ fdjt.CodexLayout=
                             (!(hasClass(parent,"codexpage"))))
                             node=parent;}
 
-                    if ((!(node))&&(!(forcepage))&&(page)&&
-                        (page.childNodes.length===0)) {
-                        logfn("Call for new page ignored on empty page %d",
-                              pagenum);
-                        return false;}
-                    
                     if ((!(node))||(forcepage)||(needNewPage(node))) {
                         // If we really need to create a new page, do so,
                         //  starting by dropping the curpage class from the
@@ -1370,10 +1407,10 @@ fdjt.CodexLayout=
             var replaceNode=fdjtDOM.replace;
 
             /* Setting content (when there's a saved version) Mostly
-             this sets up the external data and functions which would
-             have been generated if we'd gone through the layout,
-             especially the dups for split nodes and the saved_ids
-             for restoring unique IDs.
+               this sets up the external data and functions which would
+               have been generated if we'd gone through the layout,
+               especially the dups for split nodes and the saved_ids
+               for restoring unique IDs.
             */
             function setLayout(content){
                 var frag=document.createElement("div");
@@ -1460,8 +1497,8 @@ fdjt.CodexLayout=
                 if (node.id) {
                     var classname=node.className;
                     if ((!((classname)&&
-                          (typeof classname === "string")&&
-                          (classname.search(/\bcodexdup/g)>=0)))&&
+                           (typeof classname === "string")&&
+                           (classname.search(/\bcodexdup/g)>=0)))&&
                         (node.id)&&(node.id.search("CODEXTMP")!==0)) {
                         var justref=document.createElement(node.tagName);
                         justref.id=node.id;
