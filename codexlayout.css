@@ -24,14 +24,17 @@
 
 div.codexdupstart, section.codexdupstart, blockquote.codexdupstart,
 ul.codexdupstart, ol.codexdupstart, dl.codexdupstart {
-    padding-bottom: 0px; border-bottom-width: 0px; margin-bottom: 0px;}
+    padding-bottom: 0px; border-bottom-width: 0px; margin-bottom: 0px;
+    page-break-after: auto;}
 div.codexdup, section.codexdup, blockquote.codexdup,
 ul.codexdup, ol.codexdup, dl.codexdup {
     padding-top: 0px;    border-top-width: 0px;    margin-top: 0px;
-    padding-bottom: 0px; border-bottom-width: 0px; margin-bottom: 0px;}
+    padding-bottom: 0px; border-bottom-width: 0px; margin-bottom: 0px;
+    page-break-after: auto; page-break-before: auto;}
 div.codexdupend, section.codexdupend, blockquote.codexdupend,
 ul.codexdupend, ol.codexdupend, dl.codexdupend {
-    padding-top: 0px;    border-top-width: 0px;    margin-top: 0px;}
+    padding-top: 0px;    border-top-width: 0px;    margin-top: 0px;
+    page-break-before: auto;}
 p.codexdupend, p.codexdup { text-indent: 0px;}
 
 /* These can be used directly or inserted without the body.codexNNN root */
