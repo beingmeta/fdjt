@@ -1993,18 +1993,27 @@ fdjt.CodexLayout=
         CodexLayout.fetchLayout=fetchLayout;
         
         CodexLayout.clearLayouts=function(){
-            var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
-            if (layouts) {
+            function dropLayouts(layouts){
                 var i=0, lim=layouts.length; while (i<lim) {
+                    dropLayout(layouts[i++]);}}
+            var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
+            var i=0, lim=((layouts)&&(layouts.length)); 
+            if (layouts) {
+                while (i<lim) {
                     dropLayout(layouts[i++]);}
                 fdjtState.dropLocal("fdjtCodex.layouts");}
-            if (layoutDB) {
+            layouts=[]; if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"]);
                 var storage=txn.objectStore("layouts");
-                var cursor=storage.openCursor(); layouts=[];
-                cursor.onSuccess=function(evt){
-                    var cursor=evt.target.result; if (cursor) {
-                        storage['delete'](cursor.key); cursor['continue']();}};}};
+                var req=storage.openCursor();
+                req.onsuccess=function(evt){
+                    var cursor=req.result;
+                    if (cursor) {
+                        layouts.push(cursor.key);
+                        cursor['continue']();}
+                    else dropLayouts(layouts);};
+                req.onerror=function(evt){
+                    fdjtLog("Error getting layout cursor");};}};
 
         return CodexLayout;})();
 
