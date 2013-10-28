@@ -38,12 +38,13 @@
    Enjoy!
 
 */
+/* jshint browser: true */
 
-var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
+// var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
 fdjt.CodexLayout=
     (function(){
-        // "use strict";
+        "use strict";
         var fdjtDOM=fdjt.DOM;
         var fdjtLog=fdjt.Log;
         var fdjtTime=fdjt.Time;
@@ -58,7 +59,6 @@ fdjt.CodexLayout=
         var hasClass=fdjtDOM.hasClass;
         var addClass=fdjtDOM.addClass;
         var dropClass=fdjtDOM.dropClass;
-        var swapClass=fdjtDOM.swapClass;
         var TOA=fdjtDOM.toArray;
         var getElementValue=fdjtDOM.getElementValue;
         
@@ -198,28 +198,6 @@ fdjt.CodexLayout=
                 else {}}
             return false;}
 
-        function insideBounds(box){
-            var top=false, right=false, bottom=false, left=false;
-            function gatherBounds(node){
-                if ((!(node))||(node.nodeType!==1)) return;
-                var style=getStyle(node); var children;
-                if ((style.position==='static')&&
-                    ((node.tagName==='img')||(style.display!=='inline'))) {
-                    var geom=getGeom(node,box);
-                    if ((left===false)||(geom.left<left)) left=geom.left;
-                    if ((top===false)||(geom.top<top)) top=geom.top;
-                    if ((right===false)||(geom.right>right)) right=geom.right;
-                    if ((bottom===false)||(geom.bottom>bottom))
-                        bottom=geom.bottom;}
-                if ((children=node.childNodes)&&(children.length)) {
-                    var i=0; var len=children.length;
-                    while (i<len) gatherBounds(children[i++]);}}
-            var nodes=box.childNodes;
-            var j=0; var jlim=nodes.length;
-            while (j<jlim) gatherBounds(nodes[j++]);
-            return { left: left, top: top, right: right, bottom: bottom,
-                     width: right-left, height: bottom-top};}
-        
         /* Tweaking fonts */
 
         function scaleToPage(elt,width,height,leavefont){
@@ -271,6 +249,7 @@ fdjt.CodexLayout=
             else {}}
 
         function tweakFont(node,width,height){
+            var i, lim, nodes=[];
             if (!(width)) width=node.offsetWidth;
             if (!(height)) height=node.offsetHeight;
             var max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
@@ -281,8 +260,8 @@ fdjt.CodexLayout=
                 // Set up the inline-block wrapper we'll use for sizing
                 wrapper.style.display="inline-block";
                 wrapper.style.maxWidth=width+"px";
-                var nodes=[], children=node.childNodes;
-                var i=0, lim=children.length; while (i<lim) nodes.push(children[i++]);
+                var children=node.childNodes;
+                i=0, lim=children.length; while (i<lim) nodes.push(children[i++]);
                 i=0, lim=nodes.length; while (i<lim) wrapper.appendChild(nodes[i++]);
                 node.appendChild(wrapper);}
             // Now we actually tweak font sizes
@@ -296,9 +275,9 @@ fdjt.CodexLayout=
                     if (!(best_fit)) best_fit=font_pct;
                     else if (font_pct>best_fit) best_fit=font_pct;}
                 if (((hr>1)||(wr>1))&&(delta>0)) {
-                    delta=delta/-2; font_size=font_pct+delta;}
+                    delta=delta/-2; font_pct=font_pct+delta;}
                 else if (((hr<1)&&(wr<1))&&(delta<0)) {
-                    delta=delta/-2; font_size=font_pct+delta;}
+                    delta=delta/-2; font_pct=font_pct+delta;}
                 else font_pct=font_pct+delta;
                 if ((max_font)&&(font_pct>max_font)) break;
                 if ((min_font)&&(font_pct<min_font)) break;                
@@ -317,16 +296,16 @@ fdjt.CodexLayout=
                 return pct/100;}
             else return parseFloat(s);}
 
-        function atPageTop(node){
-            var scan=node, body=Codex.body||document.body;
-            while (scan) {
+        function atPageTop(node,body){
+            if (!(body)) body=document.body;
+            var scan=node; while (scan) {
                 if (scan===body) return false;
                 else if (!(scan.previousSibling)) scan=scan.parentNode;
                 else if ((scan.previousSibling.nodeType===3)&&
                          (isEmpty(scan.previousSibling.nodeValue)))
                     scan=scan.previousSibling;
                 else break;}
-            return ((scan.nodeType==1)&&(scan.className)&&
+            return ((scan.nodeType===1)&&(scan.className)&&
                     (scan.className.search(/\bcodexpage\b/g)>=0));}
 
         /* Duplicating nodes */
@@ -536,8 +515,6 @@ fdjt.CodexLayout=
                 optimizeLayoutRule(init.avoidbreakafter||false);
             var avoidbreakbefore=this.avoidbreakbefore=
                 optimizeLayoutRule(init.avoidbreakbefore||false);
-            var scaletopage=this.scaletopage=
-                optimizeLayoutRule(init.scaletopage||false);
             var fullpages=this.fullpages=
                 optimizeLayoutRule(init.fullpages||false);
             var singlepages=this.singlepages=
@@ -580,16 +557,6 @@ fdjt.CodexLayout=
                  ((typeof init.scale_pages === 'undefined')?(true):
                   (init.scale_pages)));
             
-            // This keeps track of item scaling
-            var scaled=this.scaled=[];
-
-            // This is a list of all blocks considered
-            var allblocks=this.allblocks=[];
-            var lastblock=false;
-
-            var allmoves=this.allmoves=[];
-            var lastmove=false;
-
             // This is the node DOM container where we place new pages
             var container=this.container=
                 init.container||fdjtDOM("div.codexpages");
@@ -692,8 +659,8 @@ fdjt.CodexLayout=
                 else if (singlepage) newPage(root);
                 else if ((forcedBreakBefore(root))||
                          ((prev)&&(forcedBreakAfter(prev)))) {
-                    root=newPage(root); newpage=true;}
-                else moveNode(root)
+                    root=newPage(root);}
+                else moveNode(root);
                 var scale_elts=getChildren(root,"[data-pagescale],[pagescale]");
                 scaleToPage(scale_elts,page_width,page_height);
                 if (singlepage) {
@@ -704,23 +671,22 @@ fdjt.CodexLayout=
                         addClass(page,"codexundersize");
                     else {}
                     // Start a new page and update the loop state
-                    newPage(); prev=this.prev=root; prevstyle=this.prevstyle=getStyle(root);
+                    newPage(); prev=layout.prev=root;
+                    prevstyle=layout.prevstyle=getStyle(root);
                     if (donefn) donefn(layout);
                     return;}
                 else {
                     var geom=getGeom(root,page);
                     if (geom.bottom<=page_height) {
-                        // if (lastblock!==root) {allblocks.push(root); lastblock=root;}
-                        prev=this.prev=root;
-                        prevstyle=this.prevstyle=getStyle(root);
+                        prev=layout.prev=root;
+                        prevstyle=layout.prevstyle=getStyle(root);
                         if (donefn) donefn(layout);
                         return;}
                     else if (((atomic)&&(atomic.match(root)))||
                              (avoidBreakInside(root))) {
                         if (!(newpage)) newPage(root);
-                        // if (lastblock!==root) {allblocks.push(root); lastblock=root;}
-                        prev=this.prev=root;
-                        prevstyle=this.prevstyle=getStyle(root);
+                        prev=layout.prev=root;
+                        prevstyle=layout.prevstyle=getStyle(root);
                         if (donefn) donefn(layout);
                         return;}}
 
@@ -765,59 +731,12 @@ fdjt.CodexLayout=
                         tracing=true;}
                     
                     // FIRST, HANDLE DRAGGING
-
-                    // If this block is terminal and we don't want to
-                    // break before this block or after the preceding
-                    // block, drag along the previous block to the new
-                    // page.
-
-                    // NOTE that dragged blocks have already been
-                    // placed, so the previous page will end up short.
-                    // Them's the breaks.
-                    if ((block)&&(terminal)&&(avoidBreakBefore(block,style))) {
-                        if (tracing) logfn("Possibly dragging %o",prev);
-                        drag.push(prev);}
-                    else if ((block)&&(prev)&&
-                             (avoidBreakAfter(prev,prevstyle))) {
-                        if (tracing) logfn("Possibly dragging %o",prev);
-                        drag.push(prev);}
-                    else if ((block)&&(terminal)&&(drag)&&(drag.length)) {
-                        // Otherwise, we don't have to worry about
-                        // what we've been dragging along so far,
-                        // so we clear it.
-                        if (tracing) logfn("Dropping %d drags",layout.drag.length);
-                        layout.drag=drag=[];}
-                    else {}
+                    handle_dragging(block,terminal,style);
                     
+                    if (block) block=handle_standalone(block,style);
                     // If a block is false, continue
                     if (!(block)) {ni++; return;}
-                    else if ((hasClass(block,/\bcodexfloatpage\b/))||
-                             ((floatblocks)&&(testNode(block,floatblocks)))) {
-                        // Float pages just get pushed (until newPage below)
-                        if (tracing) logfn("Pushing float page %o",block);
-                        floating.push(block); ni++; return;}
-                    else if ((checkSinglePage(block,style))||
-                             ((fullpages)&&(testNode(block,fullpages)))||
-                             ((singlepages)&&(testNode(block,singlepages)))) {
-                        // Full pages automatically get their own page
-                        if (tracing) logfn("Full single page for %o",block);
-                        block=newPage(block); newPage();
-                        ni++; return;}
-                    else if ((page.childNodes.length)&&
-                             ((forcedBreakBefore(block,style))||
-                              ((prev)&&(forcedBreakAfter(prev,prevstyle)))||
-                              ((prev)&&
-                               ((hasClass(prev,/\b(codexfullpage|codexsinglepage)\b/))||
-                                ((fullpages)&&(testNode(prev,fullpages)))||
-                                ((singlepages)&&(testNode(prev,singlepages))))))) {
-                        // This is the easy case.  Note that we don't
-                        // force a page break if the current page is
-                        // empty.
-                        if (tracing) logfn("Forced new page for %o",block);
-                        layout.drag=drag=[];
-                        block=newPage(block);}
-                    else block=moveNode(block);
-
+                    
                     // Finally, we check if everything fits.  We're
                     // walking through the blocks[] but only advance
                     // when an element fits or can't be split or
@@ -827,44 +746,26 @@ fdjt.CodexLayout=
                     var geom=getGeom(block,page);
                     if ((trace)&&((trace>3)||((track)&&(track.match(block)))))
                         logfn("Layout/geom %o %j",block,geom);
-                    if ((terminal)&&(geom.bottom>page_height)) {
-                        // We're a terminal node extending below the bottom of the page
-                        if (geom.top>page_height)
+                    if (geom.bottom>page_height) {
+                        if (!(terminal)) {
+                            if (tracing) logfn("Oversize non-terminal %o, continuing",block);
+                            ni++;}
+                        // If we get here, we're a terminal node
+                        // extending below the bottom of the page
+                        else if (geom.top>page_height)
                             // Our top is also over the bottom of the page,
                             block=newPage(block);
+                        else if ((hasClass(block,"codexfloat"))||
+                                 ((floatblocks)&&(floatblocks.match(block)))) {
+                            // If the block can float, let it
+                            floating.push(block); ni++;}
                         else if (((!(break_blocks))||
                                   ((atomic)&&(atomic.match(block)))||
                                   (avoidBreakInside(block,style))||
                                   (hasClass(block,"codexcantsplit")))) {
-                            // We can't break this block (many reasons)
-                            if ((drag.length)&&(atPageTop(drag[0]))) {
-                                // A new page won't make a difference because
-                                //  we're dragging the rest of the current page anyway
-                                var oversize_limit=0.2;
-                                if ((!(avoidBreakAfter(block,style)))&&
-                                    (((geom.bottom-page_height)/page_height)<oversize_limit)) {
-                                    // We leave the block where it is and create an oversize page
-                                    // We do this if:
-                                    //   a break after the block is okay AND
-                                    //    the page would be less than 20% oversize
-                                    addClass(page,"codexoversize");
-                                    drag=[]; newPage();}
-                                else {
-                                    // We need to leave the dragged elements behind
-                                    var curpage=page; drag=[];
-                                    block=newPage(block);
-                                    if (page===curpage)
-                                        addClass(page,"codexoversize");}}
-                            else {
-                                // We just make a new page for the block
-                                var curpage=page;
-                                block=newPage(block);
-                                if (page===curpage)
-                                    addClass(page,"codexoversize");}
-                            ni++;}
-                        else if ((hasClass(block,"codexfloat"))||
-                                 ((floatblocks)&&(floatblocks.match(block)))) {
-                            floating.push(block); ni++;}
+                            var broken=handle_unbreakable(block,style,geom,tracing);
+                            if (!(broken)) ni++;
+                            else block=broken;}
                         else {
                             // Now we try to split the block, we store
                             // the 'split block' back in the blocks
@@ -874,7 +775,6 @@ fdjt.CodexLayout=
                             blocks[ni]=splitBlock(block);}}
                     // We fit on the page, so we'll look at the next block.
                     else {
-                        if (tracing) logfn("Fits on page: %o",block);
                         drag=[];
                         ni++;}
                     // Update the prev pointer for terminals
@@ -885,10 +785,10 @@ fdjt.CodexLayout=
                 // Gather all the block-level elements inside a node,
                 // recording which ones are terminals (don't have any
                 // blocks within them)
-                function gatherBlocks(node,blocks,terminals,styles){
+                function gatherBlocks(node,blocks,terminals,styles,style){
                     if (node.nodeType!==1) return;
                     if (node.codexui) return;
-                    var style=getStyle(node); 
+                    if (!(style)) style=getStyle(node); 
                     if (((atomic)&&(atomic.match(node)))||
                         (avoidBreakInside(node,style))) {
                         blocks.push(node); styles.push(style);
@@ -918,10 +818,97 @@ fdjt.CodexLayout=
                         while (j<n_elts) {
                             var child=anchor_elts[j++];
                             if (child.nodeType!==1) continue;
-                            var style=getStyle(child);
-                            if (style.display!=='inline')
-                                gatherBlocks(child,blocks,terminals,styles);}}
+                            var cstyle=getStyle(child);
+                            if (cstyle.display!=='inline')
+                                gatherBlocks(child,blocks,terminals,styles,cstyle);}}
                     else {}}
+
+                function handle_dragging(block,terminal,style,tracing){
+                    // If this block is terminal and we don't want to
+                    // break before this block or after the preceding
+                    // block, drag along the previous block to the new
+                    // page.
+                    
+                    // NOTE that dragged blocks have already been
+                    // placed, so the previous page will end up short.
+                    // Them's the breaks.
+                    if ((block)&&(terminal)&&(avoidBreakBefore(block,style))) {
+                        if (tracing) logfn("Possibly dragging %o",prev);
+                        drag.push(prev);}
+                    else if ((block)&&(prev)&&
+                             (avoidBreakAfter(prev,prevstyle))) {
+                        if (tracing) logfn("Possibly dragging %o",prev);
+                        drag.push(prev);}
+                    else if ((block)&&(terminal)&&(drag)&&(drag.length)) {
+                        // Otherwise, we don't have to worry about
+                        // what we've been dragging along so far,
+                        // so we clear it.
+                        if (tracing) logfn("Dropping %d drags",layout.drag.length);
+                        layout.drag=drag=[];}
+                    else {}}
+
+                function handle_standalone(block,style,tracing){
+                    if ((hasClass(block,/\bcodexfloatpage\b/))||
+                        ((floatblocks)&&(testNode(block,floatblocks)))||
+                        ((floatpages)&&(testNode(block,floatpages)))) {
+                        // Float pages just get pushed (until newPage below)
+                        if (tracing) logfn("Pushing float page %o",block);
+                        floating.push(block);
+                        return false;}
+                    else if (checkSinglePage(block,style)) {
+                        // Single pages automatically get their own page
+                        if (tracing) logfn("Full single page for %o",block);
+                        block=newPage(block); newPage();
+                        return false;}
+                    else if ((page.childNodes.length)&&
+                             ((forcedBreakBefore(block,style))||
+                              ((prev)&&(forcedBreakAfter(prev,prevstyle)))||
+                              ((prev)&&
+                               ((hasClass(prev,/\b(codexfullpage|codexsinglepage)\b/))||
+                                ((fullpages)&&(testNode(prev,fullpages)))||
+                                ((singlepages)&&(testNode(prev,singlepages))))))) {
+                        // This is the easy case.  Note that we don't
+                        // force a page break if the current page is
+                        // empty.
+                        if (tracing) logfn("Forced new page for %o",block);
+                        layout.drag=drag=[];
+                        return newPage(block)||block;}
+                    else return moveNode(block);}
+
+                function handle_unbreakable(block,style,geom,tracing) {
+                    // We can't break this block (for various reasons)
+                    var curpage=page; tracing=false; // ignored
+                    if ((drag.length)&&(atPageTop(drag[0]))) {
+                        // A new page won't make a difference
+                        //  because we're dragging the rest of
+                        //  the current page anyway, so we
+                        //  need to make some choices (we're
+                        //  in an impossible situation)
+                        var oversize_limit=0.2;
+                        if ((!(avoidBreakAfter(block,style)))&&
+                            (((geom.bottom-page_height)/page_height)<oversize_limit)) {
+                            // We leave the block where it is and create an oversize page
+                            // We do this if:
+                            //   a break after the block is okay AND
+                            //    the page would be less than 20% oversize
+                            addClass(page,"codexoversize");
+                            drag=[]; newPage();
+                            return false;}
+                        else {
+                            // We need to leave the dragged elements behind
+                            drag=[]; block=newPage(block)||block;
+                            if (page===curpage) {
+                                addClass(page,"codexoversize");
+                                return false;}
+                            else return block;}}
+                    else {
+                        // We just make a new page for the block
+                        block=newPage(block)||block;
+                        if (page===curpage) {
+                            addClass(page,"codexoversize");
+                            return false;}
+                        else return block;}}
+
 
                 function checkAvoidBreakBefore(scan,root){
                     if (scan.nodeType===1) {
@@ -1057,29 +1044,26 @@ fdjt.CodexLayout=
                         var closed_page=page;
                         i=0, lim=floaters.length;
                         while (i<lim) {
-                            var floater=floaters[i++];
+                            var floater=floaters[i++], fg=false;
                             if (checkSinglePage(floater)) {
                                 newPage(floater);
                                 closed_page=page;
                                 forcepage=true;}
                             else if (closed_page===page) {
-                                newPage(floater);
-                                var geom=getGeom(floater,page);
-                                if (geom.bottom>page_height) {
+                                newPage(floater); fg=getGeom(floater,page);
+                                if (fg.bottom>page_height) {
                                     addClass(page,"codexoversize");
                                     closed_page=page;}}
                             else {                                
                                 moveNodeToPage(floater,page);
-                                var geom=getGeom(floater,newpage);
-                                if (geom.bottom>=page_height) newPage(floater);}}};
-                    var newpage="pagetop";
+                                fg=getGeom(floater,newpage);
+                                if (fg.bottom>=page_height) newPage(floater);}}}
+
                     if ((node)&&(node.nodeType===3)) {
                         var parent=node.parentNode;
                         if ((parent)&&(parent.childNodes.length===1)&&
                             (parent!==document.body)&&
-                            (parent!==codex_root)&&
-                            (parent.id!=="CODEXCONTENT")&&
-                            (!(hasClass(parent,"codexroot")))
+                            (parent!==root)&&
                             (!(hasClass(parent,"codexpage"))))
                             node=parent;}
 
@@ -1097,8 +1081,7 @@ fdjt.CodexLayout=
                         page.setAttribute("data-pagenum",pagenum);
                         fdjtDOM(container,page);
                         layout.prev=prev=false;
-                        pages.push(page);
-                        newpage="newpage";}
+                        pages.push(page);}
                     
                     if (trace) {
                         if ((trace>2)||
@@ -1374,7 +1357,7 @@ fdjt.CodexLayout=
                     if (donefn) donefn(layout);}
                 else loop();
                 
-                return this;}
+                return layout;}
             this.addContent=addContent;
 
             function gatherLayoutInfo(node,ids,dups,dupids,dupstarts,restoremap){
@@ -1457,7 +1440,7 @@ fdjt.CodexLayout=
                     else if (original) {
                         saved_ids[id]=original;
                         original.id=null;}}
-                var lostids=this.lostids={}; var really_lost=lostids._all_ids=[];
+                var lostids=layout.lostids={}; var really_lost=lostids._all_ids=[];
                 i=0, lim=dupids.length; while (i<lim) {
                     var dupid=dupids[i++];
                     var orig=document.getElementById(dupid);
@@ -1470,13 +1453,13 @@ fdjt.CodexLayout=
                 i=0; while (i<lim) container.removeChild(curnodes[i++]);
                 i=0, lim=addpages.length;
                 while (i<lim) container.appendChild(addpages[i++]);
-                this.pages=addpages;
-                dups=this.dups=newdups;
+                layout.pages=addpages;
+                dups=layout.dups=newdups;
                 saved_ids._all_ids=all_ids;
-                this.saved_ids=saved_ids;
-                this.page=addpages[0];
-                this.pagenum=parseInt(this.page.getAttribute("data-pagenum"),10);}
-            this.setLayout=setLayout;
+                layout.saved_ids=saved_ids;
+                layout.page=addpages[0];
+                layout.pagenum=parseInt(layout.page.getAttribute("data-pagenum"),10);}
+            layout.setLayout=setLayout;
 
             function dropSelected(node,dropsel){
                 if (!(dropsel)) return;
@@ -1522,9 +1505,9 @@ fdjt.CodexLayout=
                     node.removeChild(todrop[i++]);}}
             
             function saveLayout(layout_id){
-                if (!(layout_id)) layout_id=this.layout_id||
-                    (this.layout_id=this.width+"x"+
-                     this.height+fdjtState.getUUID());
+                if (!(layout_id)) layout_id=layout.layout_id||
+                    (layout.layout_id=layout.width+"x"+
+                     layout.height+fdjtState.getUUID());
                 if (!(CodexLayout.cache)) return;
                 var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
                 var dropLocal=fdjtState.dropLocal;
@@ -1546,14 +1529,14 @@ fdjt.CodexLayout=
                         while (j<n) {
                             var node=content[j++];
                             if (node.nodeType===1)
-                                prepForRestore(node,this.dontsave||false);}}}
+                                prepForRestore(node,layout.dontsave||false);}}}
                 if (layouts) {
                     if (layouts.indexOf(layout_id)<0) {
                         layouts.push(layout_id);}}
                 else layouts=[layout_id];
-                var pages=copy.innerHTML;
+                var html=copy.innerHTML;
                 try {
-                    cacheLayout(layout_id,pages);
+                    cacheLayout(layout_id,html);
                     setLocal("fdjtCodex.layouts",layouts,true);}
                 catch (ex) {
                     i=0; var lim=layouts.length; while (i<lim) {
@@ -1564,22 +1547,23 @@ fdjt.CodexLayout=
                     try {
                         cacheLayout(layout_id,copy.innerHTML);
                         setLocal("fdjtCodex.layouts",[layout_id],true);}
-                    catch (ex) {}}
+                    catch (whoops) {}}
                 return layout_id;}
             this.saveLayout=saveLayout;
             function restoreLayout(arg){
                 if (arg.indexOf("<")>=0) {
-                    this.setLayout(arg);
-                    this.done=fdjtTime();
+                    layout.setLayout(arg);
+                    layout.done=fdjtTime();
                     return true;}
-                var layout=fdjtState.getLocal(arg);
+                var saved_layout=fdjtState.getLocal(arg);
                 if (layout) {
-                    this.setLayout(layout);
-                    this.done=fdjtTime();
+                    layout.setLayout(saved_layout);
+                    layout.done=fdjtTime();
                     return true;}
                 else return false;}
             this.restoreLayout=restoreLayout;
 
+            /*
             layout.savePages=function(){
                 // This is a version which could be used if restore
                 // the entire layout takes too long, which doesn't
@@ -1592,11 +1576,13 @@ fdjt.CodexLayout=
                     while (j<lim) {
                         var node=content[j++];
                         if (node.nodeType===1) prepForRestore(node);}
-                    fdjtState.setLocal(layout_key+"#"+page.id,page.outerHTML);};}
+                    fdjtState.setLocal(layout_key+"#"+page.id,page.outerHTML);}};
+            */
 
 
             // This is for setting individual page content, assuming
             // the page node already exists
+            /*
             function setPageContent(content){
                 var frag=document.createElement("div");
                 frag.innerHTML=content;
@@ -1615,16 +1601,16 @@ fdjt.CodexLayout=
                 fdjtDOM.replace(curpage,newpage);
                 if (this.page===curpage) this.page=newpage;
                 pages[pagenum-1]=newpage;}
+            */
 
             /* Finishing the page */
 
             function finishPage(completed) {
-                var growpage=hasClass(completed,"codexundersize");
+                var undersize=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
-                var undersize=false, bounds=false;
-                if (((oversize)||(growpage))&&(scale_pages)) {
+                if (((oversize)||(undersize))&&(scale_pages)) {
                     fdjtDOM.scaleToFit(completed);}
-                if (this.pagedone) this.pagedone(completed);
+                if (layout.pagedone) layout.pagedone(completed);
                 dropClass(completed,"codexshowpage");}
             this.finishPage=finishPage;
 
@@ -1794,9 +1780,9 @@ fdjt.CodexLayout=
                     var saved=this.saved_ids, allids=saved._all_ids;
                     var crumbs=this.crumbs;
                     i=0, lim=allids.length; while (i<lim) {
-                        var id=allids[i++];
+                        var id=allids[i++], original;
                         if (crumbs[id]) {
-                            var original=document.getElementById(id);
+                            original=document.getElementById(id);
                             var oclass=original.getAttribute("data-oldclass");
                             var ostyle=original.getAttribute("data-oldstyle");
                             var crumb=crumbs[id];
@@ -1855,7 +1841,7 @@ fdjt.CodexLayout=
                             info.baseid=block.getAttribute("data-baseid");
                         pages[num].push(info);}}
                 else fdjtLog.warn("Can't find page for %o",block);}
-            return pages;}
+            return pages;};
 
         CodexLayout.prototype.getLayoutBlocks=function getLayoutBlocks(){
             var allblocks=this.allblocks;
@@ -1893,6 +1879,8 @@ fdjt.CodexLayout=
                 dbinit_timeout=false;
                 if (ondbinit) ondbinit();}}
 
+        var doinit=false;
+
         if (window.indexedDB) {
             var req=window.indexedDB.open("codexlayout",1);
             dbinit_timeout=setTimeout(indexedDB_timeout,5000);
@@ -1900,7 +1888,9 @@ fdjt.CodexLayout=
                 fdjtLog("Error initializing indexedDB layout cache: %o",
                         event.errorCode);
                 if (dbinit_timeout) clearTimeout(dbinit_timeout);
-                CodexLayout.layoutDB=layoutDB=window.localStorage;};
+                CodexLayout.layoutDB=layoutDB=window.localStorage;
+                doinit=ondbinit; ondbinit=false;
+                if (doinit) doinit();};
             req.onsuccess=function(event) {
                 var db=event.target.result;
                 if (CodexLayout.trace)
@@ -1908,28 +1898,33 @@ fdjt.CodexLayout=
                 if (dbinit_timeout) clearTimeout(dbinit_timeout);
                 CodexLayout.layoutDB=layoutDB=db;
                 CodexLayout.cache=7;
-                if (ondbinit) ondbinit();};
+                doinit=ondbinit; ondbinit=false;
+                if (doinit) doinit();};
             req.onupgradeneeded=function(event) {
                 var db=event.target.result;
                 if (dbinit_timeout) clearTimeout(dbinit_timeout);
                 db.onerror=function(event){
                     fdjtLog("Unexpected error caching layouts: %d",
                             event.target.errorCode);
+                    event=false; // ignored
                     CodexLayout.layoutDB=layoutDB=window.localStorage;
                     if (ondbinit) ondbinit();};
                 db.onsuccess=function(event){
                     if (CodexLayout.trace)
                         fdjtLog("Initialized indexedDB layout cache");
+                    event=false; // ignored
                     if (ondbinit) ondbinit();};
+                db.createObjectStore("layouts",{keyPath: "layout_id"});
                 CodexLayout.layoutDB=layoutDB=window.localStorage;
-                db.createObjectStore("layouts",{keyPath: "layout_id"});};}
+                doinit=ondbinit; ondbinit=false;
+                if (doinit) doinit();};}
         else if (window.localStorage) {
+            doinit=ondbinit; ondbinit=false;
             CodexLayout.layoutDB=layoutDB=window.localStorage;
-            var doinit=ondbinit; ondbinit=false;
             if (doinit) doinit();}
         else {
             CodexLayout.layoutDB=layoutDB=false;
-            var doinit=ondbinit; ondbinit=false;
+            doinit=ondbinit; ondbinit=false;
             if (doinit) doinit();}
 
         function cacheLayout(layout_id,content){
@@ -1946,39 +1941,43 @@ fdjt.CodexLayout=
                     fdjtLog("Error saving layout %s: %o",
                             layout_id,event.target.errorCode);};
                 req.onsuccess=function(event){
+                    event=false; // ignored
                     if (CodexLayout.trace)
                         fdjtLog("Layout %s cached",layout_id);};}
-            else Codex.layoutDB=layoutDB=window.localStorage||false;}
+            else CodexLayout.layoutDB=layoutDB=window.localStorage||false;}
         CodexLayout.cacheLayout=cacheLayout;
         function dropLayout(layout_id){
             if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"],"readwrite");
                 var storage=txn.objectStore("layouts");
-                var req=storage.delete(layout_id);
+                var req=storage['delete'](layout_id);
                 req.onsuccess=function(event){
+                    event=false; // ignored
                     if (CodexLayout.trace)
                         fdjtLog("Layout %s removed",layout_id);};}
             else fdjtState.dropLocal(layout_id);}
         CodexLayout.dropLayout=dropLayout;
         function fetchLayout(layout_id,callback){
+            var content=false;
             if (typeof layoutDB === "undefined") 
                 ondbinit=function(){fetchLayout(layout_id,callback);};
             else if (!(layoutDB)) callback(false);
             else if ((window.Storage)&&(layoutDB instanceof window.Storage)) {
-                var content=fdjtState.getLocal(layout_id)||false;
+                content=fdjtState.getLocal(layout_id)||false;
                 setTimeout(function(){callback(content);},0);}
             else if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"]);
                 var storage=txn.objectStore("layouts");
                 var req=storage.get(layout_id);
                 req.onsuccess=function(event){
-                    callback(((req.result)&&(req.result.layout)));};}
+                    var target=event.target;
+                    callback(((target.result)&&(target.result.layout)));};}
             else if (window.localStorage) {
-                var content=fdjtState.getLocal(layout_id)||false;
+                content=fdjtState.getLocal(layout_id)||false;
                 setTimeout(function(){callback(content);},0);}}
         CodexLayout.fetchLayout=fetchLayout;
         
-        CodexLayout.clearLayouts=function(keepidb){
+        CodexLayout.clearLayouts=function(){
             var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
             if (layouts) {
                 var i=0, lim=layouts.length; while (i<lim) {
@@ -1990,7 +1989,7 @@ fdjt.CodexLayout=
                 var cursor=storage.openCursor(); layouts=[];
                 cursor.onSuccess=function(evt){
                     var cursor=evt.target.result; if (cursor) {
-                        storage.delete(cursor.key); cursor.continue();}};}};
+                        storage['delete'](cursor.key); cursor['continue']();}};}};
 
         return CodexLayout;})();
 

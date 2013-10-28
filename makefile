@@ -13,7 +13,7 @@ FDJT_FILES=header.js string.js time.js  template.js hash.js \
 FDJT_HINTS=string.hint time.hint \
 	syze.hint iscroll.hint indexed.hint \
 	log.hint init.hint state.hint dom.hint \
-	refdb.hint json.hint ajax.hint \
+	refdb.hint json.hint ajax.hint codexlayout.hint \
 	hash.hint wsn.hint template.hint \
 	dialog.hint ui.hint completions.hint taphold.hint selecting.hint \
 	adjustfont.hint scrollever.hint
