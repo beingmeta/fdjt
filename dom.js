@@ -2619,6 +2619,59 @@ fdjt.DOM=
             ((typeof _fdjt_init === 'undefined')||(!(_fdjt_init))))
             fdjtDOM.addListener(window,"load",fdjtDOM.init);
         
+        /* Tweaking fonts */
+        function tweakFont(node,width,height){
+            var i, lim, nodes=[];
+            var bounds=getGeometry(node,false,true);
+            if (!(width)) width=bounds.inner_width;
+            if (!(height)) height=bounds.inner_height;
+            var max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
+            var min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
+            if (max_font) max_font=parseFloat(max_font); 
+            if (min_font) min_font=parseFloat(min_font); 
+            var wrapper=fdjtDOM("div"); {
+                // Set up the inline-block wrapper we'll use for sizing
+                wrapper.style.display="inline-block";
+                wrapper.style.maxWidth=width+"px";
+                var children=node.childNodes;
+                i=0, lim=children.length; while (i<lim) nodes.push(children[i++]);
+                i=0, lim=nodes.length; while (i<lim) wrapper.appendChild(nodes[i++]);
+                node.appendChild(wrapper);}
+            // Now we actually tweak font sizes
+            var font_pct=100, count=0, delta=8, best_fit=false;
+            node.style.fontSize=font_pct+"%";
+            var ih=wrapper.offsetHeight, iw=wrapper.offsetWidth;
+            var hr=ih/height, wr=iw/width; 
+            while (((hr>1)||(wr>1)||(hr<0.9))&&(count<20)&&(delta>1)) {
+                if ((hr<=1)&&(wr<=1)) {
+                    if (!(best_fit)) best_fit=font_pct;
+                    else if (font_pct>best_fit) best_fit=font_pct;}
+                if (((hr>1)||(wr>1))&&(delta>0)) {
+                    delta=delta/-2; font_pct=font_pct+delta;}
+                else if (((hr<1)&&(wr<1))&&(delta<0)) {
+                    delta=delta/-2; font_pct=font_pct+delta;}
+                else font_pct=font_pct+delta;
+                if ((max_font)&&(font_pct>max_font)) break;
+                if ((min_font)&&(font_pct<min_font)) break;                
+                node.style.fontSize=font_pct+"%";
+                ih=wrapper.offsetHeight; iw=wrapper.offsetWidth;
+                hr=ih/height, wr=iw/width; 
+                count++;}
+            if ((hr>1)||(wr>1)&&(best_fit)) node.style.fontSize=best_fit+"%";
+            node.removeChild(wrapper);
+            i=0, lim=nodes.length; while (i<lim) node.appendChild(nodes[i++]);
+            return node;}
+        fdjtDOM.tweakFont=tweakFont;
+
+        function tweakAll(node){
+            var all=((node)?(fdjtDOM.getChildren(node,".fdjtadjustfont")):
+                     (fdjtDOM.$(".fdjtadjustfont")));
+            var i=0, lim=all.length; while (i<lim) tweakFont(all[i++]);}
+        fdjtDOM.tweakFonts=tweakAll;
+
+        fdjt.addInit(tweakAll);
+        fdjtDOM.addListener(window,"resize",tweakAll);
+        
         return fdjtDOM;
     })();
 
