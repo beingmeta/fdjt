@@ -167,6 +167,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var touch_y=false;
         var touch_t=0;
         
+        // If this is true, second touches are turned into touchtoo events;
+        //  otherwise, they start a new tap or hold
+        var holdfast=false;
+
         var serial=serial_count++;
 
         var touchable=elt.getAttribute("data-touchable");
@@ -455,12 +459,25 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         taptapthresh||false);
 
             if ((evt.touches)&&(th_target)) {
-                var cur_holder=getParent(elt,".tapholder");
+                var cur_holder=getParent(elt,".tapholder"), touch=evt.changedTouches[0];
                 if ((th.trace)||(trace_taphold))
                     fdjtLog("TapHold(%d) second touch on %o (in %o) after %o (in %o)",
                             serial,target,holder,th_target,cur_holder,(cur_holder===holder));
-                if ((cur_holder)&&(holder)) {
-                    var touch=evt.changedTouches[0];
+                if ((holdfast)&&(cur_holder===holder)) {
+                    if ((th.trace)||(trace_taphold))
+                        fdjtLog("TapHold(%d) holdfast with touchtoo on %o after %o: %o",
+                                serial,target,th_target,evt);
+                    new_event=document.createEvent('TouchEvent');
+                    new_event.initTouchEvent(
+                        "touchtoo",true,true,window,0,
+                        touch.screenX,touch.screenY,touch.clientX,touch.clientY,
+                        evt.ctrlKey,evt.altKey,evt.shiftKey,evt.metaKey,
+                        document.createTouchList(touch),
+                        document.createTouchList(touch),
+                        document.createTouchList(touch));
+                    target.dispatchEvent(new_event);
+                    return;}
+                else if ((cur_holder)&&(holder)) {
                     if ((th.trace)||(trace_taphold))
                         fdjtLog("TapHold(%d) Clearing taphold on %o, redispatching %o to %o",
                                 serial,th_target,evt,target);
@@ -471,7 +488,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         evt.ctrlKey,evt.altKey,evt.shiftKey,evt.metaKey,
                         document.createTouchList(touch),
                         document.createTouchList(touch),
-                        document.createTouchList(touch));}}
+                        document.createTouchList(touch));}
+                else {}}
             if (new_event) {
                 abortpress(evt,"move/touch2");
                 target.dispatchEvent(new_event);
@@ -554,6 +572,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         override=((opts.hasOwnProperty('override'))?(opts.override):
                    (default_opts.hasOwnProperty('override'))?
                    (default_opts.override):(false));
+        holdfast=((opts.hasOwnProperty('holdfast'))?(opts.holdfast):
+                   (default_opts.hasOwnProperty('holdfast'))?
+                   (default_opts.holdfast):(false));
         bubble=((opts.hasOwnProperty('bubble'))?(opts.bubble):
                 (default_opts.hasOwnProperty('bubble'))?
                 (default_opts.bubble):(false));
