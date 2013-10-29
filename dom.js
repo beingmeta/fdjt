@@ -2621,7 +2621,20 @@ fdjt.DOM=
         
         /* Tweaking fonts */
         function tweakFont(node,width,height){
-            var i, lim, nodes=[];
+            var i, lim, nodes=[], style=node.style;
+            var saved_display=node.style.display||"", saved_visibility=node.style.visibility||"";
+            var saved_opacity=node.style.opacity||"", saved_zindex=node.style.zIndex||"";
+            var cstyle=getStyle(node), restore_style=false;
+            if (cstyle.display==="none") {
+                var name=node.tagName, tmp_style=display_styles[name.toUpperCase()];
+                restore_style=true; style.zIndex=500; style.visibility='hidden'; style.opacity=0.0;
+                style.display=tmp_style;
+                cstyle=getStyle(node);
+                if (cstyle.display==="none") {
+                    if (restore_style) {
+                        style.display=saved_display; style.visibility=saved_visibility;
+                        style.opacity=saved_opacity; style.zIndex=saved_zindex;}
+                    return;}}
             var bounds=getGeometry(node,false,true);
             if (!(width)) width=bounds.inner_width;
             if (!(height)) height=bounds.inner_height;
@@ -2660,6 +2673,9 @@ fdjt.DOM=
             if ((hr>1)||(wr>1)&&(best_fit)) node.style.fontSize=best_fit+"%";
             node.removeChild(wrapper);
             i=0, lim=nodes.length; while (i<lim) node.appendChild(nodes[i++]);
+            if (restore_style) {
+                style.display=saved_display; style.visibility=saved_visibility;
+                style.opacity=saved_opacity; style.zIndex=saved_zindex;}
             return node;}
         fdjtDOM.tweakFont=tweakFont;
 
