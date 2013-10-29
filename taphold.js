@@ -143,7 +143,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
 
 
     function TapHold(elt,opts,fortouch,holdthresh,movethresh,taptapthresh,
-                     override,bubble,scrolling){
+                     wanderthresh,override,bubble,scrolling){
         if (!(elt)) {
             fdjtLog.warn("TapHold with no argument!");
             return;}
@@ -173,6 +173,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         if (touchable) touchable=fdjtDOM.Selector(touchable);
         else touchable=function(e){return hasParent(e,elt);};
         
+        var wander_timer=false;
+
         function setTarget(t){
             if ((th.trace)||(trace_taphold))
                 fdjtLog("TapHold/setTarget(%d) %o cur=%o",serial,t,th_target);
@@ -295,24 +297,22 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             th_targets=[];
             setTarget(false);}
 
-        var mouseout_timer=false;
-
         function taphold_mouseout(evt){
             evt=evt||event;
             var to=evt.toElement||evt.relatedTarget;
-            if (mouseout_timer) return;
+            if (wander_timer) return;
             if (!(th_target)) return;
             if ((pressed)&&(!(hasParent(to,elt)))) {
-                mouseout_timer=setTimeout(function(){
+                wander_timer=setTimeout(function(){
                     slipped(pressed,evt,{relatedTarget: to});
                     abortpress(evt,"taphold_mouseout");},
-                                          2000);}}
+                                          wanderthresh||2000);}}
 
         function taphold_mouseover(evt){
             evt=evt||event;
-            if (mouseout_timer) {
-                clearTimeout(mouseout_timer);
-                mouseout_timer=false;}}
+            if (wander_timer) {
+                clearTimeout(wander_timer);
+                wander_timer=false;}}
 
         function taphold_move(evt){
             evt=evt||event;
@@ -320,7 +320,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((!(bubble))) noBubble(evt);
             if (override) noDefault(evt);
             if ((scrolling)&&(evt.touches)) {
-                var pos;
                 if (scroll_x>=0) 
                     scrolling.scrollLeft=scroll_x-evt.touches[0].pageX;
                 if (scroll_y>=0)
@@ -343,8 +342,23 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 if ((th.trace)||(trace_taphold)) {
                     trace_ignore_move(evt,serial,elt,holder,th_target,target,
                                       start_x,start_y,touch_x,touch_y);}
-                if (pressed) slipped(pressed,evt,{relatedTarget: target});
+                if (th_target) {
+                    wander_timer=setTimeout(function(){
+                        abortpress(evt,"taphold_wander_timeout");},
+                                            wanderthresh||2000);
+                    if (pressed) {
+                        slipped(pressed,evt,{relatedTarget: target});
+                        setTarget(false);}}
                 return;}
+            else if (wander_timer) {
+                clearTimeout(wander_timer); wander_timer=false;
+                if ((th.trace)||(trace_taphold))
+                    fdjtLog("Return(#%d) %o pressed=%o, target=%o",
+                            serial,evt,pressed,th_target);
+                if ((pressed)&&(!(th_target))) {
+                    setTarget(pressed);
+                    held(pressed,evt);}}
+            else {}
             touch_x=x; touch_y=y; touch_t=fdjtTime();
             // If touched is false, the tap/hold was aborted somehow
             // fdjtLog("taphold_move touched=%o touch_x=%o touch_y=%o",touched,touch_x,touch_y);
@@ -534,6 +548,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         taptapthresh=((opts.hasOwnProperty('taptapthresh'))?(opts.taptapthresh):
                       (default_opts.hasOwnProperty('taptapthresh'))?
                       (default_opts.taptapthresh):(false));
+        wanderthresh=((opts.hasOwnProperty('wanderthresh'))?(opts.wanderthresh):
+                     (default_opts.hasOwnProperty('wanderthresh'))?
+                     (default_opts.wanderthresh):(2000));
         override=((opts.hasOwnProperty('override'))?(opts.override):
                    (default_opts.hasOwnProperty('override'))?
                    (default_opts.override):(false));
