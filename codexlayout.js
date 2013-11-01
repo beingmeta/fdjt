@@ -2049,22 +2049,8 @@ fdjt.CodexLayout=
             var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
             var i=0, lim=((layouts)&&(layouts.length)); 
             if (layouts) {
-                while (i<lim) {
-                    dropLayout(layouts[i++]);}
-                fdjtState.dropLocal("fdjtCodex.layouts");}
-            layouts=[]; if (layoutDB) {
-                var txn=layoutDB.transaction(["layouts"]);
-                var storage=txn.objectStore("layouts");
-                var req=storage.openCursor();
-                req.onsuccess=function(evt){
-                    var cursor=req.result; evt=evt;
-                    if (cursor) {
-                        layouts.push(cursor.key);
-                        cursor['continue']();}
-                    else dropLayouts(layouts);};
-                req.onerror=function(evt){
-                    evt=evt;
-                    fdjtLog("Error getting layout cursor");};}};
+                while (i<lim) dropLayout(layouts[i++]);
+                fdjtState.dropLocal("fdjtCodex.layouts");}};
 
         return CodexLayout;})();
 
