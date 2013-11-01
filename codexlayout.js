@@ -2043,9 +2043,6 @@ fdjt.CodexLayout=
         CodexLayout.fetchLayout=fetchLayout;
         
         CodexLayout.clearLayouts=function(){
-            function dropLayouts(layouts){
-                var i=0, lim=layouts.length; while (i<lim) {
-                    dropLayout(layouts[i++]);}}
             var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
             var i=0, lim=((layouts)&&(layouts.length)); 
             if (layouts) {
