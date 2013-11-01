@@ -350,11 +350,14 @@ fdjt.CodexLayout=
                 ((nodeclass.replace(/\b((codexrelocated)|(codexdup.*))\b/g,""))+
                  " codexdup").replace(/\s+/," ").trim();
             if (!(duplicated)) {
+                // If there's not a already a duplicate, declare the
+                // root node to the start
                 if (nodeclass.search(/\bcodexdupstart\b/)<0) {
                     node.className=nodeclass+" codexdupstart";
-                    styleDupStart(node);}}
-            else styleDup(node);
+                    stripDupStart(node);}}
             
+            // Strip top style information from copy
+            if (copy.getAttribute("style")) stripTopStyles(copy);
             // If the original had an ID, save it in various ways
             if (id) {
                 copy.codexbaseid=id;
@@ -369,28 +372,29 @@ fdjt.CodexLayout=
             else page.appendChild(copy);
             return copy;}
 
-        function styleDupStart(node){
-            var style=node.style, string=style.toString();
+        function stripDupStart(node){
+            var style=node.style, string=style.cssText;
             if (string) {
                 if (style.paddingBottom) style.paddingBottom="0px";
                 if (style.borderBottomWidth) style.borderBottomWidth="0px";
                 if (style.marginBottom) style.marginBottom="0px";
-                var new_string=style.toString();
+                if (style.pageBreakAfter) style.pageBreakAfter="auto";
+                var new_string=style.cssText;
                 if (new_string!==string)
                     node.setAttribute("data-savedstyle",string);}}
-        function styleDup(node){
-            var style=node.style, string=style.toString();
-            if (string) {
-                if (style.textIndent) style.textIndent="0px";
-                if (style.paddingTop) style.paddingTop="0px";
-                if (style.borderTopWidth) style.borderTopWidth="0px";
-                if (style.marginTop) style.marginTop="0px";}}
+        function stripTopStyles(node){
+            var style=node.style;
+            if (style.textIndent) style.textIndent="0px";
+            if (style.paddingTop) style.paddingTop="0px";
+            if (style.borderTopWidth) style.borderTopWidth="0px";
+            if (style.marginTop) style.marginTop="0px";
+            if (style.pageBreakBefore) style.pageBreakBefore="auto";}
         function stripBottomStyles(node){
             var style=node.style;
-            var pb=style.paddingBottom, bb=style.borderBottomWidth, mb=style.marginBottom;
-            if (pb) style.paddingBottom="0px";
-            if (bb) style.borderBottomWidth="0px";
-            if (mb) style.marginBottom="0px";}
+            if (style.paddingBottom) style.paddingBottom="0px";
+            if (style.borderBottomWidth) style.borderBottomWidth="0px";
+            if (style.marginBottom) style.marginBottom="0px";
+            if (style.pageBreakAfter) style.pageBreakAfter="auto";}
 
         /* Moving nodes */
 
@@ -500,16 +504,14 @@ fdjt.CodexLayout=
             dropClass(cantsplit,"codexcantsplit");
             var split=TOA(
                 layout.container.getElementsByClassName("codexsplitstart"));
-            var node; i=0, lim=split.length;
-            while (i<lim) {
+            i=0, lim=split.length; while (i<lim) {
                 node=split[i++];
                 var nodeid=node.id;
                 var text=textsplits[nodeid];
                 node.parentNode.replaceChild(text,node);}
             var shards=TOA(
                 layout.container.getElementsByClassName("codextextsplit"));
-            i=0, lim=shards.length;
-            while (i<lim) {
+            i=0, lim=shards.length; while (i<lim) {
                 node=shards[i++];
                 node.parentNode.removeChild(node);}
             var moved=TOA(
@@ -667,10 +669,15 @@ fdjt.CodexLayout=
             
             function addContent(root,timeslice,timeskip,
                                 trace,progressfn,donefn) {
-
+                
                 var newpage=false;
                 var start=fdjtTime();
                 if (!(page)) {newPage(); newpage=true;}
+
+                if ((timeslice)&&(typeof timeslice !== "number"))
+                    timeslice=default_timeslice;
+                if ((timeskip)&&(typeof timeskip !== "number"))
+                    timeskip=default_timeskip;
 
                 if (typeof trace === 'undefined') trace=layout.tracelevel;
                 if (typeof progressfn === 'undefined')
@@ -1676,8 +1683,7 @@ fdjt.CodexLayout=
                         var alldups=dups[dupid];
                         var lastdup=alldups[alldups.length-1];
                         lastdup.className=lastdup.className.replace(
-                                /\bcodexdup\b/,"codexdupend");
-                        styleDupEnd(lastdup);}
+                                /\bcodexdup\b/,"codexdupend");}
                 var middle_dups=getChildren(page,"codexdup");
                 if ((middle_dups)&&(middle_dups.length)) {
                     var j=0, dl=middle_dups.length; while (j<dl) {
@@ -2051,12 +2057,13 @@ fdjt.CodexLayout=
                 var storage=txn.objectStore("layouts");
                 var req=storage.openCursor();
                 req.onsuccess=function(evt){
-                    var cursor=req.result;
+                    var cursor=req.result; evt=evt;
                     if (cursor) {
                         layouts.push(cursor.key);
                         cursor['continue']();}
                     else dropLayouts(layouts);};
                 req.onerror=function(evt){
+                    evt=evt;
                     fdjtLog("Error getting layout cursor");};}};
 
         return CodexLayout;})();
