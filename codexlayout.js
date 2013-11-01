@@ -64,6 +64,9 @@ fdjt.CodexLayout=
         
         var floor=Math.floor;
 
+        var default_timeslice=50;
+        var default_timeskip=10;
+
         var layoutDB;
 
         function appendChildren(node,children,start){
@@ -347,8 +350,11 @@ fdjt.CodexLayout=
                 ((nodeclass.replace(/\b((codexrelocated)|(codexdup.*))\b/g,""))+
                  " codexdup").replace(/\s+/," ").trim();
             if (!(duplicated)) {
-                if (nodeclass.search(/\bcodexdupstart\b/)<0)
-                    node.className=nodeclass+" codexdupstart";}
+                if (nodeclass.search(/\bcodexdupstart\b/)<0) {
+                    node.className=nodeclass+" codexdupstart";
+                    styleDupStart(node);}}
+            else styleDup(node);
+            
             // If the original had an ID, save it in various ways
             if (id) {
                 copy.codexbaseid=id;
@@ -362,6 +368,29 @@ fdjt.CodexLayout=
             if (parent) parent.appendChild(copy);
             else page.appendChild(copy);
             return copy;}
+
+        function styleDupStart(node){
+            var style=node.style, string=style.toString();
+            if (string) {
+                if (style.paddingBottom) style.paddingBottom="0px";
+                if (style.borderBottomWidth) style.borderBottomWidth="0px";
+                if (style.marginBottom) style.marginBottom="0px";
+                var new_string=style.toString();
+                if (new_string!==string)
+                    node.setAttribute("data-savedstyle",string);}}
+        function styleDup(node){
+            var style=node.style, string=style.toString();
+            if (string) {
+                if (style.textIndent) style.textIndent="0px";
+                if (style.paddingTop) style.paddingTop="0px";
+                if (style.borderTopWidth) style.borderTopWidth="0px";
+                if (style.marginTop) style.marginTop="0px";}}
+        function stripBottomStyles(node){
+            var style=node.style;
+            var pb=style.paddingBottom, bb=style.borderBottomWidth, mb=style.marginBottom;
+            if (pb) style.paddingBottom="0px";
+            if (bb) style.borderBottomWidth="0px";
+            if (mb) style.marginBottom="0px";}
 
         /* Moving nodes */
 
@@ -450,11 +479,16 @@ fdjt.CodexLayout=
             dropClass(node,"codexrelocated");}
         
         function revertLayout(layout) {
-            var crumbs=layout.crumbs; var now=fdjtTime();
+            var crumbs=layout.crumbs; var now=fdjtTime(), i=0, lim;
             if ((layout.reverting)&&((now-layout.reverting)<10000)) return;
             else layout.reverting=now;
+            var dupstarts=layout.container.getElementsByClassName("codexdupstart");
+            i=0, lim=dupstarts; while (i<lim) {
+                var dup=dupstarts[i++];
+                var saved_style=dup.getAttribute("data-savedstyle");
+                if (saved_style) dup.setAttribute("style",saved_style);}
             var textsplits=layout.textsplits;
-            var i=0, lim, node;
+            var node;
             var pagescaled=TOA(
                 layout.container.getElementsByClassName("codexpagescaled"));
             i=0, lim=pagescaled.length; while (i<lim) {
@@ -466,7 +500,7 @@ fdjt.CodexLayout=
             dropClass(cantsplit,"codexcantsplit");
             var split=TOA(
                 layout.container.getElementsByClassName("codexsplitstart"));
-            i=0, lim=split.length;
+            var node; i=0, lim=split.length;
             while (i<lim) {
                 node=split[i++];
                 var nodeid=node.id;
@@ -1350,11 +1384,13 @@ fdjt.CodexLayout=
                 function loop(){
                     var loop_start=fdjtTime();
                     while ((ni<nblocks)&&
-                           ((fdjtTime()-loop_start)<timeslice))
+                           ((!(timeslice))||((fdjtTime()-loop_start)<timeslice)))
                         step();
                     if (progressfn) progressfn(layout);
-                    if (ni<nblocks) layout.timer=
-                        setTimeout(loop,timeskip||timeslice);
+                    if (ni<nblocks) {
+                        if (timeslice)
+                            layout.timer=setTimeout(loop,timeskip||timeslice);
+                        else loop();}
                     else {
                         var last_block=blocks[nblocks-1];
                         if ((forcedBreakAfter(last_block))||
@@ -1364,7 +1400,10 @@ fdjt.CodexLayout=
                         if (layout.timer) clearTimeout(layout.timer);
                         layout.timer=false;
                         layout.root=cur_root=false;
-                        if (donefn) setTimeout(function(){donefn(layout);},10);}}
+                        if (donefn) {
+                            if (timeslice) 
+                                setTimeout(function(){donefn(layout);},10);
+                            else donefn(layout);}}}
 
                 // This is the inner loop
                 if (!(timeslice)) {
@@ -1637,7 +1676,12 @@ fdjt.CodexLayout=
                         var alldups=dups[dupid];
                         var lastdup=alldups[alldups.length-1];
                         lastdup.className=lastdup.className.replace(
-                                /\bcodexdup\b/,"codexdupend");}
+                                /\bcodexdup\b/,"codexdupend");
+                        styleDupEnd(lastdup);}
+                var middle_dups=getChildren(page,"codexdup");
+                if ((middle_dups)&&(middle_dups.length)) {
+                    var j=0, dl=middle_dups.length; while (j<dl) {
+                        stripBottomStyles(middle_dups[j++]);}}
                 if (page) dropClass(page,"codexshowpage");
                 var i=0; var lim= pages.length;
                 while (i<lim) {
