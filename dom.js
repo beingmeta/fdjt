@@ -2691,6 +2691,14 @@ fdjt.DOM=
         fdjt.addInit(tweakAll);
         fdjtDOM.addListener(window,"resize",tweakAll);
         
+        function addCXClasses(){
+            var device=fdjt.device;
+            if (device.ios) addClass(document.body,"cxIOS");
+            if (device.touch) addClass(document.body,"cxTOUCH");
+            if (device.mouse) addClass(document.body,"cxMOUSE");
+            if (device.android) addClass(document.body,"cxAndroid");}
+        fdjtDOM.addCXClasses=addCXClasses;
+
         return fdjtDOM;
     })();
 
