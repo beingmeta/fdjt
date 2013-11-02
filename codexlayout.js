@@ -251,14 +251,16 @@ fdjt.CodexLayout=
                 while (i<lim) scaleToPage(elt[i++],width,height,leavefont||false);}
             else {}}
 
-        function tweakFont(node,width,height){
+        function tweakFont(node,width,height,min_font,max_font){
             var i, lim, nodes=[];
             if (!(width)) width=node.offsetWidth;
             if (!(height)) height=node.offsetHeight;
-            var max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
-            var min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
-            if (max_font) max_font=parseFloat(max_font); 
-            if (min_font) min_font=parseFloat(min_font); 
+            if (!(min_font))
+                min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
+            if (!(max_font))
+                max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
+            if ((max_font)&&(typeof max_font=="string")) max_font=parseFloat(max_font); 
+            if ((min_font)&&(typeof min_font=="string")) min_font=parseFloat(min_font); 
             var wrapper=fdjtDOM("div"); {
                 // Set up the inline-block wrapper we'll use for sizing
                 wrapper.style.display="inline-block";
@@ -268,12 +270,12 @@ fdjt.CodexLayout=
                 i=0, lim=nodes.length; while (i<lim) wrapper.appendChild(nodes[i++]);
                 node.appendChild(wrapper);}
             // Now we actually tweak font sizes
-            var font_pct=100, count=0, delta=8, best_fit=false;
+            var font_pct=100, count=0, delta=16, best_fit=false;
             node.style.fontSize=font_pct+"%";
             var ih=wrapper.offsetHeight, iw=wrapper.offsetWidth;
             var hr=ih/height, wr=iw/width; 
             while (((hr>1)||(wr>1)||((hr<(0.9*height))&&(wr<(0.9*width))))&&
-                   (count<20)&&(delta>1)) {
+                   (count<20)&&((delta>=1)||(delta<=-1))) {
                 if ((hr<=1)&&(wr<=1)) {
                     if (!(best_fit)) best_fit=font_pct;
                     else if (font_pct>best_fit) best_fit=font_pct;}
@@ -1670,7 +1672,17 @@ fdjt.CodexLayout=
                 var undersize=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
                 if (((oversize)||(undersize))&&(scale_pages)) {
-                    fdjtDOM.scaleToFit(completed);}
+                    var geom=getGeom(completed,false,true);
+                    var iw=geom.inner_width, ih=geom.inner_height;
+                    completed.style.height="inherit";
+                    tweakFont(completed,iw,ih,80,120);
+                    var ow=completed.offsetWidth, oh=completed.offsetHeight;
+                    var noscale=((oversize)?
+                                 ((oh<=ih)&&(ow<=iw)):
+                                 ((oh<=ih)&&(ow<=iw)&&
+                                  ((oh>(0.9*ih))||(ow>(0.9*iw)))));
+                    completed.style.height="";
+                    if (!(noscale)) fdjtDOM.scaleToFit(completed);}
                 if (layout.pagedone) layout.pagedone(completed);
                 dropClass(completed,"codexshowpage");}
             this.finishPage=finishPage;
