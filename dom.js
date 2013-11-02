@@ -2620,7 +2620,7 @@ fdjt.DOM=
             fdjtDOM.addListener(window,"load",fdjtDOM.init);
         
         /* Tweaking fonts */
-        function tweakFont(node,width,height){
+        function tweakFont(node,width,height,min_font,max_font){
             var i, lim, nodes=[], style=node.style;
             var saved_display=node.style.display||"", saved_visibility=node.style.visibility||"";
             var saved_opacity=node.style.opacity||"", saved_zindex=node.style.zIndex||"";
@@ -2638,10 +2638,12 @@ fdjt.DOM=
             var bounds=getGeometry(node,false,true);
             if (!(width)) width=bounds.inner_width;
             if (!(height)) height=bounds.inner_height;
-            var max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
-            var min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
-            if (max_font) max_font=parseFloat(max_font); 
-            if (min_font) min_font=parseFloat(min_font); 
+            if (!(min_font))
+                min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
+            if (!(max_font))
+                max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
+            if ((min_font)&&(typeof min_font === "string")) min_font=parseFloat(min_font); 
+            if ((max_font)&&(typeof max_font === "string")) max_font=parseFloat(max_font); 
             var wrapper=fdjtDOM("div"); {
                 // Set up the inline-block wrapper we'll use for sizing
                 wrapper.style.display="inline-block";
@@ -2651,11 +2653,12 @@ fdjt.DOM=
                 i=0, lim=nodes.length; while (i<lim) wrapper.appendChild(nodes[i++]);
                 node.appendChild(wrapper);}
             // Now we actually tweak font sizes
-            var font_pct=100, count=0, delta=8, best_fit=false;
+            var font_pct=100, count=0, delta=16, best_fit=false;
             node.style.fontSize=font_pct+"%";
             var ih=wrapper.offsetHeight, iw=wrapper.offsetWidth;
             var hr=ih/height, wr=iw/width; 
-            while (((hr>1)||(wr>1)||(hr<0.9))&&(count<20)&&(delta>1)) {
+            while (((hr>1)||(wr>1)||((hr<0.9)&&(wr<0.9)))&&
+                   (count<20)&&((delta>=1)||(delta<=-1))) {
                 if ((hr<=1)&&(wr<=1)) {
                     if (!(best_fit)) best_fit=font_pct;
                     else if (font_pct>best_fit) best_fit=font_pct;}
