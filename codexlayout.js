@@ -1960,7 +1960,7 @@ fdjt.CodexLayout=
 
         if (window.indexedDB) {
             var req=window.indexedDB.open("codexlayout",1);
-            dbinit_timeout=setTimeout(indexedDB_timeout,5000);
+            dbinit_timeout=setTimeout(indexedDB_timeout,15000);
             req.onerror=function(event){
                 fdjtLog("Error initializing indexedDB layout cache: %o",
                         event.errorCode);
