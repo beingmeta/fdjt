@@ -259,8 +259,10 @@ fdjt.CodexLayout=
                 min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
             if (!(max_font))
                 max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
-            if ((max_font)&&(typeof max_font=="string")) max_font=parseFloat(max_font); 
-            if ((min_font)&&(typeof min_font=="string")) min_font=parseFloat(min_font); 
+            if ((max_font)&&(typeof max_font==="string"))
+                max_font=parseFloat(max_font); 
+            if ((min_font)&&(typeof min_font==="string"))
+                min_font=parseFloat(min_font); 
             var wrapper=fdjtDOM("div"); {
                 // Set up the inline-block wrapper we'll use for sizing
                 wrapper.style.display="inline-block";
