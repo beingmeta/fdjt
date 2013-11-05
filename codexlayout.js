@@ -187,10 +187,12 @@ fdjt.CodexLayout=
                 if (node===test) return true;
                 else if (atest instanceof RegExp) {
                     if (!(node.className)) continue;
+                    if (!(node.className.search)) continue;
                     // Handle inadvertant use of selector syntax
                     if (node.className.search(atest)>=0) return true;}
                 else if (typeof atest === 'string') {
                     if (!(node.className)) continue;
+                    if (!(node.className.search)) continue;
                     // Handle inadvertant use of selector syntax
                     if (atest[0]==='.') atest=atest.slice(1);
                     var classrx=new RegExp("\\b"+atest+"\\b");
@@ -312,7 +314,8 @@ fdjt.CodexLayout=
                          (isEmpty(scan.previousSibling.nodeValue)))
                     scan=scan.previousSibling;
                 else break;}
-            return ((scan.nodeType===1)&&(scan.className)&&
+            return ((scan.nodeType===1)&&
+                    (scan.className)&&(scan.className.search)&&
                     (scan.className.search(/\bcodexpage\b/g)>=0));}
 
         /* Duplicating nodes */
@@ -326,7 +329,7 @@ fdjt.CodexLayout=
                 (hasClass(node,"codexroot"))||(hasClass(node,"codexpage")))
                 return false;
             else if (hasParent(node,page)) return node;
-            else if ((node.className)&&
+            else if ((node.className)&&(node.className.search)&&
                      (node.className.search(/\bcodexwraptext\b/)>=0))
                 // We don't bother duplicating text wrapping convenience
                 //  classes
@@ -346,7 +349,9 @@ fdjt.CodexLayout=
             // Duplicate it's parent
             var copy=node.cloneNode(false);
             var parent=dupContext(node.parentNode,page,dups,crumbs);
-            var nodeclass=node.className||"";
+            var nodeclass=((node.className)&&(node.className.search)&&
+                           (node.className))
+                ||"";
             var duplicated=(nodeclass.search(/\bcodexdup.*\b/)>=0);
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
@@ -409,7 +414,11 @@ fdjt.CodexLayout=
         function moveNode(arg,into,blockp,crumbs){
             var baseclass; var node=arg;
             if (hasParent(node,into)) return node;
-            if (node.nodeType===1) baseclass=node.className;
+            if (node.nodeType===1) {
+                baseclass=node.className;
+                if ((baseclass)&&(typeof baseclass !== "string")) {
+                    into.appendChild(node);
+                    return;}}
             else if (node.nodeType===3) {
                 // Wrap text nodes in elements before moving
                 var wrapnode=fdjtDOM(
@@ -1436,6 +1445,8 @@ fdjt.CodexLayout=
                         if (!(restoremap[node.id])) {
                             ids.push(node.id);
                             restoremap[node.id]=node;}}}
+                // Weird node
+                else return;
                 if ((node.childNodes)&&(node.childNodes.length)) {
                     var children=node.childNodes;
                     var i=0, lim=children.length;
@@ -1463,7 +1474,7 @@ fdjt.CodexLayout=
                     var page=newpages[i++];
                     addpages.push(page);
                     if (page.nodeType===1) {
-                        if ((page.className)&&
+                        if ((page.className)&&(page.className.search)&&
                             (page.className.search(/\bcurpage\b/)>=0))
                             dropClass(page,"curpage");
                         gatherLayoutInfo(page,all_ids,newdups,
@@ -1709,7 +1720,7 @@ fdjt.CodexLayout=
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakBefore==='always')||
-                    ((elt.className)&&
+                    ((elt.className)&&(elt.className.search)&&
                      (elt.className.search(
                              /\b(forcebreakbefore|alwaysbreakbefore)\b/)>=0))||
                     ((forcebreakbefore)&&(testNode(elt,forcebreakbefore)));}
@@ -1719,7 +1730,7 @@ fdjt.CodexLayout=
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
                 var force=(style.pageBreakAfter==='always')||
-                    ((elt.className)&&
+                    ((elt.className)&&(elt.className.search)&&
                      (elt.className.search(
                              /\b(forcebreakafter|alwaysbreakafter)\b/)>=0))||
                     ((forcebreakafter)&&(testNode(elt,forcebreakafter)));
@@ -1745,7 +1756,7 @@ fdjt.CodexLayout=
                 if (elt.tagName==='IMG') return true;
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakInside==='avoid')||
-                    ((elt.className)&&
+                    ((elt.className)&&(elt.className.search)&&
                      (elt.className.search(page_block_classes)>=0))||
                     ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)));}
             this.avoidBreakInside=avoidBreakInside;
@@ -1754,7 +1765,8 @@ fdjt.CodexLayout=
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
                 return ((style.pageBreakBefore==='avoid')||
-                        ((elt.className)&&(elt.className.search(/\bavoidbreakbefore\b/)>=0))||
+                        ((elt.className)&&(elt.className.search)&&
+                         (elt.className.search(/\bavoidbreakbefore\b/)>=0))||
                         ((avoidbreakbefore)&&(testNode(elt,avoidbreakbefore))));}
             this.avoidBreakBefore=avoidBreakBefore;
 
