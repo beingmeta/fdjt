@@ -356,7 +356,7 @@ fdjt.CodexLayout=
                 // root node to the start
                 if (nodeclass.search(/\bcodexdupstart\b/)<0) {
                     node.className=nodeclass+" codexdupstart";
-                    stripDupStart(node);}}
+                    stripBottomStyles(node,true);}}
             
             // Strip top style information from copy
             if (copy.getAttribute("style")) stripTopStyles(copy);
@@ -374,29 +374,21 @@ fdjt.CodexLayout=
             else page.appendChild(copy);
             return copy;}
 
-        function stripDupStart(node){
+        function stripBottomStyles(node,keep){
             var style=node.style, string=style.cssText;
-            if (string) {
-                if (style.paddingBottom) style.paddingBottom="0px";
-                if (style.borderBottomWidth) style.borderBottomWidth="0px";
-                if (style.marginBottom) style.marginBottom="0px";
-                if (style.pageBreakAfter) style.pageBreakAfter="auto";
-                var new_string=style.cssText;
-                if (new_string!==string)
-                    node.setAttribute("data-savedstyle",string);}}
-        function stripTopStyles(node){
-            var style=node.style;
-            if (style.textIndent) style.textIndent="0px";
-            if (style.paddingTop) style.paddingTop="0px";
-            if (style.borderTopWidth) style.borderTopWidth="0px";
-            if (style.marginTop) style.marginTop="0px";
-            if (style.pageBreakBefore) style.pageBreakBefore="auto";}
-        function stripBottomStyles(node){
-            var style=node.style;
-            if (style.paddingBottom) style.paddingBottom="0px";
-            if (style.borderBottomWidth) style.borderBottomWidth="0px";
-            if (style.marginBottom) style.marginBottom="0px";
-            if (style.pageBreakAfter) style.pageBreakAfter="auto";}
+            if (keep) node.setAttribute("data-savedstyle",string);
+            style.paddingBottom="0px";
+            style.borderBottomWidth="0px";
+            style.marginBottom="0px";
+            style.pageBreakAfter="auto";}
+        function stripTopStyles(node,keep){
+            var style=node.style, string=style.cssText;
+            if (keep) node.setAttribute("data-savedstyle",string);
+            style.textIndent="0px";
+            style.paddingTop="0px";
+            style.borderTopWidth="0px";
+            style.marginTop="0px";
+            style.pageBreakBefore="auto";}
 
         /* Moving nodes */
 
@@ -1573,14 +1565,13 @@ fdjt.CodexLayout=
                      layout.height+fdjtState.getUUID());
                 if (!(CodexLayout.cache)) return;
                 var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
-                var dropLocal=fdjtState.dropLocal;
                 var layouts=getLocal("fdjtCodex.layouts",true);
                 if ((layouts)&&(layouts.length>=CodexLayout.cache)) {
                     var k=0, klim=(layouts.length)-(CodexLayout.cache-1);
                     while (k<klim) {
                         var id=layouts[k++];
                         fdjtLog("Discarding layout %s",id);
-                        dropLocal(id);}
+                        CodexLayout.dropLayout(id);}
                     layouts=layouts.slice(klim);}
                 var copy=container.cloneNode(true);
                 var pages=copy.childNodes, i=0, npages=pages.length;
@@ -1602,10 +1593,11 @@ fdjt.CodexLayout=
                     cacheLayout(layout_id,html);
                     setLocal("fdjtCodex.layouts",layouts,true);}
                 catch (ex) {
+                    // On an error, drop all layouts (extreme?)
                     i=0; var lim=layouts.length; while (i<lim) {
                         id=layouts[i++];
                         fdjtLog("Discarding layout %s",id);
-                        dropLayout(id);}
+                        CodexLayout.dropLayout(id);}
                     setLocal("fdjtCodex.layouts","[]");
                     try {
                         cacheLayout(layout_id,copy.innerHTML);
@@ -1696,7 +1688,7 @@ fdjt.CodexLayout=
                         var lastdup=alldups[alldups.length-1];
                         lastdup.className=lastdup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
-                var middle_dups=getChildren(page,"codexdup");
+                var middle_dups=getChildren(page,".codexdup");
                 if ((middle_dups)&&(middle_dups.length)) {
                     var j=0, dl=middle_dups.length; while (j<dl) {
                         stripBottomStyles(middle_dups[j++]);}}
