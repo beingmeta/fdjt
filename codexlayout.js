@@ -350,8 +350,7 @@ fdjt.CodexLayout=
             var copy=node.cloneNode(false);
             var parent=dupContext(node.parentNode,page,dups,crumbs);
             var nodeclass=((node.className)&&(node.className.search)&&
-                           (node.className))
-                ||"";
+                           (node.className))||"";
             var duplicated=(nodeclass.search(/\bcodexdup.*\b/)>=0);
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
@@ -848,7 +847,10 @@ fdjt.CodexLayout=
                         checkTerminal(node);
                         return;}
                     var disp=style.display;
-                    if ((style.position==='static')&&(disp!=='inline')) {
+                    if ((style.position==='static')&&(disp!=='inline')&&
+                        // This excludes weird elements like breaks
+                        (!((node.offsetTop===0)&&(node.offsetLeft===0)&&
+                           (node.offsetWidth===0)&&(node.offsetHeight===0)))) {
                         var loc=blocks.length;
                         blocks.push(node);
                         styles.push(style);
@@ -1063,7 +1065,10 @@ fdjt.CodexLayout=
                         return hasContent(page,true);
                     else if ((page.firstChild===node)||(firstGChild(page,node)))
                         return false;
-                    else if (getGeom(node,page).top===0)
+                    else if ((getGeom(node,page).top===0)&&
+                             // This handled weird things like <br/> elements
+                             (!((node.offsetTop===0)&&(node.offsetLeft===0)&&
+                                (node.offsetHeight===0)&&(node.offsetWidth===0))))
                         return false;
                     else return true;}
 
@@ -1255,7 +1260,8 @@ fdjt.CodexLayout=
                         // Add the child back and get the geometry
                         node.appendChild(child); geom=getGeom(node,page);
                         if (geom.bottom>use_page_height) {
-                            page_break=child; break;}
+                            page_break=child;
+                            break;}
                         else continue;}
                     if (page_break===node) // Never went over the edge
                         return false;
