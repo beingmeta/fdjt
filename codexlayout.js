@@ -847,10 +847,7 @@ fdjt.CodexLayout=
                         checkTerminal(node);
                         return;}
                     var disp=style.display;
-                    if ((style.position==='static')&&(disp!=='inline')&&
-                        // This excludes weird elements like breaks
-                        (!((node.offsetTop===0)&&(node.offsetLeft===0)&&
-                           (node.offsetWidth===0)&&(node.offsetHeight===0)))) {
+                    if ((style.position==='static')&&(disp!=='inline')&&(node.tagName!=="BR")) {
                         var loc=blocks.length;
                         blocks.push(node);
                         styles.push(style);
@@ -1065,10 +1062,7 @@ fdjt.CodexLayout=
                         return hasContent(page,true);
                     else if ((page.firstChild===node)||(firstGChild(page,node)))
                         return false;
-                    else if ((getGeom(node,page).top===0)&&
-                             // This handled weird things like <br/> elements
-                             (!((node.offsetTop===0)&&(node.offsetLeft===0)&&
-                                (node.offsetHeight===0)&&(node.offsetWidth===0))))
+                    else if ((getGeom(node,page).top===0)&&(node.tagName!=="BR"))
                         return false;
                     else return true;}
 
