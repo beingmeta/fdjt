@@ -261,7 +261,7 @@ if (!(fdjt.RefDB)) {
                     arg=arg.slice(0,at);
                     if (usedb) db=usedb;
                     else if (force) {
-                        warn("Creating forced RefDB %s for %s",dbname,arg);
+                        warn("Creating forced RefDB domain %s for reference %s",dbname,arg);
                         db=RefDB.open(dbname,DBType);}
                     else db=refDBProbe(dbname);
                     if ((db)&&(origin)) {
@@ -282,7 +282,7 @@ if (!(fdjt.RefDB)) {
                         ((tail)&&(refdbs[tail]||aliases[tail]));
                     if (known_db) db=known_db;
                     else if ((force)&&(type)&&(DBType)) {
-                        warn("Creating forced RefDB %s for %s",type,arg);
+                        warn("Creating forced RefDB domain %s for reference %s",type,arg);
                         db=new DBType(type);
                         if (type) db.addAlias(type);}
                     else {}}
@@ -1166,7 +1166,7 @@ if (!(fdjt.RefDB)) {
                 if (db.indices.hasOwnProperty(prop)) index=true;
                 else index=false;}
             else if ((index)&&(!(db.indices.hasOwnProperty(prop)))) {
-                warn("Creating index on %s for %o",prop,db);
+                // fdjtLog("Creating index on %s for %o",prop,db);
                 db.addIndex(prop);}
             else {}
             if ((val instanceof Array)&&(val._sortlen===0))
