@@ -212,6 +212,7 @@ fdjt.Dialog=(function(){
         dom.onmousedown=fdjtUI.cancel;
         dom.onmouseup=fdjtUI.cancel;
         dom.tabIndex=i;
+        if (spec.title) dom.title=spec.title;
         dom.onclick=function(evt){
             evt=evt||event;
             var target=fdjtUI.T(evt);
