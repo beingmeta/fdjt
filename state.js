@@ -430,6 +430,19 @@ fdjt.State=
         // adaptive design breakpoints
         fdjtState.getStyleTag=getStyleTag;
 
+        function getURL(keepquery,keephash){
+            var url=window.location.href;
+            var hashpos=url.indexOf('#'), qpos=url.indexOf('?');
+            var hash=((keephash)&&(hashpos>=0)&&(url.slice(hashpos+1)));
+            var query=((keepquery)&&(qpos>=0)&&
+                       ((hashpos>=0)?(url.slice(qpos+1,hashpos)):
+                        (url.slice(qpos+1))));
+            url=((qpos>=0)?(url.slice(0,qpos)):
+                 (hashpos>=0)?(url.slice(0,hashpos)):
+                 (url));
+            return url+((query)?("?"+query):(""))+((hash)?("#"+hash):(""));}
+        fdjtState.getURL=getURL;
+
         return fdjtState;})();
 
 /* Emacs local variables
