@@ -1436,7 +1436,8 @@ fdjt.CodexLayout=
                     if (classname.search(/\bcodexdupstart\b/)>=0) {
                         if (!(dupstarts[node.id])) {
                             dupstarts[node.id]=node;
-                            dupids.push(node.id);}}
+                            dupids.push(node.id);
+                            ids.push(node.id);}}
                     else if (classname.search(/\b(codexdup|codexdupend)\b/)>=0) {
                         var baseid=node.getAttribute("data-baseid");
                         if (baseid) {
@@ -1472,68 +1473,6 @@ fdjt.CodexLayout=
                 var dupids=[], dupstarts={}, restoremap={};
                 var curnodes=[], newdups={};
                 var newpages=frag.childNodes, addpages=[];
-                function finishRestore(){
-                    if (trace) fdjtLog("Moving originals into layout");
-                    i=0, lim=all_ids.length; while (i<lim) {
-                        var id=all_ids[i++];
-                        var original=idmap[id];
-                        var restore=restoremap[id];
-                        // The restoremap contains content references
-                        //  which are unmodified from the original
-                        //  content, making them a lot smaller and easier
-                        //  to keep around.
-                        if ((restore)&&(original)) {
-                            var classname=restore.className;
-                            var style=restore.getAttribute("style");
-                            var ostyle=original.getAttribute("style");
-                            var crumb=document.createTextNode("");
-                            replaceNode(original,crumb);
-                            crumbs[id]=crumb;
-                            replaceNode(restore,original);
-                            if (classname!==original.className) {
-                                if ((original.className)&&
-                                    (typeof original.className === "string"))
-                                    original.setAttribute(
-                                        "data-oldclass",original.className);
-                                original.className=classname;}
-                            if (style!==ostyle) {
-                                if (ostyle) original.setAttribute(
-                                    "data-oldstyle",ostyle);
-                                original.setAttribute("style",style);}}
-                        else if (original) {
-                            saved_ids[id]=original;
-                            original.id=null;}}
-                    if (trace) fdjtLog("Gathering lostids");
-                    var lostids=layout.lostids={};
-                    var really_lost=lostids._all_ids=[];
-                    i=0, lim=dupids.length; while (i<lim) {
-                        var dupid=dupids[i++];
-                        var orig=idmap[dupid];
-                        if (orig) {
-                            lostids[dupid]=orig;
-                            really_lost.push(dupid);
-                            orig.id=null;}}
-                    if (trace) fdjtLog("Moving nodes around");
-                    var cur=container.childNodes;
-                    i=0, lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
-                    i=0; while (i<lim) container.removeChild(curnodes[i++]);
-                    i=0, lim=addpages.length;
-                    while (i<lim) container.appendChild(addpages[i++]);
-                    layout.pages=addpages;
-                    dups=layout.dups=newdups;
-                    saved_ids._all_ids=all_ids;
-                    layout.saved_ids=saved_ids;
-                    layout.page=addpages[0];
-                    layout.pagenum=parseInt(
-                        layout.page.getAttribute("data-pagenum"),10);
-                    if (trace)
-                        fdjtLog("Moving origin/container back to document");
-                    if (ccrumb)
-                        ccrumb.parentNode.replaceChild(container,ccrumb);
-                    if (bcrumb)
-                        bcrumb.parentNode.replaceChild(origin,bcrumb);
-                    if (trace) fdjtLog("Done restoring layout");
-                    if (donefn) donefn();}
                 fdjtLog("Setting layout to %d characters of HTML",
                         content.length);
                 frag.innerHTML=content;
@@ -1561,7 +1500,67 @@ fdjt.CodexLayout=
                 if (container.parentNode) {
                     ccrumb=document.createTextNode();
                     container.parentNode.replaceChild(ccrumb,container);}
-                setTimeout(function(){finishRestore();},250);}
+                if (trace) fdjtLog("Moving originals into layout");
+                i=0, lim=all_ids.length; while (i<lim) {
+                    var id=all_ids[i++];
+                    var original=idmap[id];
+                    var restore=restoremap[id];
+                    // The restoremap contains content references
+                    //  which are unmodified from the original
+                    //  content, making them a lot smaller and easier
+                    //  to keep around.
+                    if ((restore)&&(original)) {
+                        var classname=restore.className;
+                        var style=restore.getAttribute("style");
+                        var ostyle=original.getAttribute("style");
+                        var crumb=document.createTextNode("");
+                        replaceNode(original,crumb);
+                        crumbs[id]=crumb;
+                        replaceNode(restore,original);
+                        if (classname!==original.className) {
+                            if ((original.className)&&
+                                (typeof original.className === "string"))
+                                original.setAttribute(
+                                    "data-oldclass",original.className);
+                            original.className=classname;}
+                        if (style!==ostyle) {
+                            if (ostyle) original.setAttribute(
+                                "data-oldstyle",ostyle);
+                            original.setAttribute("style",style);}}
+                    else if (original) {
+                        saved_ids[id]=original;
+                        original.id=null;}}
+                if (trace) fdjtLog("Gathering lostids");
+                var lostids=layout.lostids={};
+                var really_lost=lostids._all_ids=[];
+                i=0, lim=dupids.length; while (i<lim) {
+                    var dupid=dupids[i++];
+                    var orig=idmap[dupid];
+                    if (orig) {
+                        lostids[dupid]=orig;
+                        really_lost.push(dupid);
+                        orig.id=null;}}
+                if (trace) fdjtLog("Moving nodes around");
+                var cur=container.childNodes;
+                i=0, lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
+                i=0; while (i<lim) container.removeChild(curnodes[i++]);
+                i=0, lim=addpages.length;
+                while (i<lim) container.appendChild(addpages[i++]);
+                layout.pages=addpages;
+                dups=layout.dups=newdups;
+                saved_ids._all_ids=all_ids;
+                layout.saved_ids=saved_ids;
+                layout.page=addpages[0];
+                layout.pagenum=parseInt(
+                    layout.page.getAttribute("data-pagenum"),10);
+                if (trace)
+                    fdjtLog("Moving origin/container back to document");
+                if (ccrumb)
+                    ccrumb.parentNode.replaceChild(container,ccrumb);
+                if (bcrumb)
+                    bcrumb.parentNode.replaceChild(origin,bcrumb);
+                if (trace) fdjtLog("Done restoring layout");
+                if (donefn) donefn();}
             layout.setLayout=setLayout;
 
             function dropSelected(node,dropsel){
