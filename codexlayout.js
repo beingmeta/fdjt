@@ -2102,8 +2102,6 @@ fdjt.CodexLayout=
                 while (i<lim) dropLayout(layouts[i++]);
                 fdjtState.dropLocal("fdjtCodex.layouts");}};
 
-        CodexLayout.tracelevel=1;
-
         return CodexLayout;})();
 
 
