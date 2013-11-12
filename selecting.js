@@ -520,6 +520,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if (also) also(evt,sel);};}
         
         function addHandlers(container,sel,opts){
+            // We always override the default action when selecting
+            opts.override=true;
             var taphold=new fdjtUI.TapHold(container,opts);
             fdjtDOM.addListener(container,"tap",
                                 ((opts)&&(opts.ontap))||
