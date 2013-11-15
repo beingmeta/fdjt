@@ -52,6 +52,7 @@ var WSN=(function(){
             catch (ex2) {return (/[.,?!-_@&%$#\\\/\^()]/);}}}
     
     var punct_regex=get_punct_regex();
+    var decodeEntities=fdjtString.decodeEntities;
     
     function WSN(arg,sortfn,wordfn,keepdup){
         if (arg==="") return arg;
@@ -66,7 +67,8 @@ var WSN=(function(){
         if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
         if (typeof keepdup === 'undefined') keepdup=WSN.keepdup||false;
         if (typeof arg === 'string') {
-            var norm=(arg.toLowerCase().replace(punct_regex,""));
+            var norm=
+                decodeEntities(arg).toLowerCase().replace(punct_regex,"");
             // Trim spaces
             if (norm.trim) norm=norm.trim();
             else {
@@ -74,6 +76,7 @@ var WSN=(function(){
                     norm=norm.slice(norm.search(/\S/));
                 if (norm.search(/\s+$/)>0)
                     norm=norm.slice(0,norm.search(/\s+$/));}
+            if (norm==="") return "";
             var words=norm.split(/\W*\s+\W*/g), word;
             var xwords=[], xword;
             var nwords=words.length;
