@@ -1609,7 +1609,7 @@ fdjt.CodexLayout=
                 i=0, n=todrop.length; while (i<n) {
                     node.removeChild(todrop[i++]);}}
             
-            function saveLayout(layout_id){
+            function saveLayout(callback,layout_id){
                 if (!(layout_id)) layout_id=layout.layout_id||
                     (layout.layout_id=layout.width+"x"+
                      layout.height+fdjtState.getUUID());
@@ -1634,7 +1634,8 @@ fdjt.CodexLayout=
                 var html=copy.innerHTML;
                 try {
                     cacheLayout(layout_id,html);
-                    setLocal("fdjtCodex.layouts",layouts,true);}
+                    setLocal("fdjtCodex.layouts",layouts,true);
+                    callback(layout);}
                 catch (ex) {
                     fdjtLog.warn("Couldn't save layout %s: %s",layout_id,ex);
                     return false;}
@@ -2059,9 +2060,22 @@ fdjt.CodexLayout=
                 var req=storage['delete'](layout_id);
                 req.onsuccess=function(event){
                     event=false; // ignored
+                    var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
+                    if (layouts) {
+                        var loc=layouts.indexOf(layout_id);
+                        if (loc>=0) {
+                            layouts.splice(loc,1);
+                            fdjtState.setLocal("fdjtCodex.layouts",layouts,true);}}
                     if (CodexLayout.trace)
                         fdjtLog("Layout %s removed",layout_id);};}
-            else fdjtState.dropLocal(layout_id);}
+            else {
+                fdjtState.dropLocal(layout_id);
+                var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
+                if (layouts) {
+                    var loc=layouts.indexOf(layout_id);
+                    if (loc>=0) {
+                        layouts.splice(loc,1);
+                        fdjtState.setLocal("fdjtCodex.layouts",layouts,true);}}}}
         CodexLayout.dropLayout=dropLayout;
         function fetchLayout(layout_id,callback){
             var content=false;
