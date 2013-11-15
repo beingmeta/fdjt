@@ -44,6 +44,7 @@
 var WSN=(function(){
     "use strict";
     var fdjtHash=fdjt.Hash;
+    var fdjtString=fdjt.String;
 
     function get_punct_regex(){
         try { return (/(\pM)/g);}
