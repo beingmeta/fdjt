@@ -1616,13 +1616,6 @@ fdjt.CodexLayout=
                 if (!(CodexLayout.cache)) return;
                 var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
                 var layouts=getLocal("fdjtCodex.layouts",true);
-                if ((layouts)&&(layouts.length>=CodexLayout.cache)) {
-                    var k=0, klim=(layouts.length)-(CodexLayout.cache-1);
-                    while (k<klim) {
-                        var id=layouts[k++];
-                        fdjtLog("Discarding layout %s",id);
-                        CodexLayout.dropLayout(id);}
-                    layouts=layouts.slice(klim);}
                 var copy=container.cloneNode(true);
                 var pages=copy.childNodes, i=0, npages=pages.length;
                 while (i<npages) {
@@ -1643,16 +1636,8 @@ fdjt.CodexLayout=
                     cacheLayout(layout_id,html);
                     setLocal("fdjtCodex.layouts",layouts,true);}
                 catch (ex) {
-                    // On an error, drop all layouts (extreme?)
-                    i=0; var lim=layouts.length; while (i<lim) {
-                        id=layouts[i++];
-                        fdjtLog("Discarding layout %s",id);
-                        CodexLayout.dropLayout(id);}
-                    setLocal("fdjtCodex.layouts","[]");
-                    try {
-                        cacheLayout(layout_id,copy.innerHTML);
-                        setLocal("fdjtCodex.layouts",[layout_id],true);}
-                    catch (whoops) {}}
+                    fdjtLog.warn("Couldn't save layout %s: %s",layout_id,ex);
+                    return false;}
                 return layout_id;}
             this.saveLayout=saveLayout;
             function restoreLayout(arg,donefn){
