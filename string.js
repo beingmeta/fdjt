@@ -72,6 +72,8 @@ fdjt.String=
             output=output+string;
             return output;}
 
+        var notspace=/[^\n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff]/g;
+
         fdjtString.nbsp="\u00A0";
         fdjtString.middot="\u00B7";
         fdjtString.emdash="\u2013";
@@ -166,11 +168,10 @@ fdjt.String=
                     else return chopped;}}}
         fdjtString.ellipsize=ellipsize;
                 
-
         function isEmpty(string){
             if (typeof string === "string")  {
-                var i=0; var lim=string.length, pt;
-                if (lim===0) return true;
+                var pt;
+                if (string.length===0) return true;
                 else pt=string.search(notspace);
                 if (pt<0) return true;
                 else if (string[pt]!=='&') return false;
