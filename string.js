@@ -167,17 +167,19 @@ fdjt.String=
         fdjtString.ellipsize=ellipsize;
                 
 
-        fdjtString.isEmpty=function(string,decode){
+        function isEmpty(string){
             if (typeof string === "string")  {
-                if ((decode)&&(string.indexOf('&')))
-                    string=decodeEntities(string);
-                var i=0; var lim=string.length;
+                var i=0; var lim=string.length, pt;
                 if (lim===0) return true;
-                while (i<lim) {
-                    if (spacechars.indexOf(string[i])>=0) i++;
-                    else return false;}
-                return true;}
-            else return false;};
+                else pt=string.search(notspace);
+                if (pt<0) return true;
+                else if (string[pt]!=='&') return false;
+                else {
+                    string=string.replace(/&nbsp;/g,"\u0xa0");
+                    pt=string.search(notspace);
+                    return (pt<0);}}
+            else return false;}
+        fdjtString.isEmpty=isEmpty;
 
         fdjtString.findSplit=function(string,split,escape){
             var start=0;
