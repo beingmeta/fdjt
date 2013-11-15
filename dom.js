@@ -732,7 +732,7 @@ fdjt.DOM=
         function getFirstChild(elt,spec){
             var children=getChildren(elt,spec);
             if (children.length) return children[0]; else return false;}
-        fdjt.$1=fdjtDOM.getChild=fdjtDOM.getFirstChild=getFirstChild;
+        fdjt.$1=fdjtDOM.$1=fdjtDOM.getChild=fdjtDOM.getFirstChild=getFirstChild;
 
         function filter_children(node,filter,results){
             if (node.nodeType===1) {
