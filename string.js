@@ -176,7 +176,7 @@ fdjt.String=
                 if (pt<0) return true;
                 else if (string[pt]!=='&') return false;
                 else {
-                    string=string.replace(/&nbsp;/g,"\u0xa0");
+                    string=string.replace(/&nbsp;/g,"\u00a0");
                     pt=string.search(notspace);
                     return (pt<0);}}
             else return false;}
