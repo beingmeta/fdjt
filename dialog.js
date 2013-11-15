@@ -93,6 +93,11 @@ fdjt.Dialog=(function(){
                     ((fdjtID("FDJTALERT"))||(fdjtID("FDJTDIALOG"))));
         var box=fdjtDOM.getParent(target,".fdjtdialog");
         if (box) {
+            var countdown=fdjtDOM.getChild(box,".countdown");
+            if ((countdown)&&(countdown.id)) {
+                var ticker=countdown_tickers[countdown.id];
+                if (ticker) clearInterval(ticker);
+                delete countdown_tickers[countdown.id];}
             clear_countdown(box);
             fdjtDOM.remove(box);}}
     
