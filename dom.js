@@ -33,6 +33,8 @@ fdjt.DOM=
         var fdjtString=fdjt.String;
         var fdjtLog=fdjt.Log;
 
+        var css_selector_regex=/((^|[.#])\w+)|(\[[^ \]=]+=[^\]]+\])|(\[[^ \]=]+\])/ig;
+
         function fdjtDOM(spec){
             var node;
             if (spec.nodeType) node=spec;
@@ -47,6 +49,9 @@ fdjt.DOM=
                      (node=document.getElementById(spec.slice(1)))) {}
             else if (typeof spec==='string') {
                 var elts=spec.match(css_selector_regex);
+                if (!(elts)) {
+                    fdjtLog.warn("bad CSS spec");
+                    return false;}
                 var classname=false;
                 node=document.createElement(elts[0]);
                 var i=1; var len=elts.length;
@@ -215,8 +220,6 @@ fdjt.DOM=
                 return (parseFloat(lh.slice(0,-1))/100)*(parsePX(fs));
             else return parsePX(fs);}
         fdjtDOM.getLineHeight=getLineHeight;
-
-        var css_selector_regex=/((^|[.#])\w+)|(\[\w+=\w+\])/g;
 
         var whitespace_pat=/(\s)+/;
         var trimspace_pat=/^(\s)+|(\s)+$/;
@@ -489,37 +492,44 @@ fdjt.DOM=
                 i=0; lim=specs.length;
                 while (i<lim) {
                     var sub=string_trim(specs[i++]);
-                    compound.push(new Selector(sub));}
+                    var sel=new Selector(sub);
+                    if (sel) compound.push(sel);}
                 this.compound=compound;
                 selectors[spec]=this;
                 return this;}
             // Otherwise, parse and set up this
             var elts=spec.match(css_selector_regex);
-            i=0; lim=elts.length;
             var classes=[]; var classnames=[]; var attribs=false;
-            if (!((elts[0][0]==='.')||(elts[0][0]==='#')||(elts[0][0]==='['))) {
-                this.tag=((tagcs)?(elts[0]):(elts[0].toUpperCase()));
-                i=1;}
-            while (i<lim)
-                if (elts[i][0]==='#') this.id=elts[i++].slice(1);
-            else if (elts[i][0]==='.') {
-                classnames.push(elts[i].slice(1));
-                classes.push(classPat(elts[i++].slice(1)));}
-            else if (elts[i][0]==='[') {
-                var aelts=elts[i++]; var eltsend=aelts.length-1;
-                if (!(attribs)) attribs={};
-                var eqpos=aelts.indexOf('=');
-                if (eqpos<0)
-                    attribs[aelts.slice(1,eltsend)]=true;
-                else if (aelts[eqpos+1]==='~') 
-                    attribs[aelts.slice(1,eqpos)]=
-                    classPat(aelts.slice(eqpos+2,eltsend));
-                else attribs[aelts.slice(1,eqpos)]=aelts.slice(eqpos+1,eltsend);}
-            else fdjtLog.uhoh("weird elts %o",elts[i++]);
+            if (!(elts))
+                fdjtLog.warn("Couldn't parse spec %s",spec);
+            if (elts) {
+                i=0; lim=elts.length;
+                if (!((elts[0][0]==='.')||(elts[0][0]==='#')||
+                      (elts[0][0]==='['))) {
+                    this.tag=((tagcs)?(elts[0]):(elts[0].toUpperCase()));
+                    i=1;}
+                while (i<lim)
+                    if (elts[i][0]==='#') this.id=elts[i++].slice(1);
+                else if (elts[i][0]==='.') {
+                    classnames.push(elts[i].slice(1));
+                    classes.push(classPat(elts[i++].slice(1)));}
+                else if (elts[i][0]==='[') {
+                    var aelts=elts[i++]; var eltsend=aelts.length-1;
+                    if (!(attribs)) attribs={};
+                    var eqpos=aelts.indexOf('=');
+                    if (eqpos<0)
+                        attribs[aelts.slice(1,eltsend)]=true;
+                    else if (aelts[eqpos+1]==='~') 
+                        attribs[aelts.slice(1,eqpos)]=
+                        classPat(aelts.slice(eqpos+2,eltsend));
+                    else attribs[aelts.slice(1,eqpos)]=
+                        aelts.slice(eqpos+1,eltsend);}
+                else fdjtLog.uhoh("weird elts %o",elts[i++]);}
             if (classes.length) {
                 this.classes=classes; this.classnames=classnames;}
             if (attribs) this.attribs=attribs;
-            this.rank=[0,((this.id)?(1):(0)),classnames.length+attribs.length,1];
+            this.rank=[0,((this.id)?(1):(0)),
+                       classnames.length+attribs.length,1];
             selectors[spec]=this;
             return this;}
         Selector.prototype.match=function(elt){
@@ -534,7 +544,9 @@ fdjt.DOM=
                 if (typeof elt.className === "string") {
                     var classname=elt.className; var classes=this.classes;
                     i=0; lim=classes.length;
-                    while (i<lim) if (classname.search(classes[i++])<0) return false;}
+                    while (i<lim)
+                        if (classname.search(classes[i++])<0)
+                            return false;}
             else return false;
             if (this.attribs) {
                 var attribs=this.attribs;
