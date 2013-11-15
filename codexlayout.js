@@ -133,15 +133,19 @@ fdjt.CodexLayout=
         /* Node testing */
 
         var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
-        
+        var notspace=/[^\n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff]/g;
+     
         function isEmpty(string){
             if (typeof string === "string")  {
-                var i=0; var lim=string.length;
+                var i=0; var lim=string.length, pt;
                 if (lim===0) return true;
-                while (i<lim) {
-                    if (spacechars.indexOf(string[i])>=0) i++;
-                    else return false;}
-                return true;}
+                else pt=string.search(notspace);
+                if (pt<0) return true;
+                else if (string[pt]!=='&') return false;
+                else {
+                    string=string.replace(/&nbsp;/g,"\u0xa0");
+                    pt=string.search(notspace);
+                    return (pt<0);}}
             else return false;}
         
         function optimizeLayoutRule(rule){
