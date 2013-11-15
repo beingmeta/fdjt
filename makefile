@@ -3,14 +3,14 @@
 
 ECHO=/bin/echo
 CLEAN=/bin/rm -f
-FDJT_FILES=header.js string.js time.js  template.js hash.js \
+FDJT_FILES=header.js charnames.js string.js time.js  template.js hash.js \
 	syze.js iscroll.js \
 	log.js init.js state.js dom.js \
 	json.js refdb.js ajax.js wsn.js \
 	ui.js dialog.js completions.js taphold.js selecting.js \
 	adjustfont.js scrollever.js \
 	globals.js
-FDJT_HINTS=string.hint time.hint \
+FDJT_HINTS=string.hint charnames.hint time.hint \
 	syze.hint iscroll.hint indexed.hint \
 	log.hint init.hint state.hint dom.hint \
 	refdb.hint json.hint ajax.hint codexlayout.hint \

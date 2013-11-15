@@ -167,8 +167,10 @@ fdjt.String=
         fdjtString.ellipsize=ellipsize;
                 
 
-        fdjtString.isEmpty=function(string){
+        fdjtString.isEmpty=function(string,decode){
             if (typeof string === "string")  {
+                if ((decode)&&(string.indexOf('&')))
+                    string=decodeEntities(string);
                 var i=0; var lim=string.length;
                 if (lim===0) return true;
                 while (i<lim) {
@@ -295,11 +297,18 @@ fdjt.String=
             return string.replace(/\W*\s\W*/g," ").toLowerCase();}
         fdjtString.normString=normstring;
 
-        function unEntify(string) {
-            return string.replace(/&#(\d+);/g,
-                                  function(whole,paren) {
-                                      return String.fromCharCode(+paren);});}
-        fdjtString.unEntify=unEntify;
+        function dCharCode(whole,paren){
+            return String.fromCharCode(parseInt(paren,10));}
+        function xCharCode(whole,paren){
+            return String.fromCharCode(parseInt(paren,16));}
+        function nCharCode(whole,paren){
+            return fdjt.charnames[paren]||"&"+paren+";";}
+        function decodeEntities(string) {
+            return string.replace(/&#(\d+);/g,dCharCode).
+                replace(/&#x([0123456789ABCDEFabcdef]+);/g,xCharCode).
+                replace(/&([abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.]+)/g,
+                        nCharCode);}
+        fdjtString.decodeEntities=decodeEntities;
 
         var numpat=/^\d+(\.\d+)$/;
         function getMatch(string,rx,i,literal){
