@@ -101,7 +101,7 @@ fdjt.Dialog=(function(){
             clear_countdown(box);
             fdjtDOM.remove(box);}}
     
-    function close_dialog(evt){
+    function close_dialog(evt,fast){
         evt=evt||event;
         var target=((evt)?((evt.nodeType)?(evt):(fdjtUI.T(evt))):
                     ((fdjtID("FDJTALERT"))||(fdjtID("FDJTDIALOG"))));
@@ -109,13 +109,16 @@ fdjt.Dialog=(function(){
         var box=fdjtDOM.getParent(target,".fdjtdialog");
         if (box) {
             clear_countdown(box);
-            if ((fdjtDOM.transitionEnd)&&
-                (!(fdjtDOM.hasClass(box,"closing")))) {
-                fdjtDOM.addListener(box,fdjtDOM.transitionEnd,function(){
-                    fdjtDOM.remove(box);});
-                fdjtDOM.addClass(box,"closing");}
-            else fdjtDOM.remove(box);}}
-
+            if (fast) fdjtDOM.remove(box);
+            else {
+                if ((fdjtDOM.transitionEnd)&&
+                    (!(fdjtDOM.hasClass(box,"closing")))) {
+                    fdjtDOM.addListener(box,fdjtDOM.transitionEnd,function(){
+                        fdjtDOM.remove(box);});
+                    fdjtDOM.addClass(box,"closing");}
+                else fdjtDOM.remove(box);}}}
+    Dialog.close=close_dialog;
+    
     function clear_countdown(box){
         var countdown=fdjtDOM.getChild(box,".countdown");
         if (countdown) {
@@ -279,7 +282,7 @@ fdjt.Dialog=(function(){
             i++;}
         if (selection<0) selection=0; 
         box=makeDialog(
-            {},fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
+            spec,fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
             fdjtDOM("div.choices",buttons));
         close_button=fdjtDOM.getChild(box,".closebutton");
         if (spec.cancel) close_button.onclick=close_choice;
