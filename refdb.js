@@ -495,19 +495,34 @@ if (!(fdjt.RefDB)) {
             return importValue(this._db,value,refstrings);};
         RefDB.prototype.importValue=function(val,refstrings){
             return importValue(val,this,refstrings);};
-        RefDB.prototype.Import=function refDBImport(data,rules,flags){
-            var refs=[];
-            if (!(data instanceof Array)) data=[data];
-            var i=0, lim=data.length; while (i<lim) {
-                var item=data[i++];
-                var ref=resolveRef(item._id,item._domain||this,
-                                   this.constructor,true);
-                if (!(ref)) warn("Couldn't resolve database for %o",item._id);
-                else {
-                    refs.push(ref);
-                    ref.Import(item,rules||false,flags);}}
-            if (data.length===1) return refs[0];
-            else return refs;};
+        function defImport(item,refs,db,rules,flags){
+            var ref=resolveRef(item._id,item._domain||this,
+                               db.constructor,true);
+            if (!(ref)) warn("Couldn't resolve database for %o",item._id);
+            else {
+                refs.push(ref);
+                ref.Import(item,rules||false,flags);}}
+
+        RefDB.prototype.Import=function refDBImport(data,rules,flags,callback){
+            var refs=[]; var db=this;
+            if (!(data instanceof Array)) {
+                defImport(data,refs,db,rules,flags);
+                if (callback) {
+                    if (callback.call) 
+                        setTimeout(function(){callback(refs[0]);});
+                    return refs[0];}
+                else return refs[0];}
+            if ((!(callback))||(data.length<=7)) {
+                var i=0, lim=data.length; while (i<lim) {
+                    defImport(data[i++],refs,db,rules,flags);}
+                if ((callback)&&(callback.call)) 
+                    setTimeout(function(){callback(refs);},10);
+                return refs;}
+            else if (!(callback.call))
+                fdjtTime.slowmap(function(item){defImport(item,refs,db,rules,flags);},data);
+            else fdjtTime.slowmap(function(item){defImport(item,refs,db,rules,flags);},
+                                  data,false,
+                                  function(){callback(refs);});};
 
         Ref.prototype.onLoad=function(fn,name){
             if (this._live) fn(this);
