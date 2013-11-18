@@ -422,14 +422,19 @@ fdjt.CodexLayout=
                     into.appendChild(node);
                     return;}}
             else if (node.nodeType===3) {
-                // Wrap text nodes in elements before moving
-                var wrapnode=fdjtDOM(
-                    ((blockp)?"div.codexwraptext":"span.codexwraptext"));
-                if (node.parentNode)
-                    node.parentNode.replaceChild(wrapnode,node);
-                wrapnode.appendChild(node);
-                baseclass="codexwraptext";
-                node=wrapnode;}
+                if (node.nodeValue.search(/\w/g)>=0) {
+                    // Wrap text nodes in elements before moving
+                    var wrapnode=fdjtDOM(
+                        ((blockp)?"div.codexwraptext":"span.codexwraptext"));
+                    if (node.parentNode)
+                        node.parentNode.replaceChild(wrapnode,node);
+                    wrapnode.appendChild(node);
+                    baseclass="codexwraptext";
+                    node=wrapnode;}
+                else {
+                    node=node.cloneNode(true);
+                    into.appendChild(node);
+                    return node;}}
             if ((node.parentNode)&&((!(node.id))||(!(crumbs[node.id])))) {
                 // If the node has a parent and hasn't been moved before,
                 //  we leave a "crumb" (a placeholder) in the original
@@ -714,8 +719,9 @@ fdjt.CodexLayout=
                 else moveNode(root);
                 var scale_elts=getChildren(root,"[data-pagescale],[pagescale]");
                 scaleToPage(scale_elts,page_width,page_height);
+                var geom=getGeom(root,page);
                 if (singlepage) {
-                    var pw=page.offsetWidth, ph=page.offsetHeight;
+                    var pw=geom.width, ph=geom.height;
                     if ((pw>page_width)||(ph>page_height))
                         addClass(page,"codexoversize");
                     else if ((fullpage)&&((pw<(0.9*page_width))&&(ph<(0.9*page_height))))
@@ -727,7 +733,6 @@ fdjt.CodexLayout=
                     if (donefn) donefn(layout);
                     return;}
                 else {
-                    var geom=getGeom(root,page);
                     if (geom.bottom<=page_height) {
                         prev=layout.prev=root;
                         prevstyle=layout.prevstyle=getStyle(root);
