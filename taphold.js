@@ -69,14 +69,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var touches=((evt.changedTouches)&&(evt.changedTouches.length)&&
                      (evt.changedTouches))||
             ((evt.touches)&&(evt.touches.length)&&(evt.touches));
-        if (touches) return touches[0].screenX;
+        if (touches) return (touches[0].pageX-window.pageXOffset);
         else return false;}
     function getClientY(evt){
         if (typeof evt.clientY === "number") return evt.clientY;
         var touches=((evt.changedTouches)&&(evt.changedTouches.length)&&
                      (evt.changedTouches))||
             ((evt.touches)&&(evt.touches.length)&&(evt.touches));
-        if (touches) return touches[0].screenY;
+        if (touches) return (touches[0].pageY-window.pageYOffset);
         else return false;}
     
     function dispatchEvent(target,etype,orig,tx,ty,also){
@@ -325,9 +325,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (override) noDefault(evt);
             if ((scrolling)&&(evt.touches)) {
                 if (scroll_x>=0) 
-                    scrolling.scrollLeft=scroll_x-evt.touches[0].pageX;
+                    scrolling.scrollLeft=scroll_x-(evt.touches[0].pageX-window.pageXOffset);
                 if (scroll_y>=0)
-                    scrolling.scrollTop=scroll_y-evt.touches[0].pageY;}
+                    scrolling.scrollTop=scroll_y-(evt.touches[0].pageY-window.pageYOffset);}
             if ((pressed)&&(cleared>start_t)) {
                 abortpress(evt,"move/cleared");
                 return;}
@@ -442,8 +442,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
 
             if (target) target=getParent(target,touchable);
             if ((scrolling)&&(evt.touches)) {
-                if (scroll_x>=0) scroll_x=scrolling.scrollLeft+evt.touches[0].pageX;
-                if (scroll_y>=0) scroll_y=scrolling.scrollLeft+evt.touches[0].pageY;}
+                if (scroll_x>=0)
+                    scroll_x=scrolling.scrollLeft+(evt.touches[0].pageX-window.pageXOffset);
+                if (scroll_y>=0)
+                    scroll_y=scrolling.scrollLeft+(evt.touches[0].pageY-window.pageYOffset);}
             touch_x=evt.clientX||getClientX(evt)||touch_x;
             touch_y=evt.clientY||getClientY(evt)||touch_y;
             start_x=touch_x; start_y=touch_y;
