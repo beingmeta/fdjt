@@ -2095,7 +2095,7 @@ fdjt.DOM=
             // Clear any existing adjustments
             var wrapper=((node.firstChild.className==="fdjtadjusted")?
                          (node.firstChild):(getFirstChild(node,"fdjtadjusted")));
-            if (wrapper) wrapper.style="";
+            if (wrapper) wrapper.setAttribute("style","");
 
             var geom=getGeometry(node,false,true), inside=getInsideBounds(node);
             var avail_width=((fudge)?(fudge*geom.inner_width):
