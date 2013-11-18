@@ -496,7 +496,7 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.importValue=function(val,refstrings){
             return importValue(val,this,refstrings);};
         function defImport(item,refs,db,rules,flags){
-            var ref=resolveRef(item._id,item._domain||this,
+            var ref=resolveRef(item._id,item._domain||db,
                                db.constructor,true);
             if (!(ref)) warn("Couldn't resolve database for %o",item._id);
             else {
