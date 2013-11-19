@@ -454,7 +454,10 @@ fdjt.CodexLayout=
         // This moves a node onto a page, recreating (as far as
         // possible) its original DOM context on the new page.
         function moveNodeToPage(node,page,dups,crumbs){
-            if (hasParent(node,page)) return node;
+            if (hasParent(node,page)) {
+                if ((node.nodeType===1)&&(!(hasContent(page,true,false,node))))
+                    addClass(node,"codexpagetop");
+                return node;}
             var scan=node, parent=scan.parentNode;
             // If we're moving a first child, we might as well move the parent
             while ((parent)&&
@@ -464,7 +467,7 @@ fdjt.CodexLayout=
                    (!(hasClass(parent,"codexpage")))&&
                    (scan===getFirstContent(parent))) {
                 scan=parent; parent=scan.parentNode;}
-            var istop=(!hasContent(page,true));
+            var istop=(!hasContent(page,true,false,node));
             if ((!(parent))||(parent===document.body)||
                 (parent.id==="CODEXCONTENT")||
                 (hasClass(parent,"codexroot"))||
@@ -578,6 +581,9 @@ fdjt.CodexLayout=
             // Layout Dimensions
             var page_height=this.height=init.page_height||fdjtDOM.viewHeight();
             var page_width=this.width=init.page_width||fdjtDOM.viewWidth();
+            // Set the orientation when provided
+            var orientation=this.orientation=(init.orientation)||
+                ((page_width>page_height)?('landscape'):('portrait'));
             
             // Break 'paragraphs' (anything with just text and inline nodes)
             var break_blocks=this.break_blocks=
@@ -1480,10 +1486,10 @@ fdjt.CodexLayout=
                 var all_ids=[], saved_ids={};
                 var dupids=[], dupstarts={}, restoremap={};
                 var curnodes=[], newdups={};
-                var newpages=frag.childNodes, addpages=[];
+                var newpages=false, addpages=[];
                 fdjtLog("Setting layout to %d characters of HTML",
                         content.length);
-                frag.innerHTML=content;
+                frag.innerHTML=content; newpages=frag.childNodes;
                 if (trace) fdjtLog("Gathering layout info");
                 var i=0, lim=newpages.length; while (i<lim) {
                     var page=newpages[i++];
