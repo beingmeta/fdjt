@@ -190,7 +190,8 @@ var WSN=(function(){
 
     function md5ID(){
         var wsn=WSN.apply(null,arguments);
-        if (WSN.md5) return WSN.md5(wsn);
+        if (!(wsn)) return wsn;
+        else if (WSN.md5) return WSN.md5(wsn);
         else if ((fdjtHash)&&(fdjtHash.hex_md5))
             return fdjtHash.hex_md5(wsn);
         else throw new Error("No MD5 implementation");}
@@ -198,7 +199,8 @@ var WSN=(function(){
     
     function sha1ID(){
         var wsn=WSN.apply(null,arguments);
-        if (WSN.sha1) return WSN.md5(wsn);
+                if (!(wsn)) return wsn;
+        else if (WSN.sha1) return WSN.md5(wsn);
         else if ((fdjtHash)&&(fdjtHash.hex_sha1))
             return fdjtHash.hex_sha1(wsn);
         else throw new Error("No SHA1 implementation");}
@@ -210,7 +212,8 @@ var WSN=(function(){
         if (typeof wordfn === 'undefined') wordfn=WSN.wordfn||false;
         if (typeof keepdups === 'undefined') keepdups=WSN.keepdup||false;
         var wsn=WSN(arg,sortfn,wordfn,keepdups);
-        return ((hashfn)?(hashfn(wsn)):(wsn));}
+        if (!(wsn)) return wsn;
+        else return ((hashfn)?(hashfn(wsn)):(wsn));}
     WSN.hash=hash;
     WSN.prototype.Hash=function(arg){
         return hash(arg,this.hashfn||WSN.hashfn||false,
