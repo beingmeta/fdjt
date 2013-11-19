@@ -1278,6 +1278,8 @@ fdjt.DOM=
                 return true;
             else if (node.tagName.search(nontext_content)===0)
                 return true;
+            else if (node.className.search(/\bfdjtskiptext\b/g)>=0)
+                return false;
             else if ((node.childNodes)&&(node.childNodes.length)) {
                 var children=node.childNodes;
                 var i=0; while (i<children.length) {
@@ -1912,24 +1914,40 @@ fdjt.DOM=
                         win.document.documentElement.scrollLeft||0);}
             else return win.scrollLeft;};
 
-        fdjtDOM.viewHeight=function viewHeight(win){
+        function viewHeight(win){
             if (typeof win==="string") {
                 if (!(win=document.getElementById(win))) return;}
-            if ((!(win))||(win===window)||
-                ((window.Window)&&(win instanceof window.Window))) {
-                win=win||window;
-                var docelt=((win.document)&&(win.document.documentElement));
-                return (win.innerHeight)||((docelt)&&(docelt.clientHeight));}
-            else return win.offsetHeight;};
-        fdjtDOM.viewWidth=function viewWidth(win){
+            if (!(win)) win=window;
+            if (win.hasOwnProperty('innerHeight')) return win.innerHeight;
+            else if ((win.document)&&(window.document.documentElement)&&
+                     (window.document.documentElement.clientHeight))
+                return window.document.documentElement.clientHeight;
+            else return win.offsetHeight;}
+        fdjtDOM.viewHeight=viewHeight;
+        function viewWidth(win){
             if (typeof win==="string") {
                 if (!(win=document.getElementById(win))) return;}
-            if ((!(win))||(win===window)||
-                ((window.Window)&&(win instanceof window.Window))) {
-                win=win||window;
-                var docelt=((win.document)&&(win.document.documentElement));
-                return ((win.innerWidth)||((docelt)&&(docelt.clientWidth)));}
-            else return win.offsetWidth;};
+            if (!(win)) win=window;
+            if (win.hasOwnProperty('innerWidth')) return win.innerWidth;
+            else if ((win.document)&&(window.document.documentElement)&&
+                     (window.document.documentElement.clientWidth))
+                return window.document.documentElement.clientWidth;
+            else return win.offsetWidth;}
+        fdjtDOM.viewWidth=viewWidth;
+
+        function getOrientation(win){
+            if (typeof win==="string") {
+                if (!(win=document.getElementById(win))) return;}
+            if (!(win)) win=window;
+            if (win.hasOwnProperty('orientation')) {
+                if ((win.orientation===90)||(win.orientation===-90))
+                    return 'landscape';
+                else return 'portrait';}
+            else {
+                var w=viewWidth(win), h=viewHeight(win);
+                if (w>h) return 'landscape';
+                else return 'portrait';}}
+        fdjtDOM.getOrientation=getOrientation;
 
         /* Generating element IDs */
 
