@@ -46,6 +46,8 @@ span[onclick] { cursor: pointer;}
     white-space: nowrap;
     overflow: hidden;}
 
+.noindent {text-indent: 0px !important;}
+
 /* Clearing floats in various ways */
 
 div.fdjtclearfloats {
