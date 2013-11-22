@@ -64,8 +64,8 @@ fdjt.CodexLayout=
         
         var floor=Math.floor;
 
-        var default_timeslice=50;
-        var default_timeskip=10;
+        var default_timeslice=100;
+        var default_timeskip=25;
 
         var layoutDB;
 
@@ -680,6 +680,12 @@ fdjt.CodexLayout=
             this.root_count=0; // Number of root nodes added
             this.block_count=0;
             this.lastid=false;
+            this.timeslice=
+                ((init.hasOwnProperty('timeslice'))?(init.timeslice):
+                 (default_timeslice));
+            this.timeskip=
+                ((init.hasOwnProperty('timeskip'))?(init.timeskip):
+                 (default_timeskip));
             
             var pagerule=this.pagerule=init.pagerule||false;
             
@@ -1426,7 +1432,8 @@ fdjt.CodexLayout=
                 function loop(){
                     var loop_start=fdjtTime();
                     while ((ni<nblocks)&&
-                           ((!(timeslice))||((fdjtTime()-loop_start)<timeslice)))
+                           ((!(timeslice))||
+                            ((fdjtTime()-loop_start)<timeslice)))
                         step();
                     if (progressfn) progressfn(layout);
                     if (ni<nblocks) {
@@ -2128,6 +2135,38 @@ fdjt.CodexLayout=
                 while (i<lim) dropLayout(layouts[i++]);
                 fdjtState.dropLocal("fdjtCodex.layouts");}};
 
+        function fetchAll(callback){
+            if (!(layoutDB)) return false;
+            else {
+                var txn=layoutDB.transaction(["layouts"],"read");
+                var storage=txn.objectStore("layouts");
+                var layout_ids=[];
+                storage.openCursor().onsuccess=function(evt){
+                    var cursor = evt.target.result;
+                    if (cursor) {
+                        layout_ids.push(cursor.key);
+                        cursor.continue();}
+                    else callback(layout_ids);};}}
+        CodexLayout.fetchAll=fetchAll;
+        CodexLayout.clearAll=function(spec){
+            fetchAll(function(layout_ids){
+                var todrop=[]; var i=0, lim=layout_ids.length;
+                if (!(lim)) {fdjtLog.warn("No layouts"); return;}
+                else if (!(spec)) todrop=layout_ids;
+                else while (i<lim) {
+                    var id=layout_ids[i++];
+                    if (id.search(spec)>=0) todrop.push(id);}
+                if (todrop.length===0) {
+                    fdjtLog.warn("No layouts match %s",spec);
+                    return;}
+                else if (spec)
+                    fdjtLog.warn("Dropping %d layouts matching %s",
+                                 todrop.length,spec);
+                else fdjtLog.warn("Dropping %d layouts",todrop.length);
+                i=0; lim=todrop.length; while (i<lim) {
+                    fdjtLog.warn("Dropping layout %s",todrop[i]);
+                    dropLayout(todrop[i++]);}});};
+        
         return CodexLayout;})();
 
 
