@@ -582,9 +582,17 @@ fdjt.CodexLayout=
             var page_height=this.height=init.page_height||fdjtDOM.viewHeight();
             var page_width=this.width=init.page_width||fdjtDOM.viewWidth();
             // Set the orientation when provided
-            var orientation=this.orientation=(init.orientation)||
+            var orientation=(init.orientation)||
                 ((page_width>page_height)?('landscape'):('portrait'));
+            this.orientation=orientation;
             
+            // What constitutes a short page
+            var short_page_height=
+                ((init.hasOwnProperty("short_page_height"))&&
+                 ((init.short_page_height)&&
+                  ((init.short_page_height<=1)?(page_height*init.short_page_height):
+                   (init.short_page_height))));
+
             // Break 'paragraphs' (anything with just text and inline nodes)
             var break_blocks=this.break_blocks=
                 ((typeof init.break_blocks === 'undefined')?(true):
@@ -813,11 +821,19 @@ fdjt.CodexLayout=
                             if (tracing) logfn("Oversize non-terminal %o, continuing",block);
                             ni++;}
                         // If we get here, we're a terminal node
-                        // extending below the bottom of the page
+                        // which extends below the bottom of the page
                         else if ((geom.top>page_height)&&(drag.length===0)&&
                                  (!(avoidBreakBefore(block.style))))
                             // Our top is also over the bottom of the page,
-                            block=newPage(block);
+                            // and we can break here, so we just push off 
+                           block=newPage(block);
+                        else if ((short_page_height)&&(geom.top>short_page_height)&&
+                                 (drag.length===0)&&(!(avoidBreakBefore(block.style)))) {
+                            // Our top is also over the short page limit,
+                            // and we can break here, so we just push off
+                            // and mark the current page as a short page
+                            if (page) addClass(page,"codexshortpage");
+                            block=newPage(block);}
                         else if ((hasClass(block,"codexfloat"))||
                                  ((floatblocks)&&(floatblocks.match(block)))) {
                             // If the block can float, let it
@@ -1195,16 +1211,14 @@ fdjt.CodexLayout=
                     if (((init_geom.top+init_geom.top_margin+(line_height*2))>page_height)) {
                         // If the top is too close to the bottom of the page, just push it over.
                         return newPage(node);}
-                    var children=TOA(node.childNodes);
-                    var i=children.length-1, n;
-                    while (i>=0) node.removeChild(children[i--]);
+                    var children=TOA(node.childNodes); // Copy all the children into an array
+                    node.innerHTML=""; // Remove all the children at once
                     var geom=getGeom(node,page);
                     if (geom.bottom>page_height) {
                         // If the version without any children is
                         // already over the edge, just start a new
                         // page on the node (after restoring all the
                         // children to the node).
-                        i=0, n=children.length;
                         appendChildren(node,children);
                         addClass(node,"codexcantsplit");
                         newPage(node);
@@ -1223,7 +1237,7 @@ fdjt.CodexLayout=
                         newPage(node);
                         return node;}
                     else { 
-                        var page_break=push[0]; i=1; n=push.length;
+                        var page_break=push[0];
                         // Since we left something behind on this page, we
                         //  can clear anything we're dragging
                         layout.drag=drag=[];
@@ -1340,10 +1354,9 @@ fdjt.CodexLayout=
                     // Now we do a binary search to find the word
                     //  which pushes the node below the page height.
                     //  That's where we'll break.
-                    var wlen=words.length;
-                    var wbreak=floor(wlen/2);
+                    var wlen=words.length, wbreak=floor(wlen/2);
+                    var wtop=wlen, wbot=0;
                     var foundbreak=false;
-                    var wtop=wlen; var wbot=0;
                     while ((wbreak>=wbot)&&(wbreak<wtop)) {
                         var newprobe=document.createTextNode(
                             words.slice(0,wbreak).join(""));
