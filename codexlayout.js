@@ -417,7 +417,7 @@ fdjt.CodexLayout=
                 baseclass=node.className;
                 if ((baseclass)&&(typeof baseclass !== "string")) {
                     into.appendChild(node);
-                    return;}}
+                    return node;}}
             else if (node.nodeType===3) {
                 if (node.nodeValue.search(/\w/g)>=0) {
                     // Wrap text nodes in elements before moving
@@ -728,12 +728,12 @@ fdjt.CodexLayout=
                     (fullpage)||
                     (hasClass(root,"codexsinglepage"))||
                     (checkSinglePage(root));
-                if (newpage) moveNode(root);
+                if (newpage) root=moveNode(root);
                 else if (singlepage) newPage(root);
                 else if ((forcedBreakBefore(root))||
                          ((prev)&&(forcedBreakAfter(prev)))) {
                     root=newPage(root);}
-                else moveNode(root);
+                else root=moveNode(root);
                 var scale_elts=getChildren(root,"[data-pagescale],[pagescale]");
                 scaleToPage(scale_elts,page_width,page_height);
                 var geom=getGeom(root,page);
@@ -1109,7 +1109,7 @@ fdjt.CodexLayout=
                     if ((drag)&&(drag.length)&&(drag.length===1)&&(atPageTop(drag[0]))) {
                         logfn("Ignored call for new page @%d due to excessive drag",
                               pagenum);
-                        if (node) moveNode(node);
+                        if (node) node=moveNode(node);
                         return false;}
                     if ((!(node))&&(!(forcepage))&&(page)&&(page.childNodes.length===0)) {
                         if (node)
@@ -1950,6 +1950,9 @@ fdjt.CodexLayout=
 
             /* Finally return the layout */
             return this;}
+
+        CodexLayout.timeslice=50;
+        CodexLayout.timeskip=10;
 
         CodexLayout.tracelevel=0;
         CodexLayout.prototype.getDups=function getDups4ID(id){
