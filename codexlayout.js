@@ -64,9 +64,6 @@ fdjt.CodexLayout=
         
         var floor=Math.floor;
 
-        var default_timeslice=100;
-        var default_timeskip=25;
-
         var layoutDB;
 
         function appendChildren(node,children,start){
@@ -682,10 +679,10 @@ fdjt.CodexLayout=
             this.lastid=false;
             this.timeslice=
                 ((init.hasOwnProperty('timeslice'))?(init.timeslice):
-                 (default_timeslice));
+                 (CodexLayout.timeslice));
             this.timeskip=
                 ((init.hasOwnProperty('timeskip'))?(init.timeskip):
-                 (default_timeskip));
+                 (CodexLayout.timeskip));
             
             var pagerule=this.pagerule=init.pagerule||false;
             
@@ -709,10 +706,10 @@ fdjt.CodexLayout=
                 var start=fdjtTime();
                 if (!(page)) {newPage(); newpage=true;}
 
-                if ((timeslice)&&(typeof timeslice !== "number"))
-                    timeslice=default_timeslice;
+                if ((timeslice)&&(typeof timeslice !== "number")) 
+                    timeslice=layout.timeslice;
                 if ((timeskip)&&(typeof timeskip !== "number"))
-                    timeskip=default_timeskip;
+                    timeskip=layout.timeskip;
 
                 if (typeof trace === 'undefined') trace=layout.tracelevel;
                 if (typeof progressfn === 'undefined')
@@ -1214,11 +1211,15 @@ fdjt.CodexLayout=
                     // make this work.
                     var init_geom=getGeom(node,page,true);
                     var line_height=init_geom.line_height||12;
-                    if (((init_geom.top+init_geom.top_margin+(line_height*2))>page_height)) {
-                        // If the top is too close to the bottom of the page, just push it over.
+                    if (((init_geom.top+init_geom.top_margin+
+                          (line_height*2))>page_height)) {
+                        // If the top is too close to the bottom of
+                        // the page, just push it over.
                         return newPage(node);}
-                    var children=TOA(node.childNodes); // Copy all the children into an array
-                    node.innerHTML=""; // Remove all the children at once
+                    // Copy all the children into an array
+                    var children=TOA(node.childNodes);
+                    // and remove all the children at once
+                    node.innerHTML="";
                     var geom=getGeom(node,page);
                     if (geom.bottom>page_height) {
                         // If the version without any children is
