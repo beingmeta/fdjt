@@ -420,7 +420,8 @@ fdjt.CodexLayout=
                     return node;}}
             else if (node.nodeType===3) {
                 if (node.nodeValue.search(/\w/g)>=0) {
-                    // Wrap text nodes in elements before moving
+                    // Wrap non-empty text nodes in elements before
+                    // moving
                     var wrapnode=fdjtDOM(
                         ((blockp)?"div.codexwraptext":"span.codexwraptext"));
                     if (node.parentNode)
@@ -428,7 +429,7 @@ fdjt.CodexLayout=
                     wrapnode.appendChild(node);
                     baseclass="codexwraptext";
                     node=wrapnode;}
-                else {
+                else if (into) {
                     node=node.cloneNode(true);
                     into.appendChild(node);
                     return node;}}
@@ -445,7 +446,7 @@ fdjt.CodexLayout=
                 if (baseclass) node.className=baseclass+" codexrelocated";
                 else node.className="codexrelocated";
                 node.parentNode.replaceChild(crumb,node);}
-            into.appendChild(node);
+            if (into) into.appendChild(node);
             return node;}
         
         // This moves a node onto a page, recreating (as far as
@@ -583,6 +584,8 @@ fdjt.CodexLayout=
                 ((page_width>page_height)?('landscape'):('portrait'));
             this.orientation=orientation;
             
+            var pagefn=(init.pagefn)||false;
+
             // What constitutes a short page
             var short_page_height=
                 ((init.hasOwnProperty("short_page_height"))&&
@@ -741,7 +744,8 @@ fdjt.CodexLayout=
                     var pw=geom.width, ph=geom.height;
                     if ((pw>page_width)||(ph>page_height))
                         addClass(page,"codexoversize");
-                    else if ((fullpage)&&((pw<(0.9*page_width))&&(ph<(0.9*page_height))))
+                    else if ((fullpage)&&
+                             ((pw<(0.9*page_width))&&(ph<(0.9*page_height))))
                         addClass(page,"codexundersize");
                     else {}
                     // Start a new page and update the loop state
@@ -793,9 +797,6 @@ fdjt.CodexLayout=
                     var terminal=terminals[ni]||false;
                     var tracing=false;
                     if (block.id) layout.lastid=block.id;
-
-                    // We use this to cache the layout
-                    // if (lastblock!==block) {allblocks.push(block); lastblock=block;}
 
                     if ((trace)&&(block)&&
                         ((trace>3)||((track)&&(track.match(block))))) {
@@ -880,10 +881,13 @@ fdjt.CodexLayout=
                         (avoidBreakInside(node,style))) {
                         blocks.push(node); styles.push(style);
                         terminals.push(node);
+                        moveNode(node,false,true,crumbs);
                         checkTerminal(node);
                         return;}
                     var disp=style.display;
-                    if ((style.position==='static')&&(disp!=='inline')&&(node.tagName!=="BR")) {
+                    if ((style.position==='static')&&
+                        (node.tagName!=="BR")&&
+                        (disp!=='inline')) {
                         var loc=blocks.length;
                         blocks.push(node);
                         styles.push(style);
@@ -898,7 +902,8 @@ fdjt.CodexLayout=
                             if (blocks.length===total_blocks)
                                 terminals[loc]=node;}
                         else terminals[loc]=node;
-                        if (terminals[loc]) checkTerminal(node);}
+                        if (terminals[loc]) checkTerminal(node);
+                        moveNode(node,false,true,crumbs);}
                     else if ((style.position==='static')&&(node.tagName==='A')) {
                         var anchor_elts=node.childNodes;
                         var j=0; var n_elts=anchor_elts.length;
@@ -907,7 +912,9 @@ fdjt.CodexLayout=
                             if (child.nodeType!==1) continue;
                             var cstyle=getStyle(child);
                             if (cstyle.display!=='inline')
-                                gatherBlocks(child,blocks,terminals,styles,cstyle);}}
+                                gatherBlocks(child,blocks,terminals,
+                                             styles,cstyle);}
+                        moveNode(node,false,true,crumbs);}
                     else {}}
 
                 function handle_dragging(block,terminal,style,tracing){
@@ -1156,8 +1163,10 @@ fdjt.CodexLayout=
                         // If we really need to create a new page, do so,
                         //  starting by dropping the curpage class from the
                         //  current page
-                        if (page) dropClass(page,"codexshowpage");
-                        layout.page=page=fdjtDOM("div.codexpage.codexshowpage");
+                        if (page) {
+                            if (pagefn) pagefn.call(layout,page,layout);
+                            dropClass(page,"codexworkpage");}
+                        layout.page=page=fdjtDOM("div.codexpage.codexworkpage");
                         if (!(pagerule)) {
                             page.style.height=page_height+'px';
                             page.style.width=page_width+'px';}
@@ -1745,7 +1754,7 @@ fdjt.CodexLayout=
                     completed.style.height="";
                     if (!(noscale)) fdjtDOM.scaleToFit(completed);}
                 if (layout.pagedone) layout.pagedone(completed);
-                dropClass(completed,"codexshowpage");}
+                dropClass(completed,"codexworkpage");}
             this.finishPage=finishPage;
 
             /* Finishing the overall layout */
@@ -1761,11 +1770,11 @@ fdjt.CodexLayout=
                 if ((middle_dups)&&(middle_dups.length)) {
                     var j=0, dl=middle_dups.length; while (j<dl) {
                         stripBottomStyles(middle_dups[j++]);}}
-                if (page) dropClass(page,"codexshowpage");
+                if (page) dropClass(page,"codexworkpage");
                 var i=0; var lim= pages.length;
                 while (i<lim) {
                     var p=pages[i++];
-                    addClass(p,"codexshowpage");
+                    addClass(p,"codexworkpage");
                     this.finishPage(p);}
                 layout.done=fdjtTime();}
             this.Finish=Finish;

@@ -22,7 +22,11 @@
 /* These can be used directly or inserted without the body.codexNNN root */
 
 div.codexpage {}
-div.codexpage.codexshowpage { display: block !important; }
+div.codexpage.codexworkpage {
+    opacity: 0.0 !important;
+    display: block !important;
+    pointer-events: none !important;
+    z-index: -250 !important;}
 
 div.codexpage h1.codexpagetop, div.codexpage h2.codexpagetop,
 div.codexpage h3.codexpagetop, div.codexpage h4.codexpagetop,
