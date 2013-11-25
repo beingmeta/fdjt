@@ -292,7 +292,7 @@ fdjt.CodexLayout=
                     else if (font_pct>best_fit) best_fit=font_pct;}
                 if (((hr>1)||(wr>1))&&(delta>0)) {
                     delta=delta/-2; font_pct=font_pct+delta;}
-                else if (((hr<1)&&(wr<1))&&(delta<0)) {
+                else if (((hr<=1)&&(wr<=1))&&(delta<0)) {
                     delta=delta/-2; font_pct=font_pct+delta;}
                 else font_pct=font_pct+delta;
                 if ((max_font)&&(font_pct>max_font)) break;
@@ -830,22 +830,20 @@ fdjt.CodexLayout=
                         logfn("Layout/geom %o %j",block,geom);
                     if (geom.bottom>page_height) {
                         if (!(terminal)) {
-                            if (tracing) logfn("Oversize non-terminal %o, continuing",block);
+                            if (tracing)
+                                logfn("Oversize non-terminal %o, continuing",
+                                      block);
                             ni++;}
                         // If we get here, we're a terminal node
                         // which extends below the bottom of the page
-                        else if ((geom.top>page_height)&&(drag.length===0)&&
+                        else if (((short_page_height)?
+                                  (geom.top>short_page_height):
+                                  (geom.top>page_height))
+                                 &&(drag.length===0)&&
                                  (!(avoidBreakBefore(block.style))))
                             // Our top is also over the bottom of the page,
                             // and we can break here, so we just push off 
                            block=newPage(block);
-                        else if ((short_page_height)&&(geom.top>short_page_height)&&
-                                 (drag.length===0)&&(!(avoidBreakBefore(block.style)))) {
-                            // Our top is also over the short page limit,
-                            // and we can break here, so we just push off
-                            // and mark the current page as a short page
-                            if (page) addClass(page,"codexshortpage");
-                            block=newPage(block);}
                         else if ((hasClass(block,"codexfloat"))||
                                  ((floatblocks)&&(floatblocks.match(block)))) {
                             // If the block can float, let it
@@ -975,7 +973,7 @@ fdjt.CodexLayout=
                 function handle_unbreakable(block,style,geom,tracing) {
                     // We can't break this block (for various reasons)
                     var curpage=page; tracing=false; // ignored
-                    if ((drag.length)&&(atPageTop(drag[0]))) {
+                    if ((drag.length)&&(badBreak(drag[0],page))) {
                         // A new page won't make a difference
                         //  because we're dragging the rest of
                         //  the current page anyway, so we
@@ -1006,7 +1004,13 @@ fdjt.CodexLayout=
                             return false;}
                         else return block;}}
 
-
+                function badBreak(node,page){
+                    if (atPageTop(node,page)) return true;
+                    else {
+                        var geom=getGeom(node,page);
+                        if (geom.top<(page_height*0.7)) return true;
+                        else return false;}}
+                
                 function checkAvoidBreakBefore(scan,root){
                     if (scan.nodeType===1) {
                         if (avoidBreakBefore(scan)) {
