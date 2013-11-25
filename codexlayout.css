@@ -23,10 +23,18 @@
 
 div.codexpage {}
 div.codexpage.codexworkpage {
-    opacity: 0.0 !important;
     display: block !important;
+    visibility: hidden !important;
     pointer-events: none !important;
-    z-index: -250 !important;}
+    z-index: -250 !important;
+    opacity: 0.0 !important;
+    -o-opacity: 0.0 !important;
+    -moz-opacity: 0.0 !important;
+    -webkit-opacity: 0.0 !important;
+    transition-property: none !important;
+    -o-transition-property: none !important;
+    -moz-transition-property: none !important;
+    -webkit-transition-property: none !important;}
 
 div.codexpage h1.codexpagetop, div.codexpage h2.codexpagetop,
 div.codexpage h3.codexpagetop, div.codexpage h4.codexpagetop,
