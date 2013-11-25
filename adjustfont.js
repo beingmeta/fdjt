@@ -270,7 +270,7 @@ fdjt.UI.adjustFont=
         // explicitly if we're adding elements to the DOM.
         function update(elt,opts){
             var i=0, lim;
-            if (typeof elt === 'array') {
+            if (Array.isArray(elt)) {
                 lim=elt.length;
                 while (i<lim) adjustFont(elt[i++],opts||false);}
             else {
