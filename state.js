@@ -29,7 +29,7 @@ fdjt.State=
     (function(){
         "use strict";
         var fdjtLog=fdjt.Log;
-        var fdjtString=fdjt.String
+        var fdjtString=fdjt.String;
 
         function fdjtState(name,val,persist){
             if (arguments.length===1)

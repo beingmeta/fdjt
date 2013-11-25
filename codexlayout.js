@@ -838,8 +838,8 @@ fdjt.CodexLayout=
                         // which extends below the bottom of the page
                         else if (((short_page_height)?
                                   (geom.top>short_page_height):
-                                  (geom.top>page_height))
-                                 &&(drag.length===0)&&
+                                  (geom.top>page_height))&&
+                                 (drag.length===0)&&
                                  (!(avoidBreakBefore(block.style))))
                             // Our top is also over the bottom of the page,
                             // and we can break here, so we just push off 
@@ -2270,7 +2270,7 @@ fdjt.CodexLayout=
                     var cursor = evt.target.result;
                     if (cursor) {
                         layout_ids.push(cursor.key);
-                        cursor.continue();}
+                        cursor['continue']();}
                     else callback(layout_ids);};}}
         CodexLayout.fetchAll=fetchAll;
         CodexLayout.clearAll=function(spec){
