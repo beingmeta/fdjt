@@ -29,6 +29,7 @@ fdjt.State=
     (function(){
         "use strict";
         var fdjtLog=fdjt.Log;
+        var fdjtString=fdjt.String
 
         function fdjtState(name,val,persist){
             if (arguments.length===1)
@@ -145,6 +146,22 @@ fdjt.State=
             else clearCookie(name);}
         fdjtState.dropSession=dropSession;
 
+        function listSession(name){
+            var keys=[];
+            if (typeof name === "string")
+                name=new RegExp("^"+fdjtString.escapeRX(name),"g");
+            if (window.sessionStorage) {
+                var storage=window.sessionStorage;
+                var i=0, lim=storage.length, key=false;
+                if (!(name)) {
+                    while (i<lim) keys.push(storage.key(i++));}
+                else if (name instanceof RegExp) while (i<lim) {
+                    key=storage.key(i++);
+                    if (key.search(name)>=0) keys.push(key);}
+                else {}}
+            return keys;}
+        fdjtState.listSession=listSession;
+
         /* Local storage (persists between sessions) */
 
         function setLocal(name,val,unparse){
@@ -216,6 +233,8 @@ fdjt.State=
         
         function listLocal(name){
             var keys=[];
+            if (typeof name === "string")
+                name=new RegExp("^"+fdjtString.escapeRX(name),"g");
             if (window.localStorage) {
                 var storage=window.localStorage;
                 var i=0, lim=storage.length, key=false;
@@ -224,9 +243,6 @@ fdjt.State=
                 else if (name instanceof RegExp) while (i<lim) {
                     key=storage.key(i++);
                     if (key.search(name)>=0) keys.push(key);}
-                else if (typeof name === "string") while (i<lim) {
-                    key=storage.key(i++);
-                    if (key.search(name)===0) keys.push(key);}
                 else {}}
             return keys;}
         fdjtState.listLocal=listLocal;
