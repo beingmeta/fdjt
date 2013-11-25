@@ -2171,7 +2171,7 @@ fdjt.DOM=
                 var i=0, lim=children.length;
                 while (i<lim) nodes.push(children[i++]);
                 var frag=document.createDocumentFragment();
-                i=0, lim=nodes.length; while (i<lim) {
+                i=0; lim=nodes.length; while (i<lim) {
                     frag.appendChild(nodes[i++]);}
                 node.replaceChild(frag,wrapper);
                 return node;}
@@ -2679,8 +2679,10 @@ fdjt.DOM=
                 wrapper.style.display="inline-block";
                 wrapper.style.maxWidth=width+"px";
                 var children=node.childNodes;
-                i=0, lim=children.length; while (i<lim) nodes.push(children[i++]);
-                i=0, lim=nodes.length; while (i<lim) wrapper.appendChild(nodes[i++]);
+                i=0; lim=children.length;
+                while (i<lim) nodes.push(children[i++]);
+                i=0; lim=nodes.length;
+                while (i<lim) wrapper.appendChild(nodes[i++]);
                 node.appendChild(wrapper);}
             // Now we actually tweak font sizes
             var font_pct=100, count=0, delta=16, best_fit=false;
@@ -2701,14 +2703,17 @@ fdjt.DOM=
                 if ((min_font)&&(font_pct<min_font)) break;                
                 node.style.fontSize=font_pct+"%";
                 ih=wrapper.offsetHeight; iw=wrapper.offsetWidth;
-                hr=ih/height, wr=iw/width; 
+                hr=ih/height; wr=iw/width; 
                 count++;}
             if ((hr>1)||(wr>1)&&(best_fit)) node.style.fontSize=best_fit+"%";
             node.removeChild(wrapper);
-            i=0, lim=nodes.length; while (i<lim) node.appendChild(nodes[i++]);
+            i=0; lim=nodes.length;
+            while (i<lim) node.appendChild(nodes[i++]);
             if (restore_style) {
-                style.display=saved_display; style.visibility=saved_visibility;
-                style.opacity=saved_opacity; style.zIndex=saved_zindex;}
+                style.display=saved_display;
+                style.visibility=saved_visibility;
+                style.opacity=saved_opacity;
+                style.zIndex=saved_zindex;}
             return node;}
         fdjtDOM.tweakFont=tweakFont;
 
