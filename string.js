@@ -513,6 +513,12 @@ fdjt.String=
                 ((len>3)?(words[len-4][0]):".");}
         fdjtString.paraHash=paraHash;
 
+        function escapeRegExp(str) {
+            return (str+"").replace(
+                    /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&");}
+        fdjtString.escapeRegExp=escapeRegExp;
+        fdjtString.escapeRX=escapeRegExp;
+
         return fdjtString;})();
 
 /* Emacs local variables
