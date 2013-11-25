@@ -214,12 +214,20 @@ fdjt.State=
             else return false;}
         fdjtState.dropLocal=dropLocal;
         
-        function listLocal(){
+        function listLocal(name){
             var keys=[];
             if (window.localStorage) {
                 var storage=window.localStorage;
-                var i=0; var lim=storage.length;
-                while (i<lim) keys.push(storage.key(i++));}
+                var i=0, lim=storage.length, key=false;
+                if (!(name)) {
+                    while (i<lim) keys.push(storage.key(i++));}
+                else if (name instanceof RegExp) while (i<lim) {
+                    key=storage.key(i++);
+                    if (key.search(name)>=0) keys.push(key);}
+                else if (typeof name === "string") while (i<lim) {
+                    key=storage.key(i++);
+                    if (key.search(name)===0) keys.push(key);}
+                else {}}
             return keys;}
         fdjtState.listLocal=listLocal;
 
