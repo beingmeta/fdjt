@@ -1323,22 +1323,23 @@ fdjt.UI.ProgressBar=(function(){
                 elt.innerHTML=parsed.toLocaleString();
             else elt.innerHTML=parsed.toString();}}
 
-    function initTimeElementsUnder(node){
-        var elts=((fdjt.keeptime)?
-                  (fdjtDOM.getChildren(node,".fdjtime")):
-                  (fdjtDOM.getChildren(node,"time,.fdjtime")));
+    function initTimeElements(node){
+        var elts=((node)?
+                  ((fdjt.keeptime)?
+                   (fdjtDOM.getChildren(node,".fdjtime")):
+                   (fdjtDOM.getChildren(node,"time,.fdjtime"))):
+                  ((fdjt.keeptime)?
+                   (fdjtDOM.$(".fdjtime")):
+                   (fdjtDOM.$("time,.fdjtime"))));
         var i=0, lim=elts.length;
         while (i<lim) fixTimeElement(elts[i++]);}
+    fdjt.initTimeElements=initTimeElements;
 
-    function initTimeElements(){
-        var elts=((fdjt.keeptime)?(fdjtDOM.$(".fdjtime")):(fdjtDOM.$("time,.fdjtime")));
-        var i=0, lim=elts.length;
-        while (i<lim) fixTimeElement(elts[i++]);
+    fdjt.autoInitTimeElements=function(){
         fdjtDOM.addListener(document.body,"DOMNodeInserted",
                             function(evt){
                                 evt=evt||event;
-                                initTimeElementsUnder(fdjtUI.T(evt));});}
-    
+                                initTimeElements(fdjtUI.T(evt));});};
     fdjt.addInit(initTimeElements,"TimeElements",false);})();
 
 /* Emacs local variables
