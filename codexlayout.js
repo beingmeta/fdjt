@@ -1620,7 +1620,7 @@ fdjt.CodexLayout=
             function setLayout(content,donefn){
                 if (typeof content === "string") 
                     setSimpleLayout(content,donefn);
-                else if (!(content.npages)) 
+                else if (!(content.hasOwnProperty('npages'))) 
                     setSimpleLayout(content.layout,donefn);
                 else {
                     container.innerHTML=content.layout;
@@ -1723,10 +1723,13 @@ fdjt.CodexLayout=
                 function whendone(){
                     layout.done=fdjtTime();
                     if (donefn) donefn(layout);}
-                if (arg.npages) {
+                if (!(arg)) {
+                    fdjtLog.warn("Falsy arg %s to restoreLayout",arg);
+                    return;}
+                else if (arg.hasOwnProperty('npages')) {
                     layout.setLayout(arg,whendone);
                     return true;}
-                else if (arg.layout) {
+                else if (arg.hasOwnProperty('layout')) {
                     layout.setLayout(arg.layout,whendone);
                     return true;}
                 else if (arg.indexOf("<")>=0) {
@@ -2198,9 +2201,10 @@ fdjt.CodexLayout=
                     else dropRoot();};
                 req.onerror=whoops;
                 req.onsuccess=function(evt){
-                    layout=evt.value;
-                    pageids=layout.pageids;
-                    npages=layout.npages;
+                    layout=((evt.target)&&(evt.target.result));
+                    if (layout.hasOwnProperty('pageids')) {
+                        pageids=layout.pageids;
+                        npages=layout.npages;}
                     if (npages) dropPages();
                     else dropRoot();};}
             else {
@@ -2245,8 +2249,11 @@ fdjt.CodexLayout=
                 var storage=txn.objectStore("layouts");
                 var req=storage.get(layout_key);
                 req.onsuccess=function(event){
-                    var target=event.target, result=((target)&&(target.result));
-                    if (result.npages) callback(result);
+                    var target=event.target;
+                    var result=((target)&&(target.result));
+                    if (!(result)) callback(false);
+                    else if (result.hasOwnProperty('npages'))
+                        callback(result);
                     else callback(result.layout);};}
             else if (window.localStorage) {
                 content=fdjtState.getLocal(layout_key)||false;
