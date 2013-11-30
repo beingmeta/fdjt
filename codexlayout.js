@@ -2202,7 +2202,7 @@ fdjt.CodexLayout=
                 req.onerror=whoops;
                 req.onsuccess=function(evt){
                     layout=((evt.target)&&(evt.target.result));
-                    if (layout.hasOwnProperty('pageids')) {
+                    if ((layout)&&(layout.hasOwnProperty('pageids'))) {
                         pageids=layout.pageids;
                         npages=layout.npages;}
                     if (npages) dropPages();
