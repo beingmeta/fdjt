@@ -49,6 +49,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
     var noBubble=fdjtUI.noBubble;
     var noDefault=fdjtUI.noDefault;
     // var cancel=fdjtUI.cancel;
+    var eTarget=fdjtUI.T;
 
     var cleared=0;
     var serial_count=1;
@@ -80,7 +81,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         else return false;}
     
     function dispatchEvent(target,etype,orig,tx,ty,also){
-        var orig_target=(orig)&&(fdjtUI.T(orig));
+        var orig_target=(orig)&&(eTarget(orig));
         if (!(target)) target=orig_target;
         var evt = document.createEvent("UIEvent");
         var event_arg=
@@ -134,7 +135,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         if (evt.button===1) mouse_down=true;}
     function global_mouseout(evt){
         evt=evt||event;
-        var target=fdjtUI.T(evt), rel=evt.relatedTarget||evt.toElement;
+        var target=eTarget(evt), rel=evt.relatedTarget||evt.toElement;
         if (trace_taphold)
             fdjtLog("TapHold/global/mouseout %o %o==>%o",
                     evt,target,rel);
@@ -188,7 +189,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 var notouch=fdjtDOM.Selector(opts.untouchable);
                 untouchable=function(e){
                     if (e.nodeType) return notouch.match(e);
-                    else return notouch.match(T(e));};}
+                    else return notouch.match(eTarget(e));};}
             else untouchable=opts.untouchable;}
         else untouchable=function(e){return isClickable(e);};
         
@@ -217,7 +218,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             return dispatchEvent(target,"release",evt,x,y);}
         function slipped(target,evt,also){
             if ((evt)&&(!(also))) {
-                var rel=evt.relatedTarget||fdjtUI.T(evt);
+                var rel=evt.relatedTarget||eTarget(evt);
                 if (rel===target) also=false;
                 else also={relatedTarget: rel};}
             return dispatchEvent(target,"slip",evt,touch_x,touch_y,also);}
@@ -354,7 +355,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             var x=evt.clientX||getClientX(evt);
             var y=evt.clientY||getClientY(evt);
             if (evt.touches) target=document.elementFromPoint(x,y);
-            else target=fdjtUI.T(evt);
+            else target=eTarget(evt);
             if (!(target)) return;
             var holder=getParent(target,".tapholder");
             if (holder!==elt) {
@@ -447,7 +448,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((!(bubble))) noBubble(evt);
             if (override) noDefault(evt);
             var new_event=false;
-            var target=fdjtUI.T(evt);
+            var target=eTarget(evt);
             var holder=getParent(target,".tapholder");
             if (holder!==elt) {
                 if ((th.trace)||(trace_taphold))
@@ -527,7 +528,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 return;}
             if ((!(bubble))) noBubble(evt);
             if (override) noDefault(evt);
-            var target=fdjtUI.T(evt);
+            var target=eTarget(evt);
             var holder=getParent(target,".tapholder");
             if (holder!==elt) {
                 if ((th.trace)||(trace_taphold))

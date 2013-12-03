@@ -466,7 +466,7 @@
 
                  that.lastScale = scale / this.scale;
 
-                 newX = this.originX - this.originX * that.lastScale + this.x,
+                 newX = this.originX - this.originX * that.lastScale + this.x;
                  newY = this.originY - this.originY * that.lastScale + this.y;
 
                  this.scroller.style[transform] = 'translate(' + newX + 'px,' + newY + 'px) scale(' + scale + ')' + translateZ;

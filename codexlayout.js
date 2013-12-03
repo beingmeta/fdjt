@@ -460,46 +460,52 @@ fdjt.CodexLayout=
         // This moves a node onto a page, recreating (as far as
         // possible) its original DOM context on the new page.
         function moveNodeToPage(node,page,dups,crumbs){
+            var nodestyle, newstyle;
             if (hasParent(node,page)) {
                 if ((node.nodeType===1)&&(!(hasContent(page,true,false,node)))) {
-                    var ostyle=node.getAttribute("style")||"";
-                    node.setAttribute("data-oldstyle",ostyle);
-                    node.setAttribute("style",ostyle+((ostyle)?("; "):(""))+"margin-top: 0px !important");
+                    nodestyle=node.getAttribute("style")||"";
+                    newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
+                    node.setAttribute("data-oldstyle",nodestyle);
+                    node.setAttribute("style",newstyle);
                     addClass(node,"codexpagetop");}
                 return node;}
-            var scan=node, parent=scan.parentNode;
-            // If we're moving a first child, we might as well move the parent
-            while ((parent)&&
-                   (parent!==document.body)&&
-                   (parent.id!=="CODEXCONTENT")&&
-                   (!(hasClass(parent,"codexroot")))&&
-                   (!(hasClass(parent,"codexpage")))&&
-                   (scan===getFirstContent(parent))) {
-                scan=parent; parent=scan.parentNode;}
-            var istop=(!hasContent(page,true,false,scan));
-            if ((!(parent))||(parent===document.body)||
-                (parent.id==="CODEXCONTENT")||
-                (hasClass(parent,"codexroot"))||
-                (hasClass(parent,"codexpage"))) {
-                // You don't need to dup the parent on the new page
-                if (scan===node)
-                    node=moveNode(node,page,false,crumbs);
-                else moveNode(scan,page,false,crumbs);}
             else {
-                var dup_parent=dupContext(parent,page,dups,crumbs);
-                if (scan===node)
-                    node=moveNode(node,dup_parent||page,false,crumbs);
-                else moveNode(scan,dup_parent||page,false,crumbs);}
-            if (istop) {
-                scan=node; while ((scan)&&(scan!==page)) {
-                    if (scan.nodeType===1) {
-                        var ostyle=scan.getAttribute("style")||"";
-                        scan.setAttribute("data-oldstyle",ostyle);
-                        scan.setAttribute(
-                            "style",ostyle+((ostyle)?("; "):(""))+"margin-top: 0px !important");
-                        addClass(scan,"codexpagetop");}
-                    scan=scan.parentNode;}}
-            return node;}
+                var scan, parent;
+                scan=node; parent=scan.parentNode;
+                // If we're moving a first child, we might as well move the parent
+                while ((parent)&&
+                       (parent!==document.body)&&
+                       (parent.id!=="CODEXCONTENT")&&
+                       (!(hasClass(parent,"codexroot")))&&
+                       (!(hasClass(parent,"codexpage")))&&
+                       (scan===getFirstContent(parent))) {
+                    scan=parent; parent=scan.parentNode;}
+                if ((!(parent))||(parent===document.body)||
+                    (parent.id==="CODEXCONTENT")||
+                    (hasClass(parent,"codexroot"))||
+                    (hasClass(parent,"codexpage"))) {
+                    // If the node isn't on a page or is at top level of a
+                    // page, the parent doesn't need to be duplicated to
+                    // move the child
+                    if (scan===node)
+                        node=moveNode(node,page,false,crumbs);
+                    else moveNode(scan,page,false,crumbs);}
+                else {
+                    // Otherwise duplicate the parent and move the child
+                    var dup_parent=dupContext(parent,page,dups,crumbs);
+                    if (scan===node)
+                        node=moveNode(node,dup_parent||page,false,crumbs);
+                    else moveNode(scan,dup_parent||page,false,crumbs);}
+                if (!hasContent(page,true,false,scan)) {
+                    scan=node; while ((scan)&&(scan!==page)) {
+                        if (scan.nodeType===1) {
+                            nodestyle=node.getAttribute("style")||"";
+                            newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
+                            scan.setAttribute("data-oldstyle",nodestyle);
+                            scan.setAttribute("style",newstyle);
+                            addClass(scan,"codexpagetop");}
+                        scan=scan.parentNode;}}
+                return node;}}
 
         // Reverting layout
 
@@ -1867,17 +1873,16 @@ fdjt.CodexLayout=
                 while (i<lim) {
                     var dup=ol[i++];
                     var page=getParent(dup,".codexpage");
-                    var pageno=parseInt(page.getAttribute("data-pagenum"),10);
+                    var pageno=(page)&&(parseInt(page.getAttribute("data-pagenum"),10));
                     olpage.push({list: dup,pageno:pageno});}
                 olpage.sort(function(x,y){
                     if (x.pageno>y.pageno) return 1;
                     else if (x.pageno<y.pageno) return -1;
                     else return 0;});
-                i=0; lim=olpage.length;
-                while (i<lim) {
-                    dup=olpage[i++].list;
-                    var new_items=countListItems(dup);
-                    if (ntotal) addEmptyItems(dup,ntotal);
+                i=0; lim=olpage.length; while (i<lim) {
+                    var olist=olpage[i++].list;
+                    var new_items=countListItems(olist);
+                    if (ntotal) addEmptyItems(olist,ntotal);
                     ntotal=ntotal+new_items;}}
 
             function addEmptyItems(root,count){
