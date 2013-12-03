@@ -1818,9 +1818,11 @@ fdjt.CodexLayout=
                     var geom=getGeom(completed,false,true);
                     completed.style.height="inherit";
                     var iw=geom.inner_width, ih=geom.inner_height;
+                    /*
                     tweakFont(completed,iw,ih,80,120);
                     // Get new geometry
                     geom=getGeom(completed,false,true);
+                    */
                     iw=geom.inner_width; ih=geom.inner_height;
                     var ow=completed.offsetWidth, oh=completed.offsetHeight;
                     var noscale=((oversize)?
