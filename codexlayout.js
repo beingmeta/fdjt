@@ -1843,6 +1843,8 @@ fdjt.CodexLayout=
                         var alldups=dups[dupid];
                         var lastdup=alldups[alldups.length-1];
                         var dupstart=document.getElementById(dupid);
+                        if (dupstart.tagName==="OL")
+                            fixOrderedList([dupstart].concat(alldups));
                         lastdup.className=lastdup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
                 var middle_dups=getChildren(page,".codexdup");
@@ -1856,6 +1858,48 @@ fdjt.CodexLayout=
                     this.finishPage(p);}
                 layout.done=fdjtTime();}
             this.Finish=Finish;
+
+            function fixOrderedList(ol){
+                if (ol.length<2) return;
+                var olpage=[]; var i=0, lim=ol.length, ntotal=0;
+                while (i<lim) {
+                    var dup=ol[i++];
+                    var page=getParent(dup,".codexpage");
+                    var pageno=parseInt(page.getAttribute("data-pagenum"),10);
+                    olpage.push({list: dup,pageno:pageno});}
+                olpage.sort(function(x,y){
+                    if (x.pageno>y.pageno) return 1;
+                    else if (x.pageno<y.pageno) return -1;
+                    else return 0;});
+                i=0; lim=olpage.length;
+                while (i<lim) {
+                    dup=olpage[i++].list;
+                    var new_items=countListItems(dup);
+                    if (ntotal) addEmptyItems(dup,ntotal);
+                    ntotal=ntotal+new_items;}}
+
+            function addEmptyItems(root,count){
+                var frag=document.createDocumentFragment();
+                while (count>0) {
+                    var item=fdjtDOM("LI","empty");
+                    item.setAttribute(
+                        "style",
+                        "visibility: hidden !important; width: 0px !important; height: 0px !important; pointer-events: none;");
+                    frag.appendChild(item);
+                    count--;}
+                if (root.firstChild) root.insertBefore(frag,root.firstChild);
+                else root.appendChild(frag);}
+            function countListItems(root,count){
+                if (!(count)) count=0;
+                var children=root.childNodes;
+                var i=0, lim=children.length;
+                while (i<lim) {
+                    var child=children[i++];
+                    if (child.nodeType===1) {
+                        if ((child.tagName==="OL")||(child.tagName==="UL")) return count;
+                        else if (child.tagName==="LI") count++;
+                        else count=countListItems(child,count);}}
+                return count;}
 
             /* page break predicates */
             
