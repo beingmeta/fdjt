@@ -174,8 +174,23 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var serial=serial_count++;
 
         var touchable=elt.getAttribute("data-touchable");
-        if (touchable) touchable=fdjtDOM.Selector(touchable);
+        if ((opts)&&(opts.touchable)) {
+            // Opts override attributes
+            if (typeof opts.touchable === "string")
+                touchable=fdjtDOM.Selector(opts.touchable);
+            else touchable=opts.touchable;}
+        else if (touchable) touchable=fdjtDOM.Selector(touchable);
         else touchable=function(e){return hasParent(e,elt);};
+        var isClickable=fdjtUI.isClickable, untouchable;
+        if ((opts)&&(opts.untouchable)) {
+            // Opts override attributes
+            if (typeof opts.untouchable === "string") {
+                var notouch=fdjtDOM.Selector(opts.untouchable);
+                untouchable=function(e){
+                    if (e.nodeType) return notouch.match(e);
+                    else return notouch.match(T(e));};}
+            else untouchable=opts.untouchable;}
+        else untouchable=function(e){return isClickable(e);};
         
         var wander_timer=false;
 
@@ -501,7 +516,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((th.trace)||(trace_taphold))
                 fdjtLog("TapHold/down(%d) %o t=%o x=%o y=%o t=%o touched=%o",
                         serial,evt,th_target,start_x,start_y,start_t,touched);
-            if (fdjtUI.isClickable(evt)) return;
+            if (untouchable(evt)) return;
             if (!(touched)) startpress(evt,holdthresh);}
 
         function taphold_up(evt){
@@ -533,7 +548,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((evt.touches)&&(evt.touches.length)&&
                 (evt.touches.length>1))
                 return;
-            if (fdjtUI.isClickable(evt)) return;
+            if (untouchable(evt)) return;
             if ((!(mouse_down))&&((touched)||(pressed))) {
                 endpress(evt,taptapthresh);}
             else {}
