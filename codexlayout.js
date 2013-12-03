@@ -1827,7 +1827,9 @@ fdjt.CodexLayout=
                                  ((oh<=ih)&&(ow<=iw)):
                                  ((oh<=ih)&&(ow<=iw)&&
                                   ((oh>(0.9*ih))||(ow>(0.9*iw)))));
-                    if (!(noscale)) adjust_node(completed);}
+                    if (!(noscale)) {
+                        completed.style.height="";
+                        adjust_node(completed);}}
                 if (layout.pagedone) layout.pagedone(completed);
                 dropClass(completed,"codexworkpage");
                 completed.style.height="";}
@@ -1840,6 +1842,7 @@ fdjt.CodexLayout=
                     if (dups.hasOwnProperty(dupid)) {
                         var alldups=dups[dupid];
                         var lastdup=alldups[alldups.length-1];
+                        var dupstart=document.getElementById(dupid);
                         lastdup.className=lastdup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
                 var middle_dups=getChildren(page,".codexdup");
