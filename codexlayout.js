@@ -462,9 +462,11 @@ fdjt.CodexLayout=
         function moveNodeToPage(node,page,dups,crumbs){
             var nodestyle, newstyle;
             if (hasParent(node,page)) {
-                if ((node.nodeType===1)&&(!(hasContent(page,true,false,node)))) {
+                if ((node.nodeType===1)&&
+                    (!(hasContent(page,true,false,node)))) {
                     nodestyle=node.getAttribute("style")||"";
-                    newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
+                    newstyle=nodestyle+((nodestyle)?("; "):(""))+
+                        "margin-top: 0px !important";
                     node.setAttribute("data-oldstyle",nodestyle);
                     node.setAttribute("style",newstyle);
                     addClass(node,"codexpagetop");}
@@ -499,8 +501,9 @@ fdjt.CodexLayout=
                 if (!hasContent(page,true,false,scan)) {
                     scan=node; while ((scan)&&(scan!==page)) {
                         if (scan.nodeType===1) {
-                            nodestyle=node.getAttribute("style")||"";
-                            newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
+                            nodestyle=scan.getAttribute("style")||"";
+                            newstyle=nodestyle+((nodestyle)?("; "):(""))+
+                                "margin-top: 0px !important";
                             scan.setAttribute("data-oldstyle",nodestyle);
                             scan.setAttribute("style",newstyle);
                             addClass(scan,"codexpagetop");}
