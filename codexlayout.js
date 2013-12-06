@@ -462,9 +462,13 @@ fdjt.CodexLayout=
         function moveNodeToPage(node,page,dups,crumbs){
             var nodestyle, newstyle;
             if (hasParent(node,page)) {
-                if ((node.nodeType===1)&&(!(hasContent(page,true,false,node)))) {
+                if ((node.nodeType===1)&&
+                    (!(hasContent(page,true,false,node)))) {
+                    // Define markPageTop to include this logic
+                    //   and to also descend into children
                     nodestyle=node.getAttribute("style")||"";
-                    newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
+                    newstyle=nodestyle+((nodestyle)?("; "):(""))+
+                        "margin-top: 0px !important";
                     node.setAttribute("data-oldstyle",nodestyle);
                     node.setAttribute("style",newstyle);
                     addClass(node,"codexpagetop");}
@@ -472,7 +476,8 @@ fdjt.CodexLayout=
             else {
                 var scan, parent;
                 scan=node; parent=scan.parentNode;
-                // If we're moving a first child, we might as well move the parent
+                // If we're moving a first child, we might as well
+                // move the parent
                 while ((parent)&&
                        (parent!==document.body)&&
                        (parent.id!=="CODEXCONTENT")&&
@@ -500,7 +505,8 @@ fdjt.CodexLayout=
                     scan=node; while ((scan)&&(scan!==page)) {
                         if (scan.nodeType===1) {
                             nodestyle=scan.getAttribute("style")||"";
-                            newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
+                            newstyle=nodestyle+((nodestyle)?("; "):(""))+
+                                "margin-top: 0px !important";
                             scan.setAttribute("data-oldstyle",nodestyle);
                             scan.setAttribute("style",newstyle);
                             addClass(scan,"codexpagetop");}
@@ -1148,7 +1154,7 @@ fdjt.CodexLayout=
                 // element on the new page.
                 function newPage(node,forcepage){
                     var i, lim;
-                    if ((drag)&&(drag.length)&&(drag.length===1)&&
+                    if ((drag)&&(drag.length)&&(drag.length)&&
                         (atPageTop(drag[0]))) {
                         logfn("Ignored call for new page @%d due to excessive drag",
                               pagenum);
