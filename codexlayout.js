@@ -1209,9 +1209,6 @@ fdjt.CodexLayout=
                         //  current page
                         if (page) {
                             if (pagefn) pagefn.call(layout,page,layout);
-                            // Is .offsetHeight the right value???
-                            if ((page.offsetHeight+20)>page_height)
-                                addClass(page,"codexoversize");
                             page.style.height="";
                             dropClass(page,"codexworkpage");}
                         layout.page=page=fdjtDOM("div.codexpage.codexworkpage");
