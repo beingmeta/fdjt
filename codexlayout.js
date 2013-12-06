@@ -499,7 +499,7 @@ fdjt.CodexLayout=
                 if (!hasContent(page,true,false,scan)) {
                     scan=node; while ((scan)&&(scan!==page)) {
                         if (scan.nodeType===1) {
-                            nodestyle=node.getAttribute("style")||"";
+                            nodestyle=scan.getAttribute("style")||"";
                             newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
                             scan.setAttribute("data-oldstyle",nodestyle);
                             scan.setAttribute("style",newstyle);
