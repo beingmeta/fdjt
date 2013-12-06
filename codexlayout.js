@@ -457,60 +457,61 @@ fdjt.CodexLayout=
             if (into) into.appendChild(node);
             return node;}
         
+        function markPageTop(node){
+            if (hasClass(node,"codexpagetop")) return;
+            var nodestyle=node.getAttribute("style")||"";
+            var newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
+            node.setAttribute("data-oldstyle",nodestyle);
+            node.setAttribute("style",newstyle);
+            addClass(node,"codexpagetop");
+            if (node.childNodes) {
+                var children=node.childNodes, i=0, lim=children.length;
+                while (i<lim) {
+                    var child=children[i++];
+                    if (child.nodeType===1) {
+                        if ((child.classname)&&
+                            (child.className.search(/\bfdjtskiptext\b/g)>=0)) {}
+                        else return markPageTop(child);}
+                    else if (child.nodeType===3) {
+                        if (!(isEmpty(child.nodeValue))) return;}
+                    else {}}}}
+
         // This moves a node onto a page, recreating (as far as
         // possible) its original DOM context on the new page.
         function moveNodeToPage(node,page,dups,crumbs){
-            var nodestyle, newstyle;
             if (hasParent(node,page)) {
-                if ((node.nodeType===1)&&
-                    (!(hasContent(page,true,false,node)))) {
-                    // Define markPageTop to include this logic
-                    //   and to also descend into children
-                    nodestyle=node.getAttribute("style")||"";
-                    newstyle=nodestyle+((nodestyle)?("; "):(""))+
-                        "margin-top: 0px !important";
-                    node.setAttribute("data-oldstyle",nodestyle);
-                    node.setAttribute("style",newstyle);
-                    addClass(node,"codexpagetop");}
+                if ((node.nodeType===1)&&(!(hasContent(page,true,false,node))))
+                    markPageTop(node);
                 return node;}
             else {
-                var scan, parent;
-                scan=node; parent=scan.parentNode;
-                // If we're moving a first child, we might as well
-                // move the parent
+                var move=node, parent=move.parentNode;
+                // If we're moving a first child, we might as well move the parent
                 while ((parent)&&
                        (parent!==document.body)&&
                        (parent.id!=="CODEXCONTENT")&&
                        (!(hasClass(parent,"codexroot")))&&
                        (!(hasClass(parent,"codexpage")))&&
-                       (scan===getFirstContent(parent))) {
-                    scan=parent; parent=scan.parentNode;}
+                       (move===getFirstContent(parent))) {
+                    move=parent; parent=move.parentNode;}
                 if ((!(parent))||(parent===document.body)||
                     (parent.id==="CODEXCONTENT")||
                     (hasClass(parent,"codexroot"))||
                     (hasClass(parent,"codexpage"))) {
                     // If the node isn't on a page or is at top level of a
                     // page, the parent doesn't need to be duplicated to
-                    // move the child
-                    if (scan===node)
-                        node=moveNode(node,page,false,crumbs);
-                    else moveNode(scan,page,false,crumbs);}
+                    // move the child.  However, the motion might modify
+                    // the moved node (for example, cloning it).
+                    if (move===node)
+                        node=move=moveNode(node,page,false,crumbs);
+                    else move=moveNode(move,page,false,crumbs);}
                 else {
                     // Otherwise duplicate the parent and move the child
                     var dup_parent=dupContext(parent,page,dups,crumbs);
-                    if (scan===node)
-                        node=moveNode(node,dup_parent||page,false,crumbs);
-                    else moveNode(scan,dup_parent||page,false,crumbs);}
-                if (!hasContent(page,true,false,scan)) {
-                    scan=node; while ((scan)&&(scan!==page)) {
-                        if (scan.nodeType===1) {
-                            nodestyle=scan.getAttribute("style")||"";
-                            newstyle=nodestyle+((nodestyle)?("; "):(""))+
-                                "margin-top: 0px !important";
-                            scan.setAttribute("data-oldstyle",nodestyle);
-                            scan.setAttribute("style",newstyle);
-                            addClass(scan,"codexpagetop");}
-                        scan=scan.parentNode;}}
+                    if (move===node)                    
+                        node=move=moveNode(node,dup_parent||page,false,crumbs);
+                    else move=moveNode(move,dup_parent||page,false,crumbs);}
+                if ((move)&&(move.nodeType===1)&&(!hasContent(page,true,false,move)))
+                    markPageTop(move);
                 return node;}}
 
         // Reverting layout
@@ -1716,13 +1717,16 @@ fdjt.CodexLayout=
                 i=0; n=todrop.length; while (i<n) {
                     node.removeChild(todrop[i++]);}}
             
+         
             function saveLayout(callback,layout_id,separated){
+                var href=window.location.href;
+                var qpos=href.indexOf("?"), hashpos=href.indexOf("#");
+                var endpos=((qpos>=hashpos)?(qpos):(hashpos));
+                if (endpos>0) href=href.slice(0,endpos);
                 if (!(layout_id)) layout_id=layout.layout_id||
-                    (layout.layout_id=layout.width+"x"+
-                     layout.height+fdjtState.getUUID());
+                    (layout.layout_id=layout.width+"x"+layout.height+"("+href+")");
                 if (!(CodexLayout.cache)) return;
                 var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
-                var layouts=getLocal("fdjtCodex.layouts",true);
                 var copy=container.cloneNode(true);
                 var pages=copy.childNodes, i=0, npages=pages.length;
                 var pageids=((separated)&&([])), pagecontent={};
@@ -1739,16 +1743,12 @@ fdjt.CodexLayout=
                                     pageids.push(node.id);
                                     pagecontent[node.id]=node.innerHTML;
                                     node.innerHTML="";}}}}}
-                if (layouts) {
-                    if (layouts.indexOf(layout_id)<0) {
-                        layouts.push(layout_id);}}
-                else layouts=[layout_id];
                 var html=copy.innerHTML;
                 try {
                     if (pageids)
                         cacheLayout(layout_id,html,pageids,pagecontent);
                     else cacheLayout(layout_id,html);
-                    setLocal("fdjtCodex.layouts",layouts,true);
+                    gotLayout(layout_id);
                     callback(layout);}
                 catch (ex) {
                     fdjtLog.warn("Couldn't save layout %s: %s",layout_id,ex);
@@ -2324,7 +2324,8 @@ fdjt.CodexLayout=
             else if ((window.Storage)&&(layoutDB instanceof window.Storage)) {
                 var pageids=getLocal(layout_id+".pageids",true);
                 if (pageids) {
-                    content=getLocal(layout_key)||false;
+                    gotLayout(layout_id);
+                    content=getLocal(layout_id)||false;
                     if (pageid) {
                         var pnpos=layout_id.search(/\d+$/g);
                         var pagenum=parseInt(layout_id.slice(pnpos),10);
@@ -2336,7 +2337,8 @@ fdjt.CodexLayout=
                                   pageids: pageids,npages: pageids.length});},
                                     1);}
                 else {
-                    content=getLocal(layout_key)||false;
+                    content=getLocal(layout_id)||false;
+                    if (content) gotLayout(layout_id);
                     setTimeout(function(){callback(content);},1);}}
             else if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"]);
@@ -2345,12 +2347,14 @@ fdjt.CodexLayout=
                 req.onsuccess=function(event){
                     var target=event.target;
                     var result=((target)&&(target.result));
+                    if (result) gotLayout(layout_id);
                     if (!(result)) callback(false);
                     else if (result.hasOwnProperty('npages'))
                         callback(result);
                     else callback(result.layout);};}
             else if (window.localStorage) {
                 content=fdjtState.getLocal(layout_key)||false;
+                if (content) gotLayout(layout_id);
                 setTimeout(function(){callback(content);},0);}}
         CodexLayout.fetchLayout=fetchLayout;
         
@@ -2392,6 +2396,13 @@ fdjt.CodexLayout=
                 i=0; lim=todrop.length; while (i<lim) {
                     fdjtLog.warn("Dropping layout %s",todrop[i]);
                     dropLayout(todrop[i++]);}});};
+        function gotLayout(layout_id){
+            var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
+            if (!(layouts)) layouts=[layout_id];
+            else if (layouts.indexOf(layout_id)<0) 
+                layouts.push(layout_id);
+            else {}
+            fdjtState.setLocal("fdjtCodex.layouts",layouts,true);}
         
         return CodexLayout;})();
 
