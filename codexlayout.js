@@ -464,6 +464,8 @@ fdjt.CodexLayout=
             if (hasParent(node,page)) {
                 if ((node.nodeType===1)&&
                     (!(hasContent(page,true,false,node)))) {
+                    // Define markPageTop to include this logic
+                    //   and to also descend into children
                     nodestyle=node.getAttribute("style")||"";
                     newstyle=nodestyle+((nodestyle)?("; "):(""))+
                         "margin-top: 0px !important";
@@ -474,7 +476,8 @@ fdjt.CodexLayout=
             else {
                 var scan, parent;
                 scan=node; parent=scan.parentNode;
-                // If we're moving a first child, we might as well move the parent
+                // If we're moving a first child, we might as well
+                // move the parent
                 while ((parent)&&
                        (parent!==document.body)&&
                        (parent.id!=="CODEXCONTENT")&&
@@ -1151,7 +1154,7 @@ fdjt.CodexLayout=
                 // element on the new page.
                 function newPage(node,forcepage){
                     var i, lim;
-                    if ((drag)&&(drag.length)&&(drag.length===1)&&
+                    if ((drag)&&(drag.length)&&(drag.length)&&
                         (atPageTop(drag[0]))) {
                         logfn("Ignored call for new page @%d due to excessive drag",
                               pagenum);
