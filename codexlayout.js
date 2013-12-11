@@ -1391,7 +1391,7 @@ fdjt.CodexLayout=
                         text=probenode.nodeValue;}
                     else text=page_break.nodeValue;
                     // Now, break the text up at possible page breaks
-                    var breaks=text.split(/\b/g), words=[], word=false;
+                    var breaks=text.split(/(\s+)/mg), words=[], word=false;
                     var bi=0, blen=breaks.length;
                     while (bi<blen) {
                         var s=breaks[bi++]; var ws;
