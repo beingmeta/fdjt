@@ -140,6 +140,23 @@ fdjt.State=
             else return false;}
         fdjtState.getSession=getSession;
 
+        function existsSession(name){
+            if (!(name)) throw { error: "bad name",name: name};
+            else if (window.sessionStorage) {
+                if (name instanceof RegExp) {
+                    var storage=window.sessionStorage;
+                    var i=0; var lim=storage.length;
+                    while (i<lim) {
+                        var key=storage.key(i++);
+                        if (key.search(name)>=0) return true;}
+                    return false;}
+                else {
+                    var val=window.sessionStorage[name];
+                    if (val) return true;
+                    else return false;}}
+            else return false;}
+        fdjtState.existsSession=existsSession;
+
         function dropSession(name){
             if (window.sessionStorage)
                 return window.sessionStorage.removeItem(name);
@@ -198,6 +215,23 @@ fdjt.State=
                     else return false;}}
             else return false;}
         fdjtState.getLocal=getLocal;
+
+        function existsLocal(name){
+            if (!(name)) throw { error: "bad name",name: name};
+            else if (window.localStorage) {
+                if (name instanceof RegExp) {
+                    var storage=window.localStorage;
+                    var i=0; var lim=storage.length;
+                    while (i<lim) {
+                        var key=storage.key(i++);
+                        if (key.search(name)>=0) return true;}
+                    return false;}
+                else {
+                    var val=window.localStorage[name];
+                    if (typeof val === "undefined") return false;
+                    else return false;}}
+            else return false;}
+        fdjtState.existsLocal=existsLocal;
 
         function findLocal(name,val,parse){
             if (window.localStorage) {
