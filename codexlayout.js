@@ -1250,8 +1250,6 @@ fdjt.CodexLayout=
                     if (node) return moveNode(node);
                     else return false;}
 
-                var getLineHeight=fdjtDOM.getLineHeight;
-
                 // This gets a little complicated
                 function splitBlock(node){
                     if ((!(break_blocks))||(avoidBreakInside(node))||
@@ -1267,32 +1265,34 @@ fdjt.CodexLayout=
                     // make this work.
                     var init_geom=getGeom(node,page,true);
                     var line_height=init_geom.line_height||12;
+                    var use_height=page_height;
                     if (((init_geom.top+init_geom.top_margin+
                           (line_height*2))>page_height)) {
                         // If the top is too close to the bottom of
                         // the page, just push it over.
-                        // !!! Need to add test, because if the push fails,
-                        //  then you want to try to split it.
-                        return newPage(node);}
+                        var cpage=page, newblock=newPage(node);
+                        // If the page break succeeded, return the new block,
+                        //  otherwise, keep trying to split
+                        if (cpage!==page) return newblock;
+                        // If we're near the bottom and the page break
+                        // failed, we're in a tight place, so we bump
+                        // up the height
+                        else use_height=page_height+Math.floor(line_height*1.5);}
                     // Copy all the children into an array
                     var children=TOA(node.childNodes);
                     // and remove all the children at once
                     node.innerHTML="";
                     var geom=getGeom(node,page);
-                    if (geom.bottom>page_height) {
+                    if (geom.bottom>use_height) {
                         // If the version without any children is
                         // already over the edge, just start a new
                         // page on the node (after restoring all the
                         // children to the node).
                         appendChildren(node,children);
                         addClass(node,"codexcantsplit");
-                        // !!! Need to add test, if pushing the node
-                        //  fails, so that we take the page size a
-                        //  little, just so we can put something on
-                        //  this page and avoid the drag constraint
                         newPage(node);
                         return node;}
-                    var push=splitChildren(node,children,init_geom,line_height);
+                    var push=splitChildren(node,children,init_geom,use_height);
                     if (!(push)) {
                         /* Doesn't need to be split after all.
                            Not sure when this will happen, if ever. */
@@ -1330,21 +1330,15 @@ fdjt.CodexLayout=
 
                 var removeChildren=fdjtDOM.removeChildren;
 
-                function splitChildren(node,children,init_geom,line_height){
+                function splitChildren(node,children,init_geom,use_page_height){
                     /* node is a node and children are its children,
                        which have been removed from it.  We return an
                        array of children which should go onto the next
                        page, possibly synthesizing a new child by
                        splitting some text.  */
-                    var page_break=node; var use_page_height=page_height;
+                    var page_break=node; 
+                    if (!(use_page_height)) use_page_height=page_height;
                     var geom=init_geom||getGeom(node,page);
-                    if (!(line_height))
-                        line_height=getLineHeight(node)||12;
-                    if ((geom.bottom-(line_height*2))<page_height)
-                        /* If the node is just a little bit over the
-                           bottom, we tweak the page height to avoid
-                           leaving single lines on the other side. */
-                        use_page_height=page_height-line_height;
                     // We add children back until we go over the edge
                     // and then figure out if there's a way to split
                     // the child that broke the page.
@@ -1731,6 +1725,7 @@ fdjt.CodexLayout=
                 if (!(layout_id)) layout_id=layout.layout_id||
                     (layout.layout_id=layout.width+"x"+layout.height+"("+href+")");
                 if (!(CodexLayout.cache)) return;
+                // These will be used for per-page saved layouts
                 var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
                 var copy=container.cloneNode(true);
                 var pages=copy.childNodes, i=0, npages=pages.length;
