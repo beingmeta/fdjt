@@ -1207,6 +1207,8 @@ fdjt.CodexLayout=
                         // If we really need to create a new page, do so,
                         //  starting by dropping the curpage class from the
                         //  current page
+                        if ((page)&&(page.offsetHeight>page_height))
+                            addClass(page,"codexoversize");
                         if (page) {
                             if (pagefn) pagefn.call(layout,page,layout);
                             page.style.height="";
@@ -1270,6 +1272,8 @@ fdjt.CodexLayout=
                           (line_height*2))>page_height)) {
                         // If the top is too close to the bottom of
                         // the page, just push it over.
+                        // !!! Need to add test, because if the push fails,
+                        //  then you want to try to split it.
                         return newPage(node);}
                     // Copy all the children into an array
                     var children=TOA(node.childNodes);
@@ -1283,6 +1287,10 @@ fdjt.CodexLayout=
                         // children to the node).
                         appendChildren(node,children);
                         addClass(node,"codexcantsplit");
+                        // !!! Need to add test, if pushing the node
+                        //  fails, so that we take the page size a
+                        //  little, just so we can put something on
+                        //  this page and avoid the drag constraint
                         newPage(node);
                         return node;}
                     var push=splitChildren(node,children,init_geom,line_height);
@@ -1296,6 +1304,7 @@ fdjt.CodexLayout=
                     else if (push===node) {
                         appendChildren(node,children);
                         addClass(node,"codexcantsplit");
+                        // This case falls through to doing page scaling
                         newPage(node);
                         return node;}
                     else { 
