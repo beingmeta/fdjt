@@ -240,7 +240,7 @@ fdjt.Dialog=(function(){
 
     function choose(spec){
         var box=false; var selection=-1, buttons=[], choices;
-        var close_button=false;
+        var close_button=false, onclose=false;
         function close_choice(){
             var i=0, lim=buttons.length;
             while (i<lim) {
@@ -252,6 +252,7 @@ fdjt.Dialog=(function(){
             if (box) box.onclick=null;
             if (box) box.onkeydown=null;
             if (box) {
+                if (onclose) onclose(box);
                 var timeout=setTimeout(function(){
                     remove_dialog(box); clearTimeout(timeout); timeout=false;},
                                        500);}}
@@ -270,6 +271,7 @@ fdjt.Dialog=(function(){
         else {
             fdjtLog.warn("Bad spec %o to fdjtUI.choose");
             return;}
+        if (spec.onclose) onclose=spec.onclose;
         var i=0, lim=choices.length;
         while (i<lim) {
             var choice=choices[i];
@@ -280,7 +282,9 @@ fdjt.Dialog=(function(){
                 fdjtDOM.addClass(button,"selected");
                 selection=i;}
             i++;}
-        if (selection<0) selection=0; 
+        if ((selection<0)&&(!(spec.nodefault))) {
+            fdjtDOM.addClass(buttons[i],"selected");
+            selection=0;}
         box=makeDialog(
             spec,fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
             fdjtDOM("div.choices",buttons));
@@ -298,10 +302,11 @@ fdjt.Dialog=(function(){
                 if (evt.shiftKey) selection--; else selection++;
                 if (selection<0) selection=buttons.length-1;
                 else if (selection>=buttons.length) selection=0;
-                buttons[selection].focus();
+                if (selection>=0) buttons[selection].focus();
                 fdjtUI.cancel(evt);}
             else if (kc===13) {
-                if (choices[selection].handler)
+                if ((selection>=0)&&(choices[selection])&&
+                    (choices[selection].handler))
                     (choices[selection].handler)();
                 close_choice();
                 fdjtUI.cancel(evt);}
@@ -312,8 +317,10 @@ fdjt.Dialog=(function(){
         fdjtDOM.prepend(document.body,box);
         if (spec.timeout)
             setCountdown(box,spec.timeout,function(){
-                if (choices[selection].handler) choices[selection].handler();});
-        buttons[selection].focus();
+                if ((selection>=0)&&(choices[selection])&&
+                    (choices[selection].handler))
+                    (choices[selection].handler)();});
+        if (selection>=0) buttons[selection].focus();
         return box;}
     Dialog.Choice=choose;
     Dialog.choose=choose;

@@ -2734,6 +2734,16 @@ fdjt.DOM=
             if (device.android) addClass(document.body,"cxAndroid");}
         fdjtDOM.addCXClasses=addCXClasses;
 
+        function windowFocus(evt){
+            addClass(document.body,"cxFOCUS");}
+        function windowBlur(evt){
+            dropClass(document.body,"cxFOCUS");}
+        function trackPageFocus(){
+            windowFocus(); // Could be iffy...
+            addListener(window,"focus",windowFocus);
+            addListener(window,"blur",windowBlur);}
+        fdjt.addInit(trackPageFocus);
+
         return fdjtDOM;
     })();
 
