@@ -1015,22 +1015,21 @@ fdjt.CodexLayout=
                             // We do this if:
                             //   a break after the block is okay AND
                             //    the page would be less than 20% oversize
-                            addClass(page,"codexoversize");
+                            addClass(page,"codexoversize"); // probably redundant
                             layout.drag=drag=[]; newPage();
                             return false;}
                         else {
                             // We need to leave the dragged elements behind
                             layout.drag=drag=[]; block=newPage(block)||block;
-                            if (page===curpage) {
-                                addClass(page,"codexoversize");
-                                return false;}
+                            if (page===curpage)
+                                return false; // probably "codexoversize"
                             else return block;}}
                     else {
                         // We just make a new page for the block
+                        // return newPage(block);
                         block=newPage(block)||block;
-                        if (page===curpage) {
-                            addClass(page,"codexoversize");
-                            return false;}
+                        if (page===curpage)
+                            return false; // probably "codexoversize"
                         else return block;}}
 
                 function badBreak(node,page){
