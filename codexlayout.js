@@ -926,7 +926,8 @@ fdjt.CodexLayout=
                         blocks.push(node);
                         styles.push(style);
                         terminals.push(false);
-                        if ((disp==='block')||(disp==='table')) {
+                        if ((disp==='block')||(disp==='table')||
+                            (disp==='table-row-group')) {
                             var children=node.childNodes;
                             var total_blocks=blocks.length;
                             var i=0; var len=children.length;
@@ -1587,10 +1588,10 @@ fdjt.CodexLayout=
                 if (trace)
                     fdjtLog("Moving body and container out of document");
                 if ((origin)&&(origin.parentNode)) {
-                    bcrumb=document.createTextNode();
+                    bcrumb=document.createTextNode("");
                     origin.parentNode.replaceChild(bcrumb,origin);}
                 if (container.parentNode) {
-                    ccrumb=document.createTextNode();
+                    ccrumb=document.createTextNode("");
                     container.parentNode.replaceChild(ccrumb,container);}
                 if (trace) fdjtLog("Moving originals into layout");
                 i=0; lim=all_ids.length; while (i<lim) {
