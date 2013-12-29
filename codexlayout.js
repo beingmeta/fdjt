@@ -378,7 +378,7 @@ fdjt.CodexLayout=
             if (id) {
                 copy.codexbaseid=id;
                 copy.setAttribute("data-baseid",id);
-                copy.id=null;}
+                copy.removeAttribute("id");}
             // Record the copy you've made (to avoid recreation)
             if (dups[id]) dups[id].push(copy);
             else dups[id]=[copy];
@@ -887,7 +887,7 @@ fdjt.CodexLayout=
                             // variable because we might need to split
                             // it again.
                             if (tracing) logfn("Splitting block %o @ %o",block,page);
-                            var split=splitBlock(block);
+                            var split=splitBlock(block,style);
                             if (split) blocks[ni]=split;
                             else ni++;}}
                     // We fit on the page, so we'll look at the next block.
@@ -912,16 +912,27 @@ fdjt.CodexLayout=
                     if (node.codexui) return;
                     if (!(style)) style=getStyle(node); 
                     if (((atomic)&&(atomic.match(node)))||
+                        (style.display==='table-row')||
                         (avoidBreakInside(node,style))) {
-                        blocks.push(node); styles.push(style);
-                        terminals.push(node);
-                        moveNode(node,false,true,crumbs);
-                        checkTerminal(node);
-                        return;}
+                        if ((node.offsetHeight)&&(node.offsetHeight<(page_height*2))) {
+                            blocks.push(node); styles.push(style);
+                            terminals.push(node);
+                            moveNode(node,false,true,crumbs);
+                            checkTerminal(node);
+                            return;}
+                        else {
+                            // If the node is really tall, ignore the
+                            // avoid page break constraint
+                            fdjtLog.warn("Forcing split of huge (%d) block %o",
+                                         node.offsetHeight,node);
+                            node.style.pageBreakInside="auto";
+                            style=getStyle(node);}}
                     var disp=style.display;
                     if ((style.position==='static')&&
                         (node.tagName!=="BR")&&
-                        (disp!=='inline')) {
+                        (disp!=='inline')&&
+                        (disp!=='table-row')&&
+                        (disp!=='table-cell')) {
                         var loc=blocks.length;
                         blocks.push(node);
                         styles.push(style);
@@ -1252,8 +1263,9 @@ fdjt.CodexLayout=
                     else return false;}
 
                 // This gets a little complicated
-                function splitBlock(node){
-                    if ((!(break_blocks))||(avoidBreakInside(node))||
+                function splitBlock(node,style){
+                    if (!(style)) style=getStyle(node);
+                    if ((!(break_blocks))||(avoidBreakInside(node,style))||
                         (!(node.childNodes))||(node.childNodes.length===0)) {
                         // Simplest case, if we can't split, we just
                         // make a new page starting with the node.
@@ -1622,7 +1634,7 @@ fdjt.CodexLayout=
                             original.setAttribute("style",style);}}
                     else if (original) {
                         saved_ids[id]=original;
-                        original.id=null;}}
+                        if (original.id) original.removeAttribute("id");}}
                 if (trace) fdjtLog("Gathering lostids");
                 var lostids=layout.lostids={};
                 var really_lost=lostids._all_ids=[];
@@ -1632,7 +1644,7 @@ fdjt.CodexLayout=
                     if (orig) {
                         lostids[dupid]=orig;
                         really_lost.push(dupid);
-                        orig.id=null;}}
+                        if (orig.id) orig.removeAttribute("id");}}
                 if (trace) fdjtLog("Moving nodes around");
                 var cur=container.childNodes;
                 i=0; lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
@@ -1697,7 +1709,7 @@ fdjt.CodexLayout=
                            (classname.search(/\bcodexdup/g)>=0)))&&
                         (node.id)&&(node.id.search("CODEXTMP")!==0)) {
                         var justref=document.createElement(node.tagName);
-                        justref.id=node.id;
+                        if (node.id) justref.id=node.id;
                         if (typeof node.className === "string")
                             justref.className=node.className+" codexrestore";
                         else justref.className="codexrestore";
@@ -1957,6 +1969,7 @@ fdjt.CodexLayout=
                 if (elt.tagName==='IMG') return true;
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakInside==='avoid')||
+                    (style.display==='table-row')||
                     ((elt.className)&&(elt.className.search)&&
                      (elt.className.search(page_block_classes)>=0))||
                     ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)));}
@@ -2078,12 +2091,12 @@ fdjt.CodexLayout=
                                 original.removeAttribute("data-oldstyle");}
                             crumb.parentNode.replaceChild(original,crumb);}
                         else if (saved[id]) {
-                            original=saved[id]; original.id=id;}
+                            original=saved[id]; if (id) original.id=id;}
                         else {}}
                     var lost=this.lostids, lostids=lost._all_ids;
                     i=0; lim=lostids.length; while (i<lim) {
                         var lostid=lostids[i++];
-                        lost[lostid].id=lostid;}
+                        if (lostid) lost[lostid].id=lostid;}
                     this.saved_ids={}; this.dups={}; this.lostids={};
                     return;}
                 // Remove any scaleboxes (save the children)
@@ -2149,7 +2162,7 @@ fdjt.CodexLayout=
                 if ((classname)&&(classname.search(/\bcodexdup/g)>=0)) 
                     info.html=block.outerHTML;
                 else {
-                    info.id=block.id;
+                    if (block.id) info.id=block.id;
                     if (classname.search(/\bcodexpagetop\b/)>=0)
                         info.pagetop=true;
                     if (classname.search(/\bcodexcantsplit\b/)>=0)
