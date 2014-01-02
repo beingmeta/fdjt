@@ -469,8 +469,10 @@ fdjt.CodexLayout=
                 while (i<lim) {
                     var child=children[i++];
                     if (child.nodeType===1) {
-                        if ((child.classname)&&
-                            (child.className.search(/\bfdjtskiptext\b/g)>=0)) {}
+                        var style=getStyle(child);
+                        if (style.position!=='static') {}
+                        else if ((child.classname)&&
+                                 (child.className.search(/\bfdjtskiptext\b/g)>=0)) {}
                         else return markPageTop(child);}
                     else if (child.nodeType===3) {
                         if (!(isEmpty(child.nodeValue))) return;}
