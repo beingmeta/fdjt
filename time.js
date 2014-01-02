@@ -217,7 +217,7 @@ fdjt.Time=
                     now=fdjtTime(); used=used+(now-started);
                     clearTimeout(timer); timer=false;
                     if (watch) watch('finishing',i,lim,chunks,used,zerostart);
-                    if (done) done();
+                    if ((done)&&(done.call)) done();
                     var donetime=((done)&&(fdjtTime()-now));
                     now=fdjtTime(); used=used+(now-started);
                     if (watch) watch('done',i,lim,chunks,used,zerostart,donetime);}};
