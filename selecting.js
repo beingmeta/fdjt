@@ -268,12 +268,14 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if (!(container)) return false;
                 else sel=selectors[container.id];}
             if (!(sel)) return false;
-            if (trace) fdjtLog("overWord %o, sel=%o, tapped=%o, adjust=%o",
-                               word,sel,tapped,sel.adjust);
+            if (trace) fdjtLog("overWord %o, sel=%o, tapped=%o, adjust=%o, anchor=%o",
+                               word,sel,tapped,sel.adjust,sel.anchor);
             if (!(sel.start))
                 // We could have some smarts here to include quoted
                 //  phrases, capitalization runs, etc.
                 sel.setRange(word,word);
+            else if (sel.anchor)
+                sel.setRange(sel.anchor,word);
             else if (sel.start===sel.end)
                 // Just one word is selected, so use the touched word
                 // as the 'end' and let setRange sort out the correct
@@ -466,6 +468,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
             if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
                 (target.id.search("fdjtSel")===0)) {
+                var sel=getSelector(target);
+                if ((sel)&&(!(sel.anchor))&&(!(sel.start)))
+                    sel.anchor=target;
                 if (trace) fdjtLog("hold %o t=%o",evt,target);
                 if (overWord(target)) fdjtUI.cancel(evt);}}
         TextSelect.hold_handler=hold_handler;
@@ -501,6 +506,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var target=fdjtUI.T(evt);
             if (trace) fdjtLog("release %o t=%o sel=%o",evt,target,sel);
             if (sel) {
+                sel.anchor=false;
                 sel.setAdjust(false);
                 if (sel.loupe) sel.loupe.style.display='none';}}
         function slip_handler(evt,sel){
