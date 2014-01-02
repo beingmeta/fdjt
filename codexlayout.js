@@ -1880,7 +1880,10 @@ fdjt.CodexLayout=
                 if ((middle_dups)&&(middle_dups.length)) {
                     var j=0, dl=middle_dups.length; while (j<dl) {
                         stripBottomStyles(middle_dups[j++]);}}
-                if (page) dropClass(page,"codexworkpage");
+                if (page) {
+                    if (pagefn) pagefn.call(layout,page,layout);
+                    page.style.height="";
+                    dropClass(page,"codexworkpage");}
                 var i=0; var lim= pages.length;
                 while (i<lim) {
                     var p=pages[i++];
