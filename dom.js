@@ -2048,7 +2048,7 @@ fdjt.DOM=
                     fdjtLog("Can't find #%s",node);
                     return;}
                 node=elt;}
-            else if (node instanceof Array) {
+            else if ((node.length)&&(typeof node !=="string")) {
                 var i=0; var lim=node.length;
                 while (i<lim) addListener(node[i++],evtype,handler);
                 return;}
@@ -2094,6 +2094,26 @@ fdjt.DOM=
                             addListener(elts,ev,handler);}}}}}
         fdjtDOM.addListeners=addListeners;
         
+        function removeListener(node,evtype,handler){
+            if (!(node)) node=document;
+            if (typeof node === 'string') {
+                var elt=fdjtID(node);
+                if (!(node)) {
+                    fdjtLog("Can't find #%s",node);
+                    return;}
+                node=elt;}
+            else if ((node.length)&&(typeof node !=="string")) {
+                var i=0; var lim=node.length;
+                while (i<lim) removeListener(node[i++],evtype,handler);
+                return;}
+            // OK, actually do it
+            if (node.removeEventListener)  {
+                return node.removeEventListener(evtype,handler,false);}
+            else if (node.detachEvent)
+                return node.detachEvent('on'+evtype,handler);
+            else fdjtLog.warn('This node never listens: %o',node);}
+        fdjtDOM.removeListener=removeListener;
+
         fdjtDOM.T=function(evt) {
             evt=evt||event; return (evt.target)||(evt.srcElement);};
 
