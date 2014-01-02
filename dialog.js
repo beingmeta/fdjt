@@ -35,6 +35,8 @@ fdjt.Dialog=(function(){
 
     var hasClass=fdjtDOM.hasClass;
     var addToClass=fdjtDOM.addToClass;
+    var addListener=fdjtDOM.addListener;
+    var removeListener=fdjtDOM.removeListener;
 
     var countdown_serial=1; var countdown_tickers={};
 
@@ -56,7 +58,9 @@ fdjt.Dialog=(function(){
             var close_button=fdjtDOM.Image(
                 "https://s3.amazonaws.com/static.beingmeta.com/g/codex/redx40x40.png",
                 "closebutton","Close");
-            close_button.onclick=close_dialog_handler;
+            addListener(close_button,"click",close_dialog_handler);
+            addListener(close_button,"touchend",close_dialog_handler);
+            addListener(close_button,"touchstart",fdjtUI.cancel);
             close_button.title="click to close";
             box.appendChild(close_button);}
         if (spec.title) {
@@ -179,7 +183,9 @@ fdjt.Dialog=(function(){
             else countdown.innerHTML="…"+(n--)+"…";},
                                1000);
         countdown_tickers[countdown.id]=ticker;
-        fdjtDOM.addListener(box,"click",stop_countdown_onclick);
+        countdown.click=stop_countdown_onclick;
+        addListener(countdown,"touchend",stop_countdown_onclick);
+        addListener(countdown,"touchstart",fdjtUI.cancel);
         setTimeout(function(){fdjtDOM.addClass(box,"closing");},10);
         return box;}
     Dialog.setCountdown=setCountdown;
@@ -236,6 +242,8 @@ fdjt.Dialog=(function(){
             if (spec.handler) spec.handler();
             fdjtUI.cancel(evt);
             close_choice();};
+        addListener(dom,"touchstart",fdjtUI.cancel);
+        addListener(dom,"touchend",dom.onclick);
         return dom;}
 
     function choose(spec){
@@ -244,11 +252,17 @@ fdjt.Dialog=(function(){
         function close_choice(){
             var i=0, lim=buttons.length;
             while (i<lim) {
-                buttons[i].onclick=null;
-                buttons[i].onmousedown=null;
-                buttons[i].onmouseup=null;
-                i++;}
-            if (close_button) close_button.onclick=null;
+                var button=buttons[i++];
+                if (button.onclick)
+                    removeListener(button,"touchend",button.onclick);
+                removeListener(button,"touchstart",fdjtUI.cancel);
+                button.onclick=null;
+                button.onmousedown=null;
+                button.onmouseup=null;}
+            if (close_button) {
+                removeListener(close_button,"touchend",close_button.onclick);
+                removeListener(close_button,"touchstart",fdjtUI.cancel);
+                close_button.onclick=null;}
             if (box) box.onclick=null;
             if (box) box.onkeydown=null;
             if (box) {
@@ -289,7 +303,10 @@ fdjt.Dialog=(function(){
             spec,fdjtDOM("div.message",fdjtDOM.slice(arguments,1)),
             fdjtDOM("div.choices",buttons));
         close_button=fdjtDOM.getChild(box,".closebutton");
-        if (spec.cancel) close_button.onclick=close_choice;
+        if (spec.cancel) {
+            removeListener(close_button,"touchend",close_button.onclick);
+            close_button.onclick=close_choice;
+            addListener(close_button,"touchend",close_button.onclick);}
         else fdjtDOM.remove(close_button);
         
         var cancel=(spec.cancel)||false;
