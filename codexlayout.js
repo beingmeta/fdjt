@@ -1282,7 +1282,7 @@ fdjt.CodexLayout=
                     var line_height=init_geom.line_height||12;
                     var use_height=page_height;
                     if (((init_geom.top+init_geom.top_margin+
-                          (line_height*2))>page_height)) {
+                          (line_height*1.5))>page_height)) {
                         // If the top is too close to the bottom of
                         // the page, just push it over.
                         var cpage=page, newblock=newPage(node);
@@ -1741,7 +1741,7 @@ fdjt.CodexLayout=
                     (layout.layout_id=layout.width+"x"+layout.height+"("+href+")");
                 if (!(CodexLayout.cache)) return;
                 // These will be used for per-page saved layouts
-                var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
+                // var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
                 var copy=container.cloneNode(true);
                 var pages=copy.childNodes, i=0, npages=pages.length;
                 var pageids=((separated)&&([])), pagecontent={};
