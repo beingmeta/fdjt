@@ -1874,6 +1874,14 @@ fdjt.CodexLayout=
                         var dupstart=document.getElementById(dupid);
                         if (dupstart.tagName==="OL")
                             fixOrderedList([dupstart].concat(alldups));
+                        if (dupstart.tagName==="LI") {
+                            var dupi=0, ndups=alldups.length;
+                            while (dupi<ndups) {
+                                var dup=alldups[dupi++];
+                                if (!(dup.getAttribute(dup,"data-oldstyle"))) 
+                                    dup.setAttribute(
+                                        "data-oldstyle",dup.getAttribute("style")||"");
+                                dup.style.listStyleType="none";}}
                         lastdup.className=lastdup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
                 var middle_dups=getChildren(page,".codexdup");
