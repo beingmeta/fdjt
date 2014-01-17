@@ -94,11 +94,16 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             for (var prop in also) {
                 if (also.hasOwnProperty(prop)) {
                     evt[prop]=also[prop];}}}
-        if (trace_taphold)
-            fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o%s%o",
-                    etype,target,tx,ty,orig||"scratch",
-                    ((also)?(" given "):("")),
-                    ((also)?(also):("")));
+        if (trace_taphold) {
+            if ((also)&&(also.startX))
+                fdjtLog("TapHold/Synthesizing %s on %o @%d,%d/%d,%d from %o given %o",
+                        etype,target,tx,ty,also.startX,also.startY,
+                        orig||"scratch",also);
+            else if (also)
+                fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o given %o",
+                        etype,target,tx,ty,orig||"scratch",also);
+            else fdjtLog("TapHold/Synthesizing %s on %o @%d,%d from %o",
+                         etype,target,tx,ty,orig||"scratch");}
         if ((!target)||(!(hasParent(target,document.body))))
             target=document.elementFromPoint(tx,ty);
         if (orig_target!==target)
@@ -215,12 +220,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
             dropClass(elt,"tapholding");
-            return dispatchEvent(target,"release",evt,x,y);}
+            return dispatchEvent(target,"release",evt,x,y,{startX: start_x,startY: start_y});}
         function slipped(target,evt,also){
-            if ((evt)&&(!(also))) {
+            if (also) {
+                also.startX=start_x; also.startY=start_y;}
+            else also={startX: start_x,startY: start_y};
+            if (evt) {
                 var rel=evt.relatedTarget||eTarget(evt);
-                if (rel===target) also=false;
-                else also={relatedTarget: rel};}
+                if (rel!==target) also.relatedTarget=rel;}
             return dispatchEvent(target,"slip",evt,touch_x,touch_y,also);}
         function taptapped(target,evt){
             return dispatchEvent(target,"taptap",evt,touch_x,touch_y);}
