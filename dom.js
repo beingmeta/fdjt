@@ -2045,12 +2045,16 @@ fdjt.DOM=
             if (typeof node === 'string') {
                 var elt=fdjtID(node);
                 if (!(node)) {
-                    fdjtLog("Can't find #%s",node);
+                    fdjtLog.warn("Can't find #%s",node);
                     return;}
                 node=elt;}
-            else if ((node.length)&&(typeof node !=="string")) {
+            else if (((Array.isArray)&&(Array.isArray(node)))||
+                     ((window.NodeList)&&(node instanceof window.NodeList))) {
                 var i=0; var lim=node.length;
                 while (i<lim) addListener(node[i++],evtype,handler);
+                return;}
+            else if ((node!==window)&&(!(node.nodeType))) {
+                fdjtLog.warn("Bad target(s) arg to addListener(%s) %o",evtype,node);
                 return;}
             // OK, actually do it
             if (evtype==='title') { 
@@ -2102,9 +2106,13 @@ fdjt.DOM=
                     fdjtLog("Can't find #%s",node);
                     return;}
                 node=elt;}
-            else if ((node.length)&&(typeof node !=="string")) {
+            else if (((Array.isArray)&&(Array.isArray(node)))||
+                     ((window.NodeList)&&(node instanceof window.NodeList))) {
                 var i=0; var lim=node.length;
                 while (i<lim) removeListener(node[i++],evtype,handler);
+                return;}
+            else if ((node!==window)&&(!(node.nodeType))) {
+                fdjtLog.warn("Bad target(s) arg to removeListener(%s) %o",evtype,node);
                 return;}
             // OK, actually do it
             if (node.removeEventListener)  {
