@@ -485,14 +485,20 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     if ((th.trace)||(trace_taphold))
                         fdjtLog("TapHold(%d) holdfast with touchtoo on %o after %o: %o",
                                 serial,target,th_target,evt);
-                    new_event=document.createEvent('TouchEvent');
-                    new_event.initTouchEvent(
-                        "touchtoo",true,true,window,0,
-                        touch.screenX,touch.screenY,touch.clientX,touch.clientY,
-                        evt.ctrlKey,evt.altKey,evt.shiftKey,evt.metaKey,
-                        document.createTouchList(touch),
-                        document.createTouchList(touch),
-                        document.createTouchList(touch));
+                    new_event=document.createEvent('UIEvent');
+                    new_event.initUIEvent(
+                        "touchtoo",true,true,window,0);
+                    new_event.screenX=touch.screenX;
+                    new_event.screenY=touch.screenY;
+                    new_event.clientX=touch.clientX;
+                    new_event.clientY=touch.clientY;
+                    new_event.ctrlKey=evt.ctrlKey;
+                    new_event.altKey=evt.altKey;
+                    new_event.shiftKey=evt.shiftKey;
+                    new_event.metaKey=evt.metaKey;
+                    new_event.touches=document.createTouchList(touch);
+                    new_event.targetTouches=document.createTouchList(touch);
+                    new_event.changedTouches=document.createTouchList(touch);
                     target.dispatchEvent(new_event);
                     return;}
                 else if ((cur_holder)&&(holder)) {
