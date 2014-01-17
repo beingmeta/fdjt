@@ -677,12 +677,14 @@ fdjt.DOM=
                 return false;}
             else if (parent instanceof Selector) {
                 while (elt) {
-                    if (parent.match(elt)) return elt;
+                    if (elt.nodeType!==1) elt=elt.parentNode;
+                    else if (parent.match(elt)) return elt;
                     else elt=elt.parentNode;}
                 return false;}
             else if (parent instanceof RegExp) {
                 while (elt) {
-                    if ((elt.className)&&(parent.test(elt.className)))
+                    if (elt.nodeType!==1) elt=elt.parentNode;
+                    else if ((elt.className)&&(parent.test(elt.className)))
                         return elt;
                     else elt=elt.parentNode;}
                 return false;}
