@@ -59,7 +59,7 @@ fdjt.CodexLayout=
         var hasClass=fdjtDOM.hasClass;
         var addClass=fdjtDOM.addClass;
         var dropClass=fdjtDOM.dropClass;
-        var TOA=fdjtDOM.toArray;
+        var toArray=fdjtDOM.toArray;
         var getElementValue=fdjtDOM.getElementValue;
         
         var floor=Math.floor;
@@ -543,28 +543,28 @@ fdjt.CodexLayout=
                 if (saved_style) dup.setAttribute("style",saved_style);}
             var textsplits=layout.textsplits;
             var node;
-            var pagescaled=TOA(
+            var pagescaled=toArray(
                 layout.container.getElementsByClassName("codexpagescaled"));
             i=0; lim=pagescaled.length; while (i<lim) {
                 var elt=pagescaled[i++];
                 dropClass(elt,"codexpagescaled");
                 elt.setAttribute("style","");}
-            var cantsplit=TOA(
+            var cantsplit=toArray(
                 layout.container.getElementsByClassName("codexcantsplit"));
             dropClass(cantsplit,"codexcantsplit");
-            var split=TOA(
+            var split=toArray(
                 layout.container.getElementsByClassName("codexsplitstart"));
             i=0; lim=split.length; while (i<lim) {
                 node=split[i++];
                 var nodeid=node.id;
                 var text=textsplits[nodeid];
                 node.parentNode.replaceChild(text,node);}
-            var shards=TOA(
+            var shards=toArray(
                 layout.container.getElementsByClassName("codextextsplit"));
             i=0; lim=shards.length; while (i<lim) {
                 node=shards[i++];
                 node.parentNode.removeChild(node);}
-            var moved=TOA(
+            var moved=toArray(
                 layout.container.getElementsByClassName("codexrelocated"));
             if ((moved)&&(moved.length)) {
                 layout.logfn(
@@ -1294,7 +1294,7 @@ fdjt.CodexLayout=
                         // up the height
                         else use_height=page_height+Math.floor(line_height*1.5);}
                     // Copy all the children into an array
-                    var children=TOA(node.childNodes);
+                    var children=toArray(node.childNodes);
                     // and remove all the children at once
                     node.innerHTML="";
                     var geom=getGeom(node,page);
@@ -2076,8 +2076,8 @@ fdjt.CodexLayout=
                     logfn("Can't determine page from %o",spec);
                     return false;}
                 if (!(newpage)) return;
-                var oldpage=container.getChildrenByClassName('curpage');
-                dropClass(oldpage,"curpage");
+                var curpages=container.getElementsByClassName('curpage');
+                if (curpages.length) dropClass(toArray(curpages),"curpage");
                 addClass(newpage,"curpage");}
             this.gotoPage=gotoPage;
 
