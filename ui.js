@@ -119,7 +119,7 @@ fdjt.UI.Highlight=(function(){
                 while (j<n) frag.appendChild(tomove[j++]);
                 fdjtDOM.replace(hnode,frag);}
             else fdjtDOM.remove(hnode);}}
-    function highlight_node(node,hclass,htitle){
+    function highlight_node(node,hclass,htitle,hattribs){
         if (!(hclass)) hclass=highlight_class;
         var hispan=false;
         if (node.nodeType===3) 
@@ -135,21 +135,29 @@ fdjt.UI.Highlight=(function(){
             else {}}
         if (!(hispan)) return node;
         if (htitle) hispan.title=htitle;
+        if (hattribs) {
+            for (var attrib in hattribs) {
+                if (hattribs.hasOwnProperty(attrib))
+                    hispan.setAttribute(attrib,hattribs[attrib]);}}
         fdjtDOM.replace(node,hispan);
         hispan.appendChild(node);
         return hispan;}
-    function highlight_text(text,hclass,htitle){
+    function highlight_text(text,hclass,htitle,hattribs){
         var tnode=fdjtDOM("span."+(hclass||highlight_class),text);
         if (htitle) tnode.title=htitle;
+        if (hattribs) {
+            for (var attrib in hattribs) {
+                if (hattribs.hasOwnProperty(attrib))
+                    tnode.setAttribute(attrib,hattribs[attrib]);}}
         return tnode;}
-    function highlight_node_range(node,start,end,hclass,htitle){
+    function highlight_node_range(node,start,end,hclass,htitle,hattribs){
         var stringval=node.nodeValue;
         var parent=node.parentNode;
         if ((end===false)||(typeof end === 'undefined'))
             end=stringval.length;
         if (start===end) return;
         var beginning=((start>0)&&(textnode(stringval.slice(0,start))));
-        var middle=highlight_text(stringval.slice(start,end),hclass,htitle);
+        var middle=highlight_text(stringval.slice(start,end),hclass,htitle,hattribs);
         var ending=((end<stringval.length)&&
                     (textnode(stringval.slice(end))));
         if ((beginning)&&(ending)) {
@@ -164,14 +172,14 @@ fdjt.UI.Highlight=(function(){
             parent.insertBefore(middle,ending);}
         else parent.replaceChild(middle,node);
         return middle;}
-    function highlight_range(range,hclass,htitle){
+    function highlight_range(range,hclass,htitle,hattribs){
         range=fdjtDOM.refineRange(range);
         var starts_in=range.startContainer;
         var ends_in=range.endContainer;
         if (starts_in===ends_in)
             return [highlight_node_range(
                 starts_in,range.startOffset,range.endOffset,
-                hclass,htitle)];
+                hclass,htitle,hattribs)];
         else {
             var highlights=[];
             var scan=starts_in;
@@ -187,14 +195,14 @@ fdjt.UI.Highlight=(function(){
                     while ((next)&&(!(next.nextSibling)))
                         next=next.parentNode;
                     next=next.nextSibling;
-                    highlights.push(highlight_node(scan,hclass,htitle));
+                    highlights.push(highlight_node(scan,hclass,htitle,hattribs));
                     scan=next;}}
             // Do the ends
             highlights.push(
                 highlight_node_range(
-                    starts_in,range.startOffset,false,hclass,htitle));
+                    starts_in,range.startOffset,false,hclass,htitle,hattribs));
             highlights.push(
-                highlight_node_range(ends_in,0,range.endOffset,hclass,htitle));
+                highlight_node_range(ends_in,0,range.endOffset,hclass,htitle,hattribs));
             return highlights;}}
 
     highlight_range.clear=clear_highlights;
