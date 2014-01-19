@@ -737,11 +737,10 @@ fdjt.CodexLayout=
             //   setTimeout and a final call to doneFn.  The real
             //   inner function is step(), which relies on state
             //   stored in its closure.
-            
             function addContent(root,timeslice,timeskip,
                                 trace,progressfn,donefn) {
                 
-                var newpage=false;
+                var newpage=false, newpages=((page)?([page]):([]));
                 var start=fdjtTime();
                 if (!(page)) {newPage(); newpage=true;}
 
@@ -756,6 +755,7 @@ fdjt.CodexLayout=
                 if (!(layout.started)) layout.started=start;
                 // If it's already been added to a page, don't do it again.
                 if (getParent(root,".codexpage")) {
+                    pagesDone(newpages); newpages=[];
                     if (donefn) donefn(layout);
                     return false;}
                 layout.roots.push(root);
@@ -787,12 +787,14 @@ fdjt.CodexLayout=
                     // Start a new page and update the loop state
                     newPage(); prev=layout.prev=root;
                     prevstyle=layout.prevstyle=getStyle(root);
+                    pagesDone(newpages); newpages=[];
                     if (donefn) donefn(layout);
                     return;}
                 else {
                     if (geom.bottom<=page_height) {
                         prev=layout.prev=root;
                         prevstyle=layout.prevstyle=getStyle(root);
+                        pagesDone(newpages); newpages=[];
                         if (donefn) donefn(layout);
                         return;}
                     else if (((atomic)&&(atomic.match(root)))||
@@ -800,6 +802,7 @@ fdjt.CodexLayout=
                         if (!(newpage)) newPage(root);
                         prev=layout.prev=root;
                         prevstyle=layout.prevstyle=getStyle(root);
+                        pagesDone(newpages); newpages=[];
                         if (donefn) donefn(layout);
                         return;}}
 
@@ -821,6 +824,7 @@ fdjt.CodexLayout=
                 if (blocks.length===0) {
                     if (!(newpage)) newPage(root);
                     layout.root=cur_root=false;
+                    pagesDone(newpages); newpages=[];
                     if (donefn) donefn(layout);
                     return;}
                 
@@ -1024,6 +1028,7 @@ fdjt.CodexLayout=
                         //  in an impossible situation)
                         var oversize_limit=0.2;
                         if ((!(avoidBreakAfter(block,style)))&&
+                            (((geom.bottom-page_height)/page_height)>1.0)&&
                             (((geom.bottom-page_height)/page_height)<oversize_limit)) {
                             // We leave the block where it is and create an oversize page
                             // We do this if:
@@ -1218,15 +1223,12 @@ fdjt.CodexLayout=
 
                     if ((!(node))||(forcepage)||(needNewPage(node))) {
                         // If we really need to create a new page, do so,
-                        //  starting by dropping the curpage class from the
-                        //  current page
-                        if ((page)&&(page.offsetHeight>page_height))
-                            addClass(page,"codexoversize");
                         if (page) {
                             if (pagefn) pagefn.call(layout,page,layout);
                             page.style.height="";
                             dropClass(page,"codexworkpage");}
                         layout.page=page=fdjtDOM("div.codexpage.codexworkpage");
+                        newpages.push(page);
                         if (!(pagerule)) {
                             page.style.height=page_height+'px';
                             page.style.width=page_width+'px';}
@@ -1307,6 +1309,12 @@ fdjt.CodexLayout=
                         addClass(node,"codexcantsplit");
                         newPage(node);
                         return node;}
+                    // If the block is just a little bit over, tweak
+                    // the line height to avoid 
+                    if ((use_height===page_height)&&
+                        ((init_geom.bottom-page_height)<(line_height*1.5))&&
+                        (init_geom.height>(line_height*3)))
+                        use_height=page_height-Math.floor(line_height*1.5);
                     var push=splitChildren(node,children,init_geom,use_height);
                     if (!(push)) {
                         /* Doesn't need to be split after all.
@@ -1336,7 +1344,46 @@ fdjt.CodexLayout=
                         if (trace>1)
                             logfn("Layout/splitBlock %o @ %o into %o on %o",
                                   node,page_break,dup,page);
+                        var oldpage=getParent(node,".codexpage");
+                        if (oldpage) {
+                            var tempwork=!(hasClass(oldpage,"codexworkpage"));
+                            if (tempwork) addClass(oldpage,"codexworkpage");
+                            adjustTextEnd(node);
+                            if (tempwork) dropClass(oldpage,"codexworkpage");}
                         return dup;}}
+
+                function adjustTextEnd(block,delta){
+                    if (hasClass(block,"codexnosquare")) return;
+                    var probe=fdjtDOM("span"), outer=getGeom(block);
+                    var init_geom=false, geom=false, right_margin=(outer.right-3);
+                    var letter_spacing=0, last_spacing=0, n_steps=0, max_steps=32;
+                    if (!(block.getAttribute("data-oldstyle"))) 
+                        block.setAttribute("data-oldstyle",block.getAttribute("style"));
+                    if (!(delta)) delta=0.05; letter_spacing=letter_spacing+delta;
+                    probe.style.display='inline-block';
+                    block.style.letterSpacing=letter_spacing+"px";
+                    block.appendChild(probe);
+                    init_geom=geom=getGeom(probe,block);
+                    while ((geom.top===init_geom.top)&&
+                           (geom.right<right_margin)&&
+                           (n_steps<max_steps)) {
+                        last_spacing=letter_spacing; n_steps++;
+                        letter_spacing=letter_spacing+delta; 
+                        block.style.letterSpacing=letter_spacing+"px";
+                        geom=getGeom(probe,block);}
+                    if ((geom.right>outer.right)||(geom.top>init_geom.top)) {
+                        delta=-0.01;
+                        while (((geom.right>outer.right)||
+                                (geom.top>init_geom.top))&&
+                               (letter_spacing>0)&&
+                               (n_steps<max_steps)) {
+                            letter_spacing=letter_spacing+delta; n_steps++;
+                            block.style.letterSpacing=letter_spacing+"px";
+                            geom=getGeom(probe,block);}}
+                    if (geom.right>outer.right) 
+                        // Couldn't git it close enough
+                        block.style.letterSpacing=last_spacing+"px";
+                    block.removeChild(probe);}
 
                 function isTextyNode(node){
                     return ((node.childNodes)&&
@@ -1522,6 +1569,7 @@ fdjt.CodexLayout=
                         if (layout.timer) clearTimeout(layout.timer);
                         layout.timer=false;
                         layout.root=cur_root=false;
+                        pagesDone(newpages); newpages=[];
                         if (donefn) {
                             if (timeslice) 
                                 setTimeout(function(){donefn(layout);},10);
@@ -1530,11 +1578,21 @@ fdjt.CodexLayout=
                 // This is the inner loop
                 if (!(timeslice)) {
                     while (ni<nblocks) step();
+                    pagesDone(newpages);
                     if (donefn) donefn(layout);}
                 else loop();
                 
                 return layout;}
             this.addContent=addContent;
+
+            function pagesDone(pages){
+                var i=0, lim=pages.length; while (i<lim) {
+                    var page=pages[i++];
+                    if (page.style.height) continue;
+                    page.style.height="auto";
+                    if (page.offsetHeight>page_height)
+                        addClass(page,"codexoversize");
+                    page.style.height="";}}
 
             function gatherLayoutInfo(node,ids,dups,dupids,dupstarts,restoremap){
                 if (node.nodeType!==1) return;
