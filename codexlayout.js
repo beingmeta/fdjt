@@ -575,6 +575,47 @@ fdjt.CodexLayout=
                     restoreNode(moved[i++],layout,crumbs,textsplits);}
             layout.textsplits={}; layout.crumbs={};}
         
+        function adjustTextEnd(block,delta){
+            if (hasParent(block,".codexnosquare")) return;
+            var workpage=getParent(block,".codexpage");
+            if (!(workpage)) return;
+            if (workpage.offsetHeight===0) 
+                addClass(workpage,"codexworkpage");
+            else workpage=false;
+            var probe=fdjtDOM("span"," "), outer=getGeom(block);
+            var init_geom=false, geom=false;
+            var right_margin=(outer.right-3);
+            var letter_spacing=0, last_spacing=0;
+            var n_steps=0, max_steps=32;
+            if (!(block.getAttribute("data-savedstyle"))) 
+                block.setAttribute(
+                    "data-savedstyle",block.getAttribute("style")||"");
+            if (!(delta)) delta=0.05;
+            probe.style.display='inline-block'; probe.style.width="0px";
+            block.appendChild(probe);
+            init_geom=geom=getGeom(probe,block);
+            while ((geom.top===init_geom.top)&&
+                   (geom.right<right_margin)&&
+                   (n_steps<max_steps)) {
+                last_spacing=letter_spacing; n_steps++;
+                letter_spacing=letter_spacing+delta; 
+                block.style.letterSpacing=letter_spacing+"px";
+                geom=getGeom(probe,block);}
+            if ((geom.right>outer.right)||(geom.top>init_geom.top)) {
+                delta=-0.01;
+                while (((geom.right>outer.right)||
+                        (geom.top>init_geom.top))&&
+                       (letter_spacing>0)&&
+                       (n_steps<max_steps)) {
+                    letter_spacing=letter_spacing+delta; n_steps++;
+                    block.style.letterSpacing=letter_spacing+"px";
+                    geom=getGeom(probe,block);}}
+            if (geom.right>outer.right) 
+                // Couldn't git it close enough
+                block.style.letterSpacing=last_spacing+"px";
+            block.removeChild(probe);
+            if (workpage) dropClass(workpage,"codexworkpage");}
+
         /* Codex trace levels */
         /* 0=notrace
            1=trace tracked nodes
@@ -1344,46 +1385,7 @@ fdjt.CodexLayout=
                         if (trace>1)
                             logfn("Layout/splitBlock %o @ %o into %o on %o",
                                   node,page_break,dup,page);
-                        var oldpage=getParent(node,".codexpage");
-                        if (oldpage) {
-                            var tempwork=!(hasClass(oldpage,"codexworkpage"));
-                            if (tempwork) addClass(oldpage,"codexworkpage");
-                            adjustTextEnd(node);
-                            if (tempwork) dropClass(oldpage,"codexworkpage");}
                         return dup;}}
-
-                function adjustTextEnd(block,delta){
-                    if (hasClass(block,"codexnosquare")) return;
-                    var probe=fdjtDOM("span"), outer=getGeom(block);
-                    var init_geom=false, geom=false, right_margin=(outer.right-3);
-                    var letter_spacing=0, last_spacing=0, n_steps=0, max_steps=32;
-                    if (!(block.getAttribute("data-oldstyle"))) 
-                        block.setAttribute("data-oldstyle",block.getAttribute("style"));
-                    if (!(delta)) delta=0.05; letter_spacing=letter_spacing+delta;
-                    probe.style.display='inline-block';
-                    block.style.letterSpacing=letter_spacing+"px";
-                    block.appendChild(probe);
-                    init_geom=geom=getGeom(probe,block);
-                    while ((geom.top===init_geom.top)&&
-                           (geom.right<right_margin)&&
-                           (n_steps<max_steps)) {
-                        last_spacing=letter_spacing; n_steps++;
-                        letter_spacing=letter_spacing+delta; 
-                        block.style.letterSpacing=letter_spacing+"px";
-                        geom=getGeom(probe,block);}
-                    if ((geom.right>outer.right)||(geom.top>init_geom.top)) {
-                        delta=-0.01;
-                        while (((geom.right>outer.right)||
-                                (geom.top>init_geom.top))&&
-                               (letter_spacing>0)&&
-                               (n_steps<max_steps)) {
-                            letter_spacing=letter_spacing+delta; n_steps++;
-                            block.style.letterSpacing=letter_spacing+"px";
-                            geom=getGeom(probe,block);}}
-                    if (geom.right>outer.right) 
-                        // Couldn't git it close enough
-                        block.style.letterSpacing=last_spacing+"px";
-                    block.removeChild(probe);}
 
                 function isTextyNode(node){
                     return ((node.childNodes)&&
@@ -1930,6 +1932,8 @@ fdjt.CodexLayout=
                         var alldups=dups[dupid];
                         var lastdup=alldups[alldups.length-1];
                         var dupstart=document.getElementById(dupid);
+                        if (hasClass(dupstart,"codexterminal"))
+                            adjustTextEnd(dupstart);
                         if (dupstart.tagName==="OL")
                             fixOrderedList([dupstart].concat(alldups));
                         if (dupstart.tagName==="LI") {
@@ -1945,7 +1949,10 @@ fdjt.CodexLayout=
                 var middle_dups=getChildren(page,".codexdup");
                 if ((middle_dups)&&(middle_dups.length)) {
                     var j=0, dl=middle_dups.length; while (j<dl) {
-                        stripBottomStyles(middle_dups[j++]);}}
+                        var mdup=middle_dups[j++];
+                        stripBottomStyles(mdup);
+                        if (hasClass(mdup,"codexterminal"))
+                            adjustTextEnd(mdup);}}
                 if (page) {
                     if (pagefn) pagefn.call(layout,page,layout);
                     page.style.height="";
