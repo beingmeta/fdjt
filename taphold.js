@@ -303,7 +303,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                                             taptapthresh);}
                     else tapped(th_target,evt,x,y);}
                 else slipped(th_target,evt);}
-            else if (pressed) released(pressed,evt,x,y);
+            else if (pressed) {
+                var geom=fdjtDOM.getGeometry(elt);
+                if ((x>=geom.left)&&(x<=geom.right)&&(y>=geom.top)&&(y<=geom.bottom))
+                    released(pressed,evt,x,y);
+                else slipped(th_target,evt,x,y);}
+            else {}
             if (reticle.live) reticle.highlight(false);
             start_x=false; start_y=false; start_t=false;
             touched=false; pressed=false;
@@ -365,6 +370,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else target=eTarget(evt);
             if (!(target)) return;
             var holder=getParent(target,".tapholder");
+            // fdjtLog("taphold_move %o %d,%d %o %o",evt,x,y,target,holder);
             if (holder!==elt) {
                 if ((th.trace)||(trace_taphold)) {
                     trace_ignore_move(evt,serial,elt,holder,th_target,target,
