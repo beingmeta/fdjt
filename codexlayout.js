@@ -564,6 +564,9 @@ fdjt.CodexLayout=
             i=0; lim=shards.length; while (i<lim) {
                 node=shards[i++];
                 node.parentNode.removeChild(node);}
+            var leading=toArray(
+                layout.container.getElementsByClassName("codexdupleading"));
+            if ((leading)&&(leading.length)) fdjtDOM.remove(leading);
             var moved=toArray(
                 layout.container.getElementsByClassName("codexrelocated"));
             if ((moved)&&(moved.length)) {
