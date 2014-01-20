@@ -68,3 +68,6 @@ body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 .codexpage .codexpagefoot {
     position: absolute; bottom: 0px; left: 0px; right: 0px;
     width: 100%; margin: 0px; border: 0px; padding: 0px;}
+
+.codexdupleading {
+    display: inline-block; height: 0px; width: 70%; visibility: hidden;}

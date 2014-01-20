@@ -575,46 +575,8 @@ fdjt.CodexLayout=
                     restoreNode(moved[i++],layout,crumbs,textsplits);}
             layout.textsplits={}; layout.crumbs={};}
         
-        function adjustTextEnd(block,delta){
-            if (hasParent(block,".codexnosquare")) return;
-            var workpage=getParent(block,".codexpage");
-            if (!(workpage)) return;
-            if (workpage.offsetHeight===0) 
-                addClass(workpage,"codexworkpage");
-            else workpage=false;
-            var probe=fdjtDOM("span"," "), outer=getGeom(block);
-            var init_geom=false, geom=false;
-            var right_margin=(outer.right-3);
-            var letter_spacing=0, last_spacing=0;
-            var n_steps=0, max_steps=32;
-            if (!(block.getAttribute("data-savedstyle"))) 
-                block.setAttribute(
-                    "data-savedstyle",block.getAttribute("style")||"");
-            if (!(delta)) delta=0.05;
-            probe.style.display='inline-block'; probe.style.width="0px";
-            block.appendChild(probe);
-            init_geom=geom=getGeom(probe,block);
-            while ((geom.top===init_geom.top)&&
-                   (geom.right<right_margin)&&
-                   (n_steps<max_steps)) {
-                last_spacing=letter_spacing; n_steps++;
-                letter_spacing=letter_spacing+delta; 
-                block.style.letterSpacing=letter_spacing+"px";
-                geom=getGeom(probe,block);}
-            if ((geom.right>outer.right)||(geom.top>init_geom.top)) {
-                delta=-0.01;
-                while (((geom.right>outer.right)||
-                        (geom.top>init_geom.top))&&
-                       (letter_spacing>0)&&
-                       (n_steps<max_steps)) {
-                    letter_spacing=letter_spacing+delta; n_steps++;
-                    block.style.letterSpacing=letter_spacing+"px";
-                    geom=getGeom(probe,block);}}
-            if (geom.right>outer.right) 
-                // Couldn't git it close enough
-                block.style.letterSpacing=last_spacing+"px";
-            block.removeChild(probe);
-            if (workpage) dropClass(workpage,"codexworkpage");}
+        function addDupLeading(block){
+            block.appendChild(fdjtDOM("span.codexdupleading","leading"));}
 
         /* Codex trace levels */
         /* 0=notrace
@@ -1375,6 +1337,10 @@ fdjt.CodexLayout=
                         // Since we left something behind on this page, we
                         //  can clear anything we're dragging
                         layout.drag=drag=[];
+                        // Add dup leading to the leftover split,
+                        //  which will force the last line to not be
+                        //  ragged.
+                        addDupLeading(node);
                         // Finally, we create a new page
                         page_break=newPage(page_break);
                         var dup=page_break.parentNode;
@@ -1932,8 +1898,6 @@ fdjt.CodexLayout=
                         var alldups=dups[dupid];
                         var lastdup=alldups[alldups.length-1];
                         var dupstart=document.getElementById(dupid);
-                        if (hasClass(dupstart,"codexterminal"))
-                            adjustTextEnd(dupstart);
                         if (dupstart.tagName==="OL")
                             fixOrderedList([dupstart].concat(alldups));
                         if (dupstart.tagName==="LI") {
@@ -1950,9 +1914,7 @@ fdjt.CodexLayout=
                 if ((middle_dups)&&(middle_dups.length)) {
                     var j=0, dl=middle_dups.length; while (j<dl) {
                         var mdup=middle_dups[j++];
-                        stripBottomStyles(mdup);
-                        if (hasClass(mdup,"codexterminal"))
-                            adjustTextEnd(mdup);}}
+                        stripBottomStyles(mdup);}}
                 if (page) {
                     if (pagefn) pagefn.call(layout,page,layout);
                     page.style.height="";
