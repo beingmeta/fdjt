@@ -1357,12 +1357,6 @@ fdjt.CodexLayout=
                         // break.  We append all the remaining children
                         // to this duplicated parent on the new page.
                         appendChildren(dup,push,1);
-                        // Add dup leading to the leftover split,
-                        //  which will force the last line to not be
-                        //  ragged.  Note that we may want to tweak
-                        //  these nodes later to make the last line
-                        //  less ragged.
-                        addDupLeading(node);
                         if (trace>1)
                             logfn("Layout/splitBlock %o @ %o into %o on %o",
                                   node,page_break,dup,page);
@@ -1408,23 +1402,24 @@ fdjt.CodexLayout=
                         //  It's a weird node, so we punt on handling it.
                         //  If it's the first child, push the whole node,
                         //  otherwise, just split it at the break
-                        if (i===1) return node;
+                        if (breakpos===0) return node;
                         else return children.slice(breakpos);}
-                    // If there isn't any content between the node and
-                    // the break, we just push the whole node over the
-                    // edge.
-                    else if (hasContent(node,true,false,page_break))
-                        return node;
-                    // If the break is childless, we just split on it
-                    else if ((!(page_break.childNodes))||
-                             (page_break.childNodes.length===0))
-                        return children.slice(breakpos);
                     // If the page break has a single textual child, we just split
                     // it's text.
                     else if ((page_break.childNodes.length===1)&&
                              (page_break.childNodes[0].nodeType===3)) {
                         textsplit=child.childNodes[0];
                         text_parent=page_break;}
+                    // If we're breaking on the first node or there
+                    // isn't any real content before the break, we
+                    // admit defeat
+                    else if ((breakpos===0)||(!(hasContent(node,true,false,page_break)))) {
+                        appendChildren(node,children,i);
+                        return node;}
+                    // If the break is childless, we just split on it
+                    else if ((!(page_break.childNodes))||
+                             (page_break.childNodes.length===0))
+                        return children.slice(breakpos);
                     else if (true) return children.slice(breakpos);
                     // We could call splitChildren recursively, but
                     // we're not currently doing so
@@ -1501,6 +1496,8 @@ fdjt.CodexLayout=
                                 id=keepnode.id="CODEXTMPID"+(tmpid_count++);
                             else pushnode.id="";}
                         keepnode.appendChild(document.createTextNode(keeptext));
+                        // Avoid a ragged bottom line on keepnode
+                        addDupLeading(node);
                         pushnode.appendChild(document.createTextNode(pushtext));
                         if (keepnode!==probenode)
                             text_parent.replaceChild(keepnode,probenode);
@@ -1605,10 +1602,10 @@ fdjt.CodexLayout=
                 var i=0, lim=pages.length; while (i<lim) {
                     var page=pages[i++];
                     if (page.style.height) continue;
-                    page.style.height="auto";
+                    page.style.height="auto"; page.style.display="block";
                     if (page.offsetHeight>page_height)
                         addClass(page,"codexoversize");
-                    page.style.height="";}}
+                    page.style.height=""; page.style.display="";}}
 
             function gatherLayoutInfo(node,ids,dups,dupids,dupstarts,restoremap){
                 if (node.nodeType!==1) return;
