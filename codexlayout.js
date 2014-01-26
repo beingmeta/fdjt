@@ -900,8 +900,14 @@ fdjt.CodexLayout=
                             // it again.
                             if (tracing) logfn("Splitting block %o @ %o",block,page);
                             var split=splitBlock(block,style);
-                            if (split) blocks[ni]=split;
-                            else ni++;}}
+                            if ((split)&&(split!==block)) blocks[ni]=split;
+                            else {
+                                geom=getGeom(block,page);
+                                if (geom.bottom>page_height) {
+                                    addClass(page,"codexoversize");
+                                    layout.drag=drag=[];
+                                    newPage();}
+                                ni++;}}}
                     // We fit on the page, so we'll look at the next block.
                     else {
                         if ((block)&&(drag.length)&&(terminal)) {
@@ -1602,6 +1608,7 @@ fdjt.CodexLayout=
                 var i=0, lim=pages.length; while (i<lim) {
                     var page=pages[i++];
                     if (page.style.height) continue;
+                    if (hasClass(page,"codexoversize")) continue;
                     page.style.height="auto"; page.style.display="block";
                     if (page.offsetHeight>page_height)
                         addClass(page,"codexoversize");
