@@ -66,8 +66,8 @@ fdjt.CodexLayout=
 
         var layoutDB;
 
-        function appendChildren(node,children,start){
-            var lim=children.length; var i=(start)||0;
+        function appendChildren(node,children,start,end){
+            var lim=end||children.length; var i=(start)||0;
             var frag=document.createDocumentFragment();
             while (i<lim) {
                 if (children[i])
@@ -1390,14 +1390,16 @@ fdjt.CodexLayout=
                     // the child that broke the page.
                     var i=0, n=children.length, child;
                     while (i<n) {
-                        child=children[i++];
+                        var child=children[i++];
+                        node.innerHTML="";
+                        appendChildren(node,children,0,i);
                         // Add the child back and get the geometry
-                        node.appendChild(child); geom=getGeom(node,page);
+                        geom=getGeom(node,page);
                         if (geom.bottom>use_page_height) {
                             page_break=child; breaktype=child.nodeType; breakpos=i-1;
                             break;}
                         else continue;}
-                    if (!(page_break)) // Never went over the edge
+                    if (!(page_break))  // Never went over the edge
                         return false;
                     // If we get here, this child pushed the node over the edge
                     else if (breaktype===3) {
