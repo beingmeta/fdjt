@@ -353,9 +353,11 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (override) noDefault(evt);
             if ((scrolling)&&(evt.touches)) {
                 if (scroll_x>=0) 
-                    scrolling.scrollLeft=scroll_x-(evt.touches[0].pageX-window.pageXOffset);
+                    scrolling.scrollLeft=
+                    scroll_x-(evt.touches[0].pageX-window.pageXOffset);
                 if (scroll_y>=0)
-                    scrolling.scrollTop=scroll_y-(evt.touches[0].pageY-window.pageYOffset);}
+                    scrolling.scrollTop=
+                    scroll_y-(evt.touches[0].pageY-window.pageYOffset);}
             if ((pressed)&&(cleared>start_t)) {
                 abortpress(evt,"move/cleared");
                 return;}
