@@ -1388,7 +1388,7 @@ fdjt.CodexLayout=
                     // We add children back until we go over the edge
                     // and then figure out if there's a way to split
                     // the child that broke the page.
-                    var i=0, n=children.length, child;
+                    var i=0, n=children.length;
                     while (i<n) {
                         var child=children[i++];
                         node.innerHTML="";
@@ -1414,7 +1414,7 @@ fdjt.CodexLayout=
                     // it's text.
                     else if ((page_break.childNodes.length===1)&&
                              (page_break.childNodes[0].nodeType===3)) {
-                        textsplit=child.childNodes[0];
+                        textsplit=page_break.childNodes[0];
                         text_parent=page_break;}
                     // If we're breaking on the first node or there
                     // isn't any real content before the break, we
