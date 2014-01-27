@@ -399,13 +399,17 @@ fdjt.UI.ProgressBar=(function(){
             pb=document.getElementById(pb);
         if (typeof total==='number')
             progress=100*(progress/total);
+        if (!(pb)) return;
         var dom=((pb.dom)||(pb));
+        if (!(dom.nodeType)) return;
         var rule=fdjtDOM.getChildren(dom,"div.indicator")[0];
         rule.style.width=progress+"%";}
     function setMessage(pb){
         if (typeof pb==='string')
             pb=document.getElementById(pb);
+        if (!(pb)) return;
         var dom=((pb.dom)||(pb));
+        if (!(dom.nodeType)) return;
         var oldmsg=fdjtDOM.getChildren(dom,".message")[0];
         var newmsg=fdjtDOM("div.message");
         fdjtDOM.appendArray(newmsg,fdjtDOM.Array(arguments,1));
