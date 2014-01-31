@@ -864,9 +864,17 @@ fdjt.CodexLayout=
                     // more than once if we split the node and part of
                     // the split landed back in [i].
                     var geom=getGeom(block,page);
+                    var margin_bottom=parsePX(style.marginBottom);
                     if ((trace)&&((trace>3)||((track)&&(track.match(block)))))
                         logfn("Layout/geom %o %j",block,geom);
-                    if (geom.bottom>page_height) {
+                    if (((geom.bottom-margin_bottom)>page_height)||
+                        ((blocks[ni+1])&&(geom.height>30)&&
+                         ((geom.bottom+(getGeom(blocks[ni+1]).height))>page_height)&&
+                         (!(avoidBreakInside(block)))&&
+                         (avoidBreakInside(blocks[ni+1]))&&
+                         (avoidBreakBefore(blocks[ni+1])))) {
+                        var use_height=page_height;
+                        if (geom.bottom<page_height) use_height=geom.bottom-30;
                         if (!(terminal)) {
                             if (tracing)
                                 logfn("Oversize non-terminal %o, continuing",
@@ -876,7 +884,7 @@ fdjt.CodexLayout=
                         // which extends below the bottom of the page
                         else if (((short_page_height)?
                                   (geom.top>short_page_height):
-                                  (geom.top>page_height))&&
+                                  (geom.top>use_height))&&
                                  (drag.length===0)&&
                                  (!(avoidBreakBefore(block,style))))
                             // Our top is also over the bottom of the page,
@@ -899,7 +907,7 @@ fdjt.CodexLayout=
                             // variable because we might need to split
                             // it again.
                             if (tracing) logfn("Splitting block %o @ %o",block,page);
-                            var split=splitBlock(block,style);
+                            var split=splitBlock(block,style,use_height);
                             if ((split)&&(split!==block)) blocks[ni]=split;
                             else {
                                 geom=getGeom(block,page);
@@ -1279,7 +1287,8 @@ fdjt.CodexLayout=
                     else return false;}
 
                 // This gets a little complicated
-                function splitBlock(node,style){
+                function splitBlock(node,style,use_height){
+                    if (!(use_height)) use_height=page_height;
                     if (!(style)) style=getStyle(node);
                     if ((!(break_blocks))||(avoidBreakInside(node,style))||
                         (!(node.childNodes))||(node.childNodes.length===0)) {
@@ -1294,8 +1303,8 @@ fdjt.CodexLayout=
                     // make this work.
                     var init_geom=getGeom(node,page,true);
                     var line_height=init_geom.line_height||12;
-                    var use_height=page_height;
-                    if (((init_geom.top+init_geom.top_margin+
+                    if ((use_height===page_height)&&
+                        ((init_geom.top+init_geom.top_margin+
                           (line_height*1.5))>page_height)) {
                         // If the top is too close to the bottom of
                         // the page, try to just push onto a new page.
@@ -2057,6 +2066,7 @@ fdjt.CodexLayout=
             //  represent (or handle) page-break 'avoid' values.  Sigh.
             var page_block_classes=/\b(avoidbreakinside)|(sbookpage)\b/;
             function avoidBreakInside(elt,style){
+                var lh;
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (elt.tagName==='IMG') return true;
                 if (!(style)) style=getStyle(elt);
@@ -2064,7 +2074,8 @@ fdjt.CodexLayout=
                     (style.display==='table-row')||
                     ((elt.className)&&(elt.className.search)&&
                      (elt.className.search(page_block_classes)>=0))||
-                    ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)));}
+                    ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)))||
+                    ((lh=parsePX(style.lineHeight))&&((lh*2.5)>elt.offsetHeight));}
             this.avoidBreakInside=avoidBreakInside;
             
             function avoidBreakBefore(elt,style){
