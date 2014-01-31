@@ -2765,9 +2765,9 @@ fdjt.DOM=
         fdjtDOM.addCXClasses=addCXClasses;
 
         function windowFocus(evt){
-            addClass(document.body,"cxFOCUS");}
+            evt=evt||event; addClass(document.body,"cxFOCUS");}
         function windowBlur(evt){
-            dropClass(document.body,"cxFOCUS");}
+            evt=evt||event; dropClass(document.body,"cxFOCUS");}
         function trackPageFocus(){
             windowFocus(); // Could be iffy...
             addListener(window,"focus",windowFocus);
