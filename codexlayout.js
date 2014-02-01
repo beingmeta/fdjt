@@ -917,14 +917,14 @@ fdjt.CodexLayout=
                                     newPage();}
                                 ni++;}}}
                     // We fit on the page, so we'll look at the next block.
-                    else {
-                        if ((block)&&(drag.length)&&(terminal)) {
-                            if ((drag.length===1)||
-                                (avoidBreakBefore(block))||
-                                (avoidBreakAfter(drag[drag.length-1]))) {
-                                if (drag.indexOf(block)<0) drag.push(block);}
-                            else layout.drag=drag=[];}
+                    else if (avoidBreakAfter(block,style)) {
+                        if ((drag.length===0)||(drag.indexOf(block)<0)) {
+                            if (tracing) logfn("Possibly dragging %o",prev);
+                            drag.push(block);}
                         ni++;}
+                    else {
+                        layout.drag=drag=[]; ni++;}
+                        
                     // Update the prev pointer for terminals
                     if (terminal) {
                         layout.prev=prev=block;
@@ -940,7 +940,9 @@ fdjt.CodexLayout=
                     if (((atomic)&&(atomic.match(node)))||
                         (style.display==='table-row')||
                         (avoidBreakInside(node,style))) {
-                        if ((node.offsetHeight)&&(node.offsetHeight<(page_height*2))) {
+                        if ((node.offsetHeight===0)||
+                            ((node.offsetHeight)&&
+                             (node.offsetHeight<(page_height*2)))) {
                             blocks.push(node); styles.push(style);
                             terminals.push(node);
                             moveNode(node,false,true,crumbs);
@@ -949,10 +951,11 @@ fdjt.CodexLayout=
                         else {
                             // If the node is really tall, ignore the
                             // avoid page break constraint
-                            fdjtLog.warn("Forcing split of huge (%d) block %o",
-                                         node.offsetHeight,node);
-                            node.style.pageBreakInside="auto";
-                            style=getStyle(node);}}
+                            if ((node.childNodes)&&(node.childNodes.length)) {
+                                fdjtLog.warn("Allowing split of huge (%d) block %o",
+                                             node.offsetHeight,node);
+                                node.style.pageBreakInside="auto";
+                                style=getStyle(node);}}}
                     var disp=style.display;
                     if ((style.position==='static')&&
                         (node.tagName!=="BR")&&
@@ -998,13 +1001,14 @@ fdjt.CodexLayout=
                     // NOTE that dragged blocks have already been
                     // placed, so the previous page will end up short.
                     // Them's the breaks (so to speak).
-                    if ((block)&&(terminal)&&(avoidBreakBefore(block,style))) {
+                    if (!(block)) {}
+                    else if ((prev)&&(drag.indexOf(prev)<0)) {}
+                    else if ((terminal)&&(avoidBreakBefore(block,style))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
                         if ((prev)&&(drag.indexOf(prev)<0)) drag.push(prev);}
-                    else if ((block)&&(prev)&&
-                             (avoidBreakAfter(prev,prevstyle))) {
+                    else if ((prev)&&(avoidBreakAfter(prev,prevstyle))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
-                        if ((prev)&&(drag.indexOf(prev)<0)) drag.push(prev);}
+                        drag.push(prev);}
                     else if (drag.length) layout.drag=drag=[];
                     else {}}
 
@@ -2075,7 +2079,8 @@ fdjt.CodexLayout=
                     ((elt.className)&&(elt.className.search)&&
                      (elt.className.search(page_block_classes)>=0))||
                     ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)))||
-                    ((lh=parsePX(style.lineHeight))&&((lh*2.5)>elt.offsetHeight));}
+                    ((style.display==="block")&&
+                     ((lh=parsePX(style.lineHeight))&&((lh*2.5)>elt.offsetHeight)));}
             this.avoidBreakInside=avoidBreakInside;
             
             function avoidBreakBefore(elt,style){
