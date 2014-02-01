@@ -399,7 +399,7 @@ fdjt.DOM=
             else if (newinfo)
                 elt.className=newinfo;
             else if (!(keep))
-                elt.className=null;
+                elt.className="";
             else elt.className="";
             return true;}
         fdjtDOM.dropClass=dropClass;
