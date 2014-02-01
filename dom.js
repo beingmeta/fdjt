@@ -321,6 +321,8 @@ fdjt.DOM=
 
         function addClass(elt,classname,attrib){
             if (!(elt)) return;
+            else if (!(classname))
+                return;
             else if (typeof elt === 'string') {
                 if (!(elt=document.getElementById(elt)))
                     return;}
@@ -378,7 +380,7 @@ fdjt.DOM=
                  classname);
             var newinfo=classinfo;
             if (classinfo===classname) 
-                newinfo=null;
+                newinfo="";
             else if (classinfo.search(class_regex)>=0) 
                 newinfo=classinfo.replace(class_regex,"");
             else return false;
@@ -439,7 +441,7 @@ fdjt.DOM=
                  classname);
             var newinfo=classinfo;
             if (classinfo===classname) 
-                newinfo=null;
+                newinfo="";
             else if (classinfo.search(class_regex)>=0) 
                 newinfo=classinfo.replace(class_regex,"");
             else {
@@ -448,9 +450,8 @@ fdjt.DOM=
                 else elt.className=classinfo+' '+classname;
                 return true;}
             if (newinfo)
-                newinfo=newinfo.
-                replace(whitespace_pat," ").
-                replace(trimspace_pat,"");
+                newinfo=newinfo.replace(whitespace_pat," ").replace(
+                    trimspace_pat,"");
             if (attrib) {
                 if (newinfo) {
                     elt.setAttribute(attrib,newinfo);
