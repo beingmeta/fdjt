@@ -419,13 +419,12 @@ fdjt.CodexLayout=
         // This moves a node into another container, leaving
         // a back pointer for restoration
         function moveNode(arg,into,blockp,crumbs){
-            var baseclass; var node=arg;
+            var baseclass; var node=arg, weird=false;
             if (hasParent(node,into)) return node;
             if (node.nodeType===1) {
                 baseclass=node.className;
-                if ((baseclass)&&(typeof baseclass !== "string")) {
-                    into.appendChild(node);
-                    return node;}}
+                if ((baseclass)&&(typeof baseclass !== "string"))
+                    weird=true;}
             else if (node.nodeType===3) {
                 if (node.nodeValue.search(/\w/g)>=0) {
                     // Wrap non-empty text nodes in elements before
@@ -437,11 +436,10 @@ fdjt.CodexLayout=
                     wrapnode.appendChild(node);
                     baseclass="codexwraptext";
                     node=wrapnode;}
-                else if (into) {
-                    node=node.cloneNode(true);
-                    into.appendChild(node);
-                    return node;}}
-            if ((node.parentNode)&&((!(node.id))||(!(crumbs[node.id])))) {
+                else node=node.cloneNode(true);}
+            else {}
+            if (weird) {}
+            else if ((node.parentNode)&&((!(node.id))||(!(crumbs[node.id])))) {
                 // If the node has a parent and hasn't been moved before,
                 //  we leave a "crumb" (a placeholder) in the original
                 //  location.
@@ -454,14 +452,26 @@ fdjt.CodexLayout=
                 if (baseclass) node.className=baseclass+" codexrelocated";
                 else node.className="codexrelocated";
                 node.parentNode.replaceChild(crumb,node);}
-            if (into) into.appendChild(node);
+            if (into) {
+                var dragged=[], scan=node.nextSibling;
+                while (scan) {
+                    if ((scan.nodeType===1)&&
+                        (typeof scan.className === "string")&&
+                        (scan.className.search(/\bcodexblock\b/g)>=0))
+                        break;
+                    dragged.push(scan);
+                    scan=scan.nextSibling;}
+                into.appendChild(node);
+                if (dragged.length) {
+                    var d=0, ndrags=dragged.length;
+                    while (d<ndrags) into.appendChild(dragged[d++]);}}
             return node;}
         
         function markPageTop(node){
             if (hasClass(node,"codexpagetop")) return;
             var nodestyle=node.getAttribute("style")||"";
             var newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
-            node.setAttribute("data-oldstyle",nodestyle);
+            node.setAttribute("data-savedstyle",nodestyle);
             node.setAttribute("style",newstyle);
             addClass(node,"codexpagetop");
             if (node.childNodes) {
@@ -943,6 +953,7 @@ fdjt.CodexLayout=
                         if ((node.offsetHeight===0)||
                             ((node.offsetHeight)&&
                              (node.offsetHeight<(page_height*2)))) {
+                            addClass(node,"codexblock");
                             blocks.push(node); styles.push(style);
                             terminals.push(node);
                             moveNode(node,false,true,crumbs);
@@ -963,6 +974,7 @@ fdjt.CodexLayout=
                         (disp!=='table-row')&&
                         (disp!=='table-cell')) {
                         var loc=blocks.length;
+                        addClass(node,"codexblock");
                         blocks.push(node);
                         styles.push(style);
                         terminals.push(false);
@@ -1536,7 +1548,7 @@ fdjt.CodexLayout=
                     //  which pushes the node below the page bottom.
                     //  That's where we'll break.
                     var wlen=words.length, wtop=wlen, wbot=0, foundbreak=false;
-                    var probenode=probestart;
+                    var probenode=probestart, geom=false;
                     while (wbot<wtop) {
                         var wmid=wbot+floor(wtop-wbot);
                         var newprobe=document.createTextNode(
@@ -1719,11 +1731,11 @@ fdjt.CodexLayout=
                             if ((original.className)&&
                                 (typeof original.className === "string"))
                                 original.setAttribute(
-                                    "data-oldclass",original.className);
+                                    "data-savedclass",original.className);
                             original.className=classname;}
                         if (style!==ostyle) {
                             if (ostyle) original.setAttribute(
-                                "data-oldstyle",ostyle);
+                                "data-savedstyle",ostyle);
                             original.setAttribute("style",style);}}
                     else if (original) {
                         saved_ids[id]=original;
@@ -1969,9 +1981,9 @@ fdjt.CodexLayout=
                             var dupi=0, ndups=alldups.length;
                             while (dupi<ndups) {
                                 var dup=alldups[dupi++];
-                                if (!(dup.getAttribute(dup,"data-oldstyle"))) 
+                                if (!(dup.getAttribute(dup,"data-savedstyle"))) 
                                     dup.setAttribute(
-                                        "data-oldstyle",dup.getAttribute("style")||"");
+                                        "data-savedstyle",dup.getAttribute("style")||"");
                                 dup.style.listStyleType="none";}}
                         lastdup.className=lastdup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
@@ -2188,15 +2200,15 @@ fdjt.CodexLayout=
                         var id=allids[i++], original;
                         if (crumbs[id]) {
                             original=document.getElementById(id);
-                            var oclass=original.getAttribute("data-oldclass");
-                            var ostyle=original.getAttribute("data-oldstyle");
+                            var oclass=original.getAttribute("data-savedclass");
+                            var ostyle=original.getAttribute("data-savedstyle");
                             var crumb=crumbs[id];
                             if (oclass) {
                                 original.className=oclass;
-                                original.removeAttribute("data-oldclass");}
+                                original.removeAttribute("data-savedclass");}
                             if (ostyle) {
                                 original.setAttribute("style",ostyle);
-                                original.removeAttribute("data-oldstyle");}
+                                original.removeAttribute("data-savedstyle");}
                             crumb.parentNode.replaceChild(original,crumb);}
                         else if (saved[id]) {
                             original=saved[id]; if (id) original.id=id;}
@@ -2213,9 +2225,9 @@ fdjt.CodexLayout=
                 i=0; lim=pagetops.length;
                 while (i<lim) {
                     var pt=pagetops[i++];
-                    if (pt.getAttribute("data-oldstyle")) {
-                        pt.setAttribute("style",pt.getAttribute("data-oldstyle"));
-                        pt.removeAttribute("data-oldstyle");}
+                    if (pt.getAttribute("data-savedstyle")) {
+                        pt.setAttribute("style",pt.getAttribute("data-savedstyle"));
+                        pt.removeAttribute("data-savedstyle");}
                     dropClass(pt,"codexpagetop");}
                 revertLayout(this);};
 
