@@ -292,6 +292,8 @@ if (!(fdjt.UI)) fdjt.UI={};
 
     Completions.prototype.getValue=function(completion) {
         if (completion.value) return completion.value;
+        else if (completion.getAttribute("data-value"))
+            return completion.getAttribute("data-value");
         else if (completion.getAttribute("value"))
             return completion.getAttribute("value");
         var pos=position(this.nodes,completion);
