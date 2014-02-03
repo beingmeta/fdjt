@@ -88,6 +88,8 @@ if (!(fdjt.RefDB)) {
                 db.storage=init.storage||false;
                 // Whether _id fields for this database are globally unique
                 db.absrefs=init.absrefs||false;
+                // Whether _id fields for this database are OIDs (e.g. @xxx/xxx)
+                db.oidrefs=init.oidrefs||false;
                 // Handlers for loading refs from memory or network
                 db.onload=[]; db.onloadnames={};
                 // Rules to run when adding or dropping fields of references
@@ -345,7 +347,8 @@ if (!(fdjt.RefDB)) {
 
         Ref.prototype.toString=function(){
             if (this._qid) return this._qid;
-            else if (this._domain) return this._id+"@"+this._domain;
+            else if (this._domain)
+                return this._id+"@"+this._domain;
             else if (this._db.absrefs) return this._id;
             else return this._id+"@"+this._db.name;};
         Ref.prototype.getQID=function getQID(){
