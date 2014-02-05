@@ -333,6 +333,10 @@ fdjt.DOM=
                 var i=0; var lim=elts.length;
                 while (i<lim) addClass(elts[i++],classname,attrib||false);
                 return;}
+            else if ((!(attrib))&&(elt.classList)&&
+                     (typeof classname ==="string")) {
+                elt.classList.add(classname);
+                return;}
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
             if ((classinfo)&&(typeof classinfo !== "string")) {
@@ -369,6 +373,10 @@ fdjt.DOM=
                 var elts=TOA(elt);
                 var i=0; var lim=elts.length;
                 while (i<lim) dropClass(elts[i++],classname,attrib||false);
+                return;}
+            else if ((!(attrib))&&(elt.classList)&&
+                     (typeof classname ==="string")) {
+                elt.classList.remove(classname);
                 return;}
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
@@ -427,6 +435,10 @@ fdjt.DOM=
                 var elts=TOA(elt);
                 var i=0; var lim=elts.length;
                 while (i<lim) toggleClass(elts[i++],classname,attrib||false);
+                return;}
+            else if ((!(attrib))&&(elt.classList)&&
+                     (typeof classname ==="string")) {
+                elt.classList.toggle(classname);
                 return;}
             var classinfo=
                 (((attrib) ? (elt.getAttribute(attrib)||"") :
