@@ -598,10 +598,6 @@ fdjt.CodexLayout=
                     restoreNode(moved[i++],layout,crumbs,textsplits);}
             layout.textsplits={}; layout.crumbs={};}
         
-        function addDupLeading(block){
-            block.appendChild(
-                fdjtDOM("span.codexdupleading","leading"));}
-
         /* Codex trace levels */
         /* 0=notrace
            1=trace tracked nodes
@@ -862,6 +858,7 @@ fdjt.CodexLayout=
                 function step(){
                     var block=blocks[ni]; var style=styles[ni];
                     var terminal=terminals[ni]||false;
+                    var next=blocks[ni+1];
                     var tracing=false;
                     if (block.id) layout.lastid=block.id;
 
@@ -884,18 +881,32 @@ fdjt.CodexLayout=
                     // tweaked Note that we may process an element [i]
                     // more than once if we split the node and part of
                     // the split landed back in [i].
-                    var geom=getGeom(block,page);
+                    var geom=getGeom(block,page), lh=parsePX(style.lineHeight);
                     var margin_bottom=parsePX(style.marginBottom);
                     if ((trace)&&((trace>3)||((track)&&(track.match(block)))))
                         logfn("Layout/geom %o %j",block,geom);
                     if (((geom.bottom-margin_bottom)>page_height)||
-                        ((blocks[ni+1])&&(geom.height>30)&&
-                         ((geom.bottom+(getGeom(blocks[ni+1]).height))>page_height)&&
-                         (!(avoidBreakInside(block)))&&
-                         (avoidBreakInside(blocks[ni+1]))&&
-                         (avoidBreakBefore(blocks[ni+1])))) {
+                        // Even if we're above the bottom of the page,
+                        // check if the next block goes over the edge
+                        // and whether that would be a bad thing.  If
+                        // it's big enough and far down enough, we
+                        // split the current block, making a slightly
+                        // short page.
+                        ((next)&&(geom.height>3*lh)&&
+                         (((page_height-geom.bottom)/page_height)>0.9)&&
+                         ((geom.bottom+(getGeom(next).height))>page_height)&&
+                         (!(avoidBreakInside(block,style)))&&
+                         (avoidBreakInside(next))&&
+                         (avoidBreakBefore(next)))) {
                         var use_height=page_height;
-                        if (geom.bottom<page_height) use_height=geom.bottom-30;
+                        if ((geom.bottom-margin_bottom)>page_height)
+                            // This is the case where the next node is
+                            // really the  problem and we're splitting
+                            // the current  block to avoid  messing up
+                            // the  next  one.  We  force  a split  by
+                            // tweaking the  height used for splitting
+                            // to be 2 lines above the block's bottom.
+                            use_height=geom.bottom-2*lh;
                         if (!(terminal)) {
                             if (tracing)
                                 logfn("Oversize non-terminal %o, continuing",
@@ -905,7 +916,7 @@ fdjt.CodexLayout=
                         // which extends below the bottom of the page
                         else if (((short_page_height)?
                                   (geom.top>short_page_height):
-                                  (geom.top>use_height))&&
+                                  (geom.top>(use_height-lh*1.5)))&&
                                  (drag.length===0)&&
                                  (!(avoidBreakBefore(block,style))))
                             // Our top is also over the bottom of the page,
@@ -919,7 +930,8 @@ fdjt.CodexLayout=
                                   ((atomic)&&(atomic.match(block)))||
                                   (avoidBreakInside(block,style))||
                                   (hasClass(block,"codexcantsplit")))) {
-                            var broken=handle_unbreakable(block,style,geom,tracing);
+                            var broken=handle_unbreakable(
+                                block,style,geom,tracing);
                             if (!(broken)) ni++;
                             else block=broken;}
                         else {
@@ -927,7 +939,8 @@ fdjt.CodexLayout=
                             // the 'split block' back in the blocks
                             // variable because we might need to split
                             // it again.
-                            if (tracing) logfn("Splitting block %o @ %o",block,page);
+                            if (tracing)
+                                logfn("Splitting block %o @ %o",block,page);
                             var split=splitBlock(block,style,use_height);
                             if ((split)&&(split!==block)) blocks[ni]=split;
                             else {
@@ -974,8 +987,9 @@ fdjt.CodexLayout=
                             // If the node is really tall, ignore the
                             // avoid page break constraint
                             if ((node.childNodes)&&(node.childNodes.length)) {
-                                fdjtLog.warn("Allowing split of huge (%d) block %o",
-                                             node.offsetHeight,node);
+                                fdjtLog.warn(
+                                    "Allowing split of huge (%d) block %o",
+                                    node.offsetHeight,node);
                                 node.style.pageBreakInside="auto";
                                 style=getStyle(node);}}}
                     var disp=style.display;
