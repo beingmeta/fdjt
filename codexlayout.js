@@ -882,10 +882,10 @@ fdjt.CodexLayout=
                     // more than once if we split the node and part of
                     // the split landed back in [i].
                     var geom=getGeom(block,page), lh=parsePX(style.lineHeight);
-                    var margin_bottom=parsePX(style.marginBottom);
+                    var padding_bottom=parsePX(style.paddingBottom);
                     if ((trace)&&((trace>3)||((track)&&(track.match(block)))))
                         logfn("Layout/geom %o %j",block,geom);
-                    if (((geom.bottom-margin_bottom)>page_height)||
+                    if (((geom.bottom-padding_bottom)>page_height)||
                         // Even if we're above the bottom of the page,
                         // check if the next block goes over the edge
                         // and whether that would be a bad thing.  If
@@ -899,14 +899,14 @@ fdjt.CodexLayout=
                          (avoidBreakInside(next))&&
                          (avoidBreakBefore(next)))) {
                         var use_height=page_height;
-                        if ((geom.bottom-margin_bottom)>page_height)
-                            // This is the case where the next node is
-                            // really the  problem and we're splitting
-                            // the current  block to avoid  messing up
-                            // the  next  one.  We  force  a split  by
-                            // tweaking the  height used for splitting
-                            // to be 2 lines above the block's bottom.
-                            use_height=geom.bottom-2*lh;
+                        if ((geom.bottom-padding_bottom)<=page_height)
+                            // This is the case where the block fits
+                            // but the next block is really the
+                            // problem.  We force a split on the
+                            // current block by tweaking the height
+                            // used for splitting to be 2 lines above
+                            // the block's bottom.
+                            use_height=geom.bottom-padding_bottom-2*lh;
                         if (!(terminal)) {
                             if (tracing)
                                 logfn("Oversize non-terminal %o, continuing",
@@ -1382,8 +1382,8 @@ fdjt.CodexLayout=
                         ((init_geom.bottom-page_height)<(line_height*1.5))&&
                         (init_geom.height>(line_height*3)))
                         use_height=page_height-floor(line_height*1.5);
-                    // When splitChildren called, <node> is already empty and it's
-                    // children are all in <children>
+                    // When splitChildren called, <node> is already
+                    // empty and it's children are all in <children>
                     var push=splitChildren(node,children,init_geom,use_height);
                     if (!(push)) {
                         /* Doesn't need to be split after all.
@@ -1435,20 +1435,26 @@ fdjt.CodexLayout=
                     //  node by itself is on the page while node with
                     //  it's children is over the page.
                     var geom=init_geom||getGeom(node,page);
-                    // We add children back until we go over the edge
-                    // and then figure out if there's a way to split
-                    // the child that broke the page.
-                    var i=0, n=children.length;
-                    while (i<n) {
-                        var child=children[i++];
-                        node.innerHTML="";
-                        appendChildren(node,children,0,i);
-                        // Add the child back and get the geometry
-                        geom=getGeom(node,page);
-                        if (geom.bottom>use_page_height) {
-                            page_break=child; breaktype=child.nodeType; breakpos=i-1;
-                            break;}
-                        else continue;}
+                    if (children.length===1) {
+                        page_break=children[0]; breakpos=0;
+                        breaktype=page_break.nodeType;
+                        node.appendChild(page_break);}
+                    else {
+                        // We add children back until we go over the edge
+                        // and then figure out if there's a way to split
+                        // the child that broke the page.
+                        var i=0, n=children.length;
+                        while (i<n) {
+                            var child=children[i++];
+                            node.innerHTML="";
+                            appendChildren(node,children,0,i);
+                            // Add the child back and get the geometry
+                            geom=getGeom(node,page);
+                            if (geom.bottom>use_page_height) {
+                                page_break=child; breaktype=child.nodeType;
+                                breakpos=i-1;
+                                break;}
+                            else continue;}}
                     if (!(page_break))  // Never went over the edge
                         return false;
                     // If we get here, this child pushed the node over the edge
@@ -1460,8 +1466,8 @@ fdjt.CodexLayout=
                         //  otherwise, just split it at the break
                         if (breakpos===0) return node;
                         else return children.slice(breakpos);}
-                    // If the page break has a single textual child, we just split
-                    // it's text.
+                    // If the page break has a single textual child,
+                    // we just split it's text.
                     else if ((page_break.childNodes.length===1)&&
                              (page_break.childNodes[0].nodeType===3)) {
                         textsplit=page_break.childNodes[0];
@@ -1469,8 +1475,9 @@ fdjt.CodexLayout=
                     // If we're breaking on the first node or there
                     // isn't any real content before the break, we
                     // admit defeat
-                    else if ((breakpos===0)||(!(hasContent(node,true,false,page_break)))) {
-                        appendChildren(node,children,i);
+                    else if ((breakpos===0)||
+                             (!(hasContent(node,true,false,page_break)))) {
+                        appendChildren(node,children,breakpos+1);
                         return node;}
                     // If the break is childless, we just split on it
                     else if ((!(page_break.childNodes))||
@@ -1502,18 +1509,19 @@ fdjt.CodexLayout=
                     if (words.length<2) {
                         // If the break is at the head, push the whole
                         // node to the next page, otherwise, 
-                        if (i===1) return node;
+                        if (breakpos===0) return node;
                         else return children.slice(breakpos);}
                     else {
                         // Check if just the first word pushes us over
                         // the edge, a relatively common case
                         var wprobe=document.createTextNode(words[0]);
-                        text_parent.replaceChild(wprobe,probenode); probenode=wprobe;
-                        geom=getGeom(node,page);
+                        text_parent.replaceChild(wprobe,probenode);
+                        probenode=wprobe; geom=getGeom(node,page);
                         if (geom.bottom>use_page_height) {
                             text_parent.replaceChild(original,probenode);
                             return children.slice(breakpos);}}
-                    var foundbreak=splitWords(text_parent,probenode,words,node,use_page_height);
+                    var foundbreak=splitWords(
+                        text_parent,probenode,words,node,use_page_height);
                     // We're done searching for the word break
                     if ((foundbreak===0)||(foundbreak===(words.length-1))) {
                         // Don't actually do any text splitting
@@ -1568,15 +1576,15 @@ fdjt.CodexLayout=
                         // Return the children to be pushed to the new page
                         return push_children;}}
 
-                function splitWords(text_parent,probestart,words,node,
-                                    use_page_height){
+                function splitWords(
+                    text_parent,probestart,words,node,use_page_height){
                     // Now we do a binary search to find the word
                     //  which pushes the node below the page bottom.
                     //  That's where we'll break.
                     var wlen=words.length, wtop=wlen, wbot=0, foundbreak=false;
                     var probenode=probestart, geom=false;
                     while (wbot<wtop) {
-                        var wmid=wbot+floor(wtop-wbot);
+                        var wmid=wbot+floor((wtop-wbot)/2);
                         var newprobe=document.createTextNode(
                             words.slice(0,wmid).join(""));
                         // Add all the words up to foundbreak
@@ -1585,9 +1593,10 @@ fdjt.CodexLayout=
                         if (geom.bottom>use_page_height)
                             wtop=wmid-1;
                         else {
-                            /* Add the word at foundbreak to see if we break the page.
-                               This is the actual test condition. */
-                            var nextw=document.createTextNode(words[foundbreak]);
+                            /* This is the actual test condition: add
+                               the word at foundbreak to see if we
+                               break the page.*/
+                            var nextw=document.createTextNode(words[wmid]);
                             text_parent.appendChild(nextw);
                             var ngeom=getGeom(node,page);
                             text_parent.removeChild(nextw);
@@ -1599,7 +1608,8 @@ fdjt.CodexLayout=
                         text_parent.replaceChild(probestart,probenode);
                     return foundbreak;}
 
-                // This attaches trailing whitespace to words as returned by .split()
+                // This attaches trailing whitespace to words as
+                // returned by .split()
                 function attachWhitespace(breaks){
                     var words=[], word=false;
                     var bi=0, blen=breaks.length;
@@ -1661,15 +1671,23 @@ fdjt.CodexLayout=
                     if (page.style.height) continue;
                     if (hasClass(page,"codexoversize")) continue;
                     page.style.height="auto"; page.style.display="block";
-                    if (page.scrollHeight>page_height)
-                        addClass(page,"codexoversize");
+                    var content_height=page.scrollHeight;
+                    if (content_height<page_height) {}
+                    else {
+                        var pagestyle=getStyle(page);
+                        var use_height=page_height+
+                            parsePX(pagestyle.paddingTop)+
+                            parsePX(pagestyle.paddingBottom);
+                        if (content_height>use_height)
+                            addClass(page,"codexoversize");}
                     page.style.height=""; page.style.display="";
                     var ragged=getChild(page,".codexraggedsplit");
                     if (ragged) 
                         ragged.appendChild(fdjtDOM(
                             "span.codexdupleading","leading"));}}
 
-            function gatherLayoutInfo(node,ids,dups,dupids,dupstarts,restoremap){
+            function gatherLayoutInfo(
+                node,ids,dups,dupids,dupstarts,restoremap){
                 if (node.nodeType!==1) return;
                 var classname=node.className;
                 if (typeof classname === "string") {
@@ -1849,7 +1867,8 @@ fdjt.CodexLayout=
                             justref.className=node.className+" codexrestore";
                         else justref.className="codexrestore";
                         if (node.getAttribute("style"))
-                            justref.setAttribute("style",node.getAttribute("style"));
+                            justref.setAttribute(
+                                "style",node.getAttribute("style"));
                         node.parentNode.replaceChild(justref,node);
                         if (dropsel) return dropSelected(node,dropsel);
                         else return;}}
@@ -1871,7 +1890,8 @@ fdjt.CodexLayout=
                 var endpos=((qpos>=hashpos)?(qpos):(hashpos));
                 if (endpos>0) href=href.slice(0,endpos);
                 if (!(layout_id)) layout_id=layout.layout_id||
-                    (layout.layout_id=layout.width+"x"+layout.height+"("+href+")");
+                    (layout.layout_id=
+                     layout.width+"x"+layout.height+"("+href+")");
                 if (!(CodexLayout.cache)) return;
                 // These will be used for per-page saved layouts
                 // var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
@@ -2039,7 +2059,8 @@ fdjt.CodexLayout=
                 while (i<lim) {
                     var dup=ol[i++];
                     var page=getParent(dup,".codexpage");
-                    var pageno=(page)&&(parseInt(page.getAttribute("data-pagenum"),10));
+                    var pageno=(page)&&(
+                        parseInt(page.getAttribute("data-pagenum"),10));
                     olpage.push({list: dup,pageno:pageno});}
                 olpage.sort(function(x,y){
                     if (x.pageno>y.pageno) return 1;
@@ -2069,7 +2090,8 @@ fdjt.CodexLayout=
                 while (i<lim) {
                     var child=children[i++];
                     if (child.nodeType===1) {
-                        if ((child.tagName==="OL")||(child.tagName==="UL")) return count;
+                        if ((child.tagName==="OL")||
+                            (child.tagName==="UL")) return count;
                         else if (child.tagName==="LI") count++;
                         else count=countListItems(child,count);}}
                 return count;}
@@ -2122,7 +2144,8 @@ fdjt.CodexLayout=
                      (elt.className.search(page_block_classes)>=0))||
                     ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)))||
                     ((style.display==="block")&&
-                     ((lh=parsePX(style.lineHeight))&&((lh*2.5)>elt.offsetHeight)));}
+                     ((lh=parsePX(style.lineHeight))&&
+                      ((lh*2.5)>elt.offsetHeight)));}
             this.avoidBreakInside=avoidBreakInside;
             
             function avoidBreakBefore(elt,style){
@@ -2131,7 +2154,8 @@ fdjt.CodexLayout=
                 return ((style.pageBreakBefore==='avoid')||
                         ((elt.className)&&(elt.className.search)&&
                          (elt.className.search(/\bavoidbreakbefore\b/)>=0))||
-                        ((avoidbreakbefore)&&(testNode(elt,avoidbreakbefore))));}
+                        ((avoidbreakbefore)&&
+                         (testNode(elt,avoidbreakbefore))));}
             this.avoidBreakBefore=avoidBreakBefore;
 
             function avoidBreakAfter(elt,style){
@@ -2145,7 +2169,8 @@ fdjt.CodexLayout=
                 else if ((style.pageBreakAfter)&&
                          (style.pageBreakAfter!=="auto"))
                     return false;
-                else avoid=((avoidbreakafter)&&(testNode(elt,avoidbreakafter)));
+                else avoid=((avoidbreakafter)&&
+                            (testNode(elt,avoidbreakafter)));
                 if (avoid) return avoid;
                 if (elt===cur_root) return false;
                 if (!(cur_root)) return false;
@@ -2256,7 +2281,8 @@ fdjt.CodexLayout=
                 while (i<lim) {
                     var pt=pagetops[i++];
                     if (pt.getAttribute("data-savedstyle")) {
-                        pt.setAttribute("style",pt.getAttribute("data-savedstyle"));
+                        pt.setAttribute(
+                            "style",pt.getAttribute("data-savedstyle"));
                         pt.removeAttribute("data-savedstyle");}
                     dropClass(pt,"codexpagetop");}
                 revertLayout(this);};

@@ -36,8 +36,8 @@ div.codexpage.codexworkpage {
     -moz-transition-property: none !important;
     -webkit-transition-property: none !important;}
 
-body.codexlayoutdebug div.codexpage.codexworkpage {
-    visibility: hidden !important;
+body.debugcodexlayout div.codexpage.codexworkpage {
+    visibility: visible !important;
     z-index: inherit !important;
     opacity: 1.0 !important;
     -o-opacity: 1.0 !important;
