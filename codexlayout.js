@@ -70,9 +70,11 @@ fdjt.CodexLayout=
             var lim=end||children.length; var i=(start)||0;
             var frag=document.createDocumentFragment();
             while (i<lim) {
-                if (children[i])
-                    frag.appendChild(children[i++]);
-                else i++;}
+                var child=children[i++];
+                if (!(child)) i++;
+                else if ((child.nodeType===3)&&
+                         (child.nodeValue.length===0)) {}
+                else frag.appendChild(child);}
             node.appendChild(frag);}
 
         function getGeom(elt,root,extra){
@@ -126,6 +128,7 @@ fdjt.CodexLayout=
                          right:left+width,bottom:top+height};}
 
         var getChildren=fdjtDOM.getChildren;
+        var getChild=fdjtDOM.getChild;
 
         /* Node testing */
 
@@ -210,7 +213,8 @@ fdjt.CodexLayout=
             if ((!(elt))||(elt.length===0)) return;
             else if (elt.nodeType) {
                 if (elt.nodeType!==1) return;
-                if ((hasClass(elt,"codexpagescaled"))||(elt.getAttribute("style")))
+                if ((hasClass(elt,"codexpagescaled"))||
+                    (elt.getAttribute("style")))
                     return;
                 var ps=elt.getAttribute("data-pagescale")||
                     elt.getAttribute("pagescale")||
@@ -255,7 +259,8 @@ fdjt.CodexLayout=
                 addClass(elt,"codexpagescaled");}
             else if (elt.length) {
                 var i=0, lim=elt.length;
-                while (i<lim) scaleToPage(elt[i++],width,height,leavefont||false);}
+                while (i<lim) scaleToPage(
+                    elt[i++],width,height,leavefont||false);}
             else {}}
 
         function tweakFont(node,width,height,min_font,max_font){
@@ -263,9 +268,11 @@ fdjt.CodexLayout=
             if (!(width)) width=node.offsetWidth;
             if (!(height)) height=node.offsetHeight;
             if (!(min_font))
-                min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
+                min_font=node.getAttribute("data-minfont")||
+                node.getAttribute("minfont");
             if (!(max_font))
-                max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
+                max_font=node.getAttribute("data-maxfont")||
+                node.getAttribute("maxfont");
             if ((max_font)&&(typeof max_font==="string"))
                 max_font=parseFloat(max_font); 
             if ((min_font)&&(typeof min_font==="string"))
@@ -574,6 +581,9 @@ fdjt.CodexLayout=
             i=0; lim=shards.length; while (i<lim) {
                 node=shards[i++];
                 node.parentNode.removeChild(node);}
+            var ragged=toArray(
+                layout.container.getElementsByClassName("codexraggedsplit"));
+            dropClass(ragged,"codexraggedsplit");
             var leading=toArray(
                 layout.container.getElementsByClassName("codexdupleading"));
             if ((leading)&&(leading.length)) fdjtDOM.remove(leading);
@@ -589,7 +599,8 @@ fdjt.CodexLayout=
             layout.textsplits={}; layout.crumbs={};}
         
         function addDupLeading(block){
-            block.appendChild(fdjtDOM("span.codexdupleading","leading"));}
+            block.appendChild(
+                fdjtDOM("span.codexdupleading","leading"));}
 
         /* Codex trace levels */
         /* 0=notrace
@@ -1505,7 +1516,8 @@ fdjt.CodexLayout=
                             // We replace the text with an element so
                             //  that we can look it up by ID to replace
                             //  when reverting the layout.
-                            keepnode=fdjtDOM("span.codexsplitstart");
+                            keepnode=fdjtDOM(
+                                "span.codexsplitstart.codexraggedsplit");
                             id=keepnode.id="CODEXTMPID"+(tmpid_count++);
                             pushnode=fdjtDOM("span.codextextsplit");}
                         else if (hasClass(page_break,"codextextsplit")) {
@@ -1515,6 +1527,7 @@ fdjt.CodexLayout=
                             // up probenode and text_parent as though
                             // the page break were a text node being
                             // probed.
+                            addClass(page_break,"codexraggedsplit");
                             probenode=keepnode=page_break;
                             keepnode.innerHTML="";
                             text_parent=node; probenode=keepnode;
@@ -1527,8 +1540,6 @@ fdjt.CodexLayout=
                                 id=keepnode.id="CODEXTMPID"+(tmpid_count++);
                             else pushnode.id="";}
                         keepnode.appendChild(document.createTextNode(keeptext));
-                        // Avoid a ragged bottom line on keepnode
-                        addDupLeading(node);
                         pushnode.appendChild(document.createTextNode(pushtext));
                         if (keepnode!==probenode)
                             text_parent.replaceChild(keepnode,probenode);
@@ -1543,7 +1554,8 @@ fdjt.CodexLayout=
                         // Return the children to be pushed to the new page
                         return push_children;}}
 
-                function splitWords(text_parent,probestart,words,node,use_page_height){
+                function splitWords(text_parent,probestart,words,node,
+                                    use_page_height){
                     // Now we do a binary search to find the word
                     //  which pushes the node below the page bottom.
                     //  That's where we'll break.
@@ -1635,9 +1647,13 @@ fdjt.CodexLayout=
                     if (page.style.height) continue;
                     if (hasClass(page,"codexoversize")) continue;
                     page.style.height="auto"; page.style.display="block";
-                    if (page.offsetHeight>page_height)
+                    if (page.scrollHeight>page_height)
                         addClass(page,"codexoversize");
-                    page.style.height=""; page.style.display="";}}
+                    page.style.height=""; page.style.display="";
+                    var ragged=getChild(page,".codexraggedsplit");
+                    if (ragged) 
+                        ragged.appendChild(fdjtDOM(
+                            "span.codexdupleading","leading"));}}
 
             function gatherLayoutInfo(node,ids,dups,dupids,dupstarts,restoremap){
                 if (node.nodeType!==1) return;

@@ -36,6 +36,14 @@ div.codexpage.codexworkpage {
     -moz-transition-property: none !important;
     -webkit-transition-property: none !important;}
 
+body.codexlayoutdebug div.codexpage.codexworkpage {
+    visibility: hidden !important;
+    z-index: inherit !important;
+    opacity: 1.0 !important;
+    -o-opacity: 1.0 !important;
+    -moz-opacity: 1.0 !important;
+    -webkit-opacity: 1.0 !important;}
+ 
 div.codexpage h1.codexpagetop, div.codexpage h2.codexpagetop,
 div.codexpage h3.codexpagetop, div.codexpage h4.codexpagetop,
 div.codexpage p.codexpagetop,
