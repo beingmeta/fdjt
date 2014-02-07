@@ -1025,6 +1025,21 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
     div.fdjtdialog { top: 10%; }
 }
 
+/* Tap Hold */
+
+body.tapheld {}
+body.taptouch {}
+.fdjthotspot {
+    display: block; position: absolute; box-sizing: border-box;
+    width: 4px; height: 4px; border: solid transparent 1px;
+    background-color: rgba(255,0,0,0.5);
+    pointer-events: none;
+    display: none;}
+.fdjthotspot.taptouching { display: block; }
+.fdjthotspot.tapholding {
+    background-color: rgba(255,0,0,0.7);
+    border-color: rgba(255,0,0,0.9);}
+
 /* Text selection */
 
 .fdjtselecting {

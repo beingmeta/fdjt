@@ -172,6 +172,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var touch_x=false;
         var touch_y=false;
         var touch_t=0;
+        var noslip=false;
         
         // If this is true, second touches are turned into touchtoo events;
         //  otherwise, they start a new tap or hold
@@ -198,6 +199,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else untouchable=opts.untouchable;}
         else untouchable=function(e){return isClickable(e);};
         
+        if ((opts)&&(opts.noslip)) noslip=opts.noslip;
+
         var wander_timer=false;
 
         function setTarget(t){
@@ -262,7 +265,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         var elt=targets[i++];
                         if ((i===lim)&&(elt===th_target)) break;
                         held(elt);
-                        if (i<lim) slipped(elt,evt,{relatedTarget: targets[i]});
+                        if (noslip) {}
+                        else if (i<lim)
+                            slipped(elt,evt,{relatedTarget: targets[i]});
                         else slipped(elt,evt);}}
                 pressed=th_target; th_targets=[];
                 if (tap_target) {tapheld(th_target,evt); tap_target=false;}
@@ -302,10 +307,13 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                             tapped(tmp,evt,x,y);},
                                             taptapthresh);}
                     else tapped(th_target,evt,x,y);}
+                else if (noslip) {}
                 else slipped(th_target,evt);}
             else if (pressed) {
                 var geom=fdjtDOM.getGeometry(elt);
                 if ((x>=geom.left)&&(x<=geom.right)&&(y>=geom.top)&&(y<=geom.bottom))
+                    released(pressed,evt,x,y);
+                else if (noslip)
                     released(pressed,evt,x,y);
                 else slipped(th_target,evt,x,y);}
             else {}
@@ -322,6 +330,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         evt,th_target,touched,pressed);
             if (th_timer) {
                 clearTimeout(th_timer); th_timer=false;}
+            else if (noslip) {}
             else if (pressed) {slipped(pressed,evt);}
             if (reticle.live) reticle.highlight(false);
             touched=pressed=tap_target=false;
@@ -336,7 +345,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (!(th_target)) return;
             if ((pressed)&&(!(hasParent(to,elt)))) {
                 wander_timer=setTimeout(function(){
-                    slipped(pressed,evt,{relatedTarget: to});
+                    if (!(noslip))
+                        slipped(pressed,evt,{relatedTarget: to});
                     abortpress(evt,"taphold_mouseout");},
                                           wanderthresh||2000);}}
 
@@ -382,7 +392,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         abortpress(evt,"taphold_wander_timeout");},
                                             wanderthresh||2000);
                     if (pressed) {
-                        slipped(pressed,evt,{relatedTarget: target});
+                        if (!(noslip))
+                            slipped(pressed,evt,{relatedTarget: target});
                         setTarget(false);}}
                 return;}
             else if (wander_timer) {
@@ -434,10 +445,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else {
                 if (reticle.live) reticle.onmousemove(evt);}
             if (!(mouse_down)) {
-                slipped(pressed,evt,{relatedTarget: target});
+                if (!(noslip))
+                    slipped(pressed,evt,{relatedTarget: target});
                 pressed=false;}
+            else if ((pressed)&&(th_target!==pressed)&&(noslip)) {      
+                endpress(evt);}
             else if ((pressed)&&(th_target!==pressed)) {
-                slipped(pressed,evt,{relatedTarget: target});
+                if (!(noslip))
+                    slipped(pressed,evt,{relatedTarget: target});
                 pressed=th_target;
                 pressed_at=fdjtTime();
                 held(pressed);}
@@ -658,7 +673,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         this.istouched=function(){return (touched);};
         this.ispressed=function(){return (pressed);};
         this.clear=function(){
-            if (pressed) slipped(pressed);
+            if ((pressed)&&(!(noslip))) slipped(pressed);
             touched=pressed=tap_target=false;
             touch_t=touch_x=start_x=touch_y=start_y=start_t=false;
             if (th_timer) {clearTimeout(th_timer); th_timer=false;}
