@@ -954,8 +954,8 @@ fdjt.UI.ProgressBar=(function(){
     
     function doflash(){flash();}
 
-    function mousemove(evt){
-        setXY(evt.clientX,evt.clientY);}
+    function mousemove(evt,x,y){
+        setXY(x||evt.clientX,y||evt.clientY);}
     
     var highlighted=false;
     
