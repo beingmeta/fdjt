@@ -527,6 +527,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         
         function addHandlers(container,sel,opts){
             // We always override the default action when selecting
+            if (!(opts)) opts={};
             opts.override=true;
             var taphold=new fdjtUI.TapHold(container,opts);
             fdjtDOM.addListener(container,"tap",
