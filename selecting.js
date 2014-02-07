@@ -308,24 +308,36 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 sel.setRange(start,end);}
             if (sel.loupe) {
                 var parent=word.parentNode, loupe=sel.loupe;
-                loupe.innerHTML=""; loupe.style.display="";
-                if ((word.previousSibling)&&
-                    (word.previousSibling.nodeType===1)&&
-                    (word.previousSibling!==loupe)) {
-                    var before=fdjtDOM.clone(word.previousSibling);
-                    loupe.appendChild(before);}
-                var clone=fdjtDOM.clone(word); stripIDs(clone);
-                loupe.appendChild(clone);
-                if ((word.nextSibling)&&(word.nextSibling.nodeType===1)&&
-                    (word.nextSibling!==loupe)) {
-                    var after=fdjtDOM.clone(word.nextSibling);
-                    loupe.appendChild(after);}
+                var block=word.parentNode; while (block) {
+                    if (getStyle(block).display!=='inline') break;
+                    else block=block.parentNode;}
+                var context=gatherContext(word,2,6,block);
+                loupe.innerHTML=""; loupe.style.display="none";
+                fdjtDOM.append(loupe,context);
                 if (word.nextSibling)
                     parent.insertBefore(loupe,word.nextSibling);
-                else parent.appendChild(loupe);}
+                else parent.appendChild(loupe);
+                loupe.style.display="";}
             if (tapped) setTimeout(1000,function(){
                 loupe.display='none';});
             return true;}
+
+        function gatherContext(node,back,forward,parent){
+            var id=node.id, parsed=(id)&&/(fdjtSel\d+_)(\d+)/.exec(id);
+            if ((!(parsed))||(parsed.length!==3)) return;
+            var prefix=parsed[1], count=parseInt(parsed[2],10);
+            var start=count-back, end=count+forward; if (start<0) start=0;
+            var context=[];
+            var i=start; while (i<end) {
+                var elt=document.getElementById(prefix+i);
+                if ((!(elt))||((parent)&&(!(hasParent(elt,parent))))) {
+                    i++; continue;}
+                else if (elt.nodeType===1) {
+                    var clone=elt.cloneNode(true); stripIDs(clone);
+                    context.push(clone);}
+                else context.push(elt.cloneNode(true));
+                i++;}
+            return context;}
 
         function getSelector(word){
             var id=false;
@@ -373,7 +385,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     if (style.display!=='inline') combine.push("\n");}
                 if ((scan.nodeType===1)&&(scan.tagName==='SPAN')&&
                     (scan.id)&&(scan.id.search(prefix)===0)) {
-                    combine.push(scan.firstChild.nodeValue);
+                    combine.push(scan.innerText);
                     if (scan===end) break;}
                 if ((scan.firstChild)&&
                     (scan.className!=="fdjtselectloupe")&&
