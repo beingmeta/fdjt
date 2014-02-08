@@ -122,8 +122,23 @@ fdjt.UI.Highlight=(function(){
     function highlight_node(node,hclass,htitle,hattribs){
         if (!(hclass)) hclass=highlight_class;
         var hispan=false;
-        if (node.nodeType===3) 
-            hispan=fdjtDOM("span."+hclass);
+        if (node.nodeType===3) {
+            var text=node.nodeValue;
+            if (text.search(/\S/g)>=0)
+                hispan=fdjtDOM("span."+hclass);
+            else {
+                var parent=node.parentNode, style=getStyle(parent);
+                var next=node.nextSibling, prev=node.prevSibling;
+                var nstyle=next&&getStyle(next), pstyle=prev&&getStyle(prev);
+                var ndisplay=nstyle&&nstyle.display, pdisplay=pstyle&&pstyle.display;
+                if (style.whiteSpace!=='normal')
+                    hispan=fdjtDOM("span."+hclass);
+                else if (!((next)||(prev)))
+                    hispan=fdjtDOM("span."+hclass);
+                else if ((!((ndisplay==='inline')||(ndisplay==='table-cell')))&&
+                         (!((pdisplay==='inline')||(pdisplay==='table-cell'))))
+                    hispan=false;
+                else hispan=fdjtDOM("span."+hclass);}}
         else if ((node.nodeType!==1)||(hasClass(node,hclass)))
             return node;
         else {
