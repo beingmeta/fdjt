@@ -36,6 +36,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         var hasParent=fdjtDOM.hasParent;
         var stripIDs=fdjtDOM.stripIDs;        
         var getStyle=fdjtDOM.getStyle;
+        var textify=fdjtDOM.textify;
 
         function position(elt,arr){
             if (arr.indexOf) return arr.indexOf(elt);
@@ -150,14 +151,14 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (node.nodeType===3) {
                 var text=node.nodeValue, span;
                 // Skip wrapping non-inline whitespace
-                if (((text.length===0)||(text.search(/\S/g)<0))&&
-                    ((node.parentNode)&&(node.parentNode.nodeType===1)&&
-                     (getStyle(node.parentNode).whiteSpace==='normal'))
-                    ((node.nodeType!==1)||(!(node.prevSibling))||
-                     (getStyle(node.prevSibling).display!=='inline'))&&
-                    ((node.nodeType!==1)||(!(node.nextSibling))||
-                     (getStyle(node.nextSibling).display!=='inline'))) {
-                    return node;}
+                if (((text.length===0)||(text.search(/\S/g)<0))) {
+                    var parent=node.parentNode, pstyle=getStyle(parent);
+                    var prev=node.prevSibling, next=node.nextSibling;
+                    if ((pstyle.whiteSpace==='normal')&&((prev)||(next))&&
+                        (pstyle.display!=='inline')&&(pstyle.display!=='table-cell')) {
+                        if (((!(prev))||(prev.nodeType===1)&&(getStyle(prev).display!=='inline'))
+                            ((!(next))||(next.nodeType===1)&&(getStyle(next).display!=='inline')))
+                            return node;}}
                 var sliced=text.split(/\b/), wordspans=[];
                 i=0; lim=sliced.length;
                 while (i<lim) {
@@ -389,10 +390,14 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var scan=start; while (scan) {
                 if (scan.nodeType===1) {
                     var style=getStyle(scan);
-                    if (style.display!=='inline') combine.push("\n");}
+                    if ((style.position==='static')&&
+                        (style.display!=='inline')&&
+                        (style.display!=='none'))
+                        combine.push("\n");}
                 if ((scan.nodeType===1)&&(scan.tagName==='SPAN')&&
                     (scan.id)&&(scan.id.search(prefix)===0)) {
-                    combine.push(scan.innerText);
+                    var txt=scan.innerText||textify(scan);
+                    combine.push(txt);
                     if (scan===end) break;}
                 if ((scan.firstChild)&&
                     (scan.className!=="fdjtselectloupe")&&
