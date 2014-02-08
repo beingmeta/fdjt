@@ -1088,6 +1088,7 @@ body.cxTOUCH .fdjtselecting .fdjtselectend:hover {
 
 .fdjtselectloupe {
     display: inline-block; position: relative;
+    float: left; /* This seems to keep it from affecting the line layout */
     font-size: 200%; outline: solid silver 1px;
     width: 0px; height: 0px; overflow: visible; z-index: 200;
     white-space: nowrap; pointer-events: none;
