@@ -149,6 +149,15 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var i, lim;
             if (node.nodeType===3) {
                 var text=node.nodeValue, span;
+                // Skip wrapping non-inline whitespace
+                if (((text.length===0)||(text.search(/\S/g)<0))&&
+                    ((node.parentNode)&&(node.parentNode.nodeType===1)&&
+                     (getStyle(node.parentNode).whiteSpace==='normal'))
+                    ((node.nodeType!==1)||(!(node.prevSibling))||
+                     (getStyle(node.prevSibling).display!=='inline'))&&
+                    ((node.nodeType!==1)||(!(node.nextSibling))||
+                     (getStyle(node.nextSibling).display!=='inline'))) {
+                    return node;}
                 var sliced=text.split(/\b/), wordspans=[];
                 i=0; lim=sliced.length;
                 while (i<lim) {
@@ -314,9 +323,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 var context=gatherContext(word,2,6,block);
                 loupe.innerHTML=""; loupe.style.display="none";
                 fdjtDOM.append(loupe,context);
-                if (word.nextSibling)
-                    parent.insertBefore(loupe,word.nextSibling);
-                else parent.appendChild(loupe);
+                parent.insertBefore(loupe,word);
                 loupe.style.display="";}
             if (tapped) setTimeout(1000,function(){
                 loupe.display='none';});
