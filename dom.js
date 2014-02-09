@@ -2,7 +2,7 @@
 
 /* ######################### fdjt/dom.js ###################### */
 
-/* Copyright (C) 2009-2013 beingmeta, inc.
+/* Copyright (C) 2009-2014 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended Javascript utility functions
    of various kinds.
@@ -2692,6 +2692,15 @@ fdjt.DOM=
             ((typeof _fdjt_init === 'undefined')||(!(_fdjt_init))))
             fdjtDOM.addListener(window,"load",fdjtDOM.init);
         
+        /* Playing audio */
+        function playAudio(id){
+            var elt=document.getElementById(id);
+            if ((elt)&&(elt.play)) {
+                if (!(elt.paused)) {
+                    elt.pause(); elt.currentTime=0.0;}
+                elt.play();}}
+        fdjtDOM.playAudio=playAudio;
+
         /* Tweaking fonts */
         function tweakFont(node,width,height,min_font,max_font){
             var i, lim, nodes=[], style=node.style;
