@@ -2,7 +2,7 @@
 
 /* ######################### fdjt/selecting.js ###################### */
 
-/* Copyright (C) 2009-2013 beingmeta, inc.
+/* Copyright (C) 2009-2014 beingmeta, inc.
 
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides extended Javascript utility functions
@@ -37,6 +37,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         var stripIDs=fdjtDOM.stripIDs;        
         var getStyle=fdjtDOM.getStyle;
         var textify=fdjtDOM.textify;
+        var hasClass=fdjtDOM.hasClass;
+        var swapClass=fdjtDOM.swapClass;
+        var dropClass=fdjtDOM.dropClass;
 
         function position(elt,arr){
             if (arr.indexOf) return arr.indexOf(elt);
@@ -50,7 +53,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         var selectors={}; // Maps DOM ids to instances
         var alltapholds={}; // Maps DOM ids to taphold objects
         var serialnum=0;  // Tracks instances
-        var trace=false;
+        var traceall=0;
 
         function TextSelect(nodes,opts){
             if (!(this instanceof TextSelect))
@@ -63,10 +66,16 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             else if (nodes.nodeType) this.nodes=nodes=[nodes];
             else if (!(nodes.length)) return false;
             else this.nodes=nodes;
-            var sel=this;
+            var sel=this, trace=0;
             var orig=this.orig=[], wrapped=this.wrapped=[];
             var words=this.words=[], wrappers=this.wrappers=[];
             var tapholds=this.tapholds=[];
+            if ((opts)&&(opts.hasOwnProperty("trace"))) {
+                var trace_val=opts.trace;
+                if (typeof trace_val === "number") trace=trace_val;
+                else if (trace_val) trace=1;
+                else trace=0;}
+            this.traced=trace;
             var prefix=this.prefix="fdjtSel0"+this.serial;
             this.loupe=fdjtDOM("span.fdjtselectloupe");
             this.adjust=false; /* This will be 'start' or 'end' */
@@ -89,7 +98,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 var th=addHandlers(wrapper,sel,opts);
                 alltapholds[wrapper.id]=th;
                 tapholds.push(th);
-                if (trace)
+                if ((trace)||(traceall))
                     fdjtLog("Created TapHold handler (#%d) for wrapper %s around %o",
                             th.serial,wrapper.id,node);
                 // Replace the node with the wrapper and then update
@@ -119,14 +128,14 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             
             this.startEvent=function startEvent(evt){
                 var target=fdjtUI.T(evt);
-                if (trace)
+                if (traceall)
                     fdjtLog("startEvent %o, target=%o, wrappers=%o",
                             evt,target,wrappers);
                 var j=0, n_wrappers=wrappers.length; while (j<n_wrappers) {
                     var wrapper=wrappers[j++];
                     if ((hasParent(wrapper,target))||(hasParent(target,wrapper))) {
                         var taphold=alltapholds[wrapper.id];
-                        if (trace)
+                        if ((trace)||(traceall))
                             fdjtLog("Using TapHold handler @%d for wrapper %s (#%d)",
                                     j-1,wrapper.id,taphold.serial);
                         taphold.fakePress(evt);
@@ -217,8 +226,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 words[i++].className="fdjtword";}
 
         TextSelect.prototype.setRange=function(start,end){
-            if (trace) fdjtLog("TextSelect.setRange %o %o for %o",
-                               start,end,this);
+            var trace=this.trace;
+            if ((trace)||(traceall))
+                fdjtLog("TextSelect.setRange %o %o for %o",start,end,this);
             if (!(start)) {
                 if ((this.start)&&(this.end)) {
                     deselectWords(this.words,this.min,this.max);}
@@ -262,12 +272,12 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
 
         /* Handler support */
         
-        function overWord(word,tapped){
-            var sel=false, id=false;
+        function overWord(word,tapped,sel){
+            var id=false;
             while ((word)&&(word.nodeType!==1)) word=word.parentNode;
             if (hasParent(word,".fdjtselectloupe"))
                 return;
-            if ((word)&&((id=word.id))&&
+            if ((!(sel))&&(word)&&((id=word.id))&&
                 (word.tagName==='SPAN')&&
                 (id.search("fdjtSel")===0)) {
                 var split=id.indexOf("_");
@@ -281,8 +291,29 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if (!(container)) return false;
                 else sel=selectors[container.id];}
             if (!(sel)) return false;
-            if (trace) fdjtLog("overWord %o, sel=%o, tapped=%o, adjust=%o, anchor=%o",
-                               word,sel,tapped,sel.adjust,sel.anchor);
+            if ((traceall)||(sel.traced))
+                fdjtLog("overWord %o, sel=%o, tapped=%o, adjust=%o, anchor=%o",
+                        word,sel,tapped,sel.adjust,sel.anchor);
+            if (tapped) useWord(word,sel,true);
+            else if (sel.word) useWord(word,sel);
+            else if ((hasClass(word,"fdjtselectstart"))||
+                     (hasClass(word,"fdjtselectend"))) {
+                if (sel.timeout) {
+                    clearTimeout(sel.timeout); sel.timeout=false;}
+                sel.pending=false; sel.word=word; useWord(word,sel);}
+            else if (sel.pending===word) return true;
+            else {
+                if (sel.timeout) clearTimeout(sel.timeout);
+                updateLoupe(word,sel,tapped);
+                sel.word=false; sel.pending=word; sel.timeout=setTimeout(function(){
+                    if (sel.pending!==word) return;
+                    if (sel.timeout) clearTimeout(sel.timeout);
+                    sel.word=word; sel.pending=false;
+                    useWord(word,sel);},
+                                                         1000);}
+            return true;}
+
+        function useWord(word,sel,tapped){
             if (!(sel.start))
                 // We could have some smarts here to include quoted
                 //  phrases, capitalization runs, etc.
@@ -319,19 +350,20 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 else {
                     start=word; sel.setAdjust('start');}
                 sel.setRange(start,end);}
-            if (sel.loupe) {
-                var parent=word.parentNode, loupe=sel.loupe;
-                var block=word.parentNode; while (block) {
-                    if (getStyle(block).display!=='inline') break;
-                    else block=block.parentNode;}
-                var context=gatherContext(word,2,6,block);
-                loupe.innerHTML=""; loupe.style.display="none";
-                fdjtDOM.append(loupe,context);
-                parent.insertBefore(loupe,word);
-                loupe.style.display="";}
+            if (sel.loupe) updateLoupe(word,sel,tapped);}
+
+        function updateLoupe(word,sel,tapped){
+            var parent=word.parentNode, loupe=sel.loupe;
+            var block=word.parentNode; while (block) {
+                if (getStyle(block).display!=='inline') break;
+                else block=block.parentNode;}
+            var context=gatherContext(word,2,4,block);
+            loupe.innerHTML=""; loupe.style.display="none";
+            fdjtDOM.append(loupe,context);
+            parent.insertBefore(loupe,word);
+            loupe.style.display="";
             if (tapped) setTimeout(1000,function(){
-                loupe.display='none';});
-            return true;}
+                sel.loupe.display='none';});}
 
         function gatherContext(node,back,forward,parent){
             var id=node.id, parsed=(id)&&/(fdjtSel\d+_)(\d+)/.exec(id);
@@ -434,6 +466,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             return preselected.length-selected.length;};
         
         TextSelect.prototype.getInfo=function(under){
+            var trace=this.traced;
             if (!(this.start)) return false;
             var selected=this.getString();
             var first_word=this.words[0]; 
@@ -445,7 +478,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 while ((i<lim)&&(!(hasParent(first_word,under))))
                     first_word=words[i++];}
             var preselected=this.getString(first_word,this.end);
-            if (trace) 
+            if ((trace)||(traceall)) 
                 fdjtLog("GetInfo %o: start=%o, end=%o, off=%o, string=%o",
                         this,this.start,this.end,
                         preselected.length-selected.length,selected);
@@ -454,16 +487,16 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                      string: selected};};
         
         TextSelect.prototype.setAdjust=function(val){
-            if (trace) fdjtLog("TextSelect.setAdjust %o for %o",val,this);
+            var trace=this.traced;
+            if ((traceall)||(trace))
+                fdjtLog("TextSelect.setAdjust %o for %o",val,this);
             if (val) {
                 this.adjust=val;
-                fdjt.DOM.swapClass(
-                    this.nodes,/\b(fdjtadjuststart|fdjtadjustend)\b/,
-                    "fdjtadjust"+val);}
+                swapClass(this.nodes,/\b(fdjtadjuststart|fdjtadjustend)\b/,
+                          "fdjtadjust"+val);}
             else {
                 this.adjust=false;
-                fdjt.DOM.dropClass(
-                    this.nodes,/\b(fdjtadjuststart|fdjtadjustend)\b/);}};
+                dropClass(this.nodes,/\b(fdjtadjuststart|fdjtadjustend)\b/);}};
 
 
         // Life span functions
@@ -493,53 +526,67 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             evt=evt||event;
             var target=fdjtUI.T(evt);
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
-            if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
-                (target.id.search("fdjtSel")===0)) {
-                var sel=getSelector(target);
-                if ((sel)&&(!(sel.anchor))&&(!(sel.start)))
-                    sel.anchor=target;
-                if (trace) fdjtLog("hold %o t=%o",evt,target);
-                if (overWord(target)) fdjtUI.cancel(evt);}}
+            while (target) {
+                if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
+                    (target.id.search("fdjtSel")===0)) {
+                    var sel=getSelector(target);
+                    if ((sel)&&(!(sel.anchor))&&(!(sel.start)))
+                        sel.anchor=target;
+                    if ((traceall)||((sel)&&(sel.traced)))
+                        fdjtLog("hold %o t=%o sel=%o",evt,target,sel);
+                    if (overWord(target,false,sel)) fdjtUI.cancel(evt);
+                    break;}
+                else if (target.nodeType===1) target=target.parentNode;
+                else break;}}
         TextSelect.hold_handler=hold_handler;
         TextSelect.handler=hold_handler;
         function tap_handler(evt){
             evt=evt||event;
             var target=fdjtUI.T(evt);
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
-            if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
-                (target.id.search("fdjtSel")===0)) {
-                var sel=getSelector(target);
-                if (trace) fdjtLog("tap %o t=%o sel=%o",evt,target,sel);
-                // Tapping on a single word selection clears it
-                if (sel.n_words===1) sel.setRange(false);
-                else if ((target.className==="fdjtselectstart")||
-                         (target.className==="fdjtselectend")) {
-                    // Tapping on a start or end selects just that word
-                    fdjtUI.cancel(evt);
-                    sel.setRange(target,target);}
-                // Otherwise, call overWord, which makes the word the
-                //  beginning or end of the selection
-                else if (overWord(target,true)) {
-                    if (target.className==="fdjtselectstart")
-                        sel.adjust="start";
-                    else if (target.className==="fdjtselectend")
-                        sel.adjust="end";
-                    else sel.adjust=false;
-                    fdjtUI.cancel(evt);}
-                else if (sel) sel.adjust=false;}}
+            while (target) {
+                if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
+                    (target.id.search("fdjtSel")===0)) {
+                    var sel=getSelector(target);
+                    if ((traceall)||((sel)&&(sel.traced)))
+                        fdjtLog("tap %o t=%o sel=%o",evt,target,sel);
+                    // Tapping on a single word selection clears it
+                    if (sel.n_words===1) sel.setRange(false);
+                    else if ((target.className==="fdjtselectstart")||
+                             (target.className==="fdjtselectend")) {
+                        // Tapping on a start or end selects just that word
+                        fdjtUI.cancel(evt);
+                        sel.setRange(target,target);}
+                    // Otherwise, call overWord, which makes the word the
+                    //  beginning or end of the selection
+                    else if (overWord(target,true,sel)) {
+                        if (target.className==="fdjtselectstart")
+                            sel.adjust="start";
+                        else if (target.className==="fdjtselectend")
+                            sel.adjust="end";
+                        else sel.adjust=false;
+                        fdjtUI.cancel(evt);}
+                    else if (sel) sel.adjust=false;
+                    break;}
+                else if (target.nodeType===1) target=target.parentNode;
+                else break;}}
         TextSelect.tap_handler=tap_handler;
         function release_handler(evt,sel){
             evt=evt||event;
             var target=fdjtUI.T(evt);
-            if (trace) fdjtLog("release %o t=%o sel=%o",evt,target,sel);
+            if ((traceall)||((sel)&&(sel.traced)))
+                fdjtLog("release %o t=%o sel=%o",evt,target,sel);
             if (sel) {
-                sel.anchor=false;
+                sel.anchor=false; sel.word=false; sel.pending=false;
+                if (sel.timeout) {
+                    clearTimeout(sel.timeout); sel.timeout=false;}
                 sel.setAdjust(false);
                 if (sel.loupe) sel.loupe.style.display='none';}}
         function slip_handler(evt,sel){
             evt=evt||event;
             var target=fdjtUI.T(evt);
-            if (trace) fdjtLog("slip %o t=%o sel=%o",evt,target,sel);
+            if ((traceall)||((sel)&&(sel.traced)))
+                fdjtLog("slip %o t=%o sel=%o",evt,target,sel);
             if (sel) {
                 if (sel.loupe) sel.loupe.style.display='none';}}
         TextSelect.release_handler=release_handler;
@@ -571,11 +618,13 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 get_slip_handler(sel,opts.onslip||false));
             return taphold;}
 
-        TextSelect.Trace=function(flag,thtoo){
-            if ((flag)&&(thtoo)) fdjt.TapHold.Trace(true);
-            if (typeof flag === "undefined") {
-                trace=(!(trace));}
-            else trace=flag;};
+        TextSelect.trace=function(flag,thtoo){
+            if (typeof flag === "undefined") return traceall;
+            else if (typeof flag === "number")
+                traceall=flag;
+            else if (flag) traceall=1;
+            else traceall=0;
+            if (thtoo) fdjt.TapHold.trace(thtoo);};
         
         // Return the constructor
         return TextSelect;})();
