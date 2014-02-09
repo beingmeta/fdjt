@@ -81,7 +81,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         if (touches) return (touches[0].pageY-window.pageYOffset);
         else return false;}
     
-    function synthEvent(target,etype,serial,orig,tx,ty,also,trace){
+    function synthEvent(target,etype,th,orig,tx,ty,also){
+        var serial=th.serial, trace=th.traced;
         var orig_target=(orig)&&(eTarget(orig));
         if (!(target)) target=orig_target;
         var evt = document.createEvent("UIEvent");
@@ -233,19 +234,18 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function tapped(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
-            return synthEvent(target,"tap",serial,evt,x,y,false,trace);}
+            return synthEvent(target,"tap",th,evt,x,y,false);}
         function held(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
             addClass(elt,"tapholding");
-            return synthEvent(target,"hold",serial,evt,x,y,false,trace);}
+            return synthEvent(target,"hold",th,evt,x,y,false);}
         function released(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
             dropClass(elt,"tapholding");
-            return synthEvent(target,"release",serial,evt,x,y,
-                                 {startX: start_x,startY: start_y},
-                                trace);}
+            return synthEvent(target,"release",th,evt,x,y,
+                                 {startX: start_x,startY: start_y});}
         function slipped(target,evt,also){
             if (also) {
                 also.startX=start_x; also.startY=start_y;}
@@ -253,20 +253,16 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (evt) {
                 var rel=evt.relatedTarget||eTarget(evt);
                 if (rel!==target) also.relatedTarget=rel;}
-            return synthEvent(target,"slip",serial,
-                                 evt,touch_x,touch_y,also,trace);}
+            return synthEvent(target,"slip",th,evt,touch_x,touch_y,also);}
         function taptapped(target,evt){
-            return synthEvent(target,"taptap",serial,evt,
-                                 touch_x,touch_y,false,trace);}
+            return synthEvent(target,"taptap",th,evt,touch_x,touch_y,false,trace);}
         function tapheld(target,evt){
-            return synthEvent(target,"taphold",serial,evt,
-                                 touch_x,touch_y,false,trace);}
+            return synthEvent(target,"taphold",th,evt,touch_x,touch_y,false);}
         function swiped(target,evt,sx,sy,cx,cy){
             var dx=cx-sx, dy=cy-sy;
-            return synthEvent(target,"swipe",serial,evt,cx,cy,
+            return synthEvent(target,"swipe",th,evt,cx,cy,
                                  {startX: sx,startY: sy,endX: cx,endY: cy,
-                                  deltaX: dx,deltaY: dy},
-                                trace);}
+                                  deltaX: dx,deltaY: dy});}
         
         function startpress(evt){
             evt=evt||event;
@@ -722,7 +718,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 fdjtLog("TapHold/fakePress(%d) t=%o x=%o y=%o t=%o",
                         serial,th_target,start_x,start_y,start_t);
             startpress(evt,holdthresh);};
-
+        this.abort=abortpress;
+        
         if ((trace)||(traceall))
             fdjtLog("New TapHold(%d) for %o: %o opts %j, trace=%o/%o",
                     serial,elt,th,opts||false,trace,traceall);
