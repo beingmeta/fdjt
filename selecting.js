@@ -162,15 +162,18 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var i, lim;
             if (node.nodeType===3) {
                 var text=node.nodeValue, span;
+                /*
                 // Skip wrapping non-inline whitespace
                 if (((text.length===0)||(text.search(/\S/g)<0))) {
                     var parent=node.parentNode, pstyle=getStyle(parent);
                     var prev=node.prevSibling, next=node.nextSibling;
-                    if ((pstyle.whiteSpace==='normal')&&((prev)||(next))&&
+                    if (((prev)||(next))&& // ((pstyle.whiteSpace||wsprop)==='normal')
                         (pstyle.display!=='inline')&&(pstyle.display!=='table-cell')) {
-                        if (((!(prev))||(prev.nodeType===1)&&(getStyle(prev).display!=='inline'))
-                            ((!(next))||(next.nodeType===1)&&(getStyle(next).display!=='inline')))
+                        var pdisplay=((prev)&&(getStyle(prev).display));
+                        var ndisplay=((next)&&(getStyle(next).display));
+                        if ((pdisplay!=='inline')&&(ndisplay!=='inline'))
                             return node;}}
+                */
                 var sliced=text.split(/\b/), wordspans=[];
                 i=0; lim=sliced.length;
                 while (i<lim) {
@@ -354,9 +357,16 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
 
         function updateLoupe(word,sel,tapped){
             var parent=word.parentNode, loupe=sel.loupe;
+            if (sel.loupe_timeout) {
+                clearTimeout(sel.loupe_timeout);
+                sel.loupe_timeout=false;}
             var block=word.parentNode; while (block) {
                 if (getStyle(block).display!=='inline') break;
                 else block=block.parentNode;}
+            if ((traceall)||(sel.traced))
+                fdjtLog("updateLoupe(%d) over %o for %o%s",
+                        sel.serial,word,sel,
+                        ((tapped)?(" (tapped)"):("")));
             var context=gatherContext(word,2,4,block);
             loupe.innerHTML=""; loupe.style.display="none";
             fdjtDOM.append(loupe,context);
@@ -588,7 +598,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if ((traceall)||((sel)&&(sel.traced)))
                 fdjtLog("slip %o t=%o sel=%o",evt,target,sel);
             if (sel) {
-                if (sel.loupe) sel.loupe.style.display='none';}}
+                if (sel.loupe) sel.loupe_timeout=
+                    setTimeout(function(){
+                        sel.loupe_timeout=false;
+                        sel.loupe.style.display='none';},2000);}}
         TextSelect.release_handler=release_handler;
         function get_release_handler(sel,also){
             return function(evt){
