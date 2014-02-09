@@ -93,6 +93,11 @@ fdjt.String=
                     output=output+"."+arg.className.replace(/\s+/g,'.');
                 if (arg.id) output=output+"#"+arg.id;
                 if (arg.name) output=output+"[name="+arg.name+"]";
+                var txt=arg.innerText;
+                if ((!(txt))||(txt.length===0)) {}
+                else if (txt.length<32)
+                    output=output+'\''+txt.replace(/\n/g,'\\n')+'\'';
+                else output=output+'\''+txt.slice(0,16).replace(/\n/g,'\\n')+'\'...';
                 return output+"]";}
             else if (arg.nodeType) {
                 if (arg.nodeType===3)
