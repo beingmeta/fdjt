@@ -48,7 +48,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 return -1;}}
 
         var selectors={}; // Maps DOM ids to instances
-        var tapholds={}; // Maps DOM ids to taphold objects
+        var alltapholds={}; // Maps DOM ids to taphold objects
         var serialnum=0;  // Tracks instances
         var trace=false;
 
@@ -66,6 +66,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var sel=this;
             var orig=this.orig=[], wrapped=this.wrapped=[];
             var words=this.words=[], wrappers=this.wrappers=[];
+            var tapholds=this.tapholds=[];
             var prefix=this.prefix="fdjtSel0"+this.serial;
             this.loupe=fdjtDOM("span.fdjtselectloupe");
             this.adjust=false; /* This will be 'start' or 'end' */
@@ -85,10 +86,12 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     "Tap or hold/drag to move the ends of the text range";
                 selectors[wrapper.id]=sel;
                 wrappers.push(wrapper);
-                tapholds[wrapper.id]=addHandlers(wrapper,sel,opts);
+                var th=addHandlers(wrapper,sel,opts);
+                alltapholds[wrapper.id]=th;
+                tapholds.push(th);
                 if (trace)
                     fdjtLog("Created TapHold handler (#%d) for wrapper %s around %o",
-                            tapholds[wrapper.id].serial,wrapper.id,node);
+                            th.serial,wrapper.id,node);
                 // Replace the node with the wrapper and then update
                 // the node (replacing words with spans) while it's
                 // outside of the DOM for performance.
@@ -122,7 +125,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 var j=0, n_wrappers=wrappers.length; while (j<n_wrappers) {
                     var wrapper=wrappers[j++];
                     if ((hasParent(wrapper,target))||(hasParent(target,wrapper))) {
-                        var taphold=tapholds[wrapper.id];
+                        var taphold=alltapholds[wrapper.id];
                         if (trace)
                             fdjtLog("Using TapHold handler @%d for wrapper %s (#%d)",
                                     j-1,wrapper.id,taphold.serial);
@@ -476,7 +479,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             var j=0, lim=wrappers.length;
             while (j<lim) {
                 var wrapper=wrappers[j++];
-                delete tapholds[wrapper.id];
+                delete alltapholds[wrapper.id];
                 delete selectors[wrapper.id];}
             delete selectors[this.prefix];
             delete this.wrapped; delete this.orig;
