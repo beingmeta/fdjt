@@ -1054,15 +1054,6 @@ body.taptouch {}
     -webkit-user-select: none;}
 .fdjtselectwrap {}
 .fdjtselectwrap {background-color: rgba(247, 247, 124, 0.25);}
-.fdjtselectwrap > span {
-    transition-property: background-color;
-    transition-duration: 1s;
-    -o-transition-property: background-color;
-    -o-transition-duration: 1s;
-    -moz-transition-property: background-color;
-    -moz-transition-duration: 1s;
-    -webkit-transition-property: background-color;
-    -webkit-transition-duration: 1s;}
 
 .fdjtselecting .fdjtselected {
     margin: 0px !important;
