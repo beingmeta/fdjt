@@ -55,11 +55,7 @@ div.codexpage .codexpagetop > p:first-child {
     margin-top: 0px;}
 
 body.codexfixed div.codexpage {
-    position: fixed; text-align: left;
-    transition-property: opacity; transition-duration: 0.5s;
-    -o-transition-property: opacity; -o-transition-duration: 0.5s;
-    -moz-transition-property: opacity; -moz-transition-duration: 0.5s;
-    -webkit-transition-property: opacity; -webkit-transition-duration: 0.5s;}
+    position: fixed; text-align: left;}
 body.codexfade div.codexpage { opacity: 0; }
 body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 
