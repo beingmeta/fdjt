@@ -238,12 +238,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function held(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
-            addClass(elt,"tapholding");
+            setTimeout(function(){addClass(elt,"tapholding");},20);
             return synthEvent(target,"hold",th,evt,x,y,false);}
         function released(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
-            dropClass(elt,"tapholding");
+            setTimeout(function(){dropClass(elt,"tapholding");},20);
             return synthEvent(target,"release",th,evt,x,y,
                                  {startX: start_x,startY: start_y});}
         function slipped(target,evt,also){
@@ -253,6 +253,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (evt) {
                 var rel=evt.relatedTarget||eTarget(evt);
                 if (rel!==target) also.relatedTarget=rel;}
+            setTimeout(function(){dropClass(elt,"tapholding");},20);
             return synthEvent(target,"slip",th,evt,touch_x,touch_y,also);}
         function taptapped(target,evt){
             return synthEvent(target,"taptap",th,evt,touch_x,touch_y,false,trace);}
