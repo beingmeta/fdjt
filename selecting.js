@@ -138,7 +138,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         if ((trace)||(traceall))
                             fdjtLog("Using TapHold handler @%d for wrapper %s (#%d)",
                                     j-1,wrapper.id,taphold.serial);
-                        taphold.fakePress(evt);
+                        taphold.fakePress(evt,20);
                         return;}}};
 
             return this;}
@@ -308,12 +308,13 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             else {
                 if (sel.timeout) clearTimeout(sel.timeout);
                 updateLoupe(word,sel,tapped);
-                sel.word=false; sel.pending=word; sel.timeout=setTimeout(function(){
+                sel.word=false; sel.pending=word;
+                sel.timeout=setTimeout(function(){
                     if (sel.pending!==word) return;
                     if (sel.timeout) clearTimeout(sel.timeout);
                     sel.word=word; sel.pending=false;
                     useWord(word,sel);},
-                                                         1000);}
+                                                         300);}
             return true;}
 
         function useWord(word,sel,tapped){
