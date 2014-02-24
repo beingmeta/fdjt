@@ -265,8 +265,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                                  {startX: sx,startY: sy,endX: cx,endY: cy,
                                   deltaX: dx,deltaY: dy});}
         
-        function startpress(evt){
-            var to=holdthresh||TapHold.interval||100;
+        function startpress(evt,to){
+            if (!(to)) to=holdthresh||TapHold.interval||100;
             evt=evt||event;
             if ((trace>1)||(traceall>1))
                 fdjtLog("TapHold/startpress(%d) %o tht=%o timer=%o tt=%o touched=%o pressed=%o@%o timeout=%oms",
