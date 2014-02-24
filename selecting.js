@@ -368,30 +368,54 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 fdjtLog("updateLoupe(%d) over %o for %o%s",
                         sel.serial,word,sel,
                         ((tapped)?(" (tapped)"):("")));
-            var context=gatherContext(word,2,4,block);
+            var context=gatherContext(word,5,5,block);
+            var geom=fdjtDOM.getGeometry(word,word.offsetParent);
+            var cwidth=word.offsetParent.offsetWidth;
             loupe.innerHTML=""; loupe.style.display="none";
-            fdjtDOM.append(loupe,context);
+            fdjtDOM.append(loupe,context.words);
             parent.insertBefore(loupe,word);
+            if (geom.left<(cwidth/2)) {
+                loupe.style.float="left";
+                loupe.style.left=(geom.left-(1.5*context.wordstart))+"px";
+                loupe.style.right="";}
+            else {
+                loupe.style.float="right";
+                loupe.style.right=(cwidth-geom.right)-
+                    (1.5*(context.width-context.wordend))+"px";
+                loupe.style.left="";}
             loupe.style.display="";
             if (tapped) setTimeout(1000,function(){
                 sel.loupe.display='none';});}
+
+        var getGeometry=fdjtDOM.getGeometry;
 
         function gatherContext(node,back,forward,parent){
             var id=node.id, parsed=(id)&&/(fdjtSel\d+_)(\d+)/.exec(id);
             if ((!(parsed))||(parsed.length!==3)) return;
             var prefix=parsed[1], count=parseInt(parsed[2],10);
             var start=count-back, end=count+forward; if (start<0) start=0;
-            var context=[];
+            var context=[], width=0, wordstart, wordend;
+            var start_geom=getGeometry(node);
             var i=start; while (i<end) {
                 var elt=document.getElementById(prefix+i);
                 if ((!(elt))||((parent)&&(!(hasParent(elt,parent))))) {
                     i++; continue;}
                 else if (elt.nodeType===1) {
+                    var geom=getGeometry(elt);
+                    if ((geom.bottom<start_geom.top)||
+                        (geom.top>=start_geom.bottom)) {
+                        i++; continue;}
                     var clone=elt.cloneNode(true); stripIDs(clone);
+                    if (i<count) width=width+elt.offsetWidth;
+                    else if (i===count) {
+                        wordstart=width;
+                        width=wordend=width+elt.offsetWidth;}
+                    else width=width+elt.offsetWidth;
                     context.push(clone);}
                 else context.push(elt.cloneNode(true));
                 i++;}
-            return context;}
+            return {words: context, width: width,
+                    wordstart: wordstart, wordend: wordend};}
 
         function getSelector(word){
             var id=false;
