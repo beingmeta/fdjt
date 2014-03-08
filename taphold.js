@@ -242,8 +242,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (((trace>2)||(traceall>2))||
                 ((t!==th_target)&&((trace)||(traceall))))
                 fdjtLog("TapHold/setTarget(%d) %o cur=%o",serial,t,th_target);
-            if (th_target) dropClass(th_target,"tapholdtarget");
+            if ((th_target)&&(th_target!==t)) dropClass(th_target,"tapholdtarget");
             if (t) addClass(t,"tapholdtarget");
+            if (t!==th_target) {start_x=touch_x; start_y=touch_y; start_t=touch_t;}
             th_target=t;}
 
         function tapped(target,evt,x,y){
