@@ -179,7 +179,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var touch_y=false;
         var touch_t=0;
         var last_ex=false, last_ey=false, last_et=false, last_etype=false;
-        var minmove=1;
+        var minmove=2;
         var fdx=0, fdy=0;
         var noslip=false;
         var trace=0;
@@ -460,6 +460,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             
             var distance=(Math.abs(x-start_x))+(Math.abs(y-start_y));
             var delta=(Math.abs(x-touch_x))+(Math.abs(y-touch_y));
+            var dt=(fdjtTime()-touch_t)/1000;
             if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)&&
                 (distance>movethresh)) {
                 if ((trace>1)||(traceall>1))
@@ -472,7 +473,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 setTarget(false);
                 swiped(target,evt,start_x,start_y,touch_x,touch_y);
                 return;}
-            else if (delta<minmove) {
+            else if ((delta<(minmove*10))&&(dt>0)&&((delta/dt)<minmove)) {
                 if ((trace>2)||(traceall>2))
                     fdjtLog("TapHold/move/ignore(%d) s=%d,%d t=%d,%d c=%d,%d total=%d/%o, local=%d/%o, md=%o",
                             serial,start_x,start_y,touch_x,touch_y,x,y,
