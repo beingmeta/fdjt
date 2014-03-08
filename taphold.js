@@ -178,7 +178,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var touch_x=false;
         var touch_y=false;
         var touch_t=0;
-        var last_ex=false, last_ey=false, last_et=false, last_etype=false;
+        var target_x=false, target_y=false, target_t=false;
         var minmove=2;
         var fdx=0, fdy=0;
         var noslip=false;
@@ -232,7 +232,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function cleartouch(){
             start_x=start_y=start_t=
                 touch_x=touch_y=touch_t=
-                last_ex=last_ey=last_et=last_etype=false;
+                target_x=target_y=target_t=false;
             touched=pressed=pressed_at=false;}
 
         function synthEvent(target,etype,th,orig,tx,ty,also){
@@ -244,7 +244,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 fdjtLog("TapHold/setTarget(%d) %o cur=%o",serial,t,th_target);
             if ((th_target)&&(th_target!==t)) dropClass(th_target,"tapholdtarget");
             if (t) addClass(t,"tapholdtarget");
-            if (t!==th_target) {start_x=touch_x; start_y=touch_y; start_t=touch_t;}
+            if ((t)&&(th_target)&&(t!==th_target)) {
+                target_x=touch_x; target_y=touch_y; target_t=touch_t;}
             th_target=t;}
 
         function tapped(target,evt,x,y){
@@ -458,20 +459,20 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             // If touched is false, the tap/hold was aborted somehow
             if (!((touched)||(pressed))) return;
             
-            var distance=(Math.abs(x-start_x))+(Math.abs(y-start_y));
+            var distance=(Math.abs(x-target_x))+(Math.abs(y-target_y));
             var delta=(Math.abs(x-touch_x))+(Math.abs(y-touch_y));
             var dt=(fdjtTime()-touch_t)/1000;
             if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)&&
                 (distance>movethresh)) {
                 if ((trace>1)||(traceall>1))
-                    fdjtLog("TapHold/move/cancel(%d) s=%d,%d t=%d,%d c=%d,%d d=%d thresh=%o, md=%o, event=%o",
-                            serial,start_x,start_y,touch_x,touch_y,x,y,
+                    fdjtLog("TapHold/move/cancel(%d) s=%d,%d tt=%d,%d t=%d,%d c=%d,%d d=%d thresh=%o, md=%o, event=%o",
+                            serial,start_x,start_y,target_x,target_y,touch_x,touch_y,x,y,
                             distance,movethresh,mouse_down,evt);
                 abortpress(evt,"movefar");
                 if (th_timer) clearTimeout(th_timer);
                 pressed_at=touched=th_timer=pressed=false; th_targets=[];
+                swiped(target,evt,start_x,start_y,x,y);
                 setTarget(false);
-                swiped(target,evt,start_x,start_y,touch_x,touch_y);
                 return;}
             else if ((delta<(minmove*10))&&(dt>0)&&((delta/dt)<minmove)) {
                 if ((trace>2)||(traceall>2))
@@ -530,8 +531,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             mouse_down=true; cleared=0;
             touch_x=(evt.clientX||getClientX(evt)||touch_x)+fdx;
             touch_y=(evt.clientY||getClientY(evt)||touch_y)+fdy;
-            start_x=touch_x; start_y=touch_y;
-            touch_t=fdjtTime();
+            start_x=target_x=touch_x; start_y=target_y=touch_y;
+            target_t=touch_t=fdjtTime();
             if ((!(bubble))) noBubble(evt);
             if (override) noDefault(evt);
             var new_event=false;
