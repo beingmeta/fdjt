@@ -160,6 +160,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             return new TapHold(elt,opts);
         
         var th=this;
+        var holdclass="tapholding";
         var touched=false;
         var pressed=false;
         var pressed_at=false;
@@ -238,12 +239,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function held(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
-            setTimeout(function(){addClass(elt,"tapholding");},20);
+            if (holdclass)
+                setTimeout(function(){addClass(elt,holdclass);},20);
             return synthEvent(target,"hold",th,evt,x,y,false);}
         function released(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
-            setTimeout(function(){dropClass(elt,"tapholding");},20);
+            if (holdclass)
+                setTimeout(function(){dropClass(elt,holdclass);},20);
             return synthEvent(target,"release",th,evt,x,y,
                                  {startX: start_x,startY: start_y});}
         function slipped(target,evt,also){
@@ -253,10 +256,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (evt) {
                 var rel=evt.relatedTarget||eTarget(evt);
                 if (rel!==target) also.relatedTarget=rel;}
-            setTimeout(function(){dropClass(elt,"tapholding");},20);
+            if (holdclass)
+                setTimeout(function(){dropClass(elt,holdclass);},20);
             return synthEvent(target,"slip",th,evt,touch_x,touch_y,also);}
         function taptapped(target,evt){
-            return synthEvent(target,"taptap",th,evt,touch_x,touch_y,false,trace);}
+            return synthEvent(target,"taptap",th,evt,
+                              touch_x,touch_y,false,trace);}
         function tapheld(target,evt){
             return synthEvent(target,"taphold",th,evt,touch_x,touch_y,false);}
         function swiped(target,evt,sx,sy,cx,cy){
@@ -347,7 +352,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             start_x=false; start_y=false; start_t=false;
             touched=false; pressed=false; pressed_at=false;
             setTarget(false);
-            setTimeout(function(){dropClass(elt,"tapholding");},20);
+            if (holdclass)
+                setTimeout(function(){dropClass(elt,holdclass);},20);
             th_targets=[];}
         function abortpress(evt,why){
             if ((trace)||(traceall))
@@ -360,7 +366,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else if (pressed) {slipped(pressed,evt);}
             if (reticle.live) reticle.highlight(false);
             pressed_at=touched=pressed=tap_target=false;
-            setTimeout(function(){dropClass(elt,"tapholding");},20);
+            if (holdclass)
+                setTimeout(function(){dropClass(elt,holdclass);},20);
             th_targets=[];
             setTarget(false);}
 
@@ -631,12 +638,18 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else if (pressed) {released(pressed,evt);}
             if (reticle.live) reticle.highlight(false);
             pressed_at=touched=pressed=tap_target=false;
-            setTimeout(function(){dropClass(elt,"tapholding");},20);
+            if (holdclass)
+                setTimeout(function(){dropClass(elt,holdclass);},20);
             th_targets=[];
             setTarget(false);}
 
         if (!(opts)) opts={};
         else if (!(opts.hasOwnProperty)) opts={touch: true};
+        else {}
+
+        if (opts.hasOwnProperty('holdclass')) holdclass=opts.holdclass;
+        else if (default_opts.hasOwnProperty('holdclass'))
+            holdclass=default_opts.holdclass;
         else {}
 
         fortouch=((opts.hasOwnProperty('touch'))?(opts.touch):
