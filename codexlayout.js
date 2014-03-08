@@ -959,7 +959,9 @@ fdjt.CodexLayout=
                             if (tracing)
                                 logfn("Splitting block %o @ %o",block,page);
                             var split=splitBlock(block,style,use_height);
-                            if ((split)&&(split!==block)) blocks[ni]=split;
+                            if ((split)&&(split!==block)) {
+                                blocks[ni]=split;
+                                layout.drag=drag=[];}
                             else {
                                 geom=getGeom(block,page);
                                 if (geom.bottom>page_height) {
@@ -988,6 +990,7 @@ fdjt.CodexLayout=
                     if (node.nodeType!==1) return;
                     if (node.codexui) return;
                     if (!(style)) style=getStyle(node); 
+                    if (style.position!=='static') return;
                     if (((atomic)&&(atomic.match(node)))||
                         (style.display==='table-row')||
                         (avoidBreakInside(node,style))) {
