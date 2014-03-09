@@ -1193,8 +1193,8 @@ fdjt.DOM=
                 var offtop=elt.offsetTop, offbot=offtop+elt.offsetHeight;
                 var offleft=elt.offsetLeft;
                 var offright=offleft+elt.offsetWidth;
-                var l=container.scrollLeft, r=l+container.scrollWidth;
-                var t=container.scrollTop, b=t+container.scrollHeight;
+                var l=container.scrollLeft, r=l+container.clientWidth;
+                var t=container.scrollTop, b=t+container.clientHeight;
                 if (partial)
                     return ((((offleft>=l)&&(offleft<=r))||
                              ((offright>=l)&&(offright<=r))||
@@ -1829,7 +1829,7 @@ fdjt.DOM=
         fdjtDOM.forward=scan_forward;
         fdjtDOM.next=scan_next;
 
-        /* Scanning backwards */
+        /* Skimming backwards */
 
         // PREV goes the parent if there's no previous sibling
         function prev_node(node){
