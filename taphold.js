@@ -666,9 +666,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         else if (!(opts.hasOwnProperty)) opts={touch: true};
         else {}
 
-        fortouch=((opts.hasOwnProperty('touch'))?(opts.touch):
-                  (default_opts.hasOwnProperty('touch'))?
-                  (default_opts.touch):(false));
+        fortouch=((opts.hasOwnProperty('fortouch'))?(opts.fortouch):
+                  (default_opts.hasOwnProperty('fortouch'))?
+                  (default_opts.fortouch):(false));
         holdthresh=((opts.hasOwnProperty('holdthresh'))?(opts.holdthresh):
                     (default_opts.hasOwnProperty('holdthresh'))?
                     (default_opts.holdthresh):(200));

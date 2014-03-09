@@ -307,14 +307,14 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             else if (sel.pending===word) return true;
             else {
                 if (sel.timeout) clearTimeout(sel.timeout);
-                updateLoupe(word,sel,tapped);
+                updateLoupe(word,sel,false);
                 sel.word=false; sel.pending=word;
                 sel.timeout=setTimeout(function(){
                     if (sel.pending!==word) return;
                     if (sel.timeout) clearTimeout(sel.timeout);
                     sel.word=word; sel.pending=false;
                     useWord(word,sel);},
-                                                         300);}
+                                                         100);}
             return true;}
 
         function useWord(word,sel,tapped){
@@ -411,6 +411,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         wordstart=width;
                         width=wordend=width+elt.offsetWidth;}
                     else width=width+elt.offsetWidth;
+                    if (elt===node) fdjtDOM.addClass(clone,"fdjtselected");
                     context.push(clone);}
                 else context.push(elt.cloneNode(true));
                 i++;}
