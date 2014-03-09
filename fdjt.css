@@ -862,7 +862,8 @@ div.reticle.vertical.highlight { width: 3px;}
 
 .ellipsis {}
 .ellipsis .elided { display: none;}
-.ellipsis .elision { cursor: pointer;}
+.ellipsis .elision, .ellipsis .delision {
+   cursor: pointer; white-space: nowrap;}
 .ellipsis .delision { display: none;}
 .ellipsis.compact .elided { display: none;}
 .ellipsis.expanded .elided { display: inline;}
