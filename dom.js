@@ -1188,6 +1188,24 @@ fdjt.DOM=
 
         function isVisible(elt,partial){
             if (!(partial)) partial=false;
+            if ((elt.offsetParent)&&(elt.offsetParent!==document.body)) {
+                var container=elt.offsetParent;
+                var offtop=elt.offsetTop, offbot=offtop+elt.offsetHeight;
+                var offleft=elt.offsetLeft;
+                var offright=offleft+elt.offsetWidth;
+                var l=container.scrollLeft, r=l+container.scrollWidth;
+                var t=container.scrollTop, b=t+container.scrollHeight;
+                if (partial)
+                    return ((((offleft>=l)&&(offleft<=r))||
+                             ((offright>=l)&&(offright<=r))||
+                             ((offleft<l)&&(offright>r)))&&
+                            (((offtop>=t)&&(offtop<=b))||
+                             ((offbot>=t)&&(offbot<=b))||
+                             ((offtop<=t)&&(offbot>=b))));
+                else return ((((offleft>=l)&&(offleft<=r))&&
+                              ((offright>=l)&&(offright<=r)))&&
+                             (((offtop>=t)&&(offtop<=b))&&
+                              ((offbot>=t)&&(offbot<=b))));}
             var top = elt.offsetTop;
             var left = elt.offsetLeft;
             var width = elt.offsetWidth;
