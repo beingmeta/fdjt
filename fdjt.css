@@ -1069,6 +1069,9 @@ body.taptouch {}
 .fdjtselecting .fdjtselectend:hover {
     text-decoration: underline;}
 
+.fdjtselecting > * { pointer-events: none; }
+.fdjtselecting > * > * { pointer-events: all; }
+
 body.cxTOUCH .fdjtselecting .fdjtselected:hover,
 body.cxTOUCH .fdjtselecting .fdjtselectstart:hover,
 body.cxTOUCH .fdjtselecting .fdjtselectend:hover {
