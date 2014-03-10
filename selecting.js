@@ -133,7 +133,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                             evt,target,wrappers);
                 var j=0, n_wrappers=wrappers.length; while (j<n_wrappers) {
                     var wrapper=wrappers[j++];
-                    if ((hasParent(wrapper,target))||(hasParent(target,wrapper))) {
+                    if ((hasParent(wrapper,target))||
+                        (hasParent(target,wrapper))) {
                         var taphold=alltapholds[wrapper.id];
                         if ((trace)||(traceall))
                             fdjtLog("Using TapHold handler @%d for wrapper %s (#%d)",

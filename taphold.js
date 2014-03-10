@@ -322,7 +322,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 else held(th_target,evt);
                 if (th_timer) clearTimeout(th_timer);
                 th_timer=false;
-                touched=false;}),to);}
+                touched=false;}),
+                                to);}
         function endpress(evt){
             if ((trace>1)||(traceall>1))
                 fdjtLog("TapHold/endpress(%d) %o t=%o p=%o tch=%o tm=%o ttt=%o/%o",
