@@ -438,8 +438,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (holder!==elt) {
                 if ((trace>2)||(traceall>2)) {
                     trace_ignore_move(evt,serial,elt,holder,th_target,target,
-                                      start_x,start_y,touch_x,touch_y);}
+                                      start_x,start_y,target_x,target_y,
+                                      touch_x,touch_y);}
                 if (th_target) {
+                    if ((trace)||(traceall))
+                        fdjtLog("setWanderTimeout(%d): h=%o!=elt=%o",
+                                serial,holder,elt);
                     wander_timer=setTimeout(function(){
                         abortpress(evt,"taphold_wander_timeout");},
                                             wanderthresh||2000);
@@ -513,12 +517,13 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 held(pressed);}
             else {}}
         function trace_ignore_move(evt,serial,elt,holder,th_target,target,
-                                   start_x,start_y,touch_x,touch_y) {
+                                   start_x,start_y,target_x,target_y,
+                                   touch_x,touch_y) {
             fdjtLog(
-                "TapHold/move%s/farout(%d) %o %o -> %o s=%d,%d t=%d,%d",
+                "TapHold/move%s/farout(%d) %o %o -> %o s=%d,%d tt=%d,%d t=%d,%d",
                 ((mouse_down)?("/md"):("")),serial,
                 evt,th_target,target,start_x,start_y,
-                touch_x,touch_y);
+                target_x,target_y,touch_x,touch_y);
             fdjtLog("TapHold/move/farout(%d) target in %o, elt is %o",
                     serial,holder,elt);}
 
@@ -753,8 +758,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             setTarget(false);
             th_targets=[];};
         this.fakePress=function fakePress(evt,holdthresh){
-            start_x=touch_x=evt.clientX||getClientX(evt);
-            start_y=touch_y=evt.clientY||getClientY(evt);
+            start_x=target_x=touch_x=evt.clientX||getClientX(evt);
+            start_y=target_y=touch_y=evt.clientY||getClientY(evt);
             touch_t=start_t=fdjtET();
             var target=document.elementFromPoint(start_x,start_y);
             if (!(target))
