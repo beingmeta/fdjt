@@ -2,7 +2,7 @@
 
 /* ################# fdjt/dialog.js ###################### */
 
-/* Copyright (C) 2012-2013 beingmeta, inc.
+/* Copyright (C) 2012-2014 beingmeta, inc.
 
    This program comes with absolutely NO WARRANTY, including implied
    warranties of merchantability or fitness for any particular

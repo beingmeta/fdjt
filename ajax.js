@@ -2,7 +2,7 @@
 
 /* ######################### fdjt/ajax.js ###################### */
 
-/* Copyright (C) 2007-2013 beingmeta, inc.
+/* Copyright (C) 2007-2014 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
    This file provides an abstraction layer for Ajax calls
 
