@@ -359,7 +359,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 else slipped(th_target,evt);}
             else if (pressed) {
                 var geom=fdjtDOM.getGeometry(elt);
-                if ((x>=geom.left)&&(x<=geom.right)&&(y>=geom.top)&&(y<=geom.bottom))
+                if ((x>=geom.left)&&(x<=geom.right)&&
+                     (y>=geom.top)&&(y<=geom.bottom))
                     released(pressed,evt,x,y);
                 else if (noslip)
                     released(pressed,evt,x,y);
@@ -463,6 +464,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else {}
             // If touched is false, the tap/hold was aborted somehow
             if (!((touched)||(pressed))) return;
+            if (noslip) return;
             
             var distance=(Math.abs(x-target_x))+(Math.abs(y-target_y));
             var delta=(Math.abs(x-touch_x))+(Math.abs(y-touch_y));
