@@ -464,7 +464,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else {}
             // If touched is false, the tap/hold was aborted somehow
             if (!((touched)||(pressed))) return;
-            if (noslip) return;
             
             var distance=(Math.abs(x-target_x))+(Math.abs(y-target_y));
             var delta=(Math.abs(x-touch_x))+(Math.abs(y-touch_y));
@@ -494,16 +493,17 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                             distance,movethresh,delta,minmove,mouse_down);
                 touch_x=x; touch_y=y; touch_t=fdjtTime();
                 target=getParent(target,touchable);}
-            if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
-            if (!(target)) return;
-            if (hasParent(target,".tapholder")) setTarget(target);
-            if ((evt.touches)&&(touched)&&(!(pressed))&&
-                (th_targets[th_targets.length-1]!==th_target))
-                th_targets.push(th_target);
             if ((evt.touches)&&(evt.touches.length)&&(evt.touches.length>1))
                 return;
             else {
                 if (reticle.live) reticle.onmousemove(evt,touch_x,touch_y);}
+            if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
+            if (!(target)) return;
+            if ((hasParent(target,".tapholder"))&&(!(noslip)))
+                setTarget(target);
+            if ((evt.touches)&&(touched)&&(!(pressed))&&
+                (th_targets[th_targets.length-1]!==th_target))
+                th_targets.push(th_target);
             if (!(mouse_down)) {
                 if (!(noslip))
                     slipped(pressed,evt,{relatedTarget: target});
