@@ -1758,8 +1758,9 @@ fdjt.CodexLayout=
                 var all_ids=[], saved_ids={};
                 var dupids=[], dupstarts={}, restoremap={};
                 var curnodes=[], newdups={};
-                fdjtLog("Setting layout to %d characters of HTML",
-                        content.length);
+                if (trace)
+                    fdjtLog("Setting layout to %d characters of HTML",
+                            content.length);
                 frag.innerHTML=content;
                 var newpages=frag.childNodes, addpages=[];
                 if (trace) fdjtLog("Gathering layout info");
