@@ -936,7 +936,7 @@ div.fdjtdialog {
     position: fixed;
     background-color: slategray; color: black;
     font-size: 200%; font-family: helvetica,sans,sans-serif;
-    width: 50%; left: 25%; right: 25%;
+    width: 50%; left: 25%; right: 25%; box-sizing: border-box;
     top: 30%; height: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
     z-index: 250; 
@@ -1009,8 +1009,7 @@ div.fdjtdialog.fdjtconfirm div.message p { text-align: left;}
 div.fdjtdialog.fdjtconfirm div.choices {
     padding-bottom: 1em; padding-top: 1em; text-align: center;}
 div.fdjtdialog.fdjtconfirm div.choices button {
-    padding: 1ex; font-size: 70%;
-    border: solid silver 3px;
+    padding: 1ex; border: solid silver 3px;
     background-color: silver;
     border-radius: 1ex;
     margin-left: 0.5ex; margin-right: 0.5ex; margin-bottom: 1ex;
@@ -1024,6 +1023,9 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
 
 @media screen and (max-height: 400px) {
     div.fdjtdialog { top: 10%; }
+}
+@media screen and (max-width: 800px) {
+    div.fdjtdialog { width: 80%; left: 10%; right: 10%; top: 20%;}
 }
 
 /* Tap Hold */
