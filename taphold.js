@@ -169,6 +169,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var pressed_at=false;
         var tap_target=false;
         var th_target=false;
+        var th_target_t=false;
+        var th_last=false;
         var th_targets=[];
         var th_timer=false;
         var scroll_x=0, scroll_y=0;
@@ -246,7 +248,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (t) addClass(t,"tapholdtarget");
             if ((t)&&(th_target)&&(t!==th_target)) {
                 target_x=touch_x; target_y=touch_y; target_t=touch_t;}
-            th_target=t;}
+            th_last=th_target;
+            th_target=t; th_target_t=fdjtTime();}
 
         function tapped(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
@@ -259,10 +262,17 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 setTimeout(function(){addClass(elt,holdclass);},20);
             return synthEvent(target,"hold",th,evt,x,y,false);}
         function released(target,evt,x,y){
+            var target_time=
+                ((th_target_t)&&(th_last)&&(fdjtTime()-th_target_t));
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
             if (holdclass)
                 setTimeout(function(){dropClass(elt,holdclass);},20);
+            if ((target_time)&&(target_time<200)) {
+                if (trace)
+                    fdjtLog("TapHold(%d) %d=i<200ms, target=%o not %o",
+                            serial,target_time,th_last,target);
+                target=th_last;}
             return synthEvent(target,"release",th,evt,x,y,
                                  {startX: start_x,startY: start_y});}
         function slipped(target,evt,also){
