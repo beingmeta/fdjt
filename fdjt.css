@@ -991,7 +991,7 @@ div.fdjtdialog p {
 div.fdjtdialog > div, div.fdjtdialog > span { vertical-align: middle;}
 
 div.fdjtdialog .countdown {
-    color: rgb(128,0,0); font-weight: bold; font-size: 50%;
+    color: rgb(128,0,0); font-weight: bold; font-size: 75%;
     position: absolute; height: 1em; top: 4px; left: 0.5ex;
     font-variant: small-caps;}
 div.fdjtdialog .countdown { display: none;}

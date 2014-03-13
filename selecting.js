@@ -570,7 +570,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     if ((sel)&&(!(sel.anchor))&&(!(sel.start)))
                         sel.anchor=target;
                     if ((traceall)||((sel)&&(sel.traced)))
-                        fdjtLog("hold %o t=%o sel=%o",evt,target,sel);
+                        fdjtLog("TextSelect/hold %o t=%o sel=%o",
+                                evt,target,sel);
                     if (overWord(target,false,sel)) fdjtUI.cancel(evt);
                     break;}
                 else if (target.nodeType===1) target=target.parentNode;
@@ -586,7 +587,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     (target.id.search("fdjtSel")===0)) {
                     var sel=getSelector(target);
                     if ((traceall)||((sel)&&(sel.traced)))
-                        fdjtLog("tap %o t=%o sel=%o",evt,target,sel);
+                        fdjtLog("TextSelect/tap %o t=%o sel=%o",evt,target,sel);
                     // Tapping on a single word selection clears it
                     if (sel.n_words===1) sel.setRange(false);
                     else if ((target.className==="fdjtselectstart")||
@@ -612,7 +613,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             evt=evt||event;
             var target=fdjtUI.T(evt);
             if ((traceall)||((sel)&&(sel.traced)))
-                fdjtLog("release %o t=%o sel=%o",evt,target,sel);
+                fdjtLog("TextSelect/release %o t=%o sel=%o",evt,target,sel);
             if (sel) {
                 sel.anchor=false; sel.word=false; sel.pending=false;
                 if (sel.timeout) {
@@ -623,7 +624,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             evt=evt||event;
             var target=fdjtUI.T(evt);
             if ((traceall)||((sel)&&(sel.traced)))
-                fdjtLog("slip %o t=%o sel=%o",evt,target,sel);
+                fdjtLog("TextSelect/slip %o t=%o sel=%o",evt,target,sel);
             if (sel) {
                 if (sel.loupe) sel.loupe_timeout=
                     setTimeout(function(){
