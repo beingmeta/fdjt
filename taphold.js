@@ -502,7 +502,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             // If touched is false, the tap/hold was aborted somehow
             if (!((touched)||(pressed))) return;
             
-            var distance=(Math.abs(x-target_x))+(Math.abs(y-target_y));
+            var distance=((pressed)?
+                          ((Math.abs(x-target_x))+(Math.abs(y-target_y))):
+                          ((Math.abs(x-start_x))+(Math.abs(y-start_y))));
             var delta=(Math.abs(x-touch_x))+(Math.abs(y-touch_y));
             var dt=(fdjtTime()-touch_t)/1000;
             if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)&&
