@@ -44,8 +44,8 @@ fdjt.UI.adjustFont=
                 return parent;
             var cstyle=getStyle(elt), style=elt.style;
             if (((cstyle)&&(cstyle.display==='block'))||
-                (style.display==='block')||(elt.tagName==='div')||
-                (elt.tagName==='p')||(elt.tagName[0]==='h'))
+                (style.display==='block')||(elt.tagName==='DIV')||
+                (elt.tagName==='P')||(elt.tagName[0]==='H'))
                 container=document.createElement("div");
             else container=document.createElement("span");
             container.className="adjustfont_wrapper";

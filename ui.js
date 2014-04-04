@@ -1310,7 +1310,7 @@ fdjt.UI.ProgressBar=(function(){
             parsed=new Date(tstring);
             good=((parsed)&&(((parsed.getYear())||"nogood")!=="nogood"));
             if (good) {
-                if (elt.tagName==='time')
+                if (elt.tagName==='TIME')
                     elt.setAttribute('datetime',tstring);
                 else elt.setAttribute('data-datetime',tstring);}}
         if (!(good)) return;
