@@ -39,15 +39,18 @@ fdjt.UI.adjustFont=
     (function(){
         "use strict";
         function setupContainer(elt,opts){
-            var parent=elt.parentNode, container;
+            var parent=elt.parentNode, container, default_wsval;
             if (parent.className==="adjustfont_wrapper")
                 return parent;
             var cstyle=getStyle(elt), style=elt.style;
             if (((cstyle)&&(cstyle.display==='block'))||
                 (style.display==='block')||(elt.tagName==='DIV')||
-                (elt.tagName==='P')||(elt.tagName[0]==='H'))
+                (elt.tagName==='P')||(elt.tagName[0]==='H')) {
                 container=document.createElement("div");
-            else container=document.createElement("span");
+                default_wsval="normal";}
+            else {
+                container=document.createElement("span");
+                default_wsval="nowrap";}
             container.className="adjustfont_wrapper";
             parent.replaceChild(container,elt);
             container.appendChild(elt);
@@ -56,8 +59,7 @@ fdjt.UI.adjustFont=
             if (!((cstyle)&&(cstyle.display==="inline-block"))) {
                 try {style.display="inline-block;";} catch (ex) {}
                 if (style.display!=="inline-block") style.display='inline';}
-            var white_space_value=((opts)&&(opts.wsval))||
-                (adjustFont.wsval)||"nowrap";
+            var white_space_value=((opts)&&(opts.wsval))||default_wsval;
             if (!((cstyle)&&
                   ((cstyle.whiteSpace==="pre")||
                    (cstyle.whiteSpace==="nowrap"))))
