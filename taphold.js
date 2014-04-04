@@ -510,10 +510,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)&&
                 (distance>movethresh)) {
                 if ((trace>1)||(traceall>1))
-                    fdjtLog("TapHold/move/cancel(%d) s=%d,%d tt=%d,%d t=%d,%d c=%d,%d d=%d thresh=%o, md=%o, event=%o",
+                    fdjtLog("TapHold/move/cancel(%d) s=%d,%d tt=%d,%d t=%d,%d c=%d,%d d=%d thresh=%o, dt=%o md=%o, event=%o",
                             serial,start_x,start_y,
                             target_x,target_y,touch_x,touch_y,x,y,
-                            distance,movethresh,mouse_down,evt);
+                            distance,movethresh,dt,mouse_down,evt);
                 abortpress(evt,"movefar");
                 if (th_timer) clearTimeout(th_timer);
                 pressed_at=touched=th_timer=pressed=false; th_targets=[];
@@ -522,17 +522,17 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 return;}
             else if ((delta<(minmove*10))&&(dt>0)&&((delta/dt)<minmove)) {
                 if ((trace>2)||(traceall>2))
-                    fdjtLog("TapHold/move/ignore(%d) s=%d,%d t=%d,%d c=%d,%d total=%d/%o, local=%d/%o/%o, thresh=%o md=%o",
+                    fdjtLog("TapHold/move/ignore(%d) s=%d,%d t=%d,%d c=%d,%d dt=%o total=%d/%o, local=%d/%o/%o, thresh=%o md=%o",
                             serial,start_x,start_y,touch_x,touch_y,x,y,
-                            distance,movethresh,
+                            dt,distance,movethresh,
                             delta,delta/dt,minmove,
                             mouse_down);
                 return;}
             else {
                 if ((trace>2)||(traceall>2))
-                    fdjtLog("TapHold/move(%d) s=%d,%d t=%d,%d c=%d,%d total=%d/%o, local=%d/%o/%o, md=%o",
+                    fdjtLog("TapHold/move(%d) s=%d,%d t=%d,%d c=%d,%d dt=%o total=%d/%o, local=%d/%o/%o, md=%o",
                             serial,start_x,start_y,touch_x,touch_y,x,y,
-                            distance,movethresh,delta,minmove,delta/dt,
+                            dt,distance,movethresh,delta,minmove,delta/dt,
                             mouse_down);
                 touch_x=x; touch_y=y; touch_t=fdjtTime();
                 target=getParent(target,touchable);}
