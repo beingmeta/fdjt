@@ -937,7 +937,7 @@ div.fdjtdialog {
     background-color: slategray; color: black;
     font-size: 200%; font-family: helvetica,sans,sans-serif;
     width: 50%; left: 25%; right: 25%; box-sizing: border-box;
-    top: 30%; height: auto;
+    top: 15%; height: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
     z-index: 250; 
     opacity: .99;
@@ -1025,7 +1025,7 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
     div.fdjtdialog { top: 10%; }
 }
 @media screen and (max-width: 800px) {
-    div.fdjtdialog { width: 80%; left: 10%; right: 10%; top: 20%;}
+    div.fdjtdialog { width: 80%; left: 10%; right: 10%; }
 }
 
 /* Tap Hold */
