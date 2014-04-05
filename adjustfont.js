@@ -80,6 +80,11 @@ fdjt.UI.adjustFont=
                 try { return parseFloat(arg.slice(0,len-1)); }
                 catch (ex) {return false;}}}
 
+        function parentHeight(parent){
+            var w=parent.offsetHeight;
+            if (w>0) return w;
+            else return ((parent.parentNode)&&
+                         (parentHeight(parent.parentNode)));}
         function parentWidth(parent){
             var w=parent.offsetWidth;
             if (w>0) return w;
@@ -95,19 +100,20 @@ fdjt.UI.adjustFont=
         // This is the core of the algorithm, adjusting the font size to
         //  put the inner element's size just outside or inside the outer
         //  element.
-        function tweakFontSize(elt,delta,container,pct,minpct,maxpct,pw){
+        function tweakFontSize(elt,delta,container,pct,minpct,maxpct,pw,ph){
             var parent=container.parentNode;
             if (!(pw)) pw=parentWidth(parent);
+            if (!(ph)) ph=parentHeight(parent);
             if (!(pct)) pct=parseFloat(container.style.fontSize);
             // This is where the real scaling happens
-            var w=elt.offsetWidth; if (!(pw)) pw=parentWidth(parent);
-            if ((w<pw)&&(pct<(maxpct-delta)))
-                while ((w<pw)&&(pct<=(maxpct-delta))) {
+            var w=elt.offsetWidth, h=elt.offsetHeight;
+            if ((w<pw)&&(h<ph)&&(pct<(maxpct-delta)))
+                while ((w<pw)&&(h<ph)&&(pct<=(maxpct-delta))) {
                     pct=pct+delta;
                     container.style.fontSize=(pct)+"%";
                     w=elt.offsetWidth;}
-            else if ((w>pw)&&(pct>=(minpct-delta)))
-                while (w>pw) {
+            else if (((w>pw)||(h>ph))&&(pct>=(minpct-delta)))
+                while ((w>pw)||(h>ph)&&(pct>=(minpct-delta))) {
                     pct=pct-delta;
                     container.style.fontSize=(pct)+"%";
                     w=elt.offsetWidth;}
@@ -143,8 +149,10 @@ fdjt.UI.adjustFont=
             pct=tweakFontSize(elt,10,container,pct,min,max);
             pct=tweakFontSize(elt,1,container,pct,min,max);
             var w=elt.offsetWidth, pw=parentWidth(container.parentNode);
+            var h=elt.offsetWidth, ph=parentHeight(container.parentNode);
             // If you're over, adjust it one last time to make it fit
-            if (w>pw) pct=tweakFontSize(elt,0.1,container,pct,min,max);
+            if ((w>pw)||(h>ph))
+                pct=tweakFontSize(elt,0.1,container,pct,min,max);
             if (visualized) restoreVisibility(visualized);
             elt.style.display=saved_display;
             if (unhide) elt.style.visibility='visible';
