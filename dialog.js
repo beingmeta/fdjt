@@ -183,7 +183,7 @@ fdjt.Dialog=(function(){
             else countdown.innerHTML="…"+(n--)+"…";},
                                1000);
         countdown_tickers[countdown.id]=ticker;
-        countdown.click=stop_countdown_onclick;
+        countdown.onclick=stop_countdown_onclick;
         addListener(countdown,"touchend",stop_countdown_onclick);
         addListener(countdown,"touchstart",fdjtUI.cancel);
         setTimeout(function(){fdjtDOM.addClass(box,"closing");},10);
