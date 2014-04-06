@@ -2254,16 +2254,15 @@ fdjt.DOM=
 
         function checkSVG(){
             if (typeof nosvg === "undefined") {
-                if (navigator.appName==="Microsoft Internet Explorer")
+                if ((document.implementation)&&
+                    (document.implementation.hasFeature))
+                    nosvg=(!(document.implementation.hasFeature(
+                        "http://www.w3.org/TR/SVG11/feature#Image",
+                        "1.1")));
+                else if (navigator.appName==="Microsoft Internet Explorer")
                     // SVG (or at least SVGZ) images don't seem to
                     // obey CSS scaling in IE.
                     nosvg=true;
-                else if ((document.implementation)&&
-                         (document.implementation.hasFeature)&&
-                         (document.implementation.hasFeature(
-                             "http://www.w3.org/TR/SVG11/feature#BasicStructure",
-                             "1.1")))
-                    nosvg=false;
                 else if (navigator.mimeTypes["image/svg+xml"])
                     nosvg=false;
                 else nosvg=true;}
