@@ -644,6 +644,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             // We always override the default action when selecting
             if (!(opts)) opts={};
             opts.override=true;
+            opts.touchable=
+                ".fdjtword,.fdjtselected,.fdjtselectstart,.fdjtselectend";
             var taphold=new fdjtUI.TapHold(container,opts);
             fdjtDOM.addListener(container,"tap",
                                 ((opts)&&(opts.ontap))||
