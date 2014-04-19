@@ -1559,7 +1559,10 @@ if (!(fdjt.RefDB)) {
                 while (i_matches<n_matches) {
                     var match=matches[i_matches++];
                     var count=counts.get(match);
-                    if (count>=2) {
+                    // If there are just two clauses, score their union;
+                    // If there are more than two clauses, score the
+                    //  union of their pairwise intersections (count>=2).
+                    if ((n_clauses===2)||(count>=2)) {
                         var score=scores.get(match);
                         new_scores.set(match,score);
                         new_counts.set(match,count);
