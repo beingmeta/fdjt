@@ -279,6 +279,21 @@ fdjt.String=
             else return string;}
         fdjtString.stdspace=stdspace;
 
+        function stdcap(string){
+            var somecaps=
+                string.search(/(^|\s)[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/g)>=0;
+            if (!(somecaps))
+                return string.replace(/\s+/g," ").replace(/(^ | $)/g,"");
+            var words=string.split(/\s+/g);
+            var i=0, lim=words.length; while (i<lim) {
+                var word=words[i];
+                var weird=word.slice(1).search(/[ABCDEFGHIJKLMNOPQRSTUVWXYZ]/)>=0;
+                if (!(weird)) 
+                    words[i]=word[0].toUpperCase()+word.slice(1);
+                i++;}
+            return words.join(" ");}
+        fdjtString.stdcap=stdcap;
+
         function flatten(string){
             return string.replace(/\s+/g," ");}
         fdjtString.flatten=flatten;
