@@ -97,6 +97,34 @@ fdjt.UI.adjustFont=
                  ((window.getComputedStyle)&&
                   (window.getComputedStyle(elt,null))));}
 
+        function tweakUntil(testfn,elt,opts,delta,pct,minpct,maxpct){
+            if (!(delta)) delta=((opts)&&(opts.delta))||5;
+            if (!(pct)) pct=parseFloat(elt.style.fontSize)||100;
+            if (!(maxpct)) maxpct=parsePct(elt.getAttribute("data-maxfont"));
+            if (!(maxpct))
+                maxpct=((opts)&&(opts.maxpct))||(adjustFont.maxpct)||1000;
+            if (!(minpct)) minpct=parsePct(elt.getAttribute("data-minfont"));
+            if (!(minpct))
+                minpct=((opts)&&(opts.minpct))||(adjustFont.minpct)||10;
+            if (Array.isArray(delta)) {
+                var n_levels=delta.length, i=0;
+                while (i<n_levels) {
+                    pct=tweakUntil(testfn,elt,opts,delta[i++],pct,
+                                   minpct,maxpct);}
+                return pct;}
+            var test=testfn(false,pct,opts);
+            if (test<0)
+                while ((test<0)&&(pct<=(maxpct-delta))) {
+                    pct=pct+delta;
+                    elt.style.fontSize=(pct)+"%";
+                    test=testfn();}
+            else if (test>0)
+                while ((test>0)&&(pct>=(minpct-delta))) {
+                    pct=pct-delta;
+                    elt.style.fontSize=(pct)+"%";
+                    test=testfn();}
+            return pct;}
+
         // This is the core of the algorithm, adjusting the font size to
         //  put the inner element's size just outside or inside the outer
         //  element.
@@ -107,17 +135,11 @@ fdjt.UI.adjustFont=
             if (!(pct)) pct=parseFloat(container.style.fontSize);
             // This is where the real scaling happens
             var w=elt.offsetWidth, h=elt.offsetHeight;
-            if ((w<pw)&&(h<ph)&&(pct<(maxpct-delta)))
-                while ((w<pw)&&(h<ph)&&(pct<=(maxpct-delta))) {
-                    pct=pct+delta;
-                    container.style.fontSize=(pct)+"%";
-                    w=elt.offsetWidth;}
-            else if (((w>pw)||(h>ph))&&(pct>=(minpct-delta)))
-                while ((w>pw)||(h>ph)&&(pct>=(minpct-delta))) {
-                    pct=pct-delta;
-                    container.style.fontSize=(pct)+"%";
-                    w=elt.offsetWidth;}
-            return pct;}
+            return tweakUntil(function(){
+                if ((w<pw)&&(h<ph)) return -1;
+                else if ((w>pw)||(h>ph)) return 1;
+                else return 0;},
+                               container,delta,minpct,maxpct);}
         
         // This is the function to adjust an element, which starts by
         // setting up the DOM as neccessary and then using tweakFontSize
@@ -310,6 +332,8 @@ fdjt.UI.adjustFont=
         adjustFont.classes=["adjustfont","hatchshow"];
         adjustFont.wsval="nowrap";
         adjustFont.unhide=true;
+
+        adjustFont.tweakUntil=tweakUntil;
         
         if (window.addEventListener) {
             window.addEventListener("load",onload);
