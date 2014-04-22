@@ -2004,7 +2004,7 @@ fdjt.DOM=
         /* Removing IDs */
 
         function stripIDs(node,nametoo){
-            if (node.id) node.id=null;
+            if (node.id) node.id="";
             if ((nametoo)&&(node.name)) node.name=null;
             if ((node.childNodes)&&(node.childNodes.length)) {
                 var children=node.childNodes, i=0, lim=children.length;
