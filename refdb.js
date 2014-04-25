@@ -1307,6 +1307,9 @@ if (!(fdjt.RefDB)) {
             var keystring=getKeyString(key);
             if (this.hasOwnProperty(keystring))
                 return this[keystring];
+            else if (typeof key === "string")
+                // This is helpful for debugging
+                return this[key]||this["@"+key];
             else return undefined;};
         ObjectMap.prototype.getItem=ObjectMap.prototype.get;
         ObjectMap.prototype.set=function(key,val) {
@@ -1531,19 +1534,19 @@ if (!(fdjt.RefDB)) {
                 var finding_i=0, n_findings=findings.length; var seen={};
                 while (finding_i<n_findings) {
                     var finding=findings[finding_i++];
-                    var hitids=finding.hits, fdb=finding.db, abs=fdb.absrefs;
-                    var i_hit=0, n_hits=hitids.length, hitid, ref;
+                    var hit_ids=finding.hits, fdb=finding.db, abs=fdb.absrefs;
+                    var i_hit=0, n_hits=hit_ids.length, hit_id, ref;
                     if ((uniqueids)||(abs)) while (i_hit<n_hits) {
-                        hitid=hitids[i_hit++];
-                        if (seen[hitid]) continue;
-                        else seen[hitid]=hitid;
-                        if (!(match_seen[hitid])) {
-                            matches.push(fdb.ref(hitid));
-                            match_seen[hitid]=hitid;}
-                        counts[hitid]=(counts[hitid]||0)+1;
-                        scores[hitid]=(scores[hitid]||0)+finding.weight;}
+                        hit_id=hit_ids[i_hit++];
+                        if (seen[hit_id]) continue;
+                        else seen[hit_id]=hit_id;
+                        if (!(match_seen[hit_id])) {
+                            matches.push(fdb.ref(hit_id));
+                            match_seen[hit_id]=hit_id;}
+                        counts[hit_id]=(counts[hit_id]||0)+1;
+                        scores[hit_id]=(scores[hit_id]||0)+finding.weight;}
                     else {
-                        hitid=hitids[i_hit++]; ref=fdb.ref(hitid);
+                        hit_id=hit_ids[i_hit++]; ref=fdb.ref(hit_id);
                         var fullid=ref._qid||((abs)&&(ref._id))||ref.getQID();
                         if (seen[fullid]) continue;
                         else seen[fullid]=fullid;
@@ -1559,10 +1562,11 @@ if (!(fdjt.RefDB)) {
                 while (i_matches<n_matches) {
                     var match=matches[i_matches++];
                     var count=counts.get(match);
-                    // If there are just two clauses, score their union;
-                    // If there are more than two clauses, score the
-                    //  union of their pairwise intersections (count>=2).
-                    if ((n_clauses===2)||(count>=2)) {
+                    // If there are just two clauses, score their
+                    // intersection; If there are more than two
+                    // clauses (count>=2), score the union of their
+                    // pairwise intersections.
+                    if (count>=2) { /* ((n_clauses===2)||(count>=2)) */
                         var score=scores.get(match);
                         new_scores.set(match,score);
                         new_counts.set(match,count);
