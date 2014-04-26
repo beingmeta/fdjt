@@ -112,17 +112,17 @@ fdjt.UI.adjustFont=
                     pct=tweakUntil(testfn,elt,opts,delta[i++],pct,
                                    minpct,maxpct);}
                 return pct;}
-            var test=testfn(false,pct,opts);
+            var test=testfn(false,elt,pct,opts);
             if (test<0)
                 while ((test<0)&&(pct<=(maxpct-delta))) {
                     pct=pct+delta;
                     elt.style.fontSize=(pct)+"%";
-                    test=testfn();}
+                    test=testfn(false,elt,pct,opts);}
             else if (test>0)
                 while ((test>0)&&(pct>=(minpct-delta))) {
                     pct=pct-delta;
                     elt.style.fontSize=(pct)+"%";
-                    test=testfn();}
+                    test=testfn(false,elt,pct,opts);}
             return pct;}
 
         // This is the core of the algorithm, adjusting the font size to

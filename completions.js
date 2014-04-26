@@ -259,7 +259,8 @@ if (!(fdjt.UI)) fdjt.UI={};
         if ((c.selection)&&(!(hasClass(c.selection,"displayed"))))
             if (!(c.selectNext()))
                 if (!(c.selectPrevious()))
-                    c.clearSelection();}
+                    c.clearSelection();
+        if (c.updated) c.updated.call(c);}
     
     Completions.prototype.getCompletions=function(string) {
         if ((string===this.curstring)||(string===this.maxstring)||
@@ -307,7 +308,7 @@ if (!(fdjt.UI)) fdjt.UI={};
             return completion.getAttribute("key");
         else return getKey(completion);};
 
-    Completions.prototype.complete=function(string){
+    Completions.prototype.complete=function(string,callback){
         if (!(this.initialized)) initCompletions(this);
         // fdjtLog("Completing on %o",string);
         if ((!(string))&&(string!==""))
@@ -318,17 +319,20 @@ if (!(fdjt.UI)) fdjt.UI={};
             if (this.displayed) updateDisplay(this,false);
             addClass(this.dom,"noinput");
             dropClass(this.dom,"nomatches");
+            if (callback) callback(this);
             return [];}
         var result=this.getCompletions(string);
         if ((!(result))||(result.length===0)) {
             updateDisplay(this,false);
             dropClass(this.dom,"noinput");
             addClass(this.dom,"nomatches");
+            if (callback) callback(this);
             return [];}
         else {
             updateDisplay(this,result.matches);
             dropClass(this.dom,"noinput");
             dropClass(this.dom,"nomatches");}
+        if (callback) callback(this);
         return result;};
 
     Completions.prototype.getByValue=function(values,spec){
