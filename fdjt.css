@@ -205,14 +205,7 @@ div.tabcontent p {
 /* KNodes (from knodules) */
 
 span.dterm {
-    font-family: sans,sans-serif; color: blue; white-space: nowrap;
-    opacity: .95;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)";
-    filter: alpha(opacity=95);
-    -webkit-opacity: .95;
-    -khtml-opacity: .95;
-    -moz-opacity: .95;
-    -o-opacity: .95;}
+    font-family: sans,sans-serif; color: blue; white-space: nowrap;}
 span.dterm.long { white-space: normal;}
 span.dterm span.disambig {
   color: red;}
@@ -313,14 +306,14 @@ div.completions {font-family: sans,sans-serif;}
 /* Override these */
 .completions.noinput .completion.cue.hidden { display: none; }
 
-.completions.showempty.noinput a.completion { display: inline; }
-.completions.showempty.noinput span.completion { display: inline; }
-.completions.showempty.noinput li.completion { display: list-item; }
-.completions.showempty.noinput div.completion { display: block; }
-.completions.showempty.noinput tr.completion { display: table-row; }
-.completions.showempty.noinput tbody.completion { display: table-row-group; }
+.completions.showall.noinput a.completion { display: inline; }
+.completions.showall.noinput span.completion { display: inline; }
+.completions.showall.noinput li.completion { display: list-item; }
+.completions.showall.noinput div.completion { display: block; }
+.completions.showall.noinput tr.completion { display: table-row; }
+.completions.showall.noinput tbody.completion { display: table-row-group; }
 /* Override these */
-.completions.showempty.noinput .completion.hidden { display: none; }
+.completions.showall.noinput .completion.hidden { display: none; }
 
 .completions .noinputmsg { display: none;}
 
