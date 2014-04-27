@@ -217,10 +217,10 @@ fdjt.Time=
                     now=fdjtTime(); used=used+(now-started);
                     clearTimeout(timer); timer=false;
                     if (watch) watch('finishing',i,lim,chunks,used,zerostart);
-                    if ((done)&&(done.call)) done();
                     var donetime=((done)&&(fdjtTime()-now));
                     now=fdjtTime(); used=used+(now-started);
-                    if (watch) watch('done',i,lim,chunks,used,zerostart,donetime);}};
+                    if (watch) watch('done',i,lim,chunks,used,zerostart,donetime);
+                    if ((done)&&(done.call)) done(vec,now-zerostart,used);}};
             timer=setTimeout(stepfn,space);}
         fdjtTime.slowmap=slowmap;
 
