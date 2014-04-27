@@ -1226,17 +1226,35 @@ fdjt.CodexLayout=
                     checkForceBreakAfter(node,node);
                     addClass(node,"codexterminal");}
                 
+                function emptyNode(node){
+                    if (node.nodeType===3)
+                        return (node.nodeValue.search(/\S/)<0);
+                    else if (node.nodeType===1) {
+                        if (!(node.childNodes)) return true;
+                        else if (node.childNodes.length===0) return true;
+                        else {
+                            var children=node.childNodes;
+                            var i=0, lim=children.length;
+                            while (i<lim) {
+                                if (!(emptyNode(children[i++])))
+                                    return false;}
+                            return true;}}
+                    else return false;}
+
                 function firstGChild(ancestor,descendant){
-                    var first=ancestor.firstChild;
-                    while (first) {
-                        if ((first.nodeType===3)&&
-                            (first.nodeValue.search(/\S/)>=0))
-                            return false;
-                        else if (first.nodeType===1) break;
-                        else first=first.nextSibling;}
-                    if (!(first)) return false;
-                    else if (first===descendant) return true;
-                    else return firstGChild(first,descendant);}
+                    var scan=descendant;
+                    while (scan) {
+                        if (scan===ancestor) return true;
+                        else if (!(scan.previousSibling))
+                            scan=scan.parentNode;
+                        else {
+                            var prev=scan.previousSibling;
+                            while (prev) {
+                                if (emptyNode(prev)) {
+                                    scan=prev; prev=scan.previousSibling;}
+                                else return false;}
+                            scan=scan.parentNode;}}
+                    return false;}
 
                 // Whether we need to create a new page to have 'node'
                 //  at the page top We don't need a new page if the
