@@ -46,7 +46,9 @@ fdjt.String=
                         var j=0, len=arg.length;
                         output=output+"[";
                         while (j<len) {
-                            output=output+((j>0)?(","):(""))+stringify(arg[j++]);}}
+                            output=output+((j>0)?(","):(""))+
+                                stringify(arg[j++]);}
+                        output=output+"]";}
                     else output=output+stringify(arg);}
                 else if (string[cmd+1]==='j') {
                     arg=arguments[i++];
