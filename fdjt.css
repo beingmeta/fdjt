@@ -294,7 +294,7 @@ div.completions {font-family: sans,sans-serif;}
 .completions.nomatches tr.nomatchmsg { display: table-row;}
 .completions.nomatches tbody.nomatchmsg { display: table-row-group;}
 
-.completions .completion { display: none; }
+.completions .completion { display: none; cursor: pointer;}
 .completions .completion .variation { display: none; }
 .completions .completion[displayed] .variation { display: none; }
 .completions .completion.displayed .variation { display: none; }
@@ -1064,8 +1064,12 @@ body.taptouch {}
 .fdjtselecting .fdjtselectend:hover {
     text-decoration: underline;}
 
-.fdjtselecting > * { pointer-events: none; }
-.fdjtselecting > * > * { pointer-events: all; }
+.fdjtselecting > div, .fdjtselecting > p,
+.fdjtselecting > ul,  .fdjtselecting > li {
+    pointer-events: none; }
+.fdjtselecting > div span, .fdjtselecting > p span,
+.fdjtselecting > ul span,  .fdjtselecting > li span {
+    pointer-events: all; }
 
 body.cxTOUCH .fdjtselecting .fdjtselected:hover,
 body.cxTOUCH .fdjtselecting .fdjtselectstart:hover,
