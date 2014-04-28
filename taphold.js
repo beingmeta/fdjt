@@ -201,6 +201,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         
         var th=this;
         var holdclass="tapholding";
+        var touchclass="tapholdtarget";
         // Touched is set when the gesture is started, pressed is set
         // when it becomes a hold (with pressed_at as the time)
         var touched=false, pressed=false, pressed_at=false;
@@ -317,8 +318,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (((trace>2)||(traceall>2))||
                 ((t!==th_target)&&((trace)||(traceall))))
                 fdjtLog("TapHold/setTarget(%s) %o cur=%o",thid,t,th_target);
-            if ((th_target)&&(th_target!==t)) dropClass(th_target,"tapholdtarget");
-            if (t) addClass(t,"tapholdtarget");
+            if ((th_target)&&(th_target!==t)&&(touchclass))
+                dropClass(th_target,"tapholdtarget");
+            if ((t)&&(touchclass)) addClass(t,"tapholdtarget");
             if ((t)&&(th_target)&&(t!==th_target)) {
                 target_x=touch_x; target_y=touch_y; target_t=touch_t;}
             th_last=th_target;
@@ -800,9 +802,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         movethresh=((opts.hasOwnProperty('movethresh'))?(opts.movethresh):
                     (default_opts.hasOwnProperty('movethresh'))?
                     (default_opts.movethresh):(20));
-        taptapthresh=((opts.hasOwnProperty('taptapthresh'))?(opts.taptapthresh):
-                      (default_opts.hasOwnProperty('taptapthresh'))?
-                      (default_opts.taptapthresh):(false));
+        taptapthresh=((opts.hasOwnProperty('taptapthresh'))&&
+                      (opts.taptapthresh));
         wanderthresh=((opts.hasOwnProperty('wanderthresh'))?(opts.wanderthresh):
                      (default_opts.hasOwnProperty('wanderthresh'))?
                      (default_opts.wanderthresh):(2000));
@@ -816,7 +817,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 (default_opts.hasOwnProperty('bubble'))?
                 (default_opts.bubble):(false));
         if ((taptapthresh)&&(typeof taptapthresh !== "number"))
-            taptapthresh=200;
+            taptapthresh=default_opts.taptapthresh||200;
         scrolling=((opts.hasOwnProperty('scrolling'))?(opts.touch):(false));
         if (scrolling) {
             if (!(scrolling.nodeType)) scrolling=elt;
@@ -828,6 +829,11 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         if (opts.hasOwnProperty('holdclass')) holdclass=opts.holdclass;
         else if (default_opts.hasOwnProperty('holdclass'))
             holdclass=default_opts.holdclass;
+        else {}
+
+        if (opts.hasOwnProperty('touchclass')) touchclass=opts.touchclass;
+        else if (default_opts.hasOwnProperty('touchclass'))
+            touchclass=default_opts.touchclass;
         else {}
 
         if (opts.hasOwnProperty('minmove')) minmove=opts.minmove;
