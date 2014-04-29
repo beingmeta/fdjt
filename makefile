@@ -28,23 +28,23 @@ BUILDHOST:=`hostname`
 all: fdjt.js fdjt.hints
 
 buildstamp.js: $(FDJT_FILES) fdjt.css codexlayout.css langs.css misc.css
-	$(ECHO) "// FDJT build information" > buildstamp.js
-	$(ECHO) "var fdjt_revision='"`git describe`"';" >> buildstamp.js
-	$(ECHO) "var fdjt_buildhost='${BUILDHOST}';" >> buildstamp.js
-	$(ECHO) "var fdjt_buildtime='"${BUILDTIME}"';" >> buildstamp.js
-	$(ECHO) "var fdjt_builduuid='"${BUILDUUID}"';" >> buildstamp.js 
-	$(ECHO) >> buildstamp.js
+	@$(ECHO) "// FDJT build information" > buildstamp.js
+	@$(ECHO) "var fdjt_revision='"`git describe`"';" >> buildstamp.js
+	@$(ECHO) "var fdjt_buildhost='${BUILDHOST}';" >> buildstamp.js
+	@$(ECHO) "var fdjt_buildtime='"${BUILDTIME}"';" >> buildstamp.js
+	@$(ECHO) "var fdjt_builduuid='"${BUILDUUID}"';" >> buildstamp.js 
+	@$(ECHO) >> buildstamp.js
 
 fdjt.js: $(FDJT_FILES) buildstamp.js
-	cat buildstamp.js $(FDJT_FILES) > $@
+	@cat buildstamp.js $(FDJT_FILES) > $@
 fdjt.hints: $(FDJT_HINTS) buildstamp.js
-	cat $(FDJT_HINTS) > $@
+	@cat $(FDJT_HINTS) > $@
 TAGS: $(FDJT_FILES) codexlayout.js
-	etags -o $@ $^
+	@etags -o $@ $^
 ext/underscore.js: ext/underscore/underscore.js
-	cp -p ext/underscore/underscore.js ext/underscore.js
+	@cp -p ext/underscore/underscore.js ext/underscore.js
 ext/sizzle.js: ext/sizzle/sizzle.js
-	cp -p ext/sizzle/sizzle.js ext/sizzle.js
+	@cp -p ext/sizzle/sizzle.js ext/sizzle.js
 ext/augment/dist/augment-0.2.1.js ext/underscore/underscore.js ext/sizzle/sizzle.js:
 	git submodule init
 	git submodule update
