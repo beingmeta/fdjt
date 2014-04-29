@@ -450,7 +450,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     released(pressed,evt,x,y);
                 else if (noslip)
                     released(pressed,evt,x,y);
-                else slipped(th_target,evt,x,y);}
+                else slipped(th_target,evt,{touch_x: x,touch_y: y});}
             else {}
             if (reticle.live) reticle.highlight(false);
             cleartouch();
