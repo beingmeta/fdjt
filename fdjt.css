@@ -533,6 +533,9 @@ table.fdjtform { }
 table.fdjtform th, table.fdjtform td { vertical-align: top;}
 table.fdjtform th span.type {
    font-size: 80%; font-weight: normal; font-style: italic;}
+table.fdjtform tr.headers { }
+table.fdjtform tr.headers th { text-align: left; }
+table.fdjtform tr.headers th.p { padding-left: 1em; }
 
 table.fdjtform th { text-align: right;}
 
@@ -548,8 +551,9 @@ table.fdjtform td textarea {
     width: 100%;}
 table.fdjtform td p {
     font-size: 80%; max-width: 45em;
-    margin-top: 0.25ex;
+    margin-top: 0.25ex; margin-left: 1em;
     margin-bottom: 0.25ex;}
+table.fdjtform td p:first-child { margin-top: 0px; }
 
 table.fdjtform td.messages {
     text-align: center; font-style: italic;}
