@@ -134,12 +134,12 @@ fdjt.UI.adjustFont=
             if (!(ph)) ph=parentHeight(parent);
             if (!(pct)) pct=parseFloat(container.style.fontSize);
             // This is where the real scaling happens
-            var w=elt.offsetWidth, h=elt.offsetHeight;
             return tweakUntil(function(){
-                if ((w<pw)&&(h<ph)) return -1;
-                else if ((w>pw)||(h>ph)) return 1;
+                var w=elt.offsetWidth, h=elt.offsetHeight;
+                if ((w<pw)&&(h<=ph)) return -1;
+                else if ((w>pw)||(h>=ph)) return 1;
                 else return 0;},
-                               container,delta,minpct,maxpct);}
+                               container,{},delta,pct,minpct,maxpct);}
         
         // This is the function to adjust an element, which starts by
         // setting up the DOM as neccessary and then using tweakFontSize
