@@ -347,6 +347,32 @@ fdjt.String=
             else return false;}
         fdjtString.getMatch=getMatch;
 
+        function segment(string,brk,start,keepspace) {
+            if (start) string=string.slice(start);
+            var brk_source=((typeof brk === "string")?(brk):(brk.source));
+            var brk_flags=((typeof brk === "string")?(""):
+                           ((brk.ignoreCase)?("i"):("")));
+            var brkpat=new RegExp("("+brk_source+")",brk_flags);
+            var results=[], segs=string.split(brkpat);
+            var i=0, lim=segs.length, merged=false; while (i<lim) {
+                var seg=segs[i++], sep=segs[i++];
+                if ((!(seg))||(seg.search(/\S/)<0)) continue;
+                if ((seg.length)&&(seg.slice(-1)==="\\")&&
+                    ((seg.length<2)||(seg.slice(-2,-1)!=="\\"))) {
+                    var unescaped=seg.slice(0,-1)+sep;
+                    if (merged) merged=merged+unescaped;
+                    else merged=unescaped;}
+                else if (merged) {
+                    if (keepspace)
+                        results.push(merged+seg);
+                    else results.push(stdspace(merged+seg));
+                    merged=false;}
+                else if (keepspace)
+                    results.push(seg);
+                else results.push(stdspace(seg));}
+            return results;}
+        fdjtString.segment=segment;
+        
         function padNum(num,digits,prec){
             var ndigits=
                 ((num<10)?(1):(num<100)?(2):(num<1000)?(3):(num<10000)?(4):
