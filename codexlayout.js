@@ -1560,7 +1560,10 @@ fdjt.CodexLayout=
                         probenode=wprobe; geom=getGeom(node,page);
                         if (geom.bottom>use_page_height) {
                             text_parent.replaceChild(original,probenode);
-                            return children.slice(breakpos);}}
+                            return children.slice(breakpos);}
+                        else {
+                            text_parent.replaceChild(textsplit,wprobe);
+                            probenode=textsplit;}}
                     var foundbreak=splitWords(
                         text_parent,probenode,words,node,use_page_height);
                     // We're done searching for the word break
@@ -1603,6 +1606,7 @@ fdjt.CodexLayout=
                                 id=keepnode.id="CODEXTMPID"+(tmpid_count++);
                             else pushnode.id="";}
                         keepnode.appendChild(document.createTextNode(keeptext));
+                        pushnode.innerHTML="";
                         pushnode.appendChild(document.createTextNode(pushtext));
                         if (keepnode!==probenode)
                             text_parent.replaceChild(keepnode,probenode);
