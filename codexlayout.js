@@ -1544,7 +1544,8 @@ fdjt.CodexLayout=
                     var probenode=textsplit, text=textsplit.nodeValue;
                     var original=textsplit;
                     // Now, break the text up at possible page breaks
-                    // (we are not treating soft-hyphens as page breaks, though we might)
+                    // (we are not treating soft-hyphens as page
+                    // breaks, though we might)
                     var words=attachWhitespace(text.split(/(\s+)/mg));
                     // If there aren't many words, don't bother splitting
                     if (words.length<2) {
@@ -1568,7 +1569,7 @@ fdjt.CodexLayout=
                         text_parent,probenode,words,node,use_page_height);
                     // We're done searching for the word break
                     if ((foundbreak===0)||(foundbreak===(words.length-1))) {
-                        // Don't actually do any text splitting
+                        // Revert (don't actually do any text splitting)
                         text_parent.replaceChild(textsplit,probenode);
                         if (breakpos===0) return node;
                         else return children.slice(breakpos);}
@@ -1587,12 +1588,12 @@ fdjt.CodexLayout=
                             id=keepnode.id="CODEXTMPID"+(tmpid_count++);
                             pushnode=fdjtDOM("span.codextextsplit");}
                         else if (hasClass(page_break,"codextextsplit")) {
-                            // No need to save anything and we don't
-                            // want nested codextextsplits.  So we use
-                            // the page_break as the keepnode and set
-                            // up probenode and text_parent as though
-                            // the page break were a text node being
-                            // probed.
+                            // This is the case where we are splitting
+                            // a text node again.  There's no need to
+                            // save anything and we don't want nested
+                            // codextextsplits, so we'll treat the
+                            // page_break as a probenode (to be
+                            // replaced).
                             addClass(page_break,"codexraggedsplit");
                             probenode=keepnode=page_break;
                             keepnode.innerHTML="";
