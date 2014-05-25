@@ -533,11 +533,16 @@ table.fdjtform { }
 table.fdjtform th, table.fdjtform td { vertical-align: top;}
 table.fdjtform th span.type {
    font-size: 80%; font-weight: normal; font-style: italic;}
-table.fdjtform tr.headers { }
+table.fdjtform tr.headers { font-size: 120%; vertical-align: bottom;}
+table.fdjtform tr.headers th, table.fdjtform tr.headers td {
+  vertical-align: bottom;}
 table.fdjtform tr.headers th { text-align: left; }
+table.fdjtform .controls { text-align: left; }
 table.fdjtform tr.headers th.p { padding-left: 1em; }
+table.fdjtform .controls button, table.fdjtform .controls input {
+  font-size: 100%;}
 
-table.fdjtform th { text-align: right;}
+table.fdjtform th { text-align: right; padding-right: 0.2ex;}
 
 table.fdjtform td { text-align: left;}
 table.fdjtform td.rightalign { text-align: right;}
