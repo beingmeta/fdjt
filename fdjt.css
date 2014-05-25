@@ -76,9 +76,9 @@ div.fdjtclearfloats {
 
 /* Checkspans */
 
-.checkspan { cursor: pointer;}
+.checkspan { cursor: pointer; color: gray;}
 .checkspan.disabled { opacity: 0.5; cursor: auto;}
-.checkspan .alt { font-size: inherit; font-weight: bold;}
+.checkspan .alt { font-size: inherit; color: black;}
 span.checkspan, a.checkspan { white-space: nowrap; }
 span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
 .checkspan .checked { display: none;}
@@ -92,7 +92,7 @@ span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
 .checkspan .fontsize_wrapper input[TYPE="RADIO"] {
     height: 1ex; width: 1ex;}
 
-.checkspan.ischecked { font-weight: bold; font-size: 90%;}
+.checkspan.ischecked { color: black; font-size: 90%;}
 .checkspan.ischecked .alt { font-size: 80%; font-weight: normal;}
 .checkspan.ischecked .unchecked { display: none;}
 .checkspan.ischecked span.checked,
@@ -102,7 +102,7 @@ span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
 .checkspan.ischecked li.checked { display: list-item;}
 .checkspan.ischecked input {  font-size: 111%; font-weight: normal; }
 
-.checkspan[checked] { font-weight: bold; }
+.checkspan[checked] { color: black; }
 .checkspan[checked] .alt { font-size: 80%; font-weight: normal;}
 .checkspan[checked] { display: none;}
 .checkspan[checked] .unchecked { display: none;}
@@ -113,8 +113,8 @@ span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
 .checkspan[checked] li.checked { display: list-item;}
 
 th .checkspan, th.checkspan { font-weight: normal;}
-th .checkspan.ischecked, th .checkspan[checked] { font-weight: bold;}
-th.checkspan.ischecked, th.checkspan[checked] { font-weight: bold;}
+th .checkspan.ischecked, th .checkspan[checked] { color: black;}
+th.checkspan.ischecked, th.checkspan[checked] { color: black;}
 
 /* Check blocks */
 
@@ -130,7 +130,7 @@ div.checkblock > p:first-child {
    margin-left: 3em; text-indent: -3em; display: block;}
 .checkblock.checkspan.ischecked > p { font-weight: normal; }
 .checkblock.checkspan.ischecked > p:first-child {
-   font-weight: bold; }
+   color: black; }
 div.checkblock.ischecked > p { display: block; }
 div.checkblock.ischecked > table { display: table; }
 ul.checkblock.ischecked >  li { display: list-item; }
