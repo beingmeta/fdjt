@@ -119,7 +119,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 return touch.pageY-winyoff;}}
         else return false;}
     
-    function synthesizeEvent(target,etype,th,orig,tx,ty,also){
+    function synthesizeEvent(target,etype,th,orig,tx,ty,tn,also){
         var thid=th.id, trace=th.traced, handlers=th.handlers;
         var orig_target=(orig)&&(eTarget(orig));
         if (!(target)) target=orig_target;
@@ -129,7 +129,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
              ((orig)&&(orig.button))||
              0);
         evt.initUIEvent(etype, true, true,window,event_arg);
-        evt.clientX=tx; evt.clientY=ty;
+        evt.clientX=tx; evt.clientY=ty; evt.ntouches=tn||1;
         if (also) {
             for (var prop in also) {
                 if (also.hasOwnProperty(prop)) {
@@ -221,6 +221,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         // Whether to override (cancel) the default handlers on the
         // container
         var override=false;
+        // Don't capture events with more than this number of touches
+        var maxtouches=1;
 
         // If this is true, second touches in the container during a
         //  live touch are turned into touchtoo events; otherwise,
@@ -245,7 +247,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         // currently, and the last point at which the touch target
         // changed.
         var start_x=false, start_y=false, start_t=false;
-        var touch_x=false, touch_y=false, touch_t=0;
+        var touch_x=false, touch_y=false, touch_t=0, touch_n=false;
         var target_x=false, target_y=false, target_t=false;
         // This is when (and whether) a swipe event has been generated
         //  for the current gesture.
@@ -307,12 +309,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
 
         function cleartouch(){
             start_x=start_y=start_t=
-                touch_x=touch_y=touch_t=
+                touch_x=touch_y=touch_t=touch_n=
                 target_x=target_y=target_t=false;
             touched=pressed=pressed_at=false;}
 
         function synthEvent(target,etype,th,orig,tx,ty,also){
-            return synthesizeEvent(target,etype,th,orig,tx,ty,also);}
+            return synthesizeEvent(target,etype,th,orig,tx,ty,touch_n,also);}
 
         function setTarget(t){
             if (((trace>2)||(traceall>2))||
@@ -495,10 +497,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
 
         function taphold_move(evt){
             evt=evt||event;
-            var target;
+            var target, n_touches=((evt.touches)&&(evt.touches.length))||1;
             if ((!(bubble))) noBubble(evt);
             if (override) noDefault(evt);
-            if ((scrolling)&&(evt.touches)&&(evt.touches.length===1)) {
+            if ((scrolling)&&(evt.touches)&&(evt.touches.length<=maxtouches)) {
                 if (scroll_x>=0) 
                     scrolling.scrollLeft=
                     scroll_x-(evt.touches[0].pageX-window.pageXOffset);
@@ -532,6 +534,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         evt,target);
             if (!(target)) {
                 touch_x=x; touch_y=y; touch_t=fdjtTime();
+                if (!(touch_n)) touch_n=n_touches; else
+                    if (n_touches>touch_n) touch_n=n_touches;
                 return;}
             var holder=getParent(target,".tapholder");
             // fdjtLog("taphold_move %o %d,%d %o %o",evt,x,y,target,holder);
@@ -568,6 +572,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 if ((!(swipe_t))&&(xyd(start_x,start_y,x,y)>min_swipe))
                     swiped(target,evt,start_x,start_y,x,y);
                 touch_x=x; touch_y=y; touch_t=fdjtTime();
+                if (!(touch_n)) touch_n=n_touches; else
+                    if (n_touches>touch_n) touch_n=n_touches;
                 return;}
             
             if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)&&
@@ -584,6 +590,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     swiped(target,evt,start_x,start_y,x,y);
                 setTarget(false);
                 touch_x=x; touch_y=y; touch_t=fdjtTime();
+                if (!(touch_n)) touch_n=n_touches; else
+                    if (n_touches>touch_n) touch_n=n_touches;
                 return;}
             else if ((delta<(minmove*10))&&(dt>0)&&((delta/dt)<minmove)) {
                 if ((trace>2)||(traceall>2))
@@ -593,6 +601,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                             delta,delta/dt,minmove,
                             mouse_down);
                 touch_x=x; touch_y=y; touch_t=fdjtTime();
+                if (!(touch_n)) touch_n=n_touches; else
+                    if (n_touches>touch_n) touch_n=n_touches;
                 return;}
             else {
                 if ((trace>2)||(traceall>2))
@@ -601,8 +611,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                             dt,distance,movethresh,delta,minmove,delta/dt,
                             mouse_down);
                 touch_x=x; touch_y=y; touch_t=fdjtTime();
+                if (!(touch_n)) touch_n=n_touches; else
+                    if (n_touches>touch_n) touch_n=n_touches;
                 target=getParent(target,touchable);}
-            if ((evt.touches)&&(evt.touches.length)&&(evt.touches.length>1))
+            if ((evt.touches)&&(evt.touches.length)&&(evt.touches.length>maxtouches))
                 return;
             else {
                 if (reticle.live) reticle.onmousemove(evt,touch_x,touch_y);}
@@ -645,11 +657,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 (evt.button)||
                 ((evt.which)&&(evt.which>1)))
                 return;
+            var n_touches=((evt.touches)&&(evt.touches.length))||1;
             mouse_down=true; cleared=0;
             touch_x=(evt.clientX||getClientX(evt)||touch_x)+hot_xoff;
             touch_y=(evt.clientY||getClientY(evt)||touch_y)+hot_yoff;
             start_x=target_x=touch_x; start_y=target_y=touch_y;
             target_t=touch_t=fdjtTime();
+            if (!(touch_n)) touch_n=n_touches; else
+                if (n_touches>touch_n) touch_n=n_touches;
             if ((!(bubble))) noBubble(evt);
             if (override) noDefault(evt);
             var new_event=false;
@@ -664,7 +679,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 return;}
 
             if (target) target=getParent(target,touchable);
-            if ((scrolling)&&(evt.touches)&&(evt.touches.length===1)) {
+            if ((scrolling)&&(evt.touches)&&(evt.touches.length<=maxtouches)) {
                 if (scroll_x>=0)
                     scroll_x=scrolling.scrollLeft+(
                         evt.touches[0].pageX-window.pageXOffset);
@@ -763,8 +778,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         start_x,start_y,start_t,touch_x,touch_y,mouse_down,
                         touched,pressed,
                         taptapthresh);
-            if ((evt.touches)&&(evt.touches.length)&&
-                (evt.touches.length>1))
+            if ((evt.touches)&&(evt.touches.length)&&(evt.touches.length>maxtouches))
                 return;
             if ((untouchable)&&(untouchable(evt))) return;
             if ((!(mouse_down))&&((touched)||(pressed))) {
@@ -816,6 +830,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         bubble=((opts.hasOwnProperty('bubble'))?(opts.bubble):
                 (default_opts.hasOwnProperty('bubble'))?
                 (default_opts.bubble):(false));
+        maxtouches=((opts.hasOwnProperty('maxtouches'))?(opts.maxtouches):
+                    (default_opts.hasOwnProperty('maxtouches'))?
+                    (default_opts.maxtouches):(1));
         if ((taptapthresh)&&(typeof taptapthresh !== "number"))
             taptapthresh=default_opts.taptapthresh||200;
         scrolling=((opts.hasOwnProperty('scrolling'))?(opts.touch):(false));
