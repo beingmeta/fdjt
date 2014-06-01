@@ -306,6 +306,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     clearTimeout(sel.timeout); sel.timeout=false;}
                 sel.pending=false; sel.word=word; useWord(word,sel);}
             else if (sel.pending===word) return true;
+            else if (!(word.offsetParent)) return false;
             else {
                 if (sel.timeout) clearTimeout(sel.timeout);
                 updateLoupe(word,sel,false);
@@ -319,6 +320,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             return true;}
 
         function useWord(word,sel,tapped){
+            if (!(word.offsetParent)) return;
             if (!(sel.start))
                 // We could have some smarts here to include quoted
                 //  phrases, capitalization runs, etc.
@@ -362,6 +364,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (sel.loupe_timeout) {
                 clearTimeout(sel.loupe_timeout);
                 sel.loupe_timeout=false;}
+            if (!(word.offsetParent)) return;
             var block=word.parentNode; while (block) {
                 if (getStyle(block).display!=='inline') break;
                 else block=block.parentNode;}
