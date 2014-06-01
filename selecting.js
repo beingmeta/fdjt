@@ -126,7 +126,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     return parseInt(id.slice(stripid),10);
                 else return false;};
             
-            this.startEvent=function startEvent(evt){
+            this.startEvent=function startEvent(evt,holdthresh){
                 var target=fdjtUI.T(evt);
                 if (traceall)
                     fdjtLog("startEvent %o, target=%o, wrappers=%o",
@@ -139,7 +139,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         if ((trace)||(traceall))
                             fdjtLog("Using TapHold handler @%d for wrapper %s (#%d)",
                                     j-1,wrapper.id,taphold.serial);
-                        taphold.fakePress(evt,20);
+                        taphold.fakePress(evt,holdthresh);
                         return;}}};
 
             return this;}
