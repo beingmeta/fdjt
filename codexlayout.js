@@ -2052,17 +2052,11 @@ fdjt.CodexLayout=
                     var geom=getGeom(completed,false,true);
                     completed.style.height="inherit";
                     var iw=geom.inner_width, ih=geom.inner_height;
-                    /*
-                    tweakFont(completed,iw,ih,80,120);
-                    // Get new geometry
-                    geom=getGeom(completed,false,true);
-                    */
-                    iw=geom.inner_width; ih=geom.inner_height;
-                    var ow=completed.offsetWidth, oh=completed.offsetHeight;
+                    var ow=geom.outer_width, oh=geom.outer_height;
                     var noscale=((oversize)?
-                                 ((oh<=ih)&&(ow<=iw)):
+                                 ((ih<=oh)&&(iw<=ow)):
                                  ((oh<=ih)&&(ow<=iw)&&
-                                  ((oh>(0.9*ih))||(ow>(0.9*iw)))));
+                                  (oh>(0.9*ih))||(ow>(0.9*iw))));
                     if (!(noscale)) {
                         completed.style.height="";
                         adjust_node(completed);}}
