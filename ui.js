@@ -1369,6 +1369,15 @@ fdjt.UI.ProgressBar=(function(){
                                 initTimeElements(fdjtUI.T(evt));});};
     fdjt.addInit(initTimeElements,"TimeElements",false);})();
 
+(function(){
+    "use strict";
+    var vibrate=navigator.vibrate||navigator.webkitVibrate||
+        navigator.mozVibrate||navigator.msVibrate;
+    fdjt.UI.vibrate=function(args){
+        if (!(vibrate)) return false;
+        vibrate(args);
+        return true;};})();
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
