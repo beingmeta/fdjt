@@ -393,7 +393,9 @@ fdjt.CodexLayout=
                     stripBottomStyles(node,true);}}
             
             // Strip top style information from copy
-            if (copy.getAttribute("style")) stripTopStyles(copy);
+            // if (copy.getAttribute("style")) stripTopStyles(copy);
+            stripTopStyles(copy);
+            // if (copy.getAttribute("style")) 
             // If the original had an ID, save it in various ways
             if (id) {
                 copy.codexbaseid=id;
@@ -409,15 +411,17 @@ fdjt.CodexLayout=
             return copy;}
 
         function stripBottomStyles(node,keep){
-            var style=node.style, string=style.cssText;
-            if (keep) node.setAttribute("data-savedstyle",string);
+            var style=node.style;
+            if ((keep)&&(!(node.getAttribute("data-savedstyle"))))
+                node.setAttribute("data-savedstyle",style.cssText);
             style.paddingBottom="0px";
             style.borderBottomWidth="0px";
             style.marginBottom="0px";
             style.pageBreakAfter="auto";}
         function stripTopStyles(node,keep){
-            var style=node.style, string=style.cssText;
-            if (keep) node.setAttribute("data-savedstyle",string);
+            var style=node.style;
+            if ((keep)&&(!(node.getAttribute("data-savedstyle"))))
+                node.setAttribute("data-savedstyle",style.cssText);
             style.textIndent="0px";
             style.paddingTop="0px";
             style.borderTopWidth="0px";
@@ -490,7 +494,8 @@ fdjt.CodexLayout=
         function markPageTop(node){
             if (hasClass(node,"codexpagetop")) return;
             var nodestyle=node.getAttribute("style")||"";
-            var newstyle=nodestyle+((nodestyle)?("; "):(""))+"margin-top: 0px !important";
+            var newstyle=nodestyle+((nodestyle)?("; "):(""))+
+                "margin-top: 0px !important;";
             node.setAttribute("data-savedstyle",nodestyle);
             node.setAttribute("style",newstyle);
             addClass(node,"codexpagetop");
