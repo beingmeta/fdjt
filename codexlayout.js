@@ -206,14 +206,18 @@ fdjt.CodexLayout=
                 else {}}
             return false;}
 
-        /* Tweaking fonts */
+        /* Scaling elements and nodes */
+
+        var tweakFont=fdjt.DOM.tweakFont;
+        var tweakImage=fdjt.DOM.tweakImage;
 
         function scaleToPage(elt,width,height,leavefont){
             if (typeof elt === "string") elt=fdjtID(elt);
             if ((!(elt))||(elt.length===0)) return;
             else if (elt.nodeType) {
                 if (elt.nodeType!==1) return;
-                if ((hasClass(elt,"codexpagescaled"))||(elt.getAttribute("style")))
+                if ((hasClass(elt,"codexpagescaled"))||
+                    (elt.getAttribute("style")))
                     return;
                 var ps=elt.getAttribute("data-pagescale")||
                     elt.getAttribute("pagescale")||
@@ -265,7 +269,7 @@ fdjt.CodexLayout=
                          ("top center"));
                     elt.parentNode.replaceChild(wrapper,elt);}
                 else {
-                    tweakFont(elt,tw,th);
+                    tweakFont(elt,false,tw,th);
                     if (cstyle.display==="inline")
                         style.display="inline-block";
                     style.width=tw+"px"; style.height=th+"px";}
@@ -275,57 +279,6 @@ fdjt.CodexLayout=
                 while (i<lim) scaleToPage(
                     elt[i++],width,height,leavefont||false);}
             else {}}
-
-        function tweakFont(node,width,height,min_font,max_font){
-            var i, lim, nodes=[];
-            if (!(width)) width=node.offsetWidth;
-            if (!(height)) height=node.offsetHeight;
-            if (!(min_font))
-                min_font=node.getAttribute("data-minfont")||
-                node.getAttribute("minfont");
-            if (!(max_font))
-                max_font=node.getAttribute("data-maxfont")||
-                node.getAttribute("maxfont");
-            if ((max_font)&&(typeof max_font==="string"))
-                max_font=parseFloat(max_font); 
-            if ((min_font)&&(typeof min_font==="string"))
-                min_font=parseFloat(min_font); 
-            var wrapper=fdjtDOM("div"); {
-                // Set up the inline-block wrapper we'll use for sizing
-                wrapper.style.display="inline-block";
-                wrapper.style.maxWidth=width+"px";
-                var children=node.childNodes;
-                i=0; lim=children.length;
-                while (i<lim) nodes.push(children[i++]);
-                i=0; lim=nodes.length;
-                while (i<lim) wrapper.appendChild(nodes[i++]);
-                node.appendChild(wrapper);}
-            // Now we actually tweak font sizes
-            var font_pct=100, count=0, delta=16, best_fit=false;
-            node.style.fontSize=font_pct+"%";
-            var ih=wrapper.offsetHeight, iw=wrapper.offsetWidth;
-            var hr=ih/height, wr=iw/width; 
-            while (((hr>1)||(wr>1)||((hr<(0.9*height))&&(wr<(0.9*width))))&&
-                   (count<20)&&((delta>=1)||(delta<=-1))) {
-                if ((hr<=1)&&(wr<=1)) {
-                    if (!(best_fit)) best_fit=font_pct;
-                    else if (font_pct>best_fit) best_fit=font_pct;}
-                if (((hr>1)||(wr>1))&&(delta>0)) {
-                    delta=delta/-2; font_pct=font_pct+delta;}
-                else if (((hr<=1)&&(wr<=1))&&(delta<0)) {
-                    delta=delta/-2; font_pct=font_pct+delta;}
-                else font_pct=font_pct+delta;
-                if ((max_font)&&(font_pct>max_font)) break;
-                if ((min_font)&&(font_pct<min_font)) break;                
-                node.style.fontSize=font_pct+"%";
-                ih=wrapper.offsetHeight; iw=wrapper.offsetWidth;
-                hr=ih/height; wr=iw/width; 
-                count++;}
-            if ((hr>1)||(wr>1)&&(best_fit)) node.style.fontSize=best_fit+"%";
-            node.removeChild(wrapper);
-            i=0; lim=nodes.length;
-            while (i<lim) node.appendChild(nodes[i++]);
-            return node;}
 
         function parseScale(s){
             if (s.search(/%$/g)>0) {
@@ -820,6 +773,15 @@ fdjt.CodexLayout=
                 else root=moveNode(root);
                 var scale_elts=getChildren(root,"[data-pagescale],[pagescale]");
                 scaleToPage(scale_elts,page_width,page_height);
+                if (fullpage) {
+                    if (root.tagName==="IMG")
+                        tweakImage(root,page_width,page_height);
+                    else tweakFont(root,page,page_width,page_height);}
+                else if (singlepage) {
+                    if (root.tagName==="IMG")
+                        tweakImage(root,page_width,page_height);
+                    else tweakFont(root,page,page_width,page_height,false,100);}
+                else {}
                 var geom=getGeom(root,page);
                 if (singlepage) {
                     var pw=geom.width, ph=geom.height;
