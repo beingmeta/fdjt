@@ -2719,44 +2719,64 @@ fdjt.DOM=
         fdjtDOM.playAudio=playAudio;
 
         /* Tweaking fonts */
-        function tweakFont(node,width,height,min_font,max_font){
+        function tweakFont(node,container,width,height,min_font,max_font){
             var i, lim, nodes=[], style=node.style;
-            var saved_display=node.style.display||"", saved_visibility=node.style.visibility||"";
-            var saved_opacity=node.style.opacity||"", saved_zindex=node.style.zIndex||"";
+            var saved_display=node.style.display||"";
+            var saved_visibility=node.style.visibility||"";
+            var saved_opacity=node.style.opacity||"";
+            var saved_zindex=node.style.zIndex||"";
             var cstyle=getStyle(node), restore_style=false;
+            var wrapper=false;
             if (cstyle.display==="none") {
-                var name=node.tagName, tmp_style=display_styles[name.toUpperCase()];
-                restore_style=true; style.zIndex=500; style.visibility='hidden'; style.opacity=0.0;
+                var name=node.tagName;
+                var tmp_style=display_styles[name.toUpperCase()];
+                restore_style=true; style.zIndex=500;
+                style.visibility='hidden'; style.opacity=0.0;
                 style.display=tmp_style;
                 cstyle=getStyle(node);
                 if (cstyle.display==="none") {
+                    // Can't make it visible, punt
                     if (restore_style) {
-                        style.display=saved_display; style.visibility=saved_visibility;
-                        style.opacity=saved_opacity; style.zIndex=saved_zindex;}
+                        style.display=saved_display;
+                        style.visibility=saved_visibility;
+                        style.opacity=saved_opacity;
+                        style.zIndex=saved_zindex;}
                     return;}}
-            var bounds=getGeometry(node,false,true);
-            if (!(width)) width=bounds.inner_width;
-            if (!(height)) height=bounds.inner_height;
             if (!(min_font))
-                min_font=node.getAttribute("data-minfont")||node.getAttribute("minfont");
+                min_font=node.getAttribute("data-minfont")||
+                node.getAttribute("minfont");
             if (!(max_font))
-                max_font=node.getAttribute("data-maxfont")||node.getAttribute("maxfont");
-            if ((min_font)&&(typeof min_font === "string")) min_font=parseFloat(min_font); 
-            if ((max_font)&&(typeof max_font === "string")) max_font=parseFloat(max_font); 
-            var wrapper=fdjtDOM("div"); {
+                max_font=node.getAttribute("data-maxfont")||
+                node.getAttribute("maxfont");
+            if ((min_font)&&(typeof min_font === "string"))
+                min_font=parseFloat(min_font); 
+            if ((max_font)&&(typeof max_font === "string"))
+                max_font=parseFloat(max_font); 
+            if (!(max_font)) max_font=300;
+            if (!(min_font)) min_font=20;
+            if (!(container)) container=node;
+            if (!(container.offsetHeight)) {
+                wrapper=fdjtDOM("div"); 
                 // Set up the inline-block wrapper we'll use for sizing
                 wrapper.style.display="inline-block";
                 wrapper.style.maxWidth=width+"px";
-                var children=node.childNodes;
+                var children=container.childNodes;
                 i=0; lim=children.length;
                 while (i<lim) nodes.push(children[i++]);
                 i=0; lim=nodes.length;
                 while (i<lim) wrapper.appendChild(nodes[i++]);
-                node.appendChild(wrapper);}
+                container.appendChild(wrapper);}
+            if (wrapper) {
+                if (!(width)) width=wrapper.offsetWidth;
+                if (!(height)) height=wrapper.offsetHeight;}
+            else {
+                if (!(width)) width=container.offsetWidth;
+                if (!(height)) height=container.offsetHeight;}
             // Now we actually tweak font sizes
             var font_pct=100, count=0, delta=16, best_fit=false;
             node.style.fontSize=font_pct+"%";
-            var ih=wrapper.offsetHeight, iw=wrapper.offsetWidth;
+            var ih=((wrapper)?(wrapper.scrollHeight):(container.scrollHeight));
+            var iw=((wrapper)?(wrapper.scrollWidth):(container.scrollWidth));
             var hr=ih/height, wr=iw/width; 
             while (((hr>1)||(wr>1)||((hr<0.9)&&(wr<0.9)))&&
                    (count<20)&&((delta>=1)||(delta<=-1))) {
@@ -2771,20 +2791,38 @@ fdjt.DOM=
                 if ((max_font)&&(font_pct>max_font)) break;
                 if ((min_font)&&(font_pct<min_font)) break;                
                 node.style.fontSize=font_pct+"%";
-                ih=wrapper.offsetHeight; iw=wrapper.offsetWidth;
+                ih=((wrapper)?(wrapper.scrollHeight):(container.scrollHeight));
+                iw=((wrapper)?(wrapper.scrollWidth):(container.scrollWidth));
                 hr=ih/height; wr=iw/width; 
                 count++;}
             if ((hr>1)||(wr>1)&&(best_fit)) node.style.fontSize=best_fit+"%";
-            node.removeChild(wrapper);
-            i=0; lim=nodes.length;
-            while (i<lim) node.appendChild(nodes[i++]);
+            if (wrapper) {
+                node.removeChild(wrapper);
+                i=0; lim=nodes.length;
+                while (i<lim) node.appendChild(nodes[i++]);}
             if (restore_style) {
                 style.display=saved_display;
                 style.visibility=saved_visibility;
                 style.opacity=saved_opacity;
                 style.zIndex=saved_zindex;}
-            return node;}
+            return node.style.fontSize;}
         fdjtDOM.tweakFont=tweakFont;
+
+        function tweakImage(elt,tw,th) {
+            var style=elt.style;
+            style.maxHeight=style.minHeight="inherit";
+            style.maxWidth=style.minWidth="inherit";
+            // Get width and height again, with the constraints off
+            //  This means that pagescaling trumps CSS constraints,
+            //  but we'll accept that for now
+            var w=elt.offsetWidth, h=elt.offsetHeight, sw=tw/w, sh=th/h;
+            if (sw<sh) {
+                style.width=Math.round(w*sw)+"px";
+                style.height="auto";}
+            else {
+                style.height=Math.round(h*sh)+"px";
+                style.width="auto";}}
+        fdjtDOM.tweakImage=tweakImage;
 
         function tweakAll(node){
             var all=((node)?(fdjtDOM.getChildren(node,".fdjtadjustfont")):
