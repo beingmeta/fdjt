@@ -2726,7 +2726,6 @@ fdjt.DOM=
             var saved_opacity=node.style.opacity||"";
             var saved_zindex=node.style.zIndex||"";
             var cstyle=getStyle(node), restore_style=false;
-            var wrapper=false;
             if (cstyle.display==="none") {
                 var name=node.tagName;
                 var tmp_style=display_styles[name.toUpperCase()];
@@ -2755,23 +2754,18 @@ fdjt.DOM=
             if (!(max_font)) max_font=300;
             if (!(min_font)) min_font=20;
             if (!(container)) container=node;
-            if (!(container.offsetHeight)) {
-                wrapper=fdjtDOM("div"); 
-                // Set up the inline-block wrapper we'll use for sizing
-                wrapper.style.display="inline-block";
-                wrapper.style.maxWidth=width+"px";
-                var children=container.childNodes;
-                i=0; lim=children.length;
-                while (i<lim) nodes.push(children[i++]);
-                i=0; lim=nodes.length;
-                while (i<lim) wrapper.appendChild(nodes[i++]);
-                container.appendChild(wrapper);}
-            if (wrapper) {
-                if (!(width)) width=wrapper.offsetWidth;
-                if (!(height)) height=wrapper.offsetHeight;}
-            else {
-                if (!(width)) width=container.offsetWidth;
-                if (!(height)) height=container.offsetHeight;}
+            var wrapper=fdjtDOM("div"); 
+            // Set up the inline-block wrapper we'll use for sizing
+            wrapper.style.display="inline-block";
+            wrapper.style.maxWidth=width+"px";
+            var children=container.childNodes;
+            i=0; lim=children.length;
+            while (i<lim) nodes.push(children[i++]);
+            i=0; lim=nodes.length;
+            while (i<lim) wrapper.appendChild(nodes[i++]);
+            container.appendChild(wrapper);
+            if (!(width)) width=wrapper.offsetWidth;
+            if (!(height)) height=wrapper.offsetHeight;
             // Now we actually tweak font sizes
             var font_pct=100, count=0, delta=16, best_fit=false;
             node.style.fontSize=font_pct+"%";
