@@ -147,6 +147,10 @@ hr {
     height: 0;
 }
 
+/* Normalize these, use the body context to override raw attempts to
+   redefine span (done, for example, by Pottermore HTML) */
+body span, body em, body strong, body b, body i { font-size: inherit; }
+
 /**
  * Address styling not present in IE 8/9.
  */
