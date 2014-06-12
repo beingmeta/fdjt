@@ -2016,10 +2016,8 @@ fdjt.CodexLayout=
                 var oversize=hasClass(completed,"codexoversize");
                 if (((oversize)||(undersize))&&(scale_pages)) {
                     addClass(completed,"codexworkpage");
-                    var geom=getGeom(completed,false,true);
-                    completed.style.height="inherit";
-                    var iw=geom.inner_width, ih=geom.inner_height;
-                    var ow=geom.outer_width, oh=geom.outer_height;
+                    var iw=completed.scrollWidth, ih=completed.scrollHeight;
+                    var ow=completed.offsetWidth, oh=completed.offsetHeight;
                     var noscale=((oversize)?
                                  ((ih<=oh)&&(iw<=ow)):
                                  ((oh<=ih)&&(ow<=iw)&&
