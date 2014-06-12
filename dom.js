@@ -2791,9 +2791,9 @@ fdjt.DOM=
                 count++;}
             if ((hr>1)||(wr>1)&&(best_fit)) node.style.fontSize=best_fit+"%";
             if (wrapper) {
-                node.removeChild(wrapper);
+                container.removeChild(wrapper);
                 i=0; lim=nodes.length;
-                while (i<lim) node.appendChild(nodes[i++]);}
+                while (i<lim) container.appendChild(nodes[i++]);}
             if (restore_style) {
                 style.display=saved_display;
                 style.visibility=saved_visibility;
