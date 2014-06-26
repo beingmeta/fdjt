@@ -68,7 +68,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
     
     var sqrt=Math.sqrt;
     function xyd(x0,y0,x1,y1){
-        return sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1));}
+        if ((typeof x0==="number")&&(typeof y0==="number")&&
+            (typeof x1==="number")&&(typeof y1==="number"))
+            return sqrt((x0-x1)*(x0-x1)+(y0-y1)*(y0-y1));
+        else return false;}
 
     function getClientX(evt,x,y){
         if (typeof evt.clientX === "number") return evt.clientX;
@@ -120,7 +123,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         else return false;}
     
     function synthesizeEvent(target,etype,th,orig,tx,ty,tn,also){
-        var thid=th.id, trace=th.traced, handlers=th.handlers;
+        var thid=th.id||(typeof th), trace=th.traced, handlers=th.handlers;
         var orig_target=(orig)&&(eTarget(orig));
         if (!(target)) target=orig_target;
         var evt = document.createEvent("UIEvent");
@@ -135,7 +138,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 if (also.hasOwnProperty(prop)) {
                     evt[prop]=also[prop];}}}
         if ((trace)||(traceall)) {
-            if ((also)&&(also.startX))
+            if ((also)&&(typeof also.startX === "number"))
                 fdjtLog("TapHold/%s(%s) on %o @%d,%d/%d,%d from %o given %o",
                         etype,thid,target,tx,ty,also.startX,also.startY,
                         orig||"scratch",also);
@@ -266,6 +269,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var thid=(((opts)&&(opts.id))?(opts.id+":"+serial):
                   (elt.id)?("#"+elt.id+":"+serial):
                   (""+serial));
+        th.id=thid;
 
         var touchable=elt.getAttribute("data-touchable");
         if ((opts)&&(opts.hasOwnProperty("touchable"))) {
@@ -567,7 +571,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else {}
 
             // If touched is false, the tap/hold was aborted somehow
-            if (!((touched)||(pressed))) {
+            if ((!((touched)||(pressed)))) {
                 // Just tracking, to detect swipes
                 if ((!(swipe_t))&&(xyd(start_x,start_y,x,y)>min_swipe))
                     swiped(target,evt,start_x,start_y,x,y);
@@ -576,7 +580,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     if (n_touches>touch_n) touch_n=n_touches;
                 return;}
             
-            if ((movethresh)&&(start_x)&&(start_y)&&(th_timer)&&
+            if ((movethresh)&&(th_timer)&&
                 (distance>movethresh)) {
                 if ((trace>1)||(traceall>1))
                     fdjtLog("TapHold/move/cancel(%s) s=%d,%d tt=%d,%d t=%d,%d c=%d,%d d=%d thresh=%o, dt=%o md=%o, event=%o",
