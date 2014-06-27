@@ -139,13 +139,13 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     evt[prop]=also[prop];}}}
         if ((trace)||(traceall)) {
             if ((also)&&(typeof also.startX === "number"))
-                fdjtLog("TapHold/%s(%s) on %o @%d,%d/%d,%d from %o given %o",
+                fdjtLog("TapHold/%s(%s) on %o @%d,%d/%d,%d from %o given %j",
                         etype,thid,target,tx,ty,also.startX,also.startY,
                         orig||"scratch",also);
             else if (also)
-                fdjtLog("TapHold/%s(%s) on %o @%d,%d from %o given %o",
+                fdjtLog("TapHold/%s(%s) on %o @%d,%d from %o given %j",
                         etype,thid,target,tx,ty,orig||"scratch",also);
-            else fdjtLog("TapHold/%s(%s) on %o @%d,%d from %o",
+            else fdjtLog("TapHold/%s(%s) on %o @%d,%d from %j",
                          etype,thid,target,tx,ty,orig||"scratch");}
         if ((!target)||(!(hasParent(target,document.body))))
             target=document.elementFromPoint(tx,ty);
