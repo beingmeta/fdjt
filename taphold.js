@@ -782,11 +782,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         start_x,start_y,start_t,touch_x,touch_y,mouse_down,
                         touched,pressed,
                         taptapthresh);
-            if ((evt.touches)&&(evt.touches.length)&&(evt.touches.length>maxtouches))
+            if ((evt.touches)&&(evt.touches.length)&&
+                (evt.touches.length>maxtouches))
                 return;
             if ((untouchable)&&(untouchable(evt))) return;
             if ((!(mouse_down))&&((touched)||(pressed))) {
-                endpress(evt,taptapthresh);}
+                endpress(evt);}
             else if ((!(swipe_t))&&
                      (xyd(start_x,start_y,touch_x,touch_y)>min_swipe))
                 swiped(target,evt,start_x,start_y,touch_x,touch_y);
