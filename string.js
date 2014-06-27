@@ -57,6 +57,26 @@ fdjt.String=
                         output=output+"[";
                         while (k<lim) {
                             output=output+((k>0)?(","):(""))+JSON.stringify(arg[k++]);}}
+                    else if (typeof arg === "object") {
+                        var objstr=false;
+                        try {objstr=JSON.stringify(arg);}
+                        catch (ex1) {
+                            var norm={}; for (var p in arg) {
+                                if (arg.hasOwnProperty(p)) {
+                                    var pv=arg[p], nv;
+                                    if (Array.isArray(pv)) {
+                                        nv=[]; var ei=0, elim=pv.length;
+                                        while (ei<elim) {
+                                            var e=pv[ei++], sv;
+                                            try {sv=fdjtString(e);}
+                                            catch (ex2) {sv=e.toString();}
+                                            nv.push(sv);}}
+                                    else {
+                                        try {nv=fdjtString(pv);}
+                                        catch (ex) {nv=pv.toString();}}
+                                    norm[p]=nv;}}
+                            objstr=JSON.stringify(norm);}
+                        output=output+objstr;}
                     else output=output+JSON.stringify(arg);}
                 else if ((string[cmd+1]==='x')&&
                          (typeof arguments[i] === 'number')&&
