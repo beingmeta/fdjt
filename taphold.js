@@ -777,20 +777,21 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((!(target))||(hot_xoff)||(hot_yoff))
                 target=getRealTarget(elt,touchable,touch_x,touch_y);
             if ((trace>1)||(traceall>1))
-                fdjtLog("TapHold/up(%s) %o tht=%o s=%o,%o,%o t=%o,%o m=%o touched=%o pressed=%o ttt=%o",
+                fdjtLog("TapHold/up(%s) %o tht=%o d=%o s=%o,%o,%o t=%o,%o m=%o touched=%o pressed=%o ttt=%o swipe_t=%o",
                         thid,evt,th_target,
+                        xyd(start_x,start_y,touch_x,touch_y),
                         start_x,start_y,start_t,touch_x,touch_y,mouse_down,
-                        touched,pressed,
-                        taptapthresh);
-            if ((evt.touches)&&(evt.touches.length)&&
-                (evt.touches.length>maxtouches))
+                        touched,pressed,taptapthresh,swipe_t);
+            if ((evt.changedTouches)&&(evt.changedTouches.length)&&
+                (evt.changedTouches.length>maxtouches))
                 return;
-            if ((untouchable)&&(untouchable(evt))) return;
             if ((!(mouse_down))&&((touched)||(pressed))) {
+                if ((untouchable)&&(untouchable(evt))) return;
                 endpress(evt);}
             else if ((!(swipe_t))&&
                      (xyd(start_x,start_y,touch_x,touch_y)>min_swipe))
                 swiped(target,evt,start_x,start_y,touch_x,touch_y);
+            else if ((untouchable)&&(untouchable(evt))) return;
             else {}
             cleartouch();}
 
