@@ -28,7 +28,7 @@
     "use strict";
     var fdjtLog=fdjt.Log;
     var inits_run=false;
-    var inits=[];
+    var inits=[], run=[];
     var init_names={};
 
     function addInit(fcn,name,runagain){
@@ -48,9 +48,9 @@
                     return;}}
             else if (inits[i]===fcn) return;
             else i++;}
-        if (inits_run) fcn();
-        else inits.push(fcn);
-        if (name) init_names[name]=fcn;}
+        inits.push(fcn); run.push(true);
+        if (name) init_names[name]=fcn;
+        if (inits_run) fcn();}
     fdjt.addInit=addInit;
     
     fdjt.Init=function fdjtInit(){
@@ -66,20 +66,112 @@
         else fdjtLog("Running %d DOM inits (including %s)",
                      inits.length,names.join());
         var i=0; var lim=inits.length;
-        while (i<lim) inits[i++]();
+        while (i<lim)
+            if (run[i]) i++; else inits[i++]();
         inits_run=true;};
 
-    var device_info=(fdjt.device)||(fdjt.device={});
+    var numpat=/^\d+(\.\d+)$/;
+    function getMatch(string,rx,i,literal){
+        var match=rx.exec(string);
+        if (typeof i === "undefined") i=0;
+        if ((match)&&(match.length>i)) {
+            if (literal) return match[i];
+            else if (numpat.test(match[i]))
+                return parseFloat(match[i]);
+            else return match[i];}
+        else return false;}
+    
+    var spacechars="\n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
+
+    function stdspace(string){
+        string=string.replace(/\s+/g," ");
+        var start=0; var len=string.length; 
+        if (len<=0) return string;
+        while ((start<len)&&
+               (spacechars.indexOf(string.charAt(start))>-1))
+            start++;
+        if (start===len) return "";
+        var end=len-1;
+        while ((end>start)&&(spacechars.indexOf(string.charAt(end))>-1))
+            end--;
+        if ((start>0)||(end<len)) return string.slice(start,end+1);
+        else return string;}
+    
+    var device=(fdjt.device)||(fdjt.device={});
+        /* Setting up media info */
+    function identifyDevice(){
+        if ((fdjt.device)&&(fdjt.device.started)) return;
+        var navigator=window.navigator;
+        var appversion=navigator.userAgent;
+        fdjtLog("identifying device %s",appversion);
+        
+        var isAndroid = getMatch(appversion,/\bAndroid +(\d+\.\d+)\b/g,1);
+        var isWebKit = getMatch(appversion,/\bAppleWebKit\/(\d+\.\d+)\b/g,1);
+        var isGecko = getMatch(appversion,/\bGecko\/(\d+)\b/gi,1,true);
+        var isChrome = getMatch(appversion,/\bChrome\/(\d+\.\d+)\b/g,1);
+        var isFirefox = getMatch(appversion,/\bFirefox\/(\d+\.\d+)\b/gi,1);
+        var isSafari = getMatch(appversion,/\bSafari\/(\d+\.\d+)\b/gi,1);
+        var isOSX = getMatch(appversion,/\bMac OS X \/(\d+\_\d+)\b/gi,1,true);
+        var isMobileSafari = (isSafari)&&(getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
+        var isMobile = (getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
+        var hasVersion = getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1);
+        
+        var isUbuntu = (/ubuntu/gi).test(appversion);
+        var isRedHat = (/redhat/gi).test(appversion);
+        var isLinux = (/linux/gi).test(appversion);
+        var isMacintosh = (/Macintosh/gi).test(appversion);
+        
+        var isTouchPad = (/Touchpad/gi).test(appversion);
+        var iPhone = (/iphone/gi).test(appversion);
+        var iPad = (/ipad/gi).test(appversion);
+        var isTouch = iPhone || iPad || isAndroid || isTouchPad;
+        var isIOS=((iPhone)||(iPad))&&
+            (getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1));
+        
+        var opt_string=stdspace(
+            ((isAndroid)?(" Android/"+isAndroid):(""))+
+                ((isWebKit)?(" WebKit/"+isWebKit):(""))+
+                ((isGecko)?(" Gecko/"+isGecko):(""))+
+                ((isChrome)?(" Chrome/"+isChrome):(""))+
+                ((isFirefox)?(" Firefox/"+isFirefox):(""))+
+                ((isSafari)?(" Safari/"+isSafari):(""))+
+                ((isMobileSafari)?(" MobileSafari/"+isMobileSafari):(""))+
+                ((isIOS)?(" IOS/"+isIOS):(""))+
+                ((isOSX)?(" OSX/"+isOSX):(""))+
+                ((navigator.platform)?(" "+navigator.platform):(""))+
+                ((iPhone)?(" iPhone"):(""))+
+                ((iPad)?(" iPad"):(""))+
+                ((isTouchPad)?(" TouchPad"):(""))+
+                ((isTouch)?(" touch"):(" mouse")));
+        if (navigator.vendor) device.vendor=navigator.vendor;
+        if (navigator.platform) device.platform=navigator.platform;
+        if (navigator.oscpu) device.oscpu=navigator.oscpu;
+        if (navigator.cookieEnabled) device.cookies=navigator.cookies;
+        if (navigator.doNotTrack) device.notrack=navigator.doNotTrack;
+        device.string=opt_string;
+        if (isAndroid) device.android=isAndroid;
+        if (isIOS) {
+            device.ios=isIOS;
+            if (iPhone) device.iphone=isIOS;
+            if (iPad) device.ipad=isIOS;}
+        if (isChrome) device.chrome=isChrome;
+        if (isWebKit) device.webkit=isWebKit;
+        if (isSafari) device.safari=isSafari;
+        if (isMobileSafari) device.mobilesafari=isMobileSafari;
+        if (isMobile) device.mobile=isMobile;
+        if (hasVersion) device.version=hasVersion;
+        if (isMacintosh) device.isMacintosh=true;
+        if (isUbuntu) device.ubuntu=true;
+        if (isRedHat) device.redhat=true;
+        if (isLinux) device.linux=true;
+        if (isTouch) device.touch=true;
+        fdjtLog("Identified device: %j",device);}
+    
     (function(){
         /* global window: false */
         if ((typeof window !=="undefined")&&(window.navigator)&&
-            (window.navigator.appVersion)) {
-            var navigator=window.navigator;
-            device_info.isAndroid = (/android/gi).test(navigator.appVersion);
-            device_info.isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
-            device_info.isTouchPad = (/hp-tablet/gi).test(navigator.appVersion);
-            device_info.hasTouch = ('ontouchstart' in window) &&
-                (!(device_info.isTouchPad));}})();
+            (window.navigator.appVersion))
+            identifyDevice();})();
 })();
 
 
