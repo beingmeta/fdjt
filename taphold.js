@@ -243,7 +243,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         //  away from the touch container
         var wanderthresh=false;
         // Minimum distance before recognizing a swipe
-        var min_swipe=10;
+        var min_swipe=30;
         
         var scrolling=false, scroll_x=0, scroll_y=0;
         // These indicate where/when the current gesture started, is
