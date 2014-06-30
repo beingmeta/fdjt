@@ -2627,7 +2627,8 @@ fdjt.DOM=
         /* Setting up media info */
         var getMatch=fdjtString.getMatch;
         function deviceCheck(){
-            var devspec=fdjt.device={};
+            if ((fdjt.device)&&(fdjt.device.started)) return;
+            var devspec=fdjt.device={started: fdjtTime()};
             var appversion=navigator.userAgent;
 
             var isAndroid = getMatch(appversion,/\bAndroid +(\d+\.\d+)\b/g,1);
