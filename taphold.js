@@ -312,7 +312,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var wander_timer=false;
 
         function cleartouch(){
-            start_x=start_y=start_t=
+            swipe_t=start_x=start_y=start_t=
                 touch_x=touch_y=touch_t=touch_n=
                 target_x=target_y=target_t=false;
             touched=pressed=pressed_at=false;}
@@ -531,11 +531,11 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             var delta=(Math.abs(x-touch_x))+(Math.abs(y-touch_y));
             var dt=(fdjtTime()-touch_t)/1000;
             if ((trace>1)||(traceall>1))
-                fdjtLog("TapHold/move(%s) s=%d,%d tt=%d,%d t=%d,%d c=%d,%d d=%d thresh=%o, dt=%o md=%o, event=%o target=%o",
+                fdjtLog("TapHold/move(%s) s=%d,%d tt=%d,%d t=%d,%d c=%d,%d d=%d thresh=%o, dt=%o md=%o, pressed=%o, touched=%o, event=%o target=%o",
                         thid,start_x,start_y,
                         target_x,target_y,touch_x,touch_y,x,y,
                         distance,movethresh,dt,mouse_down,
-                        evt,target);
+                        pressed,touched,evt,target);
             if (!(target)) {
                 touch_x=x; touch_y=y; touch_t=fdjtTime();
                 if (!(touch_n)) touch_n=n_touches; else
@@ -618,7 +618,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 if (!(touch_n)) touch_n=n_touches; else
                     if (n_touches>touch_n) touch_n=n_touches;
                 target=getParent(target,touchable);}
-            if ((evt.touches)&&(evt.touches.length)&&(evt.touches.length>maxtouches))
+            if ((evt.touches)&&(evt.touches.length)&&
+                (evt.touches.length>maxtouches))
                 return;
             else {
                 if (reticle.live) reticle.onmousemove(evt,touch_x,touch_y);}
