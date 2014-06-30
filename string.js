@@ -115,7 +115,7 @@ fdjt.String=
                     output=output+"."+arg.className.replace(/\s+/g,'.');
                 if (arg.id) output=output+"#"+arg.id;
                 if (arg.name) output=output+"[name="+arg.name+"]";
-                var txt=arg.innerText;
+                var txt=arg.innerText.trim();
                 if ((!(txt))||(txt.length===0)) {}
                 else if (txt.length<32)
                     output=output+'\''+txt.replace(/\n/g,'\\n')+'\'';
