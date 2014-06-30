@@ -56,3 +56,7 @@ if (!String.prototype.trim) {
 
 var fdjt=((typeof fdjt === "undefined")?({}):(fdjt));
 
+fdjt.revision=fdjt_revision;
+fdjt.buildhost=fdjt_buildhost;
+fdjt.buildtime=fdjt_buildtime;
+fdjt.builduuid=fdjt_builduuid;
