@@ -103,7 +103,6 @@
         if ((fdjt.device)&&(fdjt.device.started)) return;
         var navigator=window.navigator;
         var appversion=navigator.userAgent;
-        fdjtLog("identifying device %s",appversion);
         
         var isAndroid = getMatch(appversion,/\bAndroid +(\d+\.\d+)\b/g,1);
         var isWebKit = getMatch(appversion,/\bAppleWebKit\/(\d+\.\d+)\b/g,1);
@@ -113,6 +112,7 @@
         var isSafari = getMatch(appversion,/\bSafari\/(\d+\.\d+)\b/gi,1);
         var isOSX = getMatch(appversion,/\bMac OS X \/(\d+\_\d+)\b/gi,1,true);
         var isMobileSafari = (isSafari)&&(getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
+        var isMobileWebKit = (isWebKit)&&(getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
         var isMobile = (getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
         var hasVersion = getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1);
         
@@ -126,7 +126,7 @@
         var iPad = (/ipad/gi).test(appversion);
         var isTouch = iPhone || iPad || isAndroid || isTouchPad;
         var isIOS=((iPhone)||(iPad))&&
-            (getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1));
+            ((getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1))||(true));
         
         var opt_string=stdspace(
             ((isAndroid)?(" Android/"+isAndroid):(""))+
@@ -136,6 +136,7 @@
                 ((isFirefox)?(" Firefox/"+isFirefox):(""))+
                 ((isSafari)?(" Safari/"+isSafari):(""))+
                 ((isMobileSafari)?(" MobileSafari/"+isMobileSafari):(""))+
+                ((isMobileWebKit)?(" MobileWebKit/"+isMobileWebKit):(""))+
                 ((isIOS)?(" IOS/"+isIOS):(""))+
                 ((isOSX)?(" OSX/"+isOSX):(""))+
                 ((navigator.platform)?(" "+navigator.platform):(""))+
@@ -148,6 +149,7 @@
         if (navigator.oscpu) device.oscpu=navigator.oscpu;
         if (navigator.cookieEnabled) device.cookies=navigator.cookies;
         if (navigator.doNotTrack) device.notrack=navigator.doNotTrack;
+        if (navigator.standalone) device.standalone=navigator.standalone;
         device.string=opt_string;
         if (isAndroid) device.android=isAndroid;
         if (isIOS) {
@@ -155,9 +157,14 @@
             if (iPhone) device.iphone=isIOS;
             if (iPad) device.ipad=isIOS;}
         if (isChrome) device.chrome=isChrome;
+        if (iPad) device.iPad=true;
+        if (iPhone) device.iPhone=true;
+        if (isIOS) device.ios=true;
+        if (isOSX) device.osx=true;
         if (isWebKit) device.webkit=isWebKit;
         if (isSafari) device.safari=isSafari;
         if (isMobileSafari) device.mobilesafari=isMobileSafari;
+        if (isMobileWebKit) device.mobilewebkit=isMobileWebKit;
         if (isMobile) device.mobile=isMobile;
         if (hasVersion) device.version=hasVersion;
         if (isMacintosh) device.isMacintosh=true;
@@ -165,7 +172,7 @@
         if (isRedHat) device.redhat=true;
         if (isLinux) device.linux=true;
         if (isTouch) device.touch=true;
-        fdjtLog("Identified device: %j",device);}
+        fdjtLog("Device: %j",device);}
     
     (function(){
         /* global window: false */
