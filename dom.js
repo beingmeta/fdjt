@@ -2361,6 +2361,21 @@ fdjt.DOM=
             if (!(fdjtDOM.transformOrigin))
                 fdjtDOM.transformOrigin='-moz-transform-origin';}
         
+        if (typeof document.hidden !== "undefined") {
+            fdjtDOM.isHidden="hidden";
+            fdjtDOM.vischange="visibilitychange";}
+        else if (typeof document.webkitHidden !== "undefined") {
+            fdjtDOM.isHidden="webkitHidden";
+            fdjtDOM.vischange="webkitvisibilitychange";}
+        else if (typeof document.mozHidden !== "undefined") {
+            fdjtDOM.isHidden="mozHidden";
+            fdjtDOM.vischange="mozvisibilitychange";}
+        else if (typeof document.msHidden !== "undefined") {
+            fdjtDOM.isHidden="msHidden";
+            fdjtDOM.vischange="msvisibilitychange";}
+        else {
+            fdjtDOM.isHidden=false; fdjtDOM.vischange=false;}
+
         /* Selection-y functions */
 
         fdjtDOM.getSelectedRange=function(){
