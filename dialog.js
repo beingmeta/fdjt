@@ -267,7 +267,10 @@ fdjt.Dialog=(function(){
             if (box) box.onkeydown=null;
             if (box) {
                 var timeout=setTimeout(function(){
-                    remove_dialog(box); clearTimeout(timeout); timeout=false;},
+                    if (spec.onclose) spec.onclose(box);
+                    remove_dialog(box);
+                    clearTimeout(timeout);
+                    timeout=false;},
                                        500);}}
         if (typeof spec === "function") 
             choices=[{label: "Cancel"},
@@ -336,6 +339,9 @@ fdjt.Dialog=(function(){
         fdjtDOM.prepend(document.body,box);
         if (spec.timeout)
             setCountdown(box,spec.timeout,function(){
+                if (spec.noauto) {
+                    close_choice();
+                    return;}
                 if ((selection>=0)&&(choices[selection])&&
                     (choices[selection].handler)) {
                     (choices[selection].handler)();}
