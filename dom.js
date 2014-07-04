@@ -2708,6 +2708,9 @@ fdjt.DOM=
             // Set up the inline-block wrapper we'll use for sizing
             wrapper.style.display="inline-block";
             wrapper.style.maxWidth=width+"px";
+            wrapper.style.maxHeight="95%";
+            wrapper.style.boxSizing="border-box";
+            wrapper.style.padding="1ex";
             var children=container.childNodes;
             i=0; lim=children.length;
             while (i<lim) nodes.push(children[i++]);
