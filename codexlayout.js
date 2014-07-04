@@ -1563,11 +1563,11 @@ fdjt.CodexLayout=
                             // codextextsplits, so we'll treat the
                             // page_break as a probenode (to be
                             // replaced).
-                            addClass(page_break,"codexraggedsplit");
                             probenode=keepnode=page_break;
                             keepnode.innerHTML="";
                             text_parent=node; probenode=keepnode;
                             pushnode=page_break.cloneNode(true);
+                            addClass(page_break,"codexraggedsplit");
                             pushnode.id="";}
                         else {
                             keepnode=fdjtDOM("span.codexsplitstart");
