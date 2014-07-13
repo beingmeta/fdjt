@@ -60,13 +60,13 @@ fdjt.Log=(function(){
                 else domconsole=false;}
             if ((domconsole)&&(!(domconsole.nodeType))) domconsole=false;
             if ((domconsole)&&(fdjtLog.livelog)) {
-                sync_log(domconsole);
+                update_log(domconsole);
                 domconsole.appendChild(entry);
                 domconsole.appendChild(document.createTextNode("\n"));}
             else if ((!(domconsole))||(domconsole.offsetHeight===0))
                 backlog.push(entry);
             else {
-                sync_log(domconsole);
+                update_log(domconsole);
                 domconsole.appendChild(entry);
                 domconsole.appendChild(document.createTextNode("\n"));}}
         if ((fdjtLog.useconsole)||
@@ -91,7 +91,7 @@ fdjt.Log=(function(){
                     window.console.log.apply(window.console,newargs);}}}}
     fdjtLog.console=null;
 
-    function sync_log(domconsole){
+    function update_log(domconsole){
         if ((backlog)&&(backlog.length)) {
             var frag=document.createDocumentFragment();
             var log=backlog; backlog=false;
@@ -100,8 +100,8 @@ fdjt.Log=(function(){
                 frag.appendChild(document.createTextNode("\n"));}
             domconsole.appendChild(frag);
             backlog=[];}}
-    fdjtLog.sync=function(){
-        if (fdjtLog.console) sync_log(fdjtLog.console);};
+    fdjtLog.update=function(){
+        if (fdjtLog.console) update_log(fdjtLog.console);};
 
     function remote_log(msg){
         var req=new XMLHttpRequest();
