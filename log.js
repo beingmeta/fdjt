@@ -56,15 +56,19 @@ fdjt.Log=(function(){
             if (typeof domconsole === 'string') {
                 var found=document.getElementById(domconsole);
                 if (found) {
-                    domconsole=fdjtLog.console=found;
-                    i=0; lim=backlog.length;
-                    while (i<lim) fdjt.DOM(domconsole,backlog[i++]);
-                    backlog=[];}
+                    domconsole=fdjtLog.console=found;}
                 else domconsole=false;}
-            else if (!(domconsole.nodeType)) domconsole=false;
-            if (domconsole)
-                fdjt.DOM.append(domconsole,entry);
-            else backlog.push(entry);}
+            if ((domconsole)&&(!(domconsole.nodeType))) domconsole=false;
+            if ((domconsole)&&(fdjtLog.livelog)) {
+                sync_log(domconsole);
+                domconsole.appendChild(entry);
+                domconsole.appendChild(document.createTextNode("\n"));}
+            else if ((!(domconsole))||(domconsole.offsetHeight===0))
+                backlog.push(entry);
+            else {
+                sync_log(domconsole);
+                domconsole.appendChild(entry);
+                domconsole.appendChild(document.createTextNode("\n"));}}
         if ((fdjtLog.useconsole)||
             ((!(fdjtLog.console))&&(!(fdjtLog.console_fn)))) {
             if (typeof use_console_log === 'undefined')
@@ -86,6 +90,18 @@ fdjt.Log=(function(){
                     while (i<lim) {newargs[i+1]=arguments[i]; i++;}
                     window.console.log.apply(window.console,newargs);}}}}
     fdjtLog.console=null;
+
+    function sync_log(domconsole){
+        if ((backlog)&&(backlog.length)) {
+            var frag=document.createDocumentFragment();
+            var log=backlog; backlog=false;
+            var i=0, lim=log.length; while (i<lim) {
+                frag.appendChild(log[i++]);
+                frag.appendChild(document.createTextNode("\n"));}
+            domconsole.appendChild(frag);
+            backlog=[];}}
+    fdjtLog.sync=function(){
+        if (fdjtLog.console) sync_log(fdjtLog.console);};
 
     function remote_log(msg){
         var req=new XMLHttpRequest();
