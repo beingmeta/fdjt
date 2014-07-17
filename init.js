@@ -48,9 +48,11 @@
                     return;}}
             else if (inits[i]===fcn) return;
             else i++;}
-        inits.push(fcn); run.push(true);
         if (name) init_names[name]=fcn;
-        if (inits_run) fcn();}
+        inits.push(fcn);
+        if (inits_run) {
+            fcn(); run.push(true);}
+        else run.push(false);}
     fdjt.addInit=addInit;
     
     fdjt.Init=function fdjtInit(){
