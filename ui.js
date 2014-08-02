@@ -1378,6 +1378,29 @@ fdjt.UI.ProgressBar=(function(){
         vibrate(args);
         return true;};})();
 
+fdjt.disenableInputs=fdjt.UI.disenableInputs=
+    (function(){
+        "use strict";
+        var fdjtDOM=fdjt.DOM;
+        var getStyle=fdjtDOM.getStyle;
+        var hasClass=fdjtDOM.hasClass;
+        var $=fdjtDOM.$;
+        
+        function disenableInputs(under){
+            var inputs=$("input,select,button,textarea",under);
+            var i=0, lim=inputs.length;
+            while (i<lim) {
+                var input=inputs[i++];
+                if (hasClass(input,"fdjtignore")) continue;
+                var scan=input, disable=false;
+                while ((scan)&&(scan!==under)) {
+                    var style=getStyle(scan);
+                    if (style.display==='none') {
+                        disable=true; break;}
+                    scan=scan.parentNode;}
+                input.disabled=disable;}}
+        return disenableInputs;})();
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
