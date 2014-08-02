@@ -66,8 +66,9 @@
         else fdjtLog("Running %d DOM inits (including %s)",
                      inits.length,names.join());
         var i=0; var lim=inits.length;
-        while (i<lim)
-            if (run[i]) i++; else inits[i++]();
+        while (i<lim) {
+            if (run[i]) i++; else {
+                run[i]=true; inits[i++](); }}
         inits_run=true;};
 
     var numpat=/^\d+(\.\d+)$/;
