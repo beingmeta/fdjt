@@ -500,8 +500,18 @@ fdjt.DOM=
             else if (!(this instanceof Selector))
                 // handle case of the forgotten 'new'
                 return Selector.call(new Selector(),spec);
-            if (spec.indexOf(',')>0) { // compound selectors
-                var specs=spec.split(','); var compound=[];
+            if ((Array.isArray(spec))||
+                ((typeof spec === "string")&&(spec.indexOf(',')>0))) {
+                // create compound selectors
+                var compound=[], specs=[];
+                if (typeof spec === "string")
+                    specs=spec.split(',');
+                else {
+                    var j=0, jlim=spec.length; while (j<jlim) {
+                        if (typeof spec[j] !== "string") j++;
+                        else if (spec[j].indexOf(',')>=0)
+                            specs=specs.concat(spec[j++].split(','));
+                        else specs.push(spec[j++]);}}
                 i=0; lim=specs.length;
                 while (i<lim) {
                     var sub=string_trim(specs[i++]);
