@@ -33,7 +33,7 @@ fdjt.DOM=
         var fdjtString=fdjt.String;
         var fdjtLog=fdjt.Log;
 
-        var css_selector_regex=/((^|[.#])\w+)|(\[[^ \]=]+=[^\]]+\])|(\[[^ \]=]+\])/ig;
+        var css_selector_regex=/((^|[.#])[^.#\[\s]+)|(\[[^ \]=]+=[^\]]+\])|(\[[^ \]=]+\])/ig;
 
         function fdjtDOM(spec){
             var node;
