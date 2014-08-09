@@ -563,7 +563,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         // Handlers
 
         function hold_handler(evt){
-            evt=evt||event;
+            evt=evt||window.event;
             var target=fdjtUI.T(evt);
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
             while (target) {
@@ -582,7 +582,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         TextSelect.hold_handler=hold_handler;
         TextSelect.handler=hold_handler;
         function tap_handler(evt){
-            evt=evt||event;
+            evt=evt||window.event;
             var target=fdjtUI.T(evt);
             while ((target)&&(target.nodeType!==1)) target=target.parentNode;
             while (target) {
@@ -613,7 +613,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 else break;}}
         TextSelect.tap_handler=tap_handler;
         function release_handler(evt,sel){
-            evt=evt||event;
+            evt=evt||window.event;
             var target=fdjtUI.T(evt);
             if ((traceall)||((sel)&&(sel.traced)))
                 fdjtLog("TextSelect/release %o t=%o sel=%o",evt,target,sel);
@@ -624,7 +624,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 sel.setAdjust(false);
                 if (sel.loupe) sel.loupe.style.display='none';}}
         function slip_handler(evt,sel){
-            evt=evt||event;
+            evt=evt||window.event;
             var target=fdjtUI.T(evt);
             if ((traceall)||((sel)&&(sel.traced)))
                 fdjtLog("TextSelect/slip %o t=%o sel=%o",evt,target,sel);

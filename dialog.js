@@ -92,7 +92,7 @@ fdjt.Dialog=(function(){
     var makeDialog=Dialog;
 
     function remove_dialog(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=((evt)?((evt.nodeType)?(evt):(fdjtUI.T(evt))):
                     ((fdjtID("FDJTALERT"))||(fdjtID("FDJTDIALOG"))));
         var box=fdjtDOM.getParent(target,".fdjtdialog");
@@ -106,7 +106,7 @@ fdjt.Dialog=(function(){
             fdjtDOM.remove(box);}}
     
     function close_dialog(evt,fast){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=((evt)?((evt.nodeType)?(evt):(fdjtUI.T(evt))):
                     ((fdjtID("FDJTALERT"))||(fdjtID("FDJTDIALOG"))));
         if ((evt)&&(!(evt.nodeType))) fdjtUI.cancel(evt);
@@ -132,12 +132,12 @@ fdjt.Dialog=(function(){
             fdjtDOM.remove(countdown);}}
 
     function close_dialog_handler(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         fdjtUI.cancel(evt);
         close_dialog(evt);}
 
     function stop_countdown_onclick(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         var box=fdjtDOM.getParent(target,".fdjtdialog");
         clear_countdown(box);
@@ -228,7 +228,7 @@ fdjt.Dialog=(function(){
         dom.tabIndex=i;
         if (spec.title) dom.title=spec.title;
         dom.onclick=function(evt){
-            evt=evt||event;
+            evt=evt||window.event;
             var target=fdjtUI.T(evt);
             var choices=fdjtDOM.getParent(target,".choices");
             var cursel=fdjtDOM.getChild(choices,".selected");
@@ -316,7 +316,7 @@ fdjt.Dialog=(function(){
         
         // For accessibility, handle tab/enter
         box.onkeydown=function(evt){
-            evt=evt||event;
+            evt=evt||window.event;
             var kc=evt.keyCode;
             if (kc===9) {
                 if (evt.shiftKey) selection--; else selection++;

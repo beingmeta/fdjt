@@ -10,7 +10,7 @@
      "use strict";
      var debug_iscroll=false;
      function isClickable(evt){
-         evt=evt||event;
+         evt=evt||window.event;
          var target=evt.target||evt.srcElement;
          while (target) {
              if ((target.nodeType===1)&& 

@@ -2166,10 +2166,10 @@ fdjt.DOM=
         fdjtDOM.removeListener=removeListener;
 
         fdjtDOM.T=function(evt) {
-            evt=evt||event; return (evt.target)||(evt.srcElement);};
+            evt=evt||window.event; return (evt.target)||(evt.srcElement);};
 
         fdjtDOM.cancel=function(evt){
-            evt=evt||event;
+            evt=evt||window.event;
             if (evt.preventDefault) evt.preventDefault();
             else evt.returnValue=false;
             evt.cancelBubble=true;};
@@ -2799,9 +2799,9 @@ fdjt.DOM=
         fdjtDOM.addCXClasses=addCXClasses;
 
         function windowFocus(evt){
-            evt=evt||event; addClass(document.body,"cxFOCUS");}
+            evt=evt||window.event; addClass(document.body,"cxFOCUS");}
         function windowBlur(evt){
-            evt=evt||event; dropClass(document.body,"cxFOCUS");}
+            evt=evt||window.event; dropClass(document.body,"cxFOCUS");}
         function trackPageFocus(){
             windowFocus(); // Could be iffy...
             addListener(window,"focus",windowFocus);
