@@ -552,7 +552,7 @@ if (!(fdjt.UI)) fdjt.UI={};
     var cached_completions={};
 
     function onkey(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         var name=target.name;
         var completions=cached_completions[name];
@@ -567,7 +567,7 @@ if (!(fdjt.UI)) fdjt.UI={};
     fdjtUI.Completions.onkey=onkey;
     
     function update(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         if (typeof evt==='string') evt=fdjtID(evt);
         if (!(evt)) return;
         var target=((evt.nodeType)?(evt):(fdjtUI.T(evt)));

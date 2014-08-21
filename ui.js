@@ -304,6 +304,8 @@ fdjt.UI.Highlight=(function(){
         else dropClass(checkspan,"ischecked");
         if ((changed)&&(checkbox.type==='radio')) {
             var form=checkbox.form;
+            if (!(form)) form=getParent(checkbox,".fdjtinputs");
+            if (!(form)) form=checkspan.parentNode;
             var name=checkbox.name;
             var tosync=getChildren(form,'input');
             i=0; lim=tosync.length;
@@ -334,7 +336,7 @@ fdjt.UI.Highlight=(function(){
     fdjtUI.CheckSpan.set=checkspan_set;
 
     function checkspan_onclick(evt) {
-        evt=evt||event;
+        evt=evt||window.event;
         var target=evt.target||evt.srcTarget;
         if ((target.tagName==='TEXTAREA')||
             (target.tagName==='SELECT')||
@@ -354,7 +356,7 @@ fdjt.UI.Highlight=(function(){
     fdjtUI.CheckSpan.onclick=checkspan_onclick;    
 
     function changed(evt) {
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         if ((target.type==='radio')||(target.type==='checkbox')) {
             var checkspan=getParent(target,'.checkspan');
@@ -469,7 +471,7 @@ fdjt.UI.ProgressBar=(function(){
                 return;}
         else target=target.parentNode;}
     function autoprompt_onfocus(evt){
-        evt=evt||event||null;
+        evt=evt||window.event||null;
         var elt=fdjtDOM.T(evt);
         if ((elt) && (hasClass(elt,'isempty'))) {
             elt.value=''; dropClass(elt,'isempty');}
@@ -693,14 +695,14 @@ fdjt.UI.ProgressBar=(function(){
     var fdjtUI=fdjt.UI;
 
    fdjtUI.Expansion.toggle=function(evt,spec,exspec){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         var wrapper=fdjtDOM.getParent(target,spec||".fdjtexpands");
         if (wrapper) fdjtDOM.toggleClass(wrapper,exspec||"fdjtexpanded");};
     fdjtUI.Expansion.onclick=fdjtUI.Expansion.toggle;
 
     fdjtUI.Collapsible.click=function(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         if (fdjtUI.isDefaultClickable(target)) return;
         var wrapper=fdjtDOM.getParent(target,".collapsible");
@@ -709,7 +711,7 @@ fdjt.UI.ProgressBar=(function(){
             fdjtDOM.toggleClass(wrapper,"expanded");}};
 
     fdjtUI.Collapsible.focus=function(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         var wrapper=fdjtDOM.getParent(target,".collapsible");
         if (wrapper) {
@@ -887,7 +889,7 @@ fdjt.UI.ProgressBar=(function(){
     var fdjtUI=fdjt.UI;
 
     function dosubmit(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         var form=fdjtDOM.getParent(target,"FORM");
         var submit_event = document.createEvent("HTMLEvents");
@@ -903,7 +905,7 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.forceSubmit=forceSubmit;
 
     function submitOnEnter(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var kc=evt.keyCode||evt.charCode;
         if (kc===13) {
             var target=fdjtUI.T(evt);
@@ -913,7 +915,7 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.submitOnEnter=submitOnEnter;
 
     function checkFileInputs(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var form=fdjtUI.T(evt);
         var file_inputs=fdjtDOM.getInputs(form,false,"file");
         var i=0, lim=file_inputs.length; while (i<lim) {
@@ -1008,7 +1010,7 @@ fdjt.UI.ProgressBar=(function(){
     var fdjtUI=fdjt.UI;
 
     fdjtUI.uploadSpecified=function(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var parent=fdjtDOM.getParent(fdjtUI.T(evt),'.fileuploader');
         if (parent) fdjtDOM.addClass(parent,'inuse');};})();
 
@@ -1058,20 +1060,20 @@ fdjt.UI.ProgressBar=(function(){
     var hasClass=fdjtDOM.hasClass;
     
     fdjtUI.T=function(evt) {
-        evt=evt||event; return (evt.target)||(evt.srcElement);};
+        evt=evt||window.event; return (evt.target)||(evt.srcElement);};
 
     fdjtUI.noDefault=function(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         if (evt.preventDefault) evt.preventDefault();
         else evt.returnValue=false;
         return false;};
 
     fdjtUI.noBubble=function(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         evt.cancelBubble=true;};
 
     fdjtUI.cancel=function(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         if (evt.preventDefault) evt.preventDefault();
         else evt.returnValue=false;
         evt.cancelBubble=true;
@@ -1233,7 +1235,7 @@ fdjt.UI.ProgressBar=(function(){
     var fdjtUI=fdjt.UI;
 
     function selectSubmit(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         if (target.value==="") return;
         else {
@@ -1255,7 +1257,7 @@ fdjt.UI.ProgressBar=(function(){
     var dropClass=fdjtDOM.dropClass;
     
     function updatePasswordVisibility(evt,input,visible){
-        evt=evt||event;
+        evt=evt||window.event;
         if (typeof input === "string")
             input=document.getElementById(input);
         if (!(input)) return;
@@ -1270,20 +1272,20 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.updatePasswordVisibility=updatePasswordVisibility;
 
     function uploadSelected(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         var tbody=fdjtDOM.getParent(target,".upload");
         if (tbody) fdjtDOM.addClass(tbody,"uploading");}
     fdjtUI.uploadSelected=uploadSelected;
 
     function focusBox_onfocus(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         var box=getParent(target,'.focusbox');
         if (box) addClass(box,"focused");}
     fdjtUI.FocusBox.focus=focusBox_onfocus;
     function focusBox_onblur(evt){
-        evt=evt||event;
+        evt=evt||window.event;
         var target=fdjtUI.T(evt);
         var box=getParent(target,'.focusbox');
         if (box)
@@ -1365,7 +1367,7 @@ fdjt.UI.ProgressBar=(function(){
     fdjt.autoInitTimeElements=function(){
         fdjtDOM.addListener(document.body,"DOMNodeInserted",
                             function(evt){
-                                evt=evt||event;
+                                evt=evt||window.event;
                                 initTimeElements(fdjtUI.T(evt));});};
     fdjt.addInit(initTimeElements,"TimeElements",false);})();
 

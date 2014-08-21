@@ -261,7 +261,7 @@ fdjt.Ajax=
             return true;}
 
         function form_submit(evt,callback){
-            evt=evt||event||null;
+            evt=evt||window.event||null;
             var form=((evt.nodeType)?(evt):(fdjt.UI.T(evt)));
             fdjt.UI.AutoPrompt.cleanup(form);
             if (fdjtDOM.hasClass(form,"submitting")) {
