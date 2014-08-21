@@ -927,8 +927,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         
         return this;}
 
-    TapHold.default_opts=default_opts;
-
     TapHold.clear=function(){
         if (traceall) fdjtLog("TapHold.clear()");
         cleared=fdjtET();};
@@ -945,6 +943,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else {}
             return cur;}}
     TapHold.trace=traceTapHold;
+
+    TapHold.default_opts=default_opts;
 
     return TapHold;})();
 
