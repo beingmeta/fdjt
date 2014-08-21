@@ -702,6 +702,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     touched,pressed,taptapthresh||false);
             
             if ((evt.touches)&&(th_target)) {
+                // Handle additional touches while holding/pressing
                 var cur_holder=getParent(elt,".tapholder");
                 var touch=evt.changedTouches[0];
                 if ((trace>1)||(traceall>1))
