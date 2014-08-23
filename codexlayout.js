@@ -927,19 +927,22 @@ fdjt.CodexLayout=
                                 logfn("Splitting block %o @ %o",block,page);
                             var split=splitBlock(block,style,use_height);
                             if ((split)&&(split!==block)) {
-                                blocks[ni]=split;
-                                layout.drag=drag=[];}
+                                blocks[ni]=split;}
                             else {
                                 geom=getGeom(block,page);
                                 if (geom.bottom>page_height) {
                                     addClass(page,"codexoversize");
                                     layout.drag=drag=[];
                                     newPage();}
-                                ni++;}}}
-                    // We fit on the page, so we'll look at the next block.
-                    else if (avoidBreakAfter(block,style)) {
+                                ni++;}
+                            layout.drag=drag=[];}}
+                    // We fit on the page, so we check if we might
+                    // need to be dragged to the next page by the next
+                    // block
+                    else if ((avoidBreakAfter(block,style))&&
+                             (!(atPageTop(block,page)))) {
                         if ((drag.length===0)||(drag.indexOf(block)<0)) {
-                            if (tracing) logfn("Possibly dragging %o",prev);
+                            if (tracing) logfn("Possibly dragging %o",block);
                             drag.push(block);}
                         ni++;}
                     else {
@@ -1030,12 +1033,17 @@ fdjt.CodexLayout=
                     // Them's the breaks (so to speak).
                     if (!(block)) {}
                     else if ((prev)&&(drag.indexOf(prev)<0)) {}
-                    else if ((terminal)&&(avoidBreakBefore(block,style))) {
+                    else if ((prev)&&(atPageTop(prev))) {
+                        if (drag.length) layout.drag=drag=[];}
+                    else if ((prev)&&(terminal)&&
+                             (avoidBreakBefore(block,style))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
-                        if ((prev)&&(drag.indexOf(prev)<0)) drag.push(prev);}
+                        if (drag.indexOf(prev)<0) 
+                            drag.push(prev);}
                     else if ((prev)&&(avoidBreakAfter(prev,prevstyle))) {
                         if (tracing) logfn("Possibly dragging %o",prev);
-                        drag.push(prev);}
+                        if (drag.indexOf(prev)<0) 
+                            drag.push(prev);}
                     else if (drag.length) layout.drag=drag=[];
                     else {}}
 
@@ -1324,12 +1332,14 @@ fdjt.CodexLayout=
                         i=0; lim=drag.length;
                         while (i<lim) moveNode(drag[i++],crumbs);
                         if (node) { /* node */
-                            var block=node, terminal=((terminals)&&(terminals[ni]));
+                            var block=node;
+                            var terminal=((terminals)&&(terminals[ni]));
                             if ((block)&&(drag.length)&&(terminal)) {
                                 if ((drag.length===1)||
                                     (avoidBreakBefore(block))||
                                     (avoidBreakAfter(drag[drag.length-1]))) {
-                                    if (drag.indexOf(block)<0) drag.push(block);}
+                                    if (drag.indexOf(block)<0)
+                                        drag.push(block);}
                                 else layout.drag=drag=[];}}
                         else {
                             layout.prev=prev=drag[drag.length-1];
