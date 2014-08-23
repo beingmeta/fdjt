@@ -191,10 +191,12 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                                        (space<notspace)?(space):
                                        (notspace));
                             if (split<=0) split=scan.length;
-                            span=fdjtDOM("span.fdjtword",scan.slice(0,split));
-                            span.id=prefix+"_"+(words.length);
-                            words.push(span);
-                            wordspans.push(span);
+                            if (split>0) {
+                                var txt=scan.slice(0,split);
+                                span=fdjtDOM("span.fdjtword",txt);
+                                span.id=prefix+"_"+(words.length);
+                                words.push(span);
+                                wordspans.push(span);}
                             scan=scan.slice(split);}}
                     else {
                         span=fdjtDOM("span.fdjtword",word);
@@ -203,8 +205,13 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         wordspans.push(span);}}
                 return fdjtDOM("span.fdjtselectwrap",wordspans);}
             else if (node.nodeType!==1) return node;
-            else if (node.className==='fdjtselectwrap') return node;
-            else if (node.nodeType===1) {
+            else {
+                var classname=node.className;
+                if ((classname)&&
+                    ((classname==='fdjtselectwrap')||
+                     (node.className==="fdjtskiptext")||
+                     (node.className.search(/\bfdjtskiptext\b/)>=0)))
+                    return node;
                 var children=node.childNodes;
                 if (!(children)) return node;
                 else if (children.length===0) return node;

@@ -1709,7 +1709,7 @@ fdjt.CodexLayout=
                     var ragged=getChild(page,".codexraggedsplit");
                     if (ragged) 
                         ragged.appendChild(fdjtDOM(
-                            "span.codexdupleading","leading"));
+                            "span.codexdupleading.fdjtskiptext","leading"));
                     var blocks=getChildren(page,".codexblock");
                     var j=0, nblocks=blocks.length; while (j<nblocks) {
                         var block=blocks[j++];
