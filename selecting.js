@@ -213,7 +213,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                      (node.className.search(/\bfdjtskiptext\b/)>=0)))
                     return node;
                 var style=getStyle(node);
-                if (style.position!=='static') return node;
+                if ((style.position!=='')&&
+                    (style.position!=='static'))
+                    return node;
                 var children=node.childNodes;
                 if (!(children)) return node;
                 else if (children.length===0) return node;
