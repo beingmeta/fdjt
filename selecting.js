@@ -175,7 +175,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         if ((pdisplay!=='inline')&&(ndisplay!=='inline'))
                             return node;}}
                 */
-                var sliced=text.split(/\b/), wordspans=[];
+                var sliced=mergeSoftHyphens(text.split(/\b/)), wordspans=[];
                 i=0; lim=sliced.length;
                 while (i<lim) {
                     var word=sliced[i++];
@@ -230,6 +230,19 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                             wrapped.push(wrap);
                             node.replaceChild(wrap,child);}}
                     return node;}}}
+
+        function mergeSoftHyphens(vec){
+            var i=0, lim=vec.length; var out=[], word=false;
+            while (i<lim) {
+                var wd=vec[i++];
+                if (wd==='­') {
+                    if (word) word=word+wd;
+                    else word=wd;}
+                else {
+                    if (word) out.push(word);
+                    word=wd;}}
+            if (word) out.push(word);
+            return out;}
 
         /* Selecting ranges */
 
