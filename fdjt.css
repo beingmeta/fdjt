@@ -1030,7 +1030,11 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
     div.fdjtdialog { top: 10%; }
 }
 @media screen and (max-width: 800px) {
-    div.fdjtdialog { width: 80%; left: 10%; right: 10%; }
+    div.fdjtdialog {
+	width: 80%; left: 10%; right: 10%;
+	font-size: 150%;}
+    div.fdjtdialog .closebutton {
+	width: 3ex; height: 3ex;}
 }
 
 /* Tap Hold */
