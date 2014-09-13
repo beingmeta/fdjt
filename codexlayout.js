@@ -2124,20 +2124,22 @@ fdjt.CodexLayout=
             function forcedBreakBefore(elt,style){
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
+                var classname=elt.className;
                 return (style.pageBreakBefore==='always')||
-                    ((elt.className)&&(elt.className.search)&&
-                     (elt.className.search(
-                             /\b(forcebreakbefore|alwaysbreakbefore)\b/)>=0))||
+                    ((classname)&&(classname.search)&&
+                     ((classname.search(/\b(codexdup|codexdupend)\b/)<0))&&
+                     (classname.search(/\b(forcebreakbefore|alwaysbreakbefore)\b/)>=0))||
                     ((forcebreakbefore)&&(testNode(elt,forcebreakbefore)));}
             this.forcedBreakBefore=forcedBreakBefore;
             
             function forcedBreakAfter(elt,style){ 
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
+                var classname=elt.className;
                 var force=(style.pageBreakAfter==='always')||
-                    ((elt.className)&&(elt.className.search)&&
-                     (elt.className.search(
-                             /\b(forcebreakafter|alwaysbreakafter)\b/)>=0))||
+                    ((classname)&&(classname.search)&&
+                     ((classname.search(/\b(codexdup|codexdupstart)\b/)<0))&&
+                     (classname.search(/\b(forcebreakafter|alwaysbreakafter)\b/)>=0))||
                     ((forcebreakafter)&&(testNode(elt,forcebreakafter)));
                 if (force) return force;
                 if (elt===cur_root) return false;
