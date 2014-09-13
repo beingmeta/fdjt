@@ -966,7 +966,8 @@ fdjt.CodexLayout=
                         (avoidBreakInside(node,style))) {
                         if (node.offsetWidth>page_width) {
                             var w=node.offsetWidth, sw=w/page_width;
-                            scaleToPage(node,page_width,sw*node.offsetHeight,true);}
+                            scaleToPage(
+                                node,page_width,sw*node.offsetHeight,true);}
                         if ((node.offsetHeight===0)||
                             ((node.offsetHeight)&&
                              (node.offsetHeight<(page_height*2)))) {
@@ -2124,34 +2125,32 @@ fdjt.CodexLayout=
             function forcedBreakBefore(elt,style){
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
-                var classname=elt.className;
                 return (style.pageBreakBefore==='always')||
-                    ((classname)&&(classname.search)&&
-                     ((classname.search(/\b(codexdup|codexdupend)\b/)<0))&&
-                     (classname.search(/\b(forcebreakbefore|alwaysbreakbefore)\b/)>=0))||
                     ((forcebreakbefore)&&(testNode(elt,forcebreakbefore)));}
             this.forcedBreakBefore=forcedBreakBefore;
             
             function forcedBreakAfter(elt,style){ 
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
-                var classname=elt.className;
                 var force=(style.pageBreakAfter==='always')||
-                    ((classname)&&(classname.search)&&
-                     ((classname.search(/\b(codexdup|codexdupstart)\b/)<0))&&
-                     (classname.search(/\b(forcebreakafter|alwaysbreakafter)\b/)>=0))||
                     ((forcebreakafter)&&(testNode(elt,forcebreakafter)));
                 if (force) return force;
                 if (elt===cur_root) return false;
                 if (!(cur_root)) return false;
                 var parent=elt.parentNode;
-                if ((!(parent))||(parent===document))
-                    return false;
-                var last=(parent.lastElementChild)||
-                    ((parent.children[parent.children.length-1]));
-                if (elt===last)
-                    return forcedBreakAfter(parent);
-                else return false;}
+                while (parent) {
+                    if (parent===document) return false;
+                    var children=parent.childNodes;
+                    if ((!(children))||(children.length===0))
+                        return false;
+                    var i=children.length-1;
+                    var last=children[i];
+                    while ((last.nodeType===3)&&(isEmpty(last.nodeValue)))
+                        last=children[--i];
+                    if (elt===last) {
+                        if (forcedBreakAfter(parent)) return true;
+                        parent=parent.parentNode;}
+                    return false;}}
             this.forcedBreakAfter=forcedBreakAfter;
 
             // We explicitly check for these classes because some browsers
