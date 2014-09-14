@@ -63,11 +63,22 @@ body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 
 .alwaysbreakbefore { page-break-before: always;}
 .alwaysbreakafter { page-break-after: always;}
-.avoidbreakbefore { page-break-before: avoid;}
-.avoidbreakafter { page-break-after: avoid;}
+.avoidbreakbefore,.AVOIDBREAKBEFORE { page-break-before: avoid;}
+.avoidbreakafter,.AVOIDBREAKAFTER { page-break-after: avoid;}
 .avoidbreakinside { page-break-inside: avoid;}
-.forcebreakbefore { page-break-before: always;}
-.forcebreakafter { page-break-after: always;}
+.forcebreakbefore,.FORCEBREAKBEFORE { page-break-before: always;}
+.forcebreakafter,.FORCEBREAKAFTER { page-break-after: always;}
+
+.avoidbreakbefore.codexdup,.AVOIDBREAKBEFORE.codexdup,
+.avoidbreakbefore.codexdupend,.AVOIDBREAKBEFORE.codexdupend,
+.forcebreakbefore.codexdup,.FORCEBREAKBEFORE.codexdup,
+.forcebreakbefore.codexdupend,.FORCEBREAKBEFORE.codexdupend {
+   page-break-before: auto;}
+.avoidbreakafter.codexdup,.AVOIDBREAKAFTER.codexdup,
+.avoidbreakafter.codexdupstart,.AVOIDBREAKAFTER.codexdupstart,
+.forcebreakafter.codexdup,.FORCEBREAKAFTER.codexdup,
+.forcebreakafter.codexdupstart,.FORCEBREAKAFTER.codexdupstart {
+   page-break-after: auto;}
 
 .codexpage .codexpagefoot {
     position: absolute; bottom: 0px; left: 0px; right: 0px;

@@ -335,19 +335,14 @@ fdjt.CodexLayout=
             var duplicated=(nodeclass.search(/\bcodexdup.*\b/)>=0);
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
-            copy.className=
-                ((nodeclass.replace(/\b((codexrelocated)|(codexdup.*))\b/g,""))+
-                 " codexdup").replace(/\s+/," ").trim();
-            if (!(duplicated)) {
-                // If there's not a already a duplicate, declare the
-                // root node to the start
-                if (nodeclass.search(/\bcodexdupstart\b/)<0) {
-                    node.className=nodeclass+" codexdupstart";
-                    stripBottomStyles(node,true);}}
-            
-            // Strip top style information from copy
-            // if (copy.getAttribute("style")) stripTopStyles(copy);
-            stripTopStyles(copy);
+            if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
+                node.className=nodeclass.replace(/\bcodexdupend\b/g,"codexdup");
+                stripBottomStyles(node,true);}
+            else {
+                node.className=nodeclass+" codexdupstart";
+                copy.className=nodeclass.replace(/\bcodexrelocated\b/g,"")+" codexdupend";
+                stripBottomStyles(node,true);
+                stripTopStyles(copy,true);}
             // if (copy.getAttribute("style")) 
             // If the original had an ID, save it in various ways
             if (id) {
@@ -818,7 +813,7 @@ fdjt.CodexLayout=
                 // (recursively) in the node, noting which ones are
                 // terminals.  This should be pretty fast, so we do it
                 // synchronously
-                gatherBlocks(root,blocks,terminals,styles);
+                gatherBlocks(root,root,blocks,terminals,styles);
                 layout.block_count=layout.block_count+blocks.length;
                 if (trace>1)
                     logfn("Laying out %d blocks from %o; page=%o",
@@ -956,7 +951,7 @@ fdjt.CodexLayout=
                 // Gather all the block-level elements inside a node,
                 // recording which ones are terminals (don't have any
                 // blocks within them)
-                function gatherBlocks(node,blocks,terminals,styles,style){
+                function gatherBlocks(root,node,blocks,terminals,styles,style){
                     if (node.nodeType!==1) return;
                     if (node.codexui) return;
                     if (!(style)) style=getStyle(node); 
@@ -966,8 +961,7 @@ fdjt.CodexLayout=
                         (avoidBreakInside(node,style))) {
                         if (node.offsetWidth>page_width) {
                             var w=node.offsetWidth, sw=w/page_width;
-                            scaleToPage(
-                                node,page_width,sw*node.offsetHeight,true);}
+                            scaleToPage(node,page_width,sw*node.offsetHeight,true);}
                         if ((node.offsetHeight===0)||
                             ((node.offsetHeight)&&
                              (node.offsetHeight<(page_height*2)))) {
@@ -975,7 +969,7 @@ fdjt.CodexLayout=
                             blocks.push(node); styles.push(style);
                             terminals.push(node);
                             moveNode(node,false,true,crumbs);
-                            checkTerminal(node);
+                            checkTerminal(node,root);
                             return;}
                         else {
                             // If the node is really tall, ignore the
@@ -1003,12 +997,12 @@ fdjt.CodexLayout=
                             var total_blocks=blocks.length;
                             var i=0; var len=children.length;
                             while (i<len) {
-                                gatherBlocks(children[i++],
+                                gatherBlocks(root,children[i++],
                                              blocks,terminals,styles);}
                             if (blocks.length===total_blocks)
                                 terminals[loc]=node;}
                         else terminals[loc]=node;
-                        if (terminals[loc]) checkTerminal(node);
+                        if (terminals[loc]) checkTerminal(node,root);
                         moveNode(node,false,true,crumbs);}
                     else if ((style.position==='static')&&(node.tagName==='A')) {
                         var anchor_elts=node.childNodes;
@@ -1018,7 +1012,7 @@ fdjt.CodexLayout=
                             if (child.nodeType!==1) continue;
                             var cstyle=getStyle(child);
                             if (cstyle.display!=='inline')
-                                gatherBlocks(child,blocks,terminals,
+                                gatherBlocks(root,child,blocks,terminals,
                                              styles,cstyle);}
                         moveNode(node,false,true,crumbs);}
                     else {}}
@@ -1118,88 +1112,136 @@ fdjt.CodexLayout=
                         if (geom.top<(page_height*0.7)) return true;
                         else return false;}}
                 
-                function checkAvoidBreakBefore(scan,root){
-                    if (scan.nodeType===1) {
-                        if (avoidBreakBefore(scan)) {
-                            if (scan!==root)
-                                addClass(root,"avoidbreakbefore");
-                            return true;}
-                        var children=scan.childNodes;
-                        var i=0, lim=children.length;
-                        while (i<lim) {
-                            var child=children[i++];
-                            if (child.nodeType===3) {
-                                if (isEmpty(scan.value)) {}
-                                else return true;}
-                            else if (child.nodeType===1)
-                                return checkAvoidBreakBefore(child,root);
-                            else {}}
-                        return false;}
-                    else return false;}
+                function isLastChild(node,parent){
+                    var scan=node.nextSibling;
+                    while (scan) {
+                        if (scan.nodeType===3) {
+                            if (!(isEmpty(scan.nodeValue))) return false;}
+                        else if (scan.nodeType===1) {
+                            var style=getStyle(scan);
+                            if (!((scan.position)&&(scan.position!=='static')))
+                                return false;}
+                        else {}
+                        scan=scan.nextSibling;}
+                    return true;}
+                function isFirstChild(node,parent){
+                    var scan=node.previousSibling;
+                    while (scan) {
+                        if (scan.nodeType===3) {
+                            if (!(isEmpty(scan.nodeValue))) return false;}
+                        else if (scan.nodeType===1) {
+                            var style=getStyle(scan);
+                            if (!((scan.position)&&(scan.position!=='static')))
+                                return false;}
+                        else {}
+                        scan=scan.previousSibling;}
+                    return true;}
 
-                function checkForceBreakBefore(scan,root){
-                    if (scan.nodeType===1) {
-                        if (forcedBreakBefore(scan)) {
-                            if (scan!==root)
-                                addClass(root,"forcebreakbefore");
-                            return true;}
-                        var children=scan.childNodes;
-                        var i=0, lim=children.length;
-                        while (i<lim) {
-                            var child=children[i++];
-                            if (child.nodeType===3) {
-                                if (isEmpty(scan.value)) {}
-                                else return true;}
-                            else if (child.nodeType===1)
-                                return checkForceBreakBefore(child,root);
-                            else {}}
-                        return false;}
-                    else return false;}
+                function getFrontEdge(node,root){
+                    var body=document.body;
+                    var edge=[node], parent=node.parentNode;
+                    while ((parent)&&(parent!==body)&&(node!==root)&&
+                           (isLastChild(node,parent))) {
+                        edge.push(parent);
+                        node=parent;
+                        parent=node.parentNode;}
+                    return edge;}
+                function getBackEdge(node,root){
+                    var body=document.body;
+                    var edge=[node], parent=node.parentNode;
+                    while ((parent)&&(parent!==body)&&(node!==root)&&
+                           (isFirstChild(node,parent))) {
+                        edge.push(parent);
+                        node=parent;
+                        parent=node.parentNode;}
+                    return edge;}
 
-                function checkAvoidBreakAfter(scan,root){
-                    if (scan.nodeType===1) {
-                        if (avoidBreakAfter(scan)) {
-                            if (scan!==root)
-                                addClass(root,"avoidbreakafter");
-                            return true;}
-                        var children=scan.childNodes;
-                        var i=children.length-1;
-                        while (i>=0) {
-                            var child=children[i--];
-                            if (child.nodeType===3) {
-                                if (isEmpty(scan.value)) {}
-                                else return true;}
-                            else if (child.nodeType===1) 
-                                return checkAvoidBreakAfter(child,root);
-                            else {}}
-                        return false;}
-                    else return false;}
-                
-                function checkForceBreakAfter(scan,root){
-                    if (scan.nodeType===1) {
-                        if (forcedBreakAfter(scan)) {
-                            if (scan!==root)
-                                addClass(root,"forcebreakafter");
-                            return true;}
-                        var children=scan.childNodes;
-                        var i=children.length-1;
-                        while (i>=0) {
-                            var child=children[i--];
-                            if (child.nodeType===3) {
-                                if (isEmpty(scan.value)) {}
-                                else return true;}
-                            else if (child.nodeType===1)
-                                return checkForceBreakAfter(child,root);
-                            else {}}
-                        return false;}
-                    else return false;}
+                function inheritAvoidBreakBefore(node,root){
+                    if (node.nodeType!==1) return false;
+                    else if (node===root) return false;
+                    else if (avoidBreakBefore(node)) return true;
+                    else {
+                        var up=node.parentNode; while (up) {
+                            if ((up===root)||(up===document)) break;
+                            if (isFirstChild(node,up)) {
+                                if (avoidBreakBefore(up)) return true;
+                                node=up; up=up.parentNode;}
+                            else return false;}
+                        return false;}}
 
-                function checkTerminal(node){
+                function inheritForceBreakBefore(node,root){
+                    if (node.nodeType!==1) return false;
+                    else if (node===root) return false;
+                    else if (forceBreakBefore(node)) return true;
+                    else {
+                        var up=node.parentNode; while (up) {
+                            if ((up===root)||(up===document)) break;
+                            if (isFirstChild(node,up)) {
+                                if (forceBreakBefore(up)) return true;
+                                node=up; up=up.parentNode;}
+                            else return false;}
+                        return false;}}
+
+                function inheritAvoidBreakAfter(node,root){
+                    if (node.nodeType!==1) return false;
+                    else if (node===root) return false;
+                    else if (avoidBreakBefore(node)) return true;
+                    else {
+                        var up=node.parentNode; while (up) {
+                            if ((up===root)||(up===document)) break;
+                            if (isLastChild(node,up)) {
+                                if (avoidBreakAfter(up)) return true;
+                                node=up; up=up.parentNode;}
+                            else return false;}
+                        return false;}}
+
+                function inheritForceBreakAfter(node,root){
+                    if (node.nodeType!==1) return false;
+                    else if (node===root) return false;
+                    else if (forceBreakBefore(node)) return true;
+                    else {
+                        var up=node.parentNode; while (up) {
+                            if ((up===root)||(up===document)) break;
+                            if (isLastChild(node,up)) {
+                                if (forceBreakAfter(up)) return true;
+                                node=up; up=up.parentNode;}
+                            else return false;}
+                        return false;}}
+
+                function checkTerminal(node,root){
                     if (hasClass(node,"codexterminal")) return;
-                    checkAvoidBreakBefore(node,node);
-                    checkForceBreakBefore(node,node);
-                    checkAvoidBreakAfter(node,node);
-                    checkForceBreakAfter(node,node);
+                    var front_edge=getFrontEdge(node,root);
+                    var back_edge=getBackEdge(node,root);
+                    var avoid_before=false, force_before=false;
+                    var avoid_after=false, force_after=false;
+                    var i=0, lim=front_edge.length; if (lim>1) {
+                        while (i<lim) {
+                            if (avoidBreakAfter(front_edge[i]))
+                                avoid_after=true;
+                            if (forcedBreakAfter(front_edge[i]))
+                                force_after=true;
+                            i++;}}
+                    i=0; lim=back_edge.length; if (lim>1) {
+                        while (i<lim) {
+                            if (avoidBreakBefore(back_edge[i]))
+                                avoid_before=true;
+                            if (forcedBreakBefore(back_edge[i]))
+                                force_before=true;
+                            i++;}}
+                    if ((avoid_after)&&(force_after)) {
+                        /* Avoid brain exploding */}
+                    else if (avoid_after) 
+                        addClass(back_edge,"AVOIDBREAKAFTER");
+                    else if (force_after)
+                        addClass(back_edge,"FORCEBREAKAFTER");
+                    else {}
+                    if ((avoid_before)&&(force_before)) {
+                        /* Avoid brain exploding */}
+                    else if (avoid_before) 
+                        addClass(back_edge,"AVOIDBREAKBEFORE");
+                    else if (force_before)
+                        addClass(back_edge,"FORCEBREAKBEFORE");
+                    else {}
                     addClass(node,"codexterminal");}
                 
                 function emptyNode(node){
@@ -2132,25 +2174,8 @@ fdjt.CodexLayout=
             function forcedBreakAfter(elt,style){ 
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
-                var force=(style.pageBreakAfter==='always')||
-                    ((forcebreakafter)&&(testNode(elt,forcebreakafter)));
-                if (force) return force;
-                if (elt===cur_root) return false;
-                if (!(cur_root)) return false;
-                var parent=elt.parentNode;
-                while (parent) {
-                    if (parent===document) return false;
-                    var children=parent.childNodes;
-                    if ((!(children))||(children.length===0))
-                        return false;
-                    var i=children.length-1;
-                    var last=children[i];
-                    while ((last.nodeType===3)&&(isEmpty(last.nodeValue)))
-                        last=children[--i];
-                    if (elt===last) {
-                        if (forcedBreakAfter(parent)) return true;
-                        parent=parent.parentNode;}
-                    return false;}}
+                return (style.pageBreakAfter==='always')||
+                    ((forcebreakafter)&&(testNode(elt,forcebreakafter)));}
             this.forcedBreakAfter=forcedBreakAfter;
 
             // We explicitly check for these classes because some browsers
