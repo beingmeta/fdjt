@@ -1375,12 +1375,6 @@ fdjt.DOM=
         fdjtDOM.hoverflow=function(node){
             return (node.scrollWidth/node.clientWidth);};
 
-        /* Adjusting font sizes (wrappers for adjustfont.js) */
-        fdjtDOM.adjustFont=function(elt,opts){
-            return fdjt.UI.adjustFont.update(elt,opts);};
-        fdjtDOM.adjustFonts=function(elt,opts){
-            return fdjt.UI.adjustFont.update(elt,opts);};
-        
         /* Sizing to fit */
 
         var default_trace_adjust=false;
@@ -2678,8 +2672,24 @@ fdjt.DOM=
                 elt.play();}}
         fdjtDOM.playAudio=playAudio;
 
+        function tweakImage(elt,tw,th) {
+            var style=elt.style;
+            style.maxHeight=style.minHeight="inherit";
+            style.maxWidth=style.minWidth="inherit";
+            // Get width and height again, with the constraints off
+            //  This means that pagescaling trumps CSS constraints,
+            //  but we'll accept that for now
+            var w=elt.offsetWidth, h=elt.offsetHeight, sw=tw/w, sh=th/h;
+            if (sw<sh) {
+                style.width=Math.round(w*sw)+"px";
+                style.height="auto";}
+            else {
+                style.height=Math.round(h*sh)+"px";
+                style.width="auto";}}
+        fdjtDOM.tweakImage=tweakImage;
+
         /* Tweaking fonts */
-        function tweakFont(node,container,width,height,min_font,max_font){
+        function tweakFontSize(node,container,width,height,min_font,max_font){
             var i, lim, nodes=[], style=node.style;
             var saved_display=node.style.display||"";
             var saved_visibility=node.style.visibility||"";
@@ -2763,32 +2773,28 @@ fdjt.DOM=
                 style.opacity=saved_opacity;
                 style.zIndex=saved_zindex;}
             return node.style.fontSize;}
-        fdjtDOM.tweakFont=tweakFont;
+        fdjtDOM.tweakFontSize=tweakFontSize;
 
-        function tweakImage(elt,tw,th) {
-            var style=elt.style;
-            style.maxHeight=style.minHeight="inherit";
-            style.maxWidth=style.minWidth="inherit";
-            // Get width and height again, with the constraints off
-            //  This means that pagescaling trumps CSS constraints,
-            //  but we'll accept that for now
-            var w=elt.offsetWidth, h=elt.offsetHeight, sw=tw/w, sh=th/h;
-            if (sw<sh) {
-                style.width=Math.round(w*sw)+"px";
-                style.height="auto";}
-            else {
-                style.height=Math.round(h*sh)+"px";
-                style.width="auto";}}
-        fdjtDOM.tweakImage=tweakImage;
-
-        function tweakAll(node){
-            var all=((node)?(fdjtDOM.getChildren(node,".fdjtadjustfont")):
-                     (fdjtDOM.$(".fdjtadjustfont")));
-            var i=0, lim=all.length; while (i<lim) tweakFont(all[i++]);}
-        fdjtDOM.tweakFonts=tweakAll;
-
-        fdjt.addInit(tweakAll);
-        fdjtDOM.addListener(window,"resize",tweakAll);
+        fdjtDOM.autofont=".fdjtadjustfont,.adjustfont";
+        function tweakFonts(arg){
+            var all=[];
+            if (!(arg)) all=fdjtDOM.$(fdjtDOM.autofont);
+            else if (arg.nodeType) 
+                all=fdjtDOM.getChildren(arg,fdjtDOM.autofont);
+            else if (typeof arg === "string") {
+                if (document.getElementByID(arg)) {
+                    all=[document.getElementByID(arg)];
+                    fdjtDOM.autofont.push("#"+arg);}
+                else {
+                    fdjtDOM.autofont=fdjtDOM.autofont+","+arg;
+                    all=fdjtDOM.$(arg);}}
+            else all=fdjtDOM.$(fdjtDOM.autofont);
+            var i=0, lim=all.length;
+            while (i<lim) tweakFontSize(all[i++]);}
+        fdjtDOM.tweakFont=fdjtDOM.tweakFonts=tweakFonts;
+        
+        fdjt.addInit(tweakFonts);
+        fdjtDOM.addListener(window,"resize",tweakFonts);
         
         function addCXClasses(){
             var device=fdjt.device;
