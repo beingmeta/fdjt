@@ -1613,20 +1613,25 @@ fdjt.DOM=
                     var tag=link.rel.slice(7);
                     var href=link.href;
                     // We let there be multiple references
-                    schema2tag[href]=tag;
-                    tag2schema[tag]=href;}
+                    if (tag2schema[tag])
+                        fdjtLog.warn("Conflicting schemas for %s",tag);
+                    else {
+                        if (schema2tag[href])
+                            schema2tag[href].push(tag);
+                        else schema2tag[href]=[tag];
+                        tag2schema[tag]=href;}}
                 else continue;}}
         var app_schemas={};
         fdjtDOM.addAppSchema=function(name,spec){
             app_schemas[name]=spec;};
-
+        
         function getMeta(name,multiple,foldcase,dom){
             var results=[];
             var elts=((document.getElementsByTagName)?
                       (document.getElementsByTagName("META")):
                       (getChildren(document,"META")));
             var rx=((name instanceof RegExp)?(name):(false));
-            var prefix, schema;
+            var prefix, schema, prefixes=[];
             if ((typeof name ==='string')&&
                 (typeof foldcase==='undefined')) {
                 if (name[0]==='^') {
@@ -1639,8 +1644,10 @@ fdjt.DOM=
                 schema=false;
                 var schema_end=name.indexOf('}');
                 if (schema_end>2) schema=name.slice(1,schema_end);
-                prefix=((schema)&&(schema2tag[schema]));
-                if (prefix) name=prefix+"."+name.slice(schema_end+1);}
+                prefixes=((schema)&&(schema2tag[schema]));
+                rx=new RegExp("\\b("+schema+"|"+prefixes.join("|")+")[.]"+
+                              name.slice(schema_end+1)+"\\b",
+                              ((foldcase)?("i"):("")));}
             else if (name[0]==='=') {
                 // This overrides any schema expansion
                 name=name.slice(1);}
@@ -1652,20 +1659,20 @@ fdjt.DOM=
                 var dot=name.indexOf('.');
                 prefix=name.slice(0,dot);
                 schema=app_schemas[prefix];
-                if ((schema)&&(schema2tag[schema])) 
-                    name=schema2tag[schema]+name.slice(dot);}
+                if ((schema)&&(schema2tag[schema]))
+                    prefixes=schema2tag[schema];
+                else prefixes=[prefix];
+                rx=new RegExp("\\b("+prefixes.join("|")+")[.]"+
+                              name.slice(dot+1)+"\\b",
+                              ((foldcase)?("i"):("")));}
             else {}
-            var matchname=((foldcase)&&
-                           (typeof name === 'string')&&
-                           (name.toUpperCase()));
+            if (!(rx)) 
+                rx=new RegExp("\\b"+name+"\\b",((foldcase)?("i"):("")));
             var i=0; while (i<elts.length) {
                 var elt=elts[i++];
                 if (!(elt)) continue;
                 else if (!(elt.name)) continue;
-                else if ((rx)?(rx.exec(elt.name)):
-                         (matchname)?
-                         (matchname===elt.name.toUpperCase()):
-                         (name===elt.name)) {
+                else if (elt.name.search(rx)>=0) {
                     if (multiple) {
                         if (dom) results.push(elt);
                         else results.push(elt.content);}
@@ -1687,8 +1694,8 @@ fdjt.DOM=
                       ((document.body)&&(document.body.getElementsByTagName))?
                       (document.body.getElementsByTagName("LINK")):
                       (getChildren(document,"LINK")));
-            var prefix, schema;
             var rx=((name instanceof RegExp)?(name):(false));
+            var prefix, schema, prefixes=[];
             if ((typeof name ==='string')&&
                 (typeof foldcase==='undefined')) {
                 if (name[0]==='^') {
@@ -1701,34 +1708,35 @@ fdjt.DOM=
                 schema=false;
                 var schema_end=name.indexOf('}');
                 if (schema_end>2) schema=name.slice(1,schema_end);
-                prefix=((schema)&&(schema2tag[schema]));
-                if (prefix) name=prefix+"."+name.slice(schema_end+1);}
+                prefixes=((schema)&&(schema2tag[schema]));
+                rx=new RegExp("\\b("+schema+"|"+prefixes.join("|")+")[.]"+
+                              name.slice(schema_end+1)+"\\b",
+                              ((foldcase)?("i"):("")));}
             else if (name[0]==='=') {
-                // This overrides any schema expansion and does
-                //  just a literal string match
+                // This overrides any schema expansion
                 name=name.slice(1);}
             else if ((name[0]==='*')&&(name[1]==='.')) {
-                // Schema wildcard, not recommended
+                // This overrides any schema expansion
                 rx=new RegExp("[^.]\\."+name.slice(2),
                               ((foldcase)?("i"):("")));}
             else if (name.indexOf('.')>0) {
                 var dot=name.indexOf('.');
                 prefix=name.slice(0,dot);
                 schema=app_schemas[prefix];
-                if ((schema)&&(schema2tag[schema])) 
-                    name=schema2tag[schema]+name.slice(dot);}
+                if ((schema)&&(schema2tag[schema]))
+                    prefixes=schema2tag[schema];
+                else prefixes=[prefix];
+                rx=new RegExp("\\b("+prefixes.join("|")+")[.]"+
+                              name.slice(dot+1)+"\\b",
+                              ((foldcase)?("i"):("")));}
             else {}
-            var matchname=((foldcase)&&
-                           (typeof name === 'string')&&
-                           (name.toUpperCase()));
+            if (!(rx)) 
+                rx=new RegExp("\\b"+name+"\\b",((foldcase)?("i"):("")));
             var i=0; while (i<elts.length) {
                 var elt=elts[i++];
                 if (!(elt)) continue;
                 else if (!(elt.rel)) continue;
-                else if ((rx)?(rx.exec(elt.rel)):
-                         (matchname)?
-                         (matchname===elt.rel.toUpperCase()):
-                         (name===elt.rel)) {
+                else if (elt.rel.search(rx)>=0) {
                     if (multiple) {
                         if (dom) results.push(elt);
                         else results.push(elt.href);}
