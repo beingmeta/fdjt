@@ -332,7 +332,6 @@ fdjt.CodexLayout=
             var parent=dupContext(node.parentNode,page,dups,crumbs);
             var nodeclass=((node.className)&&(node.className.search)&&
                            (node.className))||"";
-            var duplicated=(nodeclass.search(/\bcodexdup.*\b/)>=0);
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
             if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
@@ -1112,26 +1111,28 @@ fdjt.CodexLayout=
                         if (geom.top<(page_height*0.7)) return true;
                         else return false;}}
                 
-                function isLastChild(node,parent){
+                function isLastChild(node){
                     var scan=node.nextSibling;
                     while (scan) {
                         if (scan.nodeType===3) {
                             if (!(isEmpty(scan.nodeValue))) return false;}
                         else if (scan.nodeType===1) {
                             var style=getStyle(scan);
-                            if (!((scan.position)&&(scan.position!=='static')))
+                            if ((!((style.position)&&(style.position!=='static')))&&
+                                (style.display!=='none'))
                                 return false;}
                         else {}
                         scan=scan.nextSibling;}
                     return true;}
-                function isFirstChild(node,parent){
+                function isFirstChild(node){
                     var scan=node.previousSibling;
                     while (scan) {
                         if (scan.nodeType===3) {
                             if (!(isEmpty(scan.nodeValue))) return false;}
                         else if (scan.nodeType===1) {
                             var style=getStyle(scan);
-                            if (!((scan.position)&&(scan.position!=='static')))
+                            if ((!((style.position)&&(style.position!=='static')))&&
+                                (style.display!=='none'))
                                 return false;}
                         else {}
                         scan=scan.previousSibling;}
@@ -1140,8 +1141,8 @@ fdjt.CodexLayout=
                 function getFrontEdge(node,root){
                     var body=document.body;
                     var edge=[node], parent=node.parentNode;
-                    while ((parent)&&(parent!==body)&&(node!==root)&&
-                           (isLastChild(node,parent))) {
+                    while ((parent)&&(parent!==body)&&
+                           (node!==root)&&(isLastChild(node))) {
                         edge.push(parent);
                         node=parent;
                         parent=node.parentNode;}
@@ -1149,64 +1150,12 @@ fdjt.CodexLayout=
                 function getBackEdge(node,root){
                     var body=document.body;
                     var edge=[node], parent=node.parentNode;
-                    while ((parent)&&(parent!==body)&&(node!==root)&&
-                           (isFirstChild(node,parent))) {
+                    while ((parent)&&(parent!==body)&&
+                           (node!==root)&&(isFirstChild(node))) {
                         edge.push(parent);
                         node=parent;
                         parent=node.parentNode;}
                     return edge;}
-
-                function inheritAvoidBreakBefore(node,root){
-                    if (node.nodeType!==1) return false;
-                    else if (node===root) return false;
-                    else if (avoidBreakBefore(node)) return true;
-                    else {
-                        var up=node.parentNode; while (up) {
-                            if ((up===root)||(up===document)) break;
-                            if (isFirstChild(node,up)) {
-                                if (avoidBreakBefore(up)) return true;
-                                node=up; up=up.parentNode;}
-                            else return false;}
-                        return false;}}
-
-                function inheritForceBreakBefore(node,root){
-                    if (node.nodeType!==1) return false;
-                    else if (node===root) return false;
-                    else if (forceBreakBefore(node)) return true;
-                    else {
-                        var up=node.parentNode; while (up) {
-                            if ((up===root)||(up===document)) break;
-                            if (isFirstChild(node,up)) {
-                                if (forceBreakBefore(up)) return true;
-                                node=up; up=up.parentNode;}
-                            else return false;}
-                        return false;}}
-
-                function inheritAvoidBreakAfter(node,root){
-                    if (node.nodeType!==1) return false;
-                    else if (node===root) return false;
-                    else if (avoidBreakBefore(node)) return true;
-                    else {
-                        var up=node.parentNode; while (up) {
-                            if ((up===root)||(up===document)) break;
-                            if (isLastChild(node,up)) {
-                                if (avoidBreakAfter(up)) return true;
-                                node=up; up=up.parentNode;}
-                            else return false;}
-                        return false;}}
-
-                function inheritForceBreakAfter(node,root){
-                    if (node.nodeType!==1) return false;
-                    else if (node===root) return false;
-                    else if (forceBreakBefore(node)) return true;
-                    else {
-                        var up=node.parentNode; while (up) {
-                            if ((up===root)||(up===document)) break;
-                            if (isLastChild(node,up)) {
-                                if (forceBreakAfter(up)) return true;
-                                node=up; up=up.parentNode;}
-                            else return false;}
-                        return false;}}
 
                 function checkTerminal(node,root){
                     if (hasClass(node,"codexterminal")) return;
