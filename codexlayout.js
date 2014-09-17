@@ -1180,9 +1180,9 @@ fdjt.CodexLayout=
                     if ((avoid_after)&&(force_after)) {
                         /* Avoid brain exploding */}
                     else if (avoid_after) 
-                        addClass(back_edge,"AVOIDBREAKAFTER");
+                        addClass(front_edge,"AVOIDBREAKAFTER");
                     else if (force_after)
-                        addClass(back_edge,"FORCEBREAKAFTER");
+                        addClass(front_edge,"FORCEBREAKAFTER");
                     else {}
                     if ((avoid_before)&&(force_before)) {
                         /* Avoid brain exploding */}
@@ -2157,7 +2157,6 @@ fdjt.CodexLayout=
             this.avoidBreakBefore=avoidBreakBefore;
 
             function avoidBreakAfter(elt,style){
-                var avoid=false;
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 // Avoid breaks after headings
                 if (/H\d/.exec(elt.tagName)) return true;
@@ -2167,19 +2166,8 @@ fdjt.CodexLayout=
                 else if ((style.pageBreakAfter)&&
                          (style.pageBreakAfter!=="auto"))
                     return false;
-                else avoid=((avoidbreakafter)&&
-                            (testNode(elt,avoidbreakafter)));
-                if (avoid) return avoid;
-                if (elt===cur_root) return false;
-                if (!(cur_root)) return false;
-                var parent=elt.parentNode;
-                if ((!(parent))||(parent===document))
-                    return false;
-                var last=(parent.lastElementChild)||
-                    ((parent.children[parent.children.length-1]));
-                if (elt===last)
-                    return avoidBreakAfter(parent);
-                else return false;}
+                else return ((avoidbreakafter)&&
+                             (testNode(elt,avoidbreakafter)));}
             this.avoidBreakAfter=avoidBreakAfter;
             
             function checkSinglePage(elt,style){
