@@ -1625,12 +1625,9 @@ fdjt.DOM=
         fdjtDOM.addAppSchema=function(name,spec){
             app_schemas[name]=spec;};
         
-        function getMeta(name,multiple,foldcase,dom){
-            var results=[];
-            var elts=((document.getElementsByTagName)?
-                      (document.getElementsByTagName("META")):
-                      (getChildren(document,"META")));
-            var rx=((name instanceof RegExp)?(name):(false));
+        var escapeRX=fdjtString.escapeRX;
+
+        function getNameRX(name,foldcase){
             var prefix, schema, prefixes=[];
             if ((typeof name ==='string')&&
                 (typeof foldcase==='undefined')) {
@@ -1639,35 +1636,48 @@ fdjt.DOM=
                 else if (name[0]==='~') {
                     foldcase=true; name=name.slice(1);}
                 else {}}
-            if (typeof name !== 'string') {}
+            if (typeof foldcase === 'undefined') foldcase=true;
+            if (typeof name !== 'string') return name;
             else if (name[0]==='{') {
                 schema=false;
                 var schema_end=name.indexOf('}');
                 if (schema_end>2) schema=name.slice(1,schema_end);
-                prefixes=((schema)&&(schema2tag[schema]));
-                rx=new RegExp("\\b("+schema+"|"+prefixes.join("|")+")[.]"+
-                              name.slice(schema_end+1)+"\\b",
-                              ((foldcase)?("i"):("")));}
+                prefixes=((schema)&&(schema2tag[schema]))||[];
+                return new RegExp("\\b("+escapeRX(schema)+"|"+
+                                  prefixes.join("|")+")[.]"+
+                                  name.slice(schema_end+1)+"\\b",
+                                  ((foldcase)?("i"):("")));}
             else if (name[0]==='=') {
                 // This overrides any schema expansion
-                name=name.slice(1);}
+                return new RegExp("\\b"+escapeRX(name=name.slice(1))+"\\b",
+                                  ((foldcase)?("i"):("")));}
             else if ((name[0]==='*')&&(name[1]==='.')) {
                 // This overrides any schema expansion
-                rx=new RegExp("[^.]\\."+name.slice(2),
-                              ((foldcase)?("i"):("")));}
+                return new RegExp("\\b([^.]\\.)?"+name.slice(2)+"\\b",
+                                  ((foldcase)?("i"):("")));}
             else if (name.indexOf('.')>0) {
                 var dot=name.indexOf('.');
                 prefix=name.slice(0,dot);
                 schema=app_schemas[prefix];
-                if ((schema)&&(schema2tag[schema]))
+                if (!(schema))
+                    return new RegExp("\\b"+escapeRX(name)+"\\b",
+                                      ((foldcase)?("i"):("")));
+                else if ((schema)&&(schema2tag[schema]))
                     prefixes=schema2tag[schema];
                 else prefixes=[prefix];
-                rx=new RegExp("\\b("+prefixes.join("|")+")[.]"+
-                              name.slice(dot+1)+"\\b",
-                              ((foldcase)?("i"):("")));}
-            else {}
-            if (!(rx)) 
-                rx=new RegExp("\\b"+name+"\\b",((foldcase)?("i"):("")));
+                return new RegExp("\\b("+escapeRX(schema)+"|"+
+                                  prefixes.join("|")+")\\."+
+                                  name.slice(dot+1)+"\\b",
+                                  ((foldcase)?("i"):("")));}
+            else return new RegExp("\\b"+name+"\\b",((foldcase)?("i"):("")));}
+            
+
+        function getMeta(name,multiple,foldcase,dom){
+            var results=[];
+            var elts=((document.getElementsByTagName)?
+                      (document.getElementsByTagName("META")):
+                      (getChildren(document,"META")));
+            var rx=getNameRX(name,foldcase);
             var i=0; while (i<elts.length) {
                 var elt=elts[i++];
                 if (!(elt)) continue;
@@ -1694,44 +1704,7 @@ fdjt.DOM=
                       ((document.body)&&(document.body.getElementsByTagName))?
                       (document.body.getElementsByTagName("LINK")):
                       (getChildren(document,"LINK")));
-            var rx=((name instanceof RegExp)?(name):(false));
-            var prefix, schema, prefixes=[];
-            if ((typeof name ==='string')&&
-                (typeof foldcase==='undefined')) {
-                if (name[0]==='^') {
-                    foldcase=false; name=name.slice(1);}
-                else if (name[0]==='~') {
-                    foldcase=true; name=name.slice(1);}
-                else {}}
-            if (typeof name !== 'string') {}
-            else if (name[0]==='{') {
-                schema=false;
-                var schema_end=name.indexOf('}');
-                if (schema_end>2) schema=name.slice(1,schema_end);
-                prefixes=((schema)&&(schema2tag[schema]));
-                rx=new RegExp("\\b("+schema+"|"+prefixes.join("|")+")[.]"+
-                              name.slice(schema_end+1)+"\\b",
-                              ((foldcase)?("i"):("")));}
-            else if (name[0]==='=') {
-                // This overrides any schema expansion
-                name=name.slice(1);}
-            else if ((name[0]==='*')&&(name[1]==='.')) {
-                // This overrides any schema expansion
-                rx=new RegExp("[^.]\\."+name.slice(2),
-                              ((foldcase)?("i"):("")));}
-            else if (name.indexOf('.')>0) {
-                var dot=name.indexOf('.');
-                prefix=name.slice(0,dot);
-                schema=app_schemas[prefix];
-                if ((schema)&&(schema2tag[schema]))
-                    prefixes=schema2tag[schema];
-                else prefixes=[prefix];
-                rx=new RegExp("\\b("+prefixes.join("|")+")[.]"+
-                              name.slice(dot+1)+"\\b",
-                              ((foldcase)?("i"):("")));}
-            else {}
-            if (!(rx)) 
-                rx=new RegExp("\\b"+name+"\\b",((foldcase)?("i"):("")));
+            var rx=getNameRX(name,foldcase);
             var i=0; while (i<elts.length) {
                 var elt=elts[i++];
                 if (!(elt)) continue;
