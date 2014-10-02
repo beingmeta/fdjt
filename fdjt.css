@@ -1087,6 +1087,9 @@ body.taptouch {}
 .fdjtselecting > ul span,  .fdjtselecting > li span {
     pointer-events: all; }
 
+body._TOUCH .fdjtselecting .fdjtselected:hover,
+body._TOUCH .fdjtselecting .fdjtselectstart:hover,
+body._TOUCH .fdjtselecting .fdjtselectend:hover,
 body.cxTOUCH .fdjtselecting .fdjtselected:hover,
 body.cxTOUCH .fdjtselecting .fdjtselectstart:hover,
 body.cxTOUCH .fdjtselecting .fdjtselectend:hover {
