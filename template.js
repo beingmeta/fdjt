@@ -26,7 +26,6 @@
 
 fdjt.Template=(function(){
     "use strict";
-    var fdjtLog=fdjt.Log;
     var templates={};
 
     function Template(text,data,xdata){ /* Filling in templates */
@@ -41,27 +40,29 @@ fdjt.Template=(function(){
         else if (text.nodeType===1) {
             dom=text; text=dom.innerHTML;}
         else {
-            fdjtLog.warn("Bad argument %o to Template",text);
+            fdjt.Log.warn("Bad argument %o to Template",text);
             return;}
         if (Template.localTemplates.hasOwnProperty(text))
             text=Template.localTemplates[text];
         else if (templates.hasOwnProperty(text))
             text=templates[text];
         else {}
-        var substs=text.match(/{{\w+}}/gm), done={};
+        var substs=text.match(/\{\{\w+\}\}/gm), done={};
         if (substs) {
             var i=0, n=substs.length; while (i<n) {
                 var match=substs[i++];
                 var prop=match.slice(2,-2);
+                var pat=new RegExp("\\{\\{"+prop+"\\}\\}","gm");
                 if (done[prop]) continue;
                 if (!((data.hasOwnProperty(prop))||
                       ((xdata)&&(xdata.hasOwnProperty(prop))))) {
-                    fdjtLog.warn("No data for %s in %s to use in %s",prop,data,text);
+                    fdjt.Log.warn("No data for %s in %s to use in %s",
+                                  prop,data,text);
                     done[prop]=prop;
                     continue;}
                 var val=data[prop]||((xdata)&&(xdata[prop]))||"";
                 done[prop]=prop;
-                text=text.replace(new RegExp(match,"gm"),val.toString());}}
+                text=text.replace(pat,val.toString());}}
         if (dom) {
             if (dom.nodeType===3) dom.nodeValue=text;
             else dom.innerHTML=text;
