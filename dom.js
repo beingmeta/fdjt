@@ -2252,11 +2252,11 @@ fdjt.DOM=
                     nosvg=false;
                 else nosvg=true;}
             if (nosvg) {
-                addClass(document.body,"NOSVG");
-                dropClass(document.body,"USESVG");}
+                addClass(document.body,"_NOSVG");
+                dropClass(document.body,"_USESVG");}
             else {
-                dropClass(document.body,"NOSVG");
-                addClass(document.body,"USESVG");}
+                dropClass(document.body,"_NOSVG");
+                addClass(document.body,"_USESVG");}
             return (!(nosvg));}
         
         function checkChildren(){
