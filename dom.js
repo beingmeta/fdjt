@@ -2779,10 +2779,11 @@ fdjt.DOM=
         
         function addCXClasses(){
             var device=fdjt.device;
-            if (device.ios) addClass(document.body,"cxIOS");
-            if (device.touch) addClass(document.body,"cxTOUCH");
-            if (device.mouse) addClass(document.body,"cxMOUSE");
-            if (device.android) addClass(document.body,"cxAndroid");}
+            var prefix=fdjt.cxprefix||"_";
+            if (device.ios) addClass(document.body,prefix+"IOS");
+            if (device.touch) addClass(document.body,prefix+"TOUCH");
+            if (device.mouse) addClass(document.body,prefix+"MOUSE");
+            if (device.android) addClass(document.body,prefix+"Android");}
         fdjtDOM.addCXClasses=addCXClasses;
 
         function windowFocus(evt){
