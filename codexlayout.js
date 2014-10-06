@@ -1840,6 +1840,12 @@ fdjt.CodexLayout=
                     ccrumb.parentNode.replaceChild(container,ccrumb);
                 if (bcrumb)
                     bcrumb.parentNode.replaceChild(origin,bcrumb);
+                var splits=getChildren(container,".codexsplitstart");
+                var s=0, n_splits=splits.length; while (s<n_splits) {
+                    var split=splits[s++], splitid=split.id, text=split.getAttribute("data-textsplit");
+                    if ((splitid)&&(text)) {
+                        textsplits[splitid]=document.createTextNode(text);
+                        split.removeAttribute("data-textsplit");}}
                 if (trace) fdjtLog("Done restoring layout");
                 if (donefn) donefn();}
             function setLayout(content,donefn){
@@ -1934,6 +1940,11 @@ fdjt.CodexLayout=
                                     pageids.push(node.id);
                                     pagecontent[node.id]=node.innerHTML;
                                     node.innerHTML="";}}}}}
+                var splits=getChildren(copy,".codexsplitstart");
+                var s=0, n_splits=splits.length; while (s<n_splits) {
+                    var split=splits[s++], splitid=split.id;
+                    var text=(splitid)&&(textsplits[splitid]);
+                    if (text) split.setAttribute("data-textsplit",text.nodeValue);}
                 var html=copy.innerHTML;
                 try {
                     if (pageids)
