@@ -1684,8 +1684,10 @@ fdjt.CodexLayout=
 
             function pagesDone(pages){
                 var i=0, lim=pages.length; while (i<lim) {
-                    var page=pages[i++];
-                    if (page.style.height) continue;
+                    var page=pages[i++], ph=page.style.height;
+                    if ((ph)&&(ph!=="")&&(ph!=="inherit")&&
+                        (ph!=="initial")&&(ph!=="auto"))
+                        continue;
                     if (hasClass(page,"codexoversize")) continue;
                     page.style.height="auto"; page.style.display="block";
                     var content_height=page.scrollHeight;
