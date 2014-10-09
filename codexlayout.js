@@ -146,6 +146,14 @@ fdjt.CodexLayout=
                     pt=string.search(notspace);
                     return (pt<0);}}
             else return false;}
+
+        function inFlow(node){
+            var style=getStyle(node);
+            if ((style.display!=='none')&&
+                ((style.position==='static')||
+                 (style.position==='')))
+                return node;
+            else return false;}
         
         function optimizeLayoutRule(rule){
             if (!(rule)) return rule;
@@ -267,7 +275,7 @@ fdjt.CodexLayout=
                         ((cstyle.textAlign==="left")?("top left"):
                          (cstyle.textAlign==="right")?("top right"):
                          ("top center"));
-                    elt.parentNode.replaceChild(wrapper,elt);}
+                     elt.parentNode.replaceChild(wrapper,elt);}
                 else {
                     tweakFont(elt,false,tw,th);
                     if (cstyle.display==="inline")
@@ -286,13 +294,17 @@ fdjt.CodexLayout=
                 return pct/100;}
             else return parseFloat(s);}
 
-        function atPageTop(node,body){
+        function atPageTop(node,page,body){
             if (!(body)) body=document.body;
             var scan=node; while (scan) {
-                if (scan===body) return false;
+                if (scan===page) return true;
+                else if (scan===body) return false;
                 else if (!(scan.previousSibling)) scan=scan.parentNode;
                 else if ((scan.previousSibling.nodeType===3)&&
                          (isEmpty(scan.previousSibling.nodeValue)))
+                    scan=scan.previousSibling;
+                else if ((scan.previousSibling.nodeType===1)&&
+                         (!(inFlow(scan.previousSibling))))
                     scan=scan.previousSibling;
                 else break;}
             return ((scan.nodeType===1)&&
@@ -380,11 +392,10 @@ fdjt.CodexLayout=
         function getFirstContent(node){
             var child=node.firstChild;
             while (child) {
-                if (child.nodeType===3) {
-                    if (!(isEmpty(child.nodeValue))) return child;}
-                else if (child.nodeType!==1) {}
-                else return child;
-                child=child.nextSibling;}
+                if (((child.nodeType===3)&&(!(isEmpty(child.nodeValue))))||
+                    ((child.nodeType===1)&&(inFlow(child))))
+                    return child;
+                else child=child.nextSibling;}
             return false;}
         
         // This moves a node into another container, leaving
@@ -954,7 +965,8 @@ fdjt.CodexLayout=
                     if (node.nodeType!==1) return;
                     if (node.codexui) return;
                     if (!(style)) style=getStyle(node); 
-                    if (style.position!=='static') return;
+                    if (!((style.position==='static')||(style.position==='')))
+                        return;
                     if (((atomic)&&(atomic.match(node)))||
                         (style.display==='table-row')||
                         (avoidBreakInside(node,style))) {
@@ -980,8 +992,7 @@ fdjt.CodexLayout=
                                 node.style.pageBreakInside="auto";
                                 style=getStyle(node);}}}
                     var disp=style.display;
-                    if ((style.position==='static')&&
-                        (node.tagName!=="BR")&&
+                    if ((node.tagName!=="BR")&&
                         (disp!=='inline')&&
                         (disp!=='table-row')&&
                         (disp!=='table-cell')) {
@@ -1114,28 +1125,16 @@ fdjt.CodexLayout=
                 function isLastChild(node){
                     var scan=node.nextSibling;
                     while (scan) {
-                        if (scan.nodeType===3) {
-                            if (!(isEmpty(scan.nodeValue))) return false;}
-                        else if (scan.nodeType===1) {
-                            var style=getStyle(scan);
-                            if ((!((style.position)&&(style.position!=='static')))&&
-                                (style.display!=='none'))
-                                return false;}
-                        else {}
-                        scan=scan.nextSibling;}
+                        if ((scan.nodeType===3)&&(!(isEmpty(scan.nodeValue)))) return false;
+                        else if ((scan.nodeType===1)&&(inFlow(scan))) return false;
+                        else scan=scan.nextSibling;}
                     return true;}
                 function isFirstChild(node){
                     var scan=node.previousSibling;
                     while (scan) {
-                        if (scan.nodeType===3) {
-                            if (!(isEmpty(scan.nodeValue))) return false;}
-                        else if (scan.nodeType===1) {
-                            var style=getStyle(scan);
-                            if ((!((style.position)&&(style.position!=='static')))&&
-                                (style.display!=='none'))
-                                return false;}
-                        else {}
-                        scan=scan.previousSibling;}
+                        if ((scan.nodeType===3)||(!(isEmpty(scan.nodeValue)))) return false;
+                        else if ((scan.nodeType===1)&&(inFlow(scan))) return false;
+                        else scan=scan.previousSibling;}
                     return true;}
 
                 function getFrontEdge(node,root){
@@ -1219,8 +1218,10 @@ fdjt.CodexLayout=
                         else {
                             var prev=scan.previousSibling;
                             while (prev) {
-                                if (emptyNode(prev)) {
-                                    scan=prev; prev=scan.previousSibling;}
+                                if ((emptyNode(prev))||
+                                    ((prev.nodeType===1)&&(!(inFlow(prev))))) {
+                                    scan=prev;
+                                    prev=scan.previousSibling;}
                                 else return false;}
                             scan=scan.parentNode;}}
                     return false;}
