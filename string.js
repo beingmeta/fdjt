@@ -342,18 +342,30 @@ fdjt.String=
             return string.replace(/\W*\s\W*/g," ").toLowerCase();}
         fdjtString.normString=normstring;
 
+        var entities={};
+        fdjtString.entities=entities;
         function dCharCode(whole,paren){
             return String.fromCharCode(parseInt(paren,10));}
         function xCharCode(whole,paren){
             return String.fromCharCode(parseInt(paren,16));}
         function nCharCode(whole,paren){
             return fdjt.charnames[paren]||"&"+paren+";";}
+        function expandEntity(whole,paren){
+            if (entities.hasOwnProperty(paren))
+                return entities[paren];
+            else return "&"+paren+";";}
         function decodeEntities(string) {
             return string.replace(/&#(\d+);/g,dCharCode).
                 replace(/&#x([0123456789ABCDEFabcdef]+);/g,xCharCode).
                 replace(/&([abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.]+)/g,
-                        nCharCode);}
+                        nCharCode).
+                replace(/&([A-Za-z][A-Za-z0-9-_.]+;)/g,
+                        expandEntity);}
         fdjtString.decodeEntities=decodeEntities;
+        function expandEntities(string) {
+            return string.replace(/&([A-Za-z][A-Za-z0-9-_.]+);/g,
+                                  expandEntity);}
+        fdjtString.expandEntities=expandEntities;
 
         var numpat=/^\d+(\.\d+)$/;
         function getMatch(string,rx,i,literal){
@@ -587,6 +599,47 @@ fdjt.String=
         fdjtString.escapeRegExp=escapeRegExp;
         fdjtString.escapeRX=escapeRegExp;
 
+        fdjtString.templates={};
+
+        function fillIn(text,data){
+            /* Filling in templates */
+            var dom=false;
+            if (typeof data === "string") {
+                var tmp=data; data=text; text=tmp;}
+            if ((!(text))&&(data)&&(data.template)) text=data.template;
+            else if ((!(data))&&(text.template)) {
+                data=text; text=data.template;}
+            // Maybe a warning?
+            if (typeof text === "string") {}
+            else if (text.nodeType===3) {
+                dom=text; text=dom.nodeValue;}
+            else if (text.nodeType===1) {
+                dom=text; text=dom.innerHTML;}
+            else {
+                fdjt.Log.warn("Bad argument %o to Template",text);
+                return;}
+            var substs=text.match(/\{\{\w+\}\}/gm), done={};
+            if ((substs)&&(substs.length)) {
+                var i=0, n=substs.length; while (i<n) {
+                    var match=substs[i++];
+                    var prop=match.slice(2,-2);
+                    if (done[prop]) continue;
+                    var pat=new RegExp("\\{\\{"+prop+"\\}\\}","gm");
+                    if (!(data.hasOwnProperty(prop))) {
+                        fdjt.Log.warn("No data for %s in %s to use in %s",
+                                      prop,data,text);
+                        done[prop]=prop;
+                        continue;}
+                    var val=data[prop];
+                    done[prop]=prop;
+                    text=text.replace(pat,val.toString());}}
+            if (dom) {
+                if (dom.nodeType===3) dom.nodeValue=text;
+                else dom.innerHTML=text;
+                return dom;}
+            else return text;}
+        fdjtString.fillIn=fillIn;
+        
         return fdjtString;})();
 
 /* Emacs local variables
