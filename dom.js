@@ -2777,19 +2777,20 @@ fdjt.DOM=
         fdjt.addInit(tweakFonts);
         fdjtDOM.addListener(window,"resize",tweakFonts);
         
-        function addCXClasses(){
+        function addUSClasses(){
             var device=fdjt.device;
             var prefix=fdjt.cxprefix||"_";
             if (device.ios) addClass(document.body,prefix+"IOS");
             if (device.touch) addClass(document.body,prefix+"TOUCH");
             if (device.mouse) addClass(document.body,prefix+"MOUSE");
             if (device.android) addClass(document.body,prefix+"Android");}
-        fdjtDOM.addCXClasses=addCXClasses;
+        fdjtDOM.addUSClasses=addUSClasses;
+        fdjtDOM.addCXClasses=addUSClasses;
 
         function windowFocus(evt){
-            evt=evt||window.event; addClass(document.body,"cxFOCUS");}
+            evt=evt||window.event; addClass(document.body,"_FOCUS");}
         function windowBlur(evt){
-            evt=evt||window.event; dropClass(document.body,"cxFOCUS");}
+            evt=evt||window.event; dropClass(document.body,"_FOCUS");}
         function trackPageFocus(){
             windowFocus(); // Could be iffy...
             addListener(window,"focus",windowFocus);
