@@ -735,6 +735,14 @@ fdjt.CodexLayout=
                 // if (lastmove!==node) {allmoves.push(node); lastmove=node;}
                 return moveNodeToPage(node,page,dups,crumbs);}
 
+            function moveChildren(into,children,start,end){
+                var tomove=[];
+                if (!(start)) start=0;
+                if (!(end)) end=children.length;
+                while (start<end) tomove.push(children[start++]);
+                start=0; end=tomove.length; while (start<end)
+                    moveNode(tomove[start++],into,false,crumbs);}
+            
             //  addContent calls loop() exactly once to set up the
             //   actual loop to be timesliced with repeated calls
             //   setTimeout and a final call to doneFn.  The real
@@ -1425,7 +1433,9 @@ fdjt.CodexLayout=
                         // This (dup) is the copied parent of the page
                         // break.  We append all the remaining children
                         // to this duplicated parent on the new page.
-                        appendChildren(dup,push,1);
+                        if ((hasClass(node,"codexdup"))||(hasClass(node,"codexdupend")))
+                            appendChildren(dup,push,1);
+                        else moveChildren(dup,push,1);
                         if (trace>1)
                             logfn("Layout/splitBlock %o @ %o into %o on %o",
                                   node,page_break,dup,page);
@@ -1496,7 +1506,8 @@ fdjt.CodexLayout=
                     else if ((!(page_break.childNodes))||
                              (page_break.childNodes.length===0))
                         return children.slice(breakpos);
-                    else if (true) return children.slice(breakpos);
+                    else if (true)
+                        return children.slice(breakpos);
                     // We could call splitChildren recursively, but
                     // we're not currently doing so
                     else {
@@ -1508,8 +1519,7 @@ fdjt.CodexLayout=
                         else {
                             // This should reproduce the logic below
                             var clone_break=page_break.cloneNode(true);}
-                        */
-                    }
+                        */}
                     // If it's text, split it into words, then try to
                     // find the length at which one more word pushes
                     // it over the edge.
