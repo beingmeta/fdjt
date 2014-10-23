@@ -59,6 +59,13 @@ body.codexfixed div.codexpage {
 body.codexfade div.codexpage { opacity: 0; }
 body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 
+.codexfullpage {
+   page-break-before: always; page-break-after: always;
+   page-break-inside: never;
+   width: 100%;}
+@media (max-device-width: 500px) {
+ .codexfullpage {page-break-inside: auto;}}
+
 .xdatapagescale { display: none;}
 
 .alwaysbreakbefore { page-break-before: always;}
