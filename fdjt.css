@@ -35,6 +35,9 @@
 .leftclearfloat { float: left; clear: left;}
 .rightclearfloat { float: right; clear: right;}
 
+p .floatright, p .rightfloat { margin-left: 1ex; }
+p .floatleft, p .leftfloat { margin-right: 1ex; }
+
 input[TYPE="FILE"].floatright { text-align: right; }
 
 .fdjtinvisible { display: none;}
