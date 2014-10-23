@@ -594,16 +594,6 @@ fdjt.CodexLayout=
             this.init=init;
 
             // Layout rules
-            var forcebreakbefore=this.forcebreakbefore=
-                optimizeLayoutRule(init.forcebreakbefore||false);
-            var forcebreakafter=this.forcebreakafter=
-                optimizeLayoutRule(init.forcebreakafter||false);
-            var avoidbreakinside=this.avoidbreakinside=
-                optimizeLayoutRule(init.avoidbreakinside||false);
-            var avoidbreakafter=this.avoidbreakafter=
-                optimizeLayoutRule(init.avoidbreakafter||false);
-            var avoidbreakbefore=this.avoidbreakbefore=
-                optimizeLayoutRule(init.avoidbreakbefore||false);
             var fullpages=this.fullpages=
                 optimizeLayoutRule(init.fullpages||false);
             var singlepages=this.singlepages=
@@ -778,6 +768,10 @@ fdjt.CodexLayout=
                     (fullpage)||
                     (hasClass(root,"codexsinglepage"))||
                     (checkSinglePage(root));
+                if ((fullpage)||(singlepage)) {
+                    if (!(avoidBreakInside(root)))
+                        fullpage=singlepage=false;}
+                    
                 if (newpage) root=moveNode(root);
                 else if (singlepage) newPage(root);
                 else if ((forcedBreakBefore(root))||
@@ -2140,21 +2134,15 @@ fdjt.CodexLayout=
             function forcedBreakBefore(elt,style){
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
-                return (style.pageBreakBefore==='always')||
-                    ((forcebreakbefore)&&(testNode(elt,forcebreakbefore)));}
+                return (style.pageBreakBefore==='always');}
             this.forcedBreakBefore=forcedBreakBefore;
             
             function forcedBreakAfter(elt,style){ 
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
-                return (style.pageBreakAfter==='always')||
-                    ((forcebreakafter)&&(testNode(elt,forcebreakafter)));}
+                return (style.pageBreakAfter==='always');}
             this.forcedBreakAfter=forcedBreakAfter;
 
-            // We explicitly check for these classes because some browsers
-            //  which should know better (we're looking at you, Firefox) don't
-            //  represent (or handle) page-break 'avoid' values.  Sigh.
-            var page_block_classes=/\b(avoidbreakinside)|(sbookpage)\b/;
             function avoidBreakInside(elt,style){
                 var lh;
                 if ((!(elt))||(elt.nodeType!==1)) return false;
@@ -2162,9 +2150,11 @@ fdjt.CodexLayout=
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakInside==='avoid')||
                     (style.display==='table-row')||
+                    /*
                     ((elt.className)&&(elt.className.search)&&
                      (elt.className.search(page_block_classes)>=0))||
                     ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)))||
+                    */
                     ((style.display==="block")&&
                      ((lh=parsePX(style.lineHeight))&&
                       ((lh*2.5)>elt.offsetHeight)));}
@@ -2173,11 +2163,7 @@ fdjt.CodexLayout=
             function avoidBreakBefore(elt,style){
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
-                return ((style.pageBreakBefore==='avoid')||
-                        ((elt.className)&&(elt.className.search)&&
-                         (elt.className.search(/\bavoidbreakbefore\b/)>=0))||
-                        ((avoidbreakbefore)&&
-                         (testNode(elt,avoidbreakbefore))));}
+                return (style.pageBreakBefore==='avoid');}
             this.avoidBreakBefore=avoidBreakBefore;
 
             function avoidBreakAfter(elt,style){
@@ -2190,8 +2176,7 @@ fdjt.CodexLayout=
                 else if ((style.pageBreakAfter)&&
                          (style.pageBreakAfter!=="auto"))
                     return false;
-                else return ((avoidbreakafter)&&
-                             (testNode(elt,avoidbreakafter)));}
+                else return false;}
             this.avoidBreakAfter=avoidBreakAfter;
             
             function checkSinglePage(elt,style){
