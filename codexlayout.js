@@ -533,7 +533,9 @@ fdjt.CodexLayout=
             i=0; lim=dupstarts; while (i<lim) {
                 var dup=dupstarts[i++];
                 var saved_style=dup.getAttribute("data-savedstyle");
-                if (saved_style) dup.setAttribute("style",saved_style);}
+                if (saved_style) {
+                    dup.setAttribute("style",saved_style);
+                    dup.removeAttribute("data-savedstyle");}}
             var textsplits=layout.textsplits;
             var node;
             var pagescaled=toArray(
