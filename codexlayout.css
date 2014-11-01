@@ -93,3 +93,5 @@ body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 
 .codexdupleading {
     display: inline-block; height: 0px; width: 70%; visibility: hidden;}
+
+h1, h2, h3, h4, h6, h6, h7 { page-break-after: avoid; }

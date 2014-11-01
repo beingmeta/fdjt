@@ -967,7 +967,8 @@ fdjt.CodexLayout=
                     if (node.nodeType!==1) return;
                     if (node.codexui) return;
                     if (!(style)) style=getStyle(node); 
-                    if (!((style.position==='static')||(style.position==='')))
+                    if ((!((style.position==='static')||(style.position==='')))||
+                        ((style.float)&&(style.float!=='none')))
                         return;
                     if (((atomic)&&(atomic.match(node)))||
                         (style.display==='table-row')||
@@ -1009,8 +1010,9 @@ fdjt.CodexLayout=
                             var total_blocks=blocks.length;
                             var i=0; var len=children.length;
                             while (i<len) {
-                                gatherBlocks(root,children[i++],
-                                             blocks,terminals,styles);}
+                                var ch=children[i++];
+                                if (ch.nodeType===1)
+                                    gatherBlocks(root,ch,blocks,terminals,styles);}
                             if (blocks.length===total_blocks)
                                 terminals[loc]=node;}
                         else terminals[loc]=node;
