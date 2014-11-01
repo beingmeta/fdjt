@@ -351,7 +351,8 @@ fdjt.CodexLayout=
                 stripBottomStyles(node,true);}
             else {
                 node.className=nodeclass+" codexdupstart";
-                copy.className=nodeclass.replace(/\bcodexrelocated\b/g,"")+" codexdupend";
+                copy.className=nodeclass.replace(/\bcodexrelocated\b/g,"")+
+                    " codexdupend";
                 stripBottomStyles(node,true);
                 stripTopStyles(copy,true);}
             // if (copy.getAttribute("style")) 
@@ -371,7 +372,7 @@ fdjt.CodexLayout=
 
         function stripBottomStyles(node,keep){
             var style=node.style;
-            if ((keep)&&(!(node.getAttribute("data-savedstyle"))))
+            if ((keep)&&(!(node.getAttribute("data-savedstyle")))) 
                 node.setAttribute("data-savedstyle",style.cssText);
             style.paddingBottom="0px";
             style.borderBottomWidth="0px";
@@ -528,14 +529,15 @@ fdjt.CodexLayout=
             var crumbs=layout.crumbs; var now=fdjtTime(), i=0, lim;
             if ((layout.reverting)&&((now-layout.reverting)<10000)) return;
             else layout.reverting=now;
-            var dupstarts=layout.container.getElementsByClassName(
-                "codexdupstart");
-            i=0; lim=dupstarts; while (i<lim) {
-                var dup=dupstarts[i++];
-                var saved_style=dup.getAttribute("data-savedstyle");
-                if (saved_style) {
-                    dup.setAttribute("style",saved_style);
-                    dup.removeAttribute("data-savedstyle");}}
+            dropClass(toArray(layout.container.getElementsByClassName(
+                "codexdupstart")),
+                      "codexdupstart");
+            dropClass(toArray(layout.container.getElementsByClassName(
+                "codexdupend")),
+                      "codexdupend");
+            dropClass(toArray(layout.container.getElementsByClassName(
+                "codexdup")),
+                      "codexdup");
             var textsplits=layout.textsplits;
             var node;
             var pagescaled=toArray(
@@ -578,6 +580,16 @@ fdjt.CodexLayout=
                 i=0; lim=moved.length;
                 while (i<lim)
                     restoreNode(moved[i++],layout,crumbs,textsplits);}
+            dropClass(fdjtDOM.$(".codexpagetop"),"codexpagetop");
+            var restyled=fdjtDOM.$("[data-savedstyle]");
+            i=0; lim=restyled.length;
+            while (i<lim) {
+                var rs=restyled[i++];
+                if (rs.getAttribute("data-savedstyle")) {
+                    var os=rs.getAttribute("data-savedstyle");
+                    if (os) rs.setAttribute("style",os);
+                    else rs.removeAttribute("style");
+                    rs.removeAttribute("data-savedstyle");}}
             layout.textsplits={}; layout.crumbs={};}
         
         /* Codex trace levels */
@@ -2275,15 +2287,6 @@ fdjt.CodexLayout=
                     return;}
                 // Remove any scaleboxes (save the children)
                 fdjtDOM.scaleToFit.revertAll();
-                var pagetops=fdjtDOM.$(".codexpagetop");
-                i=0; lim=pagetops.length;
-                while (i<lim) {
-                    var pt=pagetops[i++];
-                    if (pt.getAttribute("data-savedstyle")) {
-                        pt.setAttribute(
-                            "style",pt.getAttribute("data-savedstyle"));
-                        pt.removeAttribute("data-savedstyle");}
-                    dropClass(pt,"codexpagetop");}
                 revertLayout(this);};
 
             /* Finally return the layout */
