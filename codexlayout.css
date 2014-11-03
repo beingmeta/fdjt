@@ -59,10 +59,14 @@ body.codexfixed div.codexpage {
 body.codexfade div.codexpage { opacity: 0; }
 body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 
+div.codexpage img {
+    max-height: 90%; max-width: 90%; width: auto; height: auto;}
+
 .codexfullpage {
    page-break-before: always; page-break-after: always;
    page-break-inside: never;
-   width: 100%;}
+   height: 100%; width: 100%;
+   text-align: center;}
 @media (max-device-width: 500px) {
  .codexfullpage {page-break-inside: auto;}}
 
