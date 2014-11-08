@@ -2805,8 +2805,8 @@ fdjt.DOM=
             wstyle.height=h+'px'; wstyle.width=w+'px';
             var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
             var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
-            if (typeof min === "string") min=parseInt(min);
-            if (typeof max === "string") max=parseInt(max);
+            if (typeof min === "string") min=parseInt(min,10);
+            if (typeof max === "string") max=parseInt(max,10);
             size=tweakScroller(wrapper,10,false,size,min,max,w,h);
             size=tweakScroller(wrapper,5,false,size,min,max,w,h);
             size=tweakScroller(wrapper,1,true,size,min,max,w,h);
