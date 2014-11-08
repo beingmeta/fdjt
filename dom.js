@@ -190,6 +190,23 @@ fdjt.DOM=
         fdjtDOM.Array=TOA;
         fdjtDOM.slice=TOA;
 
+        /* Wrapping children */
+        function wrapChildren(node,spec){
+            if (!(spec)) spec="div.fdjtfontwrapper";
+            var wrapper=getFirstChild(node,spec);
+            if ((wrapper)&&(wrapper.nodeType)&&
+                (wrapper.parentNode===node))
+                return wrapper;
+            else wrapper=fdjtDOM(spec,toArray(node.childNodes));
+            node.appendChild(wrapper);
+            return wrapper;}
+        fdjtDOM.wrapChildren=wrapChildren;
+        function unwrapChildren(node){
+            var frag=document.createFragment();
+            domappend(frag,toArray(node.childNodes));
+            node.parentNode.replaceChild(frag,node);}
+        fdjtDOM.unwrapChildren=unwrapChildren;
+
         /* Utility patterns and functions */
 
         function parsePX(arg,dflt){
@@ -2676,16 +2693,18 @@ fdjt.DOM=
             if (!(size)) {size=100; node.style.fontSize=size+"%";}
             if (!(min)) min=20;
             if (!(max)) max=150;
-            var newsize=newsize+delta;
+            var newsize=size+delta;
             node.style.fontSize=newsize+"%";
             var nw=node.scrollWidth, nh=node.scrollHeight;
-            while ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h))) {
+            while ((size>=min)&&(size<=max)&&
+                   ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h)))) {
                 size=newsize; newsize=newsize+delta;
                 node.style.fontSize=newsize+"%";
                 nw=node.scrollWidth; nh=node.scrollHeight;}
-            if (done) return size;
-            else return size-delta;}
+            if (delta>0) return size-delta;
+            else return size;}
                 
+        /*
         function tweakFontSize(node,container,width,height,min_font,max_font){
             var i, lim, nodes=[], style=node.style;
             var saved_display=node.style.display||"";
@@ -2770,24 +2789,34 @@ fdjt.DOM=
                 style.opacity=saved_opacity;
                 style.zIndex=saved_zindex;}
             return node.style.fontSize;}
+        */
         function tweakFontSize(node,min_font,max_font){
-            var h=node.offsetHeight, w=node.offsetWidth, size=100;
-            if ((h===0)||(w===0)||(node.style.fontSize)||(node.style.overflow))
-                return;
-            node.style.overflow='auto';
-            node.style.fontSize='100%';
+            var h=node.offsetHeight, w=node.offsetWidth, odisplay;
+            if ((h===0)||(w===0)) {
+                // Do a little to make the element visible if it's not.
+                odisplay=node.style.display;
+                node.style.dislay='initial';
+                h=node.offsetHeight; w=node.offsetWidth;
+                if ((h===0)||(w===0)) return;}
+            else {}
+            var wrapper=wrapChildren(node), wstyle=wrapper.style, size=100;
+            wstyle.overflow='auto'; wstyle.fontSize=size+"%";
+            h=node.offsetHeight; w=node.offsetWidth;
+            wstyle.height=h+'px'; wstyle.width=w+'px';
             var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
             var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
             if (typeof min === "string") min=parseInt(min);
             if (typeof max === "string") max=parseInt(max);
-            w=node.offsetWidth; h=node.offsetHeight;
-            size=tweakScroller(node,10,false,size,min,max,w,h);
-            size=tweakScroller(node,5,false,size,min,max,w,h);
-            size=tweakScroller(node,1,true,size,min,max,w,h);
-            node.style.overflow='';
+            size=tweakScroller(wrapper,10,false,size,min,max,w,h);
+            size=tweakScroller(wrapper,5,false,size,min,max,w,h);
+            size=tweakScroller(wrapper,1,true,size,min,max,w,h);
+            wstyle.overflow=''; wstyle.height=''; wstyle.width='';
+            if (size===100) {
+                node.removeChild(wrapper);
+                fdjtDOM.append(node,toArray(wrapper.childNodes));}
             return size;}
         fdjtDOM.tweakFontSize=tweakFontSize;
-
+        
         fdjtDOM.autofont=".fdjtadjustfont,.adjustfont";
         function tweakFonts(arg){
             var all=[];
