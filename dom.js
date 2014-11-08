@@ -2670,6 +2670,22 @@ fdjt.DOM=
         fdjtDOM.tweakImage=tweakImage;
 
         /* Tweaking fonts */
+        function tweakScroller(node,delta,done,size,min,max,w,h){
+            var sw=node.scrollWidth, sh=node.scrollHeight;
+            if ((sw>=w)||(sh>=h)) delta=-delta;
+            if (!(size)) {size=100; node.style.fontSize=size+"%";}
+            if (!(min)) min=20;
+            if (!(max)) max=150;
+            var newsize=newsize+delta;
+            node.style.fontSize=newsize+"%";
+            var nw=node.scrollWidth, nh=node.scrollHeight;
+            while ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h))) {
+                size=newsize; newsize=newsize+delta;
+                node.style.fontSize=newsize+"%";
+                nw=node.scrollWidth; nh=node.scrollHeight;}
+            if (done) return size;
+            else return size-delta;}
+                
         function tweakFontSize(node,container,width,height,min_font,max_font){
             var i, lim, nodes=[], style=node.style;
             var saved_display=node.style.display||"";
@@ -2754,6 +2770,22 @@ fdjt.DOM=
                 style.opacity=saved_opacity;
                 style.zIndex=saved_zindex;}
             return node.style.fontSize;}
+        function tweakFontSize(node,min_font,max_font){
+            var h=node.offsetHeight, w=node.offsetWidth, size=100;
+            if ((h===0)||(w===0)||(node.style.fontSize)||(node.style.overflow))
+                return;
+            node.style.overflow='auto';
+            node.style.fontSize='100%';
+            var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
+            var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
+            if (typeof min === "string") min=parseInt(min);
+            if (typeof max === "string") max=parseInt(max);
+            w=node.offsetWidth; h=node.offsetHeight;
+            size=tweakScroller(node,10,false,size,min,max,w,h);
+            size=tweakScroller(node,5,false,size,min,max,w,h);
+            size=tweakScroller(node,1,true,size,min,max,w,h);
+            node.style.overflow='';
+            return size;}
         fdjtDOM.tweakFontSize=tweakFontSize;
 
         fdjtDOM.autofont=".fdjtadjustfont,.adjustfont";
