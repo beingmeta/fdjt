@@ -2048,10 +2048,12 @@ fdjt.CodexLayout=
             var adjust_node=fdjtDOM.scaleToFit.adjust;
             function finishPage(completed) {
                 addClass(completed,"codexworkpage"); 
+                fdjtDOM.tweakFonts(completed);
                 var undersize=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
                 if (((oversize)||(undersize))&&(scale_pages)) {
                     addClass(completed,"codexworkpage");
+                    fdjtDOM.tweakFonts(completed);
                     var iw=completed.scrollWidth, ih=completed.scrollHeight;
                     var ow=completed.offsetWidth, oh=completed.offsetHeight;
                     var noscale=((oversize)?

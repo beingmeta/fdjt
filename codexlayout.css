@@ -61,6 +61,10 @@ body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
 
 div.codexpage img {
     max-height: 90%; max-width: 90%; width: auto; height: auto;}
+div.codexpage div.fdjtadjusted {
+    position: absolute; width: 100%; height: 100%;
+    box-sizing: border-box; -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;}
 
 .codexfullpage {
    page-break-before: always; page-break-after: always;
