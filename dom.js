@@ -2835,8 +2835,12 @@ fdjt.DOM=
             while (i<lim) tweakFontSize(all[i++]);}
         fdjtDOM.tweakFont=fdjtDOM.tweakFonts=tweakFonts;
         
-        fdjt.addInit(tweakFonts);
-        fdjtDOM.addListener(window,"resize",tweakFonts);
+        function autoTweakFonts(){
+            if (fdjtDOM.noautotweakfonts) return;
+            tweakFonts();
+            fdjtDOM.addListener(window,"resize",tweakFonts);}
+
+        fdjt.addInit(autoTweakFonts);
         
         function addUSClasses(){
             var device=fdjt.device;
