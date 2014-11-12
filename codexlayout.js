@@ -482,7 +482,8 @@ fdjt.CodexLayout=
                 return node;}
             else {
                 var move=node, parent=move.parentNode;
-                // If we're moving a first child, we might as well move the parent
+                // If we're moving a first child, we might as well
+                // move the parent
                 while ((parent)&&
                        (parent!==document.body)&&
                        (parent.id!=="CODEXCONTENT")&&
@@ -507,8 +508,9 @@ fdjt.CodexLayout=
                     if (move===node)                    
                         node=move=moveNode(node,dup_parent||page,false,crumbs);
                     else move=moveNode(move,dup_parent||page,false,crumbs);}
-                if ((move)&&(move.nodeType===1)&&(!hasContent(page,true,false,move)))
-                    markPageTop(move);
+                if ((node)&&(node.nodeType===1)&&
+                    (!hasContent(page,true,false,move)))
+                    markPageTop(node);
                 return node;}}
 
         // Reverting layout
