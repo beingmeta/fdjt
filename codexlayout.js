@@ -451,12 +451,13 @@ fdjt.CodexLayout=
                     while (d<ndrags) into.appendChild(dragged[d++]);}}
             return node;}
         
-        function markPageTop(node){
-            if (hasClass(node,"codexpagetop")) return;
+        function markPageTop(node,force){
+            if ((!force)&&(hasClass(node,"codexpagetop"))) return;
             var nodestyle=node.getAttribute("style")||"";
             var newstyle=nodestyle+((nodestyle)?("; "):(""))+
                 "margin-top: 0px !important;";
-            node.setAttribute("data-savedstyle",nodestyle);
+            if (!(node.getAttribute("data-savedstyle")))
+                node.setAttribute("data-savedstyle",nodestyle);
             node.setAttribute("style",newstyle);
             addClass(node,"codexpagetop");
             if (node.childNodes) {
@@ -465,7 +466,7 @@ fdjt.CodexLayout=
                     var child=children[i++];
                     if (child.nodeType===1) {
                         var style=getStyle(child);
-                        if (style.position!=='static') {}
+                        if ((style.position!=='static')&&(style.position!=='')) {}
                         else if ((child.classname)&&
                                  (child.className.search(/\bfdjtskiptext\b/g)>=0)) {}
                         else return markPageTop(child);}
@@ -1820,20 +1821,22 @@ fdjt.CodexLayout=
                         var classname=restore.className;
                         var style=restore.getAttribute("style");
                         var ostyle=original.getAttribute("style");
+                        var oclass=original.className;
                         var crumb=document.createTextNode("");
+                        classname=classname.replace(/\bcodexrestore\b/,"");
                         replaceNode(original,crumb);
                         crumbs[id]=crumb;
                         replaceNode(restore,original);
-                        if (classname!==original.className) {
-                            if ((original.className)&&
-                                (typeof original.className === "string"))
-                                original.setAttribute(
-                                    "data-savedclass",original.className);
+                        if ((classname)&&(classname!==oclass)) {
+                            if ((oclass)&&(typeof oclass === "string"))
+                                original.setAttribute("data-savedclass",oclass);
                             original.className=classname;}
                         if (style!==ostyle) {
                             if (ostyle) original.setAttribute(
                                 "data-savedstyle",ostyle);
-                            original.setAttribute("style",style);}}
+                            original.setAttribute("style",style);}
+                        if (classname.search(/\bcodexpagetop\b/)>=0) {
+                            markPageTop(original,true);}}
                     else if (original) {
                         saved_ids[id]=original;
                         if (original.id) original.removeAttribute("id");}}
@@ -1970,13 +1973,15 @@ fdjt.CodexLayout=
                 var s=0, n_splits=splits.length; while (s<n_splits) {
                     var split=splits[s++], splitid=split.id;
                     var text=(splitid)&&(textsplits[splitid]);
-                    if (text) split.setAttribute("data-textsplit",text.nodeValue);}
+                    if (text)
+                        split.setAttribute("data-textsplit",text.nodeValue);}
                 var html=copy.innerHTML;
                 try {
                     if (pageids)
-                        cacheLayout(layout_id,html,pageids,pagecontent);
-                    else cacheLayout(layout_id,html);
-                    gotLayout(layout_id);
+                        cacheLayout(layout_id,html,pageids,pagecontent,
+                                    function(){gotLayout(layout_id);});
+                    else cacheLayout(layout_id,html,false,false,
+                                    function(){gotLayout(layout_id);});
                     callback(layout);}
                 catch (ex) {
                     fdjtLog.warn("Couldn't save layout %s: %s",layout_id,ex);
@@ -2415,7 +2420,7 @@ fdjt.CodexLayout=
             doinit=ondbinit; ondbinit=false;
             if (doinit) doinit();}
 
-        function cacheLayout(layout_id,content,pageids,pages){
+        function cacheLayout(layout_id,content,pageids,pages,ondone){
             var setLocal=fdjtState.setLocal;
             if (typeof layoutDB === "undefined") 
                 ondbinit=function(){cacheLayout(layout_id,content);};
@@ -2427,7 +2432,8 @@ fdjt.CodexLayout=
                     var i=0, lim=pageids.length;
                     while (i<lim) {
                         var id=pageids[i++];
-                        fdjtState.setLocal(layout_id+"#"+id,pages[id]);}}}
+                        fdjtState.setLocal(layout_id+"#"+id,pages[id]);}}
+                if (ondone) ondone();}
             else if (window.indexedDB) {
                 var txn=layoutDB.transaction(["layouts"],"readwrite");
                 var storage=txn.objectStore("layouts"), req;
@@ -2438,8 +2444,8 @@ fdjt.CodexLayout=
                                 layout_id,event.target.errorCode);};
                     req.onsuccess=function(event){
                         event=false; // ignored
-                        if (CodexLayout.trace)
-                            fdjtLog("Layout %s cached",layout_id);};}
+                        if (ondone) ondone();
+                        fdjtLog("Layout %s cached",layout_id);};}
                 else {
                     var n=0, npages=pageids.length;
                     var putIDs=function putIDs(event){
@@ -2452,8 +2458,8 @@ fdjt.CodexLayout=
                                          content: pagecontent,
                                          pageno: n-1})
                                 .onsuccess=putIDs;}
-                        else if (CodexLayout.trace) 
-                            fdjtLog("Layout %s cached",layout_id);};
+                        if (ondone) ondone();
+                        fdjtLog("Layout %s cached",layout_id);};
                     req=storage.put({layout_id: layout_id,layout: content,
                                      pageids: pageids,npages: pageids.length});
                     req.onerror=function(event){
