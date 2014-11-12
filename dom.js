@@ -2641,6 +2641,11 @@ fdjt.DOM=
             fdjt.media=media;}
         fdjt.addInit(checkMedia,"matchMedia");
 
+        function getMediaState(){
+            return window.getComputedStyle(
+                document.body,':before').content;}
+        fdjt.getMediaState=getMediaState;
+
         /* Inserting text in an text field or textarea */
         function insertText(target,text,off){
             var pos=target.selectionStart;
