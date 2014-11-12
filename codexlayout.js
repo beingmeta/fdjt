@@ -422,6 +422,7 @@ fdjt.CodexLayout=
                 else node=node.cloneNode(true);}
             else {}
             if (weird) {}
+            else if ((node.nodeType===1)&&(hasClass(node,"codextextsplit"))) {}
             else if ((node.parentNode)&&((!(node.id))||(!(crumbs[node.id])))) {
                 // If the node has a parent and hasn't been moved before,
                 //  we leave a "crumb" (a placeholder) in the original
@@ -512,16 +513,14 @@ fdjt.CodexLayout=
 
         // Reverting layout
 
-        function restoreNode(node,info,crumbs,texts){
+        function restoreNode(node,info,crumbs){
             var id=node.id;
             if (!(id)) return;
             var origin=crumbs[id];
             if (origin) {
                 var parent=origin.parentNode;
-                if (hasClass(node,/\bcodexwraptext\b/g)) {
-                    if (hasClass(node,/\bcodexwraptextsplit\b/g))
-                        parent.replaceChild(texts[id],origin);
-                    else parent.replaceChild(node.childNodes[0],origin);}
+                if (hasClass(node,/\bcodexwraptext\b/g)) 
+                    parent.replaceChild(node.childNodes[0],origin);
                 else origin.parentNode.replaceChild(node,origin);}
             dropClass(node,"codexrelocated");}
         
@@ -529,15 +528,6 @@ fdjt.CodexLayout=
             var crumbs=layout.crumbs; var now=fdjtTime(), i=0, lim;
             if ((layout.reverting)&&((now-layout.reverting)<10000)) return;
             else layout.reverting=now;
-            dropClass(toArray(layout.container.getElementsByClassName(
-                "codexdupstart")),
-                      "codexdupstart");
-            dropClass(toArray(layout.container.getElementsByClassName(
-                "codexdupend")),
-                      "codexdupend");
-            dropClass(toArray(layout.container.getElementsByClassName(
-                "codexdup")),
-                      "codexdup");
             var textsplits=layout.textsplits;
             var node;
             var pagescaled=toArray(
@@ -578,18 +568,27 @@ fdjt.CodexLayout=
                     "Reverting layout of %d nodes and %d split texts",
                     moved.length,textsplits.length);
                 i=0; lim=moved.length;
-                while (i<lim)
-                    restoreNode(moved[i++],layout,crumbs,textsplits);}
+                while (i<lim) {
+                    restoreNode(moved[i++],layout,crumbs);}}
             dropClass(fdjtDOM.$(".codexpagetop"),"codexpagetop");
             var restyled=fdjtDOM.$("[data-savedstyle]");
             i=0; lim=restyled.length;
             while (i<lim) {
                 var rs=restyled[i++];
-                if (rs.getAttribute("data-savedstyle")) {
+                if (rs.hasAttribute("data-savedstyle")) {
                     var os=rs.getAttribute("data-savedstyle");
                     if (os) rs.setAttribute("style",os);
                     else rs.removeAttribute("style");
                     rs.removeAttribute("data-savedstyle");}}
+            dropClass(toArray(layout.container.getElementsByClassName(
+                "codexdupstart")),
+                      "codexdupstart");
+            dropClass(toArray(layout.container.getElementsByClassName(
+                "codexdupend")),
+                      "codexdupend");
+            dropClass(toArray(layout.container.getElementsByClassName(
+                "codexdup")),
+                      "codexdup");
             layout.textsplits={}; layout.crumbs={};}
         
         /* Codex trace levels */
