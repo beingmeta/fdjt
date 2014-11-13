@@ -1176,6 +1176,13 @@ table.fdjtform .usebaseline th,
 table.fdjtform .usebaseline td {
     vertical-align: baseline;}
 
+/* */
+
+@media all and (max-width: 800px) and (min-width: 500px) {
+    body:before { content: 'fdjt_tablet'; display: none; }}
+@media all and (max-width: 500px) {
+    body:before { content: 'fdjt_phone'; display: none; }}
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
