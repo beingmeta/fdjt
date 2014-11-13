@@ -141,9 +141,13 @@ fdjt.UI.Highlight=(function(){
                 else hispan=fdjtDOM("span."+hclass);}}
         else if ((node.nodeType!==1)||(hasClass(node,hclass)))
             return node;
+        else if (hasClass(node,"fdjtskiptext")) {}
         else {
-            var display=getStyle(node).display;
-            if (display==="block")
+            var nodestyle=getStyle(node);
+            var display=nodestyle.display;
+            var position=nodestyle.position;
+            if ((position!=="static")&&(position!=="")) {}
+            else if (display==="block")
                 hispan=(fdjtDOM("div."+hclass));
             else if (display==="inline")
                 hispan=fdjtDOM("span."+hclass);
