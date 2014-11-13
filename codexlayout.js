@@ -330,31 +330,43 @@ fdjt.CodexLayout=
             // Now we actually duplicate it.  
             var id=node.id, baseid=node.getAttribute("data-baseid");
             if (!(id)) id=baseid;
+            var duplist=dups[id];
+            var last_dup=((duplist)&&(duplist.length)&&
+                          (duplist[duplist.length-1]));
             // If it doesn't have an ID, we give it one, because we'll want
             //  to refer to it later while wanting to avoid DOM cycles
             if (!(id)) id=node.id="CODEXTMPID"+(tmpid_count++);
-            else if (dups[id]) {
+            else if (duplist) {
                 // See if it's already been duplicated
-                var scan_dups=dups[id]; var d=scan_dups.length-1;
+                var d=duplist.length-1;
                 while (d>=0) {
-                    if (hasParent(scan_dups[d],page)) return scan_dups[d];
+                    if (hasParent(duplist[d],page)) return duplist[d];
                     else d--;}}
             // Duplicate it's parent
             var copy=node.cloneNode(false);
             var parent=dupContext(node.parentNode,page,dups,crumbs);
             var nodeclass=((node.className)&&(node.className.search)&&
                            (node.className))||"";
+            var lastclass=((last_dup)&&(last_dup.className)&&
+                           (last_dup.className.search)&&
+                           (last_dup.className));
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
             if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
                 node.className=nodeclass.replace(/\bcodexdupend\b/g,"codexdup");
                 stripBottomStyles(node,true);}
-            else {
+            else if (nodeclass.search(/\bcodexdupstart\b/g)<0) {
                 node.className=nodeclass+" codexdupstart";
-                copy.className=nodeclass.replace(/\bcodexrelocated\b/g,"")+
-                    " codexdupend";
                 stripBottomStyles(node,true);
-                stripTopStyles(copy,true);}
+                stripTopStyles(copy,true);
+                copy.className=nodeclass.replace(/\bcodexrelocated\b/g,"")+
+                    " codexdupend";}
+            else {}
+            if ((lastclass)&&
+                (lastclass.search(/\bcodexdupend\b/g)>=0)) {
+                last_dup.className=lastclass.replace(
+                        /\bcodexdupend\b/g,"codexdup");
+                stripBottomStyles(last_dup,true);}
             // if (copy.getAttribute("style")) 
             // If the original had an ID, save it in various ways
             if (id) {
@@ -362,7 +374,7 @@ fdjt.CodexLayout=
                 copy.setAttribute("data-baseid",id);
                 copy.removeAttribute("id");}
             // Record the copy you've made (to avoid recreation)
-            if (dups[id]) dups[id].push(copy);
+            if (duplist) duplist.push(copy);
             else dups[id]=[copy];
             // If it's got a copied context, append it to the context;
             //   otherwise, just append it to the page
