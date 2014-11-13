@@ -943,7 +943,8 @@ table.fdcompound.table th.key {
 div.fdjtdialog {
     position: fixed;
     background-color: slategray; color: black;
-    font-size: 200%; font-family: helvetica,sans,sans-serif;
+    font-family: helvetica,sans,sans-serif;
+    font-size: 2em; font-size: 3vw;
     width: 50%; left: 25%; right: 25%; box-sizing: border-box;
     top: 15%; height: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
@@ -1011,7 +1012,8 @@ div.fdjtdialog .closebutton {
     top: 4px; right: 0.5ex;
     cursor: pointer;}
 
-div.fdjtdialog.fdjtconfirm div.message {}
+div.fdjtdialog.fdjtconfirm div.message {
+    font-weight: bold;}
 div.fdjtdialog.fdjtconfirm div.message .smaller { font-size: 50%;}
 div.fdjtdialog.fdjtconfirm div.message p { text-align: left;}
 div.fdjtdialog.fdjtconfirm div.choices {
