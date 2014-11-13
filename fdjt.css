@@ -1000,7 +1000,7 @@ div.fdjtdialog p {
 div.fdjtdialog > div, div.fdjtdialog > span { vertical-align: middle;}
 
 div.fdjtdialog .countdown {
-    color: rgb(128,0,0); font-weight: bold; font-size: 75%;
+    color: rgb(128,0,0); font-weight: bold;
     position: absolute; height: 1em; top: 4px; left: 0.5ex;
     font-variant: small-caps;}
 div.fdjtdialog .countdown { display: none;}
@@ -1011,6 +1011,9 @@ div.fdjtdialog .closebutton {
     width: 1em; height: 1em;
     top: 4px; right: 0.5ex;
     cursor: pointer;}
+
+div.fdjtdialog div.choices button {
+    font-size: 60%;}
 
 div.fdjtdialog.fdjtconfirm div.message {
     font-weight: bold;}
@@ -1027,6 +1030,7 @@ div.fdjtdialog.fdjtconfirm div.choices button {
     -khtml-border-radius: 1ex;
     -moz-border-radius: 1ex;
     -o-border-radius: 1ex;}
+
 div.fdjtdialog.fdjtconfirm div.choices button.selected,
 div.fdjtdialog.fdjtconfirm div.choices button:focus {
     color: black; border: solid black 3px;}
@@ -1036,11 +1040,12 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
 }
 @media screen and (max-width: 800px) {
     div.fdjtdialog {
-	width: 80%; left: 10%; right: 10%;
-	font-size: 150%;}
-    div.fdjtdialog .closebutton {
-	width: 3ex; height: 3ex;}
+	width: 80%; left: 10%; right: 10%;}
 }
+@media (pointer: corase) {
+    div.fdjtdialog {
+	font-size: 150%;
+	font-size: 5vw;}}
 
 /* Tap Hold */
 
