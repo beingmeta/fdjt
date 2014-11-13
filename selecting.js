@@ -236,7 +236,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             while (i<lim) {
                 var wd=vec[i++];
                 if (wd==='­') {
-                    if (word) word=word+wd;
+                    if (word) {
+                        var nxt=vec[i];
+                        if (nxt) {word=word+wd+nxt; i++;}
+                        else word=word+wd;}
                     else word=wd;}
                 else {
                     if (word) out.push(word);
