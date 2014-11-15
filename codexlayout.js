@@ -523,7 +523,7 @@ fdjt.CodexLayout=
                     else move=moveNode(move,dup_parent||page,false,crumbs);}
                 if ((node)&&(node.nodeType===1)&&
                     (!hasContent(page,true,false,move)))
-                    markPageTop(node);
+                    markPageTop(move);
                 return node;}}
 
         // Reverting layout
