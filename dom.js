@@ -2692,24 +2692,27 @@ fdjt.DOM=
         fdjtDOM.tweakImage=tweakImage;
 
         /* Tweaking fonts */
-        function tweakScroller(node,delta,done,size,min,max,w,h){
-            var sw=node.scrollWidth, sh=node.scrollHeight;
+        function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h){
+            var sw=wrapper.scrollWidth, sh=wrapper.scrollHeight;
+            var wstyle=wrapper.style;
             if ((sw>=w)||(sh>=h)) delta=-delta;
-            if (!(size)) {size=100; node.style.fontSize=size+"%";}
+            if (!(size)) {size=100; wstyle.fontSize=size+"%";}
             if (!(min)) min=20;
             if (!(max)) max=150;
             var newsize=size+delta;
-            node.style.fontSize=newsize+"%";
-            var nw=node.scrollWidth, nh=node.scrollHeight;
+            wstyle.fontSize=newsize+"%"; wstyle.overflow="hidden";
+            var nw=wrapper.scrollWidth, nh=wrapper.scrollHeight;
             while ((size>=min)&&(size<=max)&&
                    ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h)))) {
                 size=newsize; newsize=newsize+delta;
-                node.style.fontSize=newsize+"%";
-                nw=node.scrollWidth; nh=node.scrollHeight;}
-            if (delta>0) return size-delta;
-            else return size;}
+                wstyle.fontSize=newsize+"%";
+                nw=wrapper.scrollWidth; nh=wrapper.scrollHeight;}
+            if (delta>0) {
+                wstyle.fontSize=size+"%";
+                return size;}
+            else return newsize;}
                 
-        function tweakFontSize(node,min_font,max_font){
+        function adjustFontSize(node,min_font,max_font){
             var h=node.offsetHeight, w=node.offsetWidth, odisplay;
             if ((h===0)||(w===0)) {
                 // Do a little to make the element visible if it's not.
@@ -2719,25 +2722,24 @@ fdjt.DOM=
                 if ((h===0)||(w===0)) return;}
             else {}
             var wrapper=wrapChildren(node), wstyle=wrapper.style, size=100;
-            wstyle.overflow='auto'; wstyle.fontSize=size+"%";
+            wstyle.overflow='hidden'; wstyle.fontSize=size+"%";
             h=node.offsetHeight; w=node.offsetWidth;
-            wstyle.height=h+'px'; wstyle.width=w+'px';
             var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
             var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
             if (typeof min === "string") min=parseInt(min,10);
             if (typeof max === "string") max=parseInt(max,10);
-            size=tweakScroller(wrapper,10,false,size,min,max,w,h);
-            size=tweakScroller(wrapper,5,false,size,min,max,w,h);
-            size=tweakScroller(wrapper,1,true,size,min,max,w,h);
+            size=adjustWrapperFont(wrapper,10,false,size,min,max,w,h);
+            size=adjustWrapperFont(wrapper,5,false,size,min,max,w,h);
+            size=adjustWrapperFont(wrapper,1,true,size,min,max,w,h);
             wstyle.overflow=''; wstyle.height=''; wstyle.width='';
             if (size===100) {
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));}
             return size;}
-        fdjtDOM.tweakFontSize=tweakFontSize;
+        fdjtDOM.adjustFontSize=fdjtDOM.tweakFontSize=adjustFontSize;
         
         fdjtDOM.autofont=".fdjtadjustfont,.adjustfont";
-        function tweakFonts(arg){
+        function adjustFonts(arg){
             var all=[];
             if (!(arg)) all=fdjtDOM.$(fdjtDOM.autofont);
             else if (arg.nodeType) 
@@ -2751,15 +2753,16 @@ fdjt.DOM=
                     all=fdjtDOM.$(arg);}}
             else all=fdjtDOM.$(fdjtDOM.autofont);
             var i=0, lim=all.length;
-            while (i<lim) tweakFontSize(all[i++]);}
-        fdjtDOM.tweakFont=fdjtDOM.tweakFonts=tweakFonts;
+            while (i<lim) adjustFontSize(all[i++]);}
+        fdjtDOM.tweakFont=fdjtDOM.tweakFonts=
+            fdjtDOM.adjustFont=fdjtDOM.adjustFonts=adjustFonts;
         
-        function autoTweakFonts(){
-            if (fdjtDOM.noautotweakfonts) return;
-            tweakFonts();
-            fdjtDOM.addListener(window,"resize",tweakFonts);}
+        function autoAdjustFonts(){
+            if (fdjtDOM.noautofonts) return;
+            adjustFonts();
+            fdjtDOM.addListener(window,"resize",adjustFonts);}
 
-        fdjt.addInit(autoTweakFonts);
+        fdjt.addInit(autoAdjustFonts);
         
         function addUSClasses(){
             var device=fdjt.device;
