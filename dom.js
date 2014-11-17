@@ -2744,6 +2744,7 @@ fdjt.DOM=
             size=adjustWrapperFont(wrapper,5,false,size,min,max,w,h);
             size=adjustWrapperFont(wrapper,1,true,size,min,max,w,h);
             wstyle.overflow=''; wstyle.height=''; wstyle.width='';
+            node.style.display=odisplay;
             if (size===100) {
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));}
