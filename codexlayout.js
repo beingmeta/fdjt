@@ -216,7 +216,8 @@ fdjt.CodexLayout=
 
         /* Scaling elements and nodes */
 
-        var tweakFont=fdjt.DOM.tweakFont;
+        var adjustFontSize=fdjt.DOM.adjustFontSize;
+        var adjustFonts=fdjt.DOM.adjustFonts;
         var tweakImage=fdjt.DOM.tweakImage;
 
         function scaleToPage(elt,width,height,leavefont){
@@ -277,7 +278,7 @@ fdjt.CodexLayout=
                          ("top center"));
                      elt.parentNode.replaceChild(wrapper,elt);}
                 else {
-                    tweakFont(elt,false,tw,th);
+                    adjustFontSize(elt,false,tw,th);
                     if (cstyle.display==="inline")
                         style.display="inline-block";
                     style.width=tw+"px"; style.height=th+"px";}
@@ -595,6 +596,7 @@ fdjt.CodexLayout=
                     if (os) rs.setAttribute("style",os);
                     else rs.removeAttribute("style");
                     rs.removeAttribute("data-savedstyle");}}
+            fdjtDOM.unwrapChildren("div.fdjtfontwrapper");
             dropClass(toArray(layout.container.getElementsByClassName(
                 "codexdupstart")),
                       "codexdupstart");
@@ -811,15 +813,15 @@ fdjt.CodexLayout=
                 if (fullpage) {
                     if (root.tagName==="IMG")
                         tweakImage(root,page_width,page_height);
-                    else tweakFont(root,page,page_width,page_height);}
+                    else adjustFonts(root,root);}
                 else if (singlepage) {
                     if (root.tagName==="IMG")
                         tweakImage(root,page_width,page_height);
-                    else tweakFont(root,page,page_width,page_height,false,100);}
+                    else adjustFonts(root,root);}
                 else {}
                 var geom=getGeom(root,page);
                 if (singlepage) {
-                    var pw=geom.width, ph=geom.height;
+                    var pw=page.scrollWidth, ph=page.scrollHeight;
                     if ((pw>page_width)||(ph>page_height))
                         addClass(page,"codexoversize");
                     else if ((fullpage)&&
@@ -2068,12 +2070,11 @@ fdjt.CodexLayout=
             var adjust_node=fdjtDOM.scaleToFit.adjust;
             function finishPage(completed) {
                 addClass(completed,"codexworkpage"); 
-                fdjtDOM.tweakFonts(completed);
                 var undersize=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
+                if ((oversize)||(undersize))
+                    fdjtDOM.adjustFontSize(completed);
                 if (((oversize)||(undersize))&&(scale_pages)) {
-                    addClass(completed,"codexworkpage");
-                    fdjtDOM.tweakFonts(completed);
                     var iw=completed.scrollWidth, ih=completed.scrollHeight;
                     var ow=completed.offsetWidth, oh=completed.offsetHeight;
                     var noscale=((oversize)?
