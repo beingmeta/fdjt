@@ -1008,7 +1008,7 @@ div.fdjtdialog.closing .countdown { display: block;}
 div.fdjtdialog .closebutton {
     position: absolute;
     width: 1em; height: 1em;
-    top: 4px; right: 0.5ex;
+    top: 4px; right: 1ex;
     cursor: pointer;}
 
 div.fdjtdialog div.choices button {
