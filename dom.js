@@ -192,7 +192,7 @@ fdjt.DOM=
 
         /* Wrapping children */
         function wrapChildren(node,spec){
-            if (!(spec)) spec="div.fdjtfontwrapper";
+            if (!(spec)) spec="div.fdjtwrapper";
             var wrapper=getFirstChild(node,spec);
             if ((wrapper)&&(wrapper.nodeType)&&
                 (wrapper.parentNode===node))
@@ -201,10 +201,16 @@ fdjt.DOM=
             node.appendChild(wrapper);
             return wrapper;}
         fdjtDOM.wrapChildren=wrapChildren;
-        function unwrapChildren(node){
-            var frag=document.createFragment();
-            domappend(frag,toArray(node.childNodes));
-            node.parentNode.replaceChild(frag,node);}
+        function unwrapChildren(nodes){
+            if (typeof nodes === "string") 
+                nodes=fdjt.DOM.$(nodes);
+            else if (nodes.nodeType)
+                nodes=[nodes];
+            else {}
+            var i=0, lim=nodes.length; while (i<lim) {
+                var node=nodes[i++], frag=document.createFragment();
+                domappend(frag,toArray(node.childNodes));
+                node.parentNode.replaceChild(frag,node);}}
         fdjtDOM.unwrapChildren=unwrapChildren;
 
         /* Utility patterns and functions */
@@ -2692,18 +2698,19 @@ fdjt.DOM=
         fdjtDOM.tweakImage=tweakImage;
 
         /* Tweaking fonts */
+
         function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h){
             var sw=wrapper.scrollWidth, sh=wrapper.scrollHeight;
             var wstyle=wrapper.style;
-            if ((sw>=w)||(sh>=h)) delta=-delta;
+            if ((sw>w)||(sh>h)) delta=-delta;
             if (!(size)) {size=100; wstyle.fontSize=size+"%";}
             if (!(min)) min=20;
             if (!(max)) max=150;
             var newsize=size+delta;
-            wstyle.fontSize=newsize+"%"; wstyle.overflow="hidden";
+            wstyle.fontSize=newsize+"%";
             var nw=wrapper.scrollWidth, nh=wrapper.scrollHeight;
             while ((size>=min)&&(size<=max)&&
-                   ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h)))) {
+                   ((delta>0)?((nw<=w)&&(nh<=h)):((nw>w)||(nh>h)))) {
                 size=newsize; newsize=newsize+delta;
                 wstyle.fontSize=newsize+"%";
                 nw=wrapper.scrollWidth; nh=wrapper.scrollHeight;}
@@ -2717,13 +2724,18 @@ fdjt.DOM=
             if ((h===0)||(w===0)) {
                 // Do a little to make the element visible if it's not.
                 odisplay=node.style.display;
-                node.style.dislay='initial';
+                node.style.display='initial';
                 h=node.offsetHeight; w=node.offsetWidth;
                 if ((h===0)||(w===0)) return;}
             else {}
-            var wrapper=wrapChildren(node), wstyle=wrapper.style, size=100;
-            wstyle.overflow='hidden'; wstyle.fontSize=size+"%";
-            h=node.offsetHeight; w=node.offsetWidth;
+            var wrapper=wrapChildren(node,"div.fdjtfontwrapper");
+            var wstyle=wrapper.style, size=100;
+            wstyle.overflow='hidden';
+            wstyle.boxSizing='border-box';
+            wstyle.padding=wstyle.margin="0px !important;";
+            wstyle.fontSize=size+"%";
+            var geom=getGeometry(node,false,true);
+            w=geom.inner_width; h=geom.inner_height;
             var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
             var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
             if (typeof min === "string") min=parseInt(min,10);
@@ -2739,24 +2751,46 @@ fdjt.DOM=
         fdjtDOM.adjustFontSize=fdjtDOM.tweakFontSize=adjustFontSize;
         
         fdjtDOM.autofont=".fdjtadjustfont,.adjustfont";
-        function adjustFonts(arg){
+        function adjustFonts(arg,top){
             var all=[];
             if (!(arg)) all=fdjtDOM.$(fdjtDOM.autofont);
-            else if (arg.nodeType) 
-                all=fdjtDOM.getChildren(arg,fdjtDOM.autofont);
             else if (typeof arg === "string") {
-                if (document.getElementByID(arg)) {
+                if (document.getElementByID(arg)) 
                     all=[document.getElementByID(arg)];
-                    fdjtDOM.autofont.push("#"+arg);}
                 else {
                     fdjtDOM.autofont=fdjtDOM.autofont+","+arg;
                     all=fdjtDOM.$(arg);}}
+            else if (arg.nodeType===1) {
+                var sel=new Selector(fdjtDOM.autofont);
+                if (sel.match(arg))
+                    all=[all];
+                else all=fdjtDOM.getChildren(arg,fdjtDOM.autofont);}
             else all=fdjtDOM.$(fdjtDOM.autofont);
             var i=0, lim=all.length;
-            while (i<lim) adjustFontSize(all[i++]);}
+            if (lim) while (i<lim) adjustFontSize(all[i++]);
+            else if (top) adjustFontSize(top);}
         fdjtDOM.tweakFont=fdjtDOM.tweakFonts=
             fdjtDOM.adjustFont=fdjtDOM.adjustFonts=adjustFonts;
         
+        function adjustPositionedChildren(node){
+            if ((!(node))||(node.nodeType!==1)) return;
+            var style=getStyle(node);
+            if ((node.childNodes)&&(node.childNodes.length)) {
+                var children=node.childNodes; var i=0, lim=children.length;
+                while (i<lim) {
+                    var child=children[i++];
+                    if (child.nodeType===1)
+                        adjustPositionedChildren(child);}}
+            if (((style.display==='block')||(style.display==='inline-block'))&&
+                ((style.position==='absolute')||(style.position==='fixed')))
+                adjustFontSize(node);}
+        function adjustLayoutFonts(node){
+            var marked=fdjtDOM.getChildren(node,fdjtDOM.autofont);
+            var i=0, lim=marked.length;
+            if (lim===0) adjustPositionedChildren(node);
+            else while (i<lim) adjustFontSize(marked[i++]);}
+        fdjtDOM.adjustLayoutFonts=adjustLayoutFonts;
+
         function autoAdjustFonts(){
             if (fdjtDOM.noautofonts) return;
             adjustFonts();
