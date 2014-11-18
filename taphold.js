@@ -348,7 +348,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
             if (holdclass)
-                setTimeout(function(){dropClass(elt,holdclass);},20);
+                setTimeout(function(){
+                    if (!(th_target)) dropClass(elt,holdclass);},
+                           50);
             if ((target_time)&&(target_time<200)) {
                 if (trace)
                     fdjtLog("TapHold(%s) %d=i<200ms, target=%o not %o",
@@ -364,7 +366,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 var rel=evt.relatedTarget||eTarget(evt);
                 if (rel!==target) also.relatedTarget=rel;}
             if (holdclass)
-                setTimeout(function(){dropClass(elt,holdclass);},20);
+                setTimeout(function(){
+                    if (!(th_target)) dropClass(elt,holdclass);},
+                           50);
             return synthEvent(target,"slip",th,evt,touch_x,touch_y,also);}
         function taptapped(target,evt){
             return synthEvent(target,"taptap",th,evt,
