@@ -2726,7 +2726,9 @@ fdjt.DOM=
                 odisplay=node.style.display;
                 node.style.display='initial';
                 h=node.offsetHeight; w=node.offsetWidth;
-                if ((h===0)||(w===0)) return;}
+                if ((h===0)||(w===0)) {
+                    node.style.display=odisplay;
+                    return;}}
             else {}
             var wrapper=wrapChildren(node,"div.fdjtfontwrapper");
             var wstyle=wrapper.style, size=100;
@@ -2734,6 +2736,8 @@ fdjt.DOM=
             wstyle.boxSizing='border-box';
             wstyle.padding=wstyle.margin="0px !important;";
             wstyle.fontSize=size+"%";
+            wstyle[fdjtDOM.transitionProperty]='none';
+            wstyle.visibility='hidden';
             var geom=getGeometry(node,false,true);
             w=geom.inner_width; h=geom.inner_height;
             var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
@@ -2743,11 +2747,18 @@ fdjt.DOM=
             size=adjustWrapperFont(wrapper,10,false,size,min,max,w,h);
             size=adjustWrapperFont(wrapper,5,false,size,min,max,w,h);
             size=adjustWrapperFont(wrapper,1,true,size,min,max,w,h);
-            wstyle.overflow=''; wstyle.height=''; wstyle.width='';
             node.style.display=odisplay;
             if (size===100) {
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));}
+            else {
+                wstyle.overflow=''; 
+                wstyle[fdjtDOM.transitionProperty]='';
+                var cwstyle=getStyle(wrapper);
+                if (cwstyle[fdjtDOM.transitionProperty]) { 
+                    wstyle.fontSize=''; wstyle.visibility='';
+                    wstyle.fontSize=size+"%";}
+                else wstyle.visibility='';}
             return size;}
         fdjtDOM.adjustFontSize=fdjtDOM.tweakFontSize=adjustFontSize;
         
