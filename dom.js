@@ -208,7 +208,8 @@ fdjt.DOM=
                 nodes=[nodes];
             else {}
             var i=0, lim=nodes.length; while (i<lim) {
-                var node=nodes[i++], frag=document.createFragment();
+                var node=nodes[i++];
+                var frag=document.createDocumentFragment();
                 domappend(frag,toArray(node.childNodes));
                 node.parentNode.replaceChild(frag,node);}}
         fdjtDOM.unwrapChildren=unwrapChildren;
