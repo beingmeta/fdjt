@@ -648,7 +648,7 @@ fdjt.CodexLayout=
             var serialize=false; // Stop timeslicing
             this.serialize=function(val){
                 if (typeof val === "undefined") serialize=true;
-                else serialize=val;}
+                else serialize=val;};
 
             // What constitutes a short page
             var short_page_height=
