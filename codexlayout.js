@@ -645,6 +645,11 @@ fdjt.CodexLayout=
             
             var pagefn=(init.pagefn)||false;
 
+            var serialize=false; // Stop timeslicing
+            this.serialize=function(val){
+                if (typeof val === "undefined") serialize=true;
+                else serialize=val;}
+
             // What constitutes a short page
             var short_page_height=
                 ((init.hasOwnProperty("short_page_height"))&&
@@ -1042,13 +1047,15 @@ fdjt.CodexLayout=
                             while (i<len) {
                                 var ch=children[i++];
                                 if (ch.nodeType===1)
-                                    gatherBlocks(root,ch,blocks,terminals,styles);}
+                                    gatherBlocks(
+                                        root,ch,blocks,terminals,styles);}
                             if (blocks.length===total_blocks)
                                 terminals[loc]=node;}
                         else terminals[loc]=node;
                         if (terminals[loc]) checkTerminal(node,root);
                         moveUp(node);}
-                    else if ((style.position==='static')&&(node.tagName==='A')) {
+                    else if ((style.position==='static')&&
+                             (node.tagName==='A')) {
                         var anchor_elts=node.childNodes;
                         var j=0; var n_elts=anchor_elts.length;
                         while (j<n_elts) {
@@ -1118,7 +1125,8 @@ fdjt.CodexLayout=
                 function handle_unbreakable(block,style,geom,tracing) {
                     // We can't break this block (for various reasons)
                     var curpage=page; tracing=false; // ignored
-                    if ((drag.length)&&(badBreak(drag[0],page))) {
+                    var newblock=false;
+                    if ((drag.length)&&(atPageTop(drag[0],page))) {
                         // A new page won't make a difference
                         //  because we're dragging the rest of
                         //  the current page anyway, so we
@@ -1137,25 +1145,30 @@ fdjt.CodexLayout=
                             return false;}
                         else {
                             // We need to leave the dragged elements behind
-                            layout.drag=drag=[]; block=newPage(block)||block;
+                            layout.drag=drag=[];
+                            newblock=newPage(block);
                             if (page===curpage)
                                 return false; // probably "codexoversize"
-                            else return block;}}
+                            else if (((!(break_blocks))||
+                                      ((atomic)&&(atomic.match(newblock)))||
+                                      (avoidBreakInside(newblock))||
+                                      (hasClass(newblock,"codexcantsplit")))) {
+                                // layout.drag=drag=[];
+                                return false;}
+                            else return newblock;}}
                     else {
                         // We just make a new page for the block
-                        // return newPage(block);
-                        block=newPage(block)||block;
+                        newblock=newPage(block);
                         if (page===curpage)
                             return false; // probably "codexoversize"
-                        else return block;}}
+                        else if (((!(break_blocks))||
+                                  ((atomic)&&(atomic.match(newblock)))||
+                                  (avoidBreakInside(newblock))||
+                                  (hasClass(newblock,"codexcantsplit")))) {
+                            // layout.drag=drag=[];
+                            return false;}
+                        else return newblock;}}
 
-                function badBreak(node,page){
-                    if (atPageTop(node,page)) return true;
-                    else {
-                        var geom=getGeom(node,page);
-                        if (geom.top<(page_height*0.7)) return true;
-                        else return false;}}
-                
                 function isLastChild(node){
                     var scan=node.nextSibling;
                     while (scan) {
@@ -1688,7 +1701,7 @@ fdjt.CodexLayout=
                 function loop(){
                     var loop_start=fdjtTime();
                     while ((ni<nblocks)&&
-                           ((!(timeslice))||
+                           ((!(timeslice))||(serialize)||
                             ((fdjtTime()-loop_start)<timeslice)))
                         step();
                     if (progressfn) progressfn(layout);
