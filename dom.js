@@ -2703,7 +2703,7 @@ fdjt.DOM=
         function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h){
             var sw=wrapper.scrollWidth, sh=wrapper.scrollHeight;
             var wstyle=wrapper.style;
-            if ((sw>w)||(sh>h)) delta=-delta;
+            if ((sw>=w)||(sh>=h)) delta=-delta;
             if (!(size)) {size=100; wstyle.fontSize=size+"%";}
             if (!(min)) min=20;
             if (!(max)) max=150;
