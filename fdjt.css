@@ -1182,6 +1182,13 @@ table.fdjtform .usebaseline th,
 table.fdjtform .usebaseline td {
     vertical-align: baseline;}
 
+/* Some font family classes */
+
+.widesans, .wide_sans { font-family: Verdana, Geneva, sans-serif;}
+.narrowsans, .narrow_sans { font-family: Helvetica,Arial,sans-serif;}
+.wideserif, .wide_serif { font-family: Georgia,Utopia,Charter,serif;}
+.narrowserif, .narrow_serif { font-family: 'Times New Roman',Times, serif;}
+
 /* Add named breakpoints */
 
 @media all and (max-width: 800px) and (min-width: 500px) {
