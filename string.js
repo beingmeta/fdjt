@@ -115,7 +115,8 @@ fdjt.String=
                     output=output+"."+arg.className.replace(/\s+/g,'.');
                 if (arg.id) output=output+"#"+arg.id;
                 if (arg.name) output=output+"[name="+arg.name+"]";
-                var txt=arg.innerText.trim();
+                var txt=((arg.innerText)?(arg.innerText.trim()):
+                         (stripMarkup(arg.innerHTML).trim()));
                 if ((!(txt))||(txt.length===0)) {}
                 else if (txt.length<32)
                     output=output+'\''+txt.replace(/\n/g,'\\n')+'\'';
@@ -579,7 +580,8 @@ fdjt.String=
         fdjtString.prefixFind=prefixFind;
 
         function paraHash(node){
-            var text=node.innerText;
+            var text=((typeof node.innerText === "string")?
+                      (node.innerText):(stripMarkup(node.innerHTML)));
             var words=text.split(/\W*\S+\W*/g);
             var len=words.length;
             return "_H"+
