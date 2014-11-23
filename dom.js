@@ -2700,12 +2700,20 @@ fdjt.DOM=
 
         /* Tweaking fonts */
 
-        function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h){
+        function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h,fudge){
             var sw=wrapper.offsetWidth, sh=wrapper.offsetHeight;
             var wstyle=wrapper.style;
-            if ((sw===w)&&(sh<=h)) return size;
-            else if ((sh===h)&&(sw<=w)) return size;
-            if ((sw>=w)||(sh>=h)) delta=-delta;
+            if (typeof fudge!== "number") fudge=1;
+
+            // These are cases where one dimension is on the edge but
+            // the other dimension is inside the edge
+            if ((sw<=w)&&(sh<=h)&&(sh>=(h-fudge))) return size;
+            // We actually skip this case because increasing the font size
+            //  might not increase the width if it forces a new line break
+            // else if ((sh<=h)&&(sw<=w)&&(sw>=(w-fudge))) return size;
+
+            // Figure out if we need to grow or shrink 
+            if ((sw>w)||(sh>h)) delta=-delta;
             if (!(size)) {size=100; wstyle.fontSize=size+"%";}
             if (!(min)) min=20;
             if (!(max)) max=150;
@@ -2726,51 +2734,69 @@ fdjt.DOM=
                 return size;}
             else return newsize;}
                 
-        function adjustFontSize(node,min_font,max_font){
-            var h=node.offsetHeight, w=node.offsetWidth, odisplay;
+        function adjustFontSize(node,min_font,max_font,fudge){
+            var h=node.offsetHeight, w=node.offsetWidth;
+            var node_display=false; // node_position=false;
             if ((h===0)||(w===0)) {
                 // Do a little to make the element visible if it's not.
-                odisplay=node.style.display;
+                node_display=node.style.display;
                 node.style.display='initial';
                 h=node.offsetHeight; w=node.offsetWidth;
                 if ((h===0)||(w===0)) {
-                    node.style.display=odisplay;
+                    node.style.display=node_display;
                     return;}}
             else {}
             if ((h===0)||(w===0)) {
-                node.style.display=odisplay;
+                node.style.display=node_display;
                 return;}
             var wrapper=wrapChildren(node,"div.fdjtfontwrapper");
             var wstyle=wrapper.style, size=100;
-            wstyle.overflow='auto';
             wstyle.boxSizing='border-box';
-            wstyle.padding=wstyle.margin="0px !important;";
+            wstyle.padding=wstyle.margin="0px";
             wstyle.fontSize=size+"%";
             wstyle.transitionProperty='none';
             wstyle.transitionDuration='0s';
+            wstyle.maxWidth=Math.floor(w)+"px";
             wstyle[fdjtDOM.transitionProperty]='none';
             wstyle[fdjtDOM.transitionDuration]='0s';
             wstyle.visibility='visible';
+            // Recompute the width and height just in case wrapping generated
+            // weirdness
             var geom=getGeometry(node,false,true);
             w=geom.inner_width; h=geom.inner_height;
+            fdjtLog("Adjusting %o to %dx%d using %o, currently %dx%d",
+                    node,w,h,wrapper,wrapper.scrollWidth,wrapper.scrollHeight);
+            // This ensures that scrollHeight!==offsetHeight
+            // It's necessary for Firefox, at least, which keeps them the
+            //  same without scrolling.
+            wstyle.overflow='auto';
             if ((h===0)||(w===0)) {
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));
-                node.style.display=odisplay;
+                node.style.display=node_display;
                 return;}
             var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
             var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
-            if (typeof min === "string") min=parseInt(min,10);
-            if (typeof max === "string") max=parseInt(max,10);
-            size=adjustWrapperFont(wrapper,10,false,size,min,max,w,h);
-            size=adjustWrapperFont(wrapper,5,false,size,min,max,w,h);
-            size=adjustWrapperFont(wrapper,1,true,size,min,max,w,h);
-            node.style.display=odisplay;
+            if (typeof fudge!=="number") fudge=node.getAttribute("data-fudge");
+            if (typeof min === "string") min=parseFloat(min,10);
+            if (typeof max === "string") max=parseFloat(max,10);
+            if (typeof fudge === "string") fudge=parseInt(fudge,10);
+            if (typeof fudge !== "number") fudge=2;
+            size=adjustWrapperFont(wrapper,10,false,size,min,max,w,h,fudge);
+            size=adjustWrapperFont(wrapper,5,false,size,min,max,w,h,fudge);
+            size=adjustWrapperFont(wrapper,1,true,size,min,max,w,h,fudge);
+            node.style.display=node_display;
             if (size===100) {
+                fdjtLog("No need to adjust %o to %dx%d, wrapper @ %d,%d",
+                        node,w,h,wrapper.scrollWidth,wrapper.scrollHeight);
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));}
             else {
                 wstyle.overflow='';
+                fdjtLog("Adjusted (%s) %o towards %dx%d, wrapper @ %d,%d",
+                        wstyle.fontSize,node,w,h,
+                        wrapper.scrollWidth,wrapper.scrollHeight); 
+                // We reset all of these
                 wstyle.transitionProperty='';
                 wstyle.transitionDuration='';
                 wstyle[fdjtDOM.transitionProperty]='';
@@ -2825,7 +2851,7 @@ fdjt.DOM=
         fdjtDOM.adjustLayoutFonts=adjustLayoutFonts;
 
         function autoAdjustFonts(){
-            if (fdjtDOM.noautofonts) return;
+            if (fdjtDOM.noautofontadjust) return;
             adjustFonts();
             fdjtDOM.addListener(window,"resize",adjustFonts);}
 
