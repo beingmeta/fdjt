@@ -1212,7 +1212,7 @@ fdjt.UI.ProgressBar=(function(){
     function toggle(arg){
         var evt=false;
         if (!(arg)) {
-            evt=event||false;
+            evt=window.event||false;
             if (evt) arg=fdjtUI.T(evt);
             else return;}
         else if (typeof arg === 'string') arg=fdjtID(arg);
