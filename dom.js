@@ -2701,8 +2701,10 @@ fdjt.DOM=
         /* Tweaking fonts */
 
         function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h){
-            var sw=wrapper.scrollWidth, sh=wrapper.scrollHeight;
+            var sw=wrapper.offsetWidth, sh=wrapper.offsetHeight;
             var wstyle=wrapper.style;
+            if ((sw===w)&&(sh<=h)) return size;
+            else if ((sh===h)&&(sw<=w)) return size;
             if ((sw>=w)||(sh>=h)) delta=-delta;
             if (!(size)) {size=100; wstyle.fontSize=size+"%";}
             if (!(min)) min=20;
@@ -2714,6 +2716,10 @@ fdjt.DOM=
                    ((delta>0)?((nw<=w)&&(nh<=h)):((nw>w)||(nh>h)))) {
                 size=newsize; newsize=newsize+delta;
                 wstyle.fontSize=newsize+"%";
+                /* fdjtLog(
+                   "Adjust %o to %dx%d %o: size=%d=%d+(%d), %dx%d => %dx%d",
+                   wrapper.parentNode,w,h,wrapper,newsize,size,delta,
+                   nw,nh,wrapper.scrollWidth,wrapper.scrollHeight); */
                 nw=wrapper.scrollWidth; nh=wrapper.scrollHeight;}
             if (delta>0) {
                 wstyle.fontSize=size+"%";
@@ -2731,16 +2737,27 @@ fdjt.DOM=
                     node.style.display=odisplay;
                     return;}}
             else {}
+            if ((h===0)||(w===0)) {
+                node.style.display=odisplay;
+                return;}
             var wrapper=wrapChildren(node,"div.fdjtfontwrapper");
             var wstyle=wrapper.style, size=100;
-            wstyle.overflow='hidden';
+            wstyle.overflow='auto';
             wstyle.boxSizing='border-box';
             wstyle.padding=wstyle.margin="0px !important;";
             wstyle.fontSize=size+"%";
+            wstyle.transitionProperty='none';
+            wstyle.transitionDuration='0s';
             wstyle[fdjtDOM.transitionProperty]='none';
-            wstyle.visibility='hidden';
+            wstyle[fdjtDOM.transitionDuration]='0s';
+            wstyle.visibility='visible';
             var geom=getGeometry(node,false,true);
             w=geom.inner_width; h=geom.inner_height;
+            if ((h===0)||(w===0)) {
+                node.removeChild(wrapper);
+                fdjtDOM.append(node,toArray(wrapper.childNodes));
+                node.style.display=odisplay;
+                return;}
             var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
             var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
             if (typeof min === "string") min=parseInt(min,10);
@@ -2753,8 +2770,11 @@ fdjt.DOM=
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));}
             else {
-                wstyle.overflow=''; 
+                wstyle.overflow='';
+                wstyle.transitionProperty='';
+                wstyle.transitionDuration='';
                 wstyle[fdjtDOM.transitionProperty]='';
+                wstyle[fdjtDOM.transitionDuration]='';
                 var cwstyle=getStyle(wrapper);
                 if (cwstyle[fdjtDOM.transitionProperty]) { 
                     wstyle.fontSize=''; wstyle.visibility='';
