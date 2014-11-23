@@ -2410,8 +2410,8 @@ fdjt.CodexLayout=
                 CodexLayout.layoutDB=layoutDB=window.localStorage;
                 doinit=ondbinit; ondbinit=false;
                 if (doinit) doinit();};
-            req.onsuccess=function(event) {
-                var db=event.target.result;
+            req.onsuccess=function(evt) {
+                var db=evt.target.result;
                 if (CodexLayout.trace)
                     fdjtLog("Using existing indexedDB layout cache");
                 if (dbinit_timeout) clearTimeout(dbinit_timeout);
@@ -2419,8 +2419,8 @@ fdjt.CodexLayout=
                 CodexLayout.cache=7;
                 doinit=ondbinit; ondbinit=false;
                 if (doinit) doinit();};
-            req.onupgradeneeded=function(event) {
-                var db=event.target.result;
+            req.onupgradeneeded=function(evt) {
+                var db=evt.target.result;
                 if (dbinit_timeout) clearTimeout(dbinit_timeout);
                 db.onerror=function(event){
                     fdjtLog("Unexpected error caching layouts: %d",
@@ -2573,8 +2573,8 @@ fdjt.CodexLayout=
                 var txn=layoutDB.transaction(["layouts"]);
                 var storage=txn.objectStore("layouts");
                 var req=storage.get(layout_key);
-                req.onsuccess=function(event){
-                    var target=event.target;
+                req.onsuccess=function(evt){
+                    var target=evt.target;
                     var result=((target)&&(target.result));
                     if (result) gotLayout(layout_id);
                     if (!(result)) callback(false);
