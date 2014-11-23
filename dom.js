@@ -2740,22 +2740,18 @@ fdjt.DOM=
                 
         function adjustFontSize(node,min_font,max_font,fudge){
             var h=node.offsetHeight, w=node.offsetWidth;
-            var node_display='', node_height='';
+            var node_display='';
             if ((h===0)||(w===0)) {
                 // Do a little to make the element visible if it's not.
                 node_display=node.style.display;
-                node_height=node.style.height;
                 node.style.display='initial';
-                node.style.height='initial';
                 h=node.offsetHeight; w=node.offsetWidth;
                 if ((h===0)||(w===0)) {
                     node.style.display=node_display;
-                    node.style.height=node_height;
                     return;}}
             else {}
             if ((h===0)||(w===0)) {
                 node.style.display=node_display;
-                node.style.height=node_height;
                 return;}
             var wrapper=wrapChildren(node,"div.fdjtfontwrapper");
             var wstyle=wrapper.style, size=100;
@@ -2782,7 +2778,6 @@ fdjt.DOM=
             if ((h===0)||(w===0)) {
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));
-                node.style.height=node_height;
                 node.style.display=node_display;
                 return;}
             var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
@@ -2796,7 +2791,6 @@ fdjt.DOM=
             size=adjustWrapperFont(wrapper,5,false,size,min,max,w,h,fudge);
             size=adjustWrapperFont(wrapper,1,true,size,min,max,w,h,fudge);
             node.style.display=node_display;
-            node.style.height=node_height;
             if (size===100) {
                 /* fdjtLog("No need to adjust %o to %dx%d, wrapper @ %d,%d",
                    node,w,h,wrapper.scrollWidth,wrapper.scrollHeight); */
