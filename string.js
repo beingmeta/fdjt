@@ -626,15 +626,16 @@ fdjt.String=
                     var match=substs[i++];
                     var prop=match.slice(2,-2);
                     if (done[prop]) continue;
-                    var pat=new RegExp("\\{\\{"+prop+"\\}\\}","gm");
                     if (!(data.hasOwnProperty(prop))) {
-                        fdjt.Log.warn("No data for %s in %s to use in %s",
+                        fdjt.Log.warn("No data for %s in %j to use in %s",
                                       prop,data,text);
+                        done[prop]=prop;}
+                    else {
+                        var pat=new RegExp("\\{\\{"+prop+"\\}\\}","gm");
+                        var val=data[prop], stringval=val.toString();
                         done[prop]=prop;
-                        continue;}
-                    var val=data[prop];
-                    done[prop]=prop;
-                    text=text.replace(pat,val.toString());}}
+                        // fdjt.Log("Replacing %s with %s using %s",prop,val,pat);
+                        text=text.replace(pat,stringval);}}}
             if (dom) {
                 if (dom.nodeType===3) dom.nodeValue=text;
                 else dom.innerHTML=text;
