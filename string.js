@@ -620,20 +620,25 @@ fdjt.String=
             else {
                 fdjt.Log.warn("Bad argument %o to Template",text);
                 return;}
-            var substs=text.match(/\{\{\w+\}\}/gm), done={};
+            var substs=text.match(/\{\{\w+(\|([^\}])*)?\}\}/gm), done={};
             if ((substs)&&(substs.length)) {
                 var i=0, n=substs.length; while (i<n) {
                     var match=substs[i++];
                     var prop=match.slice(2,-2);
-                    if (done[prop]) continue;
-                    if (!(data.hasOwnProperty(prop))) {
-                        fdjt.Log.warn("No data for %s in %j to use in %s",
-                                      prop,data,text);
-                        done[prop]=prop;}
+                    var propname=((prop.search(/\|/)>=0)?
+                                  (prop.slice(0,prop.search(/\|/))):
+                                  (prop));
+                    if (done[propname]) continue;
+                    if (!(data.hasOwnProperty(propname))) {
+                        fdjt.Log.warn("No data for %s in %j to use",prop,data,text);
+                        var rpat=/\{\{\w+\|([^\}]*)\}\}/gm;
+                        text=text.replace(rpat,"$1");
+                        done[propname]=prop;}
                     else {
-                        var pat=new RegExp("\\{\\{"+prop+"\\}\\}","gm");
-                        var val=data[prop], stringval=val.toString();
-                        done[prop]=prop;
+                        var pat=new RegExp(
+                            "\\{\\{"+propname+"(\\|[^\\}]*)?\\}\\}","gm");
+                        var val=data[propname], stringval=val.toString();
+                        done[propname]=prop;
                         // fdjt.Log("Replacing %s with %s using %s",prop,val,pat);
                         text=text.replace(pat,stringval);}}}
             if (dom) {
