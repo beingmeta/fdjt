@@ -389,8 +389,7 @@ fdjt.CodexLayout=
                 node.setAttribute("data-savedstyle",style.cssText);
             style.paddingBottom="0px";
             style.borderBottomWidth="0px";
-            style.marginBottom="0px";
-            style.pageBreakAfter="auto";}
+            style.marginBottom="0px";}
         function stripTopStyles(node,keep){
             var style=node.style;
             if ((keep)&&(!(node.getAttribute("data-savedstyle"))))
@@ -398,8 +397,7 @@ fdjt.CodexLayout=
             style.textIndent="0px";
             style.paddingTop="0px";
             style.borderTopWidth="0px";
-            style.marginTop="0px";
-            style.pageBreakBefore="auto";}
+            style.marginTop="0px";}
 
         /* Moving nodes */
 
