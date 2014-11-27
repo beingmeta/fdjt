@@ -466,7 +466,7 @@ fdjt.CodexLayout=
             if ((!force)&&(hasClass(node,"codexpagetop"))) return;
             var nodestyle=node.getAttribute("style")||"";
             var newstyle=nodestyle+((nodestyle)?("; "):(""))+
-                "margin-top: 0px !important; padding-top: 0px;";
+                "margin-top: 0px !important;";
             if (!(node.getAttribute("data-savedstyle")))
                 node.setAttribute("data-savedstyle",nodestyle);
             node.setAttribute("style",newstyle);
