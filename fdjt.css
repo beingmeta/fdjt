@@ -83,7 +83,9 @@ div.fdjtclearfloats {
 .checkspan.disabled { opacity: 0.5; cursor: auto;}
 .checkspan .alt { font-size: inherit; color: black;}
 span.checkspan, a.checkspan { white-space: nowrap; }
-span.wrapcheckspan, a.wrapcheckspan { white-space: normal; }
+span.wrapcheckspan, a.wrapcheckspan,
+span.checkspan.longspan, a.checkspan.longspan {
+    white-space: normal; }
 .checkspan .checked { display: none;}
 
 .checkspan input[TYPE="CHECKBOX"], .checkspan input[TYPE="RADIO"] {
