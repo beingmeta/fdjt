@@ -201,9 +201,10 @@ fdjt.DOM=
             node.appendChild(wrapper);
             return wrapper;}
         fdjtDOM.wrapChildren=wrapChildren;
-        function unwrapChildren(nodes){
+        function unwrapChildren(nodes,cxt){
             if (typeof nodes === "string") 
-                nodes=fdjt.DOM.$(nodes);
+                nodes=((cxt)?(fdjt.DOM.getChildren(cxt,nodes)):
+                       (fdjt.DOM.$(nodes)));
             else if (nodes.nodeType)
                 nodes=[nodes];
             else {}
@@ -2738,9 +2739,11 @@ fdjt.DOM=
                 return size;}
             else return newsize;}
                 
-        function adjustFontSize(node,min_font,max_font,fudge){
+        function adjustFontSize(node,min_font,max_font,fudge,dolog){
             var h=node.offsetHeight, w=node.offsetWidth;
-            var node_display='';
+            var node_display=''; dolog=true;
+            if (typeof dolog === "undefined")
+                dolog=hasClass(node,"tracefdjt");
             if ((h===0)||(w===0)) {
                 // Do a little to make the element visible if it's not.
                 node_display=node.style.display;
@@ -2789,18 +2792,19 @@ fdjt.DOM=
             if (typeof fudge !== "number") fudge=2;
             size=adjustWrapperFont(wrapper,10,false,size,min,max,w,h,fudge);
             size=adjustWrapperFont(wrapper,5,false,size,min,max,w,h,fudge);
-            size=adjustWrapperFont(wrapper,1,true,size,min,max,w,h,fudge);
+            size=adjustWrapperFont(wrapper,1,false,size,min,max,w,h,fudge);
             node.style.display=node_display;
             if (size===100) {
-                /* fdjtLog("No need to adjust %o to %dx%d, wrapper @ %d,%d",
-                   node,w,h,wrapper.scrollWidth,wrapper.scrollHeight); */
+                if (dolog)
+                    fdjtLog("No need to resize %o towards %dx%d",node,w,h);
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));}
             else {
                 wstyle.overflow='';
-                /* fdjtLog("Adjusted (%s) %o towards %dx%d, wrapper @ %d,%d",
-                   wstyle.fontSize,node,w,h,
-                   wrapper.scrollWidth,wrapper.scrollHeight); */
+                if (dolog)
+                    fdjtLog("Adjusted (%s) %o towards %dx%d, wrapper @ %d,%d",
+                            wstyle.fontSize,node,w,h,
+                            wrapper.scrollWidth,wrapper.scrollHeight);
                 // We reset all of these
                 wstyle.transitionProperty='';
                 wstyle.transitionDuration='';
@@ -2814,6 +2818,11 @@ fdjt.DOM=
             return size;}
         fdjtDOM.adjustFontSize=fdjtDOM.tweakFontSize=adjustFontSize;
         
+        function resetFontSize(node){
+            var wrapper=getFirstChild(node,".fdjtfontwrapper");
+            if (wrapper) wrapper.style.fontSize="100%";}
+        fdjtDOM.resetFontSize=resetFontSize;
+
         fdjtDOM.autofont=".fdjtadjustfont,.adjustfont";
         function adjustFonts(arg,top){
             var all=[];
