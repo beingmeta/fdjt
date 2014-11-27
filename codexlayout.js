@@ -594,7 +594,7 @@ fdjt.CodexLayout=
                     if (os) rs.setAttribute("style",os);
                     else rs.removeAttribute("style");
                     rs.removeAttribute("data-savedstyle");}}
-            fdjtDOM.unwrapChildren("div.fdjtfontwrapper");
+            fdjtDOM.unwrapChildren("div.fdjtfontwrapper",layout.container);
             dropClass(toArray(layout.container.getElementsByClassName(
                 "codexdupstart")),
                       "codexdupstart");
