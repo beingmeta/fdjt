@@ -951,7 +951,8 @@ div.fdjtdialog {
     box-sizing: border-box; -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box; -o-box-sizing: border-box; 
     width: 50%; max-width: 700px; top: 15%; max-height: 70%;
-    left: auto; right: auto; height: auto;
+    left: 0px; right: 0px; height: auto;
+    margin-left: auto; margin-right: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
     z-index: 250; 
     opacity: .99;
