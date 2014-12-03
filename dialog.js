@@ -48,6 +48,7 @@ fdjt.Dialog=(function(){
             box.className=(box.className||"")+
                 ((box.className)?(" "):(""))+
                 spec.classes;}
+        if (spec.style) box.setAttribute("style",spec.style);
         if (!((spec.modal)||(spec.keep)||
               (hasClass(box,"fdjtmodal"))||
               (hasClass(box,"fdjtkeep")))) {
