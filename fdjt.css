@@ -739,7 +739,8 @@ table.backtrace > tbody.bindings > tr > td > table.bindings {
 table.bindings { }
 table.bindings th.head { text-align: left;}
 table.bindings tr.binding th.var { font-family: sans,sans-serif;}
-table.backtrace > tbody.bindings > tr:first-child > th { background-color: blue;}
+table.backtrace > tbody.bindings > tr:first-child > th {
+    background-color: blue;}
 table.backtrace > tbody.eval > tr > th { background-color: white; color: black;}
 table.backtrace > tbody.call > tr th { background-color: red; color: white;}
 table.backtrace > tbody.bindings > tr > td, table.backtrace > tbody.eval > tr > td {
@@ -792,7 +793,7 @@ div.backtrace div.rail span.arg {
   padding-right: 1ex; padding-left: 1ex;}
 
 div.backtrace div.last_entry {
-  font-size: 160%;}
+  font-size: 150%;}
 
 /* Highlighting */
 
@@ -921,7 +922,8 @@ table.backtrace > tbody.bindings > tr > td > table.bindings {
 table.bindings { }
 table.bindings th.head { text-align: left;}
 table.bindings tr.binding th.var { font-family: sans,sans-serif;}
-table.backtrace > tbody.bindings > tr:first-child > th { background-color: blue;}
+table.backtrace > tbody.bindings > tr:first-child > th {
+    background-color: blue;}
 table.backtrace > tbody.eval > tr > th { background-color: white; color: black;}
 table.backtrace > tbody.call > tr th { background-color: red; color: white;}
 table.backtrace > tbody.bindings > tr > td, table.backtrace > tbody.eval > tr > td {
@@ -946,8 +948,10 @@ div.fdjtdialog {
     background-color: slategray; color: black;
     font-family: helvetica,sans,sans-serif;
     font-size: 2em; font-size: 2rem;
-    width: 50%; left: 25%; right: 25%; box-sizing: border-box;
-    top: 15%; height: auto;
+    box-sizing: border-box; -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box; -o-box-sizing: border-box; 
+    width: 50%; max-width: 700px; top: 15%; max-height: 70%;
+    left: auto; right: auto; height: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
     z-index: 250; 
     opacity: .99;
@@ -1001,7 +1005,7 @@ div.fdjtdialog p {
 div.fdjtdialog > div, div.fdjtdialog > span { vertical-align: middle;}
 
 div.fdjtdialog .countdown {
-    color: rgb(128,0,0); font-weight: bold;
+    color: brown; font-weight: bold;
     position: absolute; height: 1em; top: 4px; left: 0.5ex;
     font-variant: small-caps;}
 div.fdjtdialog .countdown { display: none;}
