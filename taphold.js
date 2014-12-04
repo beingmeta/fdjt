@@ -300,12 +300,16 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (typeof opt_val==="number") trace=opt_val;
             else if (opt_val) trace=2;
             else trace=0;}
-        else if (hasParent(elt,/\btracetaphold\d*\b/g)) {
-            var trace_parent=getParent(elt,/\btracetaphold\d*\b/g);
-            if (hasClass(trace_parent,"tracetaphold")) trace=1;
-            else if (hasClass(trace_parent,"tracetaphold1")) trace=1;
-            else if (hasClass(trace_parent,"tracetaphold2")) trace=2;
-            else if (hasClass(trace_parent,"tracetaphold2")) trace=3;
+        else if (hasParent(elt,/\b(tracetaphold|fdjtlog)\d*\b/g)) {
+            var trace_parent=getParent(elt,/\b(tracetaphold|fdjtlog)\d*\b/g);
+            if (hasClass(trace_parent,/\b(tracetaphold|fdjtlog)\b/))
+                trace=1;
+            else if (hasClass(trace_parent,/\b(tracetaphold|fdjtlog)1\b/))
+                trace=1;
+            else if (hasClass(trace_parent,/\b(tracetaphold|fdjtlog)2\b/))
+                trace=2;
+            else if (hasClass(trace_parent,/\b(tracetaphold|fdjtlog)2\b/))
+                trace=3;
             else trace=4;}
         else trace=0;
 
@@ -422,9 +426,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                                 to);}
         function endpress(evt){
             if ((trace>1)||(traceall>1))
-                fdjtLog("TapHold/endpress(%s) %o t=%o p=%o tch=%o tm=%o ttt=%o/%o",
+                fdjtLog("TapHold/endpress(%s) %o t=%o p=%o tch=%o tm=%o ttt=%o/%o, start=%d,%d,%d/%d",
                         thid,evt,th_target,pressed,touched,th_timer,
-                        tap_target,taptapthresh);
+                        tap_target,taptapthresh,
+                        start_x,start_y,start_t,fdjtET());
             if ((!(pressed))&&(!(touched))&&(!(th_timer))) {
                 cleartouch();
                 return;}
@@ -433,7 +438,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 clearTimeout(th_timer); th_timer=false;
                 if (reticle.live) 
                     setTimeout(function(){reticle.highlight(false);},1500);
-                if (th_target===touched) {
+                if ((th_target===touched)||((fdjtET()-start_t)<0.4)) {
                     if ((tap_target)&&(tap_target===th_target)) {
                         tap_target=false;
                         taptapped(th_target,evt);}
@@ -681,9 +686,12 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         (document.elementFromPoint(touch_x,touch_y)):
                         (eTarget(evt)));
             var holder=getParent(target,".tapholder");
+            if ((trace>1)||(traceall>1))
+                fdjtLog("TapHold/down(%s) %o tht=%o target=%o holder=%o elt=%o",
+                            thid,evt,th_target,target,holder,elt);
             if (holder!==elt) {
                 if ((trace>1)||(traceall>1))
-                    fdjtLog("TapHold/down/ignore(%s) %o tht=%o target=%o holder=%o elt=%o",
+                    fdjtLog("TapHold/ignore(%s) %o tht=%o t=%o h=%o elt=%o",
                             thid,evt,th_target,target,holder,elt);
                 return;}
 
@@ -697,7 +705,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         evt.touches[0].pageY-window.pageYOffset);}
             if (evt.touches) {
                 target=document.elementFromPoint(touch_x,touch_y);}
-            // if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
             if ((trace>1)||(traceall>1))
                 fdjtLog(
                     "TapHold/down(%s) %o tht=%o trg=%o s=%o,%o,%o t=%o,%o m=%o tch=%o prs=%o ttt=%o",
