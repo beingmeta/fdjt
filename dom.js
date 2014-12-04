@@ -1098,8 +1098,7 @@ fdjt.DOM=
 
         function textify(arg,flat,depth,domarkup){
             if (typeof depth !== 'number') depth=0;
-            if (arg.text) return flatten(arg.text);
-            else if (arg.nodeType) {
+            if (arg.nodeType) {
                 if (arg.nodeType===3) {
                     if (flat) return flatten(arg.nodeValue);
                     else return arg.nodeValue;}
@@ -1107,11 +1106,15 @@ fdjt.DOM=
                     var children=arg.childNodes;
                     var style=getStyle(arg);
                     var display_type=style.display;
+                    var position_type=style.position;
                     var whitespace=style.whiteSpace;
                     var classname=arg.className;
                     var string=""; var suffix="";
                     if (whitespace!=="normal") flat=false;
                     if (display_type==='none') return "";
+                    else if (!((position_type==="static")||
+                               (position_type==="")))
+                        return "";
                     else if ((typeof classname === "string")&&
                              ((classname==='fdjtskiptext')||
                               (classname.search(/\bfdjtskiptext\b/)>=0)))
@@ -1307,22 +1310,29 @@ fdjt.DOM=
         function textwidth(node){
             if (node.nodeType===3) return node.nodeValue.length;
             else if (node.nodeType!==1) return 0;
-            else if (typeof node.className!=="string") return 0;
-            else if ((node.className==="fdjtskiptext")||
-                     (node.className.search(/\bfdjtskiptext/)>=0))
-                return 0;
-            else if (node.childNodes) {
-                var children=node.childNodes;
-                var i=0; var lim=children.length; var width=0;
-                while (i<lim) {
-                    var child=children[i++];
-                    if (child.nodeType===3) width=width+child.nodeValue.length;
-                    else if (child.nodeType===1)
-                        width=width+textwidth(child);
-                    else {}}
-                return width;}
-            else if (node.alt) return node.alt.length+2;
-            else return 3;}
+            else {
+                var style=getStyle(node);
+                var display=style.display, position=style.position;
+                if (display==="none") return 0;
+                else if (!((position==="")||(position==="static")))
+                    return 0;
+                else if (typeof node.className!=="string") return 0;
+                else if ((node.className==="fdjtskiptext")||
+                         (node.className.search(/\bfdjtskiptext/)>=0))
+                    return 0;
+                else if (node.childNodes) {
+                    var children=node.childNodes;
+                    var i=0; var lim=children.length; var width=0;
+                    while (i<lim) {
+                        var child=children[i++];
+                        if (child.nodeType===3)
+                            width=width+child.nodeValue.length;
+                        else if (child.nodeType===1)
+                            width=width+textwidth(child);
+                        else {}}
+                    return width;}
+                else if (node.alt) return node.alt.length+2;
+                else return 3;}}
         fdjtDOM.textWidth=textwidth;
 
         function countBreaks(arg){
@@ -1346,7 +1356,8 @@ fdjt.DOM=
                 return true;
             else if (node.tagName.search(nontext_content)===0)
                 return true;
-            else if (node.className.search(/\bfdjtskiptext\b/g)>=0)
+            else if ((typeof node.className === "string")&&
+                     (node.className.search(/\bfdjtskiptext\b/g)>=0))
                 return false;
             else if ((node.childNodes)&&(node.childNodes.length)) {
                 var children=node.childNodes;
