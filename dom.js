@@ -2193,8 +2193,9 @@ fdjt.DOM=
             if (!(fudge)) fudge=node.getAttribute("data-fudge");
 
             // Clear any existing adjustments
-            var wrapper=((node.firstChild.className==="fdjtadjusted")?
-                         (node.firstChild):(getFirstChild(node,"fdjtadjusted")));
+            var first=node.firstChild, wrapper=
+                ((first.className==="fdjtadjusted")?(first):
+                 (getFirstChild(node,"fdjtadjusted")));
             if (wrapper) wrapper.setAttribute("style","");
 
             var geom=getGeometry(node,false,true), inside=getInsideBounds(node);
@@ -2752,9 +2753,9 @@ fdjt.DOM=
                 
         function adjustFontSize(node,min_font,max_font,fudge,dolog){
             var h=node.offsetHeight, w=node.offsetWidth;
-            var node_display=''; dolog=true;
+            var node_display='';
             if (typeof dolog === "undefined")
-                dolog=hasClass(node,"tracefdjt");
+                dolog=hasClass(node,"fdjtlog");
             if ((h===0)||(w===0)) {
                 // Do a little to make the element visible if it's not.
                 node_display=node.style.display;
