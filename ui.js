@@ -129,8 +129,10 @@ fdjt.UI.Highlight=(function(){
             else {
                 var parent=node.parentNode, style=getStyle(parent);
                 var next=node.nextSibling, prev=node.prevSibling;
-                var nstyle=next&&getStyle(next), pstyle=prev&&getStyle(prev);
-                var ndisplay=nstyle&&nstyle.display, pdisplay=pstyle&&pstyle.display;
+                var nstyle=next&&(next.nodeType===1)&&getStyle(next);
+                var pstyle=prev&&(prev.nodeType===1)&&getStyle(prev);
+                var ndisplay=nstyle&&nstyle.display;
+                var pdisplay=pstyle&&pstyle.display;
                 if (style.whiteSpace!=='normal')
                     hispan=fdjtDOM("span."+hclass);
                 else if (!((next)||(prev)))
