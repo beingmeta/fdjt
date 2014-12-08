@@ -102,13 +102,30 @@ a:hover {
    ========================================================================== */
 
 /**
- * Address variable `h1` font-size and margin within `section` and `article`
- * contexts in Firefox 4+, Safari 5, and Chrome.
+ * Set `h1` font-size and margin
  */
 
 h1 {
     font-size: 2em;
     margin: 0.67em 0;
+}
+
+/**
+ * Set `h2` font-size and margin
+ */
+
+h2 {
+    font-size: 1.5em;
+    margin: 0.5em 0;
+}
+
+/**
+ * Set `h3` font-size and margin
+ */
+
+h3 {
+    font-size: 1.5em;
+    margin: 0.5em 0;
 }
 
 /**
@@ -141,7 +158,6 @@ dfn {
  */
 
 hr {
-    -webkit-box-sizing: content-box;
     -moz-box-sizing: content-box;
     box-sizing: content-box;
     height: 0;
@@ -341,7 +357,6 @@ html input[disabled] {
 
 input[type="checkbox"],
 input[type="radio"] {
-    -webkit-box-sizing: border-box;
     box-sizing: border-box; /* 1 */
     padding: 0; /* 2 */
 }
@@ -367,6 +382,16 @@ input[type="search"] {
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-decoration {
     -webkit-appearance: none;
+}
+
+/**
+ * Remove inner padding and border in Firefox 4+.
+ */
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+    border: 0;
+    padding: 0;
 }
 
 /**
@@ -397,3 +422,13 @@ div {
     page-break-after: auto;
     page-break-inside: auto;
 }
+
+/* */
+
+@media (max-width: 650px) {
+    h1 { font-size: 1.5em;}
+    h2 { font-size: 1.2em;}
+    h3 { font-size: 1.2em;}}
+
+
+
