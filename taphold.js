@@ -193,6 +193,16 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         if (target===document.documentElement)
             mouse_down=false;}
 
+    function traceValue(classname){
+        var parsed=/\bfdjtlog(\d*)/.exec(classname);
+        if ((parsed)&&(parsed.length)) {
+            var level=
+                ((typeof parsed[1] === "string")&&
+                 (parseInt(parsed[1],10)));
+            if ((level)&&(!(isNaN(level))))
+                return level;
+            else return 1;}
+        else return 0;}
 
     function TapHold(elt,opts){
         if (!(elt)) {
@@ -300,19 +310,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (typeof opt_val==="number") trace=opt_val;
             else if (opt_val) trace=2;
             else trace=0;}
-        else if (hasParent(elt,/\b(tracetaphold|fdjtlog)\d*\b/g)) {
-            var trace_parent=getParent(elt,/\b(tracetaphold|fdjtlog)\d*\b/g);
-            if (hasClass(trace_parent,/\b(tracetaphold|fdjtlog)\b/))
-                trace=1;
-            else if (hasClass(trace_parent,/\b(tracetaphold|fdjtlog)1\b/))
-                trace=1;
-            else if (hasClass(trace_parent,/\b(tracetaphold|fdjtlog)2\b/))
-                trace=2;
-            else if (hasClass(trace_parent,/\b(tracetaphold|fdjtlog)2\b/))
-                trace=3;
-            else trace=4;}
+        else if (hasClass(elt,/\bfdjtlog\d*/g))
+            trace=traceValue(elt.className);
         else trace=0;
-
+        
         var wander_timer=false;
 
         function cleartouch(){
@@ -361,7 +362,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                             thid,target_time,th_last,target);
                 target=th_last;}
             return synthEvent(target,"release",th,evt,x,y,
-                                 {startX: start_x,startY: start_y});}
+                              {startX: start_x,startY: start_y});}
         function slipped(target,evt,also){
             if (also) {
                 also.startX=start_x; also.startY=start_y;}
@@ -461,7 +462,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else if (pressed) {
                 var geom=fdjtDOM.getGeometry(elt);
                 if ((x>=geom.left)&&(x<=geom.right)&&
-                     (y>=geom.top)&&(y<=geom.bottom))
+                    (y>=geom.top)&&(y<=geom.bottom))
                     released(pressed,evt,x,y);
                 else if (noslip)
                     released(pressed,evt,x,y);
@@ -500,7 +501,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     if (!(noslip))
                         slipped(pressed,evt,{relatedTarget: to});
                     abortpress(evt,"taphold_mouseout");},
-                                          wanderthresh);}}
+                                        wanderthresh);}}
 
         function taphold_mouseover(evt){
             evt=evt||window.event;
@@ -688,7 +689,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             var holder=getParent(target,".tapholder");
             if ((trace>1)||(traceall>1))
                 fdjtLog("TapHold/down(%s) %o tht=%o target=%o holder=%o elt=%o",
-                            thid,evt,th_target,target,holder,elt);
+                        thid,evt,th_target,target,holder,elt);
             if (holder!==elt) {
                 if ((trace>1)||(traceall>1))
                     fdjtLog("TapHold/ignore(%s) %o tht=%o t=%o h=%o elt=%o",
@@ -838,14 +839,14 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         taptapthresh=((opts.hasOwnProperty('taptapthresh'))&&
                       (opts.taptapthresh));
         wanderthresh=((opts.hasOwnProperty('wanderthresh'))?(opts.wanderthresh):
-                     (default_opts.hasOwnProperty('wanderthresh'))?
-                     (default_opts.wanderthresh):(2000));
+                      (default_opts.hasOwnProperty('wanderthresh'))?
+                      (default_opts.wanderthresh):(2000));
         override=((opts.hasOwnProperty('override'))?(opts.override):
-                   (default_opts.hasOwnProperty('override'))?
-                   (default_opts.override):(false));
+                  (default_opts.hasOwnProperty('override'))?
+                  (default_opts.override):(false));
         touchtoo=((opts.hasOwnProperty('touchtoo'))?(opts.touchtoo):
-                   (default_opts.hasOwnProperty('touchtoo'))?
-                   (default_opts.touchtoo):(false));
+                  (default_opts.hasOwnProperty('touchtoo'))?
+                  (default_opts.touchtoo):(false));
         bubble=((opts.hasOwnProperty('bubble'))?(opts.bubble):
                 (default_opts.hasOwnProperty('bubble'))?
                 (default_opts.bubble):(false));
