@@ -225,8 +225,7 @@ fdjt.CodexLayout=
             if ((!(elt))||(elt.length===0)) return;
             else if (elt.nodeType) {
                 if (elt.nodeType!==1) return;
-                if ((hasClass(elt,"codexpagescaled"))||
-                    (elt.getAttribute("style")))
+                if ((hasClass(elt,"_pagescaled"))||(elt.getAttribute("style")))
                     return;
                 var ps=elt.getAttribute("data-pagescale")||
                     elt.getAttribute("pagescale")||
@@ -282,7 +281,7 @@ fdjt.CodexLayout=
                     if (cstyle.display==="inline")
                         style.display="inline-block";
                     style.width=tw+"px"; style.height=th+"px";}
-                addClass(elt,"codexpagescaled");}
+                addClass(elt,"_pagescaled");}
             else if (elt.length) {
                 var i=0, lim=elt.length;
                 while (i<lim) scaleToPage(
@@ -545,12 +544,12 @@ fdjt.CodexLayout=
             var textsplits=layout.textsplits;
             var node;
             var pagescaled=toArray(
-                layout.container.getElementsByClassName("codexpagescaled"));
+                layout.container.getElementsByClassName("_pagescaled"));
             i=0; lim=pagescaled.length; while (i<lim) {
                 var elt=pagescaled[i++];
                 var wrapper=getParent(elt,".codexscalewrapper");
                 var saved=elt.getAttribute("data-savedstyle");
-                dropClass(elt,"codexpagescaled");
+                dropClass(elt,"_pagescaled");
                 if (saved) elt.setAttribute("style",saved);
                 else elt.setAttribute("style","");
                 if (wrapper) wrapper.parentNode.replaceChild(elt,wrapper);}
