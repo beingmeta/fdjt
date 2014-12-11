@@ -629,18 +629,18 @@ fdjt.String=
                                   (prop.slice(0,prop.search(/\|/))):
                                   (prop));
                     if (done[propname]) continue;
-                    if (!(data.hasOwnProperty(propname))) {
-                        fdjt.Log.warn("No data for %s in %j to use",prop,data,text);
-                        var rpat=/\{\{\w+\|([^\}]*)\}\}/gm;
-                        text=text.replace(rpat,"$1");
-                        done[propname]=prop;}
-                    else {
+                    if ((data.hasOwnProperty(propname))&&(data[propname])) {
                         var pat=new RegExp(
                             "\\{\\{"+propname+"(\\|[^\\}]*)?\\}\\}","gm");
                         var val=data[propname], stringval=val.toString();
                         done[propname]=prop;
-                        // fdjt.Log("Replacing %s with %s using %s",prop,val,pat);
-                        text=text.replace(pat,stringval);}}}
+                        text=text.replace(pat,stringval);}
+                    else {
+                        fdjt.Log.warn("No data for %s in %j to use",
+                                      prop,data,text);
+                        var rpat=/\{\{\w+\|([^\}]*)\}\}/gm;
+                        text=text.replace(rpat,"$1");
+                        done[propname]=prop;}}}
             if (dom) {
                 if (dom.nodeType===3) dom.nodeValue=text;
                 else dom.innerHTML=text;
