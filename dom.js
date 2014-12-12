@@ -770,7 +770,8 @@ fdjt.DOM=
                         node,new Selector(classname),false,results);}
                 else if (classname.length) {
                     var i=0, lim=classname.length;
-                    while (i<lim) getChildren(node,classname[i++],attrib,results);}
+                    while (i<lim)
+                        getChildren(node,classname[i++],attrib,results);}
                 else {}}
             else if (typeof attrib !== 'string')
                 throw { error: 'bad selector arg', selector: classname};
@@ -2848,7 +2849,7 @@ fdjt.DOM=
             else if (arg.nodeType===1) {
                 var sel=new Selector(fdjtDOM.autofont);
                 if (sel.match(arg))
-                    all=[all];
+                    all=[arg];
                 else all=fdjtDOM.getChildren(arg,fdjtDOM.autofont);}
             else all=fdjtDOM.$(fdjtDOM.autofont);
             var i=0, lim=all.length;
