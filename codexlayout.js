@@ -812,14 +812,11 @@ fdjt.CodexLayout=
                 else root=moveUp(root);
                 var scale_elts=getChildren(root,"[data-pagescale],[pagescale]");
                 scaleToPage(scale_elts,page_width,page_height);
-                if (fullpage) {
-                    if (root.tagName==="IMG")
-                        tweakImage(root,page_width,page_height);
-                    else adjustFonts(root,root);}
-                else if (singlepage) {
-                    if (root.tagName==="IMG")
-                        tweakImage(root,page_width,page_height);
-                    else adjustFonts(root,root);}
+                if ((root.tagName==="IMG")&&
+                    ((fullpage)||(singlepage)))
+                    tweakImage(root,page_width,page_height);
+                else if (hasClass(root,/\b(fdjt)?adjustfont\b/g))
+                    adjustFonts(root,root);
                 else {}
                 if (singlepage) {
                     var pw=page.scrollWidth, ph=page.scrollHeight;
