@@ -821,7 +821,6 @@ fdjt.CodexLayout=
                         tweakImage(root,page_width,page_height);
                     else adjustFonts(root,root);}
                 else {}
-                var geom=getGeom(root,page);
                 if (singlepage) {
                     var pw=page.scrollWidth, ph=page.scrollHeight;
                     if ((pw>page_width)||(ph>page_height))
@@ -834,19 +833,27 @@ fdjt.CodexLayout=
                     newPage(); prev=layout.prev=root;
                     prevstyle=layout.prevstyle=getStyle(root);
                     pagesDone(newpages); newpages=[];
+                    drag=[];
                     if (donefn) donefn(layout);
                     return;}
                 else {
-                    if (geom.bottom<=page_height) {
-                        if (!(mustBreakInside(root))) {
-                            prev=layout.prev=root;
-                            prevstyle=layout.prevstyle=getStyle(root);
-                            pagesDone(newpages); newpages=[];
-                            if (donefn) donefn(layout);
-                            return;}}
+                    var geom=getGeom(root,page); var done=false;
+                    if (mustBreakInside(root)) {}
+                    else if (geom.bottom<=page_height) {
+                        if (cantBreakBefore(root)) drag.push(root);
+                        else if (cantBreakAfter(root)) drag=[root];
+                        else drag=[];
+                        done=true;}
                     else if (((atomic)&&(atomic.match(root)))||
                              (avoidBreakInside(root))) {
-                        if (!(newpage)) newPage(root);
+                        if (!(newpage)) {
+                            newPage(root); geom=getGeom(root,page);}
+                        if (geom.bottom<=page_height) {
+                            if (cantBreakAfter(root)) drag=[root];
+                            else drag=[];
+                            done=true;}}
+                    else {}
+                    if (done) {
                         prev=layout.prev=root;
                         prevstyle=layout.prevstyle=getStyle(root);
                         pagesDone(newpages); newpages=[];
