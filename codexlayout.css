@@ -57,7 +57,7 @@ div.codexpage .codexpagetop > p:first-child {
 body.codexfixed div.codexpage {
     position: fixed; text-align: left;}
 body.codexfade div.codexpage { opacity: 0; }
-body.codexfade div.codexpage.curpage {opacity: 1; z-index: 50;}
+body.codexfade div.codexpage.curpage { opacity: 1; z-index: 50; }
 
 div.codexpage img {
     max-height: 90%; max-width: 90%; width: auto; height: auto;}
@@ -98,6 +98,8 @@ div.codexpage div.fdjtadjusted {
 .codexpage .codexpagefoot {
     position: absolute; bottom: 0px; left: 0px; right: 0px;
     width: 100%; margin: 0px; border: 0px; padding: 0px;}
+
+figure { page-break-inside: avoid; }
 
 .codexdupleading {
     display: inline-block; height: 0px; width: 70%; visibility: hidden;}
