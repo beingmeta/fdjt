@@ -217,7 +217,6 @@ fdjt.CodexLayout=
         /* Scaling elements and nodes */
 
         var adjustFontSize=fdjt.DOM.adjustFontSize;
-        var adjustFonts=fdjt.DOM.adjustFonts;
         var tweakImage=fdjt.DOM.tweakImage;
 
         function scaleToPage(elt,width,height,leavefont){
@@ -277,7 +276,7 @@ fdjt.CodexLayout=
                          ("top center"));
                      elt.parentNode.replaceChild(wrapper,elt);}
                 else {
-                    adjustFontSize(elt,false,tw,th);
+                    adjustFontSize(elt);
                     if (cstyle.display==="inline")
                         style.display="inline-block";
                     style.width=tw+"px"; style.height=th+"px";}
@@ -815,8 +814,9 @@ fdjt.CodexLayout=
                 if ((root.tagName==="IMG")&&
                     ((fullpage)||(singlepage)))
                     tweakImage(root,page_width,page_height);
-                else if (hasClass(root,/\b(fdjt)?adjustfont\b/g))
-                    adjustFonts(root,root);
+                else if (((fullpage)||(singlepage))&&
+                         (hasClass(root,/\b(fdjt)?adjustfont\b/g)))
+                    adjustFontSize(root);
                 else {}
                 if (singlepage) {
                     var pw=page.scrollWidth, ph=page.scrollHeight;
@@ -2087,7 +2087,6 @@ fdjt.CodexLayout=
                 addClass(completed,"codexworkpage"); 
                 var undersize=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
-                // if ((oversize)||(undersize)) fdjtDOM.adjustFontSize(completed);
                 if (((oversize)||(undersize))&&(scale_pages)) {
                     var iw=completed.scrollWidth, ih=completed.scrollHeight;
                     var ow=completed.offsetWidth, oh=completed.offsetHeight;
