@@ -261,6 +261,7 @@ svg:not(:root) {
  */
 
 figure {
+    page-break-inside: avoid;
     margin: 0;
 }
 
