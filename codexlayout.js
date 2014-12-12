@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; Character-encoding: utf-8; -*- */
 
-/* ######################### fdjt/codex.js ###################### */
+/* ######################### fdjt/codexlayout.js ###################### */
 
 /* Copyright (C) 2009-2014 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
@@ -132,7 +132,7 @@ fdjt.CodexLayout=
 
         /* Node testing */
 
-        var notspace=/[^\n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff]/g;
+        var notspace=/[^ \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff]/g;
      
         function isEmpty(string){
             if (typeof string === "string")  {
@@ -806,8 +806,8 @@ fdjt.CodexLayout=
                     
                 if (newpage) root=moveUp(root);
                 else if (singlepage) newPage(root);
-                else if ((forcedBreakBefore(root))||
-                         ((prev)&&(forcedBreakAfter(prev)))) {
+                else if ((mustBreakBefore(root))||
+                         ((prev)&&(mustBreakAfter(prev)))) {
                     root=newPage(root);}
                 else root=moveUp(root);
                 var scale_elts=getChildren(root,"[data-pagescale],[pagescale]");
@@ -838,11 +838,12 @@ fdjt.CodexLayout=
                     return;}
                 else {
                     if (geom.bottom<=page_height) {
-                        prev=layout.prev=root;
-                        prevstyle=layout.prevstyle=getStyle(root);
-                        pagesDone(newpages); newpages=[];
-                        if (donefn) donefn(layout);
-                        return;}
+                        if (!(mustBreakInside(root))) {
+                            prev=layout.prev=root;
+                            prevstyle=layout.prevstyle=getStyle(root);
+                            pagesDone(newpages); newpages=[];
+                            if (donefn) donefn(layout);
+                            return;}}
                     else if (((atomic)&&(atomic.match(root)))||
                              (avoidBreakInside(root))) {
                         if (!(newpage)) newPage(root);
@@ -2082,8 +2083,7 @@ fdjt.CodexLayout=
                 addClass(completed,"codexworkpage"); 
                 var undersize=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
-                if ((oversize)||(undersize))
-                    fdjtDOM.adjustFontSize(completed);
+                // if ((oversize)||(undersize)) fdjtDOM.adjustFontSize(completed);
                 if (((oversize)||(undersize))&&(scale_pages)) {
                     var iw=completed.scrollWidth, ih=completed.scrollHeight;
                     var ow=completed.offsetWidth, oh=completed.offsetHeight;
@@ -2185,12 +2185,40 @@ fdjt.CodexLayout=
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakBefore==='always');}
             this.forcedBreakBefore=forcedBreakBefore;
+            function mustBreakBefore(elt){
+                if (forcedBreakBefore(elt)) return true;
+                else if ((elt.childNodes)&&(elt.childNodes.length)) {
+                    var children=elt.childNodes;
+                    var i=0, lim=children.length; while (i<lim) {
+                        var child=children[i];
+                        if (child.nodeType===3) {
+                            if (!(isEmpty(child.nodeValue))) return false;
+                            else i++;}
+                        else if (child.nodeType===1) 
+                            return mustBreakBefore(child);
+                        else i++;}
+                    return false;}}
+            this.mustBreakBefore=mustBreakBefore;
             
             function forcedBreakAfter(elt,style){ 
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakAfter==='always');}
             this.forcedBreakAfter=forcedBreakAfter;
+            function mustBreakAfter(elt){
+                if (forcedBreakAfter(elt)) return true;
+                else if ((elt.childNodes)&&(elt.childNodes.length)) {
+                    var children=elt.childNodes;
+                    var i=children.length-1; while (i>=0) {
+                        var child=children[i];
+                        if (child.nodeType===3) {
+                            if (!(isEmpty(child.nodeValue))) return false;
+                            else i--;}
+                        else if (child.nodeType===1) 
+                            return mustBreakAfter(child);
+                        else i--;}
+                    return false;}}
+            this.mustBreakAfter=mustBreakAfter;
 
             function avoidBreakInside(elt,style){
                 var lh;
@@ -2208,12 +2236,40 @@ fdjt.CodexLayout=
                      ((lh=parsePX(style.lineHeight))&&
                       ((lh*2.5)>elt.offsetHeight)));}
             this.avoidBreakInside=avoidBreakInside;
+            function mustBreakInside(elt){
+                if (avoidBreakInside(elt)) return false;
+                else if ((elt.childNodes)&&(elt.childNodes.length)) {
+                    var children=elt.childNodes;
+                    var i=0, lim=children.length; while (i<lim) {
+                        var child=children[i];
+                        if (child.nodeType!==1) i++;
+                        else if (forcedBreakBefore(child)) return true;
+                        else if (forcedBreakAfter(child)) return true;
+                        else if (mustBreakInside(child)) return true;
+                        else i++;}
+                    return false;}
+                else return false;}
+            this.mustBreakInside=mustBreakInside;
             
             function avoidBreakBefore(elt,style){
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakBefore==='avoid');}
             this.avoidBreakBefore=avoidBreakBefore;
+            function cantBreakBefore(elt){
+                if (avoidBreakBefore(elt)) return true;
+                else if ((elt.childNodes)&&(elt.childNodes.length)) {
+                    var children=elt.childNodes;
+                    var i=0, lim=children.length; while (i<lim) {
+                        var child=children[i];
+                        if (child.nodeType===3) {
+                            if (!(isEmpty(child.nodeValue))) return false;
+                            else i++;}
+                        else if (child.nodeType===1) 
+                            return cantBreakBefore(child);
+                        else i++;}
+                    return false;}}
+            this.cantBreakBefore=cantBreakBefore;
 
             function avoidBreakAfter(elt,style){
                 if ((!(elt))||(elt.nodeType!==1)) return false;
@@ -2227,6 +2283,20 @@ fdjt.CodexLayout=
                     return false;
                 else return false;}
             this.avoidBreakAfter=avoidBreakAfter;
+            function cantBreakAfter(elt){
+                if (avoidBreakAfter(elt)) return true;
+                else if ((elt.childNodes)&&(elt.childNodes.length)) {
+                    var children=elt.childNodes;
+                    var i=children.length-1; while (i>=0) {
+                        var child=children[i];
+                        if (child.nodeType===3) {
+                            if (!(isEmpty(child.nodeValue))) return false;
+                            else i--;}
+                        else if (child.nodeType===1) 
+                            return cantBreakAfter(child);
+                        else i--;}
+                    return false;}}
+            this.cantBreakAfter=cantBreakAfter;
             
             function checkSinglePage(elt,style){
                 if ((!(elt))||(elt.nodeType!==1)) return false;
