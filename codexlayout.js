@@ -217,6 +217,7 @@ fdjt.CodexLayout=
         /* Scaling elements and nodes */
 
         var adjustFontSize=fdjt.DOM.adjustFontSize;
+        var adjustFonts=fdjt.DOM.adjustFonts;
         var tweakImage=fdjt.DOM.tweakImage;
 
         function scaleToPage(elt,width,height,leavefont){
@@ -814,9 +815,6 @@ fdjt.CodexLayout=
                 if ((root.tagName==="IMG")&&
                     ((fullpage)||(singlepage)))
                     tweakImage(root,page_width,page_height);
-                else if (((fullpage)||(singlepage))&&
-                         (hasClass(root,/\b(fdjt)?adjustfont\b/g)))
-                    adjustFontSize(root);
                 else {}
                 if (singlepage) {
                     var pw=page.scrollWidth, ph=page.scrollHeight;
@@ -2087,6 +2085,8 @@ fdjt.CodexLayout=
                 addClass(completed,"codexworkpage"); 
                 var undersize=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
+                if (((oversize)||(undersize)))
+                    adjustFonts(completed);
                 if (((oversize)||(undersize))&&(scale_pages)) {
                     var iw=completed.scrollWidth, ih=completed.scrollHeight;
                     var ow=completed.offsetWidth, oh=completed.offsetHeight;
