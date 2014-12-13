@@ -2779,17 +2779,6 @@ fdjt.DOM=
             wstyle[fdjtDOM.transitionProperty]='none';
             wstyle[fdjtDOM.transitionDuration]='0s';
             wstyle.visibility='visible';
-            // Recompute the width and height just in case wrapping generated
-            // weirdness
-            var geom=getGeometry(node,false,true);
-            w=geom.inner_width; h=geom.inner_height;
-            /*
-              fdjtLog("Adjusting %o to %dx%d using %o, currently %dx%d",
-              node,w,h,wrapper,wrapper.scrollWidth,wrapper.scrollHeight); */
-                    
-            // This ensures that scrollHeight!==offsetHeight
-            // It's necessary for Firefox, at least, which keeps them the
-            //  same without scrolling.
             wstyle.overflow='auto';
             if ((h===0)||(w===0)) {
                 node.removeChild(wrapper);
@@ -2803,6 +2792,9 @@ fdjt.DOM=
             if (typeof max === "string") max=parseFloat(max,10);
             if (typeof fudge === "string") fudge=parseInt(fudge,10);
             if (typeof fudge !== "number") fudge=2;
+            wstyle.width=wstyle.height="100%";
+            w=wrapper.offsetWidth; h=wrapper.offsetHeight;
+            wstyle.width=wstyle.height="";
             size=adjustWrapperFont(wrapper,10,false,size,min,max,w,h,fudge);
             size=adjustWrapperFont(wrapper,5,false,size,min,max,w,h,fudge);
             size=adjustWrapperFont(wrapper,1,false,size,min,max,w,h,fudge);
@@ -2813,7 +2805,7 @@ fdjt.DOM=
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));}
             else {
-                wstyle.overflow='';
+                wstyle.overflow=''; wstyle.width=''; wstyle.height='';
                 if (dolog)
                     fdjtLog("Adjusted (%s) %o towards %dx%d, wrapper @ %d,%d",
                             wstyle.fontSize,node,w,h,
