@@ -2082,23 +2082,24 @@ fdjt.CodexLayout=
 
             var adjust_node=fdjtDOM.scaleToFit.adjust;
             function finishPage(completed) {
-                addClass(completed,"codexworkpage"); 
+                completed.style.display="block";
                 var undersize=hasClass(completed,"codexundersize");
                 var oversize=hasClass(completed,"codexoversize");
-                if (((oversize)||(undersize)))
+                if (((oversize)||(undersize))) {
                     adjustFonts(completed);
-                if (((oversize)||(undersize))&&(scale_pages)) {
-                    var iw=completed.scrollWidth, ih=completed.scrollHeight;
-                    var ow=completed.offsetWidth, oh=completed.offsetHeight;
-                    var noscale=((oversize)?
-                                 ((ih<=oh)&&(iw<=ow)):
-                                 ((oh<=ih)&&(ow<=iw)&&
-                                  (oh>(0.9*ih))||(ow>(0.9*iw))));
-                    if (!(noscale)) {
-                        completed.style.height="";
-                        adjust_node(completed);}}
+                    if (scale_pages) {
+                        var iw=completed.scrollWidth, ih=completed.scrollHeight;
+                        var ow=completed.offsetWidth, oh=completed.offsetHeight;
+                        var noscale=((oversize)?
+                                     ((ih<=oh)&&(iw<=ow)):
+                                     ((oh<=ih)&&(ow<=iw)&&
+                                      (oh>(0.9*ih))||(ow>(0.9*iw))));
+                        if (!(noscale)) {
+                            completed.style.height="";
+                            adjust_node(completed);}}}
                 if (layout.pagedone) layout.pagedone(completed);
                 dropClass(completed,"codexworkpage");
+                completed.style.display=""; 
                 completed.style.height="";}
             this.finishPage=finishPage;
 
