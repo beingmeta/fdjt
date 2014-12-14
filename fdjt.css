@@ -560,6 +560,8 @@ table.fdjtform td input[TYPE="PASSWORD"],
 table.fdjtform td input[TYPE="SEARCH"],
 table.fdjtform td input[TYPE="TEXT"],
 table.fdjtform td textarea {
+    box-sizing: border-box; -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box; -o-box-sizing: border-box;
     width: 100%;}
 table.fdjtform td p {
     font-size: 80%; max-width: 45em;
@@ -1048,9 +1050,11 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
 }
 @media screen and (max-width: 800px) {
     div.fdjtdialog {
-	width: 80%; left: 10%; right: 10%;}
-}
-@media (pointer: corase) {
+	width: 80%; left: 10%; right: 10%;}}
+@media screen and (max-width: 600px) {
+    div.fdjtdialog {
+	font-size: 24px; font-size: 1.7rem;}}
+@media (pointer: coarse) {
     div.fdjtdialog {
 	font-size: 150%;
 	font-size: 5vw;}}
