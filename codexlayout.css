@@ -100,6 +100,8 @@ div.codexpage div.fdjtadjusted {
     width: 100%; margin: 0px; border: 0px; padding: 0px;}
 
 figure { page-break-inside: avoid; }
+figure + figcaption { page-break-before: avoid; }
+img + figcaption { page-break-before: avoid; }
 
 .codexdupleading {
     display: inline-block; height: 0px; width: 70%; visibility: hidden;}
