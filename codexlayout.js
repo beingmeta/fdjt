@@ -576,6 +576,18 @@ fdjt.CodexLayout=
             if ((leading)&&(leading.length)) fdjtDOM.remove(leading);
             var moved=toArray(
                 layout.container.getElementsByClassName("codexrelocated"));
+            var dupstarts=toArray(layout.container.getElementsByClassName(
+                "codexdupstart"));
+            var dupends=toArray(layout.container.getElementsByClassName(
+                "codexdupend"));
+            var dupmiddle=toArray(layout.container.getElementsByClassName(
+                "codexdup"));
+            var pagetops=toArray(layout.container.getElementsByClassName(
+                "codexpagetop"));
+            dropClass(dupstarts,"codexdupstart");
+            dropClass(dupends,"codexdupend");
+            dropClass(dupmiddle,"codexdup");
+            dropClass(pagetops,"codexpagetop");
             if ((moved)&&(moved.length)) {
                 layout.logfn(
                     "Reverting layout of %d nodes and %d split texts",
@@ -583,7 +595,6 @@ fdjt.CodexLayout=
                 i=0; lim=moved.length;
                 while (i<lim) {
                     restoreNode(moved[i++],layout,crumbs);}}
-            dropClass(fdjtDOM.$(".codexpagetop"),"codexpagetop");
             var restyled=fdjtDOM.$("[data-savedstyle]");
             i=0; lim=restyled.length;
             while (i<lim) {
@@ -594,15 +605,6 @@ fdjt.CodexLayout=
                     else rs.removeAttribute("style");
                     rs.removeAttribute("data-savedstyle");}}
             fdjtDOM.unwrapChildren("div.fdjtfontwrapper",layout.container);
-            dropClass(toArray(layout.container.getElementsByClassName(
-                "codexdupstart")),
-                      "codexdupstart");
-            dropClass(toArray(layout.container.getElementsByClassName(
-                "codexdupend")),
-                      "codexdupend");
-            dropClass(toArray(layout.container.getElementsByClassName(
-                "codexdup")),
-                      "codexdup");
             layout.textsplits={}; layout.crumbs={};}
         
         /* Codex trace levels */
