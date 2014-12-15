@@ -2,7 +2,7 @@
 /* jshint browser: true */
 
 (function (window, document, Math) {
-   	            "use strict";
+                    "use strict";
 var rAF = window.requestAnimationFrame  ||
         window.webkitRequestAnimationFrame      ||
         window.mozRequestAnimationFrame         ||
@@ -2192,3 +2192,11 @@ IScroll.utils = utils;
 window.IScroll=IScroll;
 
 })(window, document, Math);
+
+
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  indent-tabs-mode: nil ***
+   ;;;  End: ***
+*/
