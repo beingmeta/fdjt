@@ -1807,7 +1807,7 @@ fdjt.CodexLayout=
                 var frag=document.createElement("div");
                 var all_ids=[], saved_ids={};
                 var dupids=[], dupstarts={}, restoremap={};
-                var curnodes=[], newdups={};
+                var curnodes=[], newdups={}, pagescales=[];
                 if (trace)
                     fdjtLog("Setting layout to %d characters of HTML",
                             content.length);
@@ -1884,7 +1884,13 @@ fdjt.CodexLayout=
                 i=0; lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
                 i=0; while (i<lim) container.removeChild(curnodes[i++]);
                 i=0; lim=addpages.length;
-                while (i<lim) container.appendChild(addpages[i++]);
+                while (i<lim) {
+                    var addpage=addpages[i++];
+                    var scale_elts=
+                        getChildren(addpage,"[pagescale],[data-pagescale]");
+                    if (scale_elts.length) 
+                        pagescales.push({page: addpage, toscale: scale_elts});
+                    container.appendChild(addpage);}
                 layout.pages=addpages;
                 dups=layout.dups=newdups;
                 saved_ids._all_ids=all_ids;
@@ -1900,10 +1906,16 @@ fdjt.CodexLayout=
                     bcrumb.parentNode.replaceChild(origin,bcrumb);
                 var splits=getChildren(container,".codexsplitstart");
                 var s=0, n_splits=splits.length; while (s<n_splits) {
-                    var split=splits[s++], splitid=split.id, text=split.getAttribute("data-textsplit");
+                    var split=splits[s++], splitid=split.id;
+                    var text=split.getAttribute("data-textsplit");
                     if ((splitid)&&(text)) {
                         textsplits[splitid]=document.createTextNode(text);
                         split.removeAttribute("data-textsplit");}}
+                i=0; lim=pagescales.length; while (i<lim) {
+                    var ps=pagescales[i++]; var pg=ps.page;
+                    pg.style.opacity=0; pg.style.display='block';
+                    scaleToPage(ps.toscale,page_width,page_height);
+                    pg.style.display=''; pg.style.opacity='';}
                 if (trace) fdjtLog("Done restoring layout");
                 if (donefn) donefn();}
             function setLayout(content,donefn){
@@ -1970,7 +1982,6 @@ fdjt.CodexLayout=
                 i=0; n=todrop.length; while (i<n) {
                     node.removeChild(todrop[i++]);}}
             
-         
             function saveLayout(callback,layout_id,separated){
                 var href=window.location.href;
                 var qpos=href.indexOf("?"), hashpos=href.indexOf("#");
