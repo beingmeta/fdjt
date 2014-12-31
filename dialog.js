@@ -57,7 +57,7 @@ fdjt.Dialog=(function(){
             box.appendChild(countdown);}
         if (!((spec.modal)||(spec.noclose)||(hasClass(box,"fdjtmodal")))) {
             var close_button=fdjtDOM.Image(
-                "https://s3.amazonaws.com/static.beingmeta.com/g/codex/redx40x40.png",
+                "https://s3.amazonaws.com/static.beingmeta.com/fdjt/redx50x50.png",
                 "closebutton","Close");
             addListener(close_button,"click",close_dialog_handler);
             addListener(close_button,"touchend",close_dialog_handler);
