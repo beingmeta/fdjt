@@ -944,7 +944,7 @@ fdjt.CodexLayout=
                         // which extends below the bottom of the page
                         else if (((short_page_height)?
                                   (geom.top>short_page_height):
-                                  (geom.top>(use_height-lh*1.5)))&&
+                                  (geom.top>(use_height-lh*1.2)))&&
                                  (drag.length===0)&&
                                  (!(avoidBreakBefore(block,style))))
                             // Our top is also over the bottom of the page,
@@ -1410,7 +1410,7 @@ fdjt.CodexLayout=
                     var line_height=init_geom.line_height||12;
                     if ((use_height===page_height)&&
                         ((init_geom.top+init_geom.top_margin+
-                          (line_height*1.5))>page_height)) {
+                          (line_height*1.2))>page_height)) {
                         // If the top is too close to the bottom of
                         // the page, try to just push onto a new page.
                         // This might fail if we're dragging too many
@@ -1423,7 +1423,7 @@ fdjt.CodexLayout=
                         // failed, we're in a tight place, so we bump
                         // up the height to let us go a little over
                         // (we'll adjust afterwards).
-                        else use_height=page_height+floor(line_height*1.5);}
+                        else use_height=page_height+floor(line_height*1.2);}
                     // Copy all the children into an array
                     var children=toArray(node.childNodes);
                     // and remove all of them at once
@@ -1443,9 +1443,9 @@ fdjt.CodexLayout=
                     // a single line on the other side, except if the
                     // overall height is small.
                     if ((use_height===page_height)&&
-                        ((init_geom.bottom-page_height)<(line_height*1.5))&&
+                        ((init_geom.bottom-page_height)<(line_height*1.2))&&
                         (init_geom.height>(line_height*3)))
-                        use_height=page_height-floor(line_height*1.5);
+                        use_height=page_height-floor(line_height*1.2);
                     // When splitChildren called, <node> is already
                     // empty and it's children are all in <children>
                     var push=splitChildren(node,children,init_geom,use_height);
