@@ -556,21 +556,40 @@ fdjt.UI.ProgressBar=(function(){
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
 
-    function multitext_keypress(evt,sepch){
+    function multitext_keypress(evt,sepchars,sepexp,fn){
+        // sepchars are characters which function just like 'Return'
+        // sepexp is a regular expression which is used to split an
+        //   input string into multiple values
         evt=(evt)||(event);
-        var ch=evt.charCode;
+        var chcode=evt.charCode, ch=String.fromCharCode(chcode);
         var target=fdjtUI.T(evt);
-        if (typeof sepch === 'string') sepch=sepch.charCodeAt(0);
-        if ((ch!==13)||((sepch)&&(sepch!==ch))) return;
-        fdjtUI.cancel(evt);
-        var checkspec=target.getAttribute("data-checkspec")||"div.checkspan";
-        var checkbox=
-            fdjtDOM.Input("[type=checkbox]",target.name,target.value);
-        var checkelt=fdjtDOM(checkspec,checkbox,target.value);
-        checkbox.checked=true;
-        fdjtDOM.addClass(checkelt,"ischecked");
-        fdjtDOM(target.parentNode," ",checkelt);
-        target.value='';}
+        if  (sepchars instanceof RegExp) {
+            sepexp=sepchars; sepchars=false;}
+        else if ((sepchars)&&(sepchars.call)) {
+            fn=sepchars; sepchars=false;}
+        else {}
+        if ((!sepchars)&&(target.getAttribute("data-sepchars")))
+            sepchars=target.getAttribute("data-sepchars");
+        if ((chcode===13)||
+            ((sepchars)&&((sepchars.indexOf(ch))>=0))) {
+            if ((!(sepexp))&&(target.getAttribute("data-separator")))
+                sepexp=new RegExp(target.getAttribute("data-separator"),"g");
+            var checkspec=
+                target.getAttribute("data-checkspec")||"div.checkspan";
+            var values=((sepexp)?(target.value.split(sepexp)):[target.value]);
+            var i=0, lim=values.length; while (i<lim) {
+                var value=values[i++];
+                if (fn)
+                    fdjtDOM(target.parentNode,"\n",fn(target.name,value));
+                else {
+                    var checkbox=
+                        fdjtDOM.Input("[type='checkbox']",target.name,value);
+                    var checkelt=fdjtDOM(checkspec,checkbox,value);
+                    checkbox.checked=true;
+                    fdjtDOM.addClass(checkelt,"ischecked");
+                    fdjtDOM(target.parentNode,"\n",checkelt);}}
+            fdjtUI.cancel(evt);
+            target.value='';}}
     fdjtUI.MultiText.keypress=multitext_keypress;})();
 
 
