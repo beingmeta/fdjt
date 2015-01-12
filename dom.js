@@ -68,9 +68,11 @@ fdjt.DOM=
                                 sel.slice(1,sel.length-1),
                                 sel.slice(1,sel.length-1));}
                         else {
-                            node.setAttribute(
-                                sel.slice(1,eqpos),
-                                sel.slice(eqpos+1,sel.length-1));}}
+                            var val=sel.slice(eqpos+1,sel.length-1);
+                            if (((val[0]==="'")&&(val[val.length-1]==="'"))||
+                                ((val[0]==='"')&&(val[val.length-1]==='"')))
+                                val=val.slice(1,val.length-1);
+                            node.setAttribute(sel.slice(1,eqpos),val);}}
                     else {}}
                 if (classname) node.className=classname;}
             else {
