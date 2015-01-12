@@ -555,6 +555,9 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtDOM=fdjt.DOM;
     var fdjtUI=fdjt.UI;
+    var fdjtString=fdjt.String;
+    var isEmpty=fdjtString.isEmpty;
+    var hasClass=fdjtDOM.hasClass;
 
     function multitext_keypress(evt,sepchars,sepexp,fn){
         // sepchars are characters which function just like 'Return'
@@ -570,6 +573,11 @@ fdjt.UI.ProgressBar=(function(){
         else {}
         if ((!sepchars)&&(target.getAttribute("data-sepchars")))
             sepchars=target.getAttribute("data-sepchars");
+        if ((chcode===13)&&(isEmpty(target.value))&&
+            (hasClass(target,"fdjtentersubmit"))) {
+            fdjt.UI.cancel(evt);
+            target.form.submit();
+            return;}
         if ((chcode===13)||
             ((sepchars)&&((sepchars.indexOf(ch))>=0))) {
             if ((!(sepexp))&&(target.getAttribute("data-separator")))
