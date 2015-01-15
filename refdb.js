@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; -*- */
 
-/* ######################### fdjt/kb.js ###################### */
+/* ######################### fdjt/refdb.js ###################### */
 
 /* Copyright (C) 2009-2014 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
@@ -442,7 +442,7 @@ if (!(fdjt.RefDB)) {
                         loadfn(this);}}
                 // Run per-instance delayed inits
                 if (this._onload) {
-                    var inits=this._onload.fns;
+                    var onloads=this._onload, inits=onloads.fns;
                     var j=0, jlim=inits.length; while (j<jlim) {
                         inits[j++](this);}
                     delete this._onload;}}
