@@ -171,24 +171,20 @@ fdjt.DOM=
         fdjtDOM.appendArray=domappend;
         
         function toArray(arg) {
-            var result=new Array(arg.length);
-            var i=0; var lim=arg.length;
-            while (i<lim) {result[i]=arg[i]; i++;}
-            return result;}
+            return Array.prototype.slice.call(arg);}
         fdjtDOM.toArray=toArray;
         function extendArray(result,arg) {
             var i=0; var lim=arg.length;
             while (i<lim) {result.push(arg[i]); i++;}
             return result;}
         function TOA(arg,start) {
-            if ((arg.constructor === Array)||(arg instanceof Array)) {
+            if ((arg.constructor === Array)||
+                (arg instanceof Array)) {
                 if (start) return arg.slice(start);
                 else return arg;}
-            start=start||0;
-            var i=0; var lim=arg.length-start;
-            var result=new Array(lim);
-            while (i<lim) {result[i]=arg[i+start]; i++;}
-            return result;}
+            else if (start)
+                return Array.prototype.slice(arg,start||0);
+            else return Array.prototype.slice(arg,start||0);}
         fdjtDOM.Array=TOA;
         fdjtDOM.slice=TOA;
 
