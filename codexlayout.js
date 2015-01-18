@@ -384,14 +384,14 @@ fdjt.CodexLayout=
 
         function stripBottomStyles(node,keep){
             var style=node.style;
-            if ((keep)&&(!(node.getAttribute("data-savedstyle")))) 
+            if ((keep)&&(!(node.hasAttribute("data-savedstyle")))) 
                 node.setAttribute("data-savedstyle",style.cssText);
             style.paddingBottom="0px";
             style.borderBottomWidth="0px";
             style.marginBottom="0px";}
         function stripTopStyles(node,keep){
             var style=node.style;
-            if ((keep)&&(!(node.getAttribute("data-savedstyle"))))
+            if ((keep)&&(!(node.hasAttribute("data-savedstyle"))))
                 node.setAttribute("data-savedstyle",style.cssText);
             style.textIndent="0px";
             style.paddingTop="0px";
@@ -466,7 +466,7 @@ fdjt.CodexLayout=
             var nodestyle=node.getAttribute("style")||"";
             var newstyle=nodestyle+((nodestyle)?("; "):(""))+
                 "margin-top: 0px !important;";
-            if (!(node.getAttribute("data-savedstyle")))
+            if (!(node.hasAttribute("data-savedstyle")))
                 node.setAttribute("data-savedstyle",nodestyle);
             node.setAttribute("style",newstyle);
             addClass(node,"codexpagetop");
@@ -2130,9 +2130,10 @@ fdjt.CodexLayout=
                             var dupi=0, ndups=alldups.length;
                             while (dupi<ndups) {
                                 var dup=alldups[dupi++];
-                                if (!(dup.getAttribute(dup,"data-savedstyle"))) 
+                                if (!(dup.hasAttribute(dup,"data-savedstyle"))) 
                                     dup.setAttribute(
-                                        "data-savedstyle",dup.getAttribute("style")||"");
+                                        "data-savedstyle",
+                                        dup.getAttribute("style")||"");
                                 dup.style.listStyleType="none";}}
                         lastdup.className=lastdup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
