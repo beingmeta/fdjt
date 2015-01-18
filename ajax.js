@@ -56,13 +56,19 @@ fdjt.Ajax=
         var trace_ajax=false;
         
         function fdjtAjax(success_callback,base_uri,args,other_callback,
-                          headers){
+                          headers,timeout){
             var req=new XMLHttpRequest();
             var uri=((args)?(compose_uri(base_uri,args)):(base_uri));
             req.onreadystatechange=function () {
                 if ((req.readyState === 4) && (req.status === 200)) {
                     success_callback(req);}
                 else if (other_callback) other_callback(req);};
+            if (timeout) {
+                req.timeout=timeout;
+                if (other_callback) {
+                    req.ontimeout=function(evt){
+                        evt=evt||window.event;
+                        other_callback(req);};}}
             req.open("GET",uri);
             req.withCredentials=true;
             if (headers) {
