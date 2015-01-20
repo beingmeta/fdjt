@@ -2425,13 +2425,18 @@ fdjt.DOM=
                 return accum;}
             else if (node.nodeType===3) {
                 var stringval=node.nodeValue;
-                if (stringval) accum=accum+stringval;
+                if (stringval)
+                    accum=accum+stringval.replace(/­/gm,"");
                 return accum;}
             else if (node.nodeType===1) {
                 var children=node.childNodes;
                 i=0; lim=children.length;
                 while (i<lim) {
-                    accum=node2text(children[i++],accum);}
+                    var child=children[i++];
+                    if (child.nodeType===3) {
+                        var s=child.nodeValue;
+                        if (s) accum=accum+s.replace(/­/gm,"");}
+                    else accum=node2text(child,accum);}
                 return accum;}
             else return accum;}
         fdjtDOM.node2text=node2text;
