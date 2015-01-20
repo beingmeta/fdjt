@@ -2426,7 +2426,7 @@ fdjt.DOM=
             else if (node.nodeType===3) {
                 var stringval=node.nodeValue;
                 if (stringval)
-                    accum=accum+stringval.replace(/­/gm,"");
+                    accum=accum+stringval;
                 return accum;}
             else if (node.nodeType===1) {
                 var children=node.childNodes;
@@ -2435,7 +2435,7 @@ fdjt.DOM=
                     var child=children[i++];
                     if (child.nodeType===3) {
                         var s=child.nodeValue;
-                        if (s) accum=accum+s.replace(/­/gm,"");}
+                        if (s) accum=accum+s;}
                     else accum=node2text(child,accum);}
                 return accum;}
             else return accum;}
@@ -2540,13 +2540,22 @@ fdjt.DOM=
             if (typeof count === 'undefined') count=1;
             var match=false;
             var fulltext=node2text(node);
-            var scan=((off===0)?(fulltext):(fulltext.slice(off)));
+            var sub=((off===0)?(fulltext):(fulltext.slice(off)));
+            var scan=sub.replace(/­/mg,"");
             var pat=((typeof needle === 'string')?
                      (new RegExp(getRegexString(needle),"gm")):
                      (needle));
             while ((match=pat.exec(scan))) {
                 if (count===1) {
                     var loc=match.index;
+                    if (scan!==sub) {
+                        // If the text contains soft hyphens, we need
+                        // to adjust *loc* (which is an offset into
+                        // the string without those hyphens into an
+                        // offset in the actual string in the DOM.
+                        var i=0; while (i<loc) {
+                            if (sub[i]==="­") loc++;
+                            i++;}}
                     var absloc=loc+off;
                     var start=get_text_pos(node,absloc,0,true);
                     var end=get_text_pos(node,absloc+(match[0].length),0);
