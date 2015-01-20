@@ -183,8 +183,8 @@ fdjt.DOM=
                 if (start) return arg.slice(start);
                 else return arg;}
             else if (start)
-                return Array.prototype.slice(arg,start||0);
-            else return Array.prototype.slice(arg,start||0);}
+                return Array.prototype.slice.call(arg,start||0);
+            else return Array.prototype.slice.call(arg,start||0);}
         fdjtDOM.Array=TOA;
         fdjtDOM.slice=TOA;
 
