@@ -1001,6 +1001,21 @@ fdjt.DOM=
                 results.push(input.value);}
             return results;}
         fdjtDOM.getInputValues=getInputValues;
+        function getInputValue(root,name,n){
+            var r=0;
+            var inputs=root.getElementsByTagName('input');
+            var i=0; var lim=inputs.length;
+            while (i<lim) {
+                var input=inputs[i++];
+                if (input.disabled) continue;
+                else if (input.name!==name) continue;
+                else if ((input.type==='checkbox')||(input.type==='radio')) {
+                    if (!(input.checked)) continue;}
+                if (!(n)) return input.value;
+                else if (r===n) return input.value;
+                else r++;}
+            return false;}
+        fdjtDOM.getInputValue=getInputValue;
 
         function getInputsFor(root,name,value){
             if (typeof root === 'string')
@@ -2415,6 +2430,14 @@ fdjt.DOM=
                 range.setEnd(sel.focusNode,sel.focusOffset);
                 return range;}
             else return false;};
+
+        fdjtDOM.emptyRange=function(range){
+            if (range) {
+                if ((range.startContainer===range.endContainer)&&
+                    (range.startOffset===range.endOffset))
+                    return true;
+                else return false;}
+            else return true;};
 
         function node2text(node,accum){
             var i, lim;
