@@ -2414,9 +2414,9 @@ fdjt.DOM=
 
         /* Selection-y functions */
 
-        fdjtDOM.getSelectedRange=function(){
-            var sel;
-            if (window.getSelection)
+        fdjtDOM.getSelectedRange=function(sel){
+            if (sel) {}
+            else if (window.getSelection)
                 sel=window.getSelection();
             else if (document.selection)
                 sel=document.selection.createRange();
@@ -2431,13 +2431,22 @@ fdjt.DOM=
                 return range;}
             else return false;};
 
-        fdjtDOM.emptyRange=function(range){
+        fdjtDOM.rangeIsEmpty=function(range){
             if (range) {
                 if ((range.startContainer===range.endContainer)&&
                     (range.startOffset===range.endOffset))
                     return true;
                 else return false;}
             else return true;};
+
+        fdjtDOM.clearSelection=function(sel){
+            if (!(sel))
+                sel=document.selection||window.getSelection();
+            if (sel.removeAllRanges) {
+                sel.removeAllRanges();}
+            else if (sel.empty) {
+                sel.empty();}
+            else {}};
 
         function node2text(node,accum){
             var i, lim;
