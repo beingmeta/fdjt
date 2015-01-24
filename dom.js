@@ -2422,8 +2422,10 @@ fdjt.DOM=
                 sel=document.selection.createRange();
             else return false;
             if (!(sel)) return false;
-            if (sel.getRangeAt)
-                return sel.getRangeAt(0);
+            if (sel.getRangeAt) {
+                if (sel.rangeCount)
+                    return sel.getRangeAt(0);
+                else return false;}
             else if (document.createRange) {
                 var range=document.createRange();
                 range.setStart(sel.anchorNode,sel.anchorOffset);
