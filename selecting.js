@@ -581,6 +581,11 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 var wrapper=wrappers[j++];
                 delete alltapholds[wrapper.id];
                 delete selectors[wrapper.id];}
+            if (this.onclear) {
+                var onclear=this.onclear; this.onclear=false;
+                if (!(Array.isArray(onclear))) onclear=[onclear];
+                i=0; lim=onclear.length; while (i<lim) {
+                    onclear[i++]();}}
             delete selectors[this.prefix];
             delete this.wrapped; delete this.orig;
             delete this.wrappers; delete this.nodes;
