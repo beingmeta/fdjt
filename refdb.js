@@ -187,6 +187,16 @@ if (!(fdjt.RefDB)) {
                 pos=this.loaded.indexOf(ref);
                 if (pos>=0) this.loaded.splice(pos);
                 delete refs[id];
+                if (this.storage instanceof Storage) {
+                    var storage=this.storage;
+                    var key="allids("+this.name+")";
+                    var allidsval=storage[key];
+                    var allids=((allidsval)&&(JSON.parse(allidsval)));
+                    var idpos=allids.indexOf(id);
+                    if (idpos>=0) {
+                        allids.splice(idpos);
+                        storage.setItem(key,JSON.stringify(allids));
+                        storage.removeItem(id);}}
                 if (aliases) {
                     var j=0, jlim=aliases.length;
                     while (j<jlim) {delete altrefs[aliases[j++]];}}}
@@ -425,11 +435,13 @@ if (!(fdjt.RefDB)) {
                                 this.dropIndexRef(key,drops,indices[key],db);}
                         if ((adds.length)&&(onadd[key])) {
                             var addfn=onadd[key];
-                            var addi=0, addlen=adds.length; while (addi<addlen) {
+                            var addi=0, addlen=adds.length;
+                            while (addi<addlen) {
                                 addfn(adds[addi++]);}}
                         if ((drops.length)&&(ondrop[key])) {
                             var dropfn=ondrop[key];
-                            var dropi=0, droplen=drops.length; while (dropi<droplen) {
+                            var dropi=0, droplen=drops.length;
+                            while (dropi<droplen) {
                                 dropfn(drops[dropi++]);}}}
                     else if ((value)&&(indexing)&&(indices[key])) 
                         this.indexRef(key,value,indices[key],db);}}
@@ -522,8 +534,10 @@ if (!(fdjt.RefDB)) {
                     setTimeout(function(){callback(refs);},10);
                 return refs;}
             else if (!(callback.call))
-                fdjtTime.slowmap(function(item){defImport(item,refs,db,rules,flags);},data);
-            else fdjtTime.slowmap(function(item){defImport(item,refs,db,rules,flags);},
+                fdjtTime.slowmap(function(item){
+                    defImport(item,refs,db,rules,flags);},data);
+            else fdjtTime.slowmap(function(item){
+                defImport(item,refs,db,rules,flags);},
                                   data,false,
                                   function(){callback(refs);});};
 
@@ -643,7 +657,8 @@ if (!(fdjt.RefDB)) {
                             content=storage[atid+"("+ref._id+")"];}
                         if (!(content))
                             warn("No item stored for %s",ref._id);
-                        else ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);},
+                        else ref.Import(
+                            JSON.parse(content),false,REFLOAD|REFINDEX);},
                                      needrefs,false,
                                      function(){if (callback) {
                                          if (args) callback.apply(null,args);
