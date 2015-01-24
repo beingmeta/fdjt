@@ -105,20 +105,24 @@ fdjt.UI.Highlight=(function(){
         if ((node.className)&&(node.className.search(classpat)>=0)) {
             into.push(node);}}
 
+    function unwrap_hnode(hnode){
+        var ch=hnode.childNodes;
+        if (ch) {
+            var frag=document.createDocumentFragment();
+            var tomove=[], j=0, n=((ch)&&(ch.length));
+            while (j<n) tomove.push(ch[j++]);
+            j=0; n=tomove.length;
+            while (j<n) frag.appendChild(tomove[j++]);
+            fdjtDOM.replace(hnode,frag);}
+        else fdjtDOM.remove(hnode);}
+    
     function clear_highlights(node,hclass){
-        var h=[]; gatherHighlights(node,new RegExp("\\b"+hclass+"\\b","g"),h);
+        var h=[];
+        if ((node===hclass)||(hasClass(node,hclass))) h=[node];
+        else gatherHighlights(node,new RegExp("\\b"+hclass+"\\b","g"),h);
         var i=0 , lim=h.length;
-        while (i<lim) {
-            var hnode=h[i++];
-            var ch=hnode.childNodes;
-            if (ch) {
-                var frag=document.createDocumentFragment();
-                var tomove=[], j=0, n=((ch)&&(ch.length));
-                while (j<n) tomove.push(ch[j++]);
-                j=0; n=tomove.length;
-                while (j<n) frag.appendChild(tomove[j++]);
-                fdjtDOM.replace(hnode,frag);}
-            else fdjtDOM.remove(hnode);}}
+        while (i<lim) unwrap_hnode(h[i++]);}
+
     function highlight_node(node,hclass,htitle,hattribs){
         if (!(hclass)) hclass=highlight_class;
         var hispan=false;
@@ -227,6 +231,7 @@ fdjt.UI.Highlight=(function(){
             return highlights;}}
 
     highlight_range.clear=clear_highlights;
+    highlight_range.remove=unwrap_hnode;
     highlight_range.highlight=highlight_range;
     return highlight_range;})();
 
