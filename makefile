@@ -7,7 +7,7 @@ PATH:=/usr/local/bin:${PATH}
 FDJT_FILES=header.js charnames.js string.js time.js  template.js hash.js \
 	syze.js iscroll.js \
 	log.js init.js state.js dom.js \
-	json.js refdb.js ajax.js wsn.js \
+	json.js refdb.js ajax.js wsn.js textindex.js \
 	ui.js dialog.js completions.js taphold.js selecting.js \
 	scrollever.js \
 	globals.js
