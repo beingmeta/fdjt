@@ -181,11 +181,11 @@ if (!(fdjt.RefDB)) {
                 if (!(ref)) continue; else count++;
                 var aliases=ref.aliases;
                 var pos=this.allrefs.indexOf(ref);
-                if (pos>=0) this.allrefs.splice(pos);
+                if (pos>=0) this.allrefs.splice(pos,1);
                 pos=this.changes.indexOf(ref);
-                if (pos>=0) this.changes.splice(pos);
+                if (pos>=0) this.changes.splice(pos,1);
                 pos=this.loaded.indexOf(ref);
-                if (pos>=0) this.loaded.splice(pos);
+                if (pos>=0) this.loaded.splice(pos,1);
                 delete refs[id];
                 if (this.storage instanceof Storage) {
                     var storage=this.storage;
@@ -194,7 +194,7 @@ if (!(fdjt.RefDB)) {
                     var allids=((allidsval)&&(JSON.parse(allidsval)));
                     var idpos=allids.indexOf(id);
                     if (idpos>=0) {
-                        allids.splice(idpos);
+                        allids.splice(idpos,1);
                         storage.setItem(key,JSON.stringify(allids));
                         storage.removeItem(id);}}
                 if (aliases) {
@@ -716,14 +716,14 @@ if (!(fdjt.RefDB)) {
                     that.changed=false;
                     that.changes=[];
                     var pos=changed_dbs.indexOf(that);
-                    if (pos>=0) changed_dbs.splice(pos);
+                    if (pos>=0) changed_dbs.splice(pos,1);
                     if (callback) callback();});}
             else if (!(refs)) {
                 return this.save(this.changes,function(){
                     that.changed=false;
                     that.changes=[];
                     var pos=changed_dbs.indexOf(that);
-                    if (pos>=0) changed_dbs.splice(pos);
+                    if (pos>=0) changed_dbs.splice(pos,1);
                     if (callback) callback();});}
             else if (this.storage instanceof Storage) {
                 var storage=this.storage;
@@ -756,7 +756,7 @@ if (!(fdjt.RefDB)) {
                     if (new_changes.length===0) {
                         this.changed=false;
                         var pos=changed_dbs.indexOf(that);
-                        if (pos>=0) changed_dbs.splice(pos);}}
+                        if (pos>=0) changed_dbs.splice(pos,1);}}
                 var allids=storage["allids("+this.name+")"];
                 if (allids) allids=JSON.parse(allids); else allids=[];
                 var n=allids.length;
@@ -879,7 +879,7 @@ if (!(fdjt.RefDB)) {
                     if (!(refs)) continue;
                     var pos=refs.indexOf(this._id);
                     if (pos<0) continue;
-                    else refs.splice(pos);
+                    else refs.splice(pos,1);
                     if (refs.length===0) delete index[keystring];
                     deleted++;}
                 return deleted;}
@@ -1366,7 +1366,7 @@ if (!(fdjt.RefDB)) {
                 else if (cur instanceof Array) {
                     var pos=cur.indexOf(val);
                     if (pos<0) return false;
-                    cur.splice(pos); if (cur._sortlen) cur._sortlen--;
+                    cur.splice(pos,1); if (cur._sortlen) cur._sortlen--;
                     if (cur.length===1) {
                         if (!(cur[0] instanceof Array))
                             this[keystring]=cur[0];}
