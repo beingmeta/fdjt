@@ -2564,9 +2564,12 @@ fdjt.DOM=
                     starts_in: within.id,ends_in: ends_in.id,
                     end: end_edge+range.endOffset};};
 
-        function getRegexString(needle){
-            return needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
-                /\s+/g,"(\\s+)");}
+        function getRegexString(needle,shyphens){
+            if (shyphens)
+                return needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
+                        /\S/g,"$&­?").replace("­? "," ").replace(/\s+/g,"(\\s+)");
+            else return needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
+                    /\s+/g,"(\\s+)");}
         fdjtDOM.textRegExp=getRegexString;
 
         function findString(node,needle,off,count){
