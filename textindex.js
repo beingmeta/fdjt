@@ -154,7 +154,7 @@ fdjt.TextIndex=(function(){
 	    if (id) indexer(arg,id);}
 	else if (arg.nodeType) {
 	    if (!(id)) id=arg.id;
-	    if (id) indexer(textify(arg),node.id);}
+	    if (id) indexer(textify(arg),id);}
 	else if (arg.length) {
 	    var i=0, lim=arg.length; while (i<lim) {
 		var node=arg[i++]; 
