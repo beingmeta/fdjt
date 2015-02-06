@@ -161,14 +161,20 @@ if (!(fdjt.RefDB)) {
             return "RefDB("+this.name+")";};
 
         RefDB.prototype.ref=function DBref(id){
-            if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
+            if (typeof id !== "string") {
+                if (id instanceof Ref) return id;
+                else throw new Error("Not a reference");}
+            else if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             var refs=this.refs;
             return ((refs.hasOwnProperty(id))&&(refs[id]))||
                 ((this.refclass)&&(new (this.refclass)(id,this)))||
                 (new Ref(id,this));};
         RefDB.prototype.probe=function DBprobe(id){
+            if (typeof id !== "string") {
+                if (id instanceof Ref) return id;
+                else return false;}
+            else if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             var refs=this.refs;
-            if ((id[0]===":")&&(id[1]==="@")) id=id.slice(1);
             return ((refs.hasOwnProperty(id))&&(refs[id]));};
         RefDB.prototype.drop=function DBdrop(refset){
             var count=0;
@@ -885,12 +891,27 @@ if (!(fdjt.RefDB)) {
                 return deleted;}
             else return false;};
 
-        RefDB.prototype.find=function findRefs(key,value){
+        RefDB.prototype.find=function findIDs(key,value){
             var index=this.indices[key];
             if (index) {
                 var items=index.getItem(value);
                 if (items) return setify(items);
                 else return [];}
+            else return [];};
+        RefDB.prototype.findRefs=function findRefs(key,value){
+            var index=this.indices[key];
+            if (index) {
+                var items=index.getItem(value), results=[];
+                if (items) {
+                    var i=0, lim=items.length;
+                    while (i<lim) {
+                        var item=items[i++];
+                        if (!(item)) {}
+                        else if (typeof item === "string") {
+                            var ref=this.probe(item);
+                            if (ref) results.push(ref);}
+                        else results.push(item);}}
+                return fdjtSet(results);}
             else return [];};
         RefDB.prototype.count=function countRefs(key,value){
             var index=this.indices[key];
