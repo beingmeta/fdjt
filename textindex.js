@@ -36,7 +36,7 @@ fdjt.TextIndex=(function(){
         if (!(opts)) opts={};
 	var stopfns=opts.stopfns||false, stopwords={};
 	var rootfns=opts.rootfns||false, rootmap={};
-	var termindex={}, idterms={}, allterms=[];
+	var termindex={}, idterms={}, allterms=[], allids=[];
         var i, lim;
 	
 	function _indexer(string,id){
@@ -45,7 +45,9 @@ fdjt.TextIndex=(function(){
 	    var i=0, lim=words.length;
 	    while (i<lim) {
                 var term=words[i++];
-		if (stopwords.hasOwnProperty(term)) continue;
+                if (term.length<2) continue;
+                else if (term.search(/\w/)<0) continue;
+                else if (stopwords.hasOwnProperty(term)) continue;
 		else if (stopfns) {
 		    var fn=0, fns=stopfns.length;
 		    while (fn<fns) {
@@ -65,9 +67,11 @@ fdjt.TextIndex=(function(){
 				termlist.push(r);
 			    else termlist=termlist.concat(r);}}}}
 	    var ti=0, tlim=termlist.length;
-	    if (idterms.hasOwnProperty(id)) 
-		idterms[id]=idterms[id].concat(termlist);
-	    else idterms[id]=termlist;
+	    if (idterms.hasOwnProperty(id)) {
+		idterms[id]=idterms[id].concat(termlist);}
+	    else {
+                idterms[id]=termlist;
+                allids.push(id);}
 	    while (ti<tlim) {
 		var t=termlist[ti++];
 		if (termindex.hasOwnProperty(t))
@@ -140,6 +144,7 @@ fdjt.TextIndex=(function(){
 	    this.termindex=termindex;
 	    this.idterms=idterms;
 	    this.allterms=allterms;
+	    this.allids=allids;
             this.opts=opts;
 	    this.stopWord=stopWord;
 	    this.getRoots=getRoots;
