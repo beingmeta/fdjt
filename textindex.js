@@ -40,7 +40,7 @@ fdjt.TextIndex=(function(){
         var i, lim;
 	
 	function _indexer(string,id){
-	    var stdtext=stdspace(string).replace("­","");
+	    var stdtext=stdspace(string).replace(/­/g,"");
 	    var words=stdtext.split(/\b/g), termlist=[];
 	    var i=0, lim=words.length;
 	    while (i<lim) {
