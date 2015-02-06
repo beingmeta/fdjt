@@ -888,18 +888,22 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.find=function findRefs(key,value){
             var index=this.indices[key];
             if (index) {
-                var keystring=getKeyString(value,this);
-                if (keystring) return setify(index[keystring]||[]);
+                var items=index.getItem(value);
+                if (items) return setify(items);
                 else return [];}
             else return [];};
         RefDB.prototype.count=function countRefs(key,value){
             var index=this.indices[key];
-            if (index)
-                return index[getKeyString(value,this)].length;
+            if (index) {
+                var vals=index.getItem(value);
+                return ((vals)?(vals.length||0):(0));}
             else return 0;};
-        RefDB.prototype.addIndex=function addIndex(key){
-            if (!(this.indices.hasOwnProperty(key)))
-                this.indices[key]=new ObjectMap();};
+        RefDB.prototype.addIndex=function addIndex(key,Constructor){
+            if (!(Constructor)) Constructor=ObjectMap;
+            if (!(this.indices.hasOwnProperty(key))) {
+                this.indices[key]=new Constructor();
+                return this.indices[key];}
+            else return this.indices[key];};
         
         // Array utility functions
         function arr_contains(arr,val,start){
@@ -1090,6 +1094,7 @@ if (!(fdjt.RefDB)) {
                 return setify(result);}}
         RefDB.Set=fdjtSet;
         fdjt.Set=fdjtSet;
+        RefDB.toSet=fdjtSet;
 
         function setify(array) {
             var len;
@@ -1317,6 +1322,7 @@ if (!(fdjt.RefDB)) {
                 (fdjtDOM("span.fdjtref",this._id||this.oid||this.uuid));};
 
         /* Maps */
+
         function ObjectMap() {return this;}
         ObjectMap.prototype.get=function ObjectMapGet(key) {
             var keystring=getKeyString(key);
@@ -1376,6 +1382,62 @@ if (!(fdjt.RefDB)) {
         fdjt.Map=ObjectMap;
         RefDB.ObjectMap=ObjectMap;
         RefDB.fdjtMap=ObjectMap;
+
+        function StringMap() {return this;}
+        StringMap.prototype.get=function StringMapGet(keystring) {
+            if (typeof keystring !== "string") return undefined;
+            if (this.hasOwnProperty(keystring))
+                return this[keystring];
+            else return undefined;};
+        StringMap.prototype.getItem=StringMap.prototype.get;
+        StringMap.prototype.set=function(keystring,val) {
+            if (typeof keystring !== "string") return;
+            if (val instanceof Array)
+                this[keystring]=[val];
+            else this[keystring]=val;};
+        StringMap.prototype.setItem=StringMap.prototype.set;
+        StringMap.prototype.increment=function(keystring,delta) {
+            if (typeof keystring !== "string") return;
+            var cur=this[keystring], next;
+            if (cur) this[keystring]=next=cur+delta;
+            else this[keystring]=next=delta;
+            return next;};
+        StringMap.prototype.add=function(keystring,val) {
+            if (typeof keystring !== "string") return;
+            if (this.hasOwnProperty(keystring)) {
+                var cur=this[keystring];
+                if (cur===val) return false;
+                else if (cur instanceof Array) {
+                    if (arr_contains(cur,val)) return false;
+                    else {cur.push(val); return true;}}
+                else if (val instanceof Array) {
+                    this[keystring]=setify([cur,val]);
+                    return true;}
+                else {
+                    this[keystring]=setify([cur,val]);
+                    return true;}}
+            else if (val instanceof Array) 
+                this[keystring]=setify([val]);
+            else this[keystring]=val;};
+        StringMap.prototype.drop=function(keystring,val) {
+            if (typeof keystring !== "string") return;
+            if (this.hasOwnProperty(keystring)) {
+                var cur=this[keystring];
+                if (cur===val) {
+                    delete this[keystring];
+                    return true;}
+                else if (cur instanceof Array) {
+                    var pos=cur.indexOf(val);
+                    if (pos<0) return false;
+                    cur.splice(pos,1); if (cur._sortlen) cur._sortlen--;
+                    if (cur.length===1) {
+                        if (!(cur[0] instanceof Array))
+                            this[keystring]=cur[0];}
+                    return true;}
+                else return false;}
+            else return false;};
+        fdjt.StringMap=StringMap;
+        RefDB.StringMap=StringMap;
 
         function RefMap(db) {this._db=db; return this;}
         RefMap.prototype.get=function(key){
