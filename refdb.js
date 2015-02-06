@@ -121,7 +121,9 @@ if (!(fdjt.RefDB)) {
                     var ix=index_specs[j++];
                     if (typeof ix !== "string") 
                         warn("Complex indices not yet handled!");
-                    else this.indices[ix]=new ObjectMap();}}
+                    else {
+                        var index=this.indices[ix]=new ObjectMap();
+                        index.fordb=db;}}}
             
             return db;}
 
@@ -491,7 +493,8 @@ if (!(fdjt.RefDB)) {
                                     (slot!=="_id")&&(slot!=="_db"))
                                     ref[slot]=importValue(v[slot],db,refstrings);}
                             nv=ref;}}
-                    else if ((refstrings)&&(typeof v === "string")&&(refpat.exec(v))) {
+                    else if ((refstrings)&&(typeof v === "string")&&
+                             (refpat.exec(v))) {
                         nv=resolveRef(v,db)||v;}
                     if (typeof nv === "undefined") {
                         if (!(copied)) copied=value.slice(0,i-1);}
@@ -894,14 +897,14 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.find=function findIDs(key,value){
             var index=this.indices[key];
             if (index) {
-                var items=index.getItem(value);
+                var items=index.getItem(value,this);
                 if (items) return setify(items);
                 else return [];}
             else return [];};
         RefDB.prototype.findRefs=function findRefs(key,value){
             var index=this.indices[key];
             if (index) {
-                var items=index.getItem(value), results=[];
+                var items=index.getItem(value,this), results=[];
                 if (items) {
                     var i=0, lim=items.length;
                     while (i<lim) {
@@ -916,14 +919,15 @@ if (!(fdjt.RefDB)) {
         RefDB.prototype.count=function countRefs(key,value){
             var index=this.indices[key];
             if (index) {
-                var vals=index.getItem(value);
+                var vals=index.getItem(value,this);
                 return ((vals)?(vals.length||0):(0));}
             else return 0;};
         RefDB.prototype.addIndex=function addIndex(key,Constructor){
             if (!(Constructor)) Constructor=ObjectMap;
             if (!(this.indices.hasOwnProperty(key))) {
-                this.indices[key]=new Constructor();
-                return this.indices[key];}
+                var index=this.indices[key]=new Constructor();
+                index.fordb=this;
+                return index;}
             else return this.indices[key];};
         
         // Array utility functions
@@ -1346,7 +1350,7 @@ if (!(fdjt.RefDB)) {
 
         function ObjectMap() {return this;}
         ObjectMap.prototype.get=function ObjectMapGet(key) {
-            var keystring=getKeyString(key);
+            var keystring=getKeyString(key,this.fordb);
             if (this.hasOwnProperty(keystring))
                 return this[keystring];
             else if (typeof key === "string")
@@ -1355,19 +1359,19 @@ if (!(fdjt.RefDB)) {
             else return undefined;};
         ObjectMap.prototype.getItem=ObjectMap.prototype.get;
         ObjectMap.prototype.set=function(key,val) {
-            var keystring=getKeyString(key);
+            var keystring=getKeyString(key,this.fordb);
             if (val instanceof Array)
                 this[keystring]=[val];
             else this[keystring]=val;};
         ObjectMap.prototype.setItem=ObjectMap.prototype.set;
         ObjectMap.prototype.increment=function(key,delta) {
-            var keystring=getKeyString(key);
+            var keystring=getKeyString(key,this.fordb);
             var cur=this[keystring], next;
             if (cur) this[keystring]=next=cur+delta;
             else this[keystring]=next=delta;
             return next;};
         ObjectMap.prototype.add=function(key,val) {
-            var keystring=getKeyString(key);
+            var keystring=getKeyString(key,this.fordb);
             if (this.hasOwnProperty(keystring)) {
                 var cur=this[keystring];
                 if (cur===val) return false;
@@ -1384,7 +1388,7 @@ if (!(fdjt.RefDB)) {
                 this[keystring]=setify([val]);
             else this[keystring]=val;};
         ObjectMap.prototype.drop=function(key,val) {
-            var keystring=getKeyString(key);
+            var keystring=getKeyString(key,this.fordb);
             if (this.hasOwnProperty(keystring)) {
                 var cur=this[keystring];
                 if (cur===val) {
