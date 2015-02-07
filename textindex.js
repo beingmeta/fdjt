@@ -178,12 +178,16 @@ fdjt.TextIndex=(function(){
                 var term=allterms[i++];
                 if (term.search(/[A-Z][a-z]/)===0) {
                     var lterm=term.toLowerCase();
-                    if (!(termindex.hasOwnProperty(lterm)))
+                    if (!(termindex.hasOwnProperty(lterm))) {
                         newindex[term]=termindex[term];
-                    else if (capwords.hasOwnProperty(term)) 
+                        newterms.push(term);}
+                    else if (capwords.hasOwnProperty(term)) {
                         newindex[term]=termindex[term];
+                        newterms.push(term);}
                     else moved.push(term);}
-                else newindex[term]=termindex[term];}
+                else {
+                    newindex[term]=termindex[term];
+                    newterms.push(term);}}
             i=0; lim=moved.length; while (i<lim) {
                 var move=moved[i++], l=move.toLowerCase();
                 newindex[l]=newindex[l].concat(termindex[move]);}
@@ -243,7 +247,9 @@ fdjt.TextIndex=(function(){
             var prefixAdd=fdjtString.prefixAdd;
             var allterms=this.allterms;
             var i=0, lim=allterms.length;
-            while (i<lim) prefixAdd(ptree,allterms[i++]);
+            while (i<lim) {
+                var term=allterms[i++];
+                prefixAdd(ptree,term,0);}
             return ptree;}};
 
     return TextIndex;})();
