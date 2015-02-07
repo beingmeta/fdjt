@@ -15,7 +15,7 @@ FDJT_HINTS=string.hint charnames.hint time.hint \
 	syze.hint iscroll.hint indexed.hint \
 	log.hint init.hint state.hint dom.hint \
 	refdb.hint json.hint ajax.hint codexlayout.hint \
-	hash.hint wsn.hint template.hint \
+	hash.hint wsn.hint template.hint textindex.hint \
 	dialog.hint ui.hint completions.hint taphold.hint selecting.hint \
 	scrollever.hint
 BUILDUUID:=`uuidgen`
