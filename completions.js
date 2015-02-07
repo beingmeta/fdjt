@@ -145,7 +145,7 @@ if (!(fdjt.UI)) fdjt.UI={};
         while (i<lim) {
             var s=strings[i++];
             var isexact=(s===keystring);
-            if (prefix) prefix=commonPrefix(prefix,s);
+            if (prefix) prefix=commonPrefix(prefix,s,false,(!(matchcase)));
             else prefix=s;
             var completions=bykey[s];
             if (completions) {
@@ -275,7 +275,8 @@ if (!(fdjt.UI)) fdjt.UI={};
                 result=[]; result.prefix=""; result.matches=[];
                 if (this.dom) addClass(this.dom,"noinput");}
             else {
-                result=getNodes(string,this.prefixtree,this.bykey);
+                result=getNodes(string,this.prefixtree,this.bykey,
+                                ((this.options)&(FDJT_COMPLETE_MATCHCASE)));
                 if (this.dom) dropClass(this.dom,"noinput");
                 updateDisplay(this,result.matches);}
             if ((this.stringmap)&&(this.strings)) {
@@ -319,20 +320,20 @@ if (!(fdjt.UI)) fdjt.UI={};
             if (this.displayed) updateDisplay(this,false);
             addClass(this.dom,"noinput");
             dropClass(this.dom,"nomatches");
-            if (callback) callback(this);
+            if (callback) callback([]);
             return [];}
         var result=this.getCompletions(string);
         if ((!(result))||(result.length===0)) {
             updateDisplay(this,false);
             dropClass(this.dom,"noinput");
             addClass(this.dom,"nomatches");
-            if (callback) callback(this);
+            if (callback) callback(result);
             return [];}
         else {
             updateDisplay(this,result.matches);
             dropClass(this.dom,"noinput");
             dropClass(this.dom,"nomatches");}
-        if (callback) callback(this);
+        if (callback) callback(result);
         return result;};
 
     Completions.prototype.getByValue=function(values,spec){
