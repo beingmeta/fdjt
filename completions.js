@@ -184,6 +184,7 @@ if (!(fdjt.UI)) fdjt.UI={};
                 c.values.push(value);
                 c.byvalue.add(value,completion);}}
         else return;
+        c.curstring=c.maxstring=false;
         if (key) addCompletionKeys(c,completion,key);}
 
     function addCompletionKeys(c,completion,key) {
@@ -512,14 +513,17 @@ if (!(fdjt.UI)) fdjt.UI={};
         if (!(selection)) {
             if (this.selection) selection=this.selection;
             else selection=false;}
-        var nodes=this.getVisible();
+        var nodes=this.getVisible(), dflt=false, found=false;
         var i=0, lim=nodes.length; while (i<lim) {
             var node=nodes[i++];
+            if (!(dflt)) dflt=node;
             if (!(selection)) {
                 selection=node; break;}
-            else if (node===selection) selection=false;
+            else if (node===selection) {
+                selection=false; found=true;}
             else continue;}
         if (this.selection) dropClass(this.selection,"selected");
+        if (!(found)) selection=dflt;
         addClass(selection,"selected");
         this.selection=selection;
         return selection;};
@@ -528,14 +532,17 @@ if (!(fdjt.UI)) fdjt.UI={};
         if (!(selection)) {
             if (this.selection) selection=this.selection;
             else selection=false;}
-        var nodes=this.getVisible();
+        var nodes=this.getVisible(), dflt=false, found=false;
         var i=nodes.length-1; while (i>=0) {
             var node=nodes[i--];
+            if (!(dflt)) dflt=node;
             if (!(selection)) {
                 selection=node; break;}
-            else if (node===selection) selection=false;
+            else if (node===selection) {
+                selection=false; found=true;}
             else continue;}
         if (this.selection) dropClass(this.selection,"selected");
+        if (!(found)) selection=dflt;
         if (selection) addClass(selection,"selected");
         this.selection=selection;
         return selection;};
