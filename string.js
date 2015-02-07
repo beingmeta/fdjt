@@ -522,7 +522,7 @@ fdjt.String=
                 else i++;
                 return false;}}
 
-        function prefixAdd(ptree,string,i) {
+        function add_prefix(ptree,string,i) {
             var strings=ptree.strings;
             if (i===string.length) 
                 if ((strings.indexOf) ?
@@ -543,7 +543,7 @@ fdjt.String=
                     split.splitchar=splitchar;
                     ptree[splitchar]=split;
                     ptree.splits.push(split);}
-                if (prefixAdd(split,string,i+1)) {
+                if (add_prefix(split,string,i+1)) {
                     strings.push(string);
                     return true;}
                 else return false;}
@@ -559,11 +559,15 @@ fdjt.String=
                 // Subdivide
                 ptree.splits=[];
                 var pstrings=ptree.strings;
-                var j=0; while (j<pstrings.length) prefixAdd(ptree,pstrings[j++],i);
-                return prefixAdd(ptree,string,i);}}
+                var j=0; while (j<pstrings.length)
+                    add_prefix(ptree,pstrings[j++],i);
+                return add_prefix(ptree,string,i);}}
+        function prefixAdd(ptree,string,i) {
+            if ((typeof i !== "number")||(i<0)) i=0;
+            return add_prefix(ptree,string,i);}
         fdjtString.prefixAdd=prefixAdd;
 
-        function prefixFind(ptree,prefix,i,plen){
+        function find_prefix(ptree,prefix,i,plen){
             if (!(plen)) plen=prefix.length;
             if (i===plen)
                 return ptree.strings;
@@ -577,8 +581,12 @@ fdjt.String=
                 else return false;}
             else {
                 var split=ptree[prefix[i]];
-                if (split) return prefixFind(split,prefix,i+1,plen);
+                if (split) return find_prefix(split,prefix,i+1,plen);
                 else return false;}}
+        function prefixFind(ptree,prefix,i,plen){
+            if ((typeof i !== "number")||(i<0)) i=0;
+            if (!(plen)) plen=prefix.length;
+            return find_prefix(ptree,prefix,i,plen);}
         fdjtString.prefixFind=prefixFind;
 
         function paraHash(node){
