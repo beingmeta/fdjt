@@ -477,29 +477,31 @@ fdjt.String=
         fdjtString.hasSuffix=hasSuffix;
 
         function commonPrefix(string1,string2,brk,foldcase){
-            var i=0; var last=0;
-            while ((i<string1.length) && (i<string2.length))
+            var i=0; var last=-1;
+            while ((i<string1.length) && (i<string2.length)) {
                 if ((string1[i]===string2[i])||
-                    ((foldcase)&&(string1[i].toLowerCase()===string2[i].toLowerCase())))
-                    if (brk)
+                    ((foldcase)&&
+                     (string1[i].toLowerCase()===string2[i].toLowerCase()))) {
+                    if (brk) {
                         if (brk===string1[i]) {last=i-1; i++;}
-            else i++;
-            else last=i++;
-            else break;
-            if (last>0) return string1.slice(0,last+1);
+                        else i++;}
+                    else last=i++;}
+                else break;}
+            if (last>=0) return string1.slice(0,last+1);
             else return false;}
         fdjtString.commonPrefix=commonPrefix;
 
         function commonSuffix(string1,string2,brk,foldcase){
             var i=string1.length, j=string2.length; var last=0;
-            while ((i>=0) && (j>=0))
+            while ((i>=0) && (j>=0)) {
                 if ((string1[i]===string2[j])||
-                    ((foldcase)&&(string1[i].toLowerCase()===string2[i].toLowerCase())))
-                    if (brk)
+                    ((foldcase)&&
+                     (string1[i].toLowerCase()===string2[i].toLowerCase()))) {
+                    if (brk) {
                         if (brk===string1[i]) {last=i+1; i--; j--;}
-            else {i--; j--;}
-            else {last=i; i--; j--;}
-            else break;
+                        else {i--; j--;}}
+                    else {last=i; i--; j--;}}
+                else break;}
             if (last>0) return string1.slice(last);
             else return false;}
         fdjtString.commonSuffix=commonSuffix;
