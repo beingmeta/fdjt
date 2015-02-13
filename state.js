@@ -192,6 +192,9 @@ fdjt.State=
 
         function setLocal(name,val,unparse){
             if (!(name)) throw { error: "bad name",name: name};
+            if (typeof value === "undefined")
+                throw { error: "undefined value", name: name};
+            if (!(val)) {dropLocal(name); return;}
             if (unparse) val=JSON.stringify(val);
             if (window.localStorage) {
                 if (name instanceof RegExp) {
@@ -215,7 +218,8 @@ fdjt.State=
                     while (i<lim) {
                         var key=storage.key(i++);
                         if (key.search(name)>=0) {
-                            return ((parse)?(JSON.parse(storage[key])):(storage[key]));}}
+                            return ((parse)?(JSON.parse(storage[key])):
+                                    (storage[key]));}}
                     return false;}
                 else {
                     var val=window.localStorage[name];
@@ -224,6 +228,33 @@ fdjt.State=
                     else return false;}}
             else return false;}
         fdjtState.getLocal=getLocal;
+
+        function pushLocal(name,val){
+            if (!(name)) throw { error: "bad name",name: name};
+            var fetched=window.localStorage[name], array=false;
+            if (fetched) {
+                array=JSON.parse(fetched);
+                if (!(Array.isArray(array))) array=[array];
+                if (array.indexOf(val)<0) array.push(val);
+                else return false;}
+            else array=[val];
+            window.localStorage[name]=JSON.stringify(array);
+            return true;}
+        fdjtState.pushLocal=pushLocal;
+
+        function removeLocal(name,val){
+            if (!(name)) throw { error: "bad name",name: name};
+            var fetched=window.localStorage[name];
+            if (fetched) {
+                var array=JSON.parse(fetched), loc;
+                if (array===val) {
+                    dropLocal(name); return;}
+                else if (!(Array.isArray(array))) return;
+                else loc=array.indexOf(val);
+                if (loc<0) return; else array.splice(loc,1);
+                window.localStorage[name]=JSON.stringify(array);}
+            return true;}
+        fdjtState.removeLocal=removeLocal;
 
         function existsLocal(name){
             if (!(name)) throw { error: "bad name",name: name};
