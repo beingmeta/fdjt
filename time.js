@@ -184,7 +184,7 @@ fdjt.Time=
             return slicefn();}
         fdjtTime.timeslice=timeslice;
 
-        function slowmap(fn,vec,watch,done,slice,space,watch_slice){
+        function slowmap(fn,vec,watch,done,failed,slice,space,watch_slice){
             var i=0; var lim=vec.length; var chunks=0;
             var used=0; var zerostart=fdjtTime();
             var timer=false;
@@ -192,35 +192,41 @@ fdjt.Time=
             if (!(space)) space=slice;
             if (!(watch_slice)) watch_slice=0;
             var stepfn=function(){
-                var started=fdjtTime(); var now=started;
-                var stopat=started+slice;
-                if (watch) watch(((i===0)?'start':'resume'),i,lim,chunks,used,
-                                 zerostart);
-                while ((i<lim)&&((now=fdjtTime())<stopat)) {
-                    var elt=vec[i];
-                    if ((watch)&&
-                        (((watch_slice)&&((i%watch_slice)===0))||(i+1===lim)))
-                        watch('element',i,lim,elt,used,now-zerostart);
-                    fn(elt);
-                    if ((watch)&&
-                        (((watch_slice)&&((i%watch_slice)===0))||(i+1===lim)))
-                        watch('after',i,lim,elt,used+(fdjtTime()-started),
-                              zerostart,fdjtTime()-now);
-                    i++;}
-                chunks=chunks+1;
-                if (i<lim) {
-                    used=used+(now-started);
-                    if (watch) watch('suspend',i,lim,chunks,used,
-                                     zerostart);
-                    timer=setTimeout(stepfn,space);}
-                else {
-                    now=fdjtTime(); used=used+(now-started);
-                    clearTimeout(timer); timer=false;
-                    if (watch) watch('finishing',i,lim,chunks,used,zerostart);
-                    var donetime=((done)&&(fdjtTime()-now));
-                    now=fdjtTime(); used=used+(now-started);
-                    if (watch) watch('done',i,lim,chunks,used,zerostart,donetime);
-                    if ((done)&&(done.call)) done(vec,now-zerostart,used);}};
+                try {
+                    var started=fdjtTime(); var now=started;
+                    var stopat=started+slice;
+                    if (watch)
+                        watch(((i===0)?'start':'resume'),i,lim,chunks,used,
+                              zerostart);
+                    while ((i<lim)&&((now=fdjtTime())<stopat)) {
+                        var elt=vec[i];
+                        if ((watch)&&(((watch_slice)&&((i%watch_slice)===0))||
+                                      (i+1===lim)))
+                            watch('element',i,lim,elt,used,now-zerostart);
+                        fn(elt);
+                        if ((watch)&&(((watch_slice)&&((i%watch_slice)===0))||
+                                      (i+1===lim)))
+                            watch('after',i,lim,elt,used+(fdjtTime()-started),
+                                  zerostart,fdjtTime()-now);
+                        i++;}
+                    chunks=chunks+1;
+                    if (i<lim) {
+                        used=used+(now-started);
+                        if (watch) watch('suspend',i,lim,chunks,used,
+                                         zerostart);
+                        timer=setTimeout(stepfn,space);}
+                    else {
+                        now=fdjtTime(); used=used+(now-started);
+                        clearTimeout(timer); timer=false;
+                        if (watch)
+                            watch('finishing',i,lim,chunks,used,zerostart);
+                        var donetime=((done)&&(fdjtTime()-now));
+                        now=fdjtTime(); used=used+(now-started);
+                        if (watch)
+                            watch('done',i,lim,chunks,used,zerostart,donetime);
+                        if ((done)&&(done.call)) 
+                            done(vec,now-zerostart,used);}}
+                catch (ex) {if (failed) failed();}};
             timer=setTimeout(stepfn,space);}
         fdjtTime.slowmap=slowmap;
 
