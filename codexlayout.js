@@ -707,6 +707,8 @@ fdjt.CodexLayout=
             // Tracks text nodes which have been split, keyed by the
             // temporary IDs assigned to them
             var textsplits=this.textsplits={};
+            // Tracks split blocks
+            var splits=this.splits={};
 
             var page=this.page=init.page; // Contains the currently open page
 
@@ -1402,6 +1404,8 @@ fdjt.CodexLayout=
                         addClass(node,"codexcantsplit");
                         newPage(node);
                         return node;}
+                    if ((node.id)&&(node.id.search("CODEXTMP")!==0)) {
+                        if (!(splits[node.id])) splits[node.id]=node.cloneNode(true);}
                     // Otherwise, we remove all of the node's children
                     // and then add back just enough to reach the
                     // edge, potentially splitting some children to
