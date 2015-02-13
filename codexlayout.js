@@ -62,6 +62,9 @@ fdjt.CodexLayout=
         var toArray=fdjtDOM.toArray;
         var getElementValue=fdjtDOM.getElementValue;
         
+        var setLocal=fdjtState.setLocal, pushLocal=fdjtState.pushLocal;
+        var dropLocal=fdjtState.dropLocal, removeLocal=fdjtState.removeLocal;
+
         var floor=Math.floor;
 
         var layoutDB;
@@ -1405,7 +1408,8 @@ fdjt.CodexLayout=
                         newPage(node);
                         return node;}
                     if ((node.id)&&(node.id.search("CODEXTMP")!==0)) {
-                        if (!(splits[node.id])) splits[node.id]=node.cloneNode(true);}
+                        if (!(splits[node.id]))
+                            splits[node.id]=node.cloneNode(true);}
                     // Otherwise, we remove all of the node's children
                     // and then add back just enough to reach the
                     // edge, potentially splitting some children to
@@ -1922,11 +1926,15 @@ fdjt.CodexLayout=
                     pg.style.display=''; pg.style.opacity='';}
                 if (trace) fdjtLog("Done restoring layout");
                 if (donefn) donefn();}
-            function setLayout(content,donefn){
-                if (typeof content === "string") 
-                    setSimpleLayout(content,donefn);
-                else if (!(content.hasOwnProperty('npages'))) 
-                    setSimpleLayout(content.layout,donefn);
+            function setLayout(content,donefn,failfn){
+                if (typeof content === "string") {
+                    try {
+                        setSimpleLayout(content,donefn);}
+                    catch (ex) {if (failfn) failfn();}}
+                else if (!(content.hasOwnProperty('npages'))) {
+                    try {
+                        setSimpleLayout(content.layout,donefn);}
+                    catch (ext) {if (failfn) failfn();}}
                 else {
                     container.innerHTML=content.layout;
                     var pagenodes=container.childNodes;
@@ -1996,7 +2004,6 @@ fdjt.CodexLayout=
                      layout.width+"x"+layout.height+"("+href+")");
                 if (!(CodexLayout.cache)) return;
                 // These will be used for per-page saved layouts
-                // var setLocal=fdjtState.setLocal, getLocal=fdjtState.getLocal;
                 var copy=container.cloneNode(true);
                 var pages=copy.childNodes, i=0, npages=pages.length;
                 var pageids=((separated)&&([])), pagecontent={};
@@ -2536,7 +2543,6 @@ fdjt.CodexLayout=
             if (doinit) doinit();}
 
         function cacheLayout(layout_id,content,pageids,pages,ondone){
-            var setLocal=fdjtState.setLocal;
             if (typeof layoutDB === "undefined") 
                 ondbinit=function(){cacheLayout(layout_id,content);};
             else if (!(layoutDB)) return;
@@ -2547,7 +2553,7 @@ fdjt.CodexLayout=
                     var i=0, lim=pageids.length;
                     while (i<lim) {
                         var id=pageids[i++];
-                        fdjtState.setLocal(layout_id+"#"+id,pages[id]);}}
+                        setLocal(layout_id+"#"+id,pages[id]);}}
                 if (ondone) ondone();}
             else if (window.indexedDB) {
                 var txn=layoutDB.transaction(["layouts"],"readwrite");
@@ -2592,14 +2598,7 @@ fdjt.CodexLayout=
                 var req=storage.get(layout_id);
                 var allDone=function allDone(event){
                     event=false; // ignored
-                    var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
-                    if (layouts) {
-                        var loc=layouts.indexOf(layout_id);
-                        if (loc>=0) {
-                            layouts.splice(loc,1);
-                            fdjtState.setLocal("fdjtCodex.layouts",layouts,true);}}
-                    if (CodexLayout.trace)
-                        fdjtLog("Layout %s removed",layout_id);};
+                    droppedLayout(layout_id);};
                 var whoops=function whoops(event) {
                     event=false; // ignored
                     fdjtLog("Error removing laytout %s",layout_id);};
@@ -2626,16 +2625,12 @@ fdjt.CodexLayout=
                 dropLocal(layout_id+".pageids");
                 var i=0, lim=pageids.length; while (i<lim) {
                     dropLocal(pageids[i++]);}
-                var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
-                if (layouts) {
-                    var loc=layouts.indexOf(layout_id);
-                    if (loc>=0) {
-                        layouts.splice(loc,1);
-                        fdjtState.setLocal("fdjtCodex.layouts",layouts,true);}}}}
+                droppedLayout(layout_id);}}
         CodexLayout.dropLayout=dropLayout;
         function fetchLayout(layout_id,callback,pageid){
             var getLocal=fdjtState.getLocal;
-            var content=false, layout_key=((pageid)?(layout_id+"#"+pageid):(layout_id));
+            var content=false, layout_key=
+                ((pageid)?(layout_id+"#"+pageid):(layout_id));
             if (typeof layoutDB === "undefined") 
                 ondbinit=function(){fetchLayout(layout_id,callback,pageid);};
             else if (!(layoutDB)) callback(false);
@@ -2715,12 +2710,12 @@ fdjt.CodexLayout=
                     fdjtLog.warn("Dropping layout %s",todrop[i]);
                     dropLayout(todrop[i++]);}});};
         function gotLayout(layout_id){
-            var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
-            if (!(layouts)) layouts=[layout_id];
-            else if (layouts.indexOf(layout_id)<0) 
-                layouts.push(layout_id);
-            else {}
-            fdjtState.setLocal("fdjtCodex.layouts",layouts,true);}
+            setLocal("fdjtCodex.layout("+layout_id+")",layout_id);
+            pushLocal("fdjtCodex.layouts",layout_id);}
+        function droppedLayout(layout_id){
+            dropLocal("fdjtCodex.layout("+layout_id+")",layout_id);
+            removeLocal("fdjtCodex.layouts",layout_id);
+            if (CodexLayout.trace) fdjtLog("Layout %s removed",layout_id);}
         
         return CodexLayout;})();
 
