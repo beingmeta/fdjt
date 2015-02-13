@@ -2038,14 +2038,20 @@ fdjt.DOM=
         
         /* Removing IDs */
 
-        function stripIDs(node,nametoo){
-            if (node.id) node.id="";
+        function stripIDs(node,nametoo,moveto){
+            if (!(nametoo)) nametoo=false;
+            if (!(moveto)) moveto=false;
+            if (node.id) {
+                if (moveto) node.setAttribute(moveto,node.id);
+                node.id="";
+                node.removeAttribute("id");}
             if ((nametoo)&&(node.name)) node.name=null;
             if ((node.childNodes)&&(node.childNodes.length)) {
                 var children=node.childNodes, i=0, lim=children.length;
                 while (i<lim) {
                     var child=children[i++];
-                    if (child.nodeType===1) stripIDs(child,nametoo||false);}}}
+                    if (child.nodeType===1)
+                        stripIDs(child,nametoo,moveto);}}}
         fdjtDOM.stripIDs=stripIDs;
 
         /* Stylesheet manipulation */
