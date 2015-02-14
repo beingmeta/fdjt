@@ -192,7 +192,7 @@ fdjt.State=
 
         function setLocal(name,val,unparse){
             if (!(name)) throw { error: "bad name",name: name};
-            if (typeof value === "undefined")
+            if (typeof val === "undefined")
                 throw { error: "undefined value", name: name};
             if (!(val)) {dropLocal(name); return;}
             if (unparse) val=JSON.stringify(val);
