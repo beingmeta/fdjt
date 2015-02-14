@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; -*- */
 
-/* Copyright (C) 2009-2014 beingmeta, inc.
+/* Copyright (C) 2009-2015 beingmeta, inc.
    This file was created from several component files and is
    part of the FDJT web toolkit (www.fdjt.org)
 
