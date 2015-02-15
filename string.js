@@ -639,11 +639,13 @@ fdjt.String=
                     var propname=((bar>=0)?(prop.slice(0,bar)):(prop));
                     if ((done[prop])||(done[propname])) continue;
                     else if (data.hasOwnProperty(propname)) {
-                        var pat=new RegExp(
-                            "\\{\\{"+propname+"(\\|[^\\}]*)?\\}\\}","gm");
-                        var val=data[propname], stringval=val.toString();
+                        var val=data[propname];
                         done[propname]=prop;
-                        text=text.replace(pat,stringval);}
+                        if (val) {
+                            var pat=new RegExp(
+                                "\\{\\{"+propname+"(\\|[^\\}]*)?\\}\\}","gm");
+                            var stringval=val.toString();
+                            text=text.replace(pat,stringval);}}
                     else if (bar>0) {
                         var replace=prop.slice(bar+1);
                         text=text.replace("{{"+prop+"}}",replace);
