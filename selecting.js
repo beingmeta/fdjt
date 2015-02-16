@@ -485,12 +485,13 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             else return;
             if ((start)&&(end)) this.setRange(start,end);};
 
-        TextSelect.prototype.getString=function(start,end){
+        TextSelect.prototype.getString=function(start,end,rawtext){
             if (!(start)) start=this.start; if (!(end)) end=this.end;
             var wrappers=this.wrappers; 
             var combine=[]; var prefix=this.prefix; var wpos=-1;
             var scan=start; while (scan) {
-                if (scan.nodeType===1) {
+                if (rawtext) {}
+                else if (scan.nodeType===1) {
                     var style=getStyle(scan);
                     if ((style.position==='static')&&
                         (style.display!=='inline')&&
@@ -528,8 +529,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     return false;
                 while ((i<lim)&&(!(hasParent(first_word,under))))
                     first_word=words[i++];}
-            var selected=this.getString();
-            var preselected=this.getString(first_word,this.end);
+            var selected=this.getString(false,false,true);
+            var preselected=this.getString(first_word,this.end,true);
             return preselected.length-selected.length;};
         
         TextSelect.prototype.getInfo=function(under){
@@ -544,13 +545,15 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     return false;
                 while ((i<lim)&&(!(hasParent(first_word,under))))
                     first_word=words[i++];}
-            var preselected=this.getString(first_word,this.end);
+            var rawselect=this.getString(false,false,true);
+            var preselected=this.getString(first_word,this.end,true);
             if ((trace)||(traceall)) 
                 fdjtLog("GetInfo %o: start=%o, end=%o, off=%o, string=%o",
                         this,this.start,this.end,
-                        preselected.length-selected.length,selected);
+                        preselected.length-rawselect.length,
+                        selected);
             return { start: this.start, end: this.end,
-                     off: preselected.length-selected.length,
+                     off: preselected.length-rawselect.length,
                      string: selected};};
         
         TextSelect.prototype.setAdjust=function(val){

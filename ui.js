@@ -182,7 +182,8 @@ fdjt.UI.Highlight=(function(){
             end=stringval.length;
         if (start===end) return;
         var beginning=((start>0)&&(textnode(stringval.slice(0,start))));
-        var middle=highlight_text(stringval.slice(start,end),hclass,htitle,hattribs);
+        var middle=highlight_text(
+            stringval.slice(start,end),hclass,htitle,hattribs);
         var ending=((end<stringval.length)&&
                     (textnode(stringval.slice(end))));
         if ((beginning)&&(ending)) {
@@ -220,14 +221,16 @@ fdjt.UI.Highlight=(function(){
                     while ((next)&&(!(next.nextSibling)))
                         next=next.parentNode;
                     next=next.nextSibling;
-                    highlights.push(highlight_node(scan,hclass,htitle,hattribs));
+                    highlights.push(
+                        highlight_node(scan,hclass,htitle,hattribs));
                     scan=next;}}
             // Do the ends
             highlights.push(
                 highlight_node_range(
                     starts_in,range.startOffset,false,hclass,htitle,hattribs));
             highlights.push(
-                highlight_node_range(ends_in,0,range.endOffset,hclass,htitle,hattribs));
+                highlight_node_range(
+                    ends_in,0,range.endOffset,hclass,htitle,hattribs));
             return highlights;}}
 
     highlight_range.clear=clear_highlights;
