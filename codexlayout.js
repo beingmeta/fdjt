@@ -45,6 +45,8 @@
 fdjt.CodexLayout=
     (function(){
         "use strict";
+        /* globals Promise: false */
+
         var fdjtDOM=fdjt.DOM;
         var fdjtLog=fdjt.Log;
         var fdjtTime=fdjt.Time;
@@ -1812,129 +1814,132 @@ fdjt.CodexLayout=
                for restoring unique IDs.
             */
             function setSimpleLayout(content,donefn){
-                var frag=document.createElement("div");
-                var all_ids=[], saved_ids={};
-                var dupids=[], dupstarts={}, restoremap={};
-                var curnodes=[], newdups={}, pagescales=[];
-                if (trace)
-                    fdjtLog("Setting layout to %d characters of HTML",
-                            content.length);
-                frag.innerHTML=content;
-                var newpages=frag.childNodes, addpages=[];
-                if (trace) fdjtLog("Gathering layout info");
-                var i=0, lim=newpages.length; while (i<lim) {
-                    var page=newpages[i++];
-                    addpages.push(page);
-                    if (page.nodeType===1) {
-                        if ((page.className)&&(page.className.search)&&
-                            (page.className.search(/\bcurpage\b/)>=0))
-                            dropClass(page,"curpage");
-                        gatherLayoutInfo(page,all_ids,newdups,
-                                         dupids,dupstarts,restoremap);}}
-                var idmap={};
-                if (trace) fdjtLog("Getting originals by ID");
-                i=0; lim=all_ids.length; while (i<lim) {
-                    var idkey=all_ids[i++];
-                    idmap[idkey]=document.getElementById(idkey);}
-                var bcrumb=false, ccrumb=false;
-                if (trace)
-                    fdjtLog("Moving body and container out of document");
-                if ((origin)&&(origin.parentNode)) {
-                    bcrumb=document.createTextNode("");
-                    origin.parentNode.replaceChild(bcrumb,origin);}
-                if (container.parentNode) {
-                    ccrumb=document.createTextNode("");
-                    container.parentNode.replaceChild(ccrumb,container);}
-                if (trace) fdjtLog("Moving originals into layout");
-                i=0; lim=all_ids.length; while (i<lim) {
-                    var id=all_ids[i++];
-                    var original=idmap[id];
-                    var restore=restoremap[id];
-                    // The restoremap contains content references
-                    //  which are unmodified from the original
-                    //  content, making them a lot smaller and easier
-                    //  to keep around.
-                    if ((restore)&&(original)) {
-                        var classname=restore.className;
-                        var style=restore.getAttribute("style");
-                        var ostyle=original.getAttribute("style");
-                        var oclass=original.className;
-                        var crumb=document.createTextNode("");
-                        classname=classname.replace(/\bcodexrestore\b/,"");
-                        replaceNode(original,crumb);
-                        crumbs[id]=crumb;
-                        replaceNode(restore,original);
-                        if ((classname)&&(classname!==oclass)) {
-                            if ((oclass)&&(typeof oclass === "string"))
-                                original.setAttribute("data-savedclass",oclass);
-                            original.className=classname;}
-                        if (style!==ostyle) {
-                            if (ostyle) original.setAttribute(
-                                "data-savedstyle",ostyle);
-                            original.setAttribute("style",style);}
-                        if (classname.search(/\bcodexpagetop\b/)>=0) {
-                            markPageTop(original,true);}}
-                    else if (original) {
-                        saved_ids[id]=original;
-                        if (original.id) original.removeAttribute("id");}}
-                if (trace) fdjtLog("Gathering lostids");
-                var lostids=layout.lostids={};
-                var really_lost=lostids._all_ids=[];
-                i=0; lim=dupids.length; while (i<lim) {
-                    var dupid=dupids[i++];
-                    var orig=idmap[dupid];
-                    if (orig) {
-                        lostids[dupid]=orig;
-                        really_lost.push(dupid);
-                        if (orig.id) orig.removeAttribute("id");}}
-                if (trace) fdjtLog("Moving nodes around");
-                var cur=container.childNodes;
-                i=0; lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
-                i=0; while (i<lim) container.removeChild(curnodes[i++]);
-                i=0; lim=addpages.length;
-                while (i<lim) {
-                    var addpage=addpages[i++];
-                    var scale_elts=
-                        getChildren(addpage,"[pagescale],[data-pagescale]");
-                    if (scale_elts.length) 
-                        pagescales.push({page: addpage, toscale: scale_elts});
-                    container.appendChild(addpage);}
-                layout.pages=addpages;
-                dups=layout.dups=newdups;
-                saved_ids._all_ids=all_ids;
-                layout.saved_ids=saved_ids;
-                layout.page=addpages[0];
-                layout.pagenum=parseInt(
-                    layout.page.getAttribute("data-pagenum"),10);
-                if (trace)
-                    fdjtLog("Moving origin/container back to document");
-                if (ccrumb)
-                    ccrumb.parentNode.replaceChild(container,ccrumb);
-                if (bcrumb)
-                    bcrumb.parentNode.replaceChild(origin,bcrumb);
-                var splits=getChildren(container,".codexsplitstart");
-                var s=0, n_splits=splits.length; while (s<n_splits) {
-                    var split=splits[s++], splitid=split.id;
-                    var text=split.getAttribute("data-textsplit");
-                    if ((splitid)&&(text)) {
-                        textsplits[splitid]=document.createTextNode(text);
-                        split.removeAttribute("data-textsplit");}}
-                i=0; lim=pagescales.length; while (i<lim) {
-                    var ps=pagescales[i++]; var pg=ps.page;
-                    pg.style.opacity=0; pg.style.display='block';
-                    scaleToPage(ps.toscale,page_width,page_height);
-                    pg.style.display=''; pg.style.opacity='';}
-                if (trace) fdjtLog("Done restoring layout");
-                if (donefn) donefn();}
-            function setLayout(content,donefn,failfn){
-                if (typeof content === "string") {
+                function restoring_layout(success,failure){
                     try {
-                        setSimpleLayout(content,donefn);}
-                    catch (ex) {if (failfn) failfn();}}
-                else if (!(content.hasOwnProperty('npages'))) {
-                    try {
-                        setSimpleLayout(content.layout,donefn);}
-                    catch (ext) {if (failfn) failfn();}}
+                        var frag=document.createElement("div");
+                        var all_ids=[], saved_ids={};
+                        var dupids=[], dupstarts={}, restoremap={};
+                        var curnodes=[], newdups={}, pagescales=[];
+                        if (trace)
+                            fdjtLog("Setting layout to %d characters of HTML",
+                                    content.length);
+                        frag.innerHTML=content;
+                        var newpages=frag.childNodes, addpages=[];
+                        if (trace) fdjtLog("Gathering layout info");
+                        var i=0, lim=newpages.length; while (i<lim) {
+                            var page=newpages[i++];
+                            addpages.push(page);
+                            if (page.nodeType===1) {
+                                if ((page.className)&&(page.className.search)&&
+                                    (page.className.search(/\bcurpage\b/)>=0))
+                                    dropClass(page,"curpage");
+                                gatherLayoutInfo(page,all_ids,newdups,
+                                                 dupids,dupstarts,restoremap);}}
+                        var idmap={};
+                        if (trace) fdjtLog("Getting originals by ID");
+                        i=0; lim=all_ids.length; while (i<lim) {
+                            var idkey=all_ids[i++];
+                            idmap[idkey]=document.getElementById(idkey);}
+                        var bcrumb=false, ccrumb=false;
+                        if (trace)
+                            fdjtLog("Moving body and container out of document");
+                        if ((origin)&&(origin.parentNode)) {
+                            bcrumb=document.createTextNode("");
+                            origin.parentNode.replaceChild(bcrumb,origin);}
+                        if (container.parentNode) {
+                            ccrumb=document.createTextNode("");
+                            container.parentNode.replaceChild(ccrumb,container);}
+                        if (trace) fdjtLog("Moving originals into layout");
+                        i=0; lim=all_ids.length; while (i<lim) {
+                            var id=all_ids[i++];
+                            var original=idmap[id];
+                            var restore=restoremap[id];
+                            // The restoremap contains content references
+                            //  which are unmodified from the original
+                            //  content, making them a lot smaller and easier
+                            //  to keep around.
+                            if ((restore)&&(original)) {
+                                var classname=restore.className;
+                                var style=restore.getAttribute("style");
+                                var ostyle=original.getAttribute("style");
+                                var oclass=original.className;
+                                var crumb=document.createTextNode("");
+                                classname=classname.replace(/\bcodexrestore\b/,"");
+                                replaceNode(original,crumb);
+                                crumbs[id]=crumb;
+                                replaceNode(restore,original);
+                                if ((classname)&&(classname!==oclass)) {
+                                    if ((oclass)&&(typeof oclass === "string"))
+                                        original.setAttribute("data-savedclass",oclass);
+                                    original.className=classname;}
+                                if (style!==ostyle) {
+                                    if (ostyle) original.setAttribute(
+                                        "data-savedstyle",ostyle);
+                                    original.setAttribute("style",style);}
+                                if (classname.search(/\bcodexpagetop\b/)>=0) {
+                                    markPageTop(original,true);}}
+                            else if (original) {
+                                saved_ids[id]=original;
+                                if (original.id) original.removeAttribute("id");}}
+                        if (trace) fdjtLog("Gathering lostids");
+                        var lostids=layout.lostids={};
+                        var really_lost=lostids._all_ids=[];
+                        i=0; lim=dupids.length; while (i<lim) {
+                            var dupid=dupids[i++];
+                            var orig=idmap[dupid];
+                            if (orig) {
+                                lostids[dupid]=orig;
+                                really_lost.push(dupid);
+                                if (orig.id) orig.removeAttribute("id");}}
+                        if (trace) fdjtLog("Moving nodes around");
+                        var cur=container.childNodes;
+                        i=0; lim=cur.length; while (i<lim) curnodes.push(cur[i++]);
+                        i=0; while (i<lim) container.removeChild(curnodes[i++]);
+                        i=0; lim=addpages.length;
+                        while (i<lim) {
+                            var addpage=addpages[i++];
+                            var scale_elts=
+                                getChildren(addpage,"[pagescale],[data-pagescale]");
+                            if (scale_elts.length) 
+                                pagescales.push({page: addpage, toscale: scale_elts});
+                            container.appendChild(addpage);}
+                        layout.pages=addpages;
+                        dups=layout.dups=newdups;
+                        saved_ids._all_ids=all_ids;
+                        layout.saved_ids=saved_ids;
+                        layout.page=addpages[0];
+                        layout.pagenum=parseInt(
+                            layout.page.getAttribute("data-pagenum"),10);
+                        if (trace)
+                            fdjtLog("Moving origin/container back to document");
+                        if (ccrumb)
+                            ccrumb.parentNode.replaceChild(container,ccrumb);
+                        if (bcrumb)
+                            bcrumb.parentNode.replaceChild(origin,bcrumb);
+                        var splits=getChildren(container,".codexsplitstart");
+                        var s=0, n_splits=splits.length; while (s<n_splits) {
+                            var split=splits[s++], splitid=split.id;
+                            var text=split.getAttribute("data-textsplit");
+                            if ((splitid)&&(text)) {
+                                textsplits[splitid]=document.createTextNode(text);
+                                split.removeAttribute("data-textsplit");}}
+                        i=0; lim=pagescales.length; while (i<lim) {
+                            var ps=pagescales[i++]; var pg=ps.page;
+                            pg.style.opacity=0; pg.style.display='block';
+                            scaleToPage(ps.toscale,page_width,page_height);
+                            pg.style.display=''; pg.style.opacity='';}}
+                    catch (ex) {
+                        if (failure) failure(); return;}
+                    if (trace) fdjtLog("Done restoring layout");
+                    if (donefn) donefn();
+                    if (success) success();}
+                return new Promise(restoring_layout);}
+
+            function setLayout(content){
+                if (typeof content === "string") 
+                    return setSimpleLayout(content);
+                else if (!(content.hasOwnProperty('npages'))) 
+                    return setSimpleLayout(content.layout);
                 else {
                     container.innerHTML=content.layout;
                     var pagenodes=container.childNodes;
@@ -1943,14 +1948,14 @@ fdjt.CodexLayout=
                             restorePage(pagenode,content);},
                         pagenodes,
                         {slice: layout.timeslice,
-                         space: layout.timeskip,
-                         done: donefn});}}
+                         space: layout.timeskip});}}
             layout.setLayout=setLayout;
 
             function restorePage(pagenode,content){
-                fetchLayout(content.layout_id,function(pagedata){
-                    pagenode.innerHTML=pagedata.content;},
-                            pagenode.id);}
+                fetchLayout(content.layout_id,pagenode.id).
+                    then(function(pagedata){
+                        pagenode.innerHTML=pagedata.content;},
+                         pagenode.id);}
 
             function dropSelected(node,dropsel){
                 if (!(dropsel)) return;
@@ -2032,9 +2037,9 @@ fdjt.CodexLayout=
                 try {
                     if (pageids)
                         cacheLayout(layout_id,html,pageids,pagecontent,
-                                    function(){gotLayout(layout_id);});
+                                    function(){cachedLayout(layout_id);});
                     else cacheLayout(layout_id,html,false,false,
-                                    function(){gotLayout(layout_id);});
+                                    function(){cachedLayout(layout_id);});
                     callback(layout);}
                 catch (ex) {
                     fdjtLog.warn("Couldn't save layout %s: %s",layout_id,ex);
@@ -2049,17 +2054,17 @@ fdjt.CodexLayout=
                     fdjtLog.warn("Falsy arg %s to restoreLayout",arg);
                     return;}
                 else if (arg.hasOwnProperty('npages')) {
-                    layout.setLayout(arg,whendone);
+                    layout.setLayout(arg).then(whendone);
                     return true;}
                 else if (arg.hasOwnProperty('layout')) {
-                    layout.setLayout(arg.layout,whendone);
+                    layout.setLayout(arg.layout).then(whendone);
                     return true;}
                 else if (arg.indexOf("<")>=0) {
-                    layout.setLayout(arg,whendone);
+                    layout.setLayout(arg,whendone).then(whendone);
                     return true;}
                 var saved_layout=fdjtState.getLocal(arg);
                 if (layout) {
-                    layout.setLayout(saved_layout,whendone);
+                    layout.setLayout(saved_layout,whendone).then(whendone);
                     return true;}
                 else return false;}
             this.restoreLayout=restoreLayout;
@@ -2629,17 +2634,21 @@ fdjt.CodexLayout=
                     dropLocal(pageids[i++]);}
                 droppedLayout(layout_id);}}
         CodexLayout.dropLayout=dropLayout;
-        function fetchLayout(layout_id,callback,pageid){
+        function fetchLayout(layout_id,pageid,callback,onerr){
             var getLocal=fdjtState.getLocal;
             var content=false, layout_key=
                 ((pageid)?(layout_id+"#"+pageid):(layout_id));
             if (typeof layoutDB === "undefined") 
-                ondbinit=function(){fetchLayout(layout_id,callback,pageid);};
-            else if (!(layoutDB)) callback(false);
+                ondbinit=function(){
+                    fetchLayout(layout_id,pageid,callback,onerr);};
+            else if (!(layoutDB)) { 
+                if (onerr) return onerr(false);
+                else if (callback) return callback(false);
+                else return false;}
             else if ((window.Storage)&&(layoutDB instanceof window.Storage)) {
                 var pageids=getLocal(layout_id+".pageids",true);
                 if (pageids) {
-                    gotLayout(layout_id);
+                    cachedLayout(layout_id);
                     content=getLocal(layout_id)||false;
                     if (pageid) {
                         var pnpos=layout_id.search(/\d+$/g);
@@ -2653,7 +2662,7 @@ fdjt.CodexLayout=
                                     1);}
                 else {
                     content=getLocal(layout_id)||false;
-                    if (content) gotLayout(layout_id);
+                    if (content) cachedLayout(layout_id);
                     setTimeout(function(){callback(content);},1);}}
             else if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"]);
@@ -2662,16 +2671,24 @@ fdjt.CodexLayout=
                 req.onsuccess=function(evt){
                     var target=evt.target;
                     var result=((target)&&(target.result));
-                    if (result) gotLayout(layout_id);
+                    if (result) cachedLayout(layout_id);
                     if (!(result)) callback(false);
                     else if (result.hasOwnProperty('npages'))
                         callback(result);
                     else callback(result.layout);};}
             else if (window.localStorage) {
                 content=fdjtState.getLocal(layout_key)||false;
-                if (content) gotLayout(layout_id);
-                setTimeout(function(){callback(content);},0);}}
-        CodexLayout.fetchLayout=fetchLayout;
+                if (content) cachedLayout(layout_id);
+                setTimeout(function(){callback(content);},0);}
+            else if (onerr)
+                return onerr(false);
+            else if (callback)
+                return callback(false);
+            else return false;}
+        CodexLayout.fetchLayout=function(layout_id,pageid){
+            function fetching_layout(success,failure){
+                return fetchLayout(layout_id,pageid,success,failure);}
+            return new Promise(fetching_layout);};
         
         CodexLayout.clearLayouts=function(){
             var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
@@ -2711,7 +2728,7 @@ fdjt.CodexLayout=
                 i=0; lim=todrop.length; while (i<lim) {
                     fdjtLog.warn("Dropping layout %s",todrop[i]);
                     dropLayout(todrop[i++]);}});};
-        function gotLayout(layout_id){
+        function cachedLayout(layout_id){
             setLocal("fdjtCodex.layout("+layout_id+")",layout_id);
             pushLocal("fdjtCodex.layouts",layout_id);}
         function droppedLayout(layout_id){
