@@ -1938,11 +1938,13 @@ fdjt.CodexLayout=
                 else {
                     container.innerHTML=content.layout;
                     var pagenodes=container.childNodes;
-                    fdjtTime.slowmap(function(pagenode){
-                        restorePage(pagenode,content);},
-                                     pagenodes,false,donefn,
-                                     layout.timeslice,
-                                     layout.timeskip);}}
+                    return fdjtTime.slowmap(
+                        function(pagenode){
+                            restorePage(pagenode,content);},
+                        pagenodes,
+                        {slice: layout.timeslice,
+                         space: layout.timeskip,
+                         done: donefn});}}
             layout.setLayout=setLayout;
 
             function restorePage(pagenode,content){

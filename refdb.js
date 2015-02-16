@@ -547,8 +547,8 @@ if (!(fdjt.RefDB)) {
                     defImport(item,refs,db,rules,flags);},data);
             else fdjtTime.slowmap(function(item){
                 defImport(item,refs,db,rules,flags);},
-                                  data,false,
-                                  function(){callback(refs);});};
+                                  data,
+                                  {done: function(){callback(refs);}});};
 
         Ref.prototype.onLoad=function(fn,name){
             if (this._live) fn(this);
@@ -668,10 +668,11 @@ if (!(fdjt.RefDB)) {
                             warn("No item stored for %s",ref._id);
                         else ref.Import(
                             JSON.parse(content),false,REFLOAD|REFINDEX);},
-                                     needrefs,false,
-                                     function(){if (callback) {
-                                         if (args) callback.apply(null,args);
-                                         else callback();}});}
+                                     needrefs,
+                                     {done:
+                                      function(){if (callback) {
+                                          if (args) callback.apply(null,args);
+                                          else callback();}}});}
                 else if (callback) {
                     if (args) callback.apply(null,args);
                     else callback();}
