@@ -4,14 +4,16 @@
 ECHO=/bin/echo
 CLEAN=/bin/rm -f
 PATH:=/usr/local/bin:${PATH}
-FDJT_FILES=header.js charnames.js string.js time.js  template.js hash.js \
+FDJT_FILES=header.js \
+	charnames.js string.js promise.js time.js \
+	template.js hash.js \
 	syze.js iscroll.js \
 	log.js init.js state.js dom.js \
 	json.js refdb.js ajax.js wsn.js textindex.js \
 	ui.js dialog.js completions.js taphold.js selecting.js \
 	scrollever.js \
 	globals.js
-FDJT_HINTS=string.hint charnames.hint time.hint \
+FDJT_HINTS=string.hint promise.hint charnames.hint time.hint \
 	syze.hint iscroll.hint indexed.hint \
 	log.hint init.hint state.hint dom.hint \
 	refdb.hint json.hint ajax.hint codexlayout.hint \
