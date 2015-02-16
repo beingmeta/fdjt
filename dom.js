@@ -2590,20 +2590,20 @@ fdjt.DOM=
                     starts_in: within.id,ends_in: ends_in.id,
                     end: end_edge+range.endOffset};};
 
-        function getRegexString(needle,shyphens,word){
+        function getRegexString(needle,shyphens,before,after){
             if (shyphens)
-                return (((word)?("\\b"):(""))+
+                return ((before||"")+
                         (needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
                                 /\S/g,"$&­?").replace("­? "," ").replace(/\s+/g,"(\\s+)"))+
-                        ((word)?("\\b"):("")));
-            else return (((word)?("\\b"):(""))+
+                        (after||""));
+            else return (((before)||(""))+
                          (needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
                                  /\s+/g,"(\\s+)"))+
-                         ((word)?("\\b"):("")));}
+                         ((after)||("")));}
         fdjtDOM.getRegexString=getRegexString;
 
-        function textRegExp(needle){
-            return new RegExp(getRegexString(needle,true,true),"gm");}
+        function textRegExp(needle,before,after){
+            return new RegExp(getRegexString(needle,true,before,after),"gm");}
         fdjtDOM.textRegExp=textRegExp;
 
         function findString(node,needle,off,count){
@@ -2632,7 +2632,11 @@ fdjt.DOM=
                     var end=get_text_pos(node,absloc+(match[0].length),0);
                     if ((!start)||(!end)) return false;
                     var range=document.createRange();
-                    range.setStart(start.node,start.off);
+                    if (start.atend) {
+                        var txt=firstText(start.node.nextSibling);
+                        if (txt) range.setStart(txt,0);
+                        else range.setStart(start.node,start.off);}
+                    else range.setStart(start.node,start.off);
                     range.setEnd(end.node,end.off);
                     return range;}
                 else {count--;
@@ -2650,13 +2654,17 @@ fdjt.DOM=
             var pat=((typeof needle === 'string')?(textRegExp(needle)):
                      (needle));
             while ((count!==0)&&(match=pat.exec(scan))) {
-                var loc=match.index;
+                var loc=match.index+off;
                 // var absloc=loc+off;
                 var start=get_text_pos(node,loc,0);
                 var end=get_text_pos(node,loc+match[0].length,0);
                 if ((!start)||(!end)) return false;
                 var range=document.createRange();
                 if (typeof start === "number") range.setStart(node,start);
+                else if (start.atend) {
+                    var txt=firstText(start.node.nextSibling);
+                    if (txt) range.setStart(txt,0);
+                    else range.setStart(start.node,start.off);}
                 else range.setStart(start.node,start.off);
                 if (typeof end === "number") range.setEnd(node,end);
                 else range.setEnd(end.node,end.off);
@@ -2665,6 +2673,13 @@ fdjt.DOM=
                 count--;} 
             return results;}
         fdjtDOM.findMatches=findMatches;
+
+        function firstText(node){
+            if (!(node)) return false;
+            else if (node.nodeType===3) return node;
+            else if (node.nodeType===1)
+                return firstText(node.firstChild);
+            else return false;}
 
         /* Paragraph hashes */
 
