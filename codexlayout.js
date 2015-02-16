@@ -49,6 +49,7 @@ fdjt.CodexLayout=
 
         var fdjtDOM=fdjt.DOM;
         var fdjtLog=fdjt.Log;
+        var fdjtAsync=fdjt.Async;
         var fdjtTime=fdjt.Time;
         var fdjtState=fdjt.State;
         var fdjtID=fdjt.ID;
@@ -1946,7 +1947,7 @@ fdjt.CodexLayout=
                     // !!! This hasn't been tested
                     container.innerHTML=content.layout;
                     var pagenodes=container.childNodes;
-                    return fdjtTime.slowmap(
+                    return fdjtAsync.slowmap(
                         function(pagenode){
                             restorePage(pagenode,content);},
                         pagenodes,

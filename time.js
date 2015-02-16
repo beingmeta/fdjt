@@ -29,9 +29,6 @@
 fdjt.Time=
     (function (){
         "use strict";
-        /* global
-           setTimeout: false, clearTimeout: false,
-           Promise: false */
 
         function _(x){ return x; }
 
@@ -165,95 +162,9 @@ fdjt.Time=
             if (!(arg)) arg=new Date();
             return (arg.getTime()-loaded)/1000;};
 
-        function timeslice(fcns,slice,space,stop,done,fail){
-            var timer=false;
-            if (typeof slice !== 'number') slice=100;
-            if (typeof space !== 'number') space=100;
-            var i=0; var lim=fcns.length;
-            var slicefn=function(){
-                var timelim=fdjtTime()+slice;
-                var nextspace=false;
-                while (i<lim) {
-                    var fcn=fcns[i++];
-                    if (!(fcn)) continue;
-                    else if (typeof fcn === 'number') {
-                        nextspace=fcn; break;}
-                    else {
-                        try {fcn();} catch (ex) {fail(ex);}}
-                    if (fdjtTime()>timelim) break;}
-                if ((i<lim)&&((!(done))||(!(done()))))
-                    timer=setTimeout(slicefn,nextspace||space);
-                else {
-                    clearTimeout(timer); 
-                    timer=false;
-                    done(false);}};
-            return slicefn();}
-        fdjtTime.timeslice=function(fcns,opts){
-            if (!(opts)) opts={};
-            var slice=opts.slice||100, space=opts.space||100;
-            var stop=opts.stop||false;
-            function timeslicing(success,failure){
-                timeslice(fcns,slice,space,stop,success,failure);}
-            return new Promise(timeslicing);};
+        fdjtTime.timeslice=fdjt.Async.timeslice;
+        fdjtTime.slowmap=fdjt.Async.slowmap;
 
-        function slowmap(fn,vec,watch,done,failed,slice,space,watch_slice){
-            var i=0; var lim=vec.length; var chunks=0;
-            var used=0; var zerostart=fdjtTime();
-            var timer=false;
-            if (!(slice)) slice=100;
-            if (!(space)) space=slice;
-            if (!(watch_slice)) watch_slice=0;
-            var stepfn=function(){
-                try {
-                    var started=fdjtTime(); var now=started;
-                    var stopat=started+slice;
-                    if (watch)
-                        watch(((i===0)?'start':'resume'),i,lim,chunks,used,
-                              zerostart);
-                    while ((i<lim)&&((now=fdjtTime())<stopat)) {
-                        var elt=vec[i];
-                        if ((watch)&&(((watch_slice)&&((i%watch_slice)===0))||
-                                      (i+1===lim)))
-                            watch('element',i,lim,elt,used,now-zerostart);
-                        fn(elt);
-                        if ((watch)&&(((watch_slice)&&((i%watch_slice)===0))||
-                                      (i+1===lim)))
-                            watch('after',i,lim,elt,used+(fdjtTime()-started),
-                                  zerostart,fdjtTime()-now);
-                        i++;}
-                    chunks=chunks+1;
-                    if (i<lim) {
-                        used=used+(now-started);
-                        if (watch) watch('suspend',i,lim,chunks,used,
-                                         zerostart);
-                        timer=setTimeout(stepfn,space);}
-                    else {
-                        now=fdjtTime(); used=used+(now-started);
-                        clearTimeout(timer); timer=false;
-                        if (watch)
-                            watch('finishing',i,lim,chunks,used,zerostart);
-                        var donetime=((done)&&(fdjtTime()-now));
-                        now=fdjtTime(); used=used+(now-started);
-                        if (watch)
-                            watch('done',i,lim,chunks,used,zerostart,donetime);
-                        if ((done)&&(done.call)) 
-                            done(vec,now-zerostart,used);}}
-                catch (ex) {if (failed) failed();}};
-            timer=setTimeout(stepfn,space);}
-        fdjtTime.slowmap=function(fcn,vec,opts){
-            if (!(opts)) opts={};
-            var slice=opts.slice, space=opts.space;
-            var watchfn=opts.watchfn, watch_slice=opts.watch;
-            var donefn=opts.done;
-            function slowmapping(success,failure){
-                slowmap(fcn,vec,watchfn,
-                        ((donefn)?(function(){
-                            donefn(); if (success) success();}):
-                         (success)),
-                        failure,slice,space,watch_slice);}
-            if (watch_slice<1) watch_slice=vec.length*watch_slice;
-            return new Promise(slowmapping);};
-        
         return fdjtTime;})();
 
 fdjt.ET=fdjt.Time.ET;

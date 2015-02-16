@@ -46,6 +46,7 @@ if (!(fdjt.RefDB)) {
         "use strict";
         var fdjtState=fdjt.State;
         var fdjtTime=fdjt.Time;
+        var fdjtAsync=fdjt.Async;
         var fdjtDOM=fdjt.DOM;
         var JSON=fdjt.JSON;
         var warn=fdjt.Log.warn;
@@ -241,7 +242,7 @@ if (!(fdjt.RefDB)) {
             if (name) this.onloadnames[name]=method;
             if (!(noupdate)) {
                 var loaded=[].concat(this.loaded);
-                fdjtTime.slowmap(method,loaded);}};
+                fdjtAsync.slowmap(method,loaded);}};
 
         RefDB.prototype.onAdd=function(name,method){
             this.onadd[name]=method;};
@@ -543,9 +544,9 @@ if (!(fdjt.RefDB)) {
                     setTimeout(function(){callback(refs);},10);
                 return refs;}
             else if (!(callback.call))
-                fdjtTime.slowmap(function(item){
+                fdjtAsync.slowmap(function(item){
                     defImport(item,refs,db,rules,flags);},data);
-            else fdjtTime.slowmap(function(item){
+            else fdjtAsync.slowmap(function(item){
                 defImport(item,refs,db,rules,flags);},
                                   data,
                                   {done: function(){callback(refs);}});};
@@ -674,7 +675,7 @@ if (!(fdjt.RefDB)) {
                 if (needrefs.length) {
                     var opts=((!(callback))?(false):
                               (args)?{done: docallback}:{done: callback});
-                    return fdjtTime.slowmap(
+                    return fdjtAsync.slowmap(
                         function(arg){load_ref(arg,loaded,storage);},
                         needrefs,opts);}
                 else {
