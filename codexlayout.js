@@ -626,6 +626,7 @@ fdjt.CodexLayout=
             var layout=this;
 
             this.init=init;
+            this.thenfns=[];
 
             // Layout rules
             var fullpages=this.fullpages=
@@ -2046,26 +2047,30 @@ fdjt.CodexLayout=
                     return false;}
                 return layout_id;}
             this.saveLayout=saveLayout;
-            function restoreLayout(arg,donefn){
+            function restoreLayout(arg,donefn,failfn){
                 function whendone(){
                     layout.done=fdjtTime();
-                    if (donefn) donefn(layout);}
+                    if (donefn) donefn(layout);
+                    if ((layout.thenfns)&&(layout.thenfns.length)) {
+                        var thenfns=layout.thenfns;
+                        var f=0, nfns=thenfns.length; while (f<nfns) {
+                            thenfns[f++].call(layout,layout);}}}
                 if (!(arg)) {
                     fdjtLog.warn("Falsy arg %s to restoreLayout",arg);
                     return;}
                 else if (arg.hasOwnProperty('npages')) {
-                    layout.setLayout(arg).then(whendone);
-                    return true;}
-                else if (arg.hasOwnProperty('layout')) {
-                    layout.setLayout(arg.layout).then(whendone);
-                    return true;}
+                    return layout.setLayout(arg).
+                        then(whendone).catch(failfn);}
+                else if (arg.hasOwnProperty('layout')) { 
+                    return layout.setLayout(arg.layout).
+                        then(whendone).catch(failfn);}
                 else if (arg.indexOf("<")>=0) {
-                    layout.setLayout(arg,whendone).then(whendone);
-                    return true;}
+                    return layout.setLayout(arg,whendone).
+                        then(whendone).catch(failfn);}
                 var saved_layout=fdjtState.getLocal(arg);
                 if (layout) {
-                    layout.setLayout(saved_layout,whendone).then(whendone);
-                    return true;}
+                    return layout.setLayout(saved_layout,whendone).
+                        then(whendone).catch(failfn);}
                 else return false;}
             this.restoreLayout=restoreLayout;
 
@@ -2168,7 +2173,11 @@ fdjt.CodexLayout=
                 while (i<lim) {
                     var p=pages[i++];
                     this.finishPage(p);}
-                layout.done=fdjtTime();}
+                layout.done=fdjtTime();
+                if ((layout.thenfns)&&(layout.thenfns.length)) {
+                    var thenfns=layout.thenfns;
+                    var f=0, nfns=thenfns.length; while (f<nfns) {
+                        thenfns[f++].call(layout,layout);}}}
             this.Finish=Finish;
 
             function fixOrderedList(ol){
@@ -2488,6 +2497,10 @@ fdjt.CodexLayout=
             return {blocks: blockinfo, npages: this.pages.length,
                     height: this.height, width: this.width,
                     break_blocks: this.break_blocks};};
+
+        CodexLayout.prototype.then=function(callback){
+            if (this.done) return callback.call(this,this);
+            else this.thenfns.push(callback);};
 
         CodexLayout.cache=2;
 
