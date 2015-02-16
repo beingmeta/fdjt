@@ -628,6 +628,30 @@ if (!(fdjt.RefDB)) {
             return exportValue(val,this);};
         
         RefDB.prototype.load=function loadRefs(refs,callback,args){
+            function docallback(){
+                if (callback) {
+                    if (args) callback.apply(null,args);
+                    else callback();}}
+            function load_ref(arg,loaded,storage){
+                var ref=arg, content;
+                if (typeof ref === "string")
+                    ref=db.ref(ref,false,true);
+                if (!(ref)) {
+                    warn("Couldn't resolve ref to %s",arg);
+                    return;}
+                else if (ref._live) return;
+                loaded.push(ref);
+                if (absrefs) content=storage[ref._id];
+                else if (atid)
+                    content=storage[atid+"("+ref._id+")"];
+                else {
+                    if (db.atid) atid=db.atid;
+                    else atid=db.atid=getatid(storage,db);
+                    content=storage[atid+"("+ref._id+")"];}
+                if (!(content))
+                    warn("No item stored for %s",ref._id);
+                else ref.Import(
+                    JSON.parse(content),false,REFLOAD|REFINDEX);}
             if (!(this.storage)) return;
             else if (this.storage instanceof Storage) {
                 if (!(refs)) refs=[].concat(this.allrefs);
@@ -648,35 +672,15 @@ if (!(fdjt.RefDB)) {
                     if (!((ref instanceof Ref)&&(ref._live)))
                         needrefs.push(refid);}
                 if (needrefs.length) {
-                    fdjtTime.slowmap(function(arg){
-                        var ref=arg, content;
-                        if (typeof ref === "string")
-                            ref=db.ref(ref,false,true);
-                        if (!(ref)) {
-                            warn("Couldn't resolve ref to %s",arg);
-                            return;}
-                        else if (ref._live) return;
-                        loaded.push(ref);
-                        if (absrefs) content=storage[ref._id];
-                        else if (atid)
-                            content=storage[atid+"("+ref._id+")"];
-                        else {
-                            if (db.atid) atid=db.atid;
-                            else atid=db.atid=getatid(storage,db);
-                            content=storage[atid+"("+ref._id+")"];}
-                        if (!(content))
-                            warn("No item stored for %s",ref._id);
-                        else ref.Import(
-                            JSON.parse(content),false,REFLOAD|REFINDEX);},
-                                     needrefs,
-                                     {done:
-                                      function(){if (callback) {
-                                          if (args) callback.apply(null,args);
-                                          else callback();}}});}
-                else if (callback) {
-                    if (args) callback.apply(null,args);
-                    else callback();}
-                else {}}
+                    var opts=((!(callback))?(false):
+                              (args)?{done: docallback}:{done: callback});
+                    return fdjtTime.slowmap(
+                        function(arg){load_ref(arg,loaded,storage);},
+                        needrefs,opts);}
+                else {
+                    docallback();
+                    return new Promise(function(resolve){
+                        resolve(refs);});}}
             else if (this.storage instanceof indexedDB) {}
             else {}};
         RefDB.prototype.loadref=function loadRef(ref,callback,args){
@@ -1286,7 +1290,7 @@ if (!(fdjt.RefDB)) {
             if (prop==='_id') return false;
             else if ((!(this._live))&&(this._db.storage)) {
                 if (db.storage instanceof Storage) {
-                    this.load(); return this.drop(prop,val);}
+                    this.load().then(function(){return this.drop(prop,val);});}
                 else {
                     return undefined;}}
             else if (this.hasOwnProperty(prop)) {
