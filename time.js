@@ -29,7 +29,9 @@
 fdjt.Time=
     (function (){
         "use strict";
-        /* global setTimeout: false, clearTimeout: false */
+        /* global
+           setTimeout: false, clearTimeout: false,
+           Promise: false */
 
         function _(x){ return x; }
 
@@ -150,19 +152,20 @@ fdjt.Time=
                 report=report+"; "+phase+": "+
                     ((time.getTime()-point.getTime())/1000)+"s";
                 point=time;}
-            return pname+" "+((point.getTime()-start.getTime())/1000)+"s"+report;};
+            return pname+" "+
+                ((point.getTime()-start.getTime())/1000)+"s"+
+                report;};
 
         fdjtTime.diffTime=function(time1,time2){
             if (!(time2)) time2=new Date();
             var diff=time1.getTime()-time2.getTime();
-            if (diff>0) return diff/1000; else return -(diff/1000);
-        };
+            if (diff>0) return diff/1000; else return -(diff/1000);};
 
         fdjtTime.ET=function(arg){
             if (!(arg)) arg=new Date();
             return (arg.getTime()-loaded)/1000;};
 
-        function timeslice(fcns,slice,space,done){
+        function timeslice(fcns,slice,space,stop,done,fail){
             var timer=false;
             if (typeof slice !== 'number') slice=100;
             if (typeof space !== 'number') space=100;
@@ -175,14 +178,23 @@ fdjt.Time=
                     if (!(fcn)) continue;
                     else if (typeof fcn === 'number') {
                         nextspace=fcn; break;}
-                    else fcn();
+                    else {
+                        try {fcn();} catch (ex) {fail(ex);}}
                     if (fdjtTime()>timelim) break;}
                 if ((i<lim)&&((!(done))||(!(done()))))
                     timer=setTimeout(slicefn,nextspace||space);
                 else {
-                    clearTimeout(timer); timer=false;}};
+                    clearTimeout(timer); 
+                    timer=false;
+                    done(false);}};
             return slicefn();}
-        fdjtTime.timeslice=timeslice;
+        fdjtTime.timeslice=function(fcns,opts){
+            if (!(opts)) opts={};
+            var slice=opts.slice||100, space=opts.space||100;
+            var stop=opts.stop||false;
+            function timeslicing(success,failure){
+                timeslice(fcns,slice,space,stop,success,failure);}
+            return new Promise(timeslicing);};
 
         function slowmap(fn,vec,watch,done,failed,slice,space,watch_slice){
             var i=0; var lim=vec.length; var chunks=0;
@@ -228,8 +240,20 @@ fdjt.Time=
                             done(vec,now-zerostart,used);}}
                 catch (ex) {if (failed) failed();}};
             timer=setTimeout(stepfn,space);}
-        fdjtTime.slowmap=slowmap;
-
+        fdjtTime.slowmap=function(fcn,vec,opts){
+            if (!(opts)) opts={};
+            var slice=opts.slice, space=opts.space;
+            var watchfn=opts.watchfn, watch_slice=opts.watch;
+            var donefn=opts.done;
+            function slowmapping(success,failure){
+                slowmap(fcn,vec,watchfn,
+                        ((donefn)?(function(){
+                            donefn(); if (success) success();}):
+                         (success)),
+                        failure,slice,space,watch_slice);}
+            if (watch_slice<1) watch_slice=vec.length*watch_slice;
+            return new Promise(slowmapping);};
+        
         return fdjtTime;})();
 
 fdjt.ET=fdjt.Time.ET;
