@@ -1814,8 +1814,8 @@ fdjt.CodexLayout=
                especially the dups for split nodes and the saved_ids
                for restoring unique IDs.
             */
-            function setSimpleLayout(content,donefn){
-                function restoring_layout(success,failure){
+            function setSimpleLayout(content){
+                function setting_layout(resolve,reject){
                     try {
                         var frag=document.createElement("div");
                         var all_ids=[], saved_ids={};
@@ -1930,11 +1930,11 @@ fdjt.CodexLayout=
                             scaleToPage(ps.toscale,page_width,page_height);
                             pg.style.display=''; pg.style.opacity='';}}
                     catch (ex) {
-                        if (failure) failure(); return;}
+                        if (reject) reject(ex); return;}
                     if (trace) fdjtLog("Done restoring layout");
-                    if (donefn) donefn();
-                    if (success) success();}
-                return new Promise(restoring_layout);}
+                    if (resolve) return resolve(layout);
+                    else return layout;}
+                return new Promise(setting_layout);}
 
             function setLayout(content){
                 if (typeof content === "string") 
@@ -1942,6 +1942,8 @@ fdjt.CodexLayout=
                 else if (!(content.hasOwnProperty('npages'))) 
                     return setSimpleLayout(content.layout);
                 else {
+                    // Page-by-page layout
+                    // !!! This hasn't been tested
                     container.innerHTML=content.layout;
                     var pagenodes=container.childNodes;
                     return fdjtTime.slowmap(
@@ -2054,25 +2056,28 @@ fdjt.CodexLayout=
                     if ((layout.thenfns)&&(layout.thenfns.length)) {
                         var thenfns=layout.thenfns;
                         var f=0, nfns=thenfns.length; while (f<nfns) {
-                            thenfns[f++].call(layout,layout);}}}
+                            thenfns[f++](layout);}}
+                    return layout;}
+                var setting=false;
                 if (!(arg)) {
                     fdjtLog.warn("Falsy arg %s to restoreLayout",arg);
                     return;}
-                else if (arg.hasOwnProperty('npages')) {
-                    return layout.setLayout(arg).
-                        then(whendone).catch(failfn);}
-                else if (arg.hasOwnProperty('layout')) { 
-                    return layout.setLayout(arg.layout).
-                        then(whendone).catch(failfn);}
-                else if (arg.indexOf("<")>=0) {
-                    return layout.setLayout(arg,whendone).
-                        then(whendone).catch(failfn);}
-                var saved_layout=fdjtState.getLocal(arg);
-                if (layout) {
-                    return layout.setLayout(saved_layout,whendone).
-                        then(whendone).catch(failfn);}
-                else return false;}
-            this.restoreLayout=restoreLayout;
+                else if (arg.hasOwnProperty('npages')) 
+                    setting=layout.setLayout(arg);
+                else if (arg.hasOwnProperty('layout'))
+                    setting=layout.setLayout(arg.layout);
+                else if (arg.indexOf("<")>=0) 
+                    setting=layout.setLayout(arg);
+                else {
+                    var saved_layout=fdjtState.getLocal(arg);
+                    if (layout) {
+                        return layout.setLayout(saved_layout,whendone);}
+                    else return false;}
+                return setting.then(whendone).catch(failfn);}
+            this.restoreLayout=function(arg){
+                function restoring_layout(resolve,reject){
+                    restoreLayout(arg,resolve,reject);}
+                return new Promise(restoring_layout);};
 
             /*
               layout.savePages=function(){
@@ -2177,7 +2182,7 @@ fdjt.CodexLayout=
                 if ((layout.thenfns)&&(layout.thenfns.length)) {
                     var thenfns=layout.thenfns;
                     var f=0, nfns=thenfns.length; while (f<nfns) {
-                        thenfns[f++].call(layout,layout);}}}
+                        thenfns[f++](layout);}}}
             this.Finish=Finish;
 
             function fixOrderedList(ol){
@@ -2498,9 +2503,10 @@ fdjt.CodexLayout=
                     height: this.height, width: this.width,
                     break_blocks: this.break_blocks};};
 
+        /*
         CodexLayout.prototype.then=function(callback){
-            if (this.done) return callback.call(this,this);
-            else this.thenfns.push(callback);};
+            if (this.done) return callback(this);
+            else this.thenfns.push(callback);}; */
 
         CodexLayout.cache=2;
 
