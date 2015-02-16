@@ -2691,7 +2691,7 @@ fdjt.CodexLayout=
                     var target=evt.target;
                     var result=((target)&&(target.result));
                     if (result) cachedLayout(layout_id);
-                    if (!(result)) callback(false);
+                    if (!(result)) onerr(false);
                     else if (result.hasOwnProperty('npages'))
                         callback(result);
                     else callback(result.layout);};}
