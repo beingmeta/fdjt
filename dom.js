@@ -2149,9 +2149,16 @@ fdjt.DOM=
 
         function defListeners(handlers,defs){
             if ((handlers)&&(defs))
-                for (var evtype in defs) {
-                    if (defs.hasOwnProperty(evtype))
-                        handlers[evtype]=defs[evtype];}}
+                for (var domspec in defs) {
+                    if (defs.hasOwnProperty(domspec)) {
+                        var evtable=defs[domspec];
+                        var addto=handlers[domspec];
+                        if ((!(addto))||
+                            (!(handlers.hasOwnProperty(domspec))))
+                            handlers[domspec]=addto={};
+                        for (var evtype in evtable) {
+                            if (evtable.hasOwnProperty(evtype))
+                                addto[evtype]=evtable[evtype];}}}}
         fdjtDOM.defListeners=defListeners;
 
         var events_pat=/^([^:]+)$/;
