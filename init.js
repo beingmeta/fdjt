@@ -32,6 +32,7 @@
     var init_names={};
 
     function addInit(fcn,name,runagain){
+        if (!(checkInit(fcn,name))) return;
         var replace=((name)&&(init_names[name]));
         var i=0, lim=inits.length;
         while (i<lim) {
@@ -54,6 +55,13 @@
             fcn(); run.push(true);}
         else run.push(false);}
     fdjt.addInit=addInit;
+    
+    function checkInit(fcn,name){
+        if ((!(fcn))||(!(fcn.call))) {
+            fdjtLog.warn("Bad argument to addInit(): %s",
+                        name||"anonymous",fcn);
+            return false;}
+        else return true;}
     
     fdjt.Init=function fdjtInit(){
         var names=[];
