@@ -2784,6 +2784,7 @@ fdjt.DOM=
             fdjtDOM.addListener(window,"load",fdjtDOM.init);
         
         /* Playing audio */
+
         function playAudio(id){
             var elt=document.getElementById(id);
             if ((elt)&&(elt.play)) {
@@ -2791,6 +2792,8 @@ fdjt.DOM=
                     elt.pause(); elt.currentTime=0.0;}
                 elt.play();}}
         fdjtDOM.playAudio=playAudio;
+
+        /* Tweaking images */
 
         function tweakImage(elt,tw,th) {
             var style=elt.style;
@@ -2807,6 +2810,34 @@ fdjt.DOM=
                 style.height=Math.round(h*sh)+"px";
                 style.width="auto";}}
         fdjtDOM.tweakImage=tweakImage;
+
+        /* Blob/URL functions */
+
+        function makeBlob(string,type){
+            if ((typeof string === "string")&&
+                (string.search("data:")===0)) {
+                if (!(type)) {
+                    var typeinfo=/data:([^;]+);/.exec(string);
+                    if (typeinfo) type=(typeinfo[1]);}
+                var elts=string.split(',');
+                var byteString = atob(elts[1]);
+                if (elts[0].indexOf('base64') >= 0)
+                    byteString = atob(elts[1]);
+                else
+                    byteString = window.unescape(elts[1]);
+                var ab = new ArrayBuffer(byteString.length);
+                var ia = new Uint8Array(ab);
+                for (var i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);}
+                return new Blob([ab], { type: type||'application' });}
+            else return false;}
+        fdjtString.makeBlob=makeBlob;
+
+        function data2URL(datauri){
+            if ((URL)&&(URL.createObjectURL)) 
+                return URL.createObjectURL(makeBlob(datauri));
+            else return datauri;}
+        fdjtDOM.data2URL=data2URL;
 
         /* Tweaking fonts */
 
