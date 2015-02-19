@@ -26,7 +26,7 @@
 
 // var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
-fdjt.Async=
+fdjt.Async=fdjt.ASync=fdjt.async=
     (function (){
         "use strict";
         /* global
