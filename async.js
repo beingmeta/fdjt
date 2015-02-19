@@ -121,7 +121,7 @@ fdjt.Async=fdjt.ASync=fdjt.async=
                             watch('done',i,lim,chunks,used,zerostart,donetime);
                         if ((done)&&(done.call)) 
                             done(vec,now-zerostart,used);}}
-                catch (ex) {if (failed) failed();}};
+                catch (ex) {if (failed) failed(ex);}};
             timer=setTimeout(stepfn,space);}
         fdjtAsync.slowmap=function(fcn,vec,opts){
             if (!(opts)) opts={};
