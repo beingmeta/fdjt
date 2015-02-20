@@ -2598,11 +2598,12 @@ fdjt.DOM=
                     end: end_edge+range.endOffset};};
 
         function getRegexString(needle,shyphens,before,after){
-            if (shyphens)
+            if (shyphens) {
+                needle=needle.replace("­","");
                 return ((before||"")+
                         (needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
                                 /\S/g,"$&­?").replace("­? "," ").replace(/\s+/g,"(\\s+)"))+
-                        (after||""));
+                        (after||""));}
             else return (((before)||(""))+
                          (needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
                                  /\s+/g,"(\\s+)"))+
@@ -2621,7 +2622,7 @@ fdjt.DOM=
             var sub=((off===0)?(fulltext):(fulltext.slice(off)));
             var scan=sub.replace(/­/mg,"");
             var pat=((typeof needle === 'string')?
-                     (new RegExp(getRegexString(needle,true),"gm")):
+                     (textRegExp(needle)):
                      (needle));
             while ((match=pat.exec(scan))) {
                 if (count===1) {

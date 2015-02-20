@@ -500,7 +500,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if ((scan.nodeType===1)&&(scan.tagName==='SPAN')&&
                     (scan.id)&&(scan.id.search(prefix)===0)) {
                     var txt=scan.innerText||textify(scan);
-                    combine.push(txt);
+                    combine.push(txt.replace("­",""));
                     if (scan===end) break;}
                 if ((scan.firstChild)&&
                     (scan.className!=="fdjtselectloupe")&&
