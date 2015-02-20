@@ -2558,7 +2558,7 @@ fdjt.CodexLayout=
         
         if (window.indexedDB) {
             fdjt.addInit(function(){
-	        if (!(CodexLayout.dbname)) {
+                if (!(CodexLayout.dbname)) {
                     CodexLayout.dbname="codexlayout";
                     useIndexedDB("codexlayout");}},
                          "CodexLayoutCache");}
