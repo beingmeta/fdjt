@@ -33,18 +33,17 @@ fdjt.Async=fdjt.ASync=fdjt.async=
            setTimeout: false, clearTimeout: false,
            Promise: false */
 
-	// This should so something real
-	function fdjtAsync(fn,args){
-	    function async_call(resolve,reject){
-		function doit(){
-		    var value;
-		    try {
-			if (args) value=fn.call(null,args);
-			else value=fn();
-			resolve(value);}
-		    catch (ex) {reject(ex);}}
-		setTimeout(doit,1);}
-	    return new Promise(async_call);}
+        function fdjtAsync(fn,args){
+            function async_call(resolve,reject){
+                function doit(){
+                    var value;
+                    try {
+                        if (args) value=fn.call(null,args);
+                        else value=fn();
+                        resolve(value);}
+                    catch (ex) {reject(ex);}}
+                setTimeout(doit,1);}
+            return new Promise(async_call);}
 
         function getnow() {return (new Date()).getTime();}
 
@@ -139,3 +138,10 @@ fdjt.Async=fdjt.ASync=fdjt.async=
             return new Promise(slowmapping);};
 
         return fdjtAsync;})();
+
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "cd ..; make" ***
+   ;;;  indent-tabs-mode: nil ***
+   ;;;  End: ***
+*/
