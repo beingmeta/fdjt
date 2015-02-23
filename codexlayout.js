@@ -70,6 +70,8 @@ fdjt.CodexLayout=
 
         var floor=Math.floor;
 
+        var root_namespace=document.body.namespaceURI;
+
         var layoutDB;
 
         function appendChildren(node,children,start,end){
@@ -469,6 +471,9 @@ fdjt.CodexLayout=
         
         function markPageTop(node,force){
             if ((!force)&&(hasClass(node,"codexpagetop"))) return;
+            if ((node.namespaceURI)&&
+                (node.namespaceURI!==root_namespace))
+                return;
             var nodestyle=node.getAttribute("style")||"";
             var newstyle=nodestyle+((nodestyle)?("; "):(""))+
                 "margin-top: 0px !important;";
@@ -1561,20 +1566,7 @@ fdjt.CodexLayout=
                     else if ((!(page_break.childNodes))||
                              (page_break.childNodes.length===0))
                         return children.slice(breakpos);
-                    else if (true)
-                        return children.slice(breakpos);
-                    // We could call splitChildren recursively, but
-                    // we're not currently doing so
-                    else {
-                        /*
-                        var grandchildren=toArray(page_break.childNodes);
-                        var push=splitChildren();
-                        if ((!(push))||(push===page_break))
-                            return children.slice(i-1);
-                        else {
-                            // This should reproduce the logic below
-                            var clone_break=page_break.cloneNode(true);}
-                        */}
+                    else return children.slice(breakpos);
                     // If it's text, split it into words, then try to
                     // find the length at which one more word pushes
                     // it over the edge.
