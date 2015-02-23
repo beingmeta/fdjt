@@ -46,13 +46,15 @@ var WSN=(function(){
     var fdjtHash=fdjt.Hash;
     var fdjtString=fdjt.String;
 
+    /*
     function get_punct_regex(){
         try { return (/(\pM)/g);}
         catch (ex1) {
             try { return (/(\pP)/g); }
             catch (ex2) {return (/[.,?!-_@&%$#\\\/\^()]/);}}}
+    */
     
-    var punct_regex=get_punct_regex();
+    var punct_regex=/(\pM)/g;
     var decodeEntities=fdjtString.decodeEntities;
     
     function WSN(arg,sortfn,wordfn,keepdup){
