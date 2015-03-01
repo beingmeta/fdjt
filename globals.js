@@ -22,30 +22,28 @@
 
 */
 
-fdjt.useGlobals=function(){
-    if (!(window.fdjtDOM)) window.fdjtDOM=fdjt.DOM;
-    if (!(window.fdjtUI)) window.fdjtUI=fdjt.UI;
-    if (window.fdjtTime) window.fdjtTime=fdjt.Time;
-    if (!(window.fdjtString)) window.fdjtString=fdjt.String;
-    if (!(window.fdjtState)) window.fdjtState=fdjt.State;
-    if (!(window.fdjtLog)) window.fdjtLog=fdjt.Log;
-    if (!(window.fdjtHash)) window.fdjtHash=fdjt.Hash;
-    if (!(window.fdjtAjax)) window.fdjtAjax=fdjt.Ajax;
-    if (!(window.CodexLayout)) window.CodexLayout=fdjt.CodexLayout;
-    if (!(window.RefDB)) window.RefDB=fdjt.RefDB;};
+fdjt.useGlobals=fdjt.dbg=function(cxt){
+    var names=["fdjtDOM","fdjtUI","fdjtTime","fdjtString","fdjtState","fdjtLog",
+	       "fdjtHash","fdjtAjax","fdjtAsync","fdjtDialog","fdjtInit",
+	       "fdjtTemplate","fdjtID","fdjtRef",
+	       "fdjtTapHold","fdjtSelecting","fdjtTextIndex","fdjtRefDB",
+	       "TextIndex","RefDB","CodexLayout","Pager"];
+    if (!(cxt)) cxt=window;
+    if (!(cxt)) {
+	fdjt.Log("Nowhere to put globals");
+	return;}
+    var i=0, n=names.length; while (i<n) {
+	var name=names[i++];
+	var fname=((name.search("fdjt")===0)?(name.slice(4)):(name));
+	if ((fdjt[fname])&&(!(cxt[name]))) {
+	    fdjt.Log("%s = fdjt.%s",name,fname);
+	    cxt[name]=fdjt[fname];}}
+    return n;};
+window.addEventListener("load",function(){fdjt.useGlobals(window);});
 
-    
-/*
-if (!(window.((typeof _declare_fdjt_globals !== "undefined")&&(_declare_fdjt_globals)))) window.(((typeof _declare_fdjt_globals !== "undefined")&&(_declare_fdjt_globals)) {
-var fdjtDOM=fdjt.DOM;
-    var fdjtUI=fdjt.UI;
-    var fdjtTime=fdjt.Time;
-    var fdjtString=fdjt.String;
-    var fdjtState=fdjt.State;
-    var fdjtLog=fdjt.Log;
-    var fdjtHash=fdjt.Hash;
-    var fdjtAjax=fdjt.Ajax;
-    var CodexLayout=fdjt.CodexLayout;
-    var RefDB=fdjt.RefDB;}
-
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
+   ;;;  indent-tabs-mode: nil ***
+   ;;;  End: ***
 */

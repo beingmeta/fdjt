@@ -108,14 +108,3 @@ img + figcaption { page-break-before: avoid; }
 
 h1, h2, h3, h4, h6, h6, h7 { page-break-after: avoid; }
 
-/* Simple Codex */
-
-.simplecodex { overflow-x: scroll; overflow-y: hidden; }
-.simplecodex > * { display: none; }
-.simplecodex > div.simplecodexshown,
-.simplecodex > p.simplecodexshown {
-    display: block; }
-.simplecodex > table.simplecodexshown { display: table; }
-.simplecodex > tbody.simplecodexshown { display: table-row-group; }
-.simplecodex > tr.simplecodexshown { display: table-row; }
-

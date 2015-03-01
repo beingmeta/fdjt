@@ -10,12 +10,12 @@ FDJT_FILES=header.js \
 	syze.js iscroll.js \
 	log.js init.js state.js dom.js \
 	json.js refdb.js ajax.js wsn.js textindex.js \
-	ui.js dialog.js completions.js taphold.js selecting.js \
+	ui.js pager.js dialog.js completions.js taphold.js selecting.js \
 	scrollever.js \
 	globals.js
 FDJT_HINTS=promise.hint async.hint indexed.hint \
 	charnames.hint time.hint string.hint \
-	syze.hint iscroll.hint indexed.hint \
+	syze.hint iscroll.hint indexed.hint pager.hint \
 	log.hint init.hint state.hint dom.hint \
 	refdb.hint json.hint ajax.hint codexlayout.hint \
 	hash.hint wsn.hint template.hint textindex.hint \

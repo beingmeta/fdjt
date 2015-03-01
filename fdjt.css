@@ -1224,6 +1224,17 @@ table.fdjtform .usebaseline td {
 @media all and (max-width: 500px) {
     body:before { content: 'fdjt_phone'; display: none; }}
 
+/* The pager */
+
+/* Simple Codex */
+
+.pager { overflow-x: scroll; overflow-y: hidden; }
+.pager > div.pagerblock { display: none; }
+.pager > div.pagerblock.pagervisible,
+.pager.pagerlayout > div.pagerblock {
+    display: block; }
+
+
 /* Emacs local variables
    ;;;  Local variables: ***
    ;;;  compile-command: "make; if test -f ../makefile; then cd ..; make; fi" ***
