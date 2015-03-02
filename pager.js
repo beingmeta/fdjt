@@ -121,6 +121,8 @@ fdjt.Pager=
                 (this.height===h)&&(this.width===w))
                 return this.pageinfo;
             else this.doLayout();};
+        Pager.prototype.resized=function resized(){
+            this.refreshLayout();};
 	Pager.prototype.changed=function changed(){
 	    if (this.layout_timer) clearTimeout(this.layout_timer);
 	    this.layout_timer=setTimeout(function(){
