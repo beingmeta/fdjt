@@ -64,14 +64,14 @@ fdjt.Pager=
             else this.container=root.parentNode;
             this.doLayout();
             return this;}
-        /*
-        function makeVisible(node){
-            var style=getStyle(node), resets=[];
-            while (style.display==="none") {
+        function makeSolid(node){
+            var style=getStyle(node), resets=[], body=document.body;
+            while ((node)&&(node!==body)) {
                 var nodestyle=node.style;
-                resets.push({node: node,style: node.getAttribute("style")});
-                nodestyle.opacity=0; nodestyle.zIndex=-500;
-                nodestyle.display='block'; nodestyle.pointerEvents='none';
+                if (style.display==="none") {
+                    resets.push({node: node,style: node.getAttribute("style")});
+                    nodestyle.opacity=0; nodestyle.zIndex=-500;
+                    nodestyle.display='block'; nodestyle.pointerEvents='none';}
                 node=node.parentNode;
                 style=getStyle(node);}
             return resets;}
@@ -81,11 +81,10 @@ fdjt.Pager=
                 var reset=resets[i++];
                 if (reset.style) reset.node.setAttribute("style",reset.style);
                 else reset.node.removeAttribute("style");}}
-        */
 
         Pager.prototype.clear=function(){
-            var shown=getChildren(this.root,".pagervisible");
-            dropClass(toArray(shown),"pagervisible");};
+            var shown=getChildren(this.root,".pagevisible");
+            dropClass(toArray(shown),"pagevisible");};
         
         function splitChildren(root,children,h){
             var page=fdjtDOM("div.pagerblock"), pages=[page];
@@ -110,7 +109,10 @@ fdjt.Pager=
             while (i<n) {frag.appendChild(children[i++]);}
             root.innerHTML=""; root.appendChild(frag);
             this.children=false; this.pages=false;
-            this.root.removeAttribute("data-npages");};
+            this.root.removeAttribute("data-npages");
+	    if (this.pagernav) {
+                fdjtDOM.remove(this.pagernav);
+                this.pagernav=false;}};
 
         Pager.prototype.refreshLayout=function refreshLayout(force){
             var container=this.container;
@@ -119,22 +121,32 @@ fdjt.Pager=
                 (this.height===h)&&(this.width===w))
                 return this.pageinfo;
             else this.doLayout();};
+	Pager.prototype.changed=function changed(){
+	    if (this.layout_timer) clearTimeout(this.layout_timer);
+	    this.layout_timer=setTimeout(function(){
+		this.layout_timer=false;
+		this.refreshLayout(true);},
+					 50);};
 
         Pager.prototype.doLayout=function doLayout(){
             var root=this.root, container=this.container;
+            var resets=makeSolid(root);
             var h=container.offsetHeight, w=container.offsetWidth;
             var cstyle=getStyle(container);
             if (cstyle.paddingTop) h=h-parsePX(cstyle.paddingTop);
             if (cstyle.borderTopWidth) h=h-parsePX(cstyle.borderTopWidth);
             if (cstyle.paddingBottom) h=h-parsePX(cstyle.paddingBottom);
             var rstyle=getStyle(root);
+            if (rstyle.paddingTop) h=h-parsePX(rstyle.paddingTop);
             if (rstyle.paddingBottom) h=h-parsePX(rstyle.paddingBottom);
             if (rstyle.borderBottomWidth) h=h-parsePX(rstyle.borderBottomWidth);
-            if (h<=0) return;
+            if (h<=0) {resetStyles(resets); return;}
             if (this.pages) this.clearLayout();
-            // var resets=makeVisible(root);
             addClass(root,"pagerlayout");
             var children=this.children=toArray(root.childNodes);
+	    var pagernav=fdjtDOM("div.pagernav");
+	    fdjtDOM.prepend(root,pagernav); this.pagernav=pagernav;
+            h=h-pagernav.offsetHeight;
             var pages=splitChildren(root,children,h);
             if (this.focus) dropClass(this.focus,"pagerfocus");
             // if (resets.length) resetStyles(resets);
@@ -144,21 +156,49 @@ fdjt.Pager=
                 this.root.setAttribute("data-npages",this.npages);
                 var focus=this.focus||pages[0].firstElementChild;
                 var newpage=getParent(focus,".pagerblock");
-                addClass(newpage,"pagervisible");
+                addClass(newpage,"pagevisible");
                 addClass(focus,"pagerfocus");
                 this.height=h; this.width=w;
                 this.page=newpage;
                 this.pageoff=pages.indexOf(newpage);}
+	    if (pages.length) this.setupPagernav();
+            resetStyles(resets);
             return pages;};
+
+        Pager.prototype.setupPagernav=function setPage(){
+            var pagernav=this.pagernav, pages=this.pages;
+	    var nav_elts=[];
+	    var pct_width=(100/pages.length);
+	    var i=0, lim=pages.length;
+	    while (i<lim) {
+		var nav_elt=fdjtDOM("span",i+1);
+		nav_elt.style.width=pct_width+"%";
+		pagernav.appendChild(nav_elt);
+                nav_elts.push(nav_elt);
+                i++;}
+            var off=pages.indexOf(this.page);
+            addClass(nav_elts[off],"pagevisible");
+            this.showpage=nav_elts[off];
+	    if (this.pagernav)
+		fdjtDOM.replace(this.pagernav,pagernav);
+	    else fdjtDOM.prepend(this.root,pagernav);
+            this.nav_elts=nav_elts;};
 
         Pager.prototype.setPage=function setPage(arg){
             if (arg.nodeType) {
                 var page=getParent(arg,".pagerblock");
                 if (!(page)) return;
                 if (this.page!==page) {
-                    if (this.page) dropClass(this.page,"pagervisible");
-                    addClass(page,"pagervisible");
-                    this.page=page;}
+                    if (this.page) dropClass(this.page,"pagevisible");
+                    addClass(page,"pagevisible");
+                    this.page=page;
+                    if (this.pagernav) {
+                        if (this.showpage)
+                            dropClass(this.showpage,"pagevisible");
+                        var off=this.pages.indexOf(page);
+                        var elt=this.nav_elts[off];
+                        if (elt) addClass(elt,"pagevisible");
+                        this.showpage=elt;}}
                 if (arg===page) arg=page.firstElementChild;
                 if (this.focus!==arg) {
                     if (this.focus) dropClass(this.focus,"pagerfocus");
@@ -170,13 +210,15 @@ fdjt.Pager=
                 this.setPage(goto);}
             else return;};
 
-        Pager.prototype.pageForward=function(){
+        Pager.prototype.forward=function(){
+            if (!(this.pages)) this.changed();
             if (!(this.page)) return;
             else if (this.page.nextElementSibling)
                 this.setPage(this.page.nextElementSibling);
             else return;};
 
-        Pager.prototype.pageBackward=function(){
+        Pager.prototype.backward=function(){
+            if (!(this.pages)) this.changed();
             if (!(this.page)) return;
             else if (this.page.previousElementSibling)
                 this.setPage(this.page.previousElementSibling);
@@ -184,3 +226,9 @@ fdjt.Pager=
 
         return Pager;})();
 
+/* Emacs local variables
+   ;;;  Local variables: ***
+   ;;;  compile-command: "cd ..; make" ***
+   ;;;  indent-tabs-mode: nil ***
+   ;;;  End: ***
+*/

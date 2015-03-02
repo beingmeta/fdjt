@@ -1230,9 +1230,23 @@ table.fdjtform .usebaseline td {
 
 .pager { overflow-x: scroll; overflow-y: hidden; }
 .pager > div.pagerblock { display: none; }
-.pager > div.pagerblock.pagervisible,
+.pager > div.pagerblock.pagevisible,
 .pager.pagerlayout > div.pagerblock {
     display: block; }
+
+.pager .pagernav {
+    width: 100%; height: 1em;
+    border-bottom: solid black 1px;}
+.pager .pagernav > span {
+    display: inline-block; box-sizing: border-box;
+    border-left: solid black 1px;
+    border-right: solid black 1px;
+    text-align: center;
+    overflow: hidden;}
+.pager .pagernav > span:first-child { border-left: transparent;}
+.pager .pagernav > span:last-child { border-right: transparent;}
+.pager .pagernav > span.pagevisible {
+    background-color: silver;}
 
 
 /* Emacs local variables
