@@ -1237,18 +1237,18 @@ table.fdjtform .usebaseline td {
 .pager .pagernav > span {
     color: blue; background-color: ivory;
     display: inline-block; box-sizing: border-box;
-    border-left: solid black 1px;
-    border-right: solid black 1px;
+    border: 0px; border-left: solid black 1px;
     border-bottom: solid black 1ex;
     text-align: center;
     overflow: hidden;}
+.pager .pagernav > span > span.num { vertical-align: top; }
 .pager .pagernav > span:first-child { border-left: transparent;}
-.pager .pagernav > span:last-child { border-right: transparent;}
 .pager .pagernav > span.pagevisible {
-    overflow: visible; z-index: 100;
+    overflow-x: visible; z-index: 100;
     background-color: silver;
     color: black;}
-
+.pager .pagernav.packed > span > span.num {
+    font-size: 80%;}
 
 /* Emacs local variables
    ;;;  Local variables: ***

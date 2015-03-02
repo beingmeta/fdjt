@@ -164,6 +164,7 @@ fdjt.Pager=
                 this.page=newpage;
                 this.pageoff=pages.indexOf(newpage);}
             if (pages.length) this.setupPagernav();
+            addClass(root,"pagerdone");
             resetStyles(resets);
             return pages;};
 
@@ -173,12 +174,14 @@ fdjt.Pager=
             var pct_width=(100/pages.length);
             var i=0, lim=pages.length;
             while (i<lim) {
-                var nav_elt=fdjtDOM("span",i+1);
+                var nav_elt=fdjtDOM("span",fdjtDOM("span.num",i+1));
                 nav_elt.style.width=pct_width+"%";
                 pagernav.appendChild(nav_elt);
                 nav_elts.push(nav_elt);
                 i++;}
             var off=pages.indexOf(this.page);
+            if ((pagernav.offsetWidth/pages.length)<25)
+                addClass(pagernav,"packed");
             addClass(nav_elts[off],"pagevisible");
             this.showpage=nav_elts[off];
             if (this.pagernav)
