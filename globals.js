@@ -21,25 +21,29 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
+/* globals window, global */
 
-fdjt.useGlobals=fdjt.dbg=function(cxt){
-    var names=["fdjtDOM","fdjtUI","fdjtTime","fdjtString","fdjtState","fdjtLog",
-	       "fdjtHash","fdjtAjax","fdjtAsync","fdjtDialog","fdjtInit",
-	       "fdjtTemplate","fdjtID","fdjtRef",
-	       "fdjtTapHold","fdjtSelecting","fdjtTextIndex","fdjtRefDB",
-	       "TextIndex","RefDB","CodexLayout","Pager"];
-    if (!(cxt)) cxt=window;
-    if (!(cxt)) {
-	fdjt.Log("Nowhere to put globals");
-	return;}
-    var i=0, n=names.length; while (i<n) {
-	var name=names[i++];
-	var fname=((name.search("fdjt")===0)?(name.slice(4)):(name));
-	if ((fdjt[fname])&&(!(cxt[name]))) {
-	    fdjt.Log("%s = fdjt.%s",name,fname);
-	    cxt[name]=fdjt[fname];}}
-    return n;};
-window.addEventListener("load",function(){fdjt.useGlobals(window);});
+(function(){
+    "use strict";
+    fdjt.useGlobals=fdjt.dbg=function(cxt){
+        var names=["fdjtDOM","fdjtUI","fdjtTime","fdjtString","fdjtState",
+                   "fdjtLog","fdjtHash","fdjtAjax","fdjtAsync","fdjtInit",
+                   "fdjtDialog","fdjtTemplate","fdjtID","fdjtRef",
+                   "fdjtTapHold","fdjtSelecting","fdjtTextIndex","fdjtRefDB",
+                   "TextIndex","RefDB","CodexLayout","Pager"];
+        if (!(cxt)) cxt=window;
+        if (!(cxt)) {
+            fdjt.Log("Nowhere to put globals");
+            return;}
+        var i=0, n=names.length; while (i<n) {
+            var name=names[i++];
+            var fname=((name.search("fdjt")===0)?(name.slice(4)):(name));
+            if ((fdjt[fname])&&(!(cxt[name]))) {
+                fdjt.Log("%s = fdjt.%s",name,fname);
+                cxt[name]=fdjt[fname];}}
+        return n;};
+    window.addEventListener("load",function(){
+        fdjt.useGlobals(global||window);});})();
 
 /* Emacs local variables
    ;;;  Local variables: ***

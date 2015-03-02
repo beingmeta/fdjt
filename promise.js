@@ -12,7 +12,7 @@
     }
 
     // Use polyfill for setImmediate for performance gains
-    var asap = Promise.immediateFn ||
+    var asap = ((root.Promise)&&(root.Promise.immediateFn)) ||
         root.setImmediate ||
         function(fn) { setTimeout(fn, 1); };
 
@@ -145,7 +145,7 @@
     PromiseFillIn.prototype.then =
         function(onFulfilled, onRejected) {
             var me = this;
-            return new Promise(function(resolve, reject) {
+            return new PromiseFillIn(function(resolve, reject) {
                 handle.call(
                     me,new Handler(onFulfilled, onRejected,
                                    resolve, reject));

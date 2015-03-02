@@ -22,7 +22,7 @@
 
 */
 
-/* global setTimeout: false */
+/* global setTimeout, Promise */
 
 //var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 

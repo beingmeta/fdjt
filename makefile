@@ -26,7 +26,12 @@ BUILDTIME:=`date`
 BUILDHOST:=`hostname`
 
 %.hint: %.js
-	@JSHINT=`which jshint`; if test "x$${JSHINT}" = "x"; then touch $@; else $${JSHINT} $^ | tee $@; fi
+	@echo Checking fdjt/$@
+	@JSHINT=`which jshint`;      \
+	if test "x$${JSHINT}" = "x"; \
+	   then touch $@;            \
+	else $${JSHINT} $^ | tee $@; \
+	fi
 
 all: fdjt.js fdjt.hints
 

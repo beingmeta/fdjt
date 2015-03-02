@@ -110,7 +110,7 @@ fdjt.Pager=
             root.innerHTML=""; root.appendChild(frag);
             this.children=false; this.pages=false;
             this.root.removeAttribute("data-npages");
-	    if (this.pagernav) {
+            if (this.pagernav) {
                 fdjtDOM.remove(this.pagernav);
                 this.pagernav=false;}};
 
@@ -123,12 +123,12 @@ fdjt.Pager=
             else this.doLayout();};
         Pager.prototype.resized=function resized(){
             this.refreshLayout();};
-	Pager.prototype.changed=function changed(){
-	    if (this.layout_timer) clearTimeout(this.layout_timer);
-	    this.layout_timer=setTimeout(function(){
-		this.layout_timer=false;
-		this.refreshLayout(true);},
-					 50);};
+        Pager.prototype.changed=function changed(){
+            if (this.layout_timer) clearTimeout(this.layout_timer);
+            this.layout_timer=setTimeout(function(){
+                this.layout_timer=false;
+                this.refreshLayout(true);},
+                                         50);};
 
         Pager.prototype.doLayout=function doLayout(){
             var root=this.root, container=this.container;
@@ -146,8 +146,8 @@ fdjt.Pager=
             if (this.pages) this.clearLayout();
             addClass(root,"pagerlayout");
             var children=this.children=toArray(root.childNodes);
-	    var pagernav=fdjtDOM("div.pagernav");
-	    fdjtDOM.prepend(root,pagernav); this.pagernav=pagernav;
+            var pagernav=fdjtDOM("div.pagernav");
+            fdjtDOM.prepend(root,pagernav); this.pagernav=pagernav;
             h=h-pagernav.offsetHeight;
             var pages=splitChildren(root,children,h);
             if (this.focus) dropClass(this.focus,"pagerfocus");
@@ -163,27 +163,27 @@ fdjt.Pager=
                 this.height=h; this.width=w;
                 this.page=newpage;
                 this.pageoff=pages.indexOf(newpage);}
-	    if (pages.length) this.setupPagernav();
+            if (pages.length) this.setupPagernav();
             resetStyles(resets);
             return pages;};
 
         Pager.prototype.setupPagernav=function setPage(){
             var pagernav=this.pagernav, pages=this.pages;
-	    var nav_elts=[];
-	    var pct_width=(100/pages.length);
-	    var i=0, lim=pages.length;
-	    while (i<lim) {
-		var nav_elt=fdjtDOM("span",i+1);
-		nav_elt.style.width=pct_width+"%";
-		pagernav.appendChild(nav_elt);
+            var nav_elts=[];
+            var pct_width=(100/pages.length);
+            var i=0, lim=pages.length;
+            while (i<lim) {
+                var nav_elt=fdjtDOM("span",i+1);
+                nav_elt.style.width=pct_width+"%";
+                pagernav.appendChild(nav_elt);
                 nav_elts.push(nav_elt);
                 i++;}
             var off=pages.indexOf(this.page);
             addClass(nav_elts[off],"pagevisible");
             this.showpage=nav_elts[off];
-	    if (this.pagernav)
-		fdjtDOM.replace(this.pagernav,pagernav);
-	    else fdjtDOM.prepend(this.root,pagernav);
+            if (this.pagernav)
+                fdjtDOM.replace(this.pagernav,pagernav);
+            else fdjtDOM.prepend(this.root,pagernav);
             this.nav_elts=nav_elts;};
 
         Pager.prototype.setPage=function setPage(arg){
