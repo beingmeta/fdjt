@@ -1226,8 +1226,6 @@ table.fdjtform .usebaseline td {
 
 /* The pager */
 
-/* Simple Codex */
-
 .pager { overflow-x: scroll; overflow-y: hidden; }
 .pager > div.pagerblock { display: none; }
 .pager > div.pagerblock.pagevisible,
@@ -1235,14 +1233,15 @@ table.fdjtform .usebaseline td {
     display: block; }
 
 .pager .pagernav {
-    width: 100%; height: 1em;
-    border-bottom: solid black 1px;}
+    width: 100%; height: 1.1em;}
 .pager .pagernav > span {
     display: inline-block; box-sizing: border-box;
     border-left: solid black 1px;
     border-right: solid black 1px;
+    border-bottom: solid black 1px;
     text-align: center;
-    overflow: hidden;}
+    overflow: hidden;
+    height: 100%;}
 .pager .pagernav > span:first-child { border-left: transparent;}
 .pager .pagernav > span:last-child { border-right: transparent;}
 .pager .pagernav > span.pagevisible {
