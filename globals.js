@@ -43,7 +43,10 @@
                 cxt[name]=fdjt[fname];}}
         return n;};
     window.addEventListener("load",function(){
-        fdjt.useGlobals(global||window);});})();
+        var root=(typeof global !== "undefined")?(global):
+            (typeof window !== "undefined")?(window):
+            (false);
+        fdjt.useGlobals(root);});})();
 
 /* Emacs local variables
    ;;;  Local variables: ***
