@@ -124,10 +124,11 @@ fdjt.Pager=
         Pager.prototype.resized=function resized(){
             this.refreshLayout();};
         Pager.prototype.changed=function changed(){
+            var pager=this;
             if (this.layout_timer) clearTimeout(this.layout_timer);
             this.layout_timer=setTimeout(function(){
-                this.layout_timer=false;
-                this.refreshLayout(true);},
+                pager.layout_timer=false;
+                pager.refreshLayout(true);},
                                          50);};
 
         Pager.prototype.doLayout=function doLayout(){
