@@ -29,7 +29,7 @@
    fdjt_revision, fdjt_buildhost,
    fdjt_buildtime, fdjt_builduuid */
 
-//var fdjt=((typeof fdjt === "undefined")?({}):(fdjt));
+var fdjt=((typeof fdjt === "undefined")?({}):(fdjt));
 var fdjt_versions=((fdjt_versions)||[]);
 (function(){
     "use strict";
