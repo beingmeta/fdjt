@@ -40,6 +40,7 @@
     }
 
     function handle(deferred) {
+	// jshint validthis: true
         var me = this;
         if (this._state === null) {
             this._deferreds.push(deferred);
@@ -64,6 +65,7 @@
     }
 
     function resolve(newValue) {
+	// jshint validthis: true
         try { //Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
             if (newValue === this)
                 throw new TypeError(
@@ -86,12 +88,14 @@
     }
 
     function reject(newValue) {
+	// jshint validthis: true
         this._state = false;
         this._value = newValue;
         finale.call(this);
     }
 
     function finale() {
+	// jshint validthis: true
         for (var i = 0, len = this._deferreds.length;
              i < len;
              i++) {
