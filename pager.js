@@ -99,9 +99,13 @@ fdjt.Pager=
                         root.appendChild(newpage);
                         newpage.setAttribute("data-pageno",pages.length);
                         page=newpage;}}
-                else {page.push(child); continue;}}
+                else continue;}
             return pages;}
         
+        Pager.prototype.reset=function(){
+            this.pages=false; this.children=false;
+            this.pagernav=false; this.showpage=false;};
+
         Pager.prototype.clearLayout=function(){
             var root=this.root, children=this.children;
             var frag=document.createDocumentFragment();
@@ -157,7 +161,9 @@ fdjt.Pager=
                 dropClass(root,"pagerlayout");
                 this.pages=pages; this.npages=pages.length;
                 this.root.setAttribute("data-npages",this.npages);
-                var focus=this.focus||pages[0].firstElementChild;
+                var focus=
+                    ((getParent(this.focus,root))?
+                     (this.focus):(pages[0].firstElementChild));
                 var newpage=getParent(focus,".pagerblock");
                 addClass(newpage,"pagevisible");
                 addClass(focus,"pagerfocus");
