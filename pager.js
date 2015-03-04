@@ -63,7 +63,7 @@ fdjt.Pager=
             this.root=root;
             if (opts.container)
                 this.container=opts.container;
-            else this.container=root.parentNode;
+            else this.container=root.parentNode||root;
             this.doLayout();
             return this;}
         function makeSolid(node){
