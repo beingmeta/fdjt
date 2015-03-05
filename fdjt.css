@@ -1233,7 +1233,9 @@ table.fdjtform .usebaseline td {
     display: block; }
 
 .pager .pagernav {
-    width: 100%; height: 1.6em;}
+    width: 100%; height: 1.6em;
+    text-align: center;}
+.pagernav .pagenum, .pagernav input { display: none;}
 .pager .pagernav > span {
     color: blue; background-color: ivory;
     display: inline-block; box-sizing: border-box;
@@ -1248,7 +1250,10 @@ table.fdjtform .usebaseline td {
     background-color: silver;
     color: black;}
 .pager .pagernav.packed > span > span.num {
-    font-size: 80%;}
+    display: none;}
+.pager .pagernav.packed > span.pagenum { display: inline;}
+.pager .pagernav.packed.input > span.pagenum { display: none; }
+.pager .pagernav.packed.input > input { display: inline; }
 .pager.pagerdone {overflow: hidden;}
 .pager.pagerdone .pagerblock {overflow: hidden;}
 

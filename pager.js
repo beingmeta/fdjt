@@ -153,8 +153,11 @@ fdjt.Pager=
             if (this.pages) this.clearLayout();
             addClass(root,"pagerlayout");
             var children=this.children=toArray(root.childNodes);
-            var pagernav=fdjtDOM("div.pagernav");
-            fdjtDOM.prepend(root,pagernav); this.pagernav=pagernav;
+            var pagenum=fdjtDOM("span.pagenum");
+            var pagernav=fdjtDOM("div.pagernav",pagenum);
+            fdjtDOM.prepend(root,pagernav); 
+            this.pagernav=pagernav; 
+            this.pagenum=pagenum;
             h=h-pagernav.offsetHeight;
             var pages=splitChildren(root,children,h);
             if (this.focus) dropClass(this.focus,"pagerfocus");
@@ -203,13 +206,14 @@ fdjt.Pager=
                 var page=getParent(arg,".pagerblock");
                 if (!(page)) return;
                 if (this.page!==page) {
+                    var off=this.pages.indexOf(page);
                     if (this.page) dropClass(this.page,"pagevisible");
                     addClass(page,"pagevisible");
                     this.page=page;
+                    this.pagenum.innerHTML=(off+1)+"/"+this.pages.length;
                     if (this.pagernav) {
                         if (this.showpage)
                             dropClass(this.showpage,"pagevisible");
-                        var off=this.pages.indexOf(page);
                         var elt=this.nav_elts[off];
                         if (elt) addClass(elt,"pagevisible");
                         this.showpage=elt;}}
