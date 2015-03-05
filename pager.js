@@ -89,22 +89,22 @@ fdjt.Pager=
             var shown=getChildren(this.root,".pagevisible");
             dropClass(toArray(shown),"pagevisible");};
         
-        function splitChildren(root,children,h){
+        function splitChildren(root,children,h,whendone){
             var page=fdjtDOM("div.pagerblock"), pages=[page];
-            var i=0, n=children.length;
-            root.appendChild(page); page.setAttribute("data-pageno",pages.length);
-            while (i<n) {
-                var child=children[i++]; page.appendChild(child);
+            root.appendChild(page);
+            page.setAttribute("data-pageno",pages.length);
+            return fdjt.Async.slowmap(function(child){
+                page.appendChild(child);
                 if (child.nodeType===1) {
                     if (page.offsetHeight>h) {
                         var newpage=fdjtDOM("div.pagerblock",child);
                         pages.push(newpage);
                         root.appendChild(newpage);
                         newpage.setAttribute("data-pageno",pages.length);
-                        page=newpage;}}
-                else continue;}
-            return pages;}
-        
+                        page=newpage;}}},
+                                      children,
+                                      {done: function(){whendone(pages);}});}
+            
         Pager.prototype.reset=function(){
             this.pages=false; this.children=false;
             this.pagernav=false; this.showpage=false;};
@@ -139,6 +139,7 @@ fdjt.Pager=
                                          50);};
 
         Pager.prototype.doLayout=function doLayout(){
+            var pager=this;
             var root=this.root, container=this.container;
             var resets=makeSolid(root);
             var h=container.offsetHeight, w=container.offsetWidth;
@@ -160,26 +161,26 @@ fdjt.Pager=
             this.pagernav=pagernav; 
             this.pagenum=pagenum;
             h=h-pagernav.offsetHeight;
-            var pages=splitChildren(root,children,h);
-            if (this.focus) dropClass(this.focus,"pagerfocus");
-            // if (resets.length) resetStyles(resets);
-            if (pages.length) {
-                dropClass(root,"pagerlayout");
-                this.pages=pages; this.npages=pages.length;
-                this.root.setAttribute("data-npages",this.npages);
-                var focus=
-                    ((getParent(this.focus,root))?
-                     (this.focus):(pages[0].firstElementChild));
-                var newpage=getParent(focus,".pagerblock");
-                addClass(newpage,"pagevisible");
-                addClass(focus,"pagerfocus");
-                this.height=h; this.width=w;
-                this.page=newpage;
-                this.pageoff=pages.indexOf(newpage);}
-            if (pages.length) this.setupPagerNav();
-            addClass(root,"pagerdone");
-            resetStyles(resets);
-            return pages;};
+            splitChildren(root,children,h,function(pages){
+                if (pager.focus) dropClass(pager.focus,"pagerfocus");
+                // if (resets.length) resetStyles(resets);
+                if (pages.length) {
+                    dropClass(root,"pagerlayout");
+                    pager.pages=pages; pager.npages=pages.length;
+                    pager.root.setAttribute("data-npages",pager.npages);
+                    var focus=
+                        ((getParent(pager.focus,root))?
+                         (pager.focus):(pages[0].firstElementChild));
+                    var newpage=getParent(focus,".pagerblock");
+                    addClass(newpage,"pagevisible");
+                    addClass(focus,"pagerfocus");
+                    pager.height=h; pager.width=w;
+                    pager.page=newpage;
+                    pager.pageoff=pages.indexOf(newpage);}
+                if (pages.length) pager.setupPagerNav();
+                addClass(root,"pagerdone");
+                resetStyles(resets);
+                return pages;});};
 
         Pager.prototype.setupPagerNav=function setupPagerNav(){
             var pagernav=this.pagernav, pages=this.pages;
