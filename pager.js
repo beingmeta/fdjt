@@ -64,6 +64,7 @@ fdjt.Pager=
             if (opts.container)
                 this.container=opts.container;
             else this.container=root.parentNode||root;
+            this.packthresh=opts.packthresh||30;
             this.doLayout();
             return this;}
         function makeSolid(node){
@@ -153,8 +154,8 @@ fdjt.Pager=
             if (this.pages) this.clearLayout();
             addClass(root,"pagerlayout");
             var children=this.children=toArray(root.childNodes);
-            var pagenum=fdjtDOM("span.pagenum");
-            var pagernav=fdjtDOM("div.pagernav",pagenum);
+            var pagenum=fdjtDOM("div.pagenum");
+            var pagernav=fdjtDOM("div.pagernav");
             fdjtDOM.prepend(root,pagernav); 
             this.pagernav=pagernav; 
             this.pagenum=pagenum;
@@ -175,12 +176,12 @@ fdjt.Pager=
                 this.height=h; this.width=w;
                 this.page=newpage;
                 this.pageoff=pages.indexOf(newpage);}
-            if (pages.length) this.setupPagernav();
+            if (pages.length) this.setupPagerNav();
             addClass(root,"pagerdone");
             resetStyles(resets);
             return pages;};
 
-        Pager.prototype.setupPagernav=function setPage(){
+        Pager.prototype.setupPagerNav=function setupPagerNav(){
             var pagernav=this.pagernav, pages=this.pages;
             var nav_elts=[];
             var pct_width=(100/pages.length);
@@ -192,10 +193,13 @@ fdjt.Pager=
                 nav_elts.push(nav_elt);
                 i++;}
             var off=pages.indexOf(this.page);
-            if ((pagernav.offsetWidth/pages.length)<25)
+            if ((pagernav.offsetWidth/pages.length)<this.packthresh)
                 addClass(pagernav,"packed");
             addClass(nav_elts[off],"pagevisible");
             this.showpage=nav_elts[off];
+            if (this.pagenum) {
+                this.pagenum.innerHTML=(off+1)+"/"+pages.length;
+                pagernav.appendChild(this.pagenum);}
             if (this.pagernav)
                 fdjtDOM.replace(this.pagernav,pagernav);
             else fdjtDOM.prepend(this.root,pagernav);
