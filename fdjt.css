@@ -1249,6 +1249,8 @@ table.fdjtform .usebaseline td {
     color: black;}
 .pager .pagernav.packed > span > span.num {
     font-size: 80%;}
+.pager.pagerdone {overflow: hidden;}
+.pager.pagerdone .pagerblock {overflow: hidden;}
 
 /* Emacs local variables
    ;;;  Local variables: ***
