@@ -1253,7 +1253,8 @@ table.fdjtform .usebaseline td {
 .pager .pagernav.packed > span {
     border-bottom: solid black 2px;}
 .pager .pagernav > div.pagenum {
-    position: absolute; top: 0px; left: 50%;
+    position: absolute;
+    top: 0px; left: 50%; margin-left: -1.5em;
     background-color: rgba(255,255,255,0.8);
     display: none;}
 .pager .pagernav.packed > div.pagenum {
