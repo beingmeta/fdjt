@@ -46,8 +46,10 @@ fdjt.Pager=
 
         var fdjtDOM=fdjt.DOM;
         var addClass=fdjtDOM.addClass;
+        var hasClass=fdjtDOM.hasClass;
         var dropClass=fdjtDOM.dropClass;
         var getChildren=fdjtDOM.getChildren;
+        var getChild=fdjtDOM.getChild;
         var getParent=fdjtDOM.getParent;
         var getStyle=fdjtDOM.getStyle;
         var toArray=fdjtDOM.toArray;
@@ -61,7 +63,7 @@ fdjt.Pager=
             this.root=root;
             if (opts.container)
                 this.container=opts.container;
-            else this.container=root.parentNode;
+            else this.container=root.parentNode||root;
             this.doLayout();
             return this;}
         function makeSolid(node){
@@ -235,6 +237,13 @@ fdjt.Pager=
             else if (this.page.previousElementSibling)
                 this.setPage(this.page.previousElementSibling);
             else return;};
+
+        Pager.prototype.getNum=function(target){
+            var num=((hasClass(target,"num"))?(target):
+                     ((getParent(target,".num"))||
+                      (getChild(target,".num"))));
+            if (!(num)) return false;
+            else return parseInt(num.innerHTML);};
 
         return Pager;})();
 

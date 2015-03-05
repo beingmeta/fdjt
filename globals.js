@@ -42,11 +42,14 @@
                 fdjt.Log("%s = fdjt.%s",name,fname);
                 cxt[name]=fdjt[fname];}}
         return n;};
+    /*
     window.addEventListener("load",function(){
         var root=(typeof global !== "undefined")?(global):
             (typeof window !== "undefined")?(window):
             (false);
-        fdjt.useGlobals(root);});})();
+        fdjt.useGlobals(root);});
+    */
+})();
 
 /* Emacs local variables
    ;;;  Local variables: ***
