@@ -52,6 +52,7 @@ fdjt.CodexLayout=
         var fdjtAsync=fdjt.Async;
         var fdjtTime=fdjt.Time;
         var fdjtState=fdjt.State;
+        var RefDB=fdjt.RefDB;
         var fdjtID=fdjt.ID;
 
         var hasContent=fdjtDOM.hasContent;
@@ -602,7 +603,7 @@ fdjt.CodexLayout=
             if ((moved)&&(moved.length)) {
                 layout.logfn(
                     "Reverting layout of %d nodes and %d split texts",
-                    moved.length,textsplits.length);
+                    moved.length,RefDB.countKeys(textsplits));
                 i=0; lim=moved.length;
                 while (i<lim) {
                     restoreNode(moved[i++],layout,crumbs);}}

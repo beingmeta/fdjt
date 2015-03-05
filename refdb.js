@@ -1570,6 +1570,17 @@
                 RefDB.contains=arr_contains;
                 RefDB.position=arr_position;
 
+                function countKeys(obj){
+                    var count=0; for (var key in obj) {
+                        if (obj.hasOwnProperty(key)) count++;}
+                    return count;}
+                RefDB.countKeys=countKeys;
+                function localKeys(obj){
+                    var keys=[]; for (var key in obj) {
+                        if (obj.hasOwnProperty(key)) keys.push(key);}
+                    return keys;}
+                RefDB.localKeys=localKeys;
+
                 function Query(dbs,clauses,weights){
                     if (arguments.length===0) return this;
                     if (dbs) this.dbs=dbs;
