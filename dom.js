@@ -153,19 +153,26 @@ fdjt.DOM=
             return node;}
         function dominsert(before,content,i) {
             var node=before.parentNode;
-            if (content.nodeType) node.insertBefore(content,node);
+            if ((content.nodeType)&&(content===before))
+                return;
+            else if (content.nodeType)
+                node.insertBefore(content,before);
             else if (typeof content === 'string') 
                 node.insertBefore(document.createTextNode(content),before);
             else if (content.toDOM)
                 return dominsert(before,content.toDOM());
             else if (content.toHTML)
                 return dominsert(before,node,content.toHTML());
-            else if (content.length) {
+            else if (content.length>=i) {
                 var frag=(((window.documentFragment)&&(node instanceof window.DocumentFragment))?
                           (node):(document.createDocumentFragment()));
                 domappend(frag,content,i);
                 node.insertBefore(frag,before);
                 return before;}
+            else if (content.length) {
+                var c=content[i];
+                if (c===before) return;
+                else node.insertBefore(before,c);}
             else node.insertBefore(document.createTextNode(""+content),before);
             return node;}
         fdjtDOM.appendArray=domappend;
