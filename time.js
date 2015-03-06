@@ -162,6 +162,24 @@ fdjt.Time=
             if (!(arg)) arg=new Date();
             return (arg.getTime()-loaded)/1000;};
 
+        var tzpat=/(EST|EDT|PDT|PST|CST|CDT|ECT|GMT|Z|([+-]\d\d?(:\d+)?))$/i;
+
+        fdjtTime.parse=function(string){
+            var value=false;
+            try {
+                if (Date.parse)
+                    value=new Date(Date.parse(string));
+                else value=new Date(string);
+            } catch (ex) {
+                fdjt.Log("Error parsing time '%s': %o",string,ex);}
+            if ((value instanceof Date)&&(!(isNaN(value.getYear()))))
+                return value;
+            else {
+                var strip=string.search(tzpat);
+                if (strip>0) return fdjtTime.parse(string.slice(0,strip));
+                fdjt.Log("Couldn't parse time '%s'",string);
+                return string;}};
+        
         fdjtTime.timeslice=fdjt.Async.timeslice;
         fdjtTime.slowmap=fdjt.Async.slowmap;
 
