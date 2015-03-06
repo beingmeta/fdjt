@@ -45,6 +45,7 @@ fdjt.Pager=
         "use strict";
 
         var fdjtDOM=fdjt.DOM;
+        var fdjtTime=fdjt.Time;
         var addClass=fdjtDOM.addClass;
         var hasClass=fdjtDOM.hasClass;
         var dropClass=fdjtDOM.dropClass;
@@ -89,7 +90,7 @@ fdjt.Pager=
             var shown=getChildren(this.root,".pagevisible");
             dropClass(toArray(shown),"pagevisible");};
         
-        function splitChildren(pager,root,children,h,whendone){
+        function doingLayout(pager,root,children,h){
             var page=fdjtDOM("div.pagerblock"), pages=[page];
             root.appendChild(page);
             page.setAttribute("data-pageno",pages.length);
@@ -115,12 +116,13 @@ fdjt.Pager=
                         root.appendChild(newpage);
                         newpage.setAttribute("data-pageno",pages.length);
                         page=newpage;}}},
-                                      children,
-                                      {done: function(){whendone(pages);}});}
+                                      children)
+                .then(function(){pager.layoutDone(pages);})
+                .catch(function(){pager.layoutDone(pages);});}
             
         Pager.prototype.reset=function(){
             this.pages=false; this.children=false;
-            this.pagernav=false; this.showpage=false;};
+            this.showpage=false;};
 
         Pager.prototype.clearLayout=function(){
             var root=this.root, children=this.children;
@@ -131,8 +133,7 @@ fdjt.Pager=
             this.children=false; this.pages=false;
             this.root.removeAttribute("data-npages");
             if (this.pagernav) {
-                fdjtDOM.remove(this.pagernav);
-                this.pagernav=false;}};
+                fdjtDOM.remove(this.pagernav);}};
 
         Pager.prototype.refreshLayout=function refreshLayout(force){
             var container=this.container;
@@ -151,11 +152,35 @@ fdjt.Pager=
                 pager.refreshLayout(true);},
                                          50);};
 
+        Pager.prototype.layoutDone=function(pages){
+            var resets=this.resets, root=this.root;
+            var h=this.h, w=this.w;
+            if (this.focus) dropClass(this.focus,"pagerfocus");
+            this.resets=false;
+            if (pages.length) {
+                dropClass(root,"pagerlayout");
+                this.pages=pages; this.npages=pages.length;
+                this.root.setAttribute("data-npages",this.npages);
+                var focus=
+                    ((getParent(this.focus,root))?
+                     (this.focus):(pages[0].firstElementChild));
+                var newpage=getParent(focus,".pagerblock");
+                addClass(newpage,"pagevisible");
+                addClass(focus,"pagerfocus");
+                this.height=h; this.width=w;
+                this.page=newpage;
+                this.pageoff=pages.indexOf(newpage);}
+            if (pages.length) this.setupPagerNav();
+            addClass(root,"pagerdone");
+            this.layout_started=false;
+            resetStyles(resets);};
+
         Pager.prototype.doLayout=function doLayout(){
-            var pager=this;
             var root=this.root, container=this.container;
-            var resets=makeSolid(root);
-            var h=container.offsetHeight, w=container.offsetWidth;
+            if (root.childNodes.length===0) return;
+            if (this.layout_started) return;
+            else this.layout_started=fdjtTime();
+            var resets=makeSolid(root), h=container.offsetHeight;
             var cstyle=getStyle(container);
             if (cstyle.paddingTop) h=h-parsePX(cstyle.paddingTop);
             if (cstyle.borderTopWidth) h=h-parsePX(cstyle.borderTopWidth);
@@ -173,27 +198,8 @@ fdjt.Pager=
             fdjtDOM.prepend(root,pagernav); 
             this.pagernav=pagernav; 
             this.pagenum=pagenum;
-            h=h-pagernav.offsetHeight;
-            splitChildren(this,root,children,h,function(pages){
-                if (pager.focus) dropClass(pager.focus,"pagerfocus");
-                // if (resets.length) resetStyles(resets);
-                if (pages.length) {
-                    dropClass(root,"pagerlayout");
-                    pager.pages=pages; pager.npages=pages.length;
-                    pager.root.setAttribute("data-npages",pager.npages);
-                    var focus=
-                        ((getParent(pager.focus,root))?
-                         (pager.focus):(pages[0].firstElementChild));
-                    var newpage=getParent(focus,".pagerblock");
-                    addClass(newpage,"pagevisible");
-                    addClass(focus,"pagerfocus");
-                    pager.height=h; pager.width=w;
-                    pager.page=newpage;
-                    pager.pageoff=pages.indexOf(newpage);}
-                if (pages.length) pager.setupPagerNav();
-                addClass(root,"pagerdone");
-                resetStyles(resets);
-                return pages;});};
+            this.resets=resets;
+            doingLayout(this,root,children,h-pagernav.offsetHeight);};
 
         Pager.prototype.setupPagerNav=function setupPagerNav(){
             var pagernav=this.pagernav, pages=this.pages;
@@ -214,9 +220,7 @@ fdjt.Pager=
             if (this.pagenum) {
                 this.pagenum.innerHTML=(off+1)+"/"+pages.length;
                 pagernav.appendChild(this.pagenum);}
-            if (this.pagernav)
-                fdjtDOM.replace(this.pagernav,pagernav);
-            else fdjtDOM.prepend(this.root,pagernav);
+            fdjtDOM.prepend(this.root,pagernav);
             this.nav_elts=nav_elts;};
 
         Pager.prototype.setPage=function setPage(arg){
