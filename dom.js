@@ -163,7 +163,7 @@ fdjt.DOM=
                 return dominsert(before,content.toDOM());
             else if (content.toHTML)
                 return dominsert(before,node,content.toHTML());
-            else if (content.length>=i) {
+            else if (content.length-i>1) {
                 var frag=(((window.documentFragment)&&(node instanceof window.DocumentFragment))?
                           (node):(document.createDocumentFragment()));
                 domappend(frag,content,i);
@@ -172,7 +172,7 @@ fdjt.DOM=
             else if (content.length) {
                 var c=content[i];
                 if (c===before) return;
-                else node.insertBefore(before,c);}
+                else node.insertBefore(c,before);}
             else node.insertBefore(document.createTextNode(""+content),before);
             return node;}
         fdjtDOM.appendArray=domappend;
