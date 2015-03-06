@@ -89,7 +89,7 @@ fdjt.Pager=
             var shown=getChildren(this.root,".pagevisible");
             dropClass(toArray(shown),"pagevisible");};
         
-        function splitChildren(root,children,h,whendone){
+        function splitChildren(pager,root,children,h,whendone){
             var page=fdjtDOM("div.pagerblock"), pages=[page];
             root.appendChild(page);
             page.setAttribute("data-pageno",pages.length);
@@ -97,7 +97,20 @@ fdjt.Pager=
                 page.appendChild(child);
                 if (child.nodeType===1) {
                     if (page.offsetHeight>h) {
-                        var newpage=fdjtDOM("div.pagerblock",child);
+                        var pagetop=child;
+                        if ((pager.badBreak)&&
+                            (pager.badBreak(child.previousElementSibling,child))) {
+                            var a=child.previousElementSibling, b=child;
+                            while ((a)&&(b)&&(pager.badBreak(a,b))) {
+                                b=a; a=a.previousElementSibling;}
+                            if ((a)&&(b)) {
+                                var scan=b;
+                                pagetop=document.createDocumentFragment();
+                                while ((scan)&&(scan!==child)) {
+                                    pagetop.appendChild(scan);
+                                    scan=scan.nextSibling;}
+                                pagetop.appendChild(child);}}
+                        var newpage=fdjtDOM("div.pagerblock",pagetop);
                         pages.push(newpage);
                         root.appendChild(newpage);
                         newpage.setAttribute("data-pageno",pages.length);
@@ -161,7 +174,7 @@ fdjt.Pager=
             this.pagernav=pagernav; 
             this.pagenum=pagenum;
             h=h-pagernav.offsetHeight;
-            splitChildren(root,children,h,function(pages){
+            splitChildren(this,root,children,h,function(pages){
                 if (pager.focus) dropClass(pager.focus,"pagerfocus");
                 // if (resets.length) resetStyles(resets);
                 if (pages.length) {
