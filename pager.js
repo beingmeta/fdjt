@@ -4,12 +4,6 @@
 
 /* Copyright (C) 2009-2015 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
-   It implements a method for breaking narrative HTML content
-   across multiple pages, attempting to honor page break constraints,
-   etc.
-
-   Check out the 'mini manual' at the bottom of the file or read the
-   code itself.
 
    This program comes with absolutely NO WARRANTY, including implied
    warranties of merchantability or fitness for any particular
@@ -195,8 +189,8 @@ fdjt.Pager=
             if (this.trace)
                 fdjtLog("Pager: Finished %d %dpx pages in %o/%os",
                         pages.length,this.height,
-                        (this.layout_used)/1000000,
-                        (fdjtTime()-this.layout_started)/1000000);
+                        (this.layout_used)/1000,
+                        (fdjtTime()-this.layout_started)/1000);
             if (pages.length) this.setupPagerNav();
             addClass(root,"pagerdone");
             this.layout_started=false;
