@@ -130,7 +130,7 @@ fdjt.Pager=
                         root.appendChild(newpage);
                         if (trace>1)
                             fdjtLog(
-                                "Pager: new #%d for ch#%d (h=%d) %o for\n\t%o",
+                                "Pager: new p#%d for ch#%d (h=%d) %o for\n\t%o",
                                 pages.length,children.indexOf(child),
                                 child.offsetHeight,child,root);
                         newpage.setAttribute("data-pageno",pages.length);
