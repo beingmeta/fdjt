@@ -188,12 +188,13 @@ fdjt.Pager=
                 addClass(focus,"pagerfocus");
                 this.page=newpage;
                 this.pageoff=pages.indexOf(newpage);}
+            if (pages.length) this.setupPagerNav();
             if (this.trace)
-                fdjtLog("Pager: Finished %d %dpx pages in %o/%os",
+                fdjtLog("Pager: Finished %d %dpx pages in %o/%os for\t\n%o",
                         pages.length,this.height,
                         (this.layout_used)/1000,
-                        (fdjtTime()-this.layout_started)/1000);
-            if (pages.length) this.setupPagerNav();
+                        (fdjtTime()-this.layout_started)/1000,
+                       this.root);
             addClass(root,"pagerdone");
             this.layout_started=false;
             resetStyles(resets);};
