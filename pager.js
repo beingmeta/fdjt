@@ -99,12 +99,13 @@ fdjt.Pager=
                 var trace=pager.trace||0, started=fdjtTime();
                 page.appendChild(child);
                 if (child.nodeType===1) {
+                    var page_height=page.offsetHeight;
                     if (trace>2)
                         fdjtLog("Pager: Child#%d %o, page %d h=%d/%d for\n\t%o",
                                 children.indexOf(child),child,
-                                pages.length,page.offsetHeight,h,
+                                pages.length,page_height,h,
                                 root);
-                    if (page.offsetHeight>h) {
+                    if (page_height>h) {
                         var pagetop=child;
                         if ((pager.badBreak)&&
                             (pager.badBreak(
@@ -131,7 +132,8 @@ fdjt.Pager=
                         dropClass(page,"working");
                         page=newpage;}}
                 pager.layout_used=pager.layout_used+(fdjtTime()-started);},
-                                      children)
+                                      children,
+                                      {slice: 100,space: 5})
                 .then(function(){pager.layoutDone(pages);})
                 .catch(function(){pager.layoutDone(pages);});}
             
