@@ -45,6 +45,7 @@ fdjt.Pager=
         "use strict";
 
         var fdjtDOM=fdjt.DOM;
+        var fdjtLog=fdjt.Log;
         var fdjtTime=fdjt.Time;
         var addClass=fdjtDOM.addClass;
         var hasClass=fdjtDOM.hasClass;
@@ -66,7 +67,10 @@ fdjt.Pager=
                 this.container=opts.container;
             else this.container=root.parentNode||root;
             this.packthresh=opts.packthresh||30;
-            this.doLayout();
+            if (opts.trace) this.trace=opts.trace;
+            if (opts.hasOwnProperty("initlayout")) {
+                if (opts.initlayout) this.doLayout();}
+            else this.doLayout();
             return this;}
         function makeSolid(node){
             var style=getStyle(node), resets=[], body=document.body;
@@ -91,16 +95,26 @@ fdjt.Pager=
             dropClass(toArray(shown),"pagevisible");};
         
         function doingLayout(pager,root,children,h){
-            var page=fdjtDOM("div.pagerblock"), pages=[page];
+            var page=fdjtDOM("div.pagerblock.working"), pages=[page];
             root.appendChild(page);
             page.setAttribute("data-pageno",pages.length);
+            if (pager.trace)
+                fdjtLog("Pager: %d children -> %dpx pages for\n\t%o",
+                        children.length,h,root);
             return fdjt.Async.slowmap(function(child){
+                var trace=pager.trace||0, started=fdjtTime();
                 page.appendChild(child);
                 if (child.nodeType===1) {
+                    if (trace>2)
+                        fdjtLog("Pager: Child#%d %o, page %d h=%d/%d for\n\t%o",
+                                children.indexOf(child),child,
+                                pages.length,page.offsetHeight,h,
+                                root);
                     if (page.offsetHeight>h) {
                         var pagetop=child;
                         if ((pager.badBreak)&&
-                            (pager.badBreak(child.previousElementSibling,child))) {
+                            (pager.badBreak(
+                                child.previousElementSibling,child))) {
                             var a=child.previousElementSibling, b=child;
                             while ((a)&&(b)&&(pager.badBreak(a,b))) {
                                 b=a; a=a.previousElementSibling;}
@@ -111,11 +125,18 @@ fdjt.Pager=
                                     pagetop.appendChild(scan);
                                     scan=scan.nextSibling;}
                                 pagetop.appendChild(child);}}
-                        var newpage=fdjtDOM("div.pagerblock",pagetop);
+                        var newpage=fdjtDOM("div.pagerblock.working",pagetop);
                         pages.push(newpage);
                         root.appendChild(newpage);
+                        if (trace>1)
+                            fdjtLog(
+                                "Pager: new #%d for ch#%d (h=%d) %o for\n\t%o",
+                                pages.length,children.indexOf(child),
+                                child.offsetHeight,child,root);
                         newpage.setAttribute("data-pageno",pages.length);
-                        page=newpage;}}},
+                        dropClass(page,"working");
+                        page=newpage;}}
+                pager.layout_used=pager.layout_used+(fdjtTime()-started);},
                                       children)
                 .then(function(){pager.layoutDone(pages);})
                 .catch(function(){pager.layoutDone(pages);});}
@@ -132,6 +153,9 @@ fdjt.Pager=
             root.innerHTML=""; root.appendChild(frag);
             this.children=false; this.pages=false;
             this.root.removeAttribute("data-npages");
+            if (this.trace)
+                fdjtLog("Pager: Cleared layout, restored %d children for\n\t%o",
+                        children.length,root);
             if (this.pagernav) {
                 fdjtDOM.remove(this.pagernav);}};
 
@@ -154,7 +178,6 @@ fdjt.Pager=
 
         Pager.prototype.layoutDone=function(pages){
             var resets=this.resets, root=this.root;
-            var h=this.h, w=this.w;
             if (this.focus) dropClass(this.focus,"pagerfocus");
             this.resets=false;
             if (pages.length) {
@@ -167,9 +190,13 @@ fdjt.Pager=
                 var newpage=getParent(focus,".pagerblock");
                 addClass(newpage,"pagevisible");
                 addClass(focus,"pagerfocus");
-                this.height=h; this.width=w;
                 this.page=newpage;
                 this.pageoff=pages.indexOf(newpage);}
+            if (this.trace)
+                fdjtLog("Pager: Finished %d %dpx pages in %o/%os",
+                        pages.length,this.height,
+                        (this.layout_used)/1000000,
+                        (fdjtTime()-this.layout_started)/1000000);
             if (pages.length) this.setupPagerNav();
             addClass(root,"pagerdone");
             this.layout_started=false;
@@ -177,10 +204,19 @@ fdjt.Pager=
 
         Pager.prototype.doLayout=function doLayout(){
             var root=this.root, container=this.container;
+            var trace=this.trace||0, started=fdjtTime();
             if (root.childNodes.length===0) return;
             if (this.layout_started) return;
-            else this.layout_started=fdjtTime();
+            else {
+                this.layout_started=fdjtTime();
+                this.layout_used=0;}
+            if (trace) fdjtLog("Pager: starting layout rh=%o, ch=%o for\n\t%o",
+                               root.offsetHeight,container.offsetHeight,
+                               root);
             var resets=makeSolid(root), h=container.offsetHeight;
+            if (trace) 
+                fdjtLog("Pager: Solidified (h=%d) with %d restyles for\n\t%o",
+                        h,resets.length,root);
             var cstyle=getStyle(container);
             if (cstyle.paddingTop) h=h-parsePX(cstyle.paddingTop);
             if (cstyle.borderTopWidth) h=h-parsePX(cstyle.borderTopWidth);
@@ -189,7 +225,13 @@ fdjt.Pager=
             if (rstyle.paddingTop) h=h-parsePX(rstyle.paddingTop);
             if (rstyle.paddingBottom) h=h-parsePX(rstyle.paddingBottom);
             if (rstyle.borderBottomWidth) h=h-parsePX(rstyle.borderBottomWidth);
-            if (h<=0) {resetStyles(resets); return;}
+            if (h<=0) {
+                fdjtLog("Pager: exit because h=%d for\n\t%o",h,root);
+                resetStyles(resets); return;}
+            else if (trace>1) 
+                fdjtLog("Pager: adjust h=%d for\n\t%o",h,root);
+            else {}
+            this.height=h;
             if (this.pages) this.clearLayout();
             addClass(root,"pagerlayout");
             var children=this.children=toArray(root.childNodes);
@@ -199,6 +241,7 @@ fdjt.Pager=
             this.pagernav=pagernav; 
             this.pagenum=pagenum;
             this.resets=resets;
+            this.layout_used=fdjtTime()-started;
             doingLayout(this,root,children,h-pagernav.offsetHeight);};
 
         Pager.prototype.setupPagerNav=function setupPagerNav(){
@@ -270,6 +313,8 @@ fdjt.Pager=
                       (getChild(target,".num"))));
             if (!(num)) return false;
             else return parseInt(num.innerHTML);};
+
+        Pager.prototype.trace=0;
 
         return Pager;})();
 

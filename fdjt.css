@@ -1229,7 +1229,7 @@ table.fdjtform .usebaseline td {
 .pager { overflow-x: scroll; overflow-y: hidden; }
 .pager > div.pagerblock { display: none; }
 .pager > div.pagerblock.pagevisible,
-.pager.pagerlayout > div.pagerblock {
+.pager.pagerlayout > div.pagerblock.working {
     display: block; }
 
 .pager .pagernav {
