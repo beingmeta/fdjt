@@ -126,14 +126,22 @@ fdjt.Async=fdjt.ASync=fdjt.async=
             if (!(opts)) opts={};
             var slice=opts.slice, space=opts.space;
             var watchfn=opts.watchfn, watch_slice=opts.watch;
+            var sync=((opts.hasOwnProperty("sync"))?(opts.sync):
+                      ((opts.hasOwnProperty("async"))?(!(opts.async)):
+                       (false)));
             var donefn=opts.done;
             function slowmapping(resolve,reject){
-                slowmap(fcn,vec,watchfn,
-                        ((donefn)?(function(){
-                            donefn(); if (resolve) resolve(vec);}):
-                         (resolve)),
-                        reject,
-                        slice,space,watch_slice);}
+                if (sync) {
+                    var i=0, lim=vec.length; while (i<lim) {
+                        try { fcn(vec[i++]);}
+                        catch (ex) { if (reject) reject(ex); }}
+                    if (resolve) resolve(vec);}
+                else slowmap(fcn,vec,watchfn,
+                             ((donefn)?(function(){
+                                 donefn(); if (resolve) resolve(vec);}):
+                              (resolve)),
+                             reject,
+                             slice,space,watch_slice);}
             if (watch_slice<1) watch_slice=vec.length*watch_slice;
             return new Promise(slowmapping);};
 
