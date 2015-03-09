@@ -30,7 +30,8 @@
    fdjt_buildtime, fdjt_builduuid */
 
 var fdjt=((typeof fdjt === "undefined")?({}):(fdjt));
-var fdjt_versions=((fdjt_versions)||[]);
+var fdjt_versions=((typeof fdjt_versions === "undefined")?([]):
+		   ((fdjt_versions)||[]));
 (function(){
     "use strict";
     fdjt_versions.decl=function(name,num){
