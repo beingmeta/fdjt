@@ -2498,72 +2498,38 @@ fdjt.CodexLayout=
         CodexLayout.cache=2;
 
         var ondbinit=false;
-        var dbinit_timeout=false;
-
-        function indexedDB_timeout(){
-            fdjtLog("Error initializing indexedDB");
-            if (!(layoutDB)) {
-                CodexLayout.layoutDB=layoutDB=window.localStorage;
-                dbinit_timeout=false;
-                if (ondbinit) ondbinit();}}
-
-        var doinit=false;
 
         function useIndexedDB(dbname){
-            var req=window.indexedDB.open(dbname,1);
             CodexLayout.dbname=dbname;
-            dbinit_timeout=setTimeout(indexedDB_timeout,15000);
-            req.onerror=function(event){
-                fdjtLog("Error initializing indexedDB layout cache: %o",
-                        event.errorCode);
-                if (dbinit_timeout) clearTimeout(dbinit_timeout);
-                CodexLayout.layoutDB=layoutDB=window.localStorage;
-                doinit=ondbinit; ondbinit=false;
-                if (doinit) doinit();};
-            req.onsuccess=function(evt) {
-                var db=evt.target.result;
-                if (CodexLayout.trace)
-                    fdjtLog("Using existing indexedDB layout cache");
-                if (dbinit_timeout) clearTimeout(dbinit_timeout);
-                CodexLayout.layoutDB=layoutDB=db;
-                CodexLayout.cache=7;
-                doinit=ondbinit; ondbinit=false;
-                if (doinit) doinit();};
-            req.onupgradeneeded=function(evt) {
-                var db=evt.target.result;
-                if (dbinit_timeout) clearTimeout(dbinit_timeout);
-                db.onerror=function(event){
-                    fdjtLog("Unexpected error caching layouts: %d",
-                            event.target.errorCode);
-                    event=false; // ignored
+            RefDB.useIndexedDB(dbname,1,function(db){
+                db.createObjectStore("layouts",{keyPath: "layout_id"});})
+                .then(function(db){
+                    var doinit=ondbinit; ondbinit=false;
+                    CodexLayout.layoutDB=layoutDB=db;
+                    CodexLayout.cache=7;
+                    if (doinit) doinit();})
+                .catch(function(trouble){
+                    fdjtLog("indexedDB failed: %o",trouble);
+                    // Fall back to local storage 
                     CodexLayout.layoutDB=layoutDB=window.localStorage;
-                    if (ondbinit) ondbinit();};
-                db.onsuccess=function(event){
-                    if (CodexLayout.trace)
-                        fdjtLog("Initialized indexedDB layout cache");
-                    event=false; // ignored
-                    if (ondbinit) ondbinit();};
-                db.createObjectStore("layouts",{keyPath: "layout_id"});
-                CodexLayout.layoutDB=layoutDB=window.localStorage;
-                doinit=ondbinit; ondbinit=false;
-                if (doinit) doinit();};}
+                    doinit=ondbinit; ondbinit=false;
+                    if (doinit) doinit();});}
         CodexLayout.useIndexedDB=useIndexedDB;
         
-        if (window.indexedDB) {
+        if (typeof indexedDB !== "undefined") {
             fdjt.addInit(function(){
                 if (!(CodexLayout.dbname)) {
                     CodexLayout.dbname="codexlayout";
                     useIndexedDB("codexlayout");}},
                          "CodexLayoutCache");}
-        
-        if (window.localStorage) {
-            doinit=ondbinit; ondbinit=false;
-            CodexLayout.layoutDB=layoutDB=window.localStorage;
-            if (doinit) doinit();}
         else {
-            CodexLayout.layoutDB=layoutDB=false;
-            doinit=ondbinit; ondbinit=false;
-            if (doinit) doinit();}
+            var doinit=ondbinit; ondbinit=false;
+            if (window.localStorage) {
+                CodexLayout.layoutDB=layoutDB=window.localStorage;
+                if (doinit) doinit();}
+            else {
+                CodexLayout.layoutDB=layoutDB=false;
+                if (doinit) doinit();}}
      
         function cacheLayout(layout_id,content,pages,ondone){
             if (typeof layoutDB === "undefined") 
