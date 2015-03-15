@@ -37,14 +37,14 @@ all: fdjt.js fdjt.hints
 
 buildstamp.js: $(FDJT_FILES) fdjt.css codexlayout.css langs.css misc.css
 	@$(ECHO) "// FDJT build information" > buildstamp.js
-	@$(ECHO) "var fdjt_revision='"`git describe`"';" >> buildstamp.js
-	@$(ECHO) "var fdjt_buildhost='${BUILDHOST}';" >> buildstamp.js
-	@$(ECHO) "var fdjt_buildtime='"${BUILDTIME}"';" >> buildstamp.js
-	@$(ECHO) "var fdjt_builduuid='"${BUILDUUID}"';" >> buildstamp.js 
+	@$(ECHO) "fdjt.revision='"`git describe`"';" >> buildstamp.js
+	@$(ECHO) "fdjt.buildhost='${BUILDHOST}';" >> buildstamp.js
+	@$(ECHO) "fdjt.buildtime='"${BUILDTIME}"';" >> buildstamp.js
+	@$(ECHO) "fdjt.builduuid='"${BUILDUUID}"';" >> buildstamp.js 
 	@$(ECHO) >> buildstamp.js
 
 fdjt.js: $(FDJT_FILES) buildstamp.js
-	@cat buildstamp.js $(FDJT_FILES) > $@
+	@cat $(FDJT_FILES) buildstamp.js > $@
 fdjt.hints: $(FDJT_HINTS) buildstamp.js
 	@cat $(FDJT_HINTS) > $@
 TAGS: $(FDJT_FILES) codexlayout.js

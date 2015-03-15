@@ -25,9 +25,6 @@
    http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 
 */
-/* global
-   fdjt_revision, fdjt_buildhost,
-   fdjt_buildtime, fdjt_builduuid */
 
 var fdjt=((typeof fdjt === "undefined")?({}):(fdjt));
 var fdjt_versions=((typeof fdjt_versions === "undefined")?([]):
@@ -60,8 +57,3 @@ var fdjt_versions=((typeof fdjt_versions === "undefined")?([]):
             return function () {
                 return this.replace(trimLeft, "").replace(trimRight, "");};});}
 })();
-
-fdjt.revision=fdjt_revision;
-fdjt.buildhost=fdjt_buildhost;
-fdjt.buildtime=fdjt_buildtime;
-fdjt.builduuid=fdjt_builduuid;
