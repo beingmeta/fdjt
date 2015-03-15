@@ -71,8 +71,12 @@ fdjt.CodexLayout=
 
         var floor=Math.floor;
 
-        var root_namespace=document.body.namespaceURI;
-
+        var root_namespace;
+        if (document.body)
+            root_namespace=document.body.namespaceURI;
+        else fdjtDOM.addListener(window,"load",function(){
+            root_namespace=document.body.namespaceURI;});
+        
         var layoutDB;
 
         function appendChildren(node,children,start,end){
