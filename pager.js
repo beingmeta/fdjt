@@ -147,19 +147,21 @@ fdjt.Pager=
       return newpage;}
     
     Pager.prototype.reset=function(){
-      this.pages=false; this.children=false;
-      this.showpage=false;};
+      this.pages=false; this.showpage=false;};
 
     Pager.prototype.clearLayout=function(){
       var root=this.root, pages=this.pages, n_restored=0;
+      this.pages=false;
       var i=0, n_pages=pages.length; while (i<n_pages) {
-        var frag=document.createDocumentFragment();
         var page=pages[i++], children=toArray(page.childNodes);
+        if (page.parentNode!==root) continue;
+        else if (children.length===0) {
+          root.removeChild(page); continue;}
+        var frag=document.createDocumentFragment();
         var j=0, n_children=children.length; 
         while (j<n_children) frag.appendChild(children[j++]);
         n_restored=n_restored+n_children;
         root.replaceChild(frag,page);}
-      this.children=false; this.pages=false;
       this.root.removeAttribute("data-npages");
       if (this.trace)
         fdjtLog("Pager: Cleared layout, restored %d children for\n\t%o",
