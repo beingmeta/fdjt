@@ -381,8 +381,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function taptapped(target,evt){
             return synthEvent(target,"taptap",th,evt,
                               touch_x,touch_y,false,trace);}
-        function tapheld(target,evt){
-            return synthEvent(target,"taphold",th,evt,touch_x,touch_y,false);}
         function swiped(target,evt,sx,sy,cx,cy){
             var dx=cx-sx, dy=cy-sy; swipe_t=fdjtTime();
             return synthEvent(target,"swipe",th,evt,cx,cy,
@@ -427,8 +425,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         else slipped(elt,evt);}}
                 pressed=th_target; th_targets=[];
                 if (th_target) pressed_at=fdjtTime(); else pressed_at=false;
-                if (tap_target) {tapheld(th_target,evt); tap_target=false;}
-                else held(th_target,evt);
+                held(th_target,evt);
                 if (th_timer) clearTimeout(th_timer);
                 th_timer=false;
                 touched=false;}),
@@ -831,7 +828,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                   (default_opts.fortouch):(false));
         holdmsecs=((opts.hasOwnProperty('holdmsecs'))?(opts.holdmsecs):
                     (default_opts.hasOwnProperty('holdmsecs'))?
-                    (default_opts.holdmsecs):(200));
+                    (default_opts.holdmsecs):(150));
         movethresh=((opts.hasOwnProperty('movethresh'))?(opts.movethresh):
                     (default_opts.hasOwnProperty('movethresh'))?
                     (default_opts.movethresh):(20));
