@@ -61,7 +61,7 @@ fdjt.Pager=
       this.root=root;
       if (opts.container)
         this.container=opts.container;
-      else this.container=root.parentNode||root;
+      else this.container=root.parentNode;
       this.packthresh=opts.packthresh||30;
       this.timeslice=opts.slice||100;
       this.timeskip=opts.slice||10;
@@ -170,7 +170,7 @@ fdjt.Pager=
         fdjtDOM.remove(this.pagernav);}};
 
     Pager.prototype.refreshLayout=function refreshLayout(force){
-      var container=this.container;
+      var container=this.container||this.root.parentNode;
       var h=container.offsetHeight, w=container.offsetWidth;
       if ((this.pages)&&(!(force))&&
           (this.height===h)&&(this.width===w))
@@ -214,10 +214,11 @@ fdjt.Pager=
       resetStyles(resets);};
 
     Pager.prototype.doLayout=function doLayout(){
-      var root=this.root, container=this.container;
+      var root=this.root, container=this.container||root.parentNode;
       var trace=this.trace||0, started=fdjtTime();
-      if (root.childNodes.length===0) return;
-      if (this.layout_started) return;
+      if (!(container)) return;
+      else if (root.childNodes.length===0) return;
+      else if (this.layout_started) return;
       else {
         this.layout_started=fdjtTime();
         this.layout_used=0;}

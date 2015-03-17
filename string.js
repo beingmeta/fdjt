@@ -456,9 +456,9 @@ fdjt.String=
 
         /* Getting initials */
 
-        function getInitials(string){
+        function getInitials(string,n){
             var words=string.split(/\W/); var initials="";
-            var i=0; var lim=words.length;
+            var i=0; var lim=((n)&&(n<words.length))?(n):(words.length);
             while (i<lim) {
                 var word=words[i++];
                 if (word.length)
