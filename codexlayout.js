@@ -1462,8 +1462,8 @@ fdjt.CodexLayout=
                     // overall height is small.
                     if ((use_height===page_height)&&
                         ((init_geom.bottom-page_height)<(line_height*1.2))&&
-                        (init_geom.height>(line_height*3)))
-                        use_height=page_height-floor(line_height*1.2);
+                        ((init_geom.height)<(line_height*3))) {
+                        use_height=page_height-floor(line_height);}
                     // When splitChildren called, <node> is already
                     // empty and it's children are all in <children>
                     var push=splitChildren(node,children,init_geom,use_height);
