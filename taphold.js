@@ -848,7 +848,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                   (default_opts.touchtoo):(false));
         min_swipe=((opts.hasOwnProperty('minswipe'))?(opts.minswipe):
                    (default_opts.hasOwnProperty('minswipe'))?
-                   (default_opts.minswipe):(false));
+                   (default_opts.minswipe):(30));
         bubble=((opts.hasOwnProperty('bubble'))?(opts.bubble):
                 (default_opts.hasOwnProperty('bubble'))?
                 (default_opts.bubble):(false));
