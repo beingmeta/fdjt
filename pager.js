@@ -51,6 +51,7 @@ fdjt.Pager=
     var getParent=fdjtDOM.getParent;
     var getStyle=fdjtDOM.getStyle;
     var parsePX=fdjtDOM.parsePX;
+    var toArray=fdjtDOM.toArray;
 
     function Pager(root,opts){
       if (!(this instanceof Pager))
@@ -153,7 +154,7 @@ fdjt.Pager=
       var root=this.root, pages=this.pages, n_restored=0;
       var i=0, n_pages=pages.length; while (i<n_pages) {
         var frag=document.createDocumentFragment();
-        var page=pages[i++], children=page.childNodes;
+        var page=pages[i++], children=toArray(page.childNodes);
         var j=0, n_children=children.length; 
         while (j<n_children) frag.appendChild(children[j++]);
         n_restored=n_restored+n_children;
