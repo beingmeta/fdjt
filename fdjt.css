@@ -832,11 +832,18 @@ body._NOSVG img.svg { display: none;}
 body._NOSVG img.inline.svg { display: none;}
 body._NOSVG .nosvg { display: inline;}
 body._NOSVG .inline.nosvg { display: inline;}
+html._NOSVG img.svg { display: none;}
+html._NOSVG img.inline.svg { display: none;}
+html._NOSVG .nosvg { display: inline;}
+html._NOSVG .inline.nosvg { display: inline;}
 
 img.hires { display: none !important;}
 img.svg { display: none !important;}
 body._USESVG img.svg { display: inline !important;}
 body._USESVG img.stdres, body._USESVG img.notsvg {
+    display: none !important;}
+html._USESVG img.svg { display: inline !important;}
+html._USESVG img.stdres, html._USESVG img.notsvg {
     display: none !important;}
 
 
@@ -1133,6 +1140,14 @@ body._TOUCH .fdjtselecting .fdjtselectstart:hover,
 body._TOUCH .fdjtselecting .fdjtselectend:hover {
     text-decoration: none;}
 
+html._TOUCH .fdjtselecting .fdjtselected:hover,
+html._TOUCH .fdjtselecting .fdjtselectstart:hover,
+html._TOUCH .fdjtselecting .fdjtselectend:hover,
+html._TOUCH .fdjtselecting .fdjtselected:hover,
+html._TOUCH .fdjtselecting .fdjtselectstart:hover,
+html._TOUCH .fdjtselecting .fdjtselectend:hover {
+    text-decoration: none;}
+
 .fdjtselecting .fdjtadjuststart .fdjtselectstart,
 .fdjtselecting .fdjtadjustend .fdjtselectend {
     background-color: gold;}
@@ -1190,12 +1205,16 @@ input.fdjtemailinput, input[TYPE="EMAIL"] {
     background-position: right;}
 body._USESVG input.fdjtemailinput,body._USESVG input[TYPE="EMAIL"] { 
     background-image: url(/static/fdjt/email_bg.svg);}
+html._USESVG input.fdjtemailinput,html._USESVG input[TYPE="EMAIL"] { 
+    background-image: url(/static/fdjt/email_bg.svg);}
 
 input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
     background-image: url(/static/fdjt/markdown-solid_bg.png);
     background-repeat: no-repeat;
     background-position: bottom right;}
-body._USESVG input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
+body._USESVG input[TYPE="TEXT"].markdowninput, body._USESVG textarea.markdowninput {
+    background-image: url(/static/fdjt/markdown-solid_bg.svg);}
+html._USESVG input[TYPE="TEXT"].markdowninput, html._USESVG textarea.markdowninput {
     background-image: url(/static/fdjt/markdown-solid_bg.svg);}
 input[TYPE="TEXT"].markdowninput {
     background-size: 20% auto;}

@@ -2309,6 +2309,7 @@ fdjt.DOM=
         var nosvg;
 
         function checkSVG(){
+            var root=document.documentElement||document.body;
             if (typeof nosvg === "undefined") {
                 if ((document.implementation)&&
                     (document.implementation.hasFeature))
@@ -2323,11 +2324,11 @@ fdjt.DOM=
                     nosvg=false;
                 else nosvg=true;}
             if (nosvg) {
-                addClass(document.body,"_NOSVG");
-                dropClass(document.body,"_USESVG");}
+                addClass(root,"_NOSVG");
+                dropClass(root,"_USESVG");}
             else {
-                dropClass(document.body,"_NOSVG");
-                addClass(document.body,"_USESVG");}
+                dropClass(root,"_NOSVG");
+                addClass(root,"_USESVG");}
             return (!(nosvg));}
         
         function checkChildren(){
