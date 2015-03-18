@@ -1251,6 +1251,16 @@ table.fdjtform .usebaseline td {
 .pager.pagerlayout > div.pagerblock.working {
     display: block; }
 
+.pager.pagerlayout > * {
+    visibility: hidden; opacity: 0.0;}
+.pager.pagerlayout {
+    background-image: url(/static/fdjt/justaminute.svgz);
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: contains;}
+html._NOSVG .pager.pagerlayout {
+    background-image: url(/static/fdjt/justaminute.png);}
+
 .pager .pagernav {
     width: 100%; height: 1.6em;
     text-align: center;}

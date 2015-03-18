@@ -252,7 +252,8 @@ fdjt.Pager=
       var i=0, lim=children.length; while (i<lim) {
         var child=children[i++];
         childinfo.push({dom: child,height: child.offsetHeight});}
-      fdjtDOM.prepend(root,pagernav); 
+      root.innerHTML="";
+      fdjtDOM.append(root,pagernav); 
       this.pagernav=pagernav; 
       this.pagenum=pagenum;
       this.resets=resets;
