@@ -96,7 +96,7 @@ fdjt.DOM=
                 var re  = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
                 var rv;
                 if (re.exec(ua) !== null)
-                    rv = parseFloat( RegExp.$1 );
+                    rv = parseFloat( re.$1 );
                 else rv=1;
                 // Fails for non-whole numbers
                 if (rv<=0) rv=1;
