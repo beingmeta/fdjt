@@ -287,7 +287,15 @@ fdjt.Pager=
         var page=getParent(arg,".pagerblock");
         if (!(page)) return;
         if (this.page!==page) {
+          // Layout isn't done yet
+          if (!(this.pages)) {
+            this.page=page; this.focus=arg;
+            return;}
           var off=this.pages.indexOf(page);
+          if (off<0) {
+            fdjtLog.warn("Couldn't find page %o for %o in %o",
+                         page,arg,this.root);
+            return;}
           if (this.page) dropClass(this.page,"pagevisible");
           addClass(page,"pagevisible");
           this.page=page;
