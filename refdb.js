@@ -257,7 +257,8 @@
 
                 function resolveRef(arg,db,DBType,force){
                     if (typeof DBType !== "function") DBType=RefDB;
-                    if (arg instanceof Ref) return arg;
+                    if (!(arg)) return arg;
+                    else if (arg instanceof Ref) return arg;
                     else if ((typeof arg === "object")&&(arg.id))
                         return object2ref(arg,db);
                     else if ((db)&&(db.refs.hasOwnProperty(arg)))
@@ -331,6 +332,7 @@
                             atprefix=arg.slice(at,slash+1);
                             db=refdbs[atprefix]||aliases[atprefix]||
                                 ((DBType)&&(new DBType(atprefix)));}}
+                    else {}
                     if (!(db)) return false;
                     if (db.refs.hasOwnProperty(arg)) return (db.refs[arg]);
                     else if (force) return db.ref(arg);
