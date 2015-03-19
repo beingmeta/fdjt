@@ -181,11 +181,12 @@ fdjt.Pager=
     Pager.prototype.changed=function changed(){
       var pager=this;
       if (this.layout_timer) clearTimeout(this.layout_timer);
-      this.layout_timer=setTimeout(function(){
+      this.layout_timer=setTimeout(
+        function(){pager_timeout(pager);},
+        250);};
+    function pager_timeout(pager){
         pager.layout_timer=false;
-        pager.refreshLayout(true);},
-                                   50);};
-
+        pager.refreshLayout(true);}
     Pager.prototype.layoutDone=function(pages){
       var resets=this.resets, root=this.root;
       if (this.focus) dropClass(this.focus,"pagerfocus");
