@@ -2618,9 +2618,14 @@ fdjt.DOM=
                          ((after)||("")));}
         fdjtDOM.getRegexString=getRegexString;
 
-        function textRegExp(needle,before,after){
-            return new RegExp(getRegexString(needle,true,before,after),"gm");}
+        function textRegExp(needle,foldcase,before,after){
+            return new RegExp(getRegexString(needle,true,before,after),
+                              ((foldcase)?("igm"):("gm")));}
         fdjtDOM.textRegExp=textRegExp;
+        function wordRegExp(needle,foldcase){
+            return new RegExp(getRegexString(needle,true,"\\b","\\b"),
+                              ((foldcase)?("igm"):("gm")));}
+        fdjtDOM.wordRegExp=wordRegExp;
 
         function findString(node,needle,off,count){
             if (typeof off === 'undefined') off=0;
