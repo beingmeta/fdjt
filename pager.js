@@ -246,6 +246,13 @@ fdjt.Pager=
       else {}
       this.height=h;
       if (this.pages) this.clearLayout();
+      if (root.offsetHeight<=h) {
+        addClass(root,"onepage");
+        this.onepage=true;
+        return;}
+      else {
+        dropClass(root,"onepage");
+        this.onepage=false;}
       addClass(root,"pagerlayout");
       var childinfo=[], children=root.childNodes;
       var pagenum=fdjtDOM("div.pagenum");
