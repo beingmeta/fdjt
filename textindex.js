@@ -105,10 +105,12 @@ fdjt.TextIndex=(function(){
             var words=stdtext.split(/\b/g), termlist=[];
             var i=0, lim=words.length;
             while (i<lim) {
-                var term=words[i++];
+                var term=words[i++], iscap=/[A-Z][^A-Z]/.exec(term);
                 if (term.length<2) continue;
                 else if (term.search(/\w/)<0) continue;
                 else if (stopwords.hasOwnProperty(term)) continue;
+                else if ((iscap)&&(stopwords.hasOwnProperty(term.toLowerCase())))
+                    continue;
                 else if (stopfns) {
                     var fn=0, fns=stopfns.length;
                     while (fn<fns) {
