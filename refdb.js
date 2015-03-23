@@ -1022,6 +1022,13 @@
                             results.push(set1[i]);
                             i++;}
                         else j++;}
+                    if ((!(new_allstrings))||(set1._allstrings)) 
+                        results=results.concat(set1.slice(i));
+                    else while (i<len1) {
+                        var elt=set1[i++];
+                        if ((new_allstrings)&&(typeof elt !== "string"))
+                            new_allstrings=false;
+                        results.push(elt);}
                     results._allstrings=new_allstrings;
                     results._sortlen=results.length;
                     return results;}
