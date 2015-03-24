@@ -46,9 +46,6 @@ if (!(fdjt.UI)) fdjt.UI={};
     var FDJT_COMPLETE_MATCHCASE=8;
     // Whether to an enter character always picks a completion
     var FDJT_COMPLETE_EAGER=16;
-    // Whether the key fields may contain disjoins (e.g. (dog|friend))
-    // to be accomodated in matching
-    var FDJT_COMPLETE_DISJOINS=32;
     // Default options
     var default_options=
         ((FDJT_COMPLETE_OPTIONS)|
