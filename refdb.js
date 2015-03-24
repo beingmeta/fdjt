@@ -676,21 +676,25 @@ fdjt.RefDB=(function(){
             return this.loadFromStorage(refs);
         else return false;};
     RefDB.prototype.loadFromStorage=function loadFromStorage(refs){
-        var db=this, storage=this.storage, loaded=this.loaded;
+        var db=this, storage=this.storage;
+        var result=[], loaded=this.loaded;
         var atid=(db.atid)||(db.atid=getatid(storage,db));
         var needrefs=[], refmap=db.refs, absrefs=db.absrefs;
         function storage_loader(arg,loaded){
             var ref=arg, content;
-            if (typeof ref === "string") ref=db.ref(ref,false,true);
-            if (!(ref)) {warn("Couldn't resolve ref to %s",arg); return;}
+            if (typeof ref === "string") {}
             else if (ref._live) return;
             else loaded.push(ref);
             if (absrefs) content=storage[ref._id];
             else if (atid) content=storage[atid+"("+ref._id+")"];
             else content=storage[atid+"("+ref._id+")"];
-            if (!(content)) warn("No item stored for %s",ref._id);
-            else ref.Import(
-                JSON.parse(content),false,REFLOAD|REFINDEX);}
+            if (!(content)) {
+                warn("No item stored for %s",ref._id);
+                return;}
+            ref=db.ref(ref);
+            if (!(ref)) {warn("Couldn't resolve ref to %s",arg); return;}
+            result.push(ref); loaded.push(ref);
+            ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);}
         if (!(refs)) refs=[].concat(db.allrefs);
         else if (refs===true) {
             var all=storage["allids("+db.name+")"]||"[]";
@@ -700,20 +704,56 @@ fdjt.RefDB=(function(){
         var i=0, lim=refs.length; while (i<lim) {
             var refid=refs[i++], ref=refid;
             if (typeof refid === "string") ref=refmap[refid];
+            if (!(ref)) needrefs.push(refid);
+            else if (ref._live) result.push(ref);
+            else needrefs.push(ref);}
+        return new Promise(function(resolve){
+            if (needrefs.length)
+                return fdjtAsync.slowmap(
+                    function(arg){storage_loader(arg,loaded,storage);},
+                    needrefs).then(function(){resolve(result);});
+            else return resolve(result);});};
+
+    RefDB.prototype.loadFromDB=function loadFromDB(refs){
+        var db=this, idb=this.storage;
+        var needrefs=[], refmap=db.refs;
+        if (!(refs)) refs=[].concat(db.allrefs);
+        else if (refs===true) {/* Load all */}
+        else if (!(Array.isArray(refs))) refs=[refs];
+        else {}
+        var i=0, lim=refs.length; while (i<lim) {
+            var refid=refs[i++], ref=refid;
+            if (typeof refid === "string") ref=refmap[refid];
             if (!((ref instanceof Ref)&&(ref._live)))
                 needrefs.push(refid);}
-        if (needrefs.length)
-            return fdjtAsync.slowmap(
-                function(arg){storage_loader(arg,loaded,storage);},
-                needrefs);
-        else return new Promise(function(resolve){
-            var resolved=[]; var i=0, lim=resolved.length;
-            while (i<lim) {
-                var refid=refs[i++];
-                if (typeof ref==="string")
-                    ref=refmap[refid]; else ref=refid;
-                resolve.push(ref);}
-            return resolve(resolved);});};
+        function loadall(resolved){
+            var needed=needrefs.length;
+            function countdown(){
+                needed--; if (needed<=0) {
+                    var resolved=[];
+                    var i=0, lim=refs.length; while (i<lim) {
+                        var ref=refs[i++];
+                        if (typeof ref === "string")
+                            resolved.push();
+                        else resolved.push(ref);}
+                    resolved(refs);}}
+            function load_from_db(event){
+                var object=event.target.result, id=object._id;
+                var ref=refmap[id];
+                ref.Import(object,false,REFLOAD|REFINDEX);
+                countdown();}
+            if (needrefs.length) {
+                var txn=idb.transaction([db.dbname],"readwrite");
+                var objstore=txn.objectStore(db.dbname);
+                var r=0, n_refs=needrefs.length;
+                while (r<n_refs) {
+                    var ref=refs[r++];
+                    if (ref._id) ref=ref._id;
+                    var req=objstore.get(ref);
+                    req.onsuccess=load_from_db;
+                    req.onerror=countdown;}}
+            else resolved(refs);}
+        return new Promise(loadall);};
 
     RefDB.prototype.loadref=function loadRef(ref){
         if (typeof ref === "string") ref=this.ref(ref);
@@ -793,6 +833,50 @@ fdjt.RefDB=(function(){
                                 JSON.stringify(allids));
             if (resolve) fdjt.ASync(resolve);}
         return new Promise(savingLocally);};
+
+    RefDB.prototype.saveToDB=function saveToDB(refs,updatechanges){
+        var db=this, idb=this.storage, exports=[], saved=[];
+        var i=0, lim=refs.length; while (i<lim) {
+            var ref=refs[i++];
+            if (typeof ref === "string") ref=db.ref(ref);
+            if (!(ref._live)) continue;
+            if ((ref._saved)&&(!(ref._changed))) continue;
+            var exported=ref.Export();
+            exported._saved=fdjtTime.tick();
+            exports.push(exported);}
+        function save_done(event){
+            var obj=event.target.result, refid=obj._id;
+            var ref=db.ref(refid);
+            ref._changed=false;
+            saved.push(ref);}
+        function save_failed(event){
+            var object=event.object;
+            fdjtLog("Error saving %j to %o",object,db);}
+        function saving(resolve) {
+            var txn=idb.transaction([db.dbname],"readwrite");
+            var objects=txn.objectStore(db.dbname);
+            var e=0, n_exports=exports.length;
+            txn.oncomplete=function(){
+                if (updatechanges) {
+                    var changes=db.changes, new_changes=[];
+                    var j=0, n_changed=changes.length;
+                    while (j<n_changed) {
+                        var c=changes[j++];
+                        if (c._changed) new_changes.push(c);}
+                    db.changes=new_changes;
+                    if (new_changes.length===0) {
+                        db.changed=false;
+                        var pos=changed_dbs.indexOf(db);
+                        if (pos>=0) changed_dbs.splice(pos,1);}}
+                resolve(saved);};
+            while (e<n_exports) {
+                var object=exports[e++];
+                var req=objects.put(object);
+                req.onerror=save_failed;
+                req.onsuccess=save_done;}}
+        if (exports.length) return new Promise(saving);
+        else return new Promise(function(resolve){
+            return resolve([]);});};
     
     RefDB.prototype.save=function saveRefs(refs,updatechanges){
         var db=this, storage=this.storage;
