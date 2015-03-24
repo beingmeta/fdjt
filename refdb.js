@@ -673,53 +673,47 @@ fdjt.RefDB=(function(){
         else {}};
     RefDB.prototype.load=function loadRefs(refs){
         if (this.storage instanceof Storage) 
-            return this.loadLocal(refs);
+            return this.loadFromStorage(refs);
         else return false;};
-    RefDB.prototype.loadLocal=function loadLocalRefs(refs){
-        var db=this, storage=this.storage; var loaded=this.loaded;
-        function loading(resolve){
-            function ref_loader(arg,loaded){
-                var ref=arg, content;
-                if (typeof ref === "string")
-                    ref=db.ref(ref,false,true);
-                if (!(ref)) {
-                    warn("Couldn't resolve ref to %s",arg);
-                    return;}
-                else if (ref._live) return;
-                loaded.push(ref);
-                if (absrefs) content=storage[ref._id];
-                else if (atid)
-                    content=storage[atid+"("+ref._id+")"];
-                else {
-                    if (db.atid) atid=db.atid;
-                    else atid=db.atid=getatid(storage,db);
-                    content=storage[atid+"("+ref._id+")"];}
-                if (!(content))
-                    warn("No item stored for %s",ref._id);
-                else ref.Import(
-                    JSON.parse(content),false,REFLOAD|REFINDEX);}
-            if (!(refs)) refs=[].concat(db.allrefs);
-            else if (refs===true) {
-                var all=storage["allids("+db.name+")"];
-                if (all) refs=JSON.parse(all).concat(db.allrefs);
-                else refs=[].concat(db.allrefs);}
-            else if (refs instanceof Ref) refs=[refs];
-            else if (typeof refs === "string") refs=[refs];
-            else if (typeof refs.length === "undefined") refs=[refs];
-            else {}
-            var absrefs=db.absrefs, refmap=db.refs;
-            var atid=false; var needrefs=[];
-            var i=0, lim=refs.length; while (i<lim) {
-                var refid=refs[i++], ref=refid;
-                if (typeof refid === "string") ref=refmap[refid];
-                if (!((ref instanceof Ref)&&(ref._live)))
-                    needrefs.push(refid);}
-            if (needrefs.length) {
-                return fdjtAsync.slowmap(
-                    function(arg){ref_loader(arg,loaded,storage);},
-                    needrefs).then(function(){resolve(refs);});}
-            else return resolve(refs);}
-        return new Promise(loading);};
+    RefDB.prototype.loadFromStorage=function loadFromStorage(refs){
+        var db=this, storage=this.storage, loaded=this.loaded;
+        var atid=(db.atid)||(db.atid=getatid(storage,db));
+        var needrefs=[], refmap=db.refs, absrefs=db.absrefs;
+        function storage_loader(arg,loaded){
+            var ref=arg, content;
+            if (typeof ref === "string") ref=db.ref(ref,false,true);
+            if (!(ref)) {warn("Couldn't resolve ref to %s",arg); return;}
+            else if (ref._live) return;
+            else loaded.push(ref);
+            if (absrefs) content=storage[ref._id];
+            else if (atid) content=storage[atid+"("+ref._id+")"];
+            else content=storage[atid+"("+ref._id+")"];
+            if (!(content)) warn("No item stored for %s",ref._id);
+            else ref.Import(
+                JSON.parse(content),false,REFLOAD|REFINDEX);}
+        if (!(refs)) refs=[].concat(db.allrefs);
+        else if (refs===true) {
+            var all=storage["allids("+db.name+")"]||"[]";
+            refs=JSON.parse(all).concat(db.allrefs);}
+        else if (!(Array.isArray(refs))) refs=[refs];
+        else {}
+        var i=0, lim=refs.length; while (i<lim) {
+            var refid=refs[i++], ref=refid;
+            if (typeof refid === "string") ref=refmap[refid];
+            if (!((ref instanceof Ref)&&(ref._live)))
+                needrefs.push(refid);}
+        if (needrefs.length)
+            return fdjtAsync.slowmap(
+                function(arg){storage_loader(arg,loaded,storage);},
+                needrefs);
+        else return new Promise(function(resolve){
+            var resolved=[]; var i=0, lim=resolved.length;
+            while (i<lim) {
+                var refid=refs[i++];
+                if (typeof ref==="string")
+                    ref=refmap[refid]; else ref=refid;
+                resolve.push(ref);}
+            return resolve(resolved);});};
 
     RefDB.prototype.loadref=function loadRef(ref){
         if (typeof ref === "string") ref=this.ref(ref);
@@ -758,7 +752,7 @@ fdjt.RefDB=(function(){
             return loads;}
         else return false;};
     
-    RefDB.prototype.saveLocal=function saveLocalRefs(refs,updatechanges){
+    RefDB.prototype.saveToStorage=function(refs,updatechanges){
         var db=this, storage=this.storage;
         var atid=this.atid; var ids=[];
         function savingLocally(resolve){
@@ -801,15 +795,13 @@ fdjt.RefDB=(function(){
         return new Promise(savingLocally);};
     
     RefDB.prototype.save=function saveRefs(refs,updatechanges){
-        var db=this, tosave=false;
-        if (!(this.storage)) return;
-        else if (refs===true) tosave=this.allrefs;
-        else if (!(refs)) tosave=this.changes;
-        else tosave=[];
+        var db=this, storage=this.storage;
+        if (refs===true) refs=this.allrefs;
+        else if (!(refs)) refs=this.changes;
+        else {}
         function saving(resolve){
-            if (tosave.length===0) return resolve();
-            else if (db.storage instanceof Storage)
-                db.saveLocal(tosave,updatechanges).then(function(){
+            if (db.storage instanceof Storage)
+                db.saveToStorage(refs,updatechanges).then(function(){
                     db.changed=false;
                     db.changes=[];
                     var pos=changed_dbs.indexOf(db);
@@ -817,7 +809,8 @@ fdjt.RefDB=(function(){
                     if (resolve) resolve();});
             else if (db.storage instanceof indexedDB) {}
             else return resolve();}
-        return new Promise(saving);};
+        if (!(storage)) return false;
+        else return new Promise(saving);};
     Ref.prototype.save=function(){
         var ref=this, db=this._db;
         function saveref(resolve){
@@ -1277,8 +1270,75 @@ fdjt.RefDB=(function(){
             else return [val];}
         else if (this._live) return [];
         else return undefined;};
+    Ref.prototype.getValue=function refGet(prop){
+        var ref=this; function getting(resolve,reject){
+            if (ref.hasOwnProperty(prop))
+                return resolve(ref[prop]);
+            else if (ref._live) return resolve(undefined);
+            else if (ref._db.storage)
+                return ref.load().then(function(r){
+                    return resolve(r[prop]);})
+                .catch(reject);
+            else return resolve(undefined);}
+        return new Promise(getting);};
+    function setCall(fn,val){
+        if (Array.isArray(val)) {
+            if ((val._sortlen)&&(val._sortlen===val.length))
+                return fn(val);
+            else return fn(setify(val));}
+        else return fn([val]);}
+    Ref.prototype.getValues=function refGet(prop){
+        var ref=this;
+        function getting(resolve,reject){
+            ref.getValue(prop).then(function(val){
+                return setCall(resolve,val);})
+                .catch(reject);}
+        return new Promise(getting);};
+
     Ref.prototype.add=function refAdd(prop,val,index){
-        var db=this._db;
+        var ref=this, db=this._db;
+        function handle_add(resolved){
+            if ((val instanceof Array)&&
+                (typeof val._sortlen === "number")) {
+                var i=0, lim=val.length; while (i<lim) {
+                    ref.add(prop,val[i++],index);}}
+            else if (prop==="aliases") {
+                if ((db.refs[val]===ref)||
+                    (db.altrefs[val]===ref))
+                    return ((resolved)&&(resolved(false)));
+                else {
+                    db.altrefs[val]=ref;
+                    if (ref.aliases) ref.aliases.push(val);
+                    else ref.aliases=[val];
+                    return (resolved)&&(resolved(true));}}
+            else if (ref.hasOwnProperty(prop)) {
+                var cur=ref[prop];
+                if (cur===val)
+                    return (resolved)&&(resolved(false));
+                else if (cur instanceof Array) {
+                    if (!(set_add(cur,val)))
+                        return (resolved)&&(resolved(false));
+                    else {}}
+                else ref[prop]=fdjtSet([cur,val]);}
+            else if ((val instanceof Array)&&
+                     (typeof val._sortlen !== "number"))
+                ref[prop]=fdjtSet([val]);
+            else ref[prop]=val;
+            // If we've gotten through to here, we've made a change,
+            //  so we update the change structures, run any add methods
+            //  and index if appropriate
+            if (!(ref._changed)) {
+                var now=fdjtTime();
+                if (!(db.changed)) changed_dbs.push(db);
+                db.changed=now;
+                ref._changed=now;
+                db.changes.push(ref);}
+            if (db.onadd.hasOwnProperty(prop))
+                (db.onadd[prop])(ref,prop,val);
+            if ((index)&&(db.indices[prop]))
+                ref.indexRef(prop,ref[prop],db.indices[prop]);
+            if (resolved) resolved(true);}
+        function add_onload(){handle_add(false);}
         if (typeof index === "undefined") {
             if (db.indices.hasOwnProperty(prop)) index=true;
             else index=false;}
@@ -1287,79 +1347,43 @@ fdjt.RefDB=(function(){
             db.addIndex(prop);}
         else {}
         if ((val instanceof Array)&&(val._sortlen===0))
-            return;
+            return new Promise(function(resolve){return resolve(false);});
         else if ((!(this._live))&&(this._db.storage)) {
-            var that=this;
-            if (this._onload)
-                this._onload.push(function(){that.add(prop,val);});
-            else this._onload=[function(){that.add(prop,val);}];
-            return this;}
-        else if ((val instanceof Array)&&
-                 (typeof val._sortlen === "number")) {
-            var i=0, lim=val.length; while (i<lim) {
-                this.add(prop,val[i++],index);}
-            return;}
-        else if (prop==="aliases") {
-            if (db.refs[val]===this) return false;
-            else if (db.altrefs[val]===this) return false;
-            else {
-                db.altrefs[val]=this;
-                if (this.aliases) this.aliases.push(val);
-                else this.aliases=[val];}}
-        else if (this.hasOwnProperty(prop)) {
-            var cur=this[prop];
-            if (cur===val) return false;
-            else if (cur instanceof Array) {
-                if (!(set_add(cur,val))) return false;
-                else {}}
-            else this[prop]=fdjtSet([cur,val]);}
-        else if ((val instanceof Array)&&
-                 (typeof val._sortlen !== "number"))
-            this[prop]=fdjtSet([val]);
-        else this[prop]=val;
-        // If we've gotten through to here, we've made a change,
-        //  so we update the change structures, run any add methods
-        //  and index if appropriate
-        if (!(this._changed)) {
-            var now=fdjtTime();
-            if (db.changed) {
-                db.changed=now;
-                changed_dbs.push(db);}
-            this._changed=now;
-            db.changes.push(this);}
-        if (db.onadd.hasOwnProperty(prop))
-            (db.onadd[prop])(this,prop,val);
-        if ((index)&&(db.indices[prop]))
-            this.indexRef(prop,this[prop],db.indices[prop]);
-        return true;};
+            if (this._onload) this._onload.push(add_onload);
+            else this._onload=[add_onload];
+            return this.load();}
+        else return new Promise(handle_add);};
     Ref.prototype.drop=function refDrop(prop,val,dropindex){
-        var db=this._db;
-        if (typeof dropindex === "undefined")
-            dropindex=true;
-        if (prop==='_id') return false;
-        else if ((!(this._live))&&(this._db.storage)) {
-            if (db.storage instanceof Storage) {
-                this.load().then(function(){return this.drop(prop,val);});}
-            else {
-                return undefined;}}
-        else if (this.hasOwnProperty(prop)) {
-            var cur=this[prop];
-            if (cur===val) delete this[prop];
-            else if (cur instanceof Array) {
-                if (!(set_drop(cur,val))) return false;
-                if (cur.length===0) delete this[prop];}
-            else return false;
+        var ref=this, db=this._db;
+        function handle_drop(resolved){
+            if (ref.hasOwnProperty(prop)) {
+                var cur=ref[prop];
+                if (cur===val) delete ref[prop];
+                else if (cur instanceof Array) {
+                    if (!(set_drop(cur,val)))
+                        return (resolved)&&(resolved(false));
+                    if (cur.length===0) delete ref[prop];}
+                else return (resolved)&&(resolved(false));}
+            else return (resolved)&&(resolved(false));
             if (db.ondrop.hasOwnProperty(prop)) 
-                (db.ondrop[prop])(this,prop,val);
-            if (!(this._changed)) {
+                (db.ondrop[prop])(ref,prop,val);
+            if (!(ref._changed)) {
                 var now=fdjtTime();
                 if (db.changed) {db.changed=now; changed_dbs.push(db);}
-                this._changed=now;
-                db.changes.push(this);}
+                ref._changed=now;
+                db.changes.push(ref);}
             if ((dropindex)&&(db.indices[prop])) 
-                this.indexRefDrop(prop,db.indices[prop]);
-            return true;}
-        else return false;};
+                ref.indexRefDrop(prop,db.indices[prop]);
+            return (resolved)&&(resolved(true));}
+        function drop_onload(){handle_drop(false);}
+        if (typeof dropindex === "undefined") dropindex=true;
+        if (prop==='_id')
+            return new Promise(function(resolved){resolved(false);});
+        else if ((!(this._live))&&(this._db.storage)) {
+            if (this._onload) this._onload.push(drop_onload);
+            else this._onload=[drop_onload];
+            return this.load();}
+        else return new Promise(handle_drop);};
     Ref.prototype.test=function(prop,val){
         if (this.hasOwnProperty(prop)) {
             if (typeof val === 'undefined') return true;
