@@ -13,13 +13,13 @@ FDJT_FILES=header.js \
 	ui.js pager.js dialog.js completions.js taphold.js selecting.js \
 	scrollever.js \
 	globals.js
-FDJT_HINTS=promise.hint async.hint indexed.hint \
-	charnames.hint time.hint string.hint \
-	syze.hint iscroll.hint indexed.hint pager.hint \
-	log.hint init.hint state.hint dom.hint \
-	refdb.hint json.hint ajax.hint codexlayout.hint \
-	hash.hint wsn.hint template.hint textindex.hint \
-	dialog.hint ui.hint completions.hint taphold.hint selecting.hint \
+# indexed.hint iscroll.hint hash.hint
+FDJT_HINTS=promise.hint async.hint time.hint init.hint syze.hint \
+	charnames.hint string.hint log.hint refdb.hint \
+	state.hint dom.hint json.hint ajax.hint \
+	wsn.hint template.hint textindex.hint codexlayout.hint \
+	dialog.hint pager.hint ui.hint completions.hint \
+	taphold.hint selecting.hint \
 	scrollever.hint
 BUILDUUID:=`uuidgen`
 BUILDTIME:=`date`
