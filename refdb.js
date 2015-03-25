@@ -681,17 +681,17 @@ fdjt.RefDB=(function(){
         var atid=(db.atid)||(db.atid=getatid(storage,db));
         var needrefs=[], refmap=db.refs, absrefs=db.absrefs;
         function storage_loader(arg,loaded){
-            var ref=arg, content;
-            if (typeof ref === "string") {}
+            var ref=arg, refid=ref._id, content;
+            if (typeof ref === "string") {
+                refid=ref; ref=db.ref(refid);}
             else if (ref._live) return;
             else loaded.push(ref);
-            if (absrefs) content=storage[ref._id];
-            else if (atid) content=storage[atid+"("+ref._id+")"];
-            else content=storage[atid+"("+ref._id+")"];
+            if (absrefs) content=storage[refid];
+            else if (atid) content=storage[atid+"("+refid+")"];
+            else content=storage[atid+"("+refid+")"];
             if (!(content)) {
-                warn("No item stored for %s",ref._id);
+                warn("No item stored for %s",refid);
                 return;}
-            ref=db.ref(ref);
             if (!(ref)) {warn("Couldn't resolve ref to %s",arg); return;}
             result.push(ref); loaded.push(ref);
             ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);}
