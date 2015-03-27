@@ -60,9 +60,11 @@ fdjt.Ajax=
             var req=new XMLHttpRequest();
             var uri=((args)?(compose_uri(base_uri,args)):(base_uri));
             req.onreadystatechange=function () {
-                if ((req.readyState === 4) && (req.status === 200)) {
-                    success_callback(req);}
-                else if (other_callback) other_callback(req);};
+                if (req.readyState === 4) {
+                    if (req.status === 200) {
+                        success_callback(req);}
+                    else if (other_callback) other_callback(req);}
+                else {}};
             if (timeout) {
                 req.timeout=timeout;
                 if (other_callback) {
