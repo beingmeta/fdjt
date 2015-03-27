@@ -1754,7 +1754,7 @@ fdjt.DOM=
             return getMeta(name,true,matchcase,true);};
 
         // This gets a LINK href field
-        function getLink(name,multiple,foldcase,dom){
+        function getLink(name,multiple,foldcase,dom,attrib){
             var results=[];
             var elts=((document.getElementsByTagName)?
                       (document.getElementsByTagName("LINK")):
@@ -1769,8 +1769,12 @@ fdjt.DOM=
                 else if (elt.rel.search(rx)>=0) {
                     if (multiple) {
                         if (dom) results.push(elt);
+                        else if (attrib)
+                            results.push(elt.getAttribute("href"));
                         else results.push(elt.href);}
                     else if (dom) return elt;
+                    else if (attrib)
+                        return elt.getAttribute("href");
                     else return elt.href;}
                 else {}}
             if (multiple) return results;
