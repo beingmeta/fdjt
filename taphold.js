@@ -320,6 +320,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (th_timer) {clearTimeout(th_timer); th_timer=false;}
             if ((all)&&(tt_timer)) {
                 clearTimeout(tt_timer); tt_timer=false;}
+            th_target=th_target_t=false; th_targets=[];
             swipe_t=start_x=start_y=start_t=
                 touch_x=touch_y=touch_t=touch_n=
                 target_x=target_y=target_t=false;
@@ -744,8 +745,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                                 thid,th_target,evt,target);
                     new_event=document.createEvent('TouchEvent');
                     new_event.initTouchEvent(
-                        evt.type,true,true,window,0,
-                        touch.screenX,touch.screenY,touch.clientX,touch.clientY,
+                        evt.type,true,true,window,null,
+                        touch.screenX,touch.screenY,
+                        touch.clientX,touch.clientY,
                         evt.ctrlKey,evt.altKey,evt.shiftKey,evt.metaKey,
                         document.createTouchList(touch),
                         document.createTouchList(touch),
