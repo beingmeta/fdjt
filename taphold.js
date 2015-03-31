@@ -739,9 +739,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     new_event.changedTouches=document.createTouchList(touch);
                     target.dispatchEvent(new_event);
                     return;}
-                else if ((cur_holder)&&(holder)) {
+                else if ((cur_holder)&&(holder)&&
+                         (cur_holder!==holder)) {
                     if ((trace>1)||(traceall>1))
-                        fdjtLog("TapHold(%s) Clearing taphold on %o, redispatching %o to %o",
+                        fdjtLog("TapHold(%s) Clearing on %o, moving %o to %o",
                                 thid,th_target,evt,target);
                     new_event=document.createEvent('TouchEvent');
                     new_event.initTouchEvent(
