@@ -113,7 +113,8 @@ span.checkspan.longspan, a.checkspan.longspan {
 .checkspan.ischecked span.checked,
 .checkspan.ischecked a.checked,
 .checkspan.ischecked img.checked { display: inline;} 
-.checkspan.ischecked div.checked { display: block;}
+.checkspan.ischecked div.checked,
+.checkspan.ischecked p.checked { display: block;}
 .checkspan.ischecked li.checked { display: list-item;}
 .checkspan.ischecked input { font-weight: normal; }
 
