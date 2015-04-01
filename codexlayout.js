@@ -39,6 +39,7 @@
 
 */
 /* jshint browser: true */
+/* global idbModules */
 
 // var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
