@@ -22,7 +22,7 @@
    
 */
 
-/* global setTimeout, clearTimeout, indexedDB, Promise */
+/* global setTimeout, clearTimeout, Promise, window, idbModules */
 
 fdjt.RefDB=(function(){
     "use strict";
@@ -34,6 +34,8 @@ fdjt.RefDB=(function(){
     var fdjtLog=fdjt.Log;
     var warn=fdjtLog.warn;
 
+    // var indexedDB=window.indexedDB||idbModules.indexedDB;
+    
     var refdbs={}, all_refdbs=[], changed_dbs=[], aliases={};
 
     function RefDB(name,init){

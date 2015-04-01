@@ -77,6 +77,8 @@ fdjt.CodexLayout=
         else fdjtDOM.addListener(window,"load",function(){
             root_namespace=document.body.namespaceURI;});
         
+        var indexedDB=window.indexedDB||idbModules.indexedDB;
+
         var layoutDB;
 
         function appendChildren(node,children,start,end){
@@ -2520,7 +2522,7 @@ fdjt.CodexLayout=
                     if (doinit) doinit();});}
         CodexLayout.useIndexedDB=useIndexedDB;
         
-        if (typeof indexedDB !== "undefined") {
+        if (indexedDB) {
             fdjt.addInit(function(){
                 if (!(CodexLayout.dbname)) {
                     CodexLayout.dbname="codexlayout";
