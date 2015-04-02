@@ -2507,6 +2507,12 @@ fdjt.CodexLayout=
         var ondbinit=false;
 
         function useIndexedDB(dbname){
+            if (!(dbname)) {
+                var doinit=ondbinit; ondbinit=false;
+                fdjtLog("Not using indexedDB for layouts");
+                CodexLayout.layoutDB=layoutDB=window.localStorage;
+                if (doinit) doinit();
+                return;}
             CodexLayout.dbname=dbname;
             RefDB.useIndexedDB(dbname,1,function(db){
                 db.createObjectStore("layouts",{keyPath: "layout_id"});})
@@ -2516,10 +2522,10 @@ fdjt.CodexLayout=
                     CodexLayout.cache=7;
                     if (doinit) doinit();})
                 .catch(function(trouble){
+                    var doinit=ondbinit; ondbinit=false;
                     fdjtLog("indexedDB failed: %o",trouble);
                     // Fall back to local storage 
                     CodexLayout.layoutDB=layoutDB=window.localStorage;
-                    doinit=ondbinit; ondbinit=false;
                     if (doinit) doinit();});}
         CodexLayout.useIndexedDB=useIndexedDB;
         
