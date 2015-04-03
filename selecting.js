@@ -403,6 +403,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         begin=last; break;}
                     else {last=scan; scan=scan.previousSibling;}}
                 if (!(scan)) begin=last;}
+            text=word.innerHTML;
             if (text.search(/[.;!?]/)>=0) end=word;
             else {
                 last=end; scan=end.nextSibling;
