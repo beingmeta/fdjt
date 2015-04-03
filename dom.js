@@ -2277,7 +2277,8 @@ fdjt.DOM=
             if (origin) node.setAttribute("data-origin",origin);
             scale_node(node,fudge,origin);
             return node;}
-        scaleToFit.scaleNode=scaleToFit.adjust=scale_node;
+        fdjtDOM.scaleToFit.scaleNode=
+            fdjtDOM.scaleToFit.adjust=scaleToFit.adjust=scale_node;
         fdjtDOM.scaleToFit=scaleToFit;
         
         function scale_revert(node,wrapper){
@@ -2297,14 +2298,14 @@ fdjt.DOM=
                 node.replaceChild(frag,wrapper);
                 return node;}
             else return false;}
-        scaleToFit.revert=scale_revert;
+        fdjtDOM.scaleToFit.revert=scale_revert;
 
         function revertAll(){
             var all=fdjtDOM.$(".fdjtadjusted");
             var i=0, lim=all.length; while (i<lim) {
                 var wrapper=all[i++];
                 scale_revert(wrapper.parentNode,wrapper);}}
-        scaleToFit.revertAll=revertAll;
+        fdjtDOM.scaleToFit.revertAll=revertAll;
 
         fdjt.addInit(scaleAll);
         fdjtDOM.addListener(window,"resize",scaleAll);
@@ -3047,6 +3048,8 @@ fdjt.DOM=
             addListener(window,"focus",windowFocus);
             addListener(window,"blur",windowBlur);}
         fdjt.addInit(trackPageFocus);
+
+        fdjtDOM.trace_adjust=false;
 
         return fdjtDOM;
     })();

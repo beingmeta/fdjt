@@ -34,7 +34,7 @@ fdjt.Dialog=(function(){
     var Templates=fdjt.Templates;
 
     var hasClass=fdjtDOM.hasClass;
-    var addToClass=fdjtDOM.addToClass;
+    var addClass=fdjtDOM.addClass;
     var addListener=fdjtDOM.addListener;
     var removeListener=fdjtDOM.removeListener;
 
@@ -151,7 +151,7 @@ fdjt.Dialog=(function(){
     function alertBox(){
         var args=fdjtDOM.toArray(arguments);
         var box=Dialog.apply(null,[{}].concat(args));
-        addToClass(box,"fdjtalert");}
+        addClass(box,"fdjtalert");}
     Dialog.alertBox=alertBox;
     fdjtUI.alertBox=alertBox;
 
