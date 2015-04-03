@@ -2277,9 +2277,8 @@ fdjt.DOM=
             if (origin) node.setAttribute("data-origin",origin);
             scale_node(node,fudge,origin);
             return node;}
-        fdjtDOM.scaleToFit.scaleNode=
-            fdjtDOM.scaleToFit.adjust=scaleToFit.adjust=scale_node;
         fdjtDOM.scaleToFit=scaleToFit;
+        fdjtDOM.scaleToFit.scaleNode=fdjtDOM.scaleToFit.adjust=scale_node;
         
         function scale_revert(node,wrapper){
             if (!(wrapper)) {
