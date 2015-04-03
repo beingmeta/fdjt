@@ -55,13 +55,27 @@ fdjt.Ajax=
 
         var trace_ajax=false;
         
+        function statusOK(req,test){
+            var status=req.status;
+            if (!(test))
+                return ((status>=200)&&(status<300))||(status===304);
+            else if (test.call)
+                return test(req);
+            else if (Array.isArray(test)) 
+                return test.indexOf(status)>=0;
+            else return ((status>=200)&&(status<300))||(status===304);}
+
         function fdjtAjax(success_callback,base_uri,args,other_callback,
-                          headers,timeout){
-            var req=new XMLHttpRequest();
+                          headers,opts){
+            var timeout=((typeof opts==="number")?(opts):
+                         ((opts)&&(opts.timeout)));
+            if (typeof opts === "number") opts={};
+            else if (!(opts)) opts={};
+            var req=new XMLHttpRequest(), success=opts.success;
             var uri=((args)?(compose_uri(base_uri,args)):(base_uri));
             req.onreadystatechange=function () {
                 if (req.readyState === 4) {
-                    if (req.status === 200) {
+                    if (statusOK(req,success)) {
                         success_callback(req);}
                     else if (other_callback) other_callback(req);}
                 else {}};
