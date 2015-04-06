@@ -1244,6 +1244,37 @@ table.fdjtform .usebaseline td {
 @media all and (max-width: 500px) {
     body:before { content: 'fdjt_phone'; display: none; }}
 
+/* The new pager */
+
+div.fdjtpage {
+    overflow-y: hidden !important;
+    max-height: 100% !important;}
+div.fdjtpage:not(.getvisible) > div, div.fdjtpage:not(.getvisible) > p {
+    display: none !important;}
+div.fdjtpage > div.fdjtshow, div.fdjtpage > p.fdjtshow {
+    display: block !important;}
+
+div.fdjtpage div.fdjtpageinfo {
+    position: absolute; right: 0px; bottom: 0px;
+    padding-right: 0.5ex; padding-left: 0.5ex;
+    color: black; background-color: rgba(0,0,0,0.4);
+    font-size: 150%; opacity: 0.25;}
+div.fdjtpage > div.fdjtpageinfo { display: block !important; }
+div.fdjtpage div.fdjtpageinfo {
+    transition-property: opacity; transition-duration: 2s;}
+div.fdjtpage.fdjtfirstpage.fdjtlastpage > div.fdjtpageinfo {
+    display: none;}
+
+div.fdjtpage.formatting div, div.fdjtpage.getvisible div, 
+div.fdjtpage.formatting p, div.fdjtpage.getvisible p {
+    visibility: hidden;}
+div.fdjtpage.formatting {
+    overflow-y: scroll !important;}
+
+div.fdjtpage.newpage div.fdjtpageinfo,
+div.fdjtpage.formatting.newpage div.fdjtpageinfo {
+    opacity: 0.9; visibility: visible;}
+
 /* The pager */
 
 .pager { overflow-x: scroll; overflow-y: hidden; }
