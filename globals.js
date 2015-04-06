@@ -30,7 +30,7 @@
                    "fdjtLog","fdjtHash","fdjtAjax","fdjtAsync","fdjtInit",
                    "fdjtDialog","fdjtTemplate","fdjtID","fdjtRef",
                    "fdjtTapHold","fdjtSelecting","fdjtTextIndex","fdjtRefDB",
-                   "TextIndex","RefDB","CodexLayout","Pager"];
+                   "TextIndex","RefDB","CodexLayout","pageShow"];
         if (!(cxt)) cxt=window;
         if (!(cxt)) {
             fdjt.Log("Nowhere to put globals");
