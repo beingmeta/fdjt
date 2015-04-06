@@ -18,7 +18,7 @@ FDJT_HINTS=promise.hint async.hint time.hint init.hint syze.hint \
 	charnames.hint string.hint log.hint refdb.hint \
 	state.hint dom.hint json.hint ajax.hint \
 	wsn.hint template.hint textindex.hint codexlayout.hint \
-	dialog.hint showpage.hint ui.hint completions.hint \
+	dialog.hint ui.hint showpage.hint completions.hint \
 	taphold.hint selecting.hint \
 	scrollever.hint
 BUILDUUID:=`uuidgen`

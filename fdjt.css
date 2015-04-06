@@ -1258,10 +1258,11 @@ div.fdjtpage div.fdjtpageinfo {
     position: absolute; right: 0px; bottom: 0px;
     padding-right: 0.5ex; padding-left: 0.5ex;
     color: black; background-color: rgba(0,0,0,0.4);
-    font-size: 150%; opacity: 0.25;}
+    font-size: 150%; opacity: 0.25;
+    pointer-events: none;}
 div.fdjtpage > div.fdjtpageinfo { display: block !important; }
 div.fdjtpage div.fdjtpageinfo {
-    transition-property: opacity; transition-duration: 2s;}
+    transition-property: opacity; transition-duration: 5s;}
 div.fdjtpage.fdjtfirstpage.fdjtlastpage > div.fdjtpageinfo {
     display: none;}
 
@@ -1274,6 +1275,8 @@ div.fdjtpage.formatting {
 div.fdjtpage.newpage div.fdjtpageinfo,
 div.fdjtpage.formatting.newpage div.fdjtpageinfo {
     opacity: 0.9; visibility: visible;}
+div.fdjtpage.newpage div.fdjtpageinfo {
+    pointer-events: all;}
 
 /* The pager */
 

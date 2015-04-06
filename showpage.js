@@ -35,176 +35,197 @@
 */
 /* jshint browser: true */
 
-fdjt.UI.showPage=(function(){
-    "use strict";
-    var fdjtDOM=fdjt.DOM;
-    var fdjtString=fdjt.String;
-    var getStyle=fdjtDOM.getStyle;
-    var getChild=fdjtDOM.getChild;
-    var getChildren=fdjtDOM.getChildren;
-    var dropClass=fdjtDOM.dropClass;
-    var addClass=fdjtDOM.addClass;
-    var hasClass=fdjtDOM.hasClass;
-    var toArray=fdjtDOM.toArray;
+fdjt.showPage=fdjt.UI.showPage=(function(){
+  "use strict";
+  var fdjtDOM=fdjt.DOM;
+  var fdjtLog=fdjt.Log;
+  var fdjtString=fdjt.String;
+  var getStyle=fdjtDOM.getStyle;
+  var getChild=fdjtDOM.getChild;
+  var getChildren=fdjtDOM.getChildren;
+  var dropClass=fdjtDOM.dropClass;
+  var addClass=fdjtDOM.addClass;
+  var hasClass=fdjtDOM.hasClass;
+  var toArray=fdjtDOM.toArray;
+  
+  function getContainer(arg){
+    var container;
+    if (typeof arg === "string")
+      container=document.getElementById(arg);
+    else if (arg.nodeType)
+      container=arg;
+    else container=false;
+    if (!(container)) fdjtLog.warn("Bad showPage container arg %s",arg);
+    return container;}
     
-    function oversize(dom){
-        return dom.scrollHeight>dom.offsetHeight;}
-    function showPage(dom,start,dir){
-        var shown=toArray(getChildren(dom,".fdjtshow"));
-        var curstart=getChild(dom,".fdjtstartofpage");
-        var curend=getChild(dom,".fdjtendofpage");
-        var info=getChild(dom,".fdjtpageinfo");
-        var children=getNodes(dom), lim=children.length, startpos;
-        var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
-        if (children.length===0) return;
-        if (typeof dir !== "number") dir=1; else if (dir<0) dir=-1; else dir=1;
-        if (!(start)) {
-            startpos=0; start=children[0];}
-        else if ((typeof start === "number")&&(start>0)&&(start<1)) {
-            startpos=Math.round(start*children.length);
-            start=children[startpos];}
-        else if (typeof start === "number") {
-            startpos=start-1; start=children[startpos];}
-        else if (start.nodeType) {
-            start=getPageElt(dom,start);
-            startpos=children.indexOf(start);}
-        if ((!(start))||(startpos<0)||(startpos>=lim)||
-            ((startpos===0)&&(dir<0)))
-            return;
-        addClass(dom,"fdjtpage"); addClass(dom,"formatting");
-        if (!(info)) info=getProgressIndicator(dom,startpos,lim);
-        // Clear old page
-        if (shown.length) unshow(shown);
-        if (curstart) dropClass(curstart,"fdjtstartofpage");
-        if (curend) dropClass(curend,"fdjtendofpage");
-        addClass(start,"fdjtshow");
-        addClass(start,((dir<0)?("fdjtendofpage"):("fdjtstartofpage")));
-        if (((dir<0)&&(hasClass(start,/fdjtpagebreak(auto)?/)))||
-	    (oversize(dom))) {
-            dropClass(dom,"formatting");
-            return startpos;}
-        var endpos=showpage(dom,children,startpos,dir);
-        var end=children[endpos];
-        if ((dir>0)&&(hasClass(end,"fdjtpagehead"))) {
-            while ((endpos>startpos)&&(hasClass(end,"fdjtpagehead"))) {
-                unshow(end); dropClass(end,caboose);
-                endpos--; end=children[endpos];
-                addClass(end,caboose);}}
-        if ((dir>0)&&(hasClass(end,"fdjtpagekeep"))) {
-            while ((endpos<startpos)&&(hasClass(end,"fdjtpagekeep"))) {
-                unshow(end); dropClass(end,caboose);
-                endpos++; end=children[endpos];
-                addClass(end,caboose);}}
-        if (startpos===0) addClass(dom,"fdjtfirstpage"); else dropClass(dom,"fdjtfirstpage");
-        if (endpos>=lim) addClass(dom,"fdjtlastpage"); else dropClass(dom,"fdjtlastpage");
-        var minpos=((startpos<=endpos)?(startpos):(endpos)), maxpos=((startpos>endpos)?(startpos):(endpos));
-        info.innerHTML=(Math.floor((minpos/lim)*100)+"%");
-        info.title=fdjtString("Items %d through %d of %d",minpos,maxpos,lim);
-        addClass(dom,"newpage"); setTimeout(function(){dropClass(dom,"newpage");},1000);
-        dropClass(dom,"formatting");
-        return endpos;}
+  function isoversize(container){
+    return container.scrollHeight>container.offsetHeight;}
+  function showPage(container,start,dir){
+    if (!(container=getContainer(container))) return;
+    var shown=toArray(getChildren(container,".fdjtshow"));
+    var curstart=getChild(container,".fdjtstartofpage");
+    var curend=getChild(container,".fdjtendofpage");
+    var info=getChild(container,".fdjtpageinfo");
+    var children=getNodes(container), lim=children.length, startpos;
+    var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
+    if (children.length===0) return;
+    if (typeof dir !== "number") dir=1; else if (dir<0) dir=-1; else dir=1;
+    if (!(start)) {
+      startpos=0; start=children[0];}
+    else if ((typeof start === "number")&&(start>0)&&(start<1)) {
+      startpos=Math.round(start*children.length);
+      start=children[startpos];}
+    else if (typeof start === "number") {
+      startpos=start-1; start=children[startpos];}
+    else if (start.nodeType) {
+      start=getPageElt(container,start);
+      startpos=children.indexOf(start);}
+    if ((!(start))||(startpos<0)||(startpos>=lim)||
+        ((startpos===0)&&(dir<0)))
+      return;
+    addClass(container,"fdjtpage"); addClass(container,"formatting");
+    if (!(info)) info=getProgressIndicator(container,startpos,lim);
+    // Clear old page
+    if (shown.length) dropClass(shown,"fdjtshow");
+    if (curstart) dropClass(curstart,"fdjtstartofpage");
+    if (curend) dropClass(curend,"fdjtendofpage");
+    addClass(start,"fdjtshow");
+    addClass(start,((dir<0)?("fdjtendofpage"):("fdjtstartofpage")));
+    if (((dir<0)&&(hasClass(start,/fdjtpagebreak(auto)?/)))||
+	(isoversize(container))) {
+      dropClass(container,"formatting");
+      return startpos;}
+    var endpos=showpage(container,children,startpos,dir);
+    var end=children[endpos];
+    if ((dir>0)&&(hasClass(end,"fdjtpagehead"))) {
+      while ((endpos>startpos)&&(hasClass(end,"fdjtpagehead"))) {
+        dropClass(end,"fdjtshow"); dropClass(end,caboose);
+        endpos--; end=children[endpos];
+        addClass(end,caboose);}}
+    if ((dir>0)&&(hasClass(end,"fdjtpagekeep"))) {
+      while ((endpos<startpos)&&(hasClass(end,"fdjtpagekeep"))) {
+        dropClass(end,"fdjtshow"); dropClass(end,caboose);
+        endpos++; end=children[endpos];
+        addClass(end,caboose);}}
+    if (startpos===0) addClass(container,"fdjtfirstpage");
+    else dropClass(container,"fdjtfirstpage");
+    if (endpos>=lim) addClass(container,"fdjtlastpage");
+    else dropClass(container,"fdjtlastpage");
+    var minpos=((startpos<=endpos)?(startpos):(endpos));
+    var maxpos=((startpos>endpos)?(startpos):(endpos));
+    info.innerHTML=(Math.floor((minpos/lim)*100)+"%");
+    info.title=fdjtString("Items %d through %d of %d",minpos,maxpos,lim);
+    addClass(container,"newpage"); setTimeout(
+      function(){dropClass(container,"newpage");},1000);
+    dropClass(container,"formatting");
+    return endpos;}
 
-    function unshow(elts){
-        if (elts.nodeType) elts=[elts];
-        var i=0, lim=elts.length; while (i<lim) {
-            var elt=elts[i++];
-            if (hasClass(elt,"fdjtshow")) {
-                dropClass(elt,"fdjtshow"); elt.style.display='';}}}
-    function show(elt){
-        addClass(elt,"fdjtshow");
-        elt.style.display='block';}
+  function getProgressIndicator(container,startpos,lim){
+    // This could include an input element for typing in a %
+    var info=fdjtDOM("div.fdjtpageinfo",(startpos+1),"/",lim);
+    container.appendChild(info);
+    return info;}
 
-    function getProgressIndicator(dom,startpos,lim){
-        // This could include an input element for typing in a %
-        var info=fdjtDOM("div.fdjtpageinfo",(startpos+1),"/",lim);
-        dom.appendChild(info);
-        return info;}
+  function getPageElt(container,node){
+    var scan=node, parent=scan.parentNode;
+    while ((parent)&&(parent!==container)) {
+      scan=parent; parent=scan.parentNode;}
+    if (parent===container) return scan;
+    else return false;}
 
-    function getPageElt(dom,node){
-        var scan=node, parent=scan.parentNode;
-        while ((parent)&&(parent!==dom)) {
-            scan=parent; parent=scan.parentNode;}
-        if (parent===dom) return scan;
-        else return false;}
+  function getNodes(container){
+    var children=[], nodes=container.childNodes; addClass(container,"getvisible");
+    var i=0, lim=nodes.length, prev=false;
+    while (i<lim) {
+      var node=nodes[i++];
+      if (node.nodeType===1) {
+        var style=getStyle(node);
+        if (style.display==='none') continue;
+        else if ((style.position)&&(style.position!=='static'))
+          continue;
+	if (style.pageBreakBefore==="force")
+	  addClass(node,"fdjtpagebreakauto");
+	else dropClass(node,"fdjtpagebreakauto");
+	// We don't currently make these stylable
+        if ((prev)&&(hasClass(prev,"fdjtpagekeep"))) 
+	  addClass(node,"fdjtpagekeep");
+        if ((prev)&&(hasClass(node,"fdjtpagekeep")))
+          addClass(prev,"fdjtpagehead");
+        children.push(node);}}
+    dropClass(container,"getvisible");
+    return children;}
 
-    function getNodes(dom){
-        var children=[], nodes=dom.childNodes; addClass(dom,"getvisible");
-        var i=0, lim=nodes.length, prev=false;
-	while (i<lim) {
-            var node=nodes[i++];
-            if (node.nodeType===1) {
-                var style=getStyle(node);
-                if (style.display==='none') continue;
-                else if ((style.position)&&(style.position!=='static'))
-                    continue;
-		if (style.pageBreakBefore==="force")
-		    addClass(node,"fdjtpagebreakauto");
-		else addClass(node,"fdjtpagebreakauto");
-		// We don't currently make these stylable
-                if ((prev)&&(hasClass(prev,"fdjtpagekeep"))) 
-		    addClass(node,"fdjtpagekeep");
-                if ((prev)&&(hasClass(node,"fdjtpagekeep")))
-                    addClass(prev,"fdjtpagehead");
-                children.push(node);}}
-        dropClass(dom,"getvisible");
-        return children;}
+  function showpage(container,children,i,dir){
+    var lim=children.length, scan=children[i+dir], last=children[i]; 
+    var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
+    i=i+dir; addClass(last,caboose); while ((i>=0)&&(i<lim)) {
+      if ((dir>0)&&(hasClass(scan,/fdjtpagebreak(auto)?/)))
+	return i-dir;
+      dropClass(last,caboose); addClass(scan,"fdjtshow"); addClass(scan,caboose);
+      if (isoversize(container)) {
+        addClass(last,caboose);
+        dropClass(scan,"fdjtshow");
+        scan.style.display='';
+        dropClass(scan,caboose);
+        return i-dir;}
+      if ((dir<0)&&(hasClass(scan,/fdjtpagebreak(auto)?/))) return i;
+      i=i+dir; last=scan; scan=children[i];}
+    return i-dir;}
 
-    function showpage(dom,children,i,dir){
-        var lim=children.length, scan=children[i+dir], last=children[i]; 
-        var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
-        i=i+dir; addClass(last,caboose); while ((i>=0)&&(i<lim)) {
-            if ((dir>0)&&(hasClass(scan,/fdjtpagebreak(auto)?/)))
-		return i-1;
-            dropClass(last,caboose); show(scan); addClass(scan,caboose);
-            if (oversize(dom)) {
-                addClass(last,caboose);
-                dropClass(scan,"fdjtshow");
-                dropClass(scan,caboose);
-                return i-1;}
-            if ((dir<0)&&(hasClass(scan,/fdjtpagebreak(auto)?/))) return i;
-            i=i+dir; last=scan; scan=children[i];}
-        return i-1;}
+  function forwardPage(container){
+    if (!(container=getContainer(container))) return;
+    var foot=getChild(container,".fdjtendofpage");
+    if (!(foot)) return showPage(container);
+    if (hasClass(container,"fdjtlastpage")) return false;
+    else if (foot.nextSibling) 
+      return showPage(container,foot.nextSibling);
+    else return false;}
+  showPage.forward=forwardPage;
 
-    function forwardPage(dom){
-        var foot=getChild(dom,".fdjtendofpage");
-        if (!(foot)) return showPage(dom);
-        if (hasClass(dom,"fdjtlastpage")) return false;
-        else if (foot.nextSibling) 
-            return showPage(dom,foot.nextSibling);
-        else return false;}
-    showPage.forward=forwardPage;
+  function backwardPage(container){
+    if (!(container=getContainer(container))) return;
+    var head=getChild(container,".fdjtstartofpage");
+    if (!(head)) return showPage(container);
+    if (hasClass(container,"fdjtfirstpage")) return false;
+    else if (head.previousSibling) 
+      return showPage(container,head.previousSibling,-1);
+    else return false;}
+  showPage.backward=backwardPage;
 
-    function backwardPage(dom){
-        var head=getChild(dom,".fdjtstartofpage");
-        if (!(head)) return showPage(dom);
-        if (hasClass(dom,"fdjtfirstpage")) return false;
-        else if (head.previousSibling) 
-            return showPage(dom,head.previousSibling,-1);
-        else return false;}
-    showPage.backward=backwardPage;
+  function updatePage(container){
+    if (!(container=getContainer(container))) return;
+    var head=getChild(container,".fdjtstartofpage");
+    if (!(head.hidden)) showPage(container,head);
+    else {
+      var scan=head;
+      while (scan) {
+        if (scan.nodeType!==1) scan=scan.nextSibling;
+        else if (!(scan.hidden)) return showPage(container,scan);
+        else scan=scan.nextSibling;}
+      showPage(container);}}
+  showPage.update=updatePage;
 
-    function updatePage(dom){
-        var head=getChild(dom,".fdjtstartofpage");
-        if (!(head.hidden)) showPage(dom,head);
-        else {
-            var scan=head;
-            while (scan) {
-                if (scan.nodeType!==1) scan=scan.nextSibling;
-                else if (!(scan.hidden)) return showPage(dom,scan);
-                else scan=scan.nextSibling;}
-            showPage(dom);}}
-    showPage.update=updatePage;
+  function checkPage(container){
+    if (!(container=getContainer(container))) return;
+    if (!(hasClass(container,"fdjtpage"))) {
+      if (container.offsetHeight) showPage(container);}
+    else if ((container.offsetHeight)&&(!(hasClass(container,"needsresize")))) {
+      dropClass(container,"needsresize");
+      updatePage(container);}
+    else return;}
+  showPage.check=checkPage;
 
-    function showNode(dom,node){
-        var parent=node.parentNode;
-        while ((parent)&&(parent!==dom)) {
-            node=parent; parent=node.parentNode;}
-        if (!(parent)) return;
-        else if (hasClass(node,"fdjtshown")) return false;
-        else return showPage(dom,node);}
-    showPage.showNode=showNode;
+  function showNode(container,node){
+    if (!(container=getContainer(container))) return;
+    var parent=node.parentNode;
+    while ((parent)&&(parent!==container)) {
+      node=parent; parent=node.parentNode;}
+    if (!(parent)) return;
+    else if (hasClass(node,"fdjtshown")) return false;
+    else return showPage(container,node);}
+  showPage.showNode=showNode;
 
-    return showPage;})();
+  return showPage;})();
 
 /* Emacs local variables
    ;;;  Local variables: ***
