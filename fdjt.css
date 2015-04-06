@@ -1246,7 +1246,7 @@ table.fdjtform .usebaseline td {
 
 /* The new pager */
 
-div.fdjtpage {
+div.fdjtpage.formatting {
     overflow-y: hidden !important;
     max-height: 100% !important;}
 div.fdjtpage:not(.getvisible) > div, div.fdjtpage:not(.getvisible) > p {
