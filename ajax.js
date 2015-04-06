@@ -191,17 +191,11 @@ fdjt.Ajax=
             return result;}
         fdjtAjax.formJSON=formJSON;
 
-        function ajaxSubmit(form,callback,cbctype){
-            /* jshint evil: true */
+        function ajaxSubmit(form,callback,opts){
             var ajax_uri=form.getAttribute("ajaxaction")||form.action;
             if (!(ajax_uri)) return false;
             // Whether to do AJAX synchronously or not.
             var syncp=form.getAttribute("synchronous");
-            if (!(callback)) {
-                if (form.oncallback) callback=form.oncallback;
-                else if (form.getAttribute("ONCALLBACK")) {
-                    callback=new Function("req","form",form.getAttribute("ONCALLBACK"));
-                    form.oncallback=callback;}}
             if (trace_ajax)
                 fdjtLog("Direct %s AJAX submit to %s for %o with callback %o",
                         ((syncp)?("synchronous"):("asynchronous")),
@@ -225,7 +219,7 @@ fdjt.Ajax=
                 else req.open('POST',ajax_uri);}
             req.onreadystatechange=function () {
                 if (trace_ajax)
-                    fdjtLog("Got callback (%d,%d) %o for %o, callback=%o",
+                    fdjtLog("Ajax (%d,%d) %o for %o, callback=%o",
                             req.readyState,
                             ((req.readyState===4)&&(req.status)),
                             req,ajax_uri,callback);
@@ -238,14 +232,18 @@ fdjt.Ajax=
                     success=true; 
                     if (callback) callback(req,form);
                     callback_run=true;}
-                else {
-                    if (trace_ajax)
-                        fdjtLog("Got callback (%d,%d) %o for %o, not calling %o",
-                                req.readyState,((req.readyState===4)&&(req.status)),
-                                req,ajax_uri,callback);
-                    callback_run=false;}};
-            if (cbctype) req.setRequestHeader("Accept",cbctype);
-            req.withCredentials=true;
+                else if (req.readyState === 4) {
+                    fdjtLog("Failed callback (%d,%d) %o for %o, not calling %o",
+                            req.readyState,((req.readyState===4)&&(req.status)),
+                            req,ajax_uri,callback);
+                    fdjtDOM.dropClass(form,"submitting");
+                    if (callback) callback(req,form);
+                    callback_run=true;}
+                else {}};
+            if ((opts)&&(opts.accept)) req.setRequestHeader("Accept",opts.accepts);
+            if ((opts)&&(opts.hasOwnProperty('creds')))
+                req.withCredentials=opts.creds;
+            else req.withCredentials=true;
             try {
                 if (form.method==="GET") req.send();
                 else {
