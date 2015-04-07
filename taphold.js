@@ -320,6 +320,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (th_timer) {clearTimeout(th_timer); th_timer=false;}
             if ((all)&&(tt_timer)) {
                 clearTimeout(tt_timer); tt_timer=false;}
+            if ((th_target)&&(touchclass))
+                dropClass(th_target,touchclass);
             th_target=th_target_t=false; th_targets=[];
             swipe_t=start_x=start_y=start_t=
                 touch_x=touch_y=touch_t=touch_n=
