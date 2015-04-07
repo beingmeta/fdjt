@@ -2596,7 +2596,7 @@ fdjt.CodexLayout=
             if (typeof layoutDB === "undefined") 
                 ondbinit=function(){fetchLayout(layout_id,callback,onerr);};
             else if (!(layoutDB)) { 
-                if (onerr) return onerr(false);
+                if (onerr) return onerr("No layout DB");
                 else if (callback) return callback(false);
                 else return false;}
             else if ((window.Storage)&&(layoutDB instanceof window.Storage)) {
@@ -2606,12 +2606,14 @@ fdjt.CodexLayout=
             else if (layoutDB) {
                 var txn=layoutDB.transaction(["layouts"]);
                 var storage=txn.objectStore("layouts");
-                var req=storage.get(layout_key);
+                var req=(storage)&&(storage.get(layout_key));
+                if (!(req)) onerr("DB error");
                 req.onsuccess=function(evt){
                     var target=evt.target;
                     var result=((target)&&(target.result));
+                    if (!(target)) onerr(false);
                     if (result) cachedLayout(layout_id);
-                    if (!(result)) onerr(false);
+                    if (!(result)) callback(false);
                     else callback(result.layout);};
                 req.onerror=function(event){onerr(event);};}
             else if (window.localStorage) {
