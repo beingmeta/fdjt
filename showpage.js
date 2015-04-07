@@ -92,7 +92,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     addClass(start,"fdjtshow");
     addClass(start,((dir<0)?("fdjtendofpage"):("fdjtstartofpage")));
     if (((dir<0)&&(hasClass(start,/fdjtpagebreak(auto)?/)))||
-	(isoversize(container))) {
+        (isoversize(container))) {
       dropClass(container,"formatting");
       return startpos;}
     var endpos=showpage(container,children,startpos,dir);
@@ -144,12 +144,12 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
         if (style.display==='none') continue;
         else if ((style.position)&&(style.position!=='static'))
           continue;
-	if (style.pageBreakBefore==="force")
-	  addClass(node,"fdjtpagebreakauto");
-	else dropClass(node,"fdjtpagebreakauto");
-	// We don't currently make these stylable
+        if (style.pageBreakBefore==="force")
+          addClass(node,"fdjtpagebreakauto");
+        else dropClass(node,"fdjtpagebreakauto");
+        // We don't currently make these stylable
         if ((prev)&&(hasClass(prev,"fdjtpagekeep"))) 
-	  addClass(node,"fdjtpagekeep");
+          addClass(node,"fdjtpagekeep");
         if ((prev)&&(hasClass(node,"fdjtpagekeep")))
           addClass(prev,"fdjtpagehead");
         children.push(node);}}
@@ -161,7 +161,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
     i=i+dir; addClass(last,caboose); while ((i>=0)&&(i<lim)) {
       if ((dir>0)&&(hasClass(scan,/fdjtpagebreak(auto)?/)))
-	return i-dir;
+        return i-dir;
       dropClass(last,caboose); addClass(scan,"fdjtshow"); addClass(scan,caboose);
       if (isoversize(container)) {
         addClass(last,caboose);
