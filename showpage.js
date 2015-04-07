@@ -109,7 +109,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
         addClass(end,caboose);}}
     if (startpos===0) addClass(container,"fdjtfirstpage");
     else dropClass(container,"fdjtfirstpage");
-    if (endpos>=lim) addClass(container,"fdjtlastpage");
+    if (endpos>=(lim-1)) addClass(container,"fdjtlastpage");
     else dropClass(container,"fdjtlastpage");
     var minpos=((startpos<=endpos)?(startpos):(endpos));
     var maxpos=((startpos>endpos)?(startpos):(endpos));

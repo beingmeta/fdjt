@@ -1265,7 +1265,7 @@ div.fdjtpage > div.fdjtpageinfo { display: block !important; }
 div.fdjtpage div.fdjtpageinfo {
     transition-property: opacity; transition-duration: 5s;}
 div.fdjtpage.fdjtfirstpage.fdjtlastpage > div.fdjtpageinfo {
-    display: none;}
+    display: none !important;}
 
 div.fdjtpage.formatting div, div.fdjtpage.getvisible div, 
 div.fdjtpage.formatting p, div.fdjtpage.getvisible p {
