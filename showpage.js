@@ -113,7 +113,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     else dropClass(container,"fdjtlastpage");
     var minpos=((startpos<=endpos)?(startpos):(endpos));
     var maxpos=((startpos>endpos)?(startpos):(endpos));
-    info.innerHTML=(Math.floor((minpos/lim)*100)+"%");
+    info.innerHTML=Math.floor((minpos/lim)*100)+"%"+
+      "<span class='count'>("+lim+")</span>";
     info.title=fdjtString("Items %d through %d of %d",minpos,maxpos,lim);
     addClass(container,"newpage"); setTimeout(
       function(){dropClass(container,"newpage");},1000);
