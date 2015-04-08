@@ -387,32 +387,45 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 sel.setRange(start,end);}
             if (sel.loupe) updateLoupe(word,sel,tapped);}
 
+        function nodeSearch(node,pat){
+            if (node.nodeType===3) {
+                return (node.nodeValue.search(pat)>=0);}
+            else if (node.nodeType===1) {
+                var children=node.childNodes;
+                var i=0, lim=((children)?(children.length):(0));
+                while (i<lim) {
+                    var child=children[i++];
+                    if (child.nodeType===3) {
+                        if (node.nodeValue.search(pat)>=0) 
+                            return child;}
+                    else if (child.nodeType===1) {
+                        if (nodeSearch(child,pat)) return child;}
+                    else {}}
+                return false;}
+            else return false;}
+
         function initSelect(word){
             var begin=word, end=word, scan, last;
-            var text=word.innerHTML;
-            if (text.search(/"'\(\[\{/)<0) {
+            if (nodeSearch(word,/"'\(\[\{/)) {
                 last=begin; scan=begin.previousSibling;
                 while (scan) {
                     if ((scan.nodeType!==1)||
                         (!(hasClass(scan,"fdjtword")))) {
                         scan=scan.previousSibling; continue;}
-                    text=scan.innerHTML;
-                    if (text.search(/["'\(\[\{]/)>=0) {
+                    if (nodeSearch(scan,/["'\(\[\{]/)) {
                         begin=scan; break;}
-                    else if (text.search(/[.;!?]/)>=0) {
+                    else if (nodeSearch(scan,/[.;!?]/)) {
                         begin=last; break;}
                     else {last=scan; scan=scan.previousSibling;}}
                 if (!(scan)) begin=last;}
-            text=word.innerHTML;
-            if (text.search(/[.;!?]/)>=0) end=word;
+            if (nodeSearch(word,/[.;!?]/)) end=word;
             else {
                 last=end; scan=end.nextSibling;
                 while (scan) {
                     if ((scan.nodeType!==1)||
                         (!(hasClass(scan,"fdjtword")))) {
                         scan=scan.nextSibling; continue;}
-                    text=scan.innerHTML;
-                    if (text.search(/["'.;!?]/)>=0) {
+                    if (nodeSearch(scan,/["'.;!?]/)) {
                         end=scan; break;}
                     else {
                         last=scan; scan=scan.nextSibling;}}
