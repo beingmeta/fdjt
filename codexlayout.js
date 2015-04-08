@@ -2361,6 +2361,8 @@ fdjt.CodexLayout=
                 if ((!(elt))||(elt.nodeType!==1)) return false;
                 if ((hasClass("codexsinglepage"))||(hasClass("codexfullpage")))
                     return true;
+                else if ((singlepages)&&(singlepages.match(elt)))
+                    return true;
                 else {
                     if (!(style)) style=getStyle(elt);
                     return ((style.pageBreakBefore==='always')&&
