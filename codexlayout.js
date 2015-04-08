@@ -374,10 +374,11 @@ fdjt.CodexLayout=
                 stripTopStyles(copy,true);
                 copy.className=nodeclass.replace(/\bcodexrelocated\b/g,"")+
                     " codexdupend";}
-            else if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
+            else copy.className=
+                nodeclass.replace(/\b(codexdupstart|codexdup)\b/,"")+" codexdupend";
+            if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
                 node.className=nodeclass.replace(/\bcodexdupend\b/g,"codexdup");
                 stripBottomStyles(node,true);}
-            else {}
             if ((lastclass)&&
                 (lastclass.search(/\bcodexdupend\b/g)>=0)) {
                 last_dup.className=lastclass.replace(
