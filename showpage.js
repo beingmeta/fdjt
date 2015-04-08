@@ -218,6 +218,9 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
 
   function showNode(container,node){
     if (!(container=getContainer(container))) return;
+    if (!(hasClass(container,"fdjtpage"))) {
+      if (container.offsetHeight) showPage(container);
+      else return false;}
     var parent=node.parentNode;
     while ((parent)&&(parent!==container)) {
       node=parent; parent=node.parentNode;}
