@@ -368,15 +368,15 @@ fdjt.CodexLayout=
                            (last_dup.className));
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
-            if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
-                node.className=nodeclass.replace(/\bcodexdupend\b/g,"codexdup");
-                stripBottomStyles(node,true);}
-            else if (nodeclass.search(/\bcodexdup[a-z]*\b/g)<0) {
+            if (!(duplist)) {
                 node.className=nodeclass+" codexdupstart";
                 stripBottomStyles(node,true);
                 stripTopStyles(copy,true);
                 copy.className=nodeclass.replace(/\bcodexrelocated\b/g,"")+
                     " codexdupend";}
+            else if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
+                node.className=nodeclass.replace(/\bcodexdupend\b/g,"codexdup");
+                stripBottomStyles(node,true);}
             else {}
             if ((lastclass)&&
                 (lastclass.search(/\bcodexdupend\b/g)>=0)) {
