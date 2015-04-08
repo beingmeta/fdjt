@@ -371,7 +371,7 @@ fdjt.CodexLayout=
             if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
                 node.className=nodeclass.replace(/\bcodexdupend\b/g,"codexdup");
                 stripBottomStyles(node,true);}
-            else if (nodeclass.search(/\bcodexdupstart\b/g)<0) {
+            else if (nodeclass.search(/\bcodexdup[a-z]*\b/g)<0) {
                 node.className=nodeclass+" codexdupstart";
                 stripBottomStyles(node,true);
                 stripTopStyles(copy,true);
