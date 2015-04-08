@@ -396,7 +396,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 while (i<lim) {
                     var child=children[i++];
                     if (child.nodeType===3) {
-                        if (node.nodeValue.search(pat)>=0) 
+                        if (child.nodeValue.search(pat)>=0) 
                             return child;}
                     else if (child.nodeType===1) {
                         if (nodeSearch(child,pat)) return child;}
@@ -406,7 +406,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
 
         function initSelect(word){
             var begin=word, end=word, scan, last;
-            if (nodeSearch(word,/"'\(\[\{/)) {
+            if (!(nodeSearch(word,/"'\(\[\{/))) {
                 last=begin; scan=begin.previousSibling;
                 while (scan) {
                     if ((scan.nodeType!==1)||
