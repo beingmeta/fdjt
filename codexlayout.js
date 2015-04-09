@@ -883,12 +883,12 @@ fdjt.CodexLayout=
                         if (donefn) donefn(layout);
                         return;}}
 
-                var blocks=[], terminals=[], blockinfo=[], styles=[];
+                var blocks=[], blockinfo=[], styles=[];
                 // gather all of the block-level elements
                 // (recursively) in the node, noting which ones are
                 // terminals.  This should be pretty fast, so we do it
                 // synchronously
-                gatherBlocks(root,root,blocks,terminals,blockinfo,styles);
+                gatherBlocks(root,root,blocks,blockinfo,styles);
                 layout.block_count=layout.block_count+blocks.length;
                 if (trace>1)
                     logfn("Laying out %d blocks from %o; page=%o",
@@ -911,7 +911,7 @@ fdjt.CodexLayout=
                 
                 function step(){
                     var block=blocks[block_i], style=styles[block_i];
-                    var info=blockinfo[block_i], terminal=terminals[block_i]||false;
+                    var info=blockinfo[block_i], terminal=info.terminal||false;
                     var next=blocks[block_i+1], nextinfo=blockinfo[block_i+1];
                     var tracing=false;
                     if (block.id) layout.lastid=block.id;
@@ -975,7 +975,7 @@ fdjt.CodexLayout=
                                  (!(info.avoidbreakbefore)))
                             // Our top is also over the bottom of the page,
                             // and we can break here, so we just push off 
-                           block=newPage(block);
+                            block=newPage(block,info);
                         else if (info.floating) {
                             // If the block can float, let it
                             floating.push(block); block_i++;}
@@ -1027,7 +1027,8 @@ fdjt.CodexLayout=
                 // Gather all the block-level elements inside a node,
                 // recording which ones are terminals (don't have any
                 // blocks within them)
-                function gatherBlocks(root,node,blocks,terminals,info,styles,style){
+                function gatherBlocks(root,node,blocks,info,styles,style){
+                    var nodeinfo=false;
                     if (node.nodeType!==1) return;
                     if (node.codexui) return;
                     if (!(style)) style=getStyle(node); 
@@ -1043,12 +1044,13 @@ fdjt.CodexLayout=
                         if ((node.offsetHeight===0)||
                             ((node.offsetHeight)&&
                              (node.offsetHeight<(page_height*1.5)))) {
+                            nodeinfo=getBlockInfo(node,style);
                             addClass(node,"codexblock");
-                            info.push(getBlockInfo(node,style));
+                            info.push(nodeinfo);
                             blocks.push(node); styles.push(style);
-                            terminals.push(node);
+                            nodeinfo.terminal=node;
                             moveUp(node);
-                            checkTerminal(node,root);
+                            checkTerminal(node,root,info);
                             return;}
                         else {
                             // If the node is really tall, ignore the
@@ -1066,9 +1068,10 @@ fdjt.CodexLayout=
                         (disp!=='table-cell')) {
                         var loc=blocks.length;
                         addClass(node,"codexblock");
+                        nodeinfo=getBlockInfo(node,style);
                         blocks.push(node);
                         styles.push(style);
-                        terminals.push(false);
+                        info.push(nodeinfo);
                         if ((disp==='block')||(disp==='table')||
                             (disp==='table-row-group')) {
                             var children=node.childNodes;
@@ -1077,12 +1080,11 @@ fdjt.CodexLayout=
                             while (i<len) {
                                 var ch=children[i++];
                                 if (ch.nodeType===1)
-                                    gatherBlocks(root,ch,blocks,terminals,info,styles);}
+                                    gatherBlocks(root,ch,blocks,info,styles);}
                             if (blocks.length===total_blocks)
-                                terminals[loc]=node;}
-                        else terminals[loc]=node;
-                        if (terminals[loc]) checkTerminal(node,root);
-                        info.push(getBlockInfo(node,style));
+                                nodeinfo.terminal=node;}
+                        else nodeinfo.terminal=node;
+                        if (nodeinfo.terminal) checkTerminal(node,root,info);
                         moveUp(node);}
                     else if ((style.position==='static')&&
                              (node.tagName==='A')) {
@@ -1093,7 +1095,8 @@ fdjt.CodexLayout=
                             if (child.nodeType!==1) continue;
                             var cstyle=getStyle(child);
                             if (cstyle.display!=='inline')
-                                gatherBlocks(root,child,blocks,terminals,styles,info,cstyle);}
+                                gatherBlocks(root,child,blocks,
+                                             terminals,styles,info,cstyle);}
                         moveUp(node);}
                     else {}}
 
@@ -1146,7 +1149,7 @@ fdjt.CodexLayout=
                     else if (info.singlepage) {
                         // Single pages automatically get their own page
                         if (tracing) logfn("Full single page for %o",block);
-                        block=newPage(block); newPage();
+                        block=newPage(block,info); newPage();
                         return false;}
                     else if ((page.childNodes.length)&&
                              ((info.forcebreakbefore)||
@@ -1158,7 +1161,7 @@ fdjt.CodexLayout=
                         if (tracing) logfn("Forced new page for %o",block);
                         // We clear the drags because we're following a force rule
                         layout.drag=drag=[];
-                        return newPage(block)||block;}
+                        return newPage(block,info)||block;}
                     else return moveUp(block);}
 
                 function handle_unbreakable(block,info,style,geom,tracing) {
@@ -1185,7 +1188,7 @@ fdjt.CodexLayout=
                         else {
                             // We need to leave the dragged elements behind
                             layout.drag=drag=[];
-                            newblock=newPage(block);
+                            newblock=newPage(block,info);
                             if (page===curpage)
                                 return false; // probably "codexoversize"
                             else if (block!==newblock) info=getBlockInfo(newblock);
@@ -1197,7 +1200,7 @@ fdjt.CodexLayout=
                             else return newblock;}}
                     else {
                         // We just make a new page for the block
-                        newblock=newPage(block);
+                        newblock=newPage(block,info);
                         if (block!==newblock) info=getBlockInfo(newblock);
                         if (page===curpage)
                             return false; // probably "codexoversize"
@@ -1243,12 +1246,20 @@ fdjt.CodexLayout=
                         parent=node.parentNode;}
                     return edge;}
 
-                function checkTerminal(node,root){
+                function findInfo(node,info){
+                    var i=info.length-1; while (i>=0) {
+                        var nodeinfo=info[i--];
+                        if (info.node===node) return info;}
+                    return false;}
+
+                function checkTerminal(node,root,info){
                     if (hasClass(node,"codexterminal")) return;
                     var front_edge=getFrontEdge(node,root);
                     var back_edge=getBackEdge(node,root);
                     var avoid_before=false, force_before=false;
                     var avoid_after=false, force_after=false;
+                    var front_info=(front_edge)&&(findInfo(front_edge,info));
+                    var back_info=(back_edge)&&(findInfo(back_edge,info));
                     var i=0, lim=front_edge.length; if (lim>1) {
                         while (i<lim) {
                             if (avoidBreakAfter(front_edge[i]))
@@ -1265,17 +1276,21 @@ fdjt.CodexLayout=
                             i++;}}
                     if ((avoid_after)&&(force_after)) {
                         /* Avoid brain exploding */}
-                    else if (avoid_after) 
-                        addClass(front_edge,"AVOIDBREAKAFTER");
-                    else if (force_after)
-                        addClass(front_edge,"FORCEBREAKAFTER");
+                    else if (avoid_after) {
+                        if (front_info) front_info.avoidbreakafter=true;
+                        addClass(front_edge,"AVOIDBREAKAFTER");}
+                    else if (force_after) {
+                        if (front_info) front_info.forcebreakafter=true;
+                        addClass(front_edge,"FORCEBREAKAFTER");}
                     else {}
                     if ((avoid_before)&&(force_before)) {
                         /* Avoid brain exploding */}
-                    else if (avoid_before) 
-                        addClass(back_edge,"AVOIDBREAKBEFORE");
-                    else if (force_before)
-                        addClass(back_edge,"FORCEBREAKBEFORE");
+                    else if (avoid_before) {
+                        if (back_info) back_info.avoidbreakbefore=true;
+                        addClass(back_edge,"AVOIDBREAKBEFORE");}
+                    else if (force_before) {
+                        if (back_info) back_info.forcebreakbefore=true;
+                        addClass(back_edge,"FORCEBREAKBEFORE");}
                     else {}
                     addClass(node,"codexterminal");}
                 
@@ -1332,7 +1347,7 @@ fdjt.CodexLayout=
                 /*** Create a new page. ***/
                 // If node is passed, it is intended to be the first
                 // element on the new page.
-                function newPage(node,forcepage){
+                function newPage(node,info,forcepage){
                     var i, lim;
                     if ((drag)&&(drag.length)&&(drag.length)&&
                         (atPageTop(drag[0]))) {
@@ -1413,9 +1428,9 @@ fdjt.CodexLayout=
                     if ((drag)&&(drag.length)) {
                         i=0; lim=drag.length;
                         while (i<lim) moveUp(drag[i++]);
-                        if (node) { /* node */
+                        if (node) {
                             var block=node;
-                            var terminal=((terminals)&&(terminals[block_i]));
+                            var terminal=(info)&&(info.terminal);
                             if ((block)&&(drag.length)&&(terminal)) {
                                 if ((drag.length===1)||
                                     (avoidBreakBefore(block))||
