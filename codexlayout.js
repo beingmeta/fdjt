@@ -972,10 +972,10 @@ fdjt.CodexLayout=
                                   (geom.top>short_page_height):
                                   (geom.top>(use_height-lh*1.2)))&&
                                  (drag.length===0)&&
-                                 (!(info.avoidbreakbefore)))
+                                 (!(info.avoidbreakbefore))) {
                             // Our top is also over the bottom of the page,
                             // and we can break here, so we just push off 
-                            block=newPage(block,info);
+                            block=newPage(block,info);}
                         else if (info.floating) {
                             // If the block can float, let it
                             floating.push(block); block_i++;}
@@ -995,9 +995,14 @@ fdjt.CodexLayout=
                                 logfn("Splitting block %o @ %o",block,page);
                             var split=splitBlock(block,info,style,use_height);
                             if ((split)&&(split!==block)) {
+                                layout.prev=prev=block;
+                                layout.prevstyle=prevstyle=style;
+                                layout.previnfo=previnfo=info;
                                 blocks[block_i]=split;
                                 styles[block_i]=style=getStyle(split);
-                                blockinfo[block_i]=getBlockInfo(split,style);}
+                                blockinfo[block_i]=getBlockInfo(split,style);
+                                blockinfo[block_i].terminal=terminal;
+                                return;}
                             else {
                                 geom=getGeom(block,page);
                                 if (geom.bottom>page_height) {
@@ -1018,7 +1023,7 @@ fdjt.CodexLayout=
                     else {
                         layout.drag=drag=[]; block_i++;}
                         
-                    // Update the prev pointer for terminals
+                    // Update the prev pointer for terminals if we advanced
                     if (terminal) {
                         layout.prev=prev=block;
                         layout.prevstyle=prevstyle=style;
