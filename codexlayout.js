@@ -1,6 +1,6 @@
 /* -*- Mode: Javascript; Character-encoding: utf-8; -*- */
 
-/* ######################### fdjt/codexlayout.js ###################### */
+/* ######################### fdjt/codexlayout.js ###################### */ 
 
 /* Copyright (C) 2009-2015 beingmeta, inc.
    This file is a part of the FDJT web toolkit (www.fdjt.org)
@@ -1071,7 +1071,6 @@ fdjt.CodexLayout=
                         (disp!=='inline')&&
                         (disp!=='table-row')&&
                         (disp!=='table-cell')) {
-                        var loc=blocks.length;
                         addClass(node,"codexblock");
                         nodeinfo=getBlockInfo(node,style);
                         blocks.push(node);
@@ -1100,8 +1099,7 @@ fdjt.CodexLayout=
                             if (child.nodeType!==1) continue;
                             var cstyle=getStyle(child);
                             if (cstyle.display!=='inline')
-                                gatherBlocks(root,child,blocks,
-                                             terminals,styles,info,cstyle);}
+                                gatherBlocks(root,child,blocks,styles,info,cstyle);}
                         moveUp(node);}
                     else {}}
 
@@ -1254,7 +1252,7 @@ fdjt.CodexLayout=
                 function findInfo(node,info){
                     var i=info.length-1; while (i>=0) {
                         var nodeinfo=info[i--];
-                        if (info.node===node) return info;}
+                        if (nodeinfo.node===node) return info;}
                     return false;}
 
                 function checkTerminal(node,root,info){
