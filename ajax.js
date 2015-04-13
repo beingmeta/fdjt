@@ -107,6 +107,35 @@ fdjt.Ajax=
             return fdjtAjax(function(req) {callback(req.responseXML);},
                             base_uri,fdjtDOM.Array(arguments,2));};
         
+        fdjtAjax.fetch=function(baseuri,args,headers,opts){
+            function fetching(resolved,rejected){
+                fdjtAjax(function(req) {resolved(req);},
+                         baseuri,args,
+                         function(req) {rejected(req);},
+                         headers,opts);}
+            return new Promise(fetching);};
+        fdjtAjax.fetchText=function(baseuri,args,headers,opts){
+            function fetching(resolved,rejected){
+                fdjtAjax(function(req) {resolved(req.responseText);},
+                         baseuri,args,
+                         function(req) {rejected(req);},
+                         headers,opts);}
+            return new Promise(fetching);};
+        fdjtAjax.fetchJSON=function(baseuri,args,headers,opts){
+            function fetching(resolved,rejected){
+                fdjtAjax(function(req) {resolved(JSON.parse(req.responseText));},
+                         baseuri,args,
+                         function(req) {rejected(req);},
+                         headers,opts);}
+            return new Promise(fetching);};
+        fdjtAjax.fetchXML=function(baseuri,args,headers,opts){
+            function fetching(resolved,rejected){
+                fdjtAjax(function(req) {resolved(JSON.parse(req.responseXML));},
+                         baseuri,args,
+                         function(req) {rejected(req);},
+                         headers,opts);}
+            return new Promise(fetching);};
+
         function jsonpCall(uri,id,cleanup){
             if ((id)&&($ID(id))) return false;
             var script_elt=fdjt.DOM("SCRIPT");
