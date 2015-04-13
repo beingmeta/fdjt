@@ -410,8 +410,8 @@ fdjt.RefDB=(function(){
                     warn("Ambiguous ref %s in %s refers to both %o and %o",
                          alias,db,cur.name,this.name);
                 else aliases[alias]=this;}}
-        var run_inits=((loading)&&(!(this._live)));
-        if (run_inits) this._live=fdjtTime();
+        var now=fdjtTime();
+        if ((loading)&&(!(this._live))) this._live=now;
         for (var key in data) {
             if ((key==="aliases")||(key==="_id")) {}
             else if (data.hasOwnProperty(key)) {
@@ -442,21 +442,20 @@ fdjt.RefDB=(function(){
                 else if ((value)&&(indexing)&&(indices[key])) 
                     this.indexRef(key,value,indices[key],db);}}
         // These are run-once inits loaded on initial import
-        if (run_inits) {
+        if (loading) {
             // Run the db-specific inits for each reference
             if (onload) {
                 var i=0, lim=onload.length; while (i<lim) {
                     var loadfn=onload[i++];
-                    loadfn(this);}}
+                    loadfn(this,now);}}
             // Run per-instance delayed inits
             if (this._onload) {
                 var onloads=this._onload, inits=onloads.fns;
                 var j=0, jlim=inits.length; while (j<jlim) {
-                    inits[j++](this);}
+                    inits[j++](this,now);}
                 delete this._onload;}}
         // Record a change if we're not loading and not already changed.
         if ((!(loading))&&(!(this._changed))) {
-            var now=fdjtTime();
             this._changed=now;
             db.changes.push(this);
             if (!(db.changed)) {
@@ -686,13 +685,13 @@ fdjt.RefDB=(function(){
             if (typeof ref === "string") ref=db.ref(ref,false,true);
             if (!(ref)) {warn("Couldn't resolve ref to %s",arg); return;}
             else if (ref._live) return;
-            else loaded.push(ref);
+            else {}
             if (absrefs) content=storage[ref._id];
             else if (atid) content=storage[atid+"("+ref._id+")"];
             else content=storage[atid+"("+ref._id+")"];
-            if (!(content)) warn("No item stored for %s",ref._id);
-            else ref.Import(
-                JSON.parse(content),false,REFLOAD|REFINDEX);}
+            if (content) {
+                loaded.push(ref);
+                ref.Import(JSON.parse(content),false,REFLOAD|REFINDEX);}}
         if (!(refs)) refs=[].concat(db.allrefs);
         else if (refs===true) {
             var all=storage["allids("+db.name+")"]||"[]";
@@ -709,7 +708,7 @@ fdjt.RefDB=(function(){
                 function(arg){storage_loader(arg,loaded,storage);},
                 needrefs);
         else return new Promise(function(resolve){
-            var resolved=[]; var i=0, lim=resolved.length;
+            var resolved=[]; var i=0, lim=refs.length;
             while (i<lim) {
                 var refid=refs[i++];
                 if (typeof ref==="string")
