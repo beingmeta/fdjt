@@ -86,7 +86,9 @@ fdjt.Ajax=
                         evt=evt||window.event;
                         other_callback(req);};}}
             req.open("GET",uri);
-            req.withCredentials=true;
+            if (opts.hasOwnProperty("credentials"))
+                req.withCredentials=opts.credentials;
+            else req.withCredentials=true;
             if (headers) {
                 for (var key in headers)
                     if (headers.hasOwnProperty(key))
