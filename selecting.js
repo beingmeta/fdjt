@@ -207,7 +207,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             else if (node.nodeType!==1) return node;
             else {
                 var classname=node.className;
-                if ((classname)&&
+                if ((classname)&&(typeof classname === "string")&&
                     ((classname==='fdjtselectwrap')||
                      (node.className==="fdjtskiptext")||
                      (node.className.search(/\bfdjtskiptext\b/)>=0)))
@@ -316,6 +316,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (!(sel)) {
                 var container=word; while (container) {
                     if ((container.className)&&(container.id)&&
+                        (typeof container.className === "string")&&
                         (container.className.search(/\bfdjtselecting\b/)>=0))
                         break;
                     else container=container.parentNode;}

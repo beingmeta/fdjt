@@ -1339,7 +1339,8 @@ fdjt.DOM=
                     return 0;
                 else if (typeof node.className!=="string") return 0;
                 else if ((node.className==="fdjtskiptext")||
-                         (node.className.search(/\bfdjtskiptext/)>=0))
+                         ((typeof node.className === "string")&&
+                          (node.className.search(/\bfdjtskiptext/)>=0)))
                     return 0;
                 else if (node.childNodes) {
                     var children=node.childNodes;
@@ -2490,7 +2491,7 @@ fdjt.DOM=
             else if (node.nodeType===1) {
                 var style=getStyle(node);
                 var children=node.childNodes;
-                if ((node.className)&&
+                if ((typeof node.className === "string")&&
                     (node.className.search(/\bfdjtskiptext\b/)>=0))
                     return accum;
                 else if ((style.display==='none')||
@@ -2529,7 +2530,7 @@ fdjt.DOM=
             else if (node.nodeType===1) {
                 var style=getStyle(node);
                 var children=node.childNodes;
-                if ((node.className)&&
+                if ((typeof node.className === "string")&&
                     (node.className.search(/\bfdjtskiptext\b/)>=0))
                     return cur;
                 else if ((style.display==='none')||

@@ -102,7 +102,8 @@ fdjt.UI.Highlight=(function(){
             var children=node.childNodes;
             var i=0, lim=children.length;
             while (i<lim) gatherHighlights(children[i++],classpat,into);}
-        if ((node.className)&&(node.className.search(classpat)>=0)) {
+        if ((node.className)&&(node.className.search)&&
+            (node.className.search(classpat)>=0)) {
             into.push(node);}}
 
     function unwrap_hnode(hnode){

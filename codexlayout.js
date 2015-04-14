@@ -497,7 +497,7 @@ fdjt.CodexLayout=
                     if (child.nodeType===1) {
                         var style=getStyle(child);
                         if ((style.position!=='static')&&(style.position!=='')) {}
-                        else if ((child.classname)&&
+                        else if ((child.classname)&&(child.classname.search)&&
                                  (child.className.search(/\bfdjtskiptext\b/g)>=0)) {}
                         else return markPageTop(child);}
                     else if (child.nodeType===3) {
@@ -1912,7 +1912,7 @@ fdjt.CodexLayout=
                                     if (ostyle) original.setAttribute(
                                         "data-savedstyle",ostyle);
                                     original.setAttribute("style",style);}
-                                if (classname.search(/\bcodexpagetop\b/)>=0) {
+                                if ((classname.search)&&(classname.search(/\bcodexpagetop\b/)>=0)) {
                                     markPageTop(original,true);}}
                             else if (original) {
                                 saved_ids[id]=original;
@@ -2305,11 +2305,6 @@ fdjt.CodexLayout=
                 if (!(style)) style=getStyle(elt);
                 return (style.pageBreakInside==='avoid')||
                     (style.display==='table-row')||
-                    /*
-                    ((elt.className)&&(elt.className.search)&&
-                     (elt.className.search(page_block_classes)>=0))||
-                    ((avoidbreakinside)&&(testNode(elt,avoidbreakinside)))||
-                    */
                     ((style.display==="block")&&
                      ((lh=parsePX(style.lineHeight))&&
                       ((lh*2.5)>elt.offsetHeight)));}
@@ -2520,7 +2515,8 @@ fdjt.CodexLayout=
                 var info={pagenum: num};
                 var classname=block.className;
                 if (block.id) info.id=block.id;
-                if ((classname)&&(classname.search(/\bcodexdup/g)>=0)) 
+                if (typeof classname !== "string") {}
+                else if (classname.search(/\bcodexdup/g)>=0) 
                     info.html=block.outerHTML;
                 else {
                     if (block.id) info.id=block.id;
