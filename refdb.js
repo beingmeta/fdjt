@@ -713,7 +713,7 @@ fdjt.RefDB=(function(){
                 var refid=refs[i++];
                 if (typeof ref==="string")
                     ref=refmap[refid]; else ref=refid;
-                resolve.push(ref);}
+                resolved.push(ref);}
             return resolve(resolved);});};
 
     RefDB.prototype.loadref=function loadRef(ref){
