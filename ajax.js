@@ -19,7 +19,8 @@
       http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
       http://www.gnu.org/licenses/lgpl-3.0-standalone.html
 */
-/* jshint browser: true */
+/* jshint browser: true  */
+/* globals Promise */
 
 // var fdjt=((window.fdjt)||{});
 
