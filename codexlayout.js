@@ -1570,14 +1570,18 @@ fdjt.CodexLayout=
                         // the child that broke the page.
                         var i=0, n=children.length;
                         while (i<n) {
-                            var child=children[i++];
-                            node.innerHTML="";
-                            appendChildren(node,children,0,i);
+                            var child=children[i++], next=children[i], span=1;
+                            // node.innerHTML="";
+                            //appendChildren(node,children,0,i);
+                            node.appendChild(child);
+                            if ((next)&&(next.nodeType===3)&&
+                                (next.nodeValue.search(/^[.,;~?"'-]/)===0)) {
+                                node.appendChild(children[i++]); span++;}
                             // Add the child back and get the geometry
                             geom=getGeom(node,page);
                             if (geom.bottom>use_page_height) {
                                 page_break=child; breaktype=child.nodeType;
-                                breakpos=i-1;
+                                breakpos=i-span;
                                 break;}
                             else continue;}}
                     if (!(page_break))  // Never went over the edge

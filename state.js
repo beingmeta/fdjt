@@ -152,8 +152,8 @@ fdjt.State=
                     return false;}
                 else {
                     var val=window.sessionStorage[name];
-                    if (val) return true;
-                    else return false;}}
+                    if (typeof val === "undefined") return false;
+                    else return true;}}
             else return false;}
         fdjtState.existsSession=existsSession;
 
@@ -269,7 +269,7 @@ fdjt.State=
                 else {
                     var val=window.localStorage[name];
                     if (typeof val === "undefined") return false;
-                    else return false;}}
+                    else return true;}}
             else return false;}
         fdjtState.existsLocal=existsLocal;
 
