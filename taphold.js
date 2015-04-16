@@ -807,9 +807,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                       ((!pressed)||(pressed!==elt))))
                 swiped(target,evt,start_x,start_y,touch_x,touch_y);
             else if ((touched)||(pressed)) {
-                if ((untouchable)&&(untouchable(evt))) return;
-                endpress(evt);}
-            else if ((untouchable)&&(untouchable(evt))) return;
+                if (!((untouchable)&&(untouchable(evt)))) endpress(evt);}
             else {}
             cleartouch();}
 
