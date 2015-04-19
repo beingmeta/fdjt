@@ -135,7 +135,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     else return false;}
 
   function getNodes(container){
-    var children=[], nodes=container.childNodes; addClass(container,"getvisible");
+    var children=[], nodes=container.childNodes;
+    addClass(container,"getvisible");
     var i=0, lim=nodes.length, prev=false;
     while (i<lim) {
       var node=nodes[i++];
@@ -183,15 +184,41 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     else return false;}
   showPage.forward=forwardPage;
 
+  function fastForwardPage(container){
+    if (!(container=getContainer(container))) return;
+    var foot=getChild(container,".fdjtendofpage");
+    if (!(foot)) return showPage(container);
+    if (hasClass(container,"fdjtlastpage")) return false;
+    else if (foot.nextSibling) {
+      var children=getNodes(container);
+      var off=children.indexOf(foot), len=children.length;
+      var next_off=Math.floor(off+(len-off)/2);
+      return showPage(container,children[next_off],1);}
+    else return false;}
+  showPage.fastForward=fastForwardPage;
+
   function backwardPage(container){
     if (!(container=getContainer(container))) return;
     var head=getChild(container,".fdjtstartofpage");
     if (!(head)) return showPage(container);
     if (hasClass(container,"fdjtfirstpage")) return false;
-    else if (head.previousSibling) 
-      return showPage(container,head.previousSibling,-1);
+    else if (head.previousSibling) {
+      return showPage(container,head.previousSibling,-1);}
     else return false;}
   showPage.backward=backwardPage;
+
+  function fastBackwardPage(container){
+    if (!(container=getContainer(container))) return;
+    var head=getChild(container,".fdjtstartofpage");
+    if (!(head)) return showPage(container);
+    if (hasClass(container,"fdjtfirstpage")) return false;
+    else if (head.previousSibling) {
+      var children=getNodes(container);
+      var off=children.indexOf(head);
+      var next_off=Math.floor(off/2);
+      return showPage(container,children[next_off],-1);}
+    else return false;}
+  showPage.fastBackward=fastBackwardPage;
 
   function updatePage(container){
     if (!(container=getContainer(container))) return;
