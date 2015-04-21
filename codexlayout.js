@@ -330,6 +330,15 @@ fdjt.CodexLayout=
         /* Duplicating nodes */
 
         var tmpid_count=1;
+        var dupstate=/\bcodexdup(start|end)?\b/g;
+        var codexstate=/\bcodex(dupstart|dup|dupend|relocated)\b/g;
+        function dupClass(classname,dupclass,pat){
+            if (!(pat)) pat=dupstate;
+            if (classname) {
+                if (classname.search(dupstate)<0)
+                    return classname+" "+dupclass;
+                else return classname.replace(dupstate,"")+" "+dupclass;}
+            else return dupclass;}
 
         // This recreates a node and it's DOM context (containers) on
         //  a new page, calling itself recursively as needed
@@ -369,18 +378,15 @@ fdjt.CodexLayout=
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
             if (!(duplist)) {
-                node.className=nodeclass+" codexdupstart";
+                node.className=dupClass(nodeclass,"codexdupstart");
                 stripBottomStyles(node,true);
                 stripTopStyles(copy,true);
-                copy.className=nodeclass.replace(/\bcodexrelocated\b/g,"")+
-                    " codexdupend";}
-            else copy.className=
-                nodeclass.replace(/\b(codexdupstart|codexdup)\b/,"")+" codexdupend";
+                copy.className=dupClass(nodeclass,"codexdupend");}
+            else copy.className=dupClass(nodeclass,"codexdupend");
             if (nodeclass.search(/\bcodexdupend\b/g)>=0) {
-                node.className=nodeclass.replace(/\bcodexdupend\b/g,"codexdup");
+                node.className=dupClass(nodeclass,"codexdup");
                 stripBottomStyles(node,true);}
-            if ((lastclass)&&
-                (lastclass.search(/\bcodexdupend\b/g)>=0)) {
+            if ((lastclass)&&(lastclass.search(/\bcodexdupend\b/g)>=0)) {
                 last_dup.className=lastclass.replace(
                         /\bcodexdupend\b/g,"codexdup");
                 stripBottomStyles(last_dup,true);}
@@ -1535,7 +1541,8 @@ fdjt.CodexLayout=
                         // This (dup) is the copied parent of the page
                         // break.  We append all the remaining children
                         // to this duplicated parent on the new page.
-                        if ((hasClass(node,"codexdup"))||(hasClass(node,"codexdupend")))
+                        if ((hasClass(node,"codexdup"))||
+                            (hasClass(node,"codexdupend")))
                             appendChildren(dup,push,1);
                         else moveChildren(dup,push,1);
                         if (trace>1)
