@@ -378,7 +378,7 @@ fdjt.CodexLayout=
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
             if (!(duplist)) {
-                node.className=dupClass(nodeclass,"codexdupstart");
+                node.className=dupClass(nodeclass,"codexdupstart",codexstate);
                 stripBottomStyles(node,true);
                 stripTopStyles(copy,true);
                 copy.className=dupClass(nodeclass,"codexdupend");}
