@@ -128,25 +128,31 @@ fdjt.String=
                 else return '<'+arg.nodeType+'>';}
             else if (arg.oid) return arg.oid;
             else if (arg._fdjtid) return '#@'+arg._fdjtid;
-            else if ((arg.type)&&((arg.target)||arg.srcElement)) {
+            else if ((arg.type)&&((arg.target)||(arg.srcElement))) {
                 var target=arg.target||arg.srcElement;
-                var ox=arg.clientX, oy=arg.clientY;
-                var result="["+arg.type+"@"+stringify(target)+"(m="+
-                    (((arg.shiftKey===true)?"s":"")+
-                     ((arg.ctrlKey===true)?"c":"")+
-                     ((arg.metaKey===true)?"m":"")+
-                     ((arg.altKey===true)?"a":"")+
-                     ((typeof arg.button !== "undefined")?
-                      (",b="+(arg.button)):(""))+
-                     ((typeof arg.which !== "undefined")?
-                      (",w="+(arg.which)):("")));
-                if ((typeof ox === "number")||(typeof oy === "number"))
-                    result=result+",cx="+ox+",cy="+oy;
-                if (arg.touches) result=result+",touches="+arg.touches.length;
-                if (arg.keyCode) result=result+",kc="+arg.keyCode;
-                if (arg.charCode) result=result+",cc="+arg.charCode;
-                return result+")]";}
+                return "["+arg.type+"@"+stringify(target)+
+                    ((((arg.target)||(arg.srcElement)).nodeType)?
+                     (getDOMEventInfo(arg)):(""))+"]";}
             else return ""+arg;}
+
+        function getDOMEventInfo(arg){
+            var info="(m="+
+                ((arg.shiftKey===true)?"s":"")+
+                ((arg.ctrlKey===true)?"c":"")+
+                ((arg.metaKey===true)?"m":"")+
+                ((arg.altKey===true)?"a":"")+
+                ((typeof arg.button !== "undefined")?
+                 (",b="+(arg.button)):(""))+
+                ((typeof arg.which !== "undefined")?
+                 (",w="+(arg.which)):(""));
+            var ox=arg.clientX, oy=arg.clientY;
+            if ((typeof ox === "number")||(typeof oy === "number"))
+                info=info+",cx="+ox+",cy="+oy;
+            if (arg.touches)
+                info=info+",touches="+arg.touches.length;
+            if (arg.keyCode) info=info+",kc="+arg.keyCode;
+            if (arg.charCode) info=info+",cc="+arg.charCode;
+            return info+")";}
 
         var spacechars=" \n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
 
