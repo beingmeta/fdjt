@@ -86,7 +86,7 @@ fdjt.Time=
             var hours=tstamp.getHours(), minutes=tstamp.getMinutes();
             var seconds=tstamp.getSeconds();
             return ((show_date)?(date_string):(""))+
-                ((show_date)?("@"):(""))
+                ((show_date)?(" - "):(""))+
                 ((hours<10)?"0":"")+hours+":"+
                 ((minutes===0)?"00":(((minutes<10)?"0":"")+minutes))+":"+
                 ((seconds===0)?"00":(((seconds<10)?"0":"")+seconds));}
