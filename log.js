@@ -32,9 +32,11 @@ fdjt.Log=(function(){
     var backlog=[];
 
     var use_console_log;
+    var compactString=fdjt.Time.compactString, ET=fdjt.ET;
 
     function fdjtLog(string){
-        var output=false; var now=fdjt.ET(); var i, lim;
+        var output=false; var now=ET(), date=new Date();
+        var i, lim;
         if (((fdjtLog.doformat)||(string.search("%j")))&&
             (typeof fdjtString !== 'undefined'))
             output=fdjtString.apply(null,arguments);
@@ -42,17 +44,20 @@ fdjt.Log=(function(){
             if (output) fdjtLog.console_fn.call(fdjtLog.console,output);
             else fdjtLog.console_fn.apply(fdjtLog.console,arguments);}
         if (fdjtLog.logurl) {
-            var msg="["+now+"s] "+fdjtString.apply(null,arguments);
+            var msg="["+now+"s "+compactString(date,false)+"] "+
+                fdjtString.apply(null,arguments);
             if (window.console)
                 window.console.log("remote logging %s",msg);
             remote_log(msg);}
         if (fdjtLog.console) {
             var domconsole=fdjtLog.console;
             var timespan=fdjt.DOM("span.time",now);
+            var abstime=fdjt.DOM("span.abstime",compactString(date));
             var entry=fdjt.DOM("div.fdjtlog");
             if (output) entry.innerHTML=output;
             else entry.innerHTML=fdjtString.apply(null,arguments);
             fdjt.DOM.prepend(entry,timespan);
+            fdjt.DOM.prepend(entry,abstime);
             if (typeof domconsole === 'string') {
                 var found=document.getElementById(domconsole);
                 if (found) {
@@ -112,7 +117,8 @@ fdjt.Log=(function(){
 
     fdjtLog.warn=function(){
         if ((!(fdjtLog.console_fn))&&
-            (!(window.console)&&(window.console.log)&&(window.console.log.count))) {
+            (!(window.console)&&(window.console.log)&&
+             (window.console.log.count))) {
             var output=fdjtString.apply(null,arguments);
             window.alert(output);}
         else fdjtLog.apply(null,arguments);};

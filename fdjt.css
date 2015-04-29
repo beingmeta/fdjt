@@ -647,6 +647,8 @@ div.fdjtlog { text-align: left; margin-left: 2em;}
 div.fdjtlog span.time {
     float: left; width: 6em; margin-right: 0.25ex;
     color: green; background-color: wheat;}
+div.fdjtlog span.abstime {
+    float: right; color: green; background-color: wheat;}
 
 /* Expansion */
 
@@ -1079,8 +1081,11 @@ div.fdjtdialog.fdjtconfirm div.choices button:focus {
     div.fdjtdialog {
 	font-size: 24px; font-size: 1.7rem;}}
 @media (pointer: coarse) {
+    div.fdjtdialog div.choices button {
+	font-size: 110%;
+	min-width: 100px;}
     div.fdjtdialog {
-	font-size: 150%;
+	font-size: 1.5rem;
 	font-size: 5vw;}}
 
 /* Tap Hold */
