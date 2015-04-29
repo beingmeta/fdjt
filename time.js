@@ -72,6 +72,26 @@ fdjt.Time=
         fdjtTime.tick2shortstring=function(tick){
             return shortString(new Date(tick*1000));};
 
+        var first_date=false;
+        function compactString(tstamp,curdate){
+            if (typeof tstamp === 'number') {
+                if (tstamp<131592918600)
+                    tstamp=new Date(tstamp*1000);
+                else tstamp=new Date(tstamp);}
+            var date_string=tstamp.toLocaleDateString();
+            if (typeof curdate==="undefined") {
+                if (first_date) curdate=first_date;
+                else first_date=new Date().toLocaleDateString();}
+            var show_date=(date_string!==curdate);
+            var hours=tstamp.getHours(), minutes=tstamp.getMinutes();
+            var seconds=tstamp.getSeconds();
+            return ((show_date)?(date_string):(""))+
+                ((show_date)?("@"):(""))
+                ((hours<10)?"0":"")+hours+":"+
+                ((minutes===0)?"00":(((minutes<10)?"0":"")+minutes))+":"+
+                ((seconds===0)?"00":(((seconds<10)?"0":"")+seconds));}
+        fdjtTime.compactString=compactString;
+        
         fdjtTime.tick2string=function(tick){
             return (new Date(tick*1000)).toString();};
         fdjtTime.tick2date=function(tick){
