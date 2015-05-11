@@ -1457,7 +1457,7 @@ fdjt.CodexLayout=
                 function splitBlock(node,info,style,use_height){
                     if (!(use_height)) use_height=page_height;
                     if (!(style)) style=getStyle(node);
-                    if ((!(break_blocks))||(avoidBreakInside(node,style))||
+                    if ((!(break_blocks))||(info.avoidbreakinside)||
                         (!(node.childNodes))||(node.childNodes.length===0)) {
                         // Simplest case, if we can't split, we just
                         // make a new page starting with the node.
@@ -1509,7 +1509,7 @@ fdjt.CodexLayout=
                     // overall height is small.
                     if ((use_height===page_height)&&
                         ((init_geom.bottom-page_height)<(line_height*1.2))&&
-                        ((init_geom.height)<(line_height*3))) {
+                        ((init_geom.height)>(line_height*3))) {
                         use_height=page_height-floor(line_height);}
                     // When splitChildren called, <node> is already
                     // empty and it's children are all in <children>
@@ -1744,9 +1744,11 @@ fdjt.CodexLayout=
                     while (bi<blen) {
                         var s=breaks[bi++]; var ws;
                         if ((ws=s.search(/\s/))>=0) { /* Includes whitespace */
-                            if (ws===0) { /* Starts with whitespace */
-                                if (word) words.push(word);
-                                if (bi<blen) word=s+breaks[bi++];
+                            if (ws===0) { /* s is a break (it starts with whitespace) */
+                                if (bi>=blen) word=s;
+                                else if ((word)&&(/ +/.exec(s)))
+                                    word=word+s+breaks[bi++];
+                                else if (word) {words.push(word); word=s;}
                                 else word=s;}
                             else {
                                 if (word) words.push(word+s);
