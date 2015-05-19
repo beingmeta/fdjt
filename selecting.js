@@ -519,8 +519,9 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     while (i<lim) {
                         var wrapper=wrappers[i++];
                         whole.appendChild(wrapper.cloneNode(true));}}
-                var found=fdjtDOM.findString(whole,string);
-                if (!(found)) return;
+                var found=fdjtDOM.findMatches(whole,string,0,1);
+                if ((!(found))||(found.length===0)) return;
+                else found=found[0];
                 var start=found.startContainer, end=found.endContainer;
                 while ((start)&&(start.nodeType!==1)) start=start.parentNode;
                 while ((end)&&(end.nodeType!==1)) end=end.parentNode;
