@@ -2614,8 +2614,9 @@ fdjt.DOM=
             if (shyphens) {
                 needle=needle.replace("­","");
                 return ((before||"")+
-                        (needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
-                                /\S/g,"$&­?").replace("­? "," ").replace(/\s+/g,"(\\s+)"))+
+                        (needle.replace(/\S/g,"$&­?").
+                         replace(/([()\[\]\.\?\+\*])­\?/gm,"[$1]").
+                         replace("­? "," ").replace(/\s+/g,"(\\s+)"))+
                         (after||""));}
             else return (((before)||(""))+
                          (needle.replace(/[()\[\]\.\?\+\*]/gm,"[$&]").replace(
@@ -2623,24 +2624,27 @@ fdjt.DOM=
                          ((after)||("")));}
         fdjtDOM.getRegexString=getRegexString;
 
-        function textRegExp(needle,foldcase,before,after){
-            return new RegExp(getRegexString(needle,true,before,after),
+        function textRegExp(needle,foldcase,shyphens,before,after){
+            if (typeof shyphens==="undefined") shyphens=true;
+            return new RegExp(getRegexString(needle,shyphens,before,after),
                               ((foldcase)?("igm"):("gm")));}
         fdjtDOM.textRegExp=textRegExp;
-        function wordRegExp(needle,foldcase){
-            return new RegExp(getRegexString(needle,true,"\\b","\\b"),
+        function wordRegExp(needle,foldcase,shyphens){
+            if (typeof shyphens==="undefined") shyphens=true;
+            return new RegExp(getRegexString(needle,shyphens,"\\b","\\b"),
                               ((foldcase)?("igm"):("gm")));}
         fdjtDOM.wordRegExp=wordRegExp;
 
         function findString(node,needle,off,count){
             if (typeof off === 'undefined') off=0;
             if (typeof count === 'undefined') count=1;
+            needle=needle.replace(/­/mg,"");
             var match=false;
             var fulltext=node2text(node);
             var sub=((off===0)?(fulltext):(fulltext.slice(off)));
             var scan=sub.replace(/­/mg,"");
             var pat=((typeof needle === 'string')?
-                     (textRegExp(needle)):
+                     (textRegExp(needle,false,false)):
                      (needle));
             while ((match=pat.exec(scan))) {
                 if (count===1) {
