@@ -241,8 +241,8 @@ fdjt.DOM=
             else return false;}
         fdjtDOM.parsePX=parsePX;
 
-        function getLineHeight(node){
-            var style=getStyle(node);
+        function getLineHeight(node,style){
+            if (!(style)) style=getStyle(node);
             var lh=style.lineHeight, fs=style.fontSize;
             if (lh==="normal") return parsePX(fs);
             else if (lh.search(/px$/)>0) return parsePX(lh);
