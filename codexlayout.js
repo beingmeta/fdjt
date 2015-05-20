@@ -1491,7 +1491,7 @@ fdjt.CodexLayout=
                         // (we'll adjust afterwards).
                         else use_height=page_height+floor(line_height*1.2);}
                     // Copy all the children into an array
-                    var children=toArray(node.childNodes);
+                    var children=nodeChildren(node);
                     // and remove all of them at once
                     node.innerHTML="";
                     var geom=getGeom(node,page);
@@ -1554,6 +1554,24 @@ fdjt.CodexLayout=
                             logfn("Layout/splitBlock %o @ %o into %o on %o",
                                   node,page_break,dup,page);
                         return dup;}}
+
+                function nodeChildren(node){
+                    var children=node.childNodes, results=[];
+                    var i=0, lim=children.length; while (i<lim) {
+                        var child=children[i++];
+                        if (child.nodeType!==3) results.push(child);
+                        else {
+                            var text=child.nodeValue;
+                            var head_match=/^[,.!?;%$#@“”‘’`”‼‡…’‛⁇„⹂"']+/.exec(text);
+                            if (head_match) {
+                                results.push(document.createTextNode(head_match[0]));
+                                text=text.slice(head_match[0].length);}
+                            var foot_loc=text.search(/[,.!?;%$#@“”‘’`”‼‡…’‛⁇„⹂"']+$/);
+                            if (foot_loc>=0) {
+                                results.push(document.createTextNode(text.slice(0,foot_loc)));
+                                results.push(document.createTextNode(text.slice(foot_loc)));}
+                            else results.push(document.createTextNode(text));}}
+                    return results;}
 
                 function splitChildren(node,children,init_geom,use_page_height){
                     /* node is an emptied node and children are its
