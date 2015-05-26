@@ -2225,10 +2225,7 @@ fdjt.DOM=
             evt.cancelBubble=true;};
 
         function triggerClick(elt){
-            if (elt.click) {
-                try { elt.click(); return;}
-                catch(ex) {}}
-            else if (document.createEvent) { // in chrome
+            if (document.createEvent) { // in chrome
                 var e = document.createEvent('MouseEvents');
                 e.initEvent( 'click', true, true );
                 elt.dispatchEvent(e);
