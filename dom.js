@@ -2224,6 +2224,20 @@ fdjt.DOM=
             else evt.returnValue=false;
             evt.cancelBubble=true;};
 
+        function triggerClick(elt){
+            if (elt.click) {
+                try { elt.click(); return;}
+                catch(ex) {}}
+            else if (document.createEvent) { // in chrome
+                var e = document.createEvent('MouseEvents');
+                e.initEvent( 'click', true, true );
+                elt.dispatchEvent(e);
+                return;}
+            else {
+                fdjtLog.warn("Couldn't trigger click");
+                return;}}
+        fdjtDOM.triggerClick=triggerClick;
+
         /* Scaling to fit using CSS transforms */
 
         function scale_node(node,fudge,origin,shrink){
