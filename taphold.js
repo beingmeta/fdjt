@@ -277,7 +277,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var trace=0;
         
         var clickable=
-            ((opts.clickable)&&
+            ((opts)&&(opts.clickable)&&
              ((opts.clickable===true)?(new Selector("a[href]")):
               (typeof opts.clickable === "string")?
               (new Selector(opts.clickable)):
