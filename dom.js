@@ -549,6 +549,8 @@ fdjt.DOM=
                     if (sel) compound.push(sel);}
                 this.compound=compound;
                 selectors[spec]=this;
+                if (typeof spec === "string") this.spec=spec;
+                else this.spec=specs.join(",");
                 return this;}
             // Otherwise, parse and set up this
             var elts=spec.match(css_selector_regex);
@@ -584,8 +586,13 @@ fdjt.DOM=
             this.rank=[0,((this.id)?(1):(0)),
                        classnames.length+attribs.length,1];
             selectors[spec]=this;
+            this.spec=spec;
             return this;}
         Selector.prototype.match=function(elt){
+            if (elt.matches) 
+                return elt.matches(this.spec);
+            else if (elt.matchesSelector)
+                return elt.matchesSelector(this.spec);
             var i, lim;
             if (this.compound) {
                 var compound=this.compound; i=0; lim=compound.length;
