@@ -1192,6 +1192,8 @@ html._TOUCH .fdjtselecting .fdjtselectend:hover {
     margin: 0px !important;
     padding: 0px !important;
     border: 0px !important;}
+div.fdjtfontwrapper {
+    display: inline-block !important;}
 
 /* For printing */
 
