@@ -45,7 +45,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
     var hasClass=fdjtDOM.hasClass;
     var getParent=fdjtDOM.getParent;
     var hasParent=fdjtDOM.hasParent;
-    var Selector=fdjtDOM.Selector;
     var reticle=fdjtUI.Reticle;
 
     var noBubble=fdjtUI.noBubble;
