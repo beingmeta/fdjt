@@ -1049,7 +1049,8 @@ fdjt.CodexLayout=
                         return;
                     if (((atomic)&&(atomic.match(node)))||
                         (style.display==='table-row')||
-                        (avoidBreakInside(node,style))) {
+                        ((node.tagName!=='BR')&&(node.tagName!=='HR')&&
+                         (avoidBreakInside(node,style)))) {
                         if (node.offsetWidth>page_width) {
                             var w=node.offsetWidth, sw=w/page_width;
                             scaleToPage(node,page_width,sw*node.offsetHeight,true);}
@@ -1555,6 +1556,7 @@ fdjt.CodexLayout=
                                   node,page_break,dup,page);
                         return dup;}}
 
+                /*
                 function nodeChildren(node){
                     var children=node.childNodes, results=[];
                     var last=false, next=children[0];
@@ -1564,6 +1566,12 @@ fdjt.CodexLayout=
                             var child=children[i++]; next=children[i];
                             if (child.nodeType!==3) results.push(child);
                             else {
+                                // We separate out leading and
+                                // trailing punctuation because those
+                                // may be attached with preceding or
+                                // succeeding elements and text
+                                // splitting normally operations on
+                                // text runs as a whole.
                                 var text=child.nodeValue;
                                 var head_match=/^[,.!?;%$#@“”‘’`”‼‡…’‛⁇„⹂"']+/.exec(text);
                                 if ((head_match)&&(last)&&(last.nodeType!==3)) {
@@ -1578,6 +1586,8 @@ fdjt.CodexLayout=
                                 else results.push(document.createTextNode(text));}
                             last=child;}
                         return results;}}
+                */
+                function nodeChildren(node){return toArray(node.childNodes);}
 
                 function splitChildren(node,children,init_geom,use_page_height){
                     /* node is an emptied node and children are its
@@ -1606,18 +1616,15 @@ fdjt.CodexLayout=
                         // the child that broke the page.
                         var i=0, n=children.length;
                         while (i<n) {
-                            var child=children[i++], next=children[i], span=1;
+                            var child=children[i++];
                             // node.innerHTML="";
                             //appendChildren(node,children,0,i);
                             node.appendChild(child);
-                            if ((next)&&(next.nodeType===3)&&
-                                (next.nodeValue.search(/^[.,;~?"'-]/)===0)) {
-                                node.appendChild(children[i++]); span++;}
                             // Add the child back and get the geometry
                             geom=getGeom(node,page);
                             if (geom.bottom>use_page_height) {
                                 page_break=child; breaktype=child.nodeType;
-                                breakpos=i-span;
+                                breakpos=i;
                                 break;}
                             else continue;}}
                     if (!(page_break))  // Never went over the edge
@@ -1663,7 +1670,9 @@ fdjt.CodexLayout=
                         // If the break is at the head, push the whole
                         // node to the next page, otherwise, 
                         if (breakpos===0) return node;
-                        else return children.slice(breakpos);}
+                        else {
+                            original.parentNode.removeChild(original);
+                            return children.slice(breakpos);}}
                     else {
                         // Check if just the first word pushes us over
                         // the edge, a relatively common case
@@ -1672,8 +1681,13 @@ fdjt.CodexLayout=
                         probenode=wprobe; geom=getGeom(node,page);
                         if (geom.bottom>use_page_height) {
                             text_parent.replaceChild(original,probenode);
-                            if (children.length===1) 
-                                return node;
+                            if (children.length===1) return node;
+                            else if (breakpos===0) return node;
+                            else if ((words[0].search(/^[.,;~?!:"'”’)\]-]/))===0) {
+                                if (breakpos===1) return node;
+                                else {
+                                    probenode.parentNode.removeChild(probenode);
+                                    return children.slice(breakpos-1);}}
                             else return children.slice(breakpos);}
                         else {
                             text_parent.replaceChild(textsplit,wprobe);
@@ -2350,6 +2364,7 @@ fdjt.CodexLayout=
                 return (style.pageBreakInside==='avoid')||
                     (style.display==='table-row')||
                     ((style.display==="block")&&
+                     (elt.childNodes)&&(elt.childNodes.length)&&
                      ((lh)&&((lh*2.5)>elt.offsetHeight)));}
             this.avoidBreakInside=avoidBreakInside;
             function mustBreakInside(elt){
