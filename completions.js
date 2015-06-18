@@ -33,6 +33,9 @@ if (!(fdjt.UI)) fdjt.UI={};
     var fdjtUI=fdjt.UI;
     var RefDB=fdjt.RefDB, fdjtID=fdjt.ID;
 
+    var rAF=fdjtDOM.requestAnimationFrame;
+    var async=fdjt.async;
+
     var serial=0;
 
     /* Constants */
@@ -276,7 +279,7 @@ if (!(fdjt.UI)) fdjt.UI={};
                 result=getNodes(string,this.prefixtree,this.bykey,
                                 ((this.options)&(FDJT_COMPLETE_MATCHCASE)));
                 if (this.dom) dropClass(this.dom,"noinput");
-                updateDisplay(this,result.matches);}
+                rAF(function(){updateDisplay(this,result.matches);});}
             if ((this.stringmap)&&(this.strings)) {
                 var stringmap=this.stringmap;
                 var strings=this.strings;
@@ -315,24 +318,27 @@ if (!(fdjt.UI)) fdjt.UI={};
                     (hasClass(this.input,"isempty"))?(""):
                     (this.input.value));
         if (isEmpty(string)) {
-            if (this.displayed) updateDisplay(this,false);
-            addClass(this.dom,"noinput");
-            dropClass(this.dom,"nomatches");
-            if (callback) callback([]);
+            rAF(function(){
+                if (this.displayed) updateDisplay(this,false);
+                addClass(this.dom,"noinput");
+                dropClass(this.dom,"nomatches");
+                if (callback) async(function(){callback([]);});});
             return [];}
         var result=this.getCompletions(string);
         if ((!(result))||(result.length===0)) {
-            updateDisplay(this,false);
-            dropClass(this.dom,"noinput");
-            addClass(this.dom,"nomatches");
-            if (callback) callback(result);
+            rAF(function(){
+                updateDisplay(this,false);
+                dropClass(this.dom,"noinput");
+                addClass(this.dom,"nomatches");
+                if (callback) async(function(){callback(result);});});
             return [];}
         else {
-            updateDisplay(this,result.matches);
-            dropClass(this.dom,"noinput");
-            dropClass(this.dom,"nomatches");}
-        if (callback) callback(result);
-        return result;};
+            rAF(function(){
+                updateDisplay(this,result.matches);
+                dropClass(this.dom,"noinput");
+                dropClass(this.dom,"nomatches");
+                if (callback) async(function(){callback(result);});});
+            return result;}};
 
     Completions.prototype.getByValue=function(values,spec){
         if (!(this.initialized)) initCompletions(this);
