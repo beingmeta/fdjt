@@ -351,8 +351,6 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (!(word.offsetParent)) return;
             if (!(sel.start)) {
                 var initial=initSelect(word);
-                // We could have some smarts here to include quoted
-                //  phrases, capitalization runs, etc.
                 sel.setRange(initial.start,initial.end);}
             else if (sel.anchor)
                 sel.setRange(sel.anchor,word);
@@ -407,13 +405,13 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
 
         function initSelect(word){
             var begin=word, end=word, scan, last;
-            if (!(nodeSearch(word,/"'\(\[\{/))) {
+            if (!(nodeSearch(word,/"\(\[\{/))) {
                 last=begin; scan=begin.previousSibling;
                 while (scan) {
                     if ((scan.nodeType!==1)||
                         (!(hasClass(scan,"fdjtword")))) {
                         scan=scan.previousSibling; continue;}
-                    if (nodeSearch(scan,/["'\(\[\{]/)) {
+                    if (nodeSearch(scan,/["\(\[\{]/)) {
                         begin=scan; break;}
                     else if (nodeSearch(scan,/[.;!?]/)) {
                         begin=last; break;}
@@ -426,7 +424,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     if ((scan.nodeType!==1)||
                         (!(hasClass(scan,"fdjtword")))) {
                         scan=scan.nextSibling; continue;}
-                    if (nodeSearch(scan,/["'.;!?]/)) {
+                    if (nodeSearch(scan,/[".;!?]/)) {
                         end=scan; break;}
                     else {
                         last=scan; scan=scan.nextSibling;}}
@@ -648,7 +646,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             function hold_handler(evt){
                 evt=evt||window.event;
                 var target=fdjtUI.T(evt);
-                while ((target)&&(target.nodeType!==1)) target=target.parentNode;
+                while ((target)&&(target.nodeType!==1))
+                    target=target.parentNode;
                 while (target) {
                     if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
                         (target.id.search("fdjtSel")===0)) {
@@ -658,7 +657,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         if ((traceall)||((sel)&&(sel.traced)))
                             fdjtLog("TextSelect/hold %o t=%o sel=%o",
                                     evt,target,sel);
-                        if (overWord(target,false,sel)) fdjtUI.cancel(evt);
+                        overWord(target,false,sel);
+                        fdjtUI.cancel(evt);
                         break;}
                     else if (target.nodeType===1) target=target.parentNode;
                     else break;}}
@@ -667,7 +667,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             function tap_handler(evt){
                 evt=evt||window.event;
                 var target=fdjtUI.T(evt);
-                while ((target)&&(target.nodeType!==1)) target=target.parentNode;
+                while ((target)&&(target.nodeType!==1))
+                    target=target.parentNode;
                 while (target) {
                     if ((target)&&(target.id)&&(target.tagName==='SPAN')&&
                         (target.id.search("fdjtSel")===0)) {
