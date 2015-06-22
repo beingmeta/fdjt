@@ -1624,10 +1624,10 @@ fdjt.CodexLayout=
                             geom=getGeom(node,page);
                             if (geom.bottom>use_page_height) {
                                 page_break=child; breaktype=child.nodeType;
-                                breakpos=i;
+                                breakpos=i-1;
                                 break;}
                             else continue;}}
-                    if (!(page_break))  // Never went over the edge
+                    if (breakpos<0)  // Never went over the edge
                         return false;
                     // If we get here, this child pushed the node over the edge
                     else if (breaktype===3) {
@@ -1675,21 +1675,36 @@ fdjt.CodexLayout=
                             return children.slice(breakpos);}}
                     else {
                         // Check if just the first word pushes us over
-                        // the edge, a relatively common case
+                        // the edge, a relatively common case.  If so,
+                        // we push the whole node over
                         var wprobe=document.createTextNode(words[0]);
                         text_parent.replaceChild(wprobe,probenode);
                         probenode=wprobe; geom=getGeom(node,page);
                         if (geom.bottom>use_page_height) {
                             text_parent.replaceChild(original,probenode);
-                            if (children.length===1) return node;
-                            else if (breakpos===0) return node;
+                            if (breakpos===0) return node;
                             else if ((words[0].search(/^[.,;~?!:"'”’)\]-]/))===0) {
+                                // If the first word is some sort of
+                                // closing punctuation, we really want
+                                // to break at the preceding child.
+                                // If that's the first child
+                                // (breakpos==1), we push the whole
+                                // node, otherwise, we remove the
+                                // probe and return the remainder of
+                                // the children including the previous
+                                // child.
                                 if (breakpos===1) return node;
                                 else {
                                     probenode.parentNode.removeChild(probenode);
                                     return children.slice(breakpos-1);}}
-                            else return children.slice(breakpos);}
+                            else {
+                                // We don't bother splitting this
+                                // text if the first word pushes us
+                                // over the edge.
+                                return children.slice(breakpos);}}
                         else {
+                            // Now we go ahead and use splitWords to
+                            // split the text.
                             text_parent.replaceChild(textsplit,wprobe);
                             probenode=textsplit;}}
                     var foundbreak=splitWords(
