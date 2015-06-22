@@ -965,7 +965,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else trace=0;
             return cur;};
 
-        this.debug=function(){debugger;};
+        this.debug=function(){
+            // jshint debug:true
+            debugger;};
         
         if ((trace)||(traceall))
             fdjtLog("New TapHold(%s) for %o: %o opts %j, trace=%o/%o",

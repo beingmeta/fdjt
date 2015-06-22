@@ -766,10 +766,16 @@ fdjt.CodexLayout=
                 (fdjtState.getLocal("codexlayout.trace",true))||0;
             var track=init.track||CodexLayout.track||
                 (fdjtState.getLocal("codexlayout.track"))||false;
+            var debug=init.debug||CodexLayout.debug||
+                fdjtState.getLocal("codexlayout.debug")||false;
             if (track) {
                 this.track=track=fdjtDOM.Selector(track);
                 if (!(trace)) trace=this.tracelevel=1;}
-            else this.track=false;
+            if (debug) {
+                this.debug=debug=fdjtDOM.Selector(debug);
+                if (!(trace)) trace=this.tracelevel=1;}
+            else this.debug=false;
+            if (trace) addClass(document.body,"debugcodexlayout");
             this.roots=init.roots||[]; // Where all roots can be tracked
             this.root_count=0; // Number of root nodes added
             this.block_count=0;
@@ -929,6 +935,10 @@ fdjt.CodexLayout=
                               block,block_i,root,page);
                         tracing=true;}
                     
+                    if ((trace)&&(block)&&(debug)&&(debug.match(block))) {
+                        // jshint debug:true
+                        debugger;}
+
                     // FIRST, HANDLE DRAGGING
                     handle_dragging(block,terminal,info,style);
                     
