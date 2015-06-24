@@ -1680,9 +1680,7 @@ fdjt.CodexLayout=
                         // If the break is at the head, push the whole
                         // node to the next page, otherwise, 
                         if (breakpos===0) return node;
-                        else {
-                            original.parentNode.removeChild(original);
-                            return children.slice(breakpos);}}
+                        else return children.slice(breakpos);}
                     else {
                         // Check if just the first word pushes us over
                         // the edge, a relatively common case.  If so,
