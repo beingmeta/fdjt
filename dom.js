@@ -3051,15 +3051,18 @@ fdjt.DOM=
 
         fdjt.addInit(autoAdjustFonts);
         
-        function addUSClasses(){
+        function addUXClasses(){
             var device=fdjt.device;
             var prefix=fdjt.cxprefix||"_";
-            if (device.ios) addClass(document.body,prefix+"IOS");
-            if (device.touch) addClass(document.body,prefix+"TOUCH");
-            if (device.mouse) addClass(document.body,prefix+"MOUSE");
-            if (device.android) addClass(document.body,prefix+"Android");}
-        fdjtDOM.addUSClasses=addUSClasses;
-        fdjtDOM.addCXClasses=addUSClasses;
+            var html=document.documentElement;
+            if (device.ios) addClass(html,prefix+"IOS");
+            if (device.touch) addClass(html,prefix+"TOUCH");
+            if (device.mouse) addClass(html,prefix+"MOUSE");
+            if (device.android) addClass(html,prefix+"Android");}
+        fdjtDOM.addUXClasses=addUXClasses;
+        fdjtDOM.addUSClasses=addUXClasses;
+        fdjtDOM.addCXClasses=addUXClasses;
+        fdjt.addInit(addUXClasses,"AddUXClasses");
 
         function windowFocus(evt){
             evt=evt||window.event; addClass(document.body,"_FOCUS");}

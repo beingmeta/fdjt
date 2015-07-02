@@ -77,8 +77,11 @@
                      inits.length,names.join());
         var i=0; var lim=inits.length;
         while (i<lim) {
-            if (run[i]) i++; else {
-                run[i]=true; inits[i++](); }}
+            if (run[i]) i++; 
+            else {
+                run[i]=true; 
+                inits[i]();
+                i++;}}
         inits_run=true;};
 
     var numpat=/^\d+(\.\d+)$/;
