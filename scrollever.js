@@ -55,6 +55,15 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
             else {
                 fdjtLog.warn("No container %s",container);
                 return;}}
+        var wrapper=spec.wrapper||
+            fdjtDOM.getMeta("~{http://fdjt.org/}scrollwrapper")||
+            fdjtDOM.getMeta("~scrollwrapper")||
+            "FDJTSCROLLWRAPPER";
+        if (typeof wrapper === 'string') {
+            if (fdjtID(wrapper)) wrapper=fdjtID(wrapper);
+            else {
+                fdjtLog.warn("No wrapper %s",container);
+                wrapper=false;}}
         var thresh=spec.thresh||
             fdjtDOM.getMeta("~{http://fdjt.org/}scrollthresh")||
             fdjtDOM.getMeta("~scrollthresh")||
@@ -122,18 +131,24 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
 
         function scrollChecker(){
             if (busy) return;
-            var iscroll=spec.iscroll||window.iscroller||false;
-            var page_height=(iscroll)?(iscroll.scrollerH):
-                (document.documentElement.scrollHeight);
-            var scroll_pos=(iscroll)?(-iscroll.y):
-                (window.pageYOffset);
-            if ((!(iscroll))&&(typeof scroll_pos !== 'number'))
-                scroll_pos=document.documentElement.scrollTop;
-            var client_height=(iscroll)?(iscroll.wrapperH):
-                (document.documentElement.clientHeight);
-            if (((page_height-(scroll_pos+client_height))<thresh)||
-                (page_height<client_height))
-                getMoreResults();}
+            if (wrapper) {
+                var top=wrapper.scrollTop, sh=wrapper.scrollHeight;
+                var oh=wrapper.offsetHeight;
+                if ((sh<=oh)||((top+(oh*2))>=sh))
+                    getMoreResults();}
+            else {
+                var iscroll=spec.iscroll||window.iscroller||false;
+                var page_height=(iscroll)?(iscroll.scrollerH):
+                    (document.documentElement.scrollHeight);
+                var scroll_pos=(iscroll)?(-iscroll.y):
+                    (window.pageYOffset);
+                if ((!(iscroll))&&(typeof scroll_pos !== 'number'))
+                    scroll_pos=document.documentElement.scrollTop;
+                var client_height=(iscroll)?(iscroll.wrapperH):
+                    (document.documentElement.clientHeight);
+                if (((page_height-(scroll_pos+client_height))<thresh)||
+                    (page_height<client_height))
+                    getMoreResults();}}
         timer=setInterval(scrollChecker,interval);
         return timer;}
     return fdjtScrollEver;})();
