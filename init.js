@@ -186,6 +186,7 @@
         if (isRedHat) device.redhat=true;
         if (isLinux) device.linux=true;
         if (isTouch) device.touch=true;
+        else device.mouse=true;
         fdjtLog("Device: %j",device);}
     
     (function(){
