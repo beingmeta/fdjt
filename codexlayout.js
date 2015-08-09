@@ -1685,7 +1685,7 @@ fdjt.CodexLayout=
                         // Check if just the first word pushes us over
                         // the edge, a relatively common case.  If so,
                         // we push the whole node over
-                        var wprobe=document.createTextNode(words[0]), foundbreak=-1;
+                        var wprobe=document.createTextNode(words[0]);
                         text_parent.replaceChild(wprobe,probenode);
                         probenode=wprobe; geom=getGeom(node,page);
                         if (geom.bottom>use_page_height) {
@@ -1715,9 +1715,8 @@ fdjt.CodexLayout=
                             // split the text.
                             text_parent.replaceChild(textsplit,wprobe);
                             probenode=textsplit;}}
-                    if (foundbreak<0)
-                        foundbreak=splitWords(
-                            text_parent,probenode,words,node,use_page_height);
+                    var foundbreak=splitWords(
+                        text_parent,probenode,words,node,use_page_height);
                     // We're done searching for the word break
                     if ((foundbreak===0)||(foundbreak===(words.length-1))) {
                         // Revert (don't actually do any text splitting)
