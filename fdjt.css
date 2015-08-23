@@ -86,7 +86,7 @@ div.fdjtclearfloats {
    checkspans to avoid distorting layouts too much. */
 span.checkspan, th.checkspan, td.checkspan,
 .inlinecheckspan, .flatcheckspan {
-    color: gray;}
+    color: rgba(0,0,0,0.7);}
 
 .checkspan .alt { font-size: inherit; color: black;}
 span.checkspan, a.checkspan { white-space: nowrap; }
