@@ -1,0 +1,14 @@
+div.logentry {
+  margin-left: 0px; margin-top: 3px; margin-bottom: 1em;
+  border-top: solid black 2px;
+  font-family: sans,sans-serif;}
+div.logentry span.loglevel {
+    float: left; font-weight: bold; color: green;}
+div.logentry datetime { float: right; font-variant: small-caps;}
+div.logentry span.condition {
+    font-family: fixed; padding-left: 2em;}
+div.logentry span.message {
+    display: block; white-space: pre;
+    margin-left: 1em; clear: both;
+    font-family: fixed;
+    overflow: auto;}
