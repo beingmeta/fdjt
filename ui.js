@@ -556,7 +556,30 @@ fdjt.UI.ProgressBar=(function(){
     fdjt.UI.InputHelp.onfocus=show_help_onfocus;
     fdjt.UI.InputHelp.onblur=hide_help_onblur;})();
 
+/* Automatic classes for focused children */
 
+(function(){
+    "use strict";
+    var fdjtDOM=fdjt.DOM, fdjtUI=fdjt.UI;
+    var addListener=fdjtDOM.addListener;
+    var body=document.body;
+    addListener(window,"focusin",function(evt){
+        var scan=fdjtUI.T(evt);
+        while (scan) {
+            var classname=scan.className;
+            if ((classname)&&(typeof classname === "string")&&
+                (classname.search(/\bfdjtfoci\b/)>=0)&&
+                (classname.search(/\bfdjtfocus\b/)<0))
+                scan.className=classname+" fdjtfocus";
+            scan=scan.parentNode;}});
+    addListener(window,"focusout",function(evt){
+        var scan=fdjtUI.T(evt);
+        while (scan) {
+            var classname=scan.className;
+            if ((classname)&&(typeof classname === "string")&&
+                (classname.search(/\bfdjtfocus\b/)>=0))
+                scan.className=classname.replace(/ fdjtfocus\b/,"");
+            scan=scan.parentNode;}});})();
 
 /* Text input boxes which create checkspans on enter. */
 
