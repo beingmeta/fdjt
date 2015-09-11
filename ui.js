@@ -562,9 +562,12 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtDOM=fdjt.DOM, fdjtUI=fdjt.UI;
     var addListener=fdjtDOM.addListener;
-    var body=document.body;
     addListener(window,"focusin",function(evt){
         var scan=fdjtUI.T(evt);
+        if (!((scan.tagName==='TEXTAREA')||
+              ((scan.tagName==='INPUT')&&
+               (/text|email/i.exec(scan.type)))))
+            return;
         while (scan) {
             var classname=scan.className;
             if ((classname)&&(typeof classname === "string")&&
@@ -574,6 +577,10 @@ fdjt.UI.ProgressBar=(function(){
             scan=scan.parentNode;}});
     addListener(window,"focusout",function(evt){
         var scan=fdjtUI.T(evt);
+        if (!((scan.tagName==='TEXTAREA')||
+              ((scan.tagName==='INPUT')&&
+               (/text|email/i.exec(scan.type)))))
+            return;
         while (scan) {
             var classname=scan.className;
             if ((classname)&&(typeof classname === "string")&&
