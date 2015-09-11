@@ -278,7 +278,12 @@ div.fdjtdata {
 
 /* Generic table stuff */
 
-tr.padding { height: 1ex;}
+tr.padding, tr.padding td { height: 1ex;}
+tr.spacer, tr.spacer td { height: 1em;}
+tr.separator { height: 1em;}
+tr.separator td { border-bottom: solid black 2px;}
+tr.subhead { font-size: 130%; }
+tr.subhead td, tr.subhead th { padding-bottom: 1ex;}
 
 /* Data tables */
 
@@ -1212,9 +1217,9 @@ input.fdjtemailinput, input[TYPE="EMAIL"] {
     background-size: auto 100%;
     background-position: right;}
 body._USESVG input.fdjtemailinput,body._USESVG input[TYPE="EMAIL"] { 
-    background-image: url(/static/fdjt/email_bg.svg);}
+    background-image: url(/static/fdjt/email_bg.svgz);}
 html._USESVG input.fdjtemailinput,html._USESVG input[TYPE="EMAIL"] { 
-    background-image: url(/static/fdjt/email_bg.svg);}
+    background-image: url(/static/fdjt/email_bg.svgz);}
 
 input[TYPE="TEXT"].markdowninput, textarea.markdowninput {
     background-image: url(/static/fdjt/markdown-solid_bg.png);
