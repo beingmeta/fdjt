@@ -280,7 +280,7 @@ div.fdjtdata {
 
 tr.padding, tr.padding td { height: 1ex;}
 tr.spacer, tr.spacer td { height: 1em;}
-tr.separator { height: 1em;}
+tr.separator { height: 2em;}
 tr.separator td { border-bottom: solid black 2px;}
 tr.subhead { font-size: 130%; }
 tr.subhead td, tr.subhead th { padding-bottom: 1ex;}
