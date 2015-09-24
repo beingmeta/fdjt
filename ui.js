@@ -562,31 +562,45 @@ fdjt.UI.ProgressBar=(function(){
     "use strict";
     var fdjtDOM=fdjt.DOM, fdjtUI=fdjt.UI;
     var addListener=fdjtDOM.addListener;
-    addListener(window,"focusin",function(evt){
-        var scan=fdjtUI.T(evt);
-        if (!((scan.tagName==='TEXTAREA')||
-              ((scan.tagName==='INPUT')&&
-               (/text|email/i.exec(scan.type)))))
-            return;
-        while (scan) {
-            var classname=scan.className;
-            if ((classname)&&(typeof classname === "string")&&
-                (classname.search(/\bfdjtfoci\b/)>=0)&&
-                (classname.search(/\bfdjtfocus\b/)<0))
-                scan.className=classname+" fdjtfocus";
-            scan=scan.parentNode;}});
-    addListener(window,"focusout",function(evt){
-        var scan=fdjtUI.T(evt);
-        if (!((scan.tagName==='TEXTAREA')||
-              ((scan.tagName==='INPUT')&&
-               (/text|email/i.exec(scan.type)))))
-            return;
-        while (scan) {
-            var classname=scan.className;
-            if ((classname)&&(typeof classname === "string")&&
-                (classname.search(/\bfdjtfocus\b/)>=0))
-                scan.className=classname.replace(/ fdjtfocus\b/,"");
-            scan=scan.parentNode;}});})();
+    function fdjt_focusin(evt){
+        var scan=fdjtUI.T(evt), add=[]; 
+        if ((scan.tagName==='TEXTAREA')||
+            ((scan.tagName==='INPUT')&&
+             (/text|email/i.exec(scan.type)))) {
+            while (scan) {
+                var classname=scan.className;
+                if ((classname)&&(typeof classname === "string")&&
+                    (classname.search(/\bfdjtfoci\b/)>=0)&&
+                    (classname.search(/\bfdjtfocus\b/)<0))
+                    add.push(scan);
+                scan=scan.parentNode;}
+            if (add.length) 
+                setTimeout(function(){
+                    var i=0; while (i<add.length) {
+                        var elt=add[i++], classname=elt.className;
+                        elt.className=classname+" fdjtfocus";}},
+                           300);}}
+    fdjtUI.focusin=fdjt_focusin;
+    addListener(window,"focusin",fdjt_focusin);
+    function fdjt_focusout(evt){
+        var scan=fdjtUI.T(evt), drop=[];
+        if ((scan.tagName==='TEXTAREA')||
+            ((scan.tagName==='INPUT')&&
+             (/text|email/i.exec(scan.type)))) {
+            while (scan) {
+                var classname=scan.className;
+                if ((classname)&&(typeof classname === "string")&&
+                    (classname.search(/\bfdjtfocus\b/)>=0))
+                    drop.push(scan);
+                scan=scan.parentNode;}
+            if (drop.length) 
+                setTimeout(function(){
+                    var i=0; while (i<drop.length) {
+                        var elt=drop[i++], classname=elt.className;
+                        elt.className=classname.replace(/ fdjtfocus\b/,"");}},
+                           300);}}
+    fdjtUI.focusout=fdjt_focusout;
+    addListener(window,"focusout",fdjt_focusout);})();
 
 /* Text input boxes which create checkspans on enter. */
 
