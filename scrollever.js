@@ -37,7 +37,10 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
         var url=spec.url||
             fdjtDOM.getLink("~{http://fdjt.org/}scrollfetch")||
             fdjtDOM.getLink("~SCROLLFETCH");
-        var off=spec.off||fdjtState.getQuery("OFF")||0;
+        var off=spec.off||fdjtState.getQuery("OFF")||
+            fdjtDOM.getMeta("~{http://fdjt.org/}scrolloffset")||
+            fdjtDOM.getMeta("~SCROLLOFFSET")||
+            -1;
         var win=spec.win||fdjtState.getQuery("WINDOW")||
             fdjtDOM.getMeta("~{http://fdjt.org/}scrollwindow")||
             fdjtDOM.getMeta("~SCROLLWINDOW")||
@@ -91,7 +94,7 @@ fdjt.ScrollEver=fdjt.UI.ScrollEver=(function(){
                 fdjtDOM.addClass(document.body,"scrolleverdone");
                 return;}
             else busy=true;
-            var call=url.replace("-off-",fdjtString(off+win));
+            var call=url.replace("-off-",fdjtString((off<0)?(0):(off)));
             var req=new XMLHttpRequest();
             req.open("GET",call,true);
             req.withCredentials=true;
