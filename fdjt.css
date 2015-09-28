@@ -139,7 +139,6 @@ td.checkspan.ischecked, td.checkspan[checked],
 
 th .checkspan, th.checkspan { font-weight: normal;}
 th .checkspan.ischecked, th .checkspan[checked] { color: black;}
- { color: black;}
 
 /* Check blocks */
 
