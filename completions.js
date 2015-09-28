@@ -270,7 +270,7 @@ if (!(fdjt.UI)) fdjt.UI={};
              (hasPrefix(this.maxstring,string))))
             return this.result;
         else {
-            var result;
+            var result, that=this;
             if (!(this.initialized)) initCompletions(this);
             if (isEmpty(string)) {
                 result=[]; result.prefix=""; result.matches=[];
@@ -279,7 +279,7 @@ if (!(fdjt.UI)) fdjt.UI={};
                 result=getNodes(string,this.prefixtree,this.bykey,
                                 ((this.options)&(FDJT_COMPLETE_MATCHCASE)));
                 if (this.dom) dropClass(this.dom,"noinput");
-                rAF(function(){updateDisplay(this,result.matches);});}
+                rAF(function(){updateDisplay(that,result.matches);});}
             if ((this.stringmap)&&(this.strings)) {
                 var stringmap=this.stringmap;
                 var strings=this.strings;
@@ -311,6 +311,7 @@ if (!(fdjt.UI)) fdjt.UI={};
         else return getKey(completion);};
 
     Completions.prototype.complete=function(string,callback){
+        var that=this;
         if (!(this.initialized)) initCompletions(this);
         // fdjtLog("Completing on %o",string);
         if ((!(string))&&(string!==""))
@@ -319,24 +320,24 @@ if (!(fdjt.UI)) fdjt.UI={};
                     (this.input.value));
         if (isEmpty(string)) {
             rAF(function(){
-                if (this.displayed) updateDisplay(this,false);
-                addClass(this.dom,"noinput");
-                dropClass(this.dom,"nomatches");
+                if (that.displayed) updateDisplay(that,false);
+                addClass(that.dom,"noinput");
+                dropClass(that.dom,"nomatches");
                 if (callback) async(function(){callback([]);});});
             return [];}
         var result=this.getCompletions(string);
         if ((!(result))||(result.length===0)) {
             rAF(function(){
-                updateDisplay(this,false);
-                dropClass(this.dom,"noinput");
-                addClass(this.dom,"nomatches");
+                updateDisplay(that,false);
+                dropClass(that.dom,"noinput");
+                addClass(that.dom,"nomatches");
                 if (callback) async(function(){callback(result);});});
             return [];}
         else {
             rAF(function(){
-                updateDisplay(this,result.matches);
-                dropClass(this.dom,"noinput");
-                dropClass(this.dom,"nomatches");
+                updateDisplay(that,result.matches);
+                dropClass(that.dom,"noinput");
+                dropClass(that.dom,"nomatches");
                 if (callback) async(function(){callback(result);});});
             return result;}};
 
