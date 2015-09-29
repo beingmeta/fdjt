@@ -67,15 +67,15 @@ div.fdjtclearfloats {
  * 2. The use of `table` rather than `block` is only necessary if using
  *    `:before` to contain the top-margins of child elements.
  */
-.fdjtfloats:before, .cf:before,
-.fdjtfloats:after, .cf:after {
+.fdjtfloats:before, .clearfloats:before,
+.fdjtfloats:after, .clearfloats:after {
     content: " "; /* 1 */
     display: table; /* 2 */}
 
-.fdjtfloats:after, .cf:after { clear: both; }
+.fdjtfloats:after, .clearfloats:after { clear: both; }
 
 /* For IE 6/7 only (triggers hasLayout) */
-.fdjtfloats, .cf { zoom: 1; }
+.fdjtfloats, .clearfloats { zoom: 1; }
 
 /* Checkspans */
 
@@ -264,11 +264,6 @@ span.font_sizer {
   -khtml-opacity: .75;
   -moz-opacity: .75;
   -o-opacity: .75;}
-
-/* Flexboxes */
-
-div.flexbox { max-height: 128px;}
-div.flexbox_expanded { max-height: inherit;}
 
 /* Formatted output */
 
