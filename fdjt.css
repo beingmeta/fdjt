@@ -287,6 +287,14 @@ table.fdjtdata th {
 table.fdjtdata td { 
   vertical-align: top; text-align: left; padding-left: 0.2ex;}
 
+table.fdjtdata span.symbol { font-weight: bold;}
+table.fdjtdata span.label { font-family: sans-serif;}
+table.fdjtdata td dl { margin-top: 1ex; margin-bottom: 0px}
+table.fdjtdata td > dl:first-child { margin-top: 0px; margin-bottom: 0px}
+
+table.fdjtdata td ol { border: solid gray 1px; padding: 1px;}
+table.fdjtdata td dl { border: solid gray 1px; padding: 1px;}
+
 table.fdjt {font-family: sans,sans-serif;}
 table.fdjt.full { width: 100%; }
 table.fdjt th { vertical-align: top; text-align: right;}
