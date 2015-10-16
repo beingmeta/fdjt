@@ -46,6 +46,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
   var dropClass=fdjtDOM.dropClass;
   var addClass=fdjtDOM.addClass;
   var hasClass=fdjtDOM.hasClass;
+  var hasParent=fdjtDOM.hasParent;
+  var addListener=fdjtDOM.addListener;
   var toArray=fdjtDOM.toArray;
   
   var adjustFonts=fdjtDOM.adjustFonts;
@@ -56,8 +58,11 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
       container=document.getElementById(arg);
     else if (arg.nodeType)
       container=arg;
+    else if (fdjt.UI.T(arg))
+      container=fdjt.UI.T(arg);
     else container=false;
     if (!(container)) fdjtLog.warn("Bad showPage container arg %s",arg);
+    else container=fdjtDOM.getParent(container,".fdjtpage")||container;
     return container;}
     
   function istootall(container){
@@ -76,6 +81,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var info=getChild(container,".fdjtpageinfo");
     var children=getNodes(container), lim=children.length, startpos;
     var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
+    var tap_event_name=
+      ((hasParent(container,".tapholder"))?("tap"):("click"));
     if (children.length===0) return;
     if (typeof dir !== "number") dir=1; else if (dir<0) dir=-1; else dir=1;
     if (!(start)) {
@@ -125,8 +132,14 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var minpos=((startpos<=endpos)?(startpos):(endpos));
     var maxpos=((startpos>endpos)?(startpos):(endpos));
     info.innerHTML=Math.floor((minpos/lim)*100)+"%"+
-      "<span class='count'>("+lim+")</span>";
+      "<span class='count'> ("+lim+")</span>";
     info.title=fdjtString("Items %d through %d of %d",minpos,maxpos,lim);
+    var forward_button=fdjtDOM("span.button.forward","》");
+    var backward_button=fdjtDOM("span.button.backward","《");
+    addListener(forward_button,tap_event_name,forwardPage);
+    addListener(backward_button,tap_event_name,backwardPage);
+    fdjtDOM.append(info,forward_button);
+    fdjtDOM.prepend(info,backward_button);
     addClass(container,"newpage"); setTimeout(
       function(){dropClass(container,"newpage");},1000);
     dropClass(container,"formatting");

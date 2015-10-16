@@ -1280,6 +1280,17 @@ div.fdjtpage div.fdjtpageinfo {
     transition-property: opacity; transition-duration: 5s;}
 div.fdjtpage.fdjtfirstpage.fdjtlastpage > div.fdjtpageinfo {
     display: none !important;}
+div.fdjtpage div.fdjtpageinfo .button {
+    font-weight: bold; pointer-events: all;
+    cursor: pointer;}
+div.fdjtpage div.fdjtpageinfo .button.forward {
+    padding-left: 1ex;}
+div.fdjtpage div.fdjtpageinfo .button.backward {
+    padding-right: 1ex;}
+html._MOUSE div.fdjtpage div.fdjtpageinfo:hover {
+    opacity: 0.75;}
+html._MOUSE div.fdjtpage div.fdjtpageinfo .button:hover {
+    color: blue;}
 
 div.fdjtpage.formatting div, div.fdjtpage.getvisible div, 
 div.fdjtpage.formatting p, div.fdjtpage.getvisible p {
