@@ -258,12 +258,7 @@ span.font_sizer {
   font-size: 16px; font-size: 1.25rem; font-weight: bold; 
   text-align: center; cursor: pointer; margin: 0.2ex;
   background: gray; color: white;
-  opacity: .75;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=75)";
-  -webkit-opacity: .75;
-  -khtml-opacity: .75;
-  -moz-opacity: .75;
-  -o-opacity: .75;}
+  opacity: .75;}
 
 /* Formatted output */
 
@@ -504,21 +499,8 @@ div.richtip {
   font-size: 10px; font-size: 0.8rem;
   font-family: sans-serif; font-weight: normal;
   width: 33%; position: absolute; top: 24px; left: 24px;
-  display: none; background: lightgray; z-index: 32; opacity: .85;
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=85)";
-  filter: alpha(opacity=85);
-  -webkit-opacity: .85;
-  -khtml-opacity: .85;
-  -moz-opacity: .85;
-  -o-opacity: .85;}
-div.richtip:hover { 
-    opacity: .95;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=95)";
-    filter: alpha(opacity=95);
-    -webkit-opacity: .95;
-    -khtml-opacity: .95;
-    -moz-opacity: .95;
-    -o-opacity: .95;}
+  display: none; background: lightgray; z-index: 32; opacity: .85;}
+div.richtip:hover { opacity: .95; }
 
 div.richtip span.dterm {
   color: blue; font-size: 1.1em; font-weight: bold;}
@@ -584,8 +566,7 @@ table.fdjtform td input[TYPE="PASSWORD"],
 table.fdjtform td input[TYPE="SEARCH"],
 table.fdjtform td input[TYPE="TEXT"],
 table.fdjtform td textarea {
-    box-sizing: border-box; -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box; -o-box-sizing: border-box;
+    box-sizing: border-box;
     width: 100%;}
 table.fdjtform td p {
     font-size: 80%; max-width: 45em;
@@ -887,12 +868,6 @@ div.fdjtprogress div.message {
 div.reticle {
     background-color: black; margin: 0px; border: 0px; padding: 0px;
     z-index: 1000; opacity: .50;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-    filter: alpha(opacity=50);
-    -webkit-opacity: .50;
-    -khtml-opacity: .50;
-    -moz-opacity: .50;
-    -o-opacity: .50;
     pointer-events: none;}
 div.reticle.vertical {
     position: fixed; height: 100%; top: 0px; bottom: 0px;
@@ -985,53 +960,20 @@ div.fdjtdialog {
     background-color: slategray; color: black;
     font-family: helvetica,sans,sans-serif;
     font-size: 2em; font-size: 2rem;
-    box-sizing: border-box; -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box; -o-box-sizing: border-box; 
+    box-sizing: border-box;
     width: 50%; max-width: 700px; top: 15%; max-height: 70%;
     left: 0px; right: 0px; height: auto;
     margin-left: auto; margin-right: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
     z-index: 250; 
     opacity: .99;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=99)";
-    filter: alpha(opacity=99);
-    -webkit-opacity: .99;
-    -khtml-opacity: .99;
-    -moz-opacity: .99;
-    -o-opacity: .99;
     transition-property: opacity;
-    -webkit-transition-property: -webkit-opacity;
-    -khtml-transition-property: -khtml-opacity;
-    -moz-transition-property: -moz-opacity;
-    -ms-transition-property: filter;
-    -o-transition-property: -o-opacity;
     transition-duration:  0.50s;
-    -webkit-transition-duration:  0.50s;
-    -khtml-transition-duration:  0.50s;
-    -moz-transition-duration:  0.50s;
-    -ms-transition-duration:  0.50s;
-    -o-transition-duration:  0.50s;
     transition-timing-function:  ease-in;
-    -webkit-transition-timing-function:  ease-in;
-    -khtml-transition-timing-function:  ease-in;
-    -moz-transition-timing-function:  ease-in;
-    -ms-transition-timing-function:  ease-in;
-    -o-transition-timing-function:  ease-in;
     border: solid black 4px;
-    border-radius: 1em;
-    -webkit-border-radius: 1em;
-    -khtml-border-radius: 1em;
-    -moz-border-radius: 1em;
-    -o-border-radius: 1em;}
-div.fdjtdialog#FDJTALERT { z-index: 250;}
-div.fdjtdialog.closing {
-    opacity: .05;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-    filter: alpha(opacity=50);
-    -webkit-opacity: .05;
-    -khtml-opacity: .05;
-    -moz-opacity: .05;
-    -o-opacity: .05;}
+    border-radius: 1em;}
+div.fdjtdialog#FDJTALERT { z-index: 250; }
+div.fdjtdialog.closing { opacity: .05; }
 div.fdjtdialog.closing { cursor: pointer;}
 
 div.fdjtdialog div.title {
@@ -1068,11 +1010,7 @@ div.fdjtdialog.fdjtconfirm div.choices button {
     padding: 1ex; border: solid silver 3px;
     background-color: silver;
     border-radius: 1ex;
-    margin-left: 0.5ex; margin-right: 0.5ex; margin-bottom: 1ex;
-    -webkit-border-radius: 1ex;
-    -khtml-border-radius: 1ex;
-    -moz-border-radius: 1ex;
-    -o-border-radius: 1ex;}
+    margin-left: 0.5ex; margin-right: 0.5ex; margin-bottom: 1ex;}
 
 div.fdjtdialog.fdjtconfirm div.choices button.selected,
 div.fdjtdialog.fdjtconfirm div.choices button:focus {
@@ -1176,9 +1114,7 @@ html._TOUCH .fdjtselecting .fdjtselectend:hover {
     bottom: 100px;
     display: none;}
 .fdjtselectloupe > span {
-    background-color: white;
-    opacity: 0.8; -webkit-opacity: 0.8; -moz-opacity: 0.8;
-    -o-opacity: 0.8;}
+    background-color: white; opacity: 0.8;}
 
 /* Use this rule for the select loupe, e.g. on touch platforms. */
 /* .fdjtselecting .fdjtselectloupe { display: inline-block; } */
