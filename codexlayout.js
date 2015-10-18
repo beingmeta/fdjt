@@ -1319,8 +1319,9 @@ fdjt.CodexLayout=
                     if (node.nodeType===3)
                         return (node.nodeValue.search(/\S/)<0);
                     else if (node.nodeType===1) {
-                        if ((!(node.childNodes))||
-                            (node.childNodes.length===0)) {
+                        if (node.offsetHeight) return false;
+                        else if ((!(node.childNodes))||
+                                 (node.childNodes.length===0)) {
                             if (node.offsetHeight) return false;
                             else return true;}
                         else {
