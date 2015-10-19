@@ -78,6 +78,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 else if (trace_val) trace=1;
                 else trace=0;}
             this.traced=trace;
+            if (opts.onstop) sel.onstop=onstop;
             var prefix=this.prefix="fdjtSel0"+this.serial;
             if ((typeof opts.loupe !== 'undefined')||
                 (typeof TextSelect.loupe !== 'undefined'))
@@ -468,9 +469,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     loupe.style.float="right";
                     loupe.style.right=(cwidth-geom.right)-
                         (1.5*(context.width-context.wordend))+"px";
-                    loupe.style.left="";}
-                loupe.style.display="";}
+                    loupe.style.left="";}}
+            loupe.style.display="";
             if (tapped) setTimeout(1000,function(){
+                if (sel.onstop) sel.onstop();
                 sel.loupe.display='none';});}
         var getGeometry=fdjtDOM.getGeometry;
 
@@ -715,7 +717,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if (sel.timeout) {
                     clearTimeout(sel.timeout); sel.timeout=false;}
                 sel.setAdjust(false);
-                if (sel.loupe) sel.loupe.style.display='none';}}
+                if (sel.loupe) sel.loupe.style.display='none';
+                if (sel.onstop) sel.onstop();}}
         function slip_handler(evt,sel){
             evt=evt||window.event;
             var target=fdjtUI.T(evt);
@@ -725,6 +728,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 if (sel.loupe) sel.loupe_timeout=
                     setTimeout(function(){
                         sel.loupe_timeout=false;
+                        if (sel.onstop) sel.onstop();
                         sel.loupe.style.display='none';},2000);}}
         TextSelect.release_handler=release_handler;
         function get_release_handler(sel,also){
