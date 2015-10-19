@@ -1218,15 +1218,15 @@ div.fdjtpage.fdjtfirstpage.fdjtlastpage > div.fdjtpageinfo {
     display: none !important;}
 div.fdjtpage div.fdjtpageinfo .button {
     font-weight: bold; pointer-events: all;
-    cursor: pointer;}
-div.fdjtpage div.fdjtpageinfo .button.forward {
-    padding-left: 1ex;}
-div.fdjtpage div.fdjtpageinfo .button.backward {
-    padding-right: 1ex;}
+    padding-right: 1ex; padding-left: 1ex;
+    z-index: 50; cursor: pointer;}
+div.fdjtpage div.fdjtpageinfo .button.forward {}
+div.fdjtpage div.fdjtpageinfo .button.backward {}
 html._MOUSE div.fdjtpage div.fdjtpageinfo:hover {
     opacity: 0.75;}
 html._MOUSE div.fdjtpage div.fdjtpageinfo .button:hover {
     color: blue;}
+html._TOUCH div.fdjtpage div.fdjtpageinfo { font-size: 200%;}
 
 div.fdjtpage.formatting div, div.fdjtpage.getvisible div, 
 div.fdjtpage.formatting p, div.fdjtpage.getvisible p {

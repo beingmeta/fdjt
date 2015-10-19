@@ -125,21 +125,29 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
         dropClass(end,"fdjtshow"); dropClass(end,caboose);
         endpos++; end=children[endpos];
         addClass(end,caboose);}}
-    if (startpos===0) addClass(container,"fdjtfirstpage");
+    var at_start=false, at_end=false;
+    if (startpos===0) {
+      addClass(container,"fdjtfirstpage");
+      at_start=true;}
     else dropClass(container,"fdjtfirstpage");
-    if (endpos>=(lim-1)) addClass(container,"fdjtlastpage");
+    if (endpos>=(lim-1)) {
+      addClass(container,"fdjtlastpage");
+      at_end=true;}
     else dropClass(container,"fdjtlastpage");
     var minpos=((startpos<=endpos)?(startpos):(endpos));
     var maxpos=((startpos>endpos)?(startpos):(endpos));
-    info.innerHTML=Math.floor((minpos/lim)*100)+"%"+
-      "<span class='count'> ("+lim+")</span>";
+    info.innerHTML="<span class='pct'>"+Math.floor((minpos/lim)*100)+"%"+
+      "</span>"+"<span class='count'> ("+lim+")</span>";
     info.title=fdjtString("Items %d through %d of %d",minpos,maxpos,lim);
-    var forward_button=fdjtDOM("span.button.forward","》");
-    var backward_button=fdjtDOM("span.button.backward","《");
-    addListener(forward_button,tap_event_name,forwardPage);
-    addListener(backward_button,tap_event_name,backwardPage);
-    fdjtDOM.append(info,forward_button);
+    var forward_button=fdjtDOM("span.button.forward"," 》");
+    var backward_button=fdjtDOM("span.button.backward","《 ");
     fdjtDOM.prepend(info,backward_button);
+    if (at_start) backward_button.innerHTML="· ";
+    else addListener(backward_button,tap_event_name,backwardPage);
+    if (at_end) forward_button.innerHTML="· ";
+    else addListener(forward_button,tap_event_name,forwardPage);
+    fdjtDOM.prepend(info,backward_button);
+    fdjtDOM.append(info,forward_button);
     addClass(container,"newpage"); setTimeout(
       function(){dropClass(container,"newpage");},1000);
     dropClass(container,"formatting");
