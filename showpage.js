@@ -82,7 +82,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var children=getNodes(container), lim=children.length, startpos;
     var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
     var tap_event_name=
-      ((hasParent(container,".tapholder"))?("tap"):("click"));
+      ((fdjt.device.touch)?("touchstart"):("click"));
     if (children.length===0) return;
     if (typeof dir !== "number") dir=1; else if (dir<0) dir=-1; else dir=1;
     if (!(start)) {
@@ -143,15 +143,22 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var backward_button=fdjtDOM("span.button.backward","《 ");
     fdjtDOM.prepend(info,backward_button);
     if (at_start) backward_button.innerHTML="· ";
-    else addListener(backward_button,tap_event_name,backwardPage);
+    else addListener(backward_button,tap_event_name,backwardButton);
     if (at_end) forward_button.innerHTML="· ";
-    else addListener(forward_button,tap_event_name,forwardPage);
+    else addListener(forward_button,tap_event_name,forwardButton);
     fdjtDOM.prepend(info,backward_button);
     fdjtDOM.append(info,forward_button);
     addClass(container,"newpage"); setTimeout(
       function(){dropClass(container,"newpage");},1000);
     dropClass(container,"formatting");
     return endpos;}
+
+  function forwardButton(evt){
+    fdjt.UI.cancel(evt);
+    forwardPage(evt);}
+  function backwardButton(evt){
+    fdjt.UI.cancel(evt);
+    backwardPage(evt);}
 
   function getProgressIndicator(container,startpos,lim){
     // This could include an input element for typing in a %
@@ -221,6 +228,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
 
   function forwardPage(container){
     if (!(container=getContainer(container))) return;
+    dropClass(container,"newpage");
     var foot=getChild(container,".fdjtendofpage");
     if (!(foot)) return showPage(container);
     if (hasClass(container,"fdjtlastpage")) return false;
@@ -244,6 +252,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
 
   function backwardPage(container){
     if (!(container=getContainer(container))) return;
+    dropClass(container,"newpage");
     var head=getChild(container,".fdjtstartofpage");
     if (!(head)) return showPage(container);
     if (hasClass(container,"fdjtfirstpage")) return false;

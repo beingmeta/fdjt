@@ -1208,8 +1208,9 @@ div.fdjtpage .fdjtpageinfo {
     position: absolute; right: 0px; bottom: 0px;
     padding-right: 0.5ex; padding-left: 0.5ex;
     color: black; background-color: rgba(0,0,0,0.4);
-    font-size: 150%; opacity: 0.25;
-    pointer-events: none;}
+    font-size: 150%; opacity: 0.25;}
+
+div.fdjtpage .fdjtpageinfo span { pointer-events: none; }
 div.fdjtpage div.fdjtpageinfo span.count { display: none;}
 div.fdjtpage > div.fdjtpageinfo { display: block !important; }
 div.fdjtpage div.fdjtpageinfo {
@@ -1218,7 +1219,6 @@ div.fdjtpage.fdjtfirstpage.fdjtlastpage > div.fdjtpageinfo {
     display: none !important;}
 div.fdjtpage div.fdjtpageinfo .button {
     font-weight: bold; pointer-events: all;
-    padding-right: 1ex; padding-left: 1ex;
     z-index: 50; cursor: pointer;}
 div.fdjtpage div.fdjtpageinfo .button.forward {}
 div.fdjtpage div.fdjtpageinfo .button.backward {}
