@@ -280,6 +280,11 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                   (""+serial));
         th.id=thid;
 
+        function start_holding(){addClass(elt,holdclass);}
+        function stop_holding(){dropClass(elt,holdclass);}
+        function check_holding(){
+            if (!(th_target)) dropClass(elt,holdclass);}
+
         var touchable=elt.getAttribute("data-touchable");
         if ((opts)&&(opts.hasOwnProperty("touchable"))) {
             // Opts override attributes
@@ -349,8 +354,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function held(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
-            if (holdclass)
-                setTimeout(function(){addClass(elt,holdclass);},20);
+            if (holdclass) setTimeout(start_holding,20);
             return synthEvent(target,"hold",th,evt,x,y,false);}
         function released(target,evt,x,y){
             var target_time=
@@ -358,9 +362,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
             if (holdclass)
-                setTimeout(function(){
-                    if (!(th_target)) dropClass(elt,holdclass);},
-                           50);
+                setTimeout(check_holding,50);
             if ((target_time)&&(target_time<200)) {
                 if (trace)
                     fdjtLog("TapHold(%s) %d=i<200ms, target=%o not %o",
@@ -376,9 +378,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 var rel=evt.relatedTarget||eTarget(evt);
                 if (rel!==target) also.relatedTarget=rel;}
             if (holdclass)
-                setTimeout(function(){
-                    if (!(th_target)) dropClass(elt,holdclass);},
-                           50);
+                setTimeout(check_holding,50);
             return synthEvent(target,"slip",th,evt,touch_x,touch_y,also);}
         function taptapped(target,evt){
             return synthEvent(target,"taptap",th,evt,
@@ -469,7 +469,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             cleartouch();
             setTarget(false);
             if (holdclass)
-                setTimeout(function(){dropClass(elt,holdclass);},20);
+                setTimeout(stop_holding,20);
             th_targets=[];}
         function abortpress(evt,why){
             if ((trace)||(traceall))
@@ -482,8 +482,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else if (pressed) {slipped(pressed,evt);}
             if (reticle.live) reticle.highlight(false);
             pressed_at=touched=pressed=tap_target=false;
-            if (holdclass)
-                setTimeout(function(){dropClass(elt,holdclass);},20);
+            if (holdclass) setTimeout(stop_holding,20);
             th_targets=[];
             setTarget(false);}
 
@@ -493,11 +492,11 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (wander_timer) return;
             if (!(th_target)) return;
             if ((pressed)&&(!(hasParent(to,elt)))) {
-                wander_timer=setTimeout(function(){
-                    if (!(noslip))
-                        slipped(pressed,evt,{relatedTarget: to});
-                    abortpress(evt,"taphold_mouseout");},
-                                        wanderthresh);}}
+                wander_timer=setTimeout(wandered,wanderthresh,evt,to);}}
+        function wandered(evt,to){
+            if (!(noslip))
+                slipped(pressed,evt,{relatedTarget: to});
+            abortpress(evt,"taphold_mouseout");}
 
         function taphold_mouseover(evt){
             evt=evt||window.event;
@@ -824,8 +823,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else if (pressed) {released(pressed,evt);}
             if (reticle.live) reticle.highlight(false);
             pressed_at=touched=pressed=tap_target=false;
-            if (holdclass)
-                setTimeout(function(){dropClass(elt,holdclass);},20);
+            if (holdclass) setTimeout(stop_holding,20);
             th_targets=[];
             setTarget(false);}
 
