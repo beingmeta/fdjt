@@ -600,7 +600,8 @@ fdjt.UI.ProgressBar=(function(){
                         elt.className=classname.replace(/ fdjtfocus\b/,"");}},
                            300);}}
     fdjtUI.focusout=fdjt_focusout;
-    addListener(window,"focusout",fdjt_focusout);})();
+    addListener(window,"focusout",fdjt_focusout);
+})();
 
 /* Text input boxes which create checkspans on enter. */
 
