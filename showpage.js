@@ -46,7 +46,6 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
   var dropClass=fdjtDOM.dropClass;
   var addClass=fdjtDOM.addClass;
   var hasClass=fdjtDOM.hasClass;
-  var hasParent=fdjtDOM.hasParent;
   var addListener=fdjtDOM.addListener;
   var toArray=fdjtDOM.toArray;
   
@@ -148,8 +147,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     else addListener(forward_button,tap_event_name,forwardButton);
     fdjtDOM.prepend(info,backward_button);
     fdjtDOM.append(info,forward_button);
-    addClass(container,"newpage"); setTimeout(
-      function(){dropClass(container,"newpage");},1000);
+    addClass(container,"fdjtpagechange"); setTimeout(
+      function(){dropClass(container,"fdjtpagechange");},1000);
     dropClass(container,"formatting");
     return endpos;}
 
@@ -228,7 +227,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
 
   function forwardPage(container){
     if (!(container=getContainer(container))) return;
-    dropClass(container,"newpage");
+    dropClass(container,"fdjtpagechange");
     var foot=getChild(container,".fdjtendofpage");
     if (!(foot)) return showPage(container);
     if (hasClass(container,"fdjtlastpage")) return false;
@@ -252,7 +251,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
 
   function backwardPage(container){
     if (!(container=getContainer(container))) return;
-    dropClass(container,"newpage");
+    dropClass(container,"fdjtpagechange");
     var head=getChild(container,".fdjtstartofpage");
     if (!(head)) return showPage(container);
     if (hasClass(container,"fdjtfirstpage")) return false;

@@ -1234,13 +1234,13 @@ div.fdjtpage.formatting p, div.fdjtpage.getvisible p {
 div.fdjtpage.formatting {
     overflow-y: scroll !important;}
 
-div.fdjtpage.newpage div.fdjtpageinfo,
-div.fdjtpage.formatting.newpage div.fdjtpageinfo {
+div.fdjtpage.fdjtpagechange div.fdjtpageinfo,
+div.fdjtpage.formatting.fdjtpagechange div.fdjtpageinfo {
     opacity: 0.9; visibility: visible;}
-div.fdjtpage.newpage div.fdjtpageinfo span.count,
-div.fdjtpage.formatting.newpage div.fdjtpageinfo span.count {
+div.fdjtpage.fdjtpagechange div.fdjtpageinfo span.count,
+div.fdjtpage.formatting.fdjtpagechange div.fdjtpageinfo span.count {
     display: inline;}
-div.fdjtpage.newpage div.fdjtpageinfo {
+div.fdjtpage.fdjtpagechange div.fdjtpageinfo {
     pointer-events: all;}
 
 /* The pager */
