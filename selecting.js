@@ -484,9 +484,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         (1.5*(context.width-context.wordend))+"px";
                     loupe.style.left="";}}
             loupe.style.display="";
-            if (tapped) setTimeout(1000,function(){
+            if (tapped) setTimeout(function(){
                 if (sel.active) stopSelection(sel);
-                sel.loupe.display='none';});}
+                sel.loupe.display='none';},
+                                   1000);}
         var getGeometry=fdjtDOM.getGeometry;
 
         function gatherContext(node,back,forward,parent){
@@ -742,7 +743,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     setTimeout(function(){
                         sel.loupe_timeout=false;
                         if (sel.active) stopSelection(sel);
-                        sel.loupe.style.display='none';},2000);}}
+                        sel.loupe.style.display='none';},
+                               2000);}}
         TextSelect.release_handler=release_handler;
         function get_release_handler(sel,also){
             return function(evt){
