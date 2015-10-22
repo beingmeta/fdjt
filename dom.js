@@ -2912,7 +2912,7 @@ fdjt.DOM=
             if (!(max)) max=150;
             newsize=size+delta;
             wstyle.fontSize=newsize+"%";
-            rect=wrapper.getBoundingClientRect(); nw=rect.width, nh=rect.height;
+            rect=wrapper.getBoundingClientRect(); nw=rect.width; nh=rect.height;
             while ((size>=min)&&(size<=max)&&
                    ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h)))) {
                 size=newsize; newsize=newsize+delta;
@@ -2923,7 +2923,7 @@ fdjt.DOM=
                         wrapper.parentNode,w,h,wrapper,newsize,size,delta,
                         ow,oh,nw,nh);
                 rect=wrapper.getBoundingClientRect();
-                nw=rect.width, nh=rect.height;}
+                nw=rect.width; nh=rect.height;}
             wstyle.maxWidth='';
             if (delta>0) {
                 wstyle.fontSize=size+"%";
