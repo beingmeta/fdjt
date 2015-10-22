@@ -183,7 +183,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
         if (style.display==='none') continue;
         else if ((style.position)&&(style.position!=='static'))
           continue;
-        if (style.pageBreakBefore==="force")
+        if (style.pageBreakBefore==="always")
           addClass(node,"fdjtpagebreakauto");
         else dropClass(node,"fdjtpagebreakauto");
         // We don't currently make these stylable
@@ -290,7 +290,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     if (!(container=getContainer(container))) return;
     if (!(hasClass(container,"fdjtpage"))) {
       if (container.offsetHeight) showPage(container);}
-    else if ((container.offsetHeight)&&(!(hasClass(container,"needsresize")))) {
+    else if ((container.offsetHeight)&&(hasClass(container,"needsresize"))) {
       dropClass(container,"needsresize");
       updatePage(container);}
     else return;}
