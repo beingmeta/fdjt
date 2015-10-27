@@ -1206,9 +1206,10 @@ div.fdjtpage > div.fdjtshow, div.fdjtpage > p.fdjtshow {
 
 div.fdjtpage .fdjtpageinfo {
     position: absolute; right: 0px; bottom: 0px;
-    padding-right: 0.5ex; padding-left: 0.5ex;
+    padding-right: 0.5ex; padding-left: 0.5ex; 
     color: black; background-color: rgba(0,0,0,0.4);
-    font-size: 150%; opacity: 0.25;}
+    font-size: 150%; line-height: 100%;
+    opacity: 0.25;}
 
 div.fdjtpage .fdjtpageinfo span { pointer-events: none; }
 div.fdjtpage div.fdjtpageinfo span.count { display: none;}
@@ -1226,7 +1227,6 @@ html._MOUSE div.fdjtpage div.fdjtpageinfo:hover {
     opacity: 0.75;}
 html._MOUSE div.fdjtpage div.fdjtpageinfo .button:hover {
     color: blue;}
-html._TOUCH div.fdjtpage div.fdjtpageinfo { font-size: 200%;}
 
 div.fdjtpage.formatting div, div.fdjtpage.getvisible div, 
 div.fdjtpage.formatting p, div.fdjtpage.getvisible p {
