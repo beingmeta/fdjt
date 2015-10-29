@@ -1228,6 +1228,8 @@ html._MOUSE div.fdjtpage div.fdjtpageinfo:hover {
 html._MOUSE div.fdjtpage div.fdjtpageinfo .button:hover {
     color: blue;}
 
+html._TOUCH div.fdjtpageinfo { font-size: 200%;}
+
 div.fdjtpage.formatting div, div.fdjtpage.getvisible div, 
 div.fdjtpage.formatting p, div.fdjtpage.getvisible p {
     visibility: hidden;}
