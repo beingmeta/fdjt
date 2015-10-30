@@ -117,6 +117,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
       dropClass(container,"formatting");
       return startpos;}
     var endpos=showchildren(container,children,startpos,dir,fudge);
+    if ((dir<0)&&(endpos===0))
+      return showPage(container,0,1);
     var end=children[endpos];
     if ((dir>0)&&(hasClass(end,"fdjtpagehead"))) {
       while ((endpos>startpos)&&(hasClass(end,"fdjtpagehead"))) {
