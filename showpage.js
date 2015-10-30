@@ -65,10 +65,11 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     else container=fdjtDOM.getParent(container,".fdjtpage")||container;
     return container;}
     
-  function istootall(container,fudge){
-    if (fudge)
-      return container.scrollHeight>(container.offsetHeight-fudge);
-    else return container.scrollHeight>container.offsetHeight;}
+  function istootall(container,height,padding){
+    if (!(height)) height=container.offsetHeight;
+    if (padding)
+      return container.scrollHeight>(height-padding);
+    else return container.scrollHeight>(height);}
   function isOversize(elt,w,h){
     if (typeof w === "undefined") w=true;
     if (typeof h === "undefined") h=true;
@@ -83,9 +84,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var info=getChild(container,".fdjtpageinfo");
     var children=getNodes(container), lim=children.length, startpos;
     var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
-    var fudge=getGeometry(container,false,true).bottom_padding;
-    var tap_event_name=
-      ((fdjt.device.touch)?("touchstart"):("click"));
+    var padding=getGeometry(container,false,true).bottom_padding, h;
+    var tap_event_name=((fdjt.device.touch)?("touchstart"):("click"));
     if (children.length===0) return;
     if (typeof dir !== "number") dir=1; else if (dir<0) dir=-1; else dir=1;
     if (!(start)) {
@@ -101,7 +101,9 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     if ((!(start))||(startpos<0)||(startpos>=lim)||
         ((startpos===0)&&(dir<0)))
       return;
-    addClass(container,"fdjtpage"); addClass(container,"formatting");
+    addClass(container,"fdjtpage"); 
+    h=container.offsetHeight;
+    addClass(container,"formatting");
     if (!(info)) info=getProgressIndicator(container,startpos,lim);
     // Clear old page
     if (shown.length) {
@@ -111,12 +113,12 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     if (curend) dropClass(curend,"fdjtendofpage");
     addClass(start,"fdjtshow");
     addClass(start,((dir<0)?("fdjtendofpage"):("fdjtstartofpage")));
-    checkOversize(start);
+    if (start.offsetHeight>h) addClass(start,"fdjtoversize");
     if (((dir<0)&&(hasClass(start,/fdjtpagebreak(auto)?/)))||
-        (istootall(container))) {
+        (istootall(container,h,padding))) {
       dropClass(container,"formatting");
       return startpos;}
-    var endpos=showchildren(container,children,startpos,dir,fudge);
+    var endpos=showchildren(container,children,startpos,dir,h,padding);
     if ((dir<0)&&(endpos===0))
       return showPage(container,0,1);
     var end=children[endpos];
@@ -201,7 +203,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     dropClass(container,"getvisible");
     return children;}
 
-  function showchildren(container,children,i,dir,fudge){
+  function showchildren(container,children,i,dir,h,padding){
     var lim=children.length, scan=children[i+dir], last=children[i]; 
     var caboose=(dir<0)?("fdjtstartofpage"):("fdjtendofpage");
     i=i+dir; addClass(last,caboose); while ((i>=0)&&(i<lim)) {
@@ -210,8 +212,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
       dropClass(last,caboose);
       addClass(scan,"fdjtshow");
       addClass(scan,caboose);
-      checkOversize(scan);
-      if (istootall(container)) {
+      if (scan.offsetHeight>h) addClass(scan,"fdjtoversize");
+      if (istootall(container,h,padding)) {
         addClass(last,caboose);
         dropClass(scan,"fdjtshow");
         scan.style.display='';
