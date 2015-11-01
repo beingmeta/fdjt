@@ -1109,10 +1109,9 @@ html._TOUCH .fdjtselecting .fdjtselectend:hover {
 .fdjtselectloupe .fdjtloupetext {
     margin: 0px !important; text-indent: 0px !important;
     z-index: 200; white-space: nowrap; pointer-events: none;
-    background-color: yellow; font-size: 120%; 
+    background-color: gray; padding: 6px; font-size: 120%; 
     width: fit-content; height: fit-content;
-    padding: 4px; border: dotted blue 2px; 
-    transform: translate(0,-2em);
+    transform: translate(-50%,-2em);
     position: absolute;}
 .fdjtselectloupe > span {
     background-color: white;}

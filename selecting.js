@@ -81,14 +81,11 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (opts.onstart) sel.onstart=opts.onstart;
             if (opts.onstop) sel.onstop=opts.onstop;
             var prefix=this.prefix="fdjtSel0"+this.serial;
-            if ((typeof opts.loupe !== 'undefined')||
-                (typeof TextSelect.loupe !== 'undefined')) {
-                var loupeval=opts.loupe||TextSelect.loupe;
-                if (!(loupeval)) {}
-                else if (loupeval.nodeType) this.loupe=loupeval;
+            if ((opts.loupe)||(TextSelect.loupe)) {
+                var spec=(opts.loupe)||(TextSelect.loupe);
+                if (spec.nodeType) this.loupe=spec;
                 else this.loupe=fdjtDOM("span.fdjtselectloupe");}
-            else {
-                this.loupe=fdjtDOM("span.fdjtselectloupe");}
+            else {}
             this.adjust=false; /* This will be 'start' or 'end' */
             selectors[prefix]=sel;
             var stripid=prefix.length+1;
@@ -474,8 +471,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         ((tapped)?(" (tapped)"):("")));
             var context=
                 ((hasClass(word,"fdjtselectend"))?
-                 (gatherContext(word,5,1,block)):
-                 (gatherContext(word,1,5,block)));
+                 (gatherContext(word,7,3,block)):
+                 (gatherContext(word,3,7,block)));
             var words=fdjtDOM("span.fdjtloupetext");
             loupe.innerHTML="";
             fdjtDOM.append(words,context.words);
