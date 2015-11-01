@@ -280,8 +280,21 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                   (""+serial));
         th.id=thid;
 
-        function start_holding(){addClass(elt,holdclass);}
-        function stop_holding(){dropClass(elt,holdclass);}
+        var drop_holding=[];
+
+        var getParents=fdjtDOM.getParents;
+
+        function start_holding(){
+            var parents=getParents(elt,".tapholdcontext");
+            if ((parents)&&(parents.length)) {
+                addClass(parents,holdclass);
+                drop_holding=parents;}
+            addClass(elt,holdclass);}
+        function stop_holding(){
+            if ((drop_holding)&&(drop_holding.length)) {
+                dropClass(drop_holding,holdclass);
+                drop_holding=false;}
+            dropClass(elt,holdclass);}
         function check_holding(){
             if (!(th_target)) dropClass(elt,holdclass);}
 
