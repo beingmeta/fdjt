@@ -1420,6 +1420,7 @@ fdjt.CodexLayout=
                                 if (fg.bottom>=page_height) newPage(floater);}}}
 
                     if ((!(node))||(forcepage)||(needNewPage(node))) {
+                        var trailing=(page)&&(getTrailingText(page));
                         // If we really need to create a new page, do so,
                         if (page) {
                             if (pagefn) pagefn.call(layout,page,layout);
@@ -1427,6 +1428,15 @@ fdjt.CodexLayout=
                             dropClass(page,"codexworkpage");}
                         layout.page=page=fdjtDOM("div.codexpage.codexworkpage");
                         newpages.push(page);
+                        if (trailing) {
+                            var text=trailing.nodeValue;
+                            var break_at=text.search(/[\(\[\"\“\‘]+$/);
+                            var keep=fdjtDOM("span.codexsplitstart",text.slice(0,break_at));
+                            var push=fdjtDOM("span.codextextsplit",text.slice(break_at));
+                            var frag=document.createDocumentFragment();
+                            frag.appendChild(keep); frag.appendChild(push);
+                            fdjtDOM.replace(trailing,frag);
+                            drag.push(push);}
                         if (!(pagerule)) {
                             page.style.height=page_height+'px';
                             page.style.width=page_width+'px';}
@@ -1464,6 +1474,18 @@ fdjt.CodexLayout=
                             layout.prev=prev=drag[drag.length-1];
                             layout.drag=drag=[];}}
                     if (node) return moveUp(node);
+                    else return false;}
+
+                function getTrailingText(node){
+                    if (node.nodeType===3) {
+                        if (node.nodeValue.search(/[\(\[\"\“\‘]+$/)>0)
+                            return node;
+                        else return false;}
+                    else if (node.nodeType===1) {
+                        var children=node.childNodes, len=children.length;
+                        if (children[len-1].nodeType===3)
+                            return getTrailingText(children[len-1]);
+                        else return false;}
                     else return false;}
 
                 // This gets a little complicated
@@ -1581,7 +1603,7 @@ fdjt.CodexLayout=
                                 // trailing punctuation because those
                                 // may be attached with preceding or
                                 // succeeding elements and text
-                                // splitting normally operations on
+                                // splitting normally operates on
                                 // text runs as a whole.
                                 var text=child.nodeValue;
                                 var head_match=/^[,.!?;%$#@“”‘’`”‼‡…’‛⁇„⹂"']+/.exec(text);
