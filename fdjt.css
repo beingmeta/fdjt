@@ -1104,17 +1104,24 @@ html._TOUCH .fdjtselecting .fdjtselectend:hover {
     background-color: gold;}
 
 .fdjtselectloupe {
-    display: inline-block; position: relative;
-    float: left; /* This seems to keep it from affecting the line layout */
-    font-size: 150%; outline: dotted silver 2px;
-    height: 0px; overflow: visible; z-index: 200; /* width: 0px; */
-    white-space: nowrap; pointer-events: none;
-    padding-right: 1ex; padding-left: 1ex;
-    background-color: white;
-    bottom: 100px;
-    display: none;}
+    width: 0px; height: 0px;
+    overflow: visible;}
+.fdjtselectloupe .fdjtloupetext {
+    margin: 0px !important; text-indent: 0px !important;
+    z-index: 200; white-space: nowrap; pointer-events: none;
+    background-color: yellow; font-size: 120%; 
+    width: fit-content; height: fit-content;
+    padding: 4px; border: dotted blue 2px; 
+    transform: translate(0,-2em);
+    position: absolute;}
 .fdjtselectloupe > span {
-    background-color: white; opacity: 0.8;}
+    background-color: white;}
+.fdjtselecting .fdjtselectloupe .fdjtselected {
+    background-color: rgb(255,255,0);
+    box-shadow: none; }
+.fdjtselecting .fdjtselectloupe .fdjtselected.fdjtselectstart,
+.fdjtselecting .fdjtselectloupe .fdjtselected.fdjtselectend {
+    background: gold;}
 
 /* Use this rule for the select loupe, e.g. on touch platforms. */
 /* .fdjtselecting .fdjtselectloupe { display: inline-block; } */

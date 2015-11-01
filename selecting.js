@@ -82,8 +82,11 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             if (opts.onstop) sel.onstop=opts.onstop;
             var prefix=this.prefix="fdjtSel0"+this.serial;
             if ((typeof opts.loupe !== 'undefined')||
-                (typeof TextSelect.loupe !== 'undefined'))
-                this.loupe=opts.loupe||TextSelect.loupe;
+                (typeof TextSelect.loupe !== 'undefined')) {
+                var loupeval=opts.loupe||TextSelect.loupe;
+                if (!(loupeval)) {}
+                else if (loupeval.nodeType) this.loupe=loupeval;
+                else this.loupe=fdjtDOM("span.fdjtselectloupe");}
             else {
                 this.loupe=fdjtDOM("span.fdjtselectloupe");}
             this.adjust=false; /* This will be 'start' or 'end' */
@@ -97,6 +100,8 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                     ((style.display==='inline')?
                      (fdjtDOM("span.fdjtselecting")):
                      (fdjtDOM("div.fdjtselecting")));
+                if ((this.loupe)&&(!(this.loupe.parentNode)))
+                    wrapper.appendChild(this.loupe);
                 // Initialize the wrapper
                 wrapper.id=prefix+"w"+k;
                 wrapper.title=((opts)&&(opts.title))||
@@ -467,26 +472,20 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 fdjtLog("updateLoupe(%d) over %o for %o%s",
                         sel.serial,word,sel,
                         ((tapped)?(" (tapped)"):("")));
-            var context=gatherContext(word,5,5,block);
-            var geom=fdjtDOM.getGeometry(word,word.offsetParent);
-            var cwidth=word.offsetParent.offsetWidth;
-            loupe.innerHTML=""; fdjtDOM.append(loupe,context.words);
+            var context=
+                ((hasClass(word,"fdjtselectend"))?
+                 (gatherContext(word,5,1,block)):
+                 (gatherContext(word,1,5,block)));
+            var words=fdjtDOM("span.fdjtloupetext");
+            loupe.innerHTML="";
+            fdjtDOM.append(words,context.words);
+            fdjtDOM.append(loupe,words);
             if (inline_loupe) {
-                loupe.style.display="none";
-                parent.insertBefore(loupe,word);
-                if (geom.left<(cwidth/2)) {
-                    loupe.style.float="left";
-                    loupe.style.left=(geom.left-(1.5*context.wordstart))+"px";
-                    loupe.style.right="";}
-                else {
-                    loupe.style.float="right";
-                    loupe.style.right=(cwidth-geom.right)-
-                        (1.5*(context.width-context.wordend))+"px";
-                    loupe.style.left="";}}
+                parent.insertBefore(loupe,word);}
             loupe.style.display="";
             if (tapped) setTimeout(function(){
                 if (sel.active) stopSelection(sel);
-                sel.loupe.display='none';},
+                sel.loupe.style.display='none';},
                                    1000);}
         var getGeometry=fdjtDOM.getGeometry;
 
