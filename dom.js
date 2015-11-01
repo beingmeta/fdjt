@@ -760,6 +760,13 @@ fdjt.DOM=
             var sel=new Selector(spec);
             return ((sel.match(node))?(node):(getParent(node,sel)));};
 
+        fdjtDOM.getParents=function getParents(node,sel){
+            var results=[], scan=node, parent=false;
+            while ((parent=getParent(scan,sel))) {
+                results.push(parent);
+                scan=parent.parentNode;}
+            return results;};
+
         function getChildNodes(node){
             if (node.nodeType!==1) return [];
             else if (!(node.childNodes)) return [];
