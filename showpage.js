@@ -232,6 +232,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
         adjustFonts(scan);}}
     scan.style.overflow=saved;}
   showPage.isOversize=isOversize;
+  showPage.checkOversize=checkOversize;
 
   function forwardPage(container){
     if (!(container=getContainer(container))) return;
