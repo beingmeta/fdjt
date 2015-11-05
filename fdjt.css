@@ -737,7 +737,8 @@ table.backtrace > tbody > tr.irritant > th {
 table.backtrace > tbody > tr > td {
     text-align: left; padding-top: 0.2ex;}
 table.backtrace > tbody.eval td.expr {
-    background-color: white; color: black; white-space: pre;}
+    background-color: white; color: black;}
+table.backtrace > tbody.eval td.expr > * { white-space: pre;}
 table.backtrace > tbody.eval td.expr .focus { color: blue; }
 table.backtrace > tbody.call > tr > td {
     background-color: whitesmoke; color: black;}
