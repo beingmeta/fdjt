@@ -144,7 +144,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var minpos=((startpos<=endpos)?(startpos):(endpos));
     var maxpos=((startpos>endpos)?(startpos):(endpos));
     info.innerHTML="<span class='pct'>"+Math.floor((minpos/lim)*100)+"%"+
-      "</span>"+"<span class='count'> ("+lim+")</span>";
+      "</span>"+"<span class='count'><strong>/</strong>"+lim+"</span>";
     info.title=fdjtString("Items %d through %d of %d",minpos,maxpos,lim);
     var forward_button=fdjtDOM("span.button.forward"," 》");
     var backward_button=fdjtDOM("span.button.backward","《 ");
