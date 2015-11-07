@@ -1218,17 +1218,19 @@ div.fdjtpage .fdjtpageinfo {
     position: absolute; right: 0px; bottom: 0px;
     padding-right: 0.5ex; padding-left: 0.5ex; 
     color: black; background-color: rgba(0,0,0,0.4);
-    font-size: 150%; line-height: 100%;
-    opacity: 0.25;}
+    font-size: 150%; /* line-height: 100%; */
+    opacity: 0.35;}
 
 div.fdjtpage .fdjtpageinfo span { pointer-events: none; }
 div.fdjtpage .fdjtpageinfo span.pct {
     padding-left: 1ex; padding-right: 1ex;
     pointer-events: all;
     cursor: text;}
+div.fdjtpage .fdjtpageinfo span.pct span.value {
+    -webkit-user-select: text;
+    -moz-select: text;
+    user-select: text;}
 div.fdjtpage div.fdjtpageinfo span.count { display: none;}
-div.fdjtpage div.fdjtpageinfo.fdjteditpageinfo span.count {
-    display: inline-block;}
 div.fdjtpage div.fdjtpageinfo span.count strong {
     padding-left: 0.5ex; padding-right: 0.5ex;}
 div.fdjtpage > div.fdjtpageinfo { display: block !important; }
@@ -1246,7 +1248,20 @@ html._MOUSE div.fdjtpage div.fdjtpageinfo:hover {
 html._MOUSE div.fdjtpage div.fdjtpageinfo .button:hover {
     color: blue;}
 
-html._TOUCH div.fdjtpageinfo { font-size: 200%;}
+div.fdjtpage div.fdjtpageinfo.fdjteditpageinfo {
+    background-color: gray;
+    transition-duration: 1s;
+    opacity: 0.9;
+    z-index: 100;}
+div.fdjtpage div.fdjtpageinfo.fdjteditpageinfo span.count {
+    display: inline-block;}
+div.fdjtpage .fdjtpageinfo.fdjteditpageinfo span.pct span.value {
+    pointer-events: all;}
+
+html._TOUCH div.fdjtpageinfo {
+    font-size: 200%;}
+html._TOUCH div.fdjtpageinfo.fdjteditpageinfo {
+    bottom: auto; top: 0px;}
 
 div.fdjtpage.formatting div, div.fdjtpage.getvisible div, 
 div.fdjtpage.formatting p, div.fdjtpage.getvisible p {

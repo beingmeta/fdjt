@@ -124,8 +124,6 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
       dropClass(container,"formatting");
       return startpos;}
     var endpos=showchildren(container,children,startpos,dir,h,padding);
-    if ((dir<0)&&(endpos===0))
-      return showPage(container,0,1);
     var end=children[endpos];
     if ((dir>0)&&(hasClass(end,"fdjtpagehead"))) {
       while ((endpos>startpos)&&(hasClass(end,"fdjtpagehead"))) {
@@ -146,10 +144,13 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
       addClass(container,"fdjtlastpage");
       at_end=true;}
     else dropClass(container,"fdjtlastpage");
+    if ((dir<0)&&(endpos===0)) {
+      dropClass(container,"formatting");
+      return showPage(container,0,1);}
     var minpos=((startpos<=endpos)?(startpos):(endpos));
     var maxpos=((startpos>endpos)?(startpos):(endpos));
     var countdom=fdjtDOM("span.count",fdjtDOM("strong","/"),lim);
-    var txtdom=fdjtDOM("span.text",Math.floor((minpos/lim)*100));
+    var txtdom=fdjtDOM("span.value",Math.floor((minpos/lim)*100));
     var pctdom=fdjtDOM("span.pct",txtdom,"%",countdom);
     var forward_button=fdjtDOM("span.button.forward"," 》");
     var backward_button=fdjtDOM("span.button.backward","《 ");
@@ -178,12 +179,16 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var kc=evt.keyCode;
     if (!(target._savedHTML))
       target._savedHTML=target.innerHTML;
-    cancelBubble(evt);
+    // cancelBubble(evt);
     if (kc===13) {
       try {
         var s=fdjtDOM.textify(target);
         var pct=parseFloat(s)/100;
-        showPage(container,pct,1);
+        if ((typeof pct === "number")&&(!(Number.isNaN(pct))))
+          showPage(container,pct,1);
+        else {
+          target.innerHTML=target._savedHTML;
+          target._savedHTML=false;}
         target.blur();}
       catch (ex) {
         if (target._savedHTML) {
@@ -209,7 +214,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
 
   function pageInputTapped(evt){
     var target=fdjtUI.T(evt);
-    var input=fdjtDOM.getChild(target,"span.text");
+    var input=fdjtDOM.getChild(target,"span.value");
     var info=getParent(target,".fdjtpageinfo");
     if (info) addClass(info,"fdjteditpageinfo");
     if (input) input.focus();
@@ -218,8 +223,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
         (getParent(selection.anchorNode,input))) {
       var anchor=selection.anchorNode;
       if (anchor.nodeType===3) {
-        selection.extend(anchor,anchor.nodeValue.length);
-        selection.collapseToEnd();}}
+        selection.extend(anchor,anchor.nodeValue.length);}}
     cancel(evt);}
 
   function forwardButton(evt){
