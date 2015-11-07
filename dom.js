@@ -515,9 +515,11 @@ fdjt.DOM=
         fdjtDOM.toggleParent=toggleParent;
         fdjtDOM.tP=toggleParent;
 
+        var text_input_types=
+            fdjtDOM.text_input_types=/text|url|email|search|password/i;
         function isTextInput(target){
             return (((target.tagName==='INPUT')&&
-                     (target.type.search(/text|url|email|search|password/i)===0))||
+                     (target.type.search(text_input_types)===0))||
                     (target.tagName==='TEXTAREA'));}
         fdjtDOM.isTextInput=isTextInput;
         
