@@ -213,7 +213,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
       var anchor=selection.anchorNode;
       if (anchor.nodeType===3) {
         selection.extend(anchor,anchor.nodeValue.length);
-        selection.collapseToEnd();}}}
+        selection.collapseToEnd();}}
+    cancel(evt);}
 
   function forwardButton(evt){
     fdjt.UI.cancel(evt);

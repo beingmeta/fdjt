@@ -1226,7 +1226,7 @@ div.fdjtpage .fdjtpageinfo span.pct {
     padding-left: 1ex; padding-right: 1ex;
     pointer-events: all;
     cursor: text;}
-/* div.fdjtpage div.fdjtpageinfo span.count { display: none;} */
+div.fdjtpage div.fdjtpageinfo span.count { display: none;}
 div.fdjtpage div.fdjtpageinfo span.count strong {
     padding-left: 0.5ex; padding-right: 0.5ex;}
 div.fdjtpage > div.fdjtpageinfo { display: block !important; }
