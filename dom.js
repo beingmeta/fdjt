@@ -133,9 +133,11 @@ fdjt.DOM=
                 if (typeof i === 'undefined') i=0;
                 while (i<len) {
                     var elt=elts[i++];
-                    if (!(elt)) {}
-                    else if (typeof elt === 'string')
+                    if (typeof elt === 'string')
                         frag.appendChild(document.createTextNode(elt));
+                    else if (typeof elt === 'number') 
+                        frag.appendChild(document.createTextNode(elt.toString()));
+                    else if (!(elt)) {}
                     else if (elt.nodeType) frag.appendChild(elt);
                     else if (elt.length)
                         domappend(frag,elt,0);
