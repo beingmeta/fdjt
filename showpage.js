@@ -37,6 +37,7 @@
 
 fdjt.showPage=fdjt.UI.showPage=(function(){
   "use strict";
+  var fdjtUI=fdjt.UI;
   var fdjtDOM=fdjt.DOM;
   var fdjtLog=fdjt.Log;
   var fdjtString=fdjt.String;
@@ -49,7 +50,11 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
   var addListener=fdjtDOM.addListener;
   var toArray=fdjtDOM.toArray;
   var getGeometry=fdjtDOM.getGeometry;
+  var getParent=fdjtDOM.getParent;
   
+  var cancelBubble=fdjtUI.cancelBubble;
+  var cancel=fdjtUI.cancel;
+
   var adjustFonts=fdjtDOM.adjustFonts;
 
   function getContainer(arg){
@@ -143,22 +148,72 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     else dropClass(container,"fdjtlastpage");
     var minpos=((startpos<=endpos)?(startpos):(endpos));
     var maxpos=((startpos>endpos)?(startpos):(endpos));
-    info.innerHTML="<span class='pct'>"+Math.floor((minpos/lim)*100)+"%"+
-      "</span>"+"<span class='count'><strong>/</strong>"+lim+"</span>";
-    info.title=fdjtString("Items %d through %d of %d",minpos,maxpos,lim);
+    var countdom=fdjtDOM("span.count",fdjtDOM("strong","/"),lim);
+    var txtdom=fdjtDOM("span.text",Math.floor((minpos/lim)*100));
+    var pctdom=fdjtDOM("span.pct",txtdom,"%",countdom);
     var forward_button=fdjtDOM("span.button.forward"," 》");
     var backward_button=fdjtDOM("span.button.backward","《 ");
-    fdjtDOM.prepend(info,backward_button);
+    info.innerHTML="";
+    fdjtDOM.append(info,backward_button,pctdom,forward_button);
+    info.title=fdjtString("Items %d through %d of %d",minpos,maxpos,lim);
+    txtdom.setAttribute("contentEditable","true");
+    addListener(txtdom,"blur",pageInputBlur);
+    addListener(txtdom,"keyup",cancelBubble);
+    addListener(txtdom,"keypress",cancelBubble);
+    addListener(txtdom,"keydown",pageInputKeydown);
+    addListener(pctdom,tap_event_name,pageInputTapped);
     if (at_start) backward_button.innerHTML="· ";
     else addListener(backward_button,tap_event_name,backwardButton);
     if (at_end) forward_button.innerHTML="· ";
     else addListener(forward_button,tap_event_name,forwardButton);
-    fdjtDOM.prepend(info,backward_button);
-    fdjtDOM.append(info,forward_button);
     addClass(container,"fdjtpagechange"); setTimeout(
       function(){dropClass(container,"fdjtpagechange");},1000);
     dropClass(container,"formatting");
     return endpos;}
+
+  function pageInputKeydown(evt){
+    var target=fdjtUI.T(evt);
+    var container=getParent(target,".fdjtpage");
+    if (!(container)) return;
+    var kc=evt.keyCode;
+    if (!(target._savedHTML))
+      target._savedHTML=target.innerHTML;
+    cancelBubble(evt);
+    if (kc===13) {
+      try {
+        var s=fdjtDOM.textify(target);
+        var pct=parseFloat(s)/100;
+        showPage(container,pct,1);}
+      catch (ex) {
+        if (target._savedHTML) {
+          target.innerHTML=target._savedHTML;
+          target._savedHTML=false;}}
+      cancel(evt);}
+    else if (kc===27) {
+      if (target._savedHTML) {
+        target.innerHTML=target._savedHTML;
+        target._savedHTML=false;}
+      target.blur();
+      cancel(evt);}
+    else {}}
+
+  function pageInputBlur(evt){
+    var target=fdjtUI.T(evt);
+    if (target._savedHTML) {
+      target.innerHTML=target._savedHTML;
+      target._savedHTML=false;}}
+
+  function pageInputTapped(evt){
+    var target=fdjtUI.T(evt);
+    var input=fdjtDOM.getChild(target,"span.text");
+    if (input) input.focus();
+    var selection=((window.getSelection)&&(window.getSelection()));
+    if ((selection)&&(selection.anchorNode)&&
+        (getParent(selection.anchorNode,input))) {
+      var anchor=selection.anchorNode;
+      if (anchor.nodeType===3) {
+        selection.extend(anchor,anchor.nodeValue.length);
+        selection.collapseToEnd();}}}
 
   function forwardButton(evt){
     fdjt.UI.cancel(evt);
