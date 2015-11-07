@@ -1227,6 +1227,8 @@ div.fdjtpage .fdjtpageinfo span.pct {
     pointer-events: all;
     cursor: text;}
 div.fdjtpage div.fdjtpageinfo span.count { display: none;}
+div.fdjtpage div.fdjtpageinfo.fdjteditpageinfo span.count {
+    display: inline-block;}
 div.fdjtpage div.fdjtpageinfo span.count strong {
     padding-left: 0.5ex; padding-right: 0.5ex;}
 div.fdjtpage > div.fdjtpageinfo { display: block !important; }

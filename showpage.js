@@ -183,11 +183,13 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
       try {
         var s=fdjtDOM.textify(target);
         var pct=parseFloat(s)/100;
-        showPage(container,pct,1);}
+        showPage(container,pct,1);
+        target.blur();}
       catch (ex) {
         if (target._savedHTML) {
           target.innerHTML=target._savedHTML;
-          target._savedHTML=false;}}
+          target._savedHTML=false;}
+        target.blur();}
       cancel(evt);}
     else if (kc===27) {
       if (target._savedHTML) {
@@ -199,6 +201,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
 
   function pageInputBlur(evt){
     var target=fdjtUI.T(evt);
+    var info=getParent(target,".fdjtpageinfo");
+    if (info) dropClass(info,"fdjteditpageinfo");
     if (target._savedHTML) {
       target.innerHTML=target._savedHTML;
       target._savedHTML=false;}}
@@ -206,6 +210,8 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
   function pageInputTapped(evt){
     var target=fdjtUI.T(evt);
     var input=fdjtDOM.getChild(target,"span.text");
+    var info=getParent(target,".fdjtpageinfo");
+    if (info) addClass(info,"fdjteditpageinfo");
     if (input) input.focus();
     var selection=((window.getSelection)&&(window.getSelection()));
     if ((selection)&&(selection.anchorNode)&&
