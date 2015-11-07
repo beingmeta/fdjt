@@ -148,8 +148,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                          etype,thid,target,tx,ty,orig||"scratch");}
         if ((!target)||(!(hasParent(target,document.body))))
             target=document.elementFromPoint(tx,ty);
-        if (orig_target!==target)
-            evt.relatedTarget=orig_target;
         if ((handlers)&&(handlers.hasOwnProperty(etype))) {
             evt.target=target;
             handlers[etype](evt,target);}
@@ -253,6 +251,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         var wanderthresh=false;
         // Minimum distance before recognizing a swipe
         var min_swipe=30;
+        // Set to suppress swipe identification
+        var no_swipe=false;
         
         var scrolling=false, scroll_x=0, scroll_y=0;
         // These indicate where/when the current gesture started, is
@@ -343,6 +343,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             swipe_t=start_x=start_y=start_t=
                 touch_x=touch_y=touch_t=touch_n=
                 target_x=target_y=target_t=false;
+            no_swipe=false;
             touched=pressed=pressed_at=false;}
 
         function synthEvent(target,etype,th,orig,tx,ty,also){
@@ -367,6 +368,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function held(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
+            no_swipe=true;
             if (holdclass) setTimeout(start_holding,20);
             return synthEvent(target,"hold",th,evt,x,y,false);}
         function released(target,evt,x,y){
@@ -387,8 +389,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (also) {
                 also.startX=start_x; also.startY=start_y;}
             else also={startX: start_x,startY: start_y};
-            if (evt) {
-                var rel=evt.relatedTarget||eTarget(evt);
+            if ((evt)&&(!(also.hasOwnProperty('relatedTarget')))) {
+                var rel=evt.relatedTarget;
                 if (rel!==target) also.relatedTarget=rel;}
             if (holdclass)
                 setTimeout(check_holding,50);
@@ -492,7 +494,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (th_timer) {
                 clearTimeout(th_timer); th_timer=false;}
             else if (noslip) {}
-            else if (pressed) {slipped(pressed,evt);}
+            else if (pressed) {
+                slipped(pressed,evt,{relatedTarget: false});}
             if (reticle.live) reticle.highlight(false);
             pressed_at=touched=pressed=tap_target=false;
             if (holdclass) setTimeout(stop_holding,20);
@@ -574,8 +577,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                         abortpress(evt,"taphold_wander_timeout");},
                                             wanderthresh);
                     if (pressed) {
-                        if (!(noslip))
-                            slipped(pressed,evt,{relatedTarget: target});
+                        if (!(noslip)) {
+                            slipped(pressed,evt,
+                                    {relatedTarget: false});}
                         setTarget(false);}}
                 return;}
             else if (wander_timer) {
@@ -591,7 +595,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             // If touched is false, the tap/hold was aborted somehow
             if ((!((touched)||(pressed)))) {
                 // Just tracking, to detect swipes
-                if ((!(swipe_t))&&(min_swipe>0)&&(xyd(start_x,start_y,x,y)>min_swipe))
+                if ((!(swipe_t))&&(!(no_swipe))&&(min_swipe>0)&&
+                    (xyd(start_x,start_y,x,y)>min_swipe))
                     swiped(target,evt,start_x,start_y,x,y);
                 touch_x=x; touch_y=y; touch_t=fdjtET();
                 if (!(touch_n)) touch_n=n_touches; else
@@ -608,7 +613,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 abortpress(evt,"movefar");
                 if (th_timer) clearTimeout(th_timer);
                 pressed_at=touched=th_timer=pressed=false; th_targets=[];
-                if ((!(swipe_t))&&(min_swipe>0)&&(xyd(start_x,start_y,x,y)>min_swipe))
+                if ((!(swipe_t))&&(!(no_swipe))&&(min_swipe>0)&&
+                    (xyd(start_x,start_y,x,y)>min_swipe))
                     swiped(target,evt,start_x,start_y,x,y);
                 setTarget(false);
                 touch_x=x; touch_y=y; touch_t=fdjtET();
@@ -650,7 +656,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 th_targets.push(th_target);
             if (!(mouse_down)) {
                 if (!(noslip))
-                    slipped(pressed,evt,{relatedTarget: target});
+                    slipped(pressed,evt,
+                            {relatedTarget: target});
                 pressed_at=pressed=false;}
             else if ((pressed)&&(th_target!==pressed)&&
                      (!((hasParent(th_target,pressed))||
@@ -662,7 +669,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 endpress(evt);}
             else if ((pressed)&&(th_target!==pressed)) {
                 if (!(noslip))
-                    slipped(pressed,evt,{relatedTarget: target});
+                    slipped(pressed,evt,
+                            {relatedTarget: target});
                 pressed=th_target;
                 if (pressed) pressed_at=fdjtET(); else pressed_at=false;
                 held(pressed);}
@@ -818,7 +826,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((touched)||(pressed)) {
                 if ((untouchable)&&(untouchable(evt))) return;
                 endpress(evt);}
-            else if ((min_swipe>0)&&(swipe_len>min_swipe)&&
+            else if ((min_swipe>0)&&(swipe_len>min_swipe)&&(!(no_swipe))&&
                      (((!touched)||(touched!==elt))&&
                       ((!pressed)||(pressed!==elt))))
                 swiped(target,evt,start_x,start_y,touch_x,touch_y);
