@@ -1149,21 +1149,23 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.T=function(evt) {
         evt=evt||window.event; return (evt.target)||(evt.srcElement);};
 
-    fdjtUI.noDefault=function(evt){
+    fdjtUI.noDefault=function noDefault(evt){
         evt=evt||window.event;
         if (evt.preventDefault) evt.preventDefault();
         else evt.returnValue=false;
         return false;};
 
-    fdjtUI.noBubble=function(evt){
+    fdjtUI.cancelBubble=fdjtUI.noBubble=function cancelBubble(evt){
         evt=evt||window.event;
-        evt.cancelBubble=true;};
+        if (evt.stopPropagation) evt.stopPropagation();
+        else evt.canceBubble=true;};
 
-    fdjtUI.cancel=function(evt){
+    fdjtUI.cancel=function cancelEvent(evt){
         evt=evt||window.event;
         if (evt.preventDefault) evt.preventDefault();
         else evt.returnValue=false;
-        evt.cancelBubble=true;
+        if (evt.stopPropagation) evt.stopPropagation();
+        else evt.cancelBubble=true;
         return false;};
 
     fdjtUI.isClickable=function(target){
