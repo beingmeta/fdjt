@@ -138,8 +138,7 @@ fdjt.Dialog=(function(){
         if (countdown) {
             var ticker=countdown_tickers[countdown.id];
             delete countdown_tickers[countdown.id];
-            if (ticker) clearInterval(ticker);
-            fdjtDOM.remove(countdown);}}
+            if (ticker) clearInterval(ticker);}}
 
     function close_dialog_handler(evt){
         evt=evt||window.event;
@@ -233,6 +232,8 @@ fdjt.Dialog=(function(){
         var dom=spec.dom||
             ((spec.label)&&(fdjtDOM("button",spec.label)))||
             fdjtDOM("button","Choice "+i);
+        if (spec.name) dom.name=spec.name;
+        if (spec.value) dom.value=spec.value;
         dom.onmousedown=fdjtUI.cancel;
         dom.onmouseup=fdjtUI.cancel;
         dom.tabIndex=i;

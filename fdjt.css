@@ -1012,6 +1012,8 @@ div.fdjtdialog.fdjtconfirm div.choices button {
     background-color: silver;
     border-radius: 1ex;
     margin-left: 0.5ex; margin-right: 0.5ex; margin-bottom: 1ex;}
+html._TOUCH div.fdjtdialog.fdjtconfirm div.choices button:hover {
+    border-color: blue;}
 
 div.fdjtdialog.fdjtconfirm div.choices button.selected,
 div.fdjtdialog.fdjtconfirm div.choices button:focus {
