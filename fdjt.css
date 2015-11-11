@@ -1247,6 +1247,8 @@ html._MOUSE div.fdjtpage div.fdjtpageinfo:hover {
     opacity: 0.75;}
 html._MOUSE div.fdjtpage div.fdjtpageinfo .button:hover {
     color: blue;}
+html._MOUSE div.fdjtpage div.fdjtpageinfo:hover span.count {
+    display: inline-block;}
 
 div.fdjtpage div.fdjtpageinfo.fdjteditpageinfo {
     background-color: gray;
@@ -1326,6 +1328,9 @@ html._NOSVG .pager.pagerlayout {
     display: block;}
 .pager.pagerdone {overflow: hidden;}
 .pager.pagerdone .pagerblock {overflow: hidden;}
+
+@media (min-width: 1000) {
+    div.fdjtpage div.fdjtpageinfo span.count { display: none;}}
 
 /* Emacs local variables
    ;;;  Local variables: ***
