@@ -227,11 +227,14 @@ fdjt.Dialog=(function(){
         return box;}
     Dialog.message=message;
     fdjt.message=message;
-
-    function makeChoice(spec,close_choice,i){
-        var dom=spec.dom||
-            ((spec.label)&&(fdjtDOM("button",spec.label)))||
-            fdjtDOM("button","Choice "+i);
+function makeChoice(spec,close_choice,i){
+        var dom=spec.dom;
+        if (!(dom)) {
+            dom=fdjtDOM("button");
+            if (spec.label.nodeType)
+                dom.appendChild(spec.label.cloneNode(true));
+            else if (spec.label) dom.innerHTML=spec.label;
+            else dom.innerHTML="Choice "+i;}
         if (spec.name) dom.name=spec.name;
         if (spec.value) dom.value=spec.value;
         dom.onmousedown=fdjtUI.cancel;
