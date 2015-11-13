@@ -2342,7 +2342,7 @@ fdjt.CodexLayout=
                     var item=fdjtDOM("LI","empty");
                     item.setAttribute(
                         "style",
-                        "visibility: hidden !important; width: 0px !important; height: 0px !important; pointer-events: none;");
+                        "visibility: hidden !important; width: 0px !important; height: 0px !important; pointer-events: none; margin: 0px !important;");
                     frag.appendChild(item);
                     count--;}
                 if (root.firstChild) root.insertBefore(frag,root.firstChild);
