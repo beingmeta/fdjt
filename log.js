@@ -156,6 +156,8 @@ fdjt.Log=(function(){
     //  so that they're easy to find.
     fdjt.Trace=fdjt.Log;
     
+    fdjtLog.getBacklog=function getBacklog(){return backlog;};
+
     return fdjtLog;})(window,document);
 
 
