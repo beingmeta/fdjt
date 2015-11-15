@@ -22,6 +22,7 @@
 
 */
 /* jshint browser: true, sub: true */
+/* global idbModules */
 
 // var fdjt=((window)?((window.fdjt)||(window.fdjt={})):({}));
 
@@ -542,6 +543,26 @@ fdjt.State=
         fdjtState.getURL=getURL;
 
         return fdjtState;})();
+
+fdjt.iDB=(function(){
+    "use strict";
+    var iDB={}, device=fdjt.device;
+    if ((!(window.indexedDB))||
+        ((device.ios)&&(device.standalone))) {
+        iDB.indexedDB = idbModules.shimIndexedDB;
+        iDB.IDBDatabase = idbModules.IDBDatabase;
+        iDB.IDBTransaction = idbModules.IDBTransaction;
+        iDB.IDBCursor = idbModules.IDBCursor;
+        iDB.IDBKeyRange = idbModules.IDBKeyRange;}
+    else {
+        iDB.indexedDB=window.indexedDB;
+        iDB.IDBDatabase=window.IDBDatabase;
+        iDB.IDBTransaction=window.IDBTransaction;
+        iDB.IDBCursor=window.IDBCursor;
+        iDB.IDBKeyRange=window.IDBKeyRange;
+        iDB.IDBTransaction=window.IDBTransaction;
+        iDB.IDBTransaction=window.IDBTransaction;}
+    return iDB;})();
 
 /* Emacs local variables
    ;;;  Local variables: ***
