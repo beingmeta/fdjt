@@ -36,18 +36,21 @@
         var replace=((name)&&(init_names[name]));
         var i=0, lim=inits.length;
         while (i<lim) {
-            if ((replace)&&(inits[i]===replace)) {
+            if (((replace)&&(inits[i]===replace))||(inits[i]===fcn)) {
                 if (inits_run) {
                     fdjtLog.warn(
                         "Replacing init %s which has already run",name);
                     if (runagain) {
                         fdjtLog.warn("Running the new version");
-                        inits[i]=fcn; init_names[name]=fcn; fcn();
-                        return;}}
+                        inits[i]=fcn; 
+                        if (name) init_names[name]=fcn;
+                        fcn();
+                        return;}
+                    else return;}
                 else {
-                    inits[i]=fcn; init_names[name]=fcn;
+                    inits[i]=fcn; 
+                    if (name) init_names[name]=fcn;
                     return;}}
-            else if (inits[i]===fcn) return;
             else i++;}
         if (name) init_names[name]=fcn;
         inits.push(fcn);
