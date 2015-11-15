@@ -22,7 +22,7 @@
    
 */
 
-/* global setTimeout, clearTimeout, Promise, window, idbModules */
+/* global setTimeout, clearTimeout, Promise, window */
 
 fdjt.RefDB=(function(){
     "use strict";
@@ -34,9 +34,10 @@ fdjt.RefDB=(function(){
     var fdjtLog=fdjt.Log;
     var warn=fdjtLog.warn;
 
-    var indexedDB=window.indexedDB||idbModules.indexedDB;
-    
     var refdbs={}, all_refdbs=[], changed_dbs=[], aliases={};
+
+    var iDB=fdjt.iDB;
+    var indexedDB=iDB.indexedDB;
 
     function RefDB(name,init){
         var db=this;
@@ -668,7 +669,7 @@ fdjt.RefDB=(function(){
                 docallback();
                 return new Promise(function(resolve){
                     resolve(refs);});}}
-        else if (this.storage instanceof indexedDB) {
+        else if (this.storage instanceof window.indexedDB) {
             // Not yet implemented
             return;}
         else {}};
@@ -808,7 +809,7 @@ fdjt.RefDB=(function(){
                     var pos=changed_dbs.indexOf(db);
                     if (pos>=0) changed_dbs.splice(pos,1);
                     if (resolve) resolve();});
-            else if (db.storage instanceof indexedDB) {}
+            else if (db.storage instanceof window.indexedDB) {}
             else return resolve();}
         if (!(storage)) return false;
         else return new Promise(saving);};
@@ -1794,57 +1795,60 @@ fdjt.RefDB=(function(){
                 if (reject)
                     reject(new Error("No indexedDB implementation"));
                 else throw new Error("No indexedDB implementation");}
-            var req=indexedDB.open(dbname,version), fail=false;
-            var init_timeout=setTimeout(function(){
-                fail=true;
-                fdjtLog.warn("Init timeout for indexedDB %s",vname);
-                reject(new Error("Init timeout"));},
-                                        opts.timeout||15000);
-            req.onerror=function(event){
-                fail=true;
-                warn("Error initializing indexedDB layout cache: %o",
-                     event.errorCode);
-                if (init_timeout) clearTimeout(init_timeout);
-                if (reject) return reject(event);
-                else return event;};
-            req.onsuccess=function(evt) {
-                if (fail) {
-                    fdjtLog("Discarding indexedDB %s after failure!",
-                            vname);
-                    return;}
-                var db=evt.target.result;
-                if (init_timeout) clearTimeout(init_timeout);
-                if (trace)
-                    fdjtLog("Got existing IndexedDB %s %o",
-                            vname,db);
-                if (resolve)
-                    return resolve(db);
-                else return db;};
-            req.onupgradeneeded=function(evt) {
-                var db=evt.target.result;
-                if (!(init)) return resolve(db);
-                else {
-                    req.onsuccess=function(){
-                        if (resolve) return resolve(db);
-                        else return db;};
-                    req.onerror=function(evt){
-                        fdjtLog("Error upgrading %s %o",vname,evt);
-                        if (reject) reject(evt);
-                        else throw new Error(
-                            "Error upgrading %s",vname);};
-                    if (init.call) {
-                        try {init(db);
-                             if (resolve) return resolve(db);
-                             else return db;}
-                        catch (ex) {
-                            fdjtLog("Error upgrading %s:%d: %o",
-                                    dbname,version,ex);
-                            if (reject) reject(ex);}}
-                    else if (reject) reject(
-                        new Error("Bad indexDB init: %o",init));
-                    else throw new Error("Bad indexDB init: %o",init);}
-                return db;};
-            return req;}
+            try {
+                var req=indexedDB.open(dbname,version), fail=false;
+                var init_timeout=setTimeout(function(){
+                    fail=true;
+                    fdjtLog.warn("Init timeout for indexedDB %s",vname);
+                    reject(new Error("Init timeout"));},
+                                            opts.timeout||15000);
+                req.onerror=function(event){
+                    fail=true;
+                    warn("Error initializing indexedDB: %o",
+                         event.errorCode);
+                    if (init_timeout) clearTimeout(init_timeout);
+                    if (reject) return reject(event);
+                    else return event;};
+                req.onsuccess=function(evt) {
+                    if (fail) {
+                        fdjtLog("Discarding indexedDB %s after failure!",
+                                vname);
+                        return;}
+                    var db=evt.target.result;
+                    if (init_timeout) clearTimeout(init_timeout);
+                    if (trace)
+                        fdjtLog("Got existing IndexedDB %s %o",
+                                vname,db);
+                    if (resolve) return resolve(db);
+                    else return db;};
+                req.onupgradeneeded=function(evt) {
+                    var db=evt.target.result;
+                    if (!(init)) return resolve(db);
+                    else {
+                        req.onsuccess=function(){
+                            if (resolve) return resolve(db);
+                            else return db;};
+                        req.onerror=function(evt){
+                            fdjtLog("Error upgrading %s %o",vname,evt);
+                            if (reject) reject(evt);
+                            else throw new Error(
+                                "Error upgrading %s",vname);};
+                        if (init.call) {
+                            try {init(db);
+                                 if (resolve) return resolve(db);
+                                 else return db;}
+                            catch (ex) {
+                                fdjtLog("Error upgrading %s:%d: %o",
+                                        dbname,version,ex);
+                                if (reject) reject(ex);}}
+                        else if (reject) reject(
+                            new Error("Bad indexDB init: %o",init));
+                        else throw new Error("Bad indexDB init: %o",init);}
+                    return db;};
+                return req;}
+            catch (ex) {
+                fdjtLog("usingIndexedDB failed: %o",ex);
+                if (reject) reject(ex);}}
         return new Promise(usingIndexedDB);}
     RefDB.useIndexedDB=useIndexedDB;
 
