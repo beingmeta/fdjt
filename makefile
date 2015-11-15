@@ -13,7 +13,7 @@ FDJT_FILES=header.js \
 	ui.js showpage.js dialog.js completions.js taphold.js selecting.js \
 	scrollever.js \
 	globals.js
-# indexed.hint iscroll.hint hash.hint
+# idbshim.hint iscroll.hint hash.hint
 FDJT_HINTS=promise.hint async.hint time.hint init.hint syze.hint \
 	charnames.hint string.hint log.hint refdb.hint \
 	state.hint dom.hint json.hint ajax.hint \
