@@ -1844,8 +1844,7 @@ fdjt.RefDB=(function(){
                         else if (reject) reject(
                             new Error("Bad indexDB init: %o",init));
                         else throw new Error("Bad indexDB init: %o",init);}
-                    return db;};
-                return req;}
+                    return db;};}
             catch (ex) {
                 fdjtLog("usingIndexedDB failed: %o",ex);
                 if (reject) reject(ex);}}
