@@ -87,15 +87,10 @@
                 i++;}}
         inits_run=true;};
 
-    var numpat=/^\d+(\.\d+)$/;
-    function getMatch(string,rx,i,literal){
+    function getMatch(string,rx,i){
         var match=rx.exec(string);
         if (typeof i === "undefined") i=0;
-        if ((match)&&(match.length>i)) {
-            if (literal) return match[i];
-            else if (numpat.test(match[i]))
-                return parseFloat(match[i]);
-            else return match[i];}
+        if ((match)&&(match.length>i)) return match[i];
         else return false;}
     
     var spacechars="\n\r\t\f\x0b\xa0\u1680\u180e\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u202f\u205f\u3000\uf3ff";
@@ -114,36 +109,50 @@
         if ((start>0)||(end<len)) return string.slice(start,end+1);
         else return string;}
     
+    var vnum_pat=/^(\d+(\.\d+)).*/;
+    function getVersionNum(s){
+        if (typeof s === "number") return s;
+        else if (typeof s === "string") {
+            if (s.indexOf('_')) s=s.replace(/_/g,'.');
+            if (/^\d+\.?$/.exec(s)) {}
+            else if (vnum_pat.exec(s))
+                s=vnum_pat.exec(s)[1];
+            else return s;
+            try { return parseFloat(s)||s; }
+            catch (ex) { return s;}}
+        else return s;}
+
     var device=(fdjt.device)||(fdjt.device={});
         /* Setting up media info */
     function identifyDevice(){
         if ((fdjt.device)&&(fdjt.device.started)) return;
         var navigator=window.navigator;
-        var appversion=navigator.userAgent;
+        var ua=navigator.userAgent;
         
-        var isAndroid = getMatch(appversion,/\bAndroid +(\d+\.\d+)\b/g,1);
-        var isWebKit = getMatch(appversion,/\bAppleWebKit\/(\d+\.\d+)\b/g,1);
-        var isGecko = getMatch(appversion,/\bGecko\/(\d+)\b/gi,1,true);
-        var isChrome = getMatch(appversion,/\bChrome\/(\d+\.\d+)\b/g,1);
-        var isFirefox = getMatch(appversion,/\bFirefox\/(\d+\.\d+)\b/gi,1);
-        var isSafari = getMatch(appversion,/\bSafari\/(\d+\.\d+)\b/gi,1);
-        var isOSX = getMatch(appversion,/\bMac OS X \/(\d+\_\d+)\b/gi,1,true);
-        var isMobileSafari = (isSafari)&&(getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
-        var isMobileWebKit = (isWebKit)&&(getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
-        var isMobile = (getMatch(appversion,/\bMobile\/(\w+)\b/gi,1,true));
-        var hasVersion = getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1);
+        var isAndroid = getMatch(ua,/\bAndroid +(\d+\.\d+)\b/g,1);
+        var isWebKit = getMatch(ua,/\bAppleWebKit\/(\d+\.\d+)\b/g,1);
+        var isGecko = getMatch(ua,/\bGecko\/(\d+)\b/gi,1,true);
+        var isChrome = getMatch(ua,/\bChrome\/(\d+\.\d+(.\d+)*)\b/g,1);
+        var isFirefox = getMatch(ua,/\bFirefox\/(\d+\.\d+(.\d+)*)\b/gi,1);
+        var isSafari = getMatch(ua,/\bSafari\/(\d+\.\d+(.\d+)*)\b/gi,1);
+        var isOSX = getMatch(ua,/\bMac OS X \/(\d+\_\d+)\b/gi,1,true);
+        var isMobileSafari = (isSafari)&&(getMatch(ua,/\bMobile\/(\w+)\b/gi,1,true));
+        var isMobileWebKit = (isWebKit)&&(getMatch(ua,/\bMobile\/(\w+)\b/gi,1,true));
+        var isMobile = (getMatch(ua,/\bMobile\/(\w+)\b/gi,1,true));
+        var hasVersion = getMatch(ua,/\bVersion\/(\d+\.\d+)\b/gi,1);
+        var os_version = getMatch(ua,/\bOS (\d+_\d+(_\d)*)\b/gi,1);
         
-        var isUbuntu = (/ubuntu/gi).test(appversion);
-        var isRedHat = (/redhat/gi).test(appversion);
-        var isLinux = (/linux/gi).test(appversion);
-        var isMacintosh = (/Macintosh/gi).test(appversion);
+        var isUbuntu = (/ubuntu/gi).test(ua);
+        var isRedHat = (/redhat/gi).test(ua);
+        var isLinux = (/linux/gi).test(ua);
+        var isMacintosh = (/Macintosh/gi).test(ua);
         
-        var isTouchPad = (/Touchpad/gi).test(appversion);
-        var iPhone = (/iphone/gi).test(appversion);
-        var iPad = (/ipad/gi).test(appversion);
+        var isTouchPad = (/Touchpad/gi).test(ua);
+        var iPhone = (/iphone/gi).test(ua);
+        var iPad = (/ipad/gi).test(ua);
         var isTouch = iPhone || iPad || isAndroid || isTouchPad;
         var isIOS=((iPhone)||(iPad))&&
-            ((getMatch(appversion,/\bVersion\/(\d+\.\d+)\b/gi,1))||(true));
+            ((getMatch(ua,/\bVersion\/(\d+\.\d+)\b/gi,1))||(true));
         
         var opt_string=stdspace(
             ((isAndroid)?(" Android/"+isAndroid):(""))+
@@ -164,24 +173,38 @@
         if (navigator.vendor) device.vendor=navigator.vendor;
         if (navigator.platform) device.platform=navigator.platform;
         if (navigator.oscpu) device.oscpu=navigator.oscpu;
-        if (navigator.cookieEnabled) device.cookies=navigator.cookies;
+        if (navigator.cookieEnabled) device.cookies=navigator.cookieEnabled;
         if (navigator.doNotTrack) device.notrack=navigator.doNotTrack;
         if (navigator.standalone) device.standalone=navigator.standalone;
         device.string=opt_string;
-        if (isAndroid) device.android=isAndroid;
+        if (isAndroid) {
+            device.android=getVersionNum(isAndroid);
+            device.android_version=isAndroid;}
         if (isIOS) {
-            device.ios=isIOS;
+            device.ios=getVersionNum(os_version)||isIOS;
+            device.ios_version=isIOS;
             if (iPhone) device.iphone=isIOS;
             if (iPad) device.ipad=isIOS;}
-        if (isChrome) device.chrome=isChrome;
+        if (isChrome) {
+            device.chrome_version=isChrome;
+            device.chrome=getVersionNum(isChrome);}
         if (iPad) device.iPad=true;
         if (iPhone) device.iPhone=true;
-        if (isIOS) device.ios=true;
-        if (isOSX) device.osx=true;
-        if (isWebKit) device.webkit=isWebKit;
-        if (isSafari) device.safari=isSafari;
-        if (isMobileSafari) device.mobilesafari=isMobileSafari;
-        if (isMobileWebKit) device.mobilewebkit=isMobileWebKit;
+        if (isOSX) {
+            device.osx=getVersionNum(isOSX);
+            device.osx_version=isOSX;}
+        if (isWebKit) {
+            device.webkit=getVersionNum(isWebKit);
+            device.webkit_version=isWebKit;}
+        if (isSafari) {
+            device.safari=getVersionNum(isSafari);
+            device.safari_version=isSafari;}
+        if (isMobileSafari) {
+            device.mobilesafari_version=isMobileSafari;
+            device.mobilesafari=getVersionNum(isMobileSafari);}
+        if (isMobileWebKit) {
+            device.mobilewebkit_version=isMobileWebKit;
+            device.mobilewebkit=getVersionNum(isMobileWebKit);}
         if (isMobile) device.mobile=isMobile;
         if (hasVersion) device.version=hasVersion;
         if (isMacintosh) device.isMacintosh=true;
