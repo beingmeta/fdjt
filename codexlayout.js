@@ -2645,17 +2645,18 @@ fdjt.CodexLayout=
                 if (layoutDB)
                     return resolve(layoutDB);
                 else if ((indexedDB)&&(dbname)) {
-                    try { return RefDB.useIndexedDB(dbname,1,function(db){
-                        db.createObjectStore("layouts",{keyPath: "layout_id"});})
-                          .then(function(db){
-                              CodexLayout.layoutDB=layoutDB=db;
-                              CodexLayout.cache=7;
-                              resolve(db);})
-                          .catch(function(trouble){
-                              fdjtLog("indexedDB failed: %o",trouble);
-                              // Fall back to local storage 
-                              CodexLayout.layoutDB=layoutDB=window.localStorage;
-                              resolve(layoutDB);});}
+                    try {
+                        RefDB.useIndexedDB(dbname,1,function(db){
+                            db.createObjectStore("layouts",{keyPath: "layout_id"});})
+                            .then(function(db){
+                                CodexLayout.layoutDB=layoutDB=db;
+                                CodexLayout.cache=7;
+                                resolve(db);})
+                            .catch(function(trouble){
+                                fdjtLog("indexedDB failed: %o",trouble);
+                                // Fall back to local storage 
+                                CodexLayout.layoutDB=layoutDB=window.localStorage;
+                                resolve(layoutDB);});}
                     catch (ex) {reject(ex);}}
                 else {
                     CodexLayout.layoutDB=layoutDB=window.localStorage;
@@ -2685,6 +2686,7 @@ fdjt.CodexLayout=
                 else {
                     return useIndexedDB()
                         .then(function(db){
+                            layoutDB=CodexLayout.layoutDB=window.LocalStorage;
                             cacheLayoutIDB(db,layout_id,content,resolve,reject);})
                         .catch(function(){
                             layoutDB=CodexLayout.layoutDB=window.LocalStorage;
@@ -2807,6 +2809,10 @@ fdjt.CodexLayout=
         CodexLayout.dbname="codexlayout";
 
         return CodexLayout;})();
+
+// Make CodexLayout 'global'
+if ((typeof window !== "undefined")&&(window.fdjt))
+    window.CodexLayout=fdjt.CodexLayout;
 
 
 /* Mini Manual */
