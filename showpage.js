@@ -83,6 +83,7 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
   
   function showPage(container,start,dir){
     if (!(container=getContainer(container))) return;
+    if (typeof dir !== "number") dir=1; else if (dir<0) dir=-1; else dir=1;
     var shown=toArray(getChildren(container,".fdjtshow"));
     var curstart=getChild(container,".fdjtstartofpage");
     var curend=getChild(container,".fdjtendofpage");
@@ -92,7 +93,6 @@ fdjt.showPage=fdjt.UI.showPage=(function(){
     var padding=getGeometry(container,false,true).bottom_padding, h;
     var tap_event_name=((fdjt.device.touch)?("touchstart"):("click"));
     if (children.length===0) return;
-    if (typeof dir !== "number") dir=1; else if (dir<0) dir=-1; else dir=1;
     if (!(start)) {
       startpos=0; start=children[0];}
     else if ((typeof start === "number")&&(start>0)&&(start<1)) {
