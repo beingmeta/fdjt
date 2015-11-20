@@ -1545,7 +1545,7 @@ fdjt.RefDB=(function(){
     RefDB.StringMap=StringMap;
 
     function RefMap(db) {this._db=db; return this;}
-    RefMap.prototype.get=function(key){
+    RefMap.prototype.get=function RefMapGet(key){
         if (typeof key === "string") {
             if (this.hasOwnProperty(key)) return this[key];
             else return undefined;}
@@ -1553,13 +1553,13 @@ fdjt.RefDB=(function(){
             var id=((this.uniqueids)&&key._id)||key._qid||key.getQID();
             return this[id];}
         else return undefined;};
-    RefMap.prototype.set=function(key,val){
+    RefMap.prototype.set=function RefMapSet(key,val){
         if (typeof key === "string") this[key]=val;
         else if (key instanceof Ref) {
             var id=key._qid||((this.uniqueid)&&key._id)||key.getQID();
             this[id]=val;}
         else return false;};
-    RefMap.prototype.increment=function(key,delta){
+    RefMap.prototype.increment=function RefMapIncrement(key,delta){
         if (typeof key === "string") {
             if (this.hasOwnProperty(key))
                 this[key]=this[key]+delta;
@@ -1572,7 +1572,7 @@ fdjt.RefDB=(function(){
     
     /* Miscellaneous array and table functions */
 
-    RefDB.add=function(obj,field,val,nodup){
+    RefDB.add=function refDBAdd(obj,field,val,nodup){
         if (arguments.length===2)
             return set_add(obj,field);
         else if (obj instanceof Ref)
@@ -1589,7 +1589,7 @@ fdjt.RefDB=(function(){
         if ((obj._all) && (!(arr_contains(obj._all,field))))
             obj._all.push(field);};
 
-    RefDB.drop=function(obj,field,val){
+    RefDB.drop=function refDBDrop(obj,field,val){
         if (arguments.length===2)
             return set_drop(obj,field);
         else if (obj instanceof Ref)
@@ -1604,7 +1604,7 @@ fdjt.RefDB=(function(){
             else vals.splice(pos,1);}
         else {}};
 
-    RefDB.test=function(obj,field,val){
+    RefDB.test=function refDBTest(obj,field,val){
         if (arguments.length===2)
             return arr_contains(obj,field);
         else if (obj instanceof Ref)
@@ -1619,10 +1619,10 @@ fdjt.RefDB=(function(){
             else return true;}
         else return false;};
 
-    RefDB.insert=function(array,value){
+    RefDB.insert=function RefDBInsert(array,value){
         if (arr_position(array,value)<0) array.push(value);};
 
-    RefDB.remove=function(array,value,count){
+    RefDB.remove=function RefDBInsert(array,value,count){
         var pos=arr_position(array,value);
         if (pos<0) return array;
         array.splice(pos,1);
@@ -1633,7 +1633,7 @@ fdjt.RefDB=(function(){
                 array.splice(pos,1); count--;}}
         return array;};
 
-    RefDB.indexOf=function(array,elt,pos){
+    RefDB.indexOf=function RefDBIndexOf(array,elt,pos){
         if (pos) return array.indexOf(elt,pos);
         else return array.indexOf(elt);};
 
