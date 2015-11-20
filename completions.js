@@ -371,7 +371,7 @@ if (!(fdjt.UI)) fdjt.UI={};
         var i=0; var lim=keys.length;
         while (i<lim) {
             var key=keys[i++];
-            var completions=bykey.get(key);
+            var completions=bykey[key];
             if (completions) {
                 if (!(completions instanceof Array))
                     completions=[completions];
