@@ -2989,12 +2989,15 @@ fdjt.DOM=
             wstyle.width=wstyle.height="100%";
             w=wrapper.offsetWidth; h=wrapper.offsetHeight;
             wstyle.width=wstyle.height="";
+            wstyle.maxWidth=wstyle.maxHeight="100%";
+            w=wrapper.offsetWidth; h=wrapper.offsetHeight;
             size=adjustWrapperFont(
                 wrapper,10,false,size,min,max,w,h,fudge,dolog);
             size=adjustWrapperFont(
                 wrapper,5,false,size,min,max,w,h,fudge,dolog);
             size=adjustWrapperFont(
                 wrapper,1,false,size,min,max,w,h,fudge,dolog);
+            wstyle.maxWidth=wstyle.maxHeight="";
             node.style.display=node_display;
             if (size===100) {
                 if (dolog)
