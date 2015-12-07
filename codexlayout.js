@@ -435,7 +435,7 @@ fdjt.CodexLayout=
         
         // This moves a node into another container, leaving
         // a back pointer for restoration
-        function moveNode(arg,into,blockp,crumbs){
+        function moveNodeInto(arg,into,blockp,crumbs){
             var baseclass; var node=arg, weird=false;
             if (hasParent(node,into)) return node;
             if (node.nodeType===1) {
@@ -470,6 +470,11 @@ fdjt.CodexLayout=
                 if (baseclass) node.className=baseclass+" codexrelocated";
                 else node.className="codexrelocated";
                 node.parentNode.replaceChild(crumb,node);}
+            into.appendChild(node);
+            return node;}
+
+        function moveNode(arg,into,blockp,crumbs){
+            var node=moveNodeInto(arg,into,blockp,crumbs);
             if (into) {
                 var dragged=[], scan=node.nextSibling;
                 while (scan) {
@@ -482,7 +487,8 @@ fdjt.CodexLayout=
                 into.appendChild(node);
                 if (dragged.length) {
                     var d=0, ndrags=dragged.length;
-                    while (d<ndrags) into.appendChild(dragged[d++]);}}
+                    while (d<ndrags)
+                        moveNodeInto(dragged[d++],node,false,crumbs);}}
             return node;}
         
         function markPageTop(node,force){
@@ -766,13 +772,13 @@ fdjt.CodexLayout=
                 (fdjtState.getLocal("codexlayout.trace",true))||0;
             var track=init.track||CodexLayout.track||
                 (fdjtState.getLocal("codexlayout.track"))||false;
-            var debug=init.debug||CodexLayout.debug||
+            var debug_match=init.debug||CodexLayout.debug||
                 fdjtState.getLocal("codexlayout.debug")||false;
             if (track) {
                 this.track=track=fdjtDOM.Selector(track);
                 if (!(trace)) trace=this.tracelevel=1;}
-            if (debug) {
-                this.debug=debug=fdjtDOM.Selector(debug);
+            if (debug_match) {
+                this.debug=debug_match=fdjtDOM.Selector(debug_match);
                 if (!(trace)) trace=this.tracelevel=1;}
             else this.debug=false;
             if (trace) addClass(document.body,"debugcodexlayout");
@@ -935,7 +941,8 @@ fdjt.CodexLayout=
                               block,block_i,root,page);
                         tracing=true;}
                     
-                    if ((trace)&&(block)&&(debug)&&(debug.match(block))) {
+                    if ((trace)&&(block)&&
+                        (debug_match)&&(debug_match.match(block))) {
                         // jshint debug:true
                         debugger;}
 
@@ -1580,10 +1587,7 @@ fdjt.CodexLayout=
                         // (crumbs), so we only appendChildren if the
                         // node is already a dup; otherwise we
                         // moveChildren to leave crumbs.
-                        if ((hasClass(node,"codexdup"))||
-                            (hasClass(node,"codexdupend")))
-                            appendChildren(dup,push,1);
-                        else moveChildren(dup,push,1);
+                        moveChildren(dup,push,1);
                         if (trace>1)
                             logfn("Layout/splitBlock %o @ %o into %o on %o",
                                   node,page_break,dup,page);
@@ -1682,6 +1686,7 @@ fdjt.CodexLayout=
                     // admit defeat
                     else if ((breakpos===0)||
                              (!(hasContent(node,true,false,page_break)))) {
+                        // Append the remaining children all at once
                         appendChildren(node,children,breakpos+1);
                         return node;}
                     // If the break is childless, we just split on it
@@ -1691,18 +1696,21 @@ fdjt.CodexLayout=
                     else return children.slice(breakpos);
                     // If it's text, split it into words, then try to
                     // find the length at which one more word pushes
-                    // it over the edge.
-                    var probenode=textsplit, text=textsplit.nodeValue;
-                    var original=textsplit;
-                    // Now, break the text up at possible page breaks
-                    // (we are not treating soft-hyphens as page
-                    // breaks, though we might)
+                    // it over the edge.  _probenode_ is the current
+                    // text node, and we'll replace it with substrings
+                    // of different sizes;
+                    var probenode=textsplit, original=textsplit;
+                    // Break the text up at possible page breaks (we
+                    // are not treating soft-hyphens as page breaks,
+                    // though we might)
+                    var text=textsplit.nodeValue;
                     var words=attachWhitespace(text.split(/(\s+)/mg));
                     // If there aren't many words, don't bother splitting
                     if (words.length<2) {
-                        // If the break is at the head, push the whole
-                        // node to the next page, otherwise, 
+                        // and if the break is at the head of the
+                        // node, push the whole node to the next page,
                         if (breakpos===0) return node;
+                        // otherwise, push the text node and everything after it
                         else return children.slice(breakpos);}
                     else {
                         // Check if just the first word pushes us over
@@ -1734,15 +1742,20 @@ fdjt.CodexLayout=
                                 // over the edge.
                                 return children.slice(breakpos);}}
                         else {
-                            // Now we go ahead and use splitWords to
-                            // split the text.
+                            // Now we put things back and use
+                            // splitWords to split the text.
                             text_parent.replaceChild(textsplit,wprobe);
                             probenode=textsplit;}}
                     var foundbreak=splitWords(
                         text_parent,probenode,words,node,use_page_height);
                     // We're done searching for the word break
                     if ((foundbreak===0)||(foundbreak===(words.length-1))) {
-                        // Revert (don't actually do any text splitting)
+                        // If there isn't a break, or the break is at
+                        // the last work, we don't actually split the
+                        // text and revert, returning either the rest
+                        // of the children or the node itself (if the
+                        // page break was at the beginning of the
+                        // node).
                         text_parent.replaceChild(textsplit,probenode);
                         if (breakpos===0) return node;
                         else return children.slice(breakpos);}
@@ -1763,13 +1776,13 @@ fdjt.CodexLayout=
                         else if (hasClass(page_break,"codextextsplit")) {
                             // This is the case where we are splitting
                             // a text node again.  There's no need to
-                            // save anything and we don't want nested
+                            // save the text and we don't want nested
                             // codextextsplits, so we'll treat the
-                            // page_break as a probenode (to be
+                            // page_break as the probenode (to be
                             // replaced).
                             probenode=keepnode=page_break;
                             keepnode.innerHTML="";
-                            text_parent=node; probenode=keepnode;
+                            text_parent=node;
                             pushnode=page_break.cloneNode(true);
                             addClass(page_break,"codexraggedsplit");
                             pushnode.id="";}
