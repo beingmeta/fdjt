@@ -1094,7 +1094,6 @@ fdjt.CodexLayout=
                     var disp=style.display;
                     if ((node.tagName!=="BR")&&
                         (disp!=='inline')&&
-                        (disp!=='table-row')&&
                         (disp!=='table-cell')) {
                         addClass(node,"codexblock");
                         nodeinfo=getBlockInfo(node,style);
@@ -1102,7 +1101,7 @@ fdjt.CodexLayout=
                         styles.push(style);
                         info.push(nodeinfo);
                         if ((disp==='block')||(disp==='table')||
-                            (disp==='table-row-group')) {
+                            (disp==='list-item')||(disp==='table-row-group')) {
                             var children=node.childNodes;
                             var total_blocks=blocks.length;
                             var i=0; var len=children.length;
