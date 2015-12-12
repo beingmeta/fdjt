@@ -2905,8 +2905,7 @@ fdjt.DOM=
         var floor=Math.floor;
 
         function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h,fudge,dolog){
-            var rect=wrapper.getBoundingClientRect();
-            var ow=floor(rect.width), oh=floor(rect.height);
+            var ow=floor(wrapper.scrollWidth), oh=floor(wrapper.scrollHeight);
             var nw, nh, newsize;
             var wstyle=wrapper.style;
             if (typeof fudge!== "number") fudge=1;
@@ -2928,8 +2927,7 @@ fdjt.DOM=
             if (!(max)) max=150;
             newsize=size+delta;
             wstyle.fontSize=newsize+"%";
-            rect=wrapper.getBoundingClientRect();
-            nw=floor(rect.width); nh=floor(rect.height);
+            nw=floor(wrapper.scrollWidth); nh=floor(wrapper.scrollHeight);
             while ((size>=min)&&(size<=max)&&
                    ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h)))) {
                 size=newsize; newsize=newsize+delta;
@@ -2939,8 +2937,7 @@ fdjt.DOM=
                         "Adjust %o to %dx%d %o: size=%d=%d+(%d), %dx%d => %dx%d",
                         wrapper.parentNode,w,h,wrapper,newsize,size,delta,
                         ow,oh,nw,nh);
-                rect=wrapper.getBoundingClientRect();
-                nw=floor(rect.width); nh=floor(rect.height);}
+                nw=floor(wrapper.scrollWidth); nh=floor(wrapper.scrollHeight);}
             wstyle.maxWidth='';
             if (delta>0) {
                 wstyle.fontSize=size+"%";
@@ -2973,7 +2970,6 @@ fdjt.DOM=
             wstyle[fdjtDOM.transitionProperty]='none';
             wstyle[fdjtDOM.transitionDuration]='0s';
             wstyle.visibility='visible';
-            wstyle.overflow='visible';
             if ((h===0)||(w===0)) {
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));
@@ -2988,9 +2984,10 @@ fdjt.DOM=
             if (typeof fudge !== "number") fudge=2;
             wstyle.width=wstyle.height="100%";
             w=wrapper.offsetWidth; h=wrapper.offsetHeight;
-            wstyle.width=wstyle.height="";
+            wstyle.width=wstyle.height="100%";
             wstyle.maxWidth=wstyle.maxHeight="100%";
             w=wrapper.offsetWidth; h=wrapper.offsetHeight;
+            wstyle.width=wstyle.height="";
             size=adjustWrapperFont(
                 wrapper,10,false,size,min,max,w,h,fudge,dolog);
             size=adjustWrapperFont(
@@ -3005,7 +3002,8 @@ fdjt.DOM=
                 node.removeChild(wrapper);
                 fdjtDOM.append(node,toArray(wrapper.childNodes));}
             else {
-                wstyle.overflow=''; wstyle.width=''; wstyle.height='';
+                wstyle.width=''; wstyle.height='';
+                wstyle.maxWidth=''; wstyle.maxHeight='';
                 if (dolog)
                     fdjtLog("Adjusted (%s) %o towards %dx%d, wrapper @ %d,%d",
                             wstyle.fontSize,node,w,h,
