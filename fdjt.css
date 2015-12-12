@@ -1070,10 +1070,7 @@ body.taptouch {}
     border: 0px !important;}
 .fdjtselecting {
      user-select: none;
-    -o-user-select: none;
-    -moz-user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0.5);
-    -webkit-user-select: none;}
+    -webkit-tap-highlight-color: rgba(0,0,0,0.5);}
 .fdjtselectwrap {}
 .fdjtselectwrap {background-color: rgba(247, 247, 124, 0.25);}
 
@@ -1238,8 +1235,6 @@ div.fdjtpage .fdjtpageinfo span.pct {
     pointer-events: all;
     cursor: text;}
 div.fdjtpage .fdjtpageinfo span.pct span.value {
-    -webkit-user-select: text;
-    -moz-select: text;
     user-select: text;}
 div.fdjtpage div.fdjtpageinfo span.count { display: none;}
 div.fdjtpage div.fdjtpageinfo span.count strong {

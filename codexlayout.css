@@ -28,21 +28,12 @@ div.codexpage.codexworkpage {
     pointer-events: none !important;
     z-index: -250 !important;
     opacity: 0.0 !important;
-    -o-opacity: 0.0 !important;
-    -moz-opacity: 0.0 !important;
-    -webkit-opacity: 0.0 !important;
-    transition-property: none !important;
-    -o-transition-property: none !important;
-    -moz-transition-property: none !important;
-    -webkit-transition-property: none !important;}
+    transition-property: none !important;}
 
 body.debugcodexlayout div.codexpage.codexworkpage {
     visibility: visible !important;
     z-index: inherit !important;
-    opacity: 1.0 !important;
-    -o-opacity: 1.0 !important;
-    -moz-opacity: 1.0 !important;
-    -webkit-opacity: 1.0 !important;}
+    opacity: 1.0 !important;}
  
 div.codexpage h1.codexpagetop, div.codexpage h2.codexpagetop,
 div.codexpage h3.codexpagetop, div.codexpage h4.codexpagetop,
@@ -63,8 +54,7 @@ div.codexpage img {
     max-height: 90%; max-width: 90%; width: auto; height: auto;}
 div.codexpage div.fdjtadjusted {
     position: absolute; width: 100%; height: 100%;
-    box-sizing: border-box; -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;}
+    box-sizing: border-box;}
 
 .codexfullpage {
    page-break-before: always; page-break-after: always;
