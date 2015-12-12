@@ -1266,8 +1266,6 @@ div.fdjtpage div.fdjtpageinfo.fdjteditpageinfo span.count {
 div.fdjtpage .fdjtpageinfo.fdjteditpageinfo span.pct span.value {
     pointer-events: all;}
 
-html._TOUCH div.fdjtpageinfo {
-    font-size: 200%;}
 html._TOUCH div.fdjtpageinfo.fdjteditpageinfo {
     bottom: auto; top: 0px;}
 
