@@ -50,6 +50,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
     var noDefault=fdjtUI.noDefault;
     // var cancel=fdjtUI.cancel;
     var eTarget=fdjtUI.T;
+    var isTextInput=fdjtDOM.isTextInput;
 
     var cleared=0;
     var serial_count=1;
@@ -549,6 +550,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 x=x+hot_xoff; y=y+hot_yoff;
                 target=document.elementFromPoint(x,y);}
             else target=eTarget(evt);
+            if ((target)&&(isTextInput(target))) return;
             var delta=(Math.abs(x-touch_x))+(Math.abs(y-touch_y));
             var dt=fdjtET()-touch_t;
             if ((trace>2)||(traceall>2))
@@ -702,6 +704,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             var target=(((hot_xoff)||(hot_yoff))?
                         (document.elementFromPoint(touch_x,touch_y)):
                         (eTarget(evt)));
+            if ((target)&&(isTextInput(target))) return;
             if (!(touch_n)) touch_n=n_touches; else
                 if (n_touches>touch_n) touch_n=n_touches;
             if ((!(bubble))) noBubble(evt);
@@ -799,6 +802,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 abortpress(evt,"up");
                 return;}
             var target=eTarget(evt);
+            if ((target)&&(isTextInput(target))) return;
             if ((!(bubble))) noBubble(evt);
             if (override) noDefault(evt);
             var holder=getParent(target,".tapholder");
