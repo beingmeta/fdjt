@@ -5,18 +5,18 @@ ECHO=/bin/echo
 CLEAN=/bin/rm -f
 PATH:=/usr/local/bin:${PATH}
 FDJT_FILES=header.js \
-	promise.js async.js \
+	promise.js async.js fetch.js \
 	charnames.js string.js time.js template.js hash.js \
 	syze.js iscroll.js \
-	log.js init.js state.js dom.js \
+	log.js init.js state.js dom.js adjustfont.js \
 	json.js refdb.js ajax.js wsn.js textindex.js \
 	ui.js showpage.js dialog.js completions.js taphold.js selecting.js \
 	scrollever.js \
 	globals.js
 # idbshim.hint iscroll.hint hash.hint
-FDJT_HINTS=promise.hint async.hint time.hint init.hint syze.hint \
+FDJT_HINTS=promise.hint async.hint fetch.hint time.hint init.hint syze.hint \
 	charnames.hint string.hint log.hint refdb.hint \
-	state.hint dom.hint json.hint ajax.hint \
+	state.hint dom.hint json.hint ajax.hint adjustfont.hint \
 	wsn.hint template.hint textindex.hint codexlayout.hint \
 	dialog.hint ui.hint showpage.hint completions.hint \
 	taphold.hint selecting.hint \
