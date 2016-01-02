@@ -1453,6 +1453,117 @@ fdjt.DOM=
         fdjtDOM.hoverflow=function(node){
             return (node.scrollWidth/node.clientWidth);};
 
+        /* Listeners */
+
+        function addListener(node,evtype,handler){
+            if (!(node)) node=document;
+            if (typeof node === 'string') {
+                var elt=fdjtID(node);
+                if (!(node)) {
+                    fdjtLog.warn("Can't find #%s",node);
+                    return;}
+                node=elt;}
+            else if (((Array.isArray)&&(Array.isArray(node)))||
+                     ((window.NodeList)&&(node instanceof window.NodeList))) {
+                var i=0; var lim=node.length;
+                while (i<lim) addListener(node[i++],evtype,handler);
+                return;}
+            else if ((node!==window)&&(!(node.nodeType))) {
+                fdjtLog.warn("Bad target(s) arg to addListener(%s) %o",evtype,node);
+                return;}
+            // OK, actually do it
+            if (evtype==='title') { 
+                // Not really a listener, but helpful
+                if (typeof handler === 'string') 
+                    if (node.title)
+                        node.title='('+handler+') '+node.title;
+                else node.title=handler;}
+            else if (evtype[0]==='=')
+                node[evtype.slice(1)]=handler;
+            else if (node.addEventListener)  {
+                // fdjtLog("Adding listener %o for %o to %o",handler,evtype,node);
+                return node.addEventListener(evtype,handler,false);}
+            else if (node.attachEvent)
+                return node.attachEvent('on'+evtype,handler);
+            else fdjtLog.warn('This node never listens: %o',node);}
+        fdjtDOM.addListener=addListener;
+
+        function defListeners(handlers,defs){
+            if ((handlers)&&(defs))
+                for (var domspec in defs) {
+                    if (defs.hasOwnProperty(domspec)) {
+                        var evtable=defs[domspec];
+                        var addto=handlers[domspec];
+                        if ((!(addto))||
+                            (!(handlers.hasOwnProperty(domspec))))
+                            handlers[domspec]=addto={};
+                        for (var evtype in evtable) {
+                            if (evtable.hasOwnProperty(evtype))
+                                addto[evtype]=evtable[evtype];}}}}
+        fdjtDOM.defListeners=defListeners;
+
+        var events_pat=/^([^:]+)$/;
+        var spec_events_pat=/^([^: ]+):([^: ]+)$/;
+
+        function addListeners(node,handlers){
+            if (handlers) {
+                for (var evtype in handlers) {
+                    if (handlers.hasOwnProperty(evtype)) {
+                        var match=false, val=handlers[evtype];
+                        if (!(val.call)) {}
+                        else if (events_pat.exec(evtype))
+                            addListener(node,evtype,handlers[evtype]);
+                        else if ((match=spec_events_pat.exec(evtype))) {
+                            var ev=match[2];
+                            var handler=handlers[evtype];
+                            var elts=node.querySelectorAll(match[1]);
+                            addListener(elts,ev,handler);}}}}}
+        fdjtDOM.addListeners=addListeners;
+        
+        function removeListener(node,evtype,handler){
+            if (!(node)) node=document;
+            if (typeof node === 'string') {
+                var elt=fdjtID(node);
+                if (!(node)) {
+                    fdjtLog("Can't find #%s",node);
+                    return;}
+                node=elt;}
+            else if (((Array.isArray)&&(Array.isArray(node)))||
+                     ((window.NodeList)&&(node instanceof window.NodeList))) {
+                var i=0; var lim=node.length;
+                while (i<lim) removeListener(node[i++],evtype,handler);
+                return;}
+            else if ((node!==window)&&(!(node.nodeType))) {
+                fdjtLog.warn("Bad target(s) arg to removeListener(%s) %o",evtype,node);
+                return;}
+            // OK, actually do it
+            if (node.removeEventListener)  {
+                return node.removeEventListener(evtype,handler,false);}
+            else if (node.detachEvent)
+                return node.detachEvent('on'+evtype,handler);
+            else fdjtLog.warn('This node never listens: %o',node);}
+        fdjtDOM.removeListener=removeListener;
+
+        fdjtDOM.T=function(evt) {
+            evt=evt||window.event; return (evt.target)||(evt.srcElement);};
+
+        fdjtDOM.cancel=function(evt){
+            evt=evt||window.event;
+            if (evt.preventDefault) evt.preventDefault();
+            else evt.returnValue=false;
+            evt.cancelBubble=true;};
+
+        function triggerClick(elt){
+            if (document.createEvent) { // in chrome
+                var e = document.createEvent('MouseEvents');
+                e.initEvent( 'click', true, true );
+                elt.dispatchEvent(e);
+                return;}
+            else {
+                fdjtLog.warn("Couldn't trigger click");
+                return;}}
+        fdjtDOM.triggerClick=triggerClick;
+
         /* Sizing to fit */
 
         var default_trace_adjust=false;
@@ -1647,6 +1758,92 @@ fdjt.DOM=
             delete container.bestfit;
             delete container.goodscale;};
         
+        /* Scaling to fit using CSS transforms */
+
+        function scale_node(node,fudge,origin,shrink){
+            if (!(origin)) origin=node.getAttribute("data-origin");
+            if (!(shrink)) shrink=node.getAttribute("data-shrink");
+            if (!(fudge)) fudge=node.getAttribute("data-fudge");
+
+            // Clear any existing adjustments
+            var first=node.firstChild, wrapper=
+                ((first.className==="fdjtadjusted")?(first):
+                 (getFirstChild(node,"fdjtadjusted")));
+            if (wrapper) wrapper.setAttribute("style","");
+
+            var geom=getGeometry(node,false,true), inside=getInsideBounds(node);
+            var avail_width=((fudge)?(fudge*geom.inner_width):
+                             (geom.inner_width));
+            var avail_height=((fudge)?(fudge*geom.inner_height):
+                              (geom.inner_height));
+
+            if ((inside.height<=avail_height)&&(inside.width<=avail_width)) {
+                // Everything is inside
+                if (!(shrink)) return;
+                // If you fit closely in any dimension, don't try scaling
+                if (((inside.height<avail_height)&&
+                     (inside.height>=(avail_height*0.9)))||
+                    ((inside.width<geom.inner_width)&&
+                     (inside.width>=(avail_height*0.9))))
+                    return;}
+            if (!(wrapper)) {
+                var nodes=[], children=node.childNodes;
+                var i=0, lim=children.length;
+                while (i<lim) nodes.push(children[i++]);
+                wrapper=fdjtDOM("div.fdjtadjusted");
+                i=0; lim=nodes.length; while (i<lim)
+                    wrapper.appendChild(nodes[i++]);
+                node.appendChild(wrapper);}
+            var w_scale=avail_width/inside.width;
+            var h_scale=avail_height/inside.height;
+            var scale=((w_scale<h_scale)?(w_scale):(h_scale));
+            wrapper.style[fdjtDOM.transform]="scale("+scale+","+scale+")";
+            wrapper.style[fdjtDOM.transformOrigin]=origin||"50% 0%";}
+
+        function scaleAll(){
+            var all=fdjtDOM.$(".fdjtadjustfit");
+            var i=0, lim=all.length; while (i<lim)
+                scale_node(all[i++]);}
+        
+        function scaleToFit(node,fudge,origin){
+            fdjtDOM.addClass(node,"fdjtadjustfit");
+            if ((fudge)&&(typeof fudge !== "number")) fudge=0.9;
+            if (fudge) node.setAttribute("data-fudge",fudge);
+            if (origin) node.setAttribute("data-origin",origin);
+            scale_node(node,fudge,origin);
+            return node;}
+        fdjtDOM.scaleToFit=scaleToFit;
+        fdjtDOM.scaleToFit.scaleNode=fdjtDOM.scaleToFit.adjust=scale_node;
+        
+        function scale_revert(node,wrapper){
+            if (!(wrapper)) {
+                if (hasClass(node,"fdjtadjusted")) {
+                    wrapper=node; node=wrapper.parentNode;}
+                else wrapper=
+                    ((node.firstChild.className==="fdjtadjusted")?
+                     (node.firstChild):(getFirstChild(node,"fdjtadjusted")));}
+            if ((node)&&(wrapper)) {
+                var nodes=[], children=wrapper.childNodes;
+                var i=0, lim=children.length;
+                while (i<lim) nodes.push(children[i++]);
+                var frag=document.createDocumentFragment();
+                i=0; lim=nodes.length; while (i<lim) {
+                    frag.appendChild(nodes[i++]);}
+                node.replaceChild(frag,wrapper);
+                return node;}
+            else return false;}
+        fdjtDOM.scaleToFit.revert=scale_revert;
+
+        function revertAll(){
+            var all=fdjtDOM.$(".fdjtadjusted");
+            var i=0, lim=all.length; while (i<lim) {
+                var wrapper=all[i++];
+                scale_revert(wrapper.parentNode,wrapper);}}
+        fdjtDOM.scaleToFit.revertAll=revertAll;
+
+        fdjt.addInit(scaleAll);
+        fdjtDOM.addListener(window,"resize",scaleAll);
+
         /* Getting various kinds of metadata */
 
         function getHTML(){
@@ -2144,203 +2341,6 @@ fdjt.DOM=
             else return false;}
         fdjtDOM.addCSSRule=addCSSRule;
 
-        /* Listeners (should be in UI?) */
-
-        function addListener(node,evtype,handler){
-            if (!(node)) node=document;
-            if (typeof node === 'string') {
-                var elt=fdjtID(node);
-                if (!(node)) {
-                    fdjtLog.warn("Can't find #%s",node);
-                    return;}
-                node=elt;}
-            else if (((Array.isArray)&&(Array.isArray(node)))||
-                     ((window.NodeList)&&(node instanceof window.NodeList))) {
-                var i=0; var lim=node.length;
-                while (i<lim) addListener(node[i++],evtype,handler);
-                return;}
-            else if ((node!==window)&&(!(node.nodeType))) {
-                fdjtLog.warn("Bad target(s) arg to addListener(%s) %o",evtype,node);
-                return;}
-            // OK, actually do it
-            if (evtype==='title') { 
-                // Not really a listener, but helpful
-                if (typeof handler === 'string') 
-                    if (node.title)
-                        node.title='('+handler+') '+node.title;
-                else node.title=handler;}
-            else if (evtype[0]==='=')
-                node[evtype.slice(1)]=handler;
-            else if (node.addEventListener)  {
-                // fdjtLog("Adding listener %o for %o to %o",handler,evtype,node);
-                return node.addEventListener(evtype,handler,false);}
-            else if (node.attachEvent)
-                return node.attachEvent('on'+evtype,handler);
-            else fdjtLog.warn('This node never listens: %o',node);}
-        fdjtDOM.addListener=addListener;
-
-        function defListeners(handlers,defs){
-            if ((handlers)&&(defs))
-                for (var domspec in defs) {
-                    if (defs.hasOwnProperty(domspec)) {
-                        var evtable=defs[domspec];
-                        var addto=handlers[domspec];
-                        if ((!(addto))||
-                            (!(handlers.hasOwnProperty(domspec))))
-                            handlers[domspec]=addto={};
-                        for (var evtype in evtable) {
-                            if (evtable.hasOwnProperty(evtype))
-                                addto[evtype]=evtable[evtype];}}}}
-        fdjtDOM.defListeners=defListeners;
-
-        var events_pat=/^([^:]+)$/;
-        var spec_events_pat=/^([^: ]+):([^: ]+)$/;
-
-        function addListeners(node,handlers){
-            if (handlers) {
-                for (var evtype in handlers) {
-                    if (handlers.hasOwnProperty(evtype)) {
-                        var match=false, val=handlers[evtype];
-                        if (!(val.call)) {}
-                        else if (events_pat.exec(evtype))
-                            addListener(node,evtype,handlers[evtype]);
-                        else if ((match=spec_events_pat.exec(evtype))) {
-                            var ev=match[2];
-                            var handler=handlers[evtype];
-                            var elts=node.querySelectorAll(match[1]);
-                            addListener(elts,ev,handler);}}}}}
-        fdjtDOM.addListeners=addListeners;
-        
-        function removeListener(node,evtype,handler){
-            if (!(node)) node=document;
-            if (typeof node === 'string') {
-                var elt=fdjtID(node);
-                if (!(node)) {
-                    fdjtLog("Can't find #%s",node);
-                    return;}
-                node=elt;}
-            else if (((Array.isArray)&&(Array.isArray(node)))||
-                     ((window.NodeList)&&(node instanceof window.NodeList))) {
-                var i=0; var lim=node.length;
-                while (i<lim) removeListener(node[i++],evtype,handler);
-                return;}
-            else if ((node!==window)&&(!(node.nodeType))) {
-                fdjtLog.warn("Bad target(s) arg to removeListener(%s) %o",evtype,node);
-                return;}
-            // OK, actually do it
-            if (node.removeEventListener)  {
-                return node.removeEventListener(evtype,handler,false);}
-            else if (node.detachEvent)
-                return node.detachEvent('on'+evtype,handler);
-            else fdjtLog.warn('This node never listens: %o',node);}
-        fdjtDOM.removeListener=removeListener;
-
-        fdjtDOM.T=function(evt) {
-            evt=evt||window.event; return (evt.target)||(evt.srcElement);};
-
-        fdjtDOM.cancel=function(evt){
-            evt=evt||window.event;
-            if (evt.preventDefault) evt.preventDefault();
-            else evt.returnValue=false;
-            evt.cancelBubble=true;};
-
-        function triggerClick(elt){
-            if (document.createEvent) { // in chrome
-                var e = document.createEvent('MouseEvents');
-                e.initEvent( 'click', true, true );
-                elt.dispatchEvent(e);
-                return;}
-            else {
-                fdjtLog.warn("Couldn't trigger click");
-                return;}}
-        fdjtDOM.triggerClick=triggerClick;
-
-        /* Scaling to fit using CSS transforms */
-
-        function scale_node(node,fudge,origin,shrink){
-            if (!(origin)) origin=node.getAttribute("data-origin");
-            if (!(shrink)) shrink=node.getAttribute("data-shrink");
-            if (!(fudge)) fudge=node.getAttribute("data-fudge");
-
-            // Clear any existing adjustments
-            var first=node.firstChild, wrapper=
-                ((first.className==="fdjtadjusted")?(first):
-                 (getFirstChild(node,"fdjtadjusted")));
-            if (wrapper) wrapper.setAttribute("style","");
-
-            var geom=getGeometry(node,false,true), inside=getInsideBounds(node);
-            var avail_width=((fudge)?(fudge*geom.inner_width):
-                             (geom.inner_width));
-            var avail_height=((fudge)?(fudge*geom.inner_height):
-                              (geom.inner_height));
-
-            if ((inside.height<=avail_height)&&(inside.width<=avail_width)) {
-                // Everything is inside
-                if (!(shrink)) return;
-                // If you fit closely in any dimension, don't try scaling
-                if (((inside.height<avail_height)&&
-                     (inside.height>=(avail_height*0.9)))||
-                    ((inside.width<geom.inner_width)&&
-                     (inside.width>=(avail_height*0.9))))
-                    return;}
-            if (!(wrapper)) {
-                var nodes=[], children=node.childNodes;
-                var i=0, lim=children.length;
-                while (i<lim) nodes.push(children[i++]);
-                wrapper=fdjtDOM("div.fdjtadjusted");
-                i=0; lim=nodes.length; while (i<lim)
-                    wrapper.appendChild(nodes[i++]);
-                node.appendChild(wrapper);}
-            var w_scale=avail_width/inside.width;
-            var h_scale=avail_height/inside.height;
-            var scale=((w_scale<h_scale)?(w_scale):(h_scale));
-            wrapper.style[fdjtDOM.transform]="scale("+scale+","+scale+")";
-            wrapper.style[fdjtDOM.transformOrigin]=origin||"50% 0%";}
-
-        function scaleAll(){
-            var all=fdjtDOM.$(".fdjtadjustfit");
-            var i=0, lim=all.length; while (i<lim)
-                scale_node(all[i++]);}
-        
-        function scaleToFit(node,fudge,origin){
-            fdjtDOM.addClass(node,"fdjtadjustfit");
-            if ((fudge)&&(typeof fudge !== "number")) fudge=0.9;
-            if (fudge) node.setAttribute("data-fudge",fudge);
-            if (origin) node.setAttribute("data-origin",origin);
-            scale_node(node,fudge,origin);
-            return node;}
-        fdjtDOM.scaleToFit=scaleToFit;
-        fdjtDOM.scaleToFit.scaleNode=fdjtDOM.scaleToFit.adjust=scale_node;
-        
-        function scale_revert(node,wrapper){
-            if (!(wrapper)) {
-                if (hasClass(node,"fdjtadjusted")) {
-                    wrapper=node; node=wrapper.parentNode;}
-                else wrapper=
-                    ((node.firstChild.className==="fdjtadjusted")?
-                     (node.firstChild):(getFirstChild(node,"fdjtadjusted")));}
-            if ((node)&&(wrapper)) {
-                var nodes=[], children=wrapper.childNodes;
-                var i=0, lim=children.length;
-                while (i<lim) nodes.push(children[i++]);
-                var frag=document.createDocumentFragment();
-                i=0; lim=nodes.length; while (i<lim) {
-                    frag.appendChild(nodes[i++]);}
-                node.replaceChild(frag,wrapper);
-                return node;}
-            else return false;}
-        fdjtDOM.scaleToFit.revert=scale_revert;
-
-        function revertAll(){
-            var all=fdjtDOM.$(".fdjtadjusted");
-            var i=0, lim=all.length; while (i<lim) {
-                var wrapper=all[i++];
-                scale_revert(wrapper.parentNode,wrapper);}}
-        fdjtDOM.scaleToFit.revertAll=revertAll;
-
-        fdjt.addInit(scaleAll);
-        fdjtDOM.addListener(window,"resize",scaleAll);
-
         /* Check for SVG */
         var nosvg;
 
@@ -2742,10 +2742,6 @@ fdjt.DOM=
                 return firstText(node.firstChild);
             else return false;}
 
-        /* Paragraph hashes */
-
-        // fdjtDOM.getParaHash=function(node){return paraHash(textify(node,true,false,false));};
-
         /* Getting transition event names */
 
         var transition_events=[
@@ -2900,180 +2896,6 @@ fdjt.DOM=
             else return datauri;}
         fdjtDOM.data2URL=data2URL;
 
-        /* Tweaking fonts */
-
-        var floor=Math.floor;
-
-        function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h,fudge,dolog){
-            var ow=floor(wrapper.scrollWidth), oh=floor(wrapper.scrollHeight);
-            var nw, nh, newsize;
-            var wstyle=wrapper.style;
-            if (typeof fudge!== "number") fudge=1;
-
-            // These are cases where one dimension is on the edge but
-            // the other dimension is inside the edge
-            if ((ow<=w)&&(oh<=h)&&(oh>=(h-fudge))) return size;
-            // We actually skip this case because increasing the font size
-            //  might not increase the width if it forces a new line break
-            // else if ((sh<=h)&&(sw<=w)&&(sw>=(w-fudge))) return size;
-
-            // Figure out if we need to grow or shrink 
-            if ((ow>w)||(oh>h)) delta=-delta;
-
-            if (delta>0) wstyle.maxWidth=floor(w)+"px";
-
-            if (!(size)) {size=100; wstyle.fontSize=size+"%";}
-            if (!(min)) min=20;
-            if (!(max)) max=150;
-            newsize=size+delta;
-            wstyle.fontSize=newsize+"%";
-            nw=floor(wrapper.scrollWidth); nh=floor(wrapper.scrollHeight);
-            while ((size>=min)&&(size<=max)&&
-                   ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h)))) {
-                size=newsize; newsize=newsize+delta;
-                wstyle.fontSize=newsize+"%";
-                if (dolog)
-                    fdjtLog(
-                        "Adjust %o to %dx%d %o: size=%d=%d+(%d), %dx%d => %dx%d",
-                        wrapper.parentNode,w,h,wrapper,newsize,size,delta,
-                        ow,oh,nw,nh);
-                nw=floor(wrapper.scrollWidth); nh=floor(wrapper.scrollHeight);}
-            wstyle.maxWidth='';
-            if (delta>0) {
-                wstyle.fontSize=size+"%";
-                return size;}
-            else return newsize;}
-                
-        function adjustFontSize(node,min_font,max_font,fudge){
-            var h=node.offsetHeight, w=node.offsetWidth;
-            var dolog=hasClass(node,"_fdjtlog");
-            var node_display='';
-            if ((h===0)||(w===0)) {
-                // Do a little to make the element visible if it's not.
-                node_display=node.style.display;
-                node.style.display='initial';
-                h=node.offsetHeight; w=node.offsetWidth;
-                if ((h===0)||(w===0)) {
-                    node.style.display=node_display;
-                    return;}}
-            else {}
-            if ((h===0)||(w===0)) {
-                node.style.display=node_display;
-                return;}
-            var wrapper=wrapChildren(node,"div.fdjtfontwrapper");
-            var wstyle=wrapper.style, size=100;
-            wstyle.boxSizing='border-box';
-            wstyle.padding=wstyle.margin="0px";
-            wstyle.fontSize=size+"%";
-            wstyle.transitionProperty='none';
-            wstyle.transitionDuration='0s';
-            wstyle[fdjtDOM.transitionProperty]='none';
-            wstyle[fdjtDOM.transitionDuration]='0s';
-            wstyle.visibility='visible';
-            if ((h===0)||(w===0)) {
-                node.removeChild(wrapper);
-                fdjtDOM.append(node,toArray(wrapper.childNodes));
-                node.style.display=node_display;
-                return;}
-            var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
-            var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
-            if (typeof fudge!=="number") fudge=node.getAttribute("data-fudge");
-            if (typeof min === "string") min=parseFloat(min,10);
-            if (typeof max === "string") max=parseFloat(max,10);
-            if (typeof fudge === "string") fudge=parseInt(fudge,10);
-            if (typeof fudge !== "number") fudge=2;
-            wstyle.width=wstyle.height="100%";
-            w=wrapper.offsetWidth; h=wrapper.offsetHeight;
-            wstyle.width=wstyle.height="100%";
-            wstyle.maxWidth=wstyle.maxHeight="100%";
-            w=wrapper.offsetWidth; h=wrapper.offsetHeight;
-            wstyle.width=wstyle.height="";
-            size=adjustWrapperFont(
-                wrapper,10,false,size,min,max,w,h,fudge,dolog);
-            size=adjustWrapperFont(
-                wrapper,5,false,size,min,max,w,h,fudge,dolog);
-            size=adjustWrapperFont(
-                wrapper,1,false,size,min,max,w,h,fudge,dolog);
-            wstyle.maxWidth=wstyle.maxHeight="";
-            node.style.display=node_display;
-            if (size===100) {
-                if (dolog)
-                    fdjtLog("No need to resize %o towards %dx%d",node,w,h);
-                node.removeChild(wrapper);
-                fdjtDOM.append(node,toArray(wrapper.childNodes));}
-            else {
-                wstyle.width=''; wstyle.height='';
-                wstyle.maxWidth=''; wstyle.maxHeight='';
-                if (dolog)
-                    fdjtLog("Adjusted (%s) %o towards %dx%d, wrapper @ %d,%d",
-                            wstyle.fontSize,node,w,h,
-                            wrapper.scrollWidth,wrapper.scrollHeight);
-                // We reset all of these
-                wstyle.transitionProperty='';
-                wstyle.transitionDuration='';
-                wstyle[fdjtDOM.transitionProperty]='';
-                wstyle[fdjtDOM.transitionDuration]='';
-                var cwstyle=getStyle(wrapper);
-                if (cwstyle[fdjtDOM.transitionProperty]) { 
-                    wstyle.fontSize=''; wstyle.visibility='';
-                    wstyle.fontSize=size+"%";}
-                else wstyle.visibility='';}
-            return size;}
-        fdjtDOM.adjustFontSize=fdjtDOM.tweakFontSize=adjustFontSize;
-        
-        function resetFontSize(node){
-            var wrapper=getFirstChild(node,".fdjtfontwrapper");
-            if (wrapper) wrapper.style.fontSize="100%";}
-        fdjtDOM.resetFontSize=resetFontSize;
-
-        fdjtDOM.autofont=".fdjtadjustfont,.adjustfont";
-        function adjustFonts(arg,top){
-            var all=[];
-            if (!(arg)) all=fdjtDOM.$(fdjtDOM.autofont);
-            else if (typeof arg === "string") {
-                if (document.getElementByID(arg)) 
-                    all=[document.getElementByID(arg)];
-                else {
-                    fdjtDOM.autofont=fdjtDOM.autofont+","+arg;
-                    all=fdjtDOM.$(arg);}}
-            else if (arg.nodeType===1) {
-                var sel=new Selector(fdjtDOM.autofont);
-                if (sel.match(arg))
-                    all=[arg];
-                else all=fdjtDOM.getChildren(arg,fdjtDOM.autofont);}
-            else all=fdjtDOM.$(fdjtDOM.autofont);
-            var i=0, lim=all.length;
-            if (lim) while (i<lim) adjustFontSize(all[i++]);
-            else if (top) adjustFontSize(top);}
-        fdjtDOM.tweakFont=fdjtDOM.tweakFonts=
-            fdjtDOM.adjustFont=fdjtDOM.adjustFonts=adjustFonts;
-        
-        function adjustPositionedChildren(node){
-            if ((!(node))||(node.nodeType!==1)) return;
-            var style=getStyle(node);
-            if ((node.childNodes)&&(node.childNodes.length)) {
-                var children=node.childNodes; var i=0, lim=children.length;
-                while (i<lim) {
-                    var child=children[i++];
-                    if (child.nodeType===1)
-                        adjustPositionedChildren(child);}}
-            if (((style.display==='block')||(style.display==='inline-block'))&&
-                ((style.position==='absolute')||(style.position==='fixed')))
-                adjustFontSize(node);}
-        function adjustLayoutFonts(node){
-            var marked=fdjtDOM.getChildren(node,fdjtDOM.autofont);
-            var i=0, lim=marked.length;
-            if (lim===0) adjustPositionedChildren(node);
-            else while (i<lim) adjustFontSize(marked[i++]);}
-        fdjtDOM.adjustLayoutFonts=adjustLayoutFonts;
-
-        function autoAdjustFonts(){
-            if (fdjtDOM.noautofontadjust) return;
-            adjustFonts();
-            fdjtDOM.addListener(window,"resize",adjustFonts);}
-
-        fdjt.addInit(autoAdjustFonts,"adjustFonts");
-        
         function addUXClasses(){
             var device=fdjt.device;
             var prefix=fdjt.cxprefix||"_";

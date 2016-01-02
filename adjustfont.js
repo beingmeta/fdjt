@@ -33,318 +33,194 @@
 */
 
 // var fdjt=((window.fdjt)||{});
-if (!(fdjt.UI)) fdjt.UI={};
 
-fdjt.UI.adjustFont=
-    (function(){
-        "use strict";
-        function setupContainer(elt,opts){
-            var parent=elt.parentNode, container, default_wsval;
-            if (parent.className==="adjustfont_wrapper")
-                return parent;
-            var cstyle=getStyle(elt), style=elt.style;
-            if (((cstyle)&&(cstyle.display==='block'))||
-                (style.display==='block')||(elt.tagName==='DIV')||
-                (elt.tagName==='P')||(elt.tagName[0]==='H')) {
-                container=document.createElement("div");
-                default_wsval="normal";}
+(function(){
+    "use strict";
+    /* Tweaking fonts */
+
+    var floor=Math.floor;
+    var fdjtDOM=fdjt.DOM;
+    var fdjtLog=fdjt.Log;
+    var getFirstChild=fdjtDOM.getFirstChild;
+    var wrapChildren=fdjtDOM.wrapChildren;
+    var getStyle=fdjtDOM.getStyle;
+    var Selector=fdjtDOM.Selector;
+    var hasClass=fdjtDOM.hasClass;
+
+    function toArray(arg) {
+        return Array.prototype.slice.call(arg);}
+
+    function adjustWrapperFont(wrapper,delta,done,size,min,max,w,h,fudge,dolog){
+        var ow=floor(wrapper.scrollWidth), oh=floor(wrapper.scrollHeight);
+        var nw, nh, newsize;
+        var wstyle=wrapper.style;
+        if (typeof fudge!== "number") fudge=1;
+
+        // These are cases where one dimension is on the edge but
+        // the other dimension is inside the edge
+        if ((ow<=w)&&(oh<=h)&&(oh>=(h-fudge))) return size;
+        // We actually skip this case because increasing the font size
+        //  might not increase the width if it forces a new line break
+        // else if ((sh<=h)&&(sw<=w)&&(sw>=(w-fudge))) return size;
+
+        // Figure out if we need to grow or shrink 
+        if ((ow>w)||(oh>h)) delta=-delta;
+
+        if (delta>0) wstyle.maxWidth=floor(w)+"px";
+
+        if (!(size)) {size=100; wstyle.fontSize=size+"%";}
+        if (!(min)) min=20;
+        if (!(max)) max=150;
+        newsize=size+delta;
+        wstyle.fontSize=newsize+"%";
+        nw=floor(wrapper.scrollWidth); nh=floor(wrapper.scrollHeight);
+        while ((size>=min)&&(size<=max)&&
+               ((delta>0)?((nw<w)&&(nh<h)):((nw>w)||(nh>h)))) {
+            size=newsize; newsize=newsize+delta;
+            wstyle.fontSize=newsize+"%";
+            if (dolog)
+                fdjtLog(
+                    "Adjust %o to %dx%d %o: size=%d=%d+(%d), %dx%d => %dx%d",
+                    wrapper.parentNode,w,h,wrapper,newsize,size,delta,
+                    ow,oh,nw,nh);
+            nw=floor(wrapper.scrollWidth); nh=floor(wrapper.scrollHeight);}
+        wstyle.maxWidth='';
+        if (delta>0) {
+            wstyle.fontSize=size+"%";
+            return size;}
+        else return newsize;}
+    
+    function adjustFontSize(node,min_font,max_font,fudge){
+        var h=node.offsetHeight, w=node.offsetWidth;
+        var dolog=hasClass(node,"_fdjtlog");
+        var node_display='';
+        if ((h===0)||(w===0)) {
+            // Do a little to make the element visible if it's not.
+            node_display=node.style.display;
+            node.style.display='initial';
+            h=node.offsetHeight; w=node.offsetWidth;
+            if ((h===0)||(w===0)) {
+                node.style.display=node_display;
+                return;}}
+        else {}
+        if ((h===0)||(w===0)) {
+            node.style.display=node_display;
+            return;}
+        var wrapper=wrapChildren(node,"div.fdjtfontwrapper");
+        var wstyle=wrapper.style, size=100;
+        wstyle.boxSizing='border-box';
+        wstyle.padding=wstyle.margin="0px";
+        wstyle.fontSize=size+"%";
+        wstyle.transitionProperty='none';
+        wstyle.transitionDuration='0s';
+        wstyle[fdjtDOM.transitionProperty]='none';
+        wstyle[fdjtDOM.transitionDuration]='0s';
+        wstyle.visibility='visible';
+        if ((h===0)||(w===0)) {
+            node.removeChild(wrapper);
+            fdjtDOM.append(node,toArray(wrapper.childNodes));
+            node.style.display=node_display;
+            return;}
+        var min=((min_font)||(node.getAttribute("data-minfont"))||(20));
+        var max=((max_font)||(node.getAttribute("data-maxfont"))||(200));
+        if (typeof fudge!=="number") fudge=node.getAttribute("data-fudge");
+        if (typeof min === "string") min=parseFloat(min,10);
+        if (typeof max === "string") max=parseFloat(max,10);
+        if (typeof fudge === "string") fudge=parseInt(fudge,10);
+        if (typeof fudge !== "number") fudge=2;
+        wstyle.width=wstyle.height="100%";
+        w=wrapper.offsetWidth; h=wrapper.offsetHeight;
+        wstyle.width=wstyle.height="100%";
+        wstyle.maxWidth=wstyle.maxHeight="100%";
+        w=wrapper.offsetWidth; h=wrapper.offsetHeight;
+        wstyle.width=wstyle.height="";
+        size=adjustWrapperFont(
+            wrapper,10,false,size,min,max,w,h,fudge,dolog);
+        size=adjustWrapperFont(
+            wrapper,5,false,size,min,max,w,h,fudge,dolog);
+        size=adjustWrapperFont(
+            wrapper,1,false,size,min,max,w,h,fudge,dolog);
+        wstyle.maxWidth=wstyle.maxHeight="";
+        node.style.display=node_display;
+        if (size===100) {
+            if (dolog)
+                fdjtLog("No need to resize %o towards %dx%d",node,w,h);
+            node.removeChild(wrapper);
+            fdjtDOM.append(node,toArray(wrapper.childNodes));}
+        else {
+            wstyle.width=''; wstyle.height='';
+            wstyle.maxWidth=''; wstyle.maxHeight='';
+            if (dolog)
+                fdjtLog("Adjusted (%s) %o towards %dx%d, wrapper @ %d,%d",
+                        wstyle.fontSize,node,w,h,
+                        wrapper.scrollWidth,wrapper.scrollHeight);
+            // We reset all of these
+            wstyle.transitionProperty='';
+            wstyle.transitionDuration='';
+            wstyle[fdjtDOM.transitionProperty]='';
+            wstyle[fdjtDOM.transitionDuration]='';
+            var cwstyle=getStyle(wrapper);
+            if (cwstyle[fdjtDOM.transitionProperty]) { 
+                wstyle.fontSize=''; wstyle.visibility='';
+                wstyle.fontSize=size+"%";}
+            else wstyle.visibility='';}
+        return size;}
+    fdjtDOM.adjustFontSize=fdjtDOM.tweakFontSize=adjustFontSize;
+    
+    function resetFontSize(node){
+        var wrapper=getFirstChild(node,".fdjtfontwrapper");
+        if (wrapper) wrapper.style.fontSize="100%";}
+    fdjtDOM.resetFontSize=resetFontSize;
+
+    fdjtDOM.autofont=".fdjtadjustfont,.adjustfont";
+    function adjustFonts(arg,top){
+        var all=[];
+        if (!(arg)) all=fdjtDOM.$(fdjtDOM.autofont);
+        else if (typeof arg === "string") {
+            if (document.getElementByID(arg)) 
+                all=[document.getElementByID(arg)];
             else {
-                container=document.createElement("span");
-                default_wsval="nowrap";}
-            container.className="adjustfont_wrapper";
-            parent.replaceChild(container,elt);
-            container.appendChild(elt);
-            container.style.display='block';
-            // Set up CSS valures if needed
-            if (!((cstyle)&&(cstyle.display==="inline-block"))) {
-                try {style.display="inline-block;";} catch (ex) {}
-                if (style.display!=="inline-block") style.display='inline';}
-            var white_space_value=((opts)&&(opts.wsval))||default_wsval;
-            if (!((cstyle)&&
-                  ((cstyle.whiteSpace==="pre")||
-                   (cstyle.whiteSpace==="nowrap"))))
-                style.whiteSpace=white_space_value;
-            container.style.fontSize="100%";
-            return container;}
-
-        function parsePct(arg){
-            // To be more clever and robust, we could handle units besides
-            // pixels
-            if (!(arg)) return arg;
-            else if (typeof arg === 'number') return arg;
-            // In many cases, this just works
-            else try { return parseFloat(arg); }
-            catch (ex) {}
-            var len=arg.length;
-            if ((len>2)&&((arg.slice(len-1))==="%")) {
-                try { return parseFloat(arg.slice(0,len-1)); }
-                catch (ex) {return false;}}}
-
-        function parentHeight(parent){
-            var w=parent.offsetHeight;
-            if (w>0) return w;
-            else return ((parent.parentNode)&&
-                         (parentHeight(parent.parentNode)));}
-        function parentWidth(parent){
-            var w=parent.offsetWidth;
-            if (w>0) return w;
-            else return ((parent.parentNode)&&
-                         (parentWidth(parent.parentNode)));}
-
-        function getStyle(elt){
-            return (elt)&&(elt.nodeType===1)&&
-                (elt.currentStyle||
-                 ((window.getComputedStyle)&&
-                  (window.getComputedStyle(elt,null))));}
-
-        function tweakUntil(testfn,elt,opts,delta,pct,minpct,maxpct){
-            if (!(delta)) delta=((opts)&&(opts.delta))||5;
-            if (!(pct)) pct=parseFloat(elt.style.fontSize)||100;
-            if (!(maxpct)) maxpct=parsePct(elt.getAttribute("data-maxfont"));
-            if (!(maxpct))
-                maxpct=((opts)&&(opts.maxpct))||(adjustFont.maxpct)||1000;
-            if (!(minpct)) minpct=parsePct(elt.getAttribute("data-minfont"));
-            if (!(minpct))
-                minpct=((opts)&&(opts.minpct))||(adjustFont.minpct)||10;
-            if (Array.isArray(delta)) {
-                var n_levels=delta.length, i=0;
-                while (i<n_levels) {
-                    pct=tweakUntil(testfn,elt,opts,delta[i++],pct,
-                                   minpct,maxpct);}
-                return pct;}
-            var test=testfn(false,elt,pct,opts);
-            if (test<0)
-                while ((test<0)&&(pct<=(maxpct-delta))) {
-                    pct=pct+delta;
-                    elt.style.fontSize=(pct)+"%";
-                    test=testfn(false,elt,pct,opts);}
-            else if (test>0)
-                while ((test>0)&&(pct>=(minpct-delta))) {
-                    pct=pct-delta;
-                    elt.style.fontSize=(pct)+"%";
-                    test=testfn(false,elt,pct,opts);}
-            return pct;}
-
-        // This is the core of the algorithm, adjusting the font size to
-        //  put the inner element's size just outside or inside the outer
-        //  element.
-        function tweakFontSize(elt,delta,container,pct,minpct,maxpct,pw,ph){
-            var parent=container.parentNode;
-            if (!(pw)) pw=parentWidth(parent);
-            if (!(ph)) ph=parentHeight(parent);
-            if (!(pct)) pct=parseFloat(container.style.fontSize);
-            // This is where the real scaling happens
-            return tweakUntil(function(){
-                var w=elt.offsetWidth, h=elt.offsetHeight;
-                if ((w<pw)&&(h<=ph)) return -1;
-                else if ((w>pw)||(h>=ph)) return 1;
-                else return 0;},
-                               container,{},delta,pct,minpct,maxpct);}
-        
-        // This is the function to adjust an element, which starts by
-        // setting up the DOM as neccessary and then using tweakFontSize
-        // with different deltas (10, 1 and 0.1) to zero in on a pretty
-        // good value.
-        function adjustFont(elt,opts){
-            var container=setupContainer(elt,opts);
-            var pct=parsePct(container.style.fontSize);
-            var unhide=((opts)&&(opts.unhide))||(adjustFont.unhide);
-            var max=((opts)&&(opts.maxpct)), min=((opts)&&(opts.minpct));
-            var saved_display=elt.style.display;
-            var visualized=((elt.offsetWidth===0)&&(makeVisible(elt)));
-            if (!(max)) {
-                max=parsePct(elt.getAttribute("data-maxfont"));
-                if (!(max)) max=adjustFont.maxpct;
-                else if (opts) opts.maxpct=max;
-                else {}}
-            if (!(max)) max=1000;
-            if (!(min)) {
-                min=parsePct(elt.getAttribute("data-minfont"));
-                if (!(min)) min=adjustFont.minpct;
-                else if (opts) opts.mincpt=min;
-                else {}}
-            if (!(min)) min=5;
-            elt.style.display='inline-block';
-            // Tweak the font percent size at progressively finer
-            // granularities
-            pct=tweakFontSize(elt,25,container,pct,min,max);
-            pct=tweakFontSize(elt,10,container,pct,min,max);
-            pct=tweakFontSize(elt,1,container,pct,min,max);
-            var w=elt.offsetWidth, pw=parentWidth(container.parentNode);
-            var h=elt.offsetWidth, ph=parentHeight(container.parentNode);
-            // If you're over, adjust it one last time to make it fit
-            if ((w>pw)||(h>ph))
-                pct=tweakFontSize(elt,0.1,container,pct,min,max);
-            if (visualized) restoreVisibility(visualized);
-            elt.style.display=saved_display;
-            if (unhide) elt.style.visibility='visible';
-            return pct;}
-        
-        function makeVisible(elt){
-            var results=[];
-            while (elt) {
-                var cstyle=getStyle(elt);
-                var style=elt.style;
-                if (!(style)) elt=elt.parentNode; 
-                else if (cstyle.display==='none') {
-                    var saved={};
-                    if ((style.opacity===0)||
-                        ((style.opacity)&&(style.opacity!=='')))
-                        saved.opacity=style.opacity;
-                    if ((style.visibility)&&(style.visibility!==''))
-                        saved.visibility=style.visibility;
-                    if ((style.display)&&(style.display!==''))
-                        saved.display=style.display;
-                    style.visibility='hidden';
-                    style.opacity=0.0;
-                    if ((elt.tag==="TH")||(elt.tag==="TD"))
-                        style.display="table-cell";
-                    else if (elt.tag==="TR")
-                        style.display="table-row";
-                    else if (elt.tag==="LI")
-                        style.display="list-item";
-                    else if (elt.tag==="TBODY")
-                        style.display="table-row-group";
-                    else if (elt.tag==="TABLE")
-                        style.display="table";
-                    else style.display="block";
-                    results.push([elt,saved]);
-                    elt=elt.parentNode;}
-                else elt=elt.parentNode;}
-            return results;}
-        function restoreVisibility(elements){
-            var i=0, lim=elements.length;
-            while (i<lim) {
-                var entry=elements[i++];
-                var elt=entry[0], saved=entry[1];
-                if (saved.display)
-                    elt.style.display=saved.display;
-                else elt.style.display='';
-                if (saved.visibility)
-                    elt.style.visibility=saved.visibility;
-                else elt.style.visibility=''; 
-                if ((saved.opacity===0)||(saved.opacity))
-                    elt.style.opacity=saved.opacity;
-                else elt.style.opacity='';}}
-                
-        
-        function classes2spec(classes){
-            var specs=[]; var i=0, lim=classes.length;
-            while (i<lim) {
-                var classname=classes[i++];
-                if (classname[0]===".") specs.push(classname);
-                else specs.push("."+classname);}
-            return specs.join(",");}
-
-        // This handles getting the elements to adjust and makes up for
-        // not being able to count on jQuery or another selector library,
-        // though it does check for some of those libraries.
-        function getElements(elt){
-            var results=[];
-            var classes=adjustFont.classes, spec;
-            if (classes.length===0) return [];
-            if (!(elt)) elt=document.body;
-            if (!(elt)) return [];
-            if (elt.querySelectorAll) {
-                spec=classes2spec(classes);
-                return elt.querySelectorAll(spec);}
-            else if (window.jQuery) {
-                spec=classes2spec(classes);
-                return window.jQuery(spec);}
-            else if ((window.fdjt)&&(window.fdjt.DOM)) {
-                spec=classes2spec(classes);
-                return fdjt.DOM.$(spec);}
-            else if (window.Sizzle) {
-                spec=classes2spec(classes);
-                return window.Sizzle(spec);}
-            else if (elt.getElementsByClassName) {
-                if (classes.length===1)
-                    return elt.getElementsByClassName(classes[0]);
-                else {
-                    var j=0, jlim=classes.length;
-                    while (j<jlim) {
-                        var classname=classes[j++];
-                        results=results.concat(
-                            elt.getElementsByClassName(classname));}
-                    return results;}}
-            else {
-                var regex_string=
-                    ((classes.length===1)?("\\b"+classes[0]+"\\b"):
-                     ("(\\b"+classes.join("\\b)|(\\b")+"\\b)"));
-                var regex=new RegExp(regex_string);
-                if (elt.children) {
-                    var children=elt.children;
-                    var i=0, lim=children.length;
-                    while (i<lim) {
-                        var node=children[i++];
-                        if ((node.nodeType===1)&&(node.className)&&
-                            (node.className.search(regex)>=0))
-                            results.push(node);}
-                    return results;}
-                else {
-                    slowZoneSearch(elt,regex,results);
-                    return results;}}}
-
-        // This does a laborious search for elements whose className
-        // contains the given regex.
-        function slowZoneSearch(elt,regex,results){
-            if (elt.nodeType!==1) return;
-            if ((elt.className)&&(elt.className.search(regex)>=0))
-                results.push(elt);
-            var children=elt.childNodes;
-            var i=0, lim=children.length;
+                fdjtDOM.autofont=fdjtDOM.autofont+","+arg;
+                all=fdjtDOM.$(arg);}}
+        else if (arg.nodeType===1) {
+            var sel=new Selector(fdjtDOM.autofont);
+            if (sel.match(arg))
+                all=[arg];
+            else all=fdjtDOM.getChildren(arg,fdjtDOM.autofont);}
+        else all=fdjtDOM.$(fdjtDOM.autofont);
+        var i=0, lim=all.length;
+        if (lim) while (i<lim) adjustFontSize(all[i++]);
+        else if (top) adjustFontSize(top);}
+    fdjtDOM.tweakFont=fdjtDOM.tweakFonts=
+        fdjtDOM.adjustFont=fdjtDOM.adjustFonts=adjustFonts;
+    
+    function adjustPositionedChildren(node){
+        if ((!(node))||(node.nodeType!==1)) return;
+        var style=getStyle(node);
+        if ((node.childNodes)&&(node.childNodes.length)) {
+            var children=node.childNodes; var i=0, lim=children.length;
             while (i<lim) {
                 var child=children[i++];
-                if (child.nodeType===1) slowZoneSearch(child,regex,results);}}
-        
-        // This sets up a DOM tree for use with the module; it's called by
-        // the onload and onresize handlers and can also be called
-        // explicitly if we're adding elements to the DOM.
-        function update(elt,opts){
-            var i=0, lim;
-            if (Array.isArray(elt)) {
-                lim=elt.length;
-                while (i<lim) adjustFont(elt[i++],opts||false);}
-            else {
-                if (!(elt)) elt=document.body;
-                var elts=getElements(elt);
-                lim=elts.length;
-                while (i<lim) adjustFont(elts[i++],opts||false);}}
-        adjustFont.update=update;
-        adjustFont.setup=update;
+                if (child.nodeType===1)
+                    adjustPositionedChildren(child);}}
+        if (((style.display==='block')||(style.display==='inline-block'))&&
+            ((style.position==='absolute')||(style.position==='fixed')))
+            adjustFontSize(node);}
+    function adjustLayoutFonts(node){
+        var marked=fdjtDOM.getChildren(node,fdjtDOM.autofont);
+        var i=0, lim=marked.length;
+        if (lim===0) adjustPositionedChildren(node);
+        else while (i<lim) adjustFontSize(marked[i++]);}
+    fdjtDOM.adjustLayoutFonts=adjustLayoutFonts;
 
-        function adjustfont_onresize(){update(document.body);}
-        function adjustfont_onload(){update(document.body);}
+    function autoAdjustFonts(){
+        if (fdjtDOM.noautofontadjust) return;
+        adjustFonts();
+        fdjtDOM.addListener(window,"resize",adjustFonts);}
 
-        function onload(){
-            if (adjustFont.onload) {
-                if (adjustFont.delay)
-                    adjustFont.delay=adjustfont_onload;
-                else adjustfont_onload();}}
-        function onresize(){
-            if (adjustFont.onresize) {
-                if (adjustFont.delay)
-                    adjustFont.delay=adjustfont_onresize;
-                else adjustfont_onresize();}}
-        
-        adjustFont.onload=true;
-        adjustFont.onresize=true;
-        adjustFont.classes=["adjustfont","hatchshow"];
-        adjustFont.wsval="nowrap";
-        adjustFont.unhide=true;
-
-        adjustFont.tweakUntil=tweakUntil;
-        
-        if (window.addEventListener) {
-            window.addEventListener("load",onload);
-            window.addEventListener("resize",onresize);}
-        else if (window.attachEvent) {
-            window.attachEvent("onload",onload);
-            window.attachEvent("onload",onresize);}
-        else {}
-        
-        return adjustFont;
-    })();
+    fdjt.addInit(autoAdjustFonts,"adjustFonts");
+    
+})();
 
 /* Emacs local variables
    ;;;  Local variables: ***
