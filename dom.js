@@ -1573,6 +1573,17 @@ fdjt.DOM=
                 return;}}
         fdjtDOM.triggerClick=triggerClick;
 
+        /* Scrolling by pages */
+        function pageScroll(container,n){
+            var ch=container.clientHeight, delta=ch*n;
+            var sh=container.scrollHeight, st=container.scrollTop;
+            var nt=st+delta;
+            if (ch>=sh) return;
+            if (nt<0) container.scrollTop=0;
+            else if ((nt+ch)>=sh) container.scrollTop=sh-ch;
+            else container.scrollTop=nt;}
+        fdjtDOM.pageScroll=pageScroll;
+
         /* Sizing to fit */
 
         var default_trace_adjust=false;
