@@ -525,6 +525,10 @@ fdjt.DOM=
                     (target.tagName==='TEXTAREA'));}
         fdjtDOM.isTextInput=isTextInput;
         
+        function isImage(target){
+            return (target.tagName==='IMG');}
+        fdjtDOM.isImage=isImage;
+
         /* Simple CSS selectors */
 
         var selectors={};
@@ -1544,14 +1548,19 @@ fdjt.DOM=
             else fdjtLog.warn('This node never listens: %o',node);}
         fdjtDOM.removeListener=removeListener;
 
-        fdjtDOM.T=function(evt) {
-            evt=evt||window.event; return (evt.target)||(evt.srcElement);};
+        function eventTarget(evt) {
+            evt=evt||window.event; 
+            return (evt.target)||(evt.srcElement);}
+        fdjtDOM.T=eventTarget;
+        fdjtDOM.eventTarget=eventTarget;
+        fdjtDOM.getTarget=eventTarget;
 
-        fdjtDOM.cancel=function(evt){
+        function cancelEvent(evt){
             evt=evt||window.event;
             if (evt.preventDefault) evt.preventDefault();
             else evt.returnValue=false;
-            evt.cancelBubble=true;};
+            evt.cancelBubble=true;}
+        fdjtDOM.cancel=cancelEvent;
 
         function triggerClick(elt){
             if (document.createEvent) { // in chrome
