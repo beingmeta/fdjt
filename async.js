@@ -35,24 +35,21 @@ fdjt.Async=fdjt.ASync=fdjt.async=
 
         function fdjtAsync(fn,args){
             function async_call(resolve,reject){
-                function doit(){
+                function async_doit(){
                     var value;
                     try {
                         if (args) value=fn.call(null,args);
                         else value=fn();
                         resolve(value);}
                     catch (ex) {reject(ex);}}
-                setTimeout(doit,1);}
+                setTimeout(async_doit,1);}
             return new Promise(async_call);}
 
         function getnow() {return (new Date()).getTime();}
-
+        
         function timeslice(fcns,slice,space,stop,done,fail){
             var timer=false;
-            if (typeof slice !== 'number') slice=100;
-            if (typeof space !== 'number') space=100;
-            var i=0; var lim=fcns.length;
-            var slicefn=function(){
+            function slicefn(){
                 var timelim=getnow()+slice;
                 var nextspace=false;
                 while (i<lim) {
@@ -68,15 +65,19 @@ fdjt.Async=fdjt.ASync=fdjt.async=
                 else {
                     clearTimeout(timer); 
                     timer=false;
-                    done(false);}};
+                    done(false);}}
+            if (typeof slice !== 'number') slice=100;
+            if (typeof space !== 'number') space=100;
+            var i=0; var lim=fcns.length;
             return slicefn();}
-        fdjtAsync.timeslice=function(fcns,opts){
+        function timeslice_method(fcns,opts){
             if (!(opts)) opts={};
             var slice=opts.slice||100, space=opts.space||100;
             var stop=opts.stop||false;
             function timeslicing(success,failure){
                 timeslice(fcns,slice,space,stop,success,failure);}
-            return new Promise(timeslicing);};
+            return new Promise(timeslicing);}
+        fdjtAsync.timeslice=timeslice_method;
 
         function slowmap(fn,vec,watch,done,failed,slice,space,onerr,watch_slice){
             var i=0; var lim=vec.length; var chunks=0;
@@ -85,7 +86,7 @@ fdjt.Async=fdjt.ASync=fdjt.async=
             if (!(slice)) slice=100;
             if (!(space)) space=slice;
             if (!(watch_slice)) watch_slice=0;
-            var stepfn=function(){
+            function slowmap_stepfn(){
                 try {
                     var started=getnow(); var now=started;
                     var stopat=started+slice;
@@ -113,7 +114,7 @@ fdjt.Async=fdjt.ASync=fdjt.async=
                         used=used+(now-started);
                         if (watch) watch('suspend',i,lim,chunks,used,
                                          zerostart);
-                        timer=setTimeout(stepfn,space);}
+                        timer=setTimeout(slowmap_stepfn,space);}
                     else {
                         now=getnow(); used=used+(now-started);
                         clearTimeout(timer); timer=false;
@@ -125,9 +126,9 @@ fdjt.Async=fdjt.ASync=fdjt.async=
                             watch('done',i,lim,chunks,used,zerostart,donetime);
                         if ((done)&&(done.call)) 
                             done(vec,now-zerostart,used);}}
-                catch (ex) {if (failed) failed(ex);}};
-            timer=setTimeout(stepfn,space);}
-        fdjtAsync.slowmap=function(fcn,vec,opts){
+                catch (ex) {if (failed) failed(ex);}}
+            timer=setTimeout(slowmap_stepfn,space);}
+        function slowmap_handler(fcn,vec,opts){
             if (!(opts)) opts={};
             var slice=opts.slice, space=opts.space, onerr=opts.onerr;
             var watchfn=opts.watchfn, watch_slice=opts.watch;
@@ -153,17 +154,19 @@ fdjt.Async=fdjt.ASync=fdjt.async=
                              reject,
                              slice,space,onerr,watch_slice);}
             if (watch_slice<1) watch_slice=vec.length*watch_slice;
-            return new Promise(slowmapping);};
-
-        // Returns a function, that, as long as it continues to be invoked, will not
-        // be triggered. The function will be called after it stops being called for
-        // N milliseconds. If `immediate` is passed, trigger the function on the
-        // leading edge, instead of the trailing.
+            return new Promise(slowmapping);}
+        fdjtAsync.slowmap=slowmap_handler;
+        
+        // Returns a function, that, as long as it continues to be
+        // invoked, will not be triggered. The function will be called
+        // after it stops being called for N milliseconds. If
+        // `immediate` is passed, trigger the function on the leading
+        // edge, instead of the trailing.
         function debounce(func, wait, immediate) {
             var timeout;
-            return function() {
+            return function debounced() {
                 var context = this, args = arguments;
-                var later = function() {
+                var later = function debounce_later() {
                     timeout = null;
                     if (!immediate) func.apply(context, args);
                 };
@@ -199,7 +202,7 @@ fdjt.Async=fdjt.ASync=fdjt.async=
         function once(fn, context) { 
             var result;
 
-            return function() { 
+            return function justonce() { 
                 if(fn) {
                     result = fn.apply(context || this, arguments);
                     fn = null;
