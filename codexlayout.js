@@ -1459,9 +1459,8 @@ fdjt.CodexLayout=
                     if (trace) {
                         if ((trace>2)||
                             ((track)&&(node)&&(track.match(node)))) {
-                            if (node) logfn("Layout/%s %o at %o",
-                                            newpage,page,node);
-                            else logfn("Layout/%s %o",newpage,page);}}
+                            if (node) logfn("Layout/newpage %o at %o",page,node);
+                            else logfn("Layout/newpage %o",page);}}
                     
                     // If there are things we are dragging along, move
                     // them to the new page
