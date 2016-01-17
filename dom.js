@@ -81,8 +81,8 @@ fdjt.DOM=
                 for (var attrib in spec) {
                     if (attrib==="tagName") continue;
                     else node.setAttribute(attrib,spec[attrib]);}}
-            var args=aslice.call(arguments);
-            domappend(node,args,1);
+            var j=1, lim=arguments.length; while (j<lim)
+                domappend(node,arguments[j++]);
             return node;}
 
         fdjtDOM.useNative=function(flag) {
