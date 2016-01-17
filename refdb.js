@@ -1159,12 +1159,13 @@ fdjt.RefDB=(function(){
                 result._sortlen=1;
                 return result;}}
         else {
-            result=[];
-            for (arg in arguments)
-                if (!(arg)) {}
-            else if (arg instanceof Array)
-                result=result.concat(arg);
-            else result.push(arg);
+            var i=0, lim=arguments.length; result=[];
+            while (i<lim) {
+                var each_arg=arguments[i++];
+                if (!(each_arg)) {}
+                else if (each_arg instanceof Array)
+                    result=result.concat(each_arg);
+                else result.push(each_arg);}
             return setify(result);}}
     RefDB.Set=fdjtSet;
     fdjt.Set=fdjtSet;
