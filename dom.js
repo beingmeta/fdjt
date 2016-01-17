@@ -32,6 +32,7 @@ fdjt.DOM=
         var usenative=true;
         var fdjtString=fdjt.String;
         var fdjtLog=fdjt.Log;
+        var aslice=Array.prototype.slice;
 
         var css_selector_regex=/((^|[.#])[^.#\[\s]+)|(\[[^ \]=]+=[^\]]+\])|(\[[^ \]=]+\])/ig;
 
@@ -80,7 +81,8 @@ fdjt.DOM=
                 for (var attrib in spec) {
                     if (attrib==="tagName") continue;
                     else node.setAttribute(attrib,spec[attrib]);}}
-            domappend(node,arguments,1);
+            var args=aslice.call(arguments);
+            domappend(node,args,1);
             return node;}
 
         fdjtDOM.useNative=function(flag) {
@@ -166,7 +168,8 @@ fdjt.DOM=
             else if (content.toHTML)
                 return dominsert(before,node,content.toHTML());
             else if (content.length-i>1) {
-                var frag=(((window.documentFragment)&&(node instanceof window.DocumentFragment))?
+                var frag=(((window.documentFragment)&&
+                           (node instanceof window.DocumentFragment))?
                           (node):(document.createDocumentFragment()));
                 domappend(frag,content,i);
                 node.insertBefore(frag,before);
@@ -180,7 +183,7 @@ fdjt.DOM=
         fdjtDOM.appendArray=domappend;
         
         function toArray(arg) {
-            return Array.prototype.slice.call(arg);}
+            return aslice.call(arg);}
         fdjtDOM.toArray=toArray;
         function extendArray(result,arg) {
             var i=0; var lim=arg.length;
@@ -192,8 +195,8 @@ fdjt.DOM=
                 if (start) return arg.slice(start);
                 else return arg;}
             else if (start)
-                return Array.prototype.slice.call(arg,start||0);
-            else return Array.prototype.slice.call(arg,start||0);}
+                return aslice.call(arg,start||0);
+            else return aslice.call(arg,start||0);}
         fdjtDOM.Array=TOA;
         fdjtDOM.slice=TOA;
 
@@ -384,7 +387,8 @@ fdjt.DOM=
             else newinfo=classname+" "+classinfo;
             if (attrib) {
                 elt.setAttribute(attrib,newinfo);
-                // This sometimes trigger a CSS update that doesn't happen otherwise
+                // This sometimes trigger a CSS update that doesn't
+                // happen otherwise
                 elt.className=elt.className;}
             else elt.className=newinfo;
             return true;}
@@ -413,7 +417,8 @@ fdjt.DOM=
                     elt.classList.remove(classname);
                 return;}
             var classinfo=
-                (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
+                (((attrib) ? (elt.getAttribute(attrib)||"") :
+                  (elt.className))||null);
             if ((typeof classinfo !== "string")||(classinfo===""))
                 return false;
             var class_regex=
@@ -906,25 +911,31 @@ fdjt.DOM=
             while (n>=0) node.removeChild(children[n--]);}
         fdjtDOM.removeChildren=removeChildren;
 
-        fdjtDOM.append=function (node) {
+        function DOMappend(node) {
             if (typeof node === 'string') node=document.getElementById(node);
-            domappend(node,arguments,1);};
-        fdjtDOM.prepend=function (node) {
+            domappend(node,aslice.call(arguments),1);}
+        fdjtDOM.append=DOMappend;
+        function DOMprepend(node) {
             if (typeof node === 'string') node=document.getElementById(node);
             if (node.firstChild)
-                dominsert(node.firstChild,arguments,1);
-            else domappend(node,arguments,1);};
-
-        fdjtDOM.insertBefore=function (before) {
+                dominsert(node.firstChild,aslice.call(arguments),1);
+            else domappend(node,aslice.call(arguments),1);}
+        fdjtDOM.prepend=DOMprepend;
+        
+        function DOMinsertBefore(before) {
             if (typeof before === 'string')
                 before=document.getElementById(before);
-            dominsert(before,arguments,1);};
-        fdjtDOM.insertAfter=function (after) {
+            dominsert(before,aslice.call(arguments),1);}
+        fdjtDOM.insertBefore=DOMinsertBefore;
+        function DOMinsertAfter(after) {
             if (typeof after === 'string')
                 after=document.getElementById(after);
             if (after.nextSibling)
-                dominsert(after.nextSibling,arguments,1);
-            else domappend(after.parentNode,arguments,1);};
+                dominsert(after.nextSibling,
+                          aslice.call(arguments),1);
+            else domappend(after.parentNode,
+                           aslice.call(arguments),1);}
+        fdjtDOM.insertAfter=DOMinsertAfter;
         
         /* DOM construction shortcuts */
 
@@ -959,14 +970,14 @@ fdjt.DOM=
         fdjtDOM.Anchor=function(href,spec){
             spec=tag_spec(spec,"A");
             var node=fdjtDOM(spec); node.href=href;
-            domappend(node,arguments,2);
+            domappend(node,aslice.call(arguments),2);
             return node;};
         fdjtDOM.Image=function(src,spec,alt,title){
             spec=tag_spec(spec,"IMG");
             var node=fdjtDOM(spec); node.src=src;
             if (alt) node.alt=alt;
             if (title) node.title=title;
-            domappend(node,arguments,4);
+            domappend(node,aslice.call(arguments),4);
             return node;};
 
         function getInputs(root,name,type){
@@ -1087,17 +1098,13 @@ fdjt.DOM=
             if (typeof elt === 'string') elt=document.getElementById(elt);
             if (!(elt)) return elt;
             if (elt.nodeType!==1) throw "Not an element";
-            try {
-                var style=
-                    ((window.getComputedStyle)&&
-                     (window.getComputedStyle(elt,null)))||
-                    (elt.currentStyle);
-                if (!(style)) return false;
-                else if (prop) return style[prop];
-                else return style;}
-            catch (ex) {
-                fdjtLog("Unexpected style error %o",ex);
-                return false;}}
+            var style=
+                ((window.getComputedStyle)&&
+                 (window.getComputedStyle(elt,null)))||
+                (elt.currentStyle);
+            if (!(style)) return false;
+            else if (prop) return style[prop];
+            else return style;}
         fdjtDOM.getStyle=getStyle;
 
         function styleString(elt){
