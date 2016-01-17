@@ -941,10 +941,12 @@ fdjt.CodexLayout=
                               block,block_i,root,page);
                         tracing=true;}
                     
-                    if ((trace)&&(block)&&
-                        (debug_match)&&(debug_match.match(block))) {
-                        // jshint debug:true
-                        debugger;}
+                    /*
+                      if ((trace)&&(block)&&
+                      (debug_match)&&(debug_match.match(block))) {
+                      // jshint debug:true
+                      debugger;}
+                    */
 
                     // FIRST, HANDLE DRAGGING
                     handle_dragging(block,terminal,info,style);
@@ -1863,6 +1865,7 @@ fdjt.CodexLayout=
                     return words;}
 
                 function loop(){
+                    function layoutLoopDone(){donefn(layout);}
                     var loop_start=fdjtTime();
                     while ((block_i<n_blocks)&&
                            ((!(timeslice))||(serialize)||
@@ -1885,7 +1888,7 @@ fdjt.CodexLayout=
                         pagesDone(newpages); newpages=[];
                         if (donefn) {
                             if (timeslice) 
-                                setTimeout(function(){donefn(layout);},10);
+                                setTimeout(layoutLoopDone,10);
                             else donefn(layout);}}}
 
                 // This is the inner loop
@@ -2088,6 +2091,8 @@ fdjt.CodexLayout=
                 return new Promise(setting_layout);}
 
             function setLayout(content){
+                function restorePageNode(pagenode){
+                    restorePage(pagenode,content);}
                 if (typeof content === "string") 
                     return setSimpleLayout(content);
                 else if (!(content.hasOwnProperty('npages'))) 
@@ -2098,18 +2103,16 @@ fdjt.CodexLayout=
                     container.innerHTML=content.layout;
                     var pagenodes=container.childNodes;
                     return fdjtAsync.slowmap(
-                        function(pagenode){
-                            restorePage(pagenode,content);},
-                        pagenodes,
+                        restorePageNode,pagenodes,
                         {slice: layout.timeslice,
                          space: layout.timeskip});}}
             layout.setLayout=setLayout;
 
             function restorePage(pagenode,content){
+                function restorePageData(pagedata){
+                    pagenode.innerHTML=pagedata.content;}
                 fetchLayout(content.layout_id,pagenode.id).
-                    then(function(pagedata){
-                        pagenode.innerHTML=pagedata.content;},
-                         pagenode.id);}
+                    then(restorePageData);}
 
             function dropSelected(node,dropsel){
                 if (!(dropsel)) return;
@@ -2184,7 +2187,7 @@ fdjt.CodexLayout=
                         split.setAttribute("data-textsplit",text.nodeValue);}
                 var html=copy.innerHTML;
                 cacheLayout(layout_id,html,false,false)
-                    .then(function(){
+                    .then(function layoutSaved(){
                         cachedLayout(layout_id);
                         callback(layout);})
                     .catch(function(ex){
@@ -2338,7 +2341,7 @@ fdjt.CodexLayout=
                     var pageno=(page)&&(
                         parseInt(page.getAttribute("data-pagenum"),10));
                     olpage.push({list: dup,pageno:pageno});}
-                olpage.sort(function(x,y){
+                olpage.sort(function sortOList(x,y){
                     if (x.pageno>y.pageno) return 1;
                     else if (x.pageno<y.pageno) return -1;
                     else return 0;});
@@ -2548,7 +2551,7 @@ fdjt.CodexLayout=
                 addClass(newpage,"curpage");}
             this.gotoPage=gotoPage;
 
-            this.Revert=function(){
+            this.Revert=function layoutRevert(){
                 var i, lim;
                 if (this.saved_ids) {
                     // This means that the content was explicitly set,
@@ -2586,8 +2589,8 @@ fdjt.CodexLayout=
             /* Finally return the layout */
             return this;}
 
-        CodexLayout.timeslice=80;
-        CodexLayout.timeskip=10;
+        CodexLayout.timeslice=50;
+        CodexLayout.timeskip=5;
 
         CodexLayout.tracelevel=0;
         CodexLayout.prototype.getDups=function getDups4ID(id){
@@ -2658,9 +2661,9 @@ fdjt.CodexLayout=
                     return resolve(layoutDB);
                 else if ((indexedDB)&&(dbname)) {
                     try {
-                        RefDB.useIndexedDB(dbname,1,function(db){
+                        RefDB.useIndexedDB(dbname,1,function gotRootDB(db){
                             db.createObjectStore("layouts",{keyPath: "layout_id"});})
-                            .then(function(db){
+                            .then(function gotLayoutsDB(db){
                                 CodexLayout.layoutDB=layoutDB=db;
                                 CodexLayout.cache=7;
                                 resolve(db);})
@@ -2697,10 +2700,10 @@ fdjt.CodexLayout=
                     return cacheLayoutIDB(layoutDB,layout_id,content,resolve,reject);
                 else {
                     return useIndexedDB()
-                        .then(function(db){
+                        .then(function layoutCached(db){
                             layoutDB=CodexLayout.layoutDB=window.LocalStorage;
                             cacheLayoutIDB(db,layout_id,content,resolve,reject);})
-                        .catch(function(){
+                        .catch(function noLayoutIDB(){
                             layoutDB=CodexLayout.layoutDB=window.LocalStorage;
                             setLocal(layout_id,content);
                             if (resolve) resolve(layoutDB);});}}
@@ -2765,20 +2768,22 @@ fdjt.CodexLayout=
             function fetching_layout(resolve,reject){
                 return fetchLayout(db,layout_id,resolve,reject);}
             return new Promise(fetching_layout);}
-        CodexLayout.fetchLayout=function(layout_id){
+        function fetchLayoutHandler(layout_id){
             return useIndexedDB().then(function(db){
                 return fetchLayoutFrom(db,layout_id);})
                 .catch(function(ex){
                     fdjtLog("Layout DB init failed: %o",ex);
-                    return fetchLayoutFrom(false,layout_id);});};
+                    return fetchLayoutFrom(false,layout_id);});}
+        CodexLayout.fetchLayout=fetchLayoutHandler;
         
-        CodexLayout.clearLayouts=function(){
+        function clearLayoutsHandler(){
             var layouts=fdjtState.getLocal("fdjtCodex.layouts",true);
             var i=0, lim=((layouts)&&(layouts.length)); 
             if (layouts) {
                 while (i<lim) dropLayout(layouts[i++]);
-                fdjtState.dropLocal("fdjtCodex.layouts");}};
-
+                fdjtState.dropLocal("fdjtCodex.layouts");}}
+        CodexLayout.clearLayouts=clearLayoutsHandler;
+        
         function fetchAll(callback){
             if (!(layoutDB)) return false;
             else {
@@ -2792,7 +2797,7 @@ fdjt.CodexLayout=
                         cursor['continue']();}
                     else callback(layout_ids);};}}
         CodexLayout.fetchAll=fetchAll;
-        CodexLayout.clearAll=function(spec){
+        function clearAllLayouts(spec){
             fetchAll(function(layout_ids){
                 var todrop=[]; var i=0, lim=layout_ids.length;
                 if (!(lim)) {fdjtLog.warn("No layouts"); return;}
@@ -2809,7 +2814,8 @@ fdjt.CodexLayout=
                 else fdjtLog.warn("Dropping %d layouts",todrop.length);
                 i=0; lim=todrop.length; while (i<lim) {
                     fdjtLog.warn("Dropping layout %s",todrop[i]);
-                    dropLayout(todrop[i++]);}});};
+                    dropLayout(todrop[i++]);}});}
+        CodexLayout.clearAll=clearAllLayouts;
         function cachedLayout(layout_id){
             setLocal("fdjtCodex.layout("+layout_id+")",layout_id);
             pushLocal("fdjtCodex.layouts",layout_id);}
