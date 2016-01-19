@@ -116,7 +116,10 @@ fdjt.DOM=
         fdjt.ID=fdjtID;
 
         function domappend(node,content,i) {
-            if (content.nodeType) node.appendChild(content);
+            if (content===0) 
+                node.appendChild(document.createTextNode("0"));
+            else if (!(content)) return;
+            else if (content.nodeType) node.appendChild(content);
             else if (typeof content === 'string') 
                 node.appendChild(document.createTextNode(content));
             else if (content.toDOM)
