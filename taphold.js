@@ -202,6 +202,23 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             else return 1;}
         else return 0;}
 
+    function initSound(name,th,opts,elt){
+        var found=(th[name])||
+            ((opts)&&(opts[name]))||
+            (elt.getAttribute("data-"+name))||
+            (TapHold[name]);
+        if (found) th[name]=found;
+        return found;}
+    function playSound(name,evt,th){
+        var target=((evt.nodeType)&&(evt))||(fdjtUI.T(evt));
+        if ((th.mute)||(TapHold.mute)||
+            (hasClass(target,"fdjtmute"))||
+            (hasClass(th.container,"fdjtmute"))) 
+            return false;
+        var sound=(target.getAttribute("data-"+name))||(th[name]);
+        if (typeof sound === "string") sound=document.getElementById(sound);
+        if (sound) sound.play();}
+
     function TapHold(elt,opts){
         if (!(elt)) {
             fdjtLog.warn("TapHold with no argument!");
@@ -285,6 +302,13 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
 
         var getParents=fdjtDOM.getParents;
 
+        initSound("tapsound",th,opts,elt);
+        initSound("holdsound",th,opts,elt);
+        initSound("releasesound",th,opts,elt);
+        initSound("slipsound",th,opts,elt);
+        initSound("taptapsound",th,opts,elt);
+        initSound("swipesound",th,opts,elt);
+
         function start_holding(){
             var parents=getParents(elt,".tapholdcontext");
             if ((parents)&&(parents.length)) {
@@ -365,11 +389,13 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
         function tapped(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
+            playSound("tapsound",target,th);
             return synthEvent(target,"tap",th,evt,x,y,false);}
         function held(target,evt,x,y){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
             no_swipe=true;
+            playSound("holdsound",target,th);
             if (holdclass) setTimeout(start_holding,20);
             return synthEvent(target,"hold",th,evt,x,y,false);}
         function released(target,evt,x,y){
@@ -377,6 +403,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 ((th_target_t)&&(th_last)&&(fdjtET()-th_target_t));
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
+            playSound("releasesound",target,th);
             if (holdclass)
                 setTimeout(check_holding,50);
             if ((target_time)&&(target_time<200)) {
@@ -393,14 +420,17 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((evt)&&(!(also.hasOwnProperty('relatedTarget')))) {
                 var rel=evt.relatedTarget;
                 if (rel!==target) also.relatedTarget=rel;}
+            playSound("slipsound",target,th);
             if (holdclass)
                 setTimeout(check_holding,50);
             return synthEvent(target,"slip",th,evt,touch_x,touch_y,also);}
         function taptapped(target,evt){
+            playSound("taptapsound",target,th);
             return synthEvent(target,"taptap",th,evt,
                               touch_x,touch_y,false,trace);}
         function swiped(target,evt,sx,sy,cx,cy){
             var dx=cx-sx, dy=cy-sy; swipe_t=fdjtET();
+            playSound("swipesound",target,th);
             return synthEvent(target,"swipe",th,evt,cx,cy,
                               {startX: sx,startY: sy,endX: cx,endY: cy,
                                deltaX: dx,deltaY: dy});}
@@ -467,7 +497,8 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     tap_target=th_target;
                     if ((taptapmsecs)&&(taptapmsecs>0)) {
                         tt_timer=setTimeout(function(){
-                            tt_timer=false; tapped(tap_target,evt,x,y);},
+                            tt_timer=false; 
+                            tapped(tap_target,evt,x,y);},
                                             taptapmsecs);}
                     else tapped(th_target,evt,x,y);}
                 else if (noslip) {}
