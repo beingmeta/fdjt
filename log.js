@@ -105,9 +105,10 @@ fdjt.Log=(function(){
                 frag.appendChild(document.createTextNode("\n"));}
             domconsole.appendChild(frag);
             backlog=[];}}
-    fdjtLog.update=function(){
-        if (fdjtLog.console) update_log(fdjtLog.console);};
-
+    function updateLogHandler(){
+        if (fdjtLog.console) update_log(fdjtLog.console);}
+    fdjtLog.update=updateLogHandler;
+    
     function remote_log(msg){
         var req=new XMLHttpRequest();
         req.open('POST',fdjtLog.logurl,(!(fdjtLog.logsync)));
@@ -115,18 +116,22 @@ fdjt.Log=(function(){
         req.send(msg);
         return req;}
 
-    fdjtLog.warn=function(){
+    
+    function fdjtLogWarn(){
         if ((!(fdjtLog.console_fn))&&
             (!(window.console)&&(window.console.log)&&
              (window.console.log.count))) {
             var output=fdjtString.apply(null,arguments);
             window.alert(output);}
-        else fdjtLog.apply(null,arguments);};
-
-    fdjtLog.uhoh=function(){
-        if (fdjtLog.debugging) fdjtLog.warn.call(this,arguments);};
-
-    fdjtLog.bkpt=function(){
+        else fdjtLog.apply(null,arguments);}
+    fdjtLog.warn=fdjtLogWarn;
+    
+    function fdjtLogUhOh(){
+        if (fdjtLog.debugging) 
+            fdjtLog.warn.call(null,arguments);}
+    fdjtLog.uhoh=fdjtLogUhOh;
+    
+    function fdjtLogBkpt(){
         var output=false;
         if ((fdjtLog.doformat)&&(typeof fdjtString !== 'undefined'))
             output=fdjtString.apply(null,arguments);
@@ -137,8 +142,8 @@ fdjt.Log=(function(){
                  (window.console.count))
             if (output)
                 window.console.log.call(window.console,output);
-        else window.console.log.apply(window.console,arguments);
-    };
+        else window.console.log.apply(window.console,arguments);}
+    fdjtLog.bkpt=fdjtLogBkpt;
 
     fdjtLog.useconsole=true;
 
@@ -150,7 +155,6 @@ fdjt.Log=(function(){
                 try {window.console.log("Testing console");}
                 catch (ex) { use_console_log=false;}}}
         else use_console_log=false;}
-
 
     // This is for temporary trace statements; we use a different name
     //  so that they're easy to find.
