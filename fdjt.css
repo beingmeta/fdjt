@@ -1122,7 +1122,7 @@ html._TOUCH .fdjtselecting .fdjtselectend:hover {
     z-index: 200; white-space: nowrap; pointer-events: none;
     background-color: gray; padding: 6px; font-size: 120%; 
     width: fit-content; height: fit-content;
-    transform: translate(-50%,-2em);
+    transform: translate3d(-50%,-2em,0);
     position: absolute;}
 .fdjtselectloupe > span {
     background-color: white;}
