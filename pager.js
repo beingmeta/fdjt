@@ -284,7 +284,7 @@ fdjt.Pager=
         addClass(pagernav,"packed");
       addClass(nav_elts[off],"pagevisible");
       this.showpage=nav_elts[off];
-      if (this.pagenum) {
+      if (typeof this.pagenum === "number") {
         this.pagenum.innerHTML=(off+1)+"/"+pages.length;
         pagernav.appendChild(this.pagenum);}
       fdjtDOM.prepend(this.root,pagernav);
