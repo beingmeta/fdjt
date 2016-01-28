@@ -2958,8 +2958,10 @@ fdjt.DOM=
 (function() {
     "use strict";
     var lastTime = 0;
-    var rAF=window.requestAnimationFrame;
-    var cAF=window.cancelAnimationFrame;
+    var rAF=(window.requestAnimationFrame)&&
+        (function(thunk){window.requestAnimationFrame(thunk);});
+    var cAF=(window.cancelAnimationFrame)&&
+        (function(thunk){window.cancelAnimationFrame(thunk);});
     var vendors = ['webkit', 'moz','ms','o'];
 
     function fakeAnimationFrame(callback) {
