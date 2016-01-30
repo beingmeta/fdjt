@@ -168,7 +168,7 @@ fdjt.RefDB=(function(){
     RefDB.prototype.drop=function DBdrop(refset){
         var count=0;
         var refs=this.refs; var altrefs=this.altrefs;
-        if (!(id instanceof Array)) refset=[refset];
+        if (!(refset instanceof Array)) refset=[refset];
         var i=0, nrefs=refset.length; while (i<nrefs) {
             var ref=refset[i++]; var id;
             if (ref instanceof Ref) id=ref._id;
@@ -1182,7 +1182,7 @@ fdjt.RefDB=(function(){
             var elt1=array[0];
             array._sortlen=1;
             array._allstrings=(typeof elt1 === 'string');
-            if (typeof elt === "object") {
+            if (typeof elt1 === "object") {
                 if ((elt1._qid)||(elt1._fdjtid)) {}
                 else if (elt1.getQID) elt1._qid=elt1.getQID();
                 else elt1._fdjtid=++id_counter;}

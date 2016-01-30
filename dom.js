@@ -1406,7 +1406,7 @@ fdjt.DOM=
         function hasContent(node,recur,test,limit){
             if (node===limit) return false;
             else if (node.nodeType===3)
-                return (child.nodeValue.search(/\w/g)>=0);
+                return (node.nodeValue.search(/\w/g)>=0);
             else if (node.nodeType!==1) return false;
             else if ((test)&&(test.match)&&(test.match(node)))
                 return true;
