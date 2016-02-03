@@ -1376,8 +1376,12 @@ fdjt.DOM=
                          ((typeof node.className === "string")&&
                           (node.className.search(/\bfdjtskiptext/)>=0)))
                     return 0;
+                else if (node.getAttribute('data-locwidth')) {
+                    return parseInt(node.getAttribute('data-locwidth'));}
                 else if (node.childNodes) {
                     var children=node.childNodes;
+                    var padding=((display==='inline')?(0):
+                                 (/^(li|td|dt|dd|label|input)$/i.exec(node.tagName))?(1):(2));
                     var i=0; var lim=children.length; var width=0;
                     while (i<lim) {
                         var child=children[i++];
@@ -1386,7 +1390,7 @@ fdjt.DOM=
                         else if (child.nodeType===1)
                             width=width+textwidth(child);
                         else {}}
-                    return width;}
+                    return width+padding*2;}
                 else if (node.alt) return node.alt.length+2;
                 else return 3;}}
         fdjtDOM.textWidth=textwidth;
