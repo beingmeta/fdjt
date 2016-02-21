@@ -2943,6 +2943,15 @@ fdjt.DOM=
         fdjtDOM.addCXClasses=addUXClasses;
         fdjt.addInit(addUXClasses,"AddUXClasses");
 
+        function focusElt(id){
+            var elt=document.getElementById(id);
+            if (elt) setTimeout(function(){elt.focus();},10);}
+        fdjtDOM.focus=focusElt;
+        function blurElt(id){
+            var elt=document.getElementById(id);
+            if (elt) setTimeout(function(){elt.blur();},10);}
+        fdjtDOM.blur=blurElt;
+
         function windowFocus(evt){
             evt=evt||window.event; addClass(document.body,"_FOCUS");}
         function windowBlur(evt){
