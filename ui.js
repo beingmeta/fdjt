@@ -1356,8 +1356,8 @@ fdjt.UI.ProgressBar=(function(){
             else input.type="TEXT";}
         else {
             if (target.checked) input.type="TEXT";
-            else input.type="PASSWORD";}}
-
+            else input.type="PASSWORD";}
+        setTimeout(function(){input.focus();},1000);}
     fdjtUI.updatePasswordVisibility=updatePasswordVisibility;
 
     function uploadSelected(evt){
