@@ -824,7 +824,7 @@ fdjt.CodexLayout=
                     // Start a new page and update the loop state
                     newPage(); prev=layout.prev=root;
                     prevstyle=layout.prevstyle=getStyle(root);
-                    previnfo=layout.previnfo=getBlockInfo(root,prevstyle);
+                    previnfo=layout.previnfo=new BlockInfo(root,prevstyle);
                     pagesDone(newpages); newpages=[];
                     drag=[];
                     if (donefn) donefn(layout);
@@ -849,7 +849,7 @@ fdjt.CodexLayout=
                     if (done) {
                         prev=layout.prev=root; 
                         prevstyle=layout.prevstyle=getStyle(root);
-                        previnfo=layout.previnfo=getBlockInfo(root,prevstyle);
+                        previnfo=layout.previnfo=new BlockInfo(root,prevstyle);
                         pagesDone(newpages); newpages=[];
                         if (donefn) donefn(layout);
                         return;}}
@@ -978,7 +978,7 @@ fdjt.CodexLayout=
                                 layout.previnfo=previnfo=info;
                                 blocks[block_i]=split;
                                 styles[block_i]=style=getStyle(split);
-                                blockinfo[block_i]=getBlockInfo(split,style);
+                                blockinfo[block_i]=new BlockInfo(split,style);
                                 blockinfo[block_i].terminal=terminal;
                                 return;}
                             else {
@@ -1028,7 +1028,7 @@ fdjt.CodexLayout=
                         if ((node.offsetHeight===0)||
                             ((node.offsetHeight)&&
                              (node.offsetHeight<(page_height*1.5)))) {
-                            nodeinfo=getBlockInfo(node,style);
+                            nodeinfo=new BlockInfo(node,style);
                             addClass(node,"codexblock");
                             info.push(nodeinfo);
                             blocks.push(node); styles.push(style);
@@ -1050,7 +1050,7 @@ fdjt.CodexLayout=
                         (disp!=='inline')&&
                         (disp!=='table-cell')) {
                         addClass(node,"codexblock");
-                        nodeinfo=getBlockInfo(node,style);
+                        nodeinfo=new BlockInfo(node,style);
                         blocks.push(node);
                         styles.push(style);
                         info.push(nodeinfo);
@@ -1081,21 +1081,30 @@ fdjt.CodexLayout=
                         moveUp(node);}
                     else {}}
 
-                function getBlockInfo(node,style){
-                    return {
-                        avoidbreakinside: avoidBreakInside(node,style),
-                        forcebreakbefore: forcedBreakBefore(node,style),
-                        forcebreakafter: forcedBreakAfter(node,style),
-                        avoidbreakbefore: avoidBreakBefore(node,style),
-                        avoidbreakafter: avoidBreakAfter(node,style),
-                        fullpage: ((hasClass(node,/\bcodexfullpage\b/))||
-                                   ((fullpages)&&(testNode(node,fullpages)))),
-                        singlepage: checkSinglePage(node,style),
-                        atomic: ((atomic)&&(atomic.match(node))),
-                        floatpage: ((hasClass(node,/\bcodexfloatpage\b/))||
-                                    ((floatpages)&&(testNode(node,floatpages)))),
-                        floating: ((hasClass(node,"codexfloat"))||
-                                   ((floatblocks)&&(floatblocks.match(node))))};}
+                function BlockInfo(node,style){
+                    this.avoidbreakinside=avoidBreakInside(node,style);
+                    this.forcebreakbefore=forcedBreakBefore(node,style);
+                    this.forcebreakafter=forcedBreakAfter(node,style);
+                    this.avoidbreakbefore=avoidBreakBefore(node,style);
+                    this.avoidbreakafter=avoidBreakAfter(node,style);
+                    this.fullpage=((hasClass(node,/\bcodexfullpage\b/))||
+                                   ((fullpages)&&(testNode(node,fullpages))));
+                    this.singlepage=checkSinglePage(node,style);
+                    this.atomic=((atomic)&&(atomic.match(node)));
+                    this.floatpage=((floatpages)&&(testNode(node,floatpages)));
+                    this.floating=((hasClass(node,"codexfloat"))||
+                                   ((floatblocks)&&(floatblocks.match(node))));
+                    return this;}
+                BlockInfo.prototype.avoidbreakinside=
+                    BlockInfo.prototype.forcebreakbefore=
+                    BlockInfo.prototype.forcebreakafter=
+                    BlockInfo.prototype.avoidbreakbefore=
+                    BlockInfo.prototype.avoidbreakafter=
+                    BlockInfo.prototype.fullpage=
+                    BlockInfo.prototype.singlepage=
+                    BlockInfo.prototype.floatpage=
+                    BlockInfo.prototype.floating=
+                    BlockInfo.prototype.atomic=false;
 
                 function handle_dragging(block,terminal,info,style,tracing){
                     // If this block is terminal and we don't want to
@@ -1172,7 +1181,7 @@ fdjt.CodexLayout=
                             newblock=newPage(block,info);
                             if (page===curpage)
                                 return false; // probably "codexoversize"
-                            else if (block!==newblock) info=getBlockInfo(newblock);
+                            else if (block!==newblock) info=new BlockInfo(newblock);
                             if (((!(break_blocks))||
                                  (info.atomic)||(info.avoidbreakinside)||
                                  (hasClass(newblock,"codexcantsplit")))) {
@@ -1182,10 +1191,10 @@ fdjt.CodexLayout=
                     else {
                         // We just make a new page for the block
                         newblock=newPage(block,info);
-                        if (block!==newblock) info=getBlockInfo(newblock);
+                        if (block!==newblock) info=new BlockInfo(newblock);
                         if (page===curpage)
                             return false; // probably "codexoversize"
-                        else if (block!==newblock) info=getBlockInfo(newblock);
+                        else if (block!==newblock) info=new BlockInfo(newblock);
                         if (((!(break_blocks))||
                              (info.atomic)||(info.avoidbreakinside)||
                              (hasClass(newblock,"codexcantsplit")))) {
