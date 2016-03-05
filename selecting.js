@@ -153,8 +153,17 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                         return;}}};
 
             return this;}
-
-        
+        TextSelect.prototype.serial=TextSelect.prototype.traced=
+            TextSelect.prototype.adjust=TextSelect.prototype.n_words=
+            TextSelect.prototype.start=TextSelect.prototype.end=
+            TextSelect.prototype.min=TextSelect.prototype.max=0;
+        TextSelect.prototype.prefix=TextSelect.prototype.traced=0;
+        TextSelect.prototype.nodes=TextSelect.prototype.orig=
+            TextSelect.prototype.wrapped=TextSelect.prototype.wrappers=
+            TextSelect.prototype.words=TextSelect.prototype.tapholds=
+            TextSelect.prototype.loupe=[];
+        TextSelect.prototype.onchange=TextSelect.prototype.wordnum=
+            TextSelect.prototype.startEvent=false;
 
         TextSelect.prototype.toString=function(){
             var wrappers=this.wrappers; 

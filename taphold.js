@@ -1028,6 +1028,13 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                     thid,elt,th,opts||false,trace,traceall);
         
         return this;}
+    TapHold.prototype.id=TapHold.prototype.elt=
+        TapHold.prototype.opts=TapHold.prototype.handlers=false;
+    TapHold.prototype.serial=0;
+    TapHold.prototype.istouched=TapHold.prototype.ispressed=
+        TapHold.prototype.fakepress=TapHold.prototype.clear=
+        TapHold.prototype.getState=TapHold.prototype.trace=
+        TapHold.prototype.abort=TapHold.prototype.debug=false;
 
     TapHold.clear=function(){
         if (traceall) fdjtLog("TapHold.clear()");

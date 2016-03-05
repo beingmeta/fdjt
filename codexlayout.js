@@ -94,58 +94,10 @@ fdjt.CodexLayout=
                 else frag.appendChild(child);}
             node.appendChild(frag);}
 
-        function getGeom(elt,root,extra){
-            var top = elt.offsetTop;
-            var left = elt.offsetLeft;
-            var width=elt.offsetWidth;
-            var height=elt.offsetHeight;
-            var rootp=((root)&&(root.offsetParent));
-            var style=((extra)&&(getStyle(elt)));
-
-            if (elt===root) 
-                return {left: 0,top: 0,width:width,height: height};
-            elt=elt.offsetParent;
-            while (elt) {
-                if ((root)&&((elt===root)||(elt===rootp))) break;
-                top += elt.offsetTop;
-                left += elt.offsetLeft;
-                elt=elt.offsetParent;}
-            
-            if (extra) {
-                var t_margin=parsePX(style.marginTop);
-                var r_margin=parsePX(style.marginRight);
-                var b_margin=parsePX(style.marginBottom);
-                var l_margin=parsePX(style.marginLeft);
-                var t_padding=parsePX(style.paddingTop);
-                var r_padding=parsePX(style.paddingRight);
-                var b_padding=parsePX(style.paddingBottom);
-                var l_padding=parsePX(style.paddingLeft);
-                var t_border=parsePX(style.borderTopWidth);
-                var r_border=parsePX(style.borderRightWidth);
-                var b_border=parsePX(style.borderBottomWidth);
-                var l_border=parsePX(style.borderLeftWidth);
-                var outer_width=width+l_margin+r_margin;
-                var outer_height=height+t_margin+b_margin;
-                var inner_width=width-(l_border+l_padding+r_border+r_padding);
-                var inner_height=height-(t_border+t_padding+b_border+b_padding);
-                var lh=style.lineHeight, fs=style.fontSize, lhpx=false;
-                if (lh==="normal") lhpx=parsePX(fs);
-                else if (lh.search(/px$/)>0) lhpx=parsePX(lh);
-                else if (lh.search(/%$/)>0) 
-                    lhpx=(parseFloat(lh.slice(0,-1))/100)*(parsePX(fs));
-                else lhpx=parsePX(fs);
-                return {left: left, top: top, width: width,height: height,
-                        right:left+width,bottom:top+height,
-                        top_margin: t_margin, bottom_margin: b_margin,
-                        left_margin: l_margin, right_margin: r_margin,
-                        outer_height: outer_height,outer_width: outer_width,
-                        inner_height: inner_height,inner_width: inner_width,
-                        line_height: lhpx};}
-            else return {left: left, top: top, width: width,height: height,
-                         right:left+width,bottom:top+height};}
-
         var getChildren=fdjtDOM.getChildren;
         var getChild=fdjtDOM.getChild;
+        var Geometry=fdjtDOM.Geometry;
+        var XGeometry=fdjtDOM.XGeometry;
 
         /* Node testing */
 
@@ -878,7 +830,7 @@ fdjt.CodexLayout=
                     if (donefn) donefn(layout);
                     return;}
                 else {
-                    var geom=getGeom(root,page); var done=false;
+                    var geom=new Geometry(root,page); var done=false;
                     if (mustBreakInside(root)) {}
                     else if (geom.bottom<=page_height) {
                         if (cantBreakBefore(root)) drag.push(root);
@@ -888,7 +840,7 @@ fdjt.CodexLayout=
                     else if (((atomic)&&(atomic.match(root)))||
                              (avoidBreakInside(root))) {
                         if (!(newpage)) {
-                            newPage(root); geom=getGeom(root,page);}
+                            newPage(root); geom=new Geometry(root,page);}
                         if (geom.bottom<=page_height) {
                             if (cantBreakAfter(root)) drag=[root];
                             else drag=[];
@@ -961,7 +913,7 @@ fdjt.CodexLayout=
                     // tweaked Note that we may process an element [i]
                     // more than once if we split the node and part of
                     // the split landed back in [i].
-                    var geom=getGeom(block,page), lh=getLineHeight(block,style);
+                    var geom=new Geometry(block,page), lh=getLineHeight(block,style);
                     var padding_bottom=parsePX(style.paddingBottom);
                     if ((trace)&&((trace>3)||((track)&&(track.match(block)))))
                         logfn("Layout/geom %o %j",block,geom);
@@ -974,7 +926,7 @@ fdjt.CodexLayout=
                         // short page.
                         ((next)&&(geom.height>3*lh)&&
                          (((page_height-geom.bottom)/page_height)>0.9)&&
-                         ((geom.bottom+(getGeom(next).height))>page_height)&&
+                         ((geom.bottom+(new Geometry(next).height))>page_height)&&
                          (!(info.avoidbreakinside))&&
                          (nextinfo.avoidbreakinside)&&
                          (nextinfo.avoidbreakinside))) {
@@ -1030,7 +982,7 @@ fdjt.CodexLayout=
                                 blockinfo[block_i].terminal=terminal;
                                 return;}
                             else {
-                                geom=getGeom(block,page);
+                                geom=new Geometry(block,page);
                                 if (geom.bottom>page_height) {
                                     addClass(page,"codexoversize");
                                     layout.drag=drag=[];
@@ -1369,7 +1321,7 @@ fdjt.CodexLayout=
                     else if ((page.firstChild===node)||(firstGChild(page,node)))
                         return false;
                     else if ((node.nodeType===1)&&
-                             (getGeom(node,page).top===0)&&
+                             (new Geometry(node,page).top===0)&&
                              (node.tagName!=="BR"))
                         return false;
                     else return true;}
@@ -1418,13 +1370,13 @@ fdjt.CodexLayout=
                                 closed_page=page;
                                 forcepage=true;}
                             else if (closed_page===page) {
-                                newPage(floater); fg=getGeom(floater,page);
+                                newPage(floater); fg=new Geometry(floater,page);
                                 if (fg.bottom>page_height) {
                                     addClass(page,"codexoversize");
                                     closed_page=page;}}
                             else {                                
                                 moveNodeToPage(floater,page);
-                                fg=getGeom(floater,newpage);
+                                fg=new Geometry(floater,newpage);
                                 if (fg.bottom>=page_height) newPage(floater);}}}
 
                     if ((!(node))||(forcepage)||(needNewPage(node))) {
@@ -1513,7 +1465,7 @@ fdjt.CodexLayout=
                     // and then add back just enough to reach the
                     // edge, potentially splitting some children to
                     // make this work.
-                    var init_geom=getGeom(node,page,true);
+                    var init_geom=new XGeometry(node,page,true);
                     var line_height=init_geom.line_height||12;
                     if ((use_height===page_height)&&
                         ((init_geom.top+init_geom.top_margin+
@@ -1535,7 +1487,7 @@ fdjt.CodexLayout=
                     var children=nodeChildren(node);
                     // and remove all of them at once
                     node.innerHTML="";
-                    var geom=getGeom(node,page);
+                    var geom=new Geometry(node,page);
                     if (geom.bottom>use_height) {
                         // If the version without any children is
                         // already over the edge, just start a new
@@ -1642,7 +1594,7 @@ fdjt.CodexLayout=
                     //  break point in splitChildren, so we know that
                     //  node by itself is on the page while node with
                     //  it's children is over the page.
-                    var geom=init_geom||getGeom(node,page);
+                    var geom=init_geom||new Geometry(node,page);
                     if (children.length===1) {
                         page_break=children[0]; breakpos=0;
                         breaktype=page_break.nodeType;
@@ -1658,7 +1610,7 @@ fdjt.CodexLayout=
                             //appendChildren(node,children,0,i);
                             node.appendChild(child);
                             // Add the child back and get the geometry
-                            geom=getGeom(node,page);
+                            geom=new Geometry(node,page);
                             if (geom.bottom>use_page_height) {
                                 page_break=child; breaktype=child.nodeType;
                                 breakpos=i-1;
@@ -1718,7 +1670,7 @@ fdjt.CodexLayout=
                         // we push the whole node over
                         var wprobe=document.createTextNode(words[0]);
                         text_parent.replaceChild(wprobe,probenode);
-                        probenode=wprobe; geom=getGeom(node,page);
+                        probenode=wprobe; geom=new Geometry(node,page);
                         if (geom.bottom>use_page_height) {
                             text_parent.replaceChild(original,probenode);
                             if (breakpos===0) return node;
@@ -1821,7 +1773,7 @@ fdjt.CodexLayout=
                             words.slice(0,wmid).join(""));
                         // Add all the words up to foundbreak
                         text_parent.replaceChild(newprobe,probenode);
-                        probenode=newprobe; geom=getGeom(node,page);
+                        probenode=newprobe; geom=new Geometry(node,page);
                         if (geom.bottom>use_page_height)
                             wtop=wmid-1;
                         else {
@@ -1830,7 +1782,7 @@ fdjt.CodexLayout=
                                break the page.*/
                             var nextw=document.createTextNode(words[wmid]);
                             text_parent.appendChild(nextw);
-                            var ngeom=getGeom(node,page);
+                            var ngeom=new Geometry(node,page);
                             text_parent.removeChild(nextw);
                             if (ngeom.bottom>use_page_height) {
                                 foundbreak=wmid; break;}
