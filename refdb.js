@@ -113,6 +113,14 @@ fdjt.RefDB=(function(){
                     index.fordb=db;}}}
         
         return db;}
+    RefDB.prototype.name=RefDB.prototype.aliases=
+        RefDB.prototype.refs=RefDB.prototype.altrefs=
+        RefDB.prototype.allrefs=RefDB.prototype.loaded=
+        RefDB.prototype.changes=RefDB.prototype.changed=
+        RefDB.prototype.storage=RefDB.prototype.absrefs=
+        RefDB.prototype.oidrefs=RefDB.prototype.onload=
+        RefDB.prototype.onadd=RefDB.prototype.indices=
+        RefDB.prototype.complete=false;
 
     var REFINDEX=RefDB.REFINDEX=2;
     var REFLOAD=RefDB.REFLOAD=4;
@@ -351,7 +359,9 @@ fdjt.RefDB=(function(){
             db.allrefs.push(this);
             return this;}}
     fdjt.Ref=RefDB.Ref=Ref;
-
+    Ref.prototype._db=Ref.prototype._domain=
+        Ref.prototype._qid=Ref.prototype._id=false;
+    
     Ref.prototype.toString=function(){
         if (this._qid) return this._qid;
         else if (this._domain)
