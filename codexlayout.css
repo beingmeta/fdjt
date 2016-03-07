@@ -43,7 +43,7 @@ div.codexpage .codexpagetop > h2:first-child,
 div.codexpage .codexpagetop > h3:first-child,
 div.codexpage .codexpagetop > h4:first-child,
 div.codexpage .codexpagetop > p:first-child {
-    margin-top: 0px;}
+    margin-top: 0;}
 
 body.codexfixed div.codexpage {
     position: fixed; text-align: left;}
@@ -58,7 +58,7 @@ div.codexpage div.fdjtadjusted {
 
 .codexfullpage {
    page-break-before: always; page-break-after: always;
-   page-break-inside: never;
+   page-break-inside: avoid;
    height: 100%; width: 100%;
    text-align: center;}
 @media (max-device-width: 500px) {
@@ -86,15 +86,15 @@ div.codexpage div.fdjtadjusted {
    page-break-after: auto;}
 
 .codexpage .codexpagefoot {
-    position: absolute; bottom: 0px; left: 0px; right: 0px;
-    width: 100%; margin: 0px; border: 0px; padding: 0px;}
+    position: absolute; bottom: 0; left: 0; right: 0;
+    width: 100%; margin: 0; border: 0; padding: 0;}
 
 figure { page-break-inside: avoid; }
 figure + figcaption { page-break-before: avoid; }
 img + figcaption { page-break-before: avoid; }
 
 .codexdupleading {
-    display: inline-block; height: 0px; width: 70%; visibility: hidden;}
+    display: inline-block; height: 0; width: 70%; visibility: hidden;}
 
 h1, h2, h3, h4, h6, h6, h7 { page-break-after: avoid; }
 

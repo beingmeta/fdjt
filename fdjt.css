@@ -49,13 +49,13 @@ span[onclick] { cursor: pointer;}
     white-space: nowrap;
     overflow: hidden;}
 
-.noindent {text-indent: 0px !important;}
+.noindent {text-indent: 0 !important;}
 
 /* Clearing floats in various ways */
 
 div.fdjtclearfloats {
-    width: 100%; height: 0px; clear: both;
-    margin: 0px; padding: 0px; border: 0px;}
+    width: 100%; height: 0; clear: both;
+    margin: 0; padding: 0; border: 0;}
 
 /**
  * From: http://nicolasgallagher.com/micro-clearfix-hack/
@@ -143,12 +143,12 @@ th .checkspan.ischecked, th .checkspan[checked] { color: black;}
 /* Check blocks */
 
 div.checkblock {  text-align: left; margin-top: 0.5em;}
-td div.checkblock { margin-top: 0px; }
+td div.checkblock { margin-top: 0; }
 div.checkblock > table { display: none; }
 ul.checkblock > li, ol.checkblock > li { display: none; }
 div.checkblock > p {
    margin-left: 5em; text-indent: -3em;
-   margin-top: 0px; margin-bottom: 0px; font-size: 80%;
+   margin-top: 0; margin-bottom: 0; font-size: 80%;
    display: none;}
 div.checkblock > p:first-child {
    margin-left: 3em; text-indent: -3em; display: block;}
@@ -183,7 +183,7 @@ textarea.autoprompt.isempty { font-style: italic; color: gray;}
 
 img.helpicon { 
   padding-right: 2px; padding-left: 2px;
-  margin-left: 1px; margin-right: 0px;
+  margin-left: 1px; margin-right: 0;
   color: yellow; background-color: gray;
   font-size: 80%; vertical-align: middle;
   font-weight: bold; font-style: normal;}
@@ -284,8 +284,8 @@ table.fdjtdata td {
 
 table.fdjtdata span.symbol { font-weight: bold;}
 table.fdjtdata span.label { font-family: sans-serif;}
-table.fdjtdata td dl { margin-top: 1ex; margin-bottom: 0px}
-table.fdjtdata td > dl:first-child { margin-top: 0px; margin-bottom: 0px}
+table.fdjtdata td dl { margin-top: 1ex; margin-bottom: 0}
+table.fdjtdata td > dl:first-child { margin-top: 0; margin-bottom: 0}
 
 table.fdjtdata td ol { border: solid gray 1px; padding: 1px;}
 table.fdjtdata td dl { border: solid gray 1px; padding: 1px;}
@@ -525,7 +525,7 @@ div.live.richtip { display: block;}
 
 div.richtip span.controls .button {
   font-weight: bold; font-size: 150%; color: brown; 
-  padding: 0px; margin: 0px; padding-right: 1px;
+  padding: 0; margin: 0; padding-right: 1px;
   cursor: pointer; vertical-align: top;}
 
 div.richtip.minimized { max-height: 4em;}
@@ -537,8 +537,8 @@ div.richtip .maximize { display: none; }
 table.fdjtdata table { border: solid silver 2px;}
 table.fdjtdata table.fdjtdata { width: auto;}
 table.fdjtdata td ul, table.fdjtdata td ol {
-    margin-left: 0px; margin-right: 0px;
-    margin-top: 0px; margin-bottom: 0px;}
+    margin-left: 0; margin-right: 0;
+    margin-top: 0; margin-bottom: 0;}
 
 /* Tables for form input */
 
@@ -572,7 +572,7 @@ table.fdjtform td p {
     font-size: 80%; max-width: 45em;
     margin-top: 0.25ex; margin-left: 1em;
     margin-bottom: 0.25ex;}
-table.fdjtform td p:first-child { margin-top: 0px; }
+table.fdjtform td p:first-child { margin-top: 0; }
 
 table.fdjtform td.messages {
     text-align: center; font-style: italic;}
@@ -843,14 +843,14 @@ html._USESVG img.stdres, html._USESVG img.notsvg {
 
 div.fdjtprogress {
     text-align: left; position: relative;
-    margin: 0px; padding: 0px; border: 0px;}
+    margin: 0; padding: 0; border: 0;}
 div.fdjtprogress div.indicator {
-    position: absolute; left: 0px; top: 0px; z-index: 50;
+    position: absolute; left: 0; top: 0; z-index: 50;
     background-color: lightblue; height: 100%; width: 0%;
-    margin: 0px; padding: 0px; border: 0px;
+    margin: 0; padding: 0; border: 0;
     border-right: solid darkblue 2px;}
 div.fdjtprogress div.message {
-    position: absolute; left: 0px; top: 0px; z-index: 100;
+    position: absolute; left: 0; top: 0; z-index: 100;
     width: 100%; height: 100%;
     text-align: center; vertical-align: middle;}
 
@@ -867,14 +867,14 @@ div.fdjtprogress div.message {
    action of the mouse.  */
 
 div.reticle {
-    background-color: black; margin: 0px; border: 0px; padding: 0px;
+    background-color: black; margin: 0; border: 0; padding: 0;
     z-index: 1000; opacity: .50;
     pointer-events: none;}
 div.reticle.vertical {
-    position: fixed; height: 100%; top: 0px; bottom: 0px;
+    position: fixed; height: 100%; top: 0; bottom: 0;
     width: 1px;}
 div.reticle.horizontal {
-    position: fixed; width: 100%; left: 0px; right: 0px;
+    position: fixed; width: 100%; left: 0; right: 0;
     height: 1px;}
 
 div.reticle.highlight { color: blue;}
@@ -963,7 +963,7 @@ div.fdjtdialog {
     font-size: 2em; font-size: 2rem;
     box-sizing: border-box;
     width: 50%; max-width: 700px; top: 15%; max-height: 70%;
-    left: 0px; right: 0px; height: auto;
+    left: 0; right: 0; height: auto;
     margin-left: auto; margin-right: auto;
     text-align: center; padding: 1em; vertical-align: middle; 
     z-index: 250; 
@@ -981,7 +981,7 @@ div.fdjtdialog div.title {
   text-align: center; font-weight: bold; font-size: 120%;}
 div.fdjtdialog p {
   margin-top: 1ex; margin-bottom: 0.5ex;
-  text-align: left; text-indent: 0px;}
+  text-align: left; text-indent: 0;}
 
 div.fdjtdialog > div, div.fdjtdialog > span { vertical-align: middle;}
 
@@ -1065,9 +1065,9 @@ body.taptouch {}
 /* Text selection */
 
 .fdjtselecting {
-    margin: 0px !important;
-    padding: 0px !important;
-    border: 0px !important;}
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;}
 .fdjtselecting {
      user-select: none;
     -webkit-tap-highlight-color: rgba(0,0,0,0.5);}
@@ -1075,9 +1075,9 @@ body.taptouch {}
 .fdjtselectwrap {background-color: rgba(247, 247, 124, 0.25);}
 
 .fdjtselecting .fdjtselected {
-    margin: 0px !important;
-    padding: 0px !important;
-    border: 0px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
     background-color: rgba(255,255,0,0.7); }
 .fdjtselecting .fdjtselectstart, .fdjtselecting .fdjtselectend {
     background-color: rgba(255,215,0,0.7); }
@@ -1115,10 +1115,10 @@ html._TOUCH .fdjtselecting .fdjtselectend:hover {
     background-color: gold;}
 
 .fdjtselectloupe {
-    width: 0px; height: 0px;
+    width: 0; height: 0;
     overflow: visible;}
 .fdjtselectloupe .fdjtloupetext {
-    margin: 0px !important; text-indent: 0px !important;
+    margin: 0 !important; text-indent: 0 !important;
     z-index: 200; white-space: nowrap; pointer-events: none;
     background-color: gray; padding: 6px; font-size: 120%; 
     width: fit-content; height: fit-content;
@@ -1149,9 +1149,9 @@ html._TOUCH .fdjtselecting .fdjtselectend:hover {
 /* Adjust font wrapper */
 
 .fdjtfontwrapper {
-    margin: 0px !important;
-    padding: 0px !important;
-    border: 0px !important;}
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;}
 div.fdjtfontwrapper {
     display: inline-block !important;}
 
@@ -1216,14 +1216,14 @@ table.fdjtform .usebaseline td {
 div.fdjtpage.formatting {
     overflow-y: auto !important;
     max-height: 100% !important;
-    min-height: 0px !important;}
+    min-height: 0 !important;}
 div.fdjtpage:not(.getvisible) > div, div.fdjtpage:not(.getvisible) > p {
     display: none !important;}
 div.fdjtpage > div.fdjtshow, div.fdjtpage > p.fdjtshow {
     display: block !important;}
 
 div.fdjtpage .fdjtpageinfo {
-    position: absolute; right: 0px; bottom: 0px;
+    position: absolute; right: 0; bottom: 0;
     padding-right: 0.5ex; padding-left: 0.5ex; 
     color: black; background-color: rgba(0,0,0,0.4);
     font-size: 150%; /* line-height: 100%; */
@@ -1267,7 +1267,7 @@ div.fdjtpage .fdjtpageinfo.fdjteditpageinfo span.pct span.value {
     pointer-events: all;}
 
 html._TOUCH div.fdjtpageinfo.fdjteditpageinfo {
-    bottom: auto; top: 0px;}
+    bottom: auto; top: 0;}
 
 div.fdjtpage.formatting div, div.fdjtpage.getvisible div, 
 div.fdjtpage.formatting p, div.fdjtpage.getvisible p {
@@ -1308,7 +1308,7 @@ html._NOSVG .pager.pagerlayout {
 .pager .pagernav > span {
     color: blue; background-color: ivory;
     display: inline-block; box-sizing: border-box;
-    border: 0px; border-left: solid black 1px;
+    border: 0; border-left: solid black 1px;
     border-bottom: solid black 1ex;
     text-align: center;
     overflow: hidden;}
@@ -1324,7 +1324,7 @@ html._NOSVG .pager.pagerlayout {
     border-bottom: solid black 2px;}
 .pager .pagernav > div.pagenum {
     position: absolute;
-    top: 0px; left: 50%; margin-left: -1.5em;
+    top: 0; left: 50%; margin-left: -1.5em;
     background-color: rgba(255,255,255,0.8);
     display: none;}
 .pager .pagernav.packed > div.pagenum {
