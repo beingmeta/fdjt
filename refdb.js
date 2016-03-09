@@ -109,7 +109,7 @@ fdjt.RefDB=(function(){
                 if (typeof ix !== "string") 
                     warn("Complex indices not yet handled!");
                 else {
-                    var index=this.indices[ix]=new ObjectMap();
+                    var index=db.indices[ix]=new ObjectMap();
                     index.fordb=db;}}}
         
         return db;}
