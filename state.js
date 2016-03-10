@@ -77,7 +77,7 @@ fdjt.State=
                 return false;}}
         fdjtState.getCookie=getCookie;
 
-        function setCookie(name,value,expires,path,domain){
+        function setCookie(name,value,expires,path,domain,secure){
             try {
                 if (value) {
                     var valuestring=
@@ -90,17 +90,19 @@ fdjt.State=
                             cookietext=cookietext+'; '+expires;
                     else if (expires.toGMTString)
                         cookietext=cookietext+"; expires="+expires.toGMTString();
-                    else if (typeof(expires)==='number')
+                    else if (typeof(expires)==='number') {
                         if (expires>0) {
                             var now=new Date();
                             now.setTime(now.getTime()+expires);
                             cookietext=cookietext+"; expires="+now.toGMTString;}
-                    else cookietext=cookietext+"; expires=Sun 1 Jan 2000 00:00:00 UTC";
+                        else cookietext=cookietext+
+                            "; expires=Sun 1 Jan 2000 00:00:00 UTC";}
                     else {}
                     if (path) cookietext=cookietext+"; path="+path;
                     // This certainly doesn't work generally and might not work ever
                     if (domain) cookietext=cookietext+"; domain="+domain;
                     // fdjtTrace("Setting cookie %o cookietext=%o",name,cookietext);
+                    if (secure) cookietext=cookietext+"; Secure";
                     document.cookie=cookietext;}
                 else clearCookie(name,path,domain);}
             catch (ex) {
