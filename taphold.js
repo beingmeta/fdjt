@@ -404,6 +404,10 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if (typeof x === "undefined") x=touch_x;
             if (typeof y === "undefined") y=touch_y;
             playSound("releasesound",target,th);
+            var point_target=document.elementFromPoint(x,y);
+            if (point_target) point_target=getParent(point_target,touchable);
+            if ((point_target)&&(point_target!==target)&&(hasParent(point_target,target))) {
+                target=point_target;}
             if (holdclass)
                 setTimeout(check_holding,50);
             if ((target_time)&&(target_time<200)) {
