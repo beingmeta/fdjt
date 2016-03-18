@@ -745,11 +745,7 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
                 fdjtLog("TextSelect/slip %o t=%o sel=%o",evt,target,sel);
             if (sel) {
                 if (sel.loupe) sel.loupe_timeout=
-                    setTimeout(function(){
-                        sel.loupe_timeout=false;
-                        if (sel.active) stopSelection(sel);
-                        sel.loupe.style.display='none';},
-                               2000);}}
+                    setTimeout(get_loupe_timeout(sel),2000);}}
         TextSelect.release_handler=release_handler;
         function get_release_handler(sel,also){
             return function(evt){
@@ -759,6 +755,12 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
             return function(evt){
                 slip_handler(evt,sel);
                 if (also) also(evt,sel);};}
+        function get_loupe_timeout(sel){
+            return function(){
+                        sel.loupe_timeout=false;
+                        if (sel.active) stopSelection(sel);
+                sel.loupe.style.display='none';};}
+            
         
         function addHandlers(container,sel,opts){
             // We always override the default action when selecting
