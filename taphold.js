@@ -509,8 +509,9 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
                 else slipped(th_target,evt);}
             else if (pressed) {
                 var geom=fdjtDOM.getGeometry(elt);
-                if ((x>=geom.left)&&(x<=geom.right)&&
-                    (y>=geom.top)&&(y<=geom.bottom))
+                if (((x===0)&&(y===0))||
+                    ((x>=geom.left)&&(x<=geom.right)&&
+                     (y>=geom.top)&&(y<=geom.bottom)))
                     released(pressed,evt,x,y);
                 else if (noslip)
                     released(pressed,evt,x,y);
