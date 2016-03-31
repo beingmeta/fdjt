@@ -575,6 +575,7 @@ fdjt.DOM=
             var classes=[]; var classnames=[]; var attribs=false;
             if (!(elts))
                 fdjtLog.warn("Couldn't parse spec %s",spec);
+            this.tag=false;
             if (elts) {
                 i=0; lim=elts.length;
                 if (!((elts[0][0]==='.')||(elts[0][0]==='#')||
@@ -600,16 +601,20 @@ fdjt.DOM=
                 else fdjtLog.uhoh("weird elts %o",elts[i++]);}
             if (classes.length) {
                 this.classes=classes; this.classnames=classnames;}
+            else this.classes=false;
             if (attribs) this.attribs=attribs;
+            else this.attribs=false;
             this.rank=[0,((this.id)?(1):(0)),
-                       classnames.length+attribs.length,1];
+                       classnames.length+((attribs)?(attribs.length):(0)),
+                       1];
             selectors[spec]=this;
             this.spec=spec;
             return this;}
+        // Populate the prototype's fields
+        Selector.prototype.tag=Selector.prototype.classes=
+            Selector.prototype.attribs=Selector.prototype.id=false;
         Selector.prototype.match=function(elt){
-            if (elt.matches) 
-                return elt.matches(this.spec);
-            else if (elt.matchesSelector)
+            if (elt.matchesSelector)
                 return elt.matchesSelector(this.spec);
             var i, lim;
             if (this.compound) {
