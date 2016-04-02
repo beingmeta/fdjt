@@ -997,7 +997,10 @@ fdjt.UI.ProgressBar=(function(){
         if (kc===13) {
             var target=fdjtUI.T(evt);
             var form=fdjtDOM.getParent(target,'FORM');
+            var submit_event = document.createEvent("HTMLEvents");
+            submit_event.initEvent('submit',false,true);
             fdjtUI.cancel(evt);
+            form.dispatchEvent(submit_event);
             form.submit();}}
     fdjtUI.submitOnEnter=submitOnEnter;
 
