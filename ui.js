@@ -1038,7 +1038,9 @@ fdjt.UI.ProgressBar=(function(){
 (function() {
     "use strict";
     var fdjtDOM=fdjt.DOM;
+    var fdjtLog=fdjt.Log;
     var fdjtUI=fdjt.UI;
+    var device=fdjt.device;
 
     var vreticle=false;
     var hreticle=false;
@@ -1052,7 +1054,11 @@ fdjt.UI.ProgressBar=(function(){
         if (!(hreticle)) {
             hreticle=fdjtDOM("div.reticle.horizontal#HRETICLE"," ");
             fdjtDOM.prepend(document.body,hreticle);}
-        fdjtDOM.addListener(document,"mousemove",mousemove);
+        fdjtLog("Setting up reticle");
+        if (device.touch)
+            fdjtDOM.addListener(document.body,"touchmove",touchmove);
+        else fdjtDOM.addListener(document,"mousemove",mousemove);
+        fdjtDOM.addListener(document.body,"touchmove",touchmove);
         fdjtDOM.addListener(document,"click",doflash);
         fdjtUI.Reticle.live=true;}
     
@@ -1060,6 +1066,11 @@ fdjt.UI.ProgressBar=(function(){
 
     function mousemove(evt,x,y){
         setXY(x||evt.clientX,y||evt.clientY);}
+    function touchmove(evt,x,y,touch){
+        if (evt.touches) touch=evt.touches[0];
+        else touch=evt;
+        // fdjtLog("touchmove %o: %o",evt,touch);
+        setXY(x||touch.clientX,y||touch.clientY);}
     
     var highlighted=false;
     
@@ -1085,7 +1096,10 @@ fdjt.UI.ProgressBar=(function(){
     fdjtUI.Reticle.highlight=highlight;
     fdjtUI.Reticle.flash=flash;
     fdjtUI.Reticle.onmousemove=mousemove;
+    fdjtUI.Reticle.ontouchmove=touchmove;
+    fdjtUI.Reticle.onmove=((device.touch)?(touchmove):(mousemove));
     fdjtUI.Reticle.setXY=setXY;
+    fdjtUI.Reticle.visible=false;
     fdjtUI.Reticle.live=false;})();
 
 

@@ -579,6 +579,7 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             // if (target!==th_target) fdjtLog("New target %o",target);
             var x=evt.clientX||getClientX(evt,touch_x,touch_y);
             var y=evt.clientY||getClientY(evt,touch_x,touch_y);
+            if (reticle.live) reticle.onmove(evt,x,y);
             var distance=((pressed)?
                           (xyd(x,y,target_x,target_y)):
                           (xyd(x,y,start_x,start_y)));
@@ -683,8 +684,6 @@ fdjt.TapHold=fdjt.UI.TapHold=(function(){
             if ((evt.touches)&&(evt.touches.length)&&
                 (evt.touches.length>maxtouches))
                 return;
-            else {
-                if (reticle.live) reticle.onmousemove(evt,touch_x,touch_y);}
             if (!(target)) target=getRealTarget(elt,touchable,touch_x,touch_y);
             if (!(target)) return;
             if ((hasParent(target,".tapholder"))&&(!(noslip)))
