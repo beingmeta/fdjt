@@ -943,7 +943,8 @@ fdjt.CodexLayout=
                             if (tracing)
                                 logfn("Oversize non-terminal %o, continuing",
                                       block);
-                            block_i++;}
+                            block_i++;
+                            return;}
                         // If we get here, we're a terminal node
                         // which extends below the bottom of the page
                         else if (((short_page_height)?
