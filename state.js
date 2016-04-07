@@ -341,7 +341,7 @@ fdjt.State=
                                    ((matchcase)?"g":"gi"));
             start=from.search(namepat);
             while (start>=0) {
-                // Skip over separator if non-initial
+                if (from[start]==='&') start++;
                 var valstart=start+ename.length;
                 var valstring=from.slice(valstart+1);
                 var end=valstring.search(/(&|$)/g);
