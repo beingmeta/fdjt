@@ -168,7 +168,7 @@ fdjt.State=
 
         function clearSession(){
             if (window.sessionStorage) {
-                var storage=window.localStorage;
+                var storage=window.sessionStorage;
                 var i=0; var lim=storage.length;
                 var keys=[];
                 while (i<lim) keys.push(storage.key(i++));
