@@ -166,13 +166,18 @@ fdjt.State=
             else clearCookie(name);}
         fdjtState.dropSession=dropSession;
 
-        function clearSession(){
+        function clearSession(pat){
             if (window.sessionStorage) {
                 var storage=window.sessionStorage;
                 var i=0; var lim=storage.length;
                 var keys=[];
-                while (i<lim) keys.push(storage.key(i++));
-                i=0; while (i<lim) storage.removeItem(keys[i++]);}}
+                if (pat)
+                    while (i<lim) {
+                        var key=storage.key(i++);
+                        if (pat.exec(key)) keys.push(key);}
+                else while (i<lim) keys.push(storage.key(i++));
+                i=0; lim=keys.length;
+                while (i<lim) storage.removeItem(keys[i++]);}}
         fdjtState.clearSession=clearSession;
         
         function listSession(name){
@@ -324,13 +329,20 @@ fdjt.State=
             return keys;}
         fdjtState.listLocal=listLocal;
 
-        function clearLocal(){
+        function clearLocal(pat){
+            if (typeof pat === 'string')
+                pat=new RegExp(".*"+pat+".*");
             if (window.localStorage) {
                 var storage=window.localStorage;
                 var i=0; var lim=storage.length;
                 var keys=[];
-                while (i<lim) keys.push(storage.key(i++));
-                i=0; while (i<lim) storage.removeItem(keys[i++]);}}
+                if (pat)
+                    while (i<lim) {
+                        var key=storage.key(i++);
+                        if (pat.exec(key)) keys.push(key);}
+                else while (i<lim) keys.push(storage.key(i++));
+                i=0; lim=keys.length;
+                while (i<lim) storage.removeItem(keys[i++]);}}
         fdjtState.clearLocal=clearLocal;
 
         /* Gets arguments from the query string */
