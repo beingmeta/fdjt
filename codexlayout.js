@@ -66,6 +66,7 @@ fdjt.CodexLayout=
         var dropClass=fdjtDOM.dropClass;
         var toArray=fdjtDOM.toArray;
         var getElementValue=fdjtDOM.getElementValue;
+        // var rAF=fdjtDOM.requestAnimationFrame;
         
         var setLocal=fdjtState.setLocal, pushLocal=fdjtState.pushLocal;
         var dropLocal=fdjtState.dropLocal, removeLocal=fdjtState.removeLocal;
@@ -879,13 +880,32 @@ fdjt.CodexLayout=
                 layout.root=cur_root=root;
 
                 var block_i=0, n_blocks=blocks.length; 
-                
+                var block_hidden=0;
+
+                // Hide all of the blocks to start; this avoids
+                // needless computation as blocks are moved onto pages
+                // from wherever they started.
+                var hide_i=0; while (hide_i<n_blocks) {
+                    var hide_block=blocks[hide_i++];
+                    hide_block.style.display='none';}
+
                 function step(){
                     var block=blocks[block_i], style=styles[block_i];
                     var info=blockinfo[block_i], terminal=info.terminal||false;
                     var next=blocks[block_i+1], nextinfo=blockinfo[block_i+1];
                     var tracing=false;
                     if (block.id) layout.lastid=block.id;
+                    
+                    // Reveal the block and it's children
+                    if (block_i<=block_hidden) {
+                        var show_i=block_i;
+                        block.style.display='';
+                        while (show_i<n_blocks) {
+                            var show_block=blocks[show_i];
+                            if (hasParent(show_block,block)) {
+                                show_block.style.display=''; show_i++;}
+                            else break;}
+                        block_hidden=show_i;}
                     
                     if ((trace)&&(block)&&
                         ((trace>3)||((track)&&(track.match(block))))) {
