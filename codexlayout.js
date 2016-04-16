@@ -66,7 +66,6 @@ fdjt.CodexLayout=
         var dropClass=fdjtDOM.dropClass;
         var toArray=fdjtDOM.toArray;
         var getElementValue=fdjtDOM.getElementValue;
-        // var rAF=fdjtDOM.requestAnimationFrame;
         
         var setLocal=fdjtState.setLocal, pushLocal=fdjtState.pushLocal;
         var dropLocal=fdjtState.dropLocal, removeLocal=fdjtState.removeLocal;
@@ -660,6 +659,9 @@ fdjt.CodexLayout=
 
             this.dontsave=init.dontsave||false;
 
+            var use_raf=(window.requestAnimationFrame)?(true):(false);
+            // use_raf=false;
+
             var use_scaling=
                 ((typeof init.use_scaling === 'undefined')?(true):
                  (init.use_scaling));
@@ -1128,6 +1130,7 @@ fdjt.CodexLayout=
                     BlockInfo.prototype.atomic=false;
 
                 function handle_dragging(block,terminal,info,style,tracing){
+
                     // If this block is terminal and we don't want to
                     // break before this block or after the preceding
                     // block, drag along the previous block to the new
@@ -1137,7 +1140,8 @@ fdjt.CodexLayout=
                     // placed, so the previous page will end up short.
                     // Them's the breaks (so to speak).
                     if (!(block)) {}
-                    else if ((prev)&&(drag.indexOf(prev)<0)) {}
+                    else if ((prev)&&(drag.indexOf(prev)<0)) {
+                        if (drag.length) layout.drag=drag=[];}
                     else if ((prev)&&(atPageTop(prev))) {
                         if (drag.length) layout.drag=drag=[];}
                     else if ((prev)&&(terminal)&&(info.avoidbreakbefore)) {
@@ -1146,9 +1150,7 @@ fdjt.CodexLayout=
                             drag.push(prev);}
                     else if ((prev)&&(info.avoidbreakafter)) {
                         if (tracing) logfn("Possibly dragging %o",prev);
-                        if (drag.indexOf(prev)<0) 
-                            drag.push(prev);}
-                    else if (drag.length) layout.drag=drag=[];
+                        if (drag.indexOf(prev)<0) drag.push(prev);}
                     else {}}
 
                 function handle_standalone(block,info,style,tracing){
@@ -1847,17 +1849,28 @@ fdjt.CodexLayout=
 
                 function loop(){
                     function layoutLoopDone(){donefn(layout);}
-                    var loop_start=fdjtTime();
-                    while ((block_i<n_blocks)&&
-                           ((!(timeslice))||(serialize)||
-                            ((fdjtTime()-loop_start)<timeslice)))
-                        step();
-                    if (progressfn) progressfn(layout);
-                    if (block_i<n_blocks) {
-                        if (timeslice)
-                            layout.timer=setTimeout(loop,timeskip||timeslice);
-                        else loop();}
-                    else {
+                    var wait_for=timeskip||timeslice;
+                    if ((!(timeslice))||(serialize)) 
+                        while (block_i<n_blocks) step();
+                    else if ((use_raf)&&(block_i<n_blocks)) {
+                        window.requestAnimationFrame(function(){
+                            var loop_start=fdjtTime();
+                            while ((block_i<n_blocks)&&(!(serialize))&&
+                                   ((fdjtTime()-loop_start)<timeslice))
+                                step();
+                            if (progressfn) progressfn(layout);
+                            layout.timer=setTimeout(loop,wait_for);});}
+                    else if (block_i<n_blocks) {
+                        var loop_start=fdjtTime();
+                        while ((block_i<n_blocks)&&(!(serialize))&&
+                               ((fdjtTime()-loop_start)<timeslice))
+                            step();
+                        if (progressfn) progressfn(layout);
+                        if (serialize)
+                            return loop();
+                        else layout.timer=setTimeout(loop,wait_for);}
+                    else {}
+                    if (block_i>=n_blocks) {
                         var last_block=blocks[n_blocks-1];
                         if ((forcedBreakAfter(last_block))||
                             (hasClass(last_block,/\bcodexfullpage\b/))||
