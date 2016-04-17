@@ -659,7 +659,8 @@ fdjt.CodexLayout=
 
             this.dontsave=init.dontsave||false;
 
-            var use_raf=(window.requestAnimationFrame)?(true):(false);
+            var use_raf=(!(CodexLayout.dont_rAF))&&
+                ((window.requestAnimationFrame)?(true):(false));
             // use_raf=false;
 
             var use_scaling=
