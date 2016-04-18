@@ -2340,23 +2340,13 @@ fdjt.CodexLayout=
                     if (x.pageno>y.pageno) return 1;
                     else if (x.pageno<y.pageno) return -1;
                     else return 0;});
+                var start_at=olpage[0].list.getAttribute("start")||0;
                 i=0; lim=olpage.length; while (i<lim) {
                     var olist=olpage[i++].list;
                     var new_items=countListItems(olist);
-                    if (ntotal) addEmptyItems(olist,ntotal);
+                    if (ntotal) olist.setAttribute("start",start_at+ntotal);
                     ntotal=ntotal+new_items;}}
 
-            function addEmptyItems(root,count){
-                var frag=document.createDocumentFragment();
-                while (count>0) {
-                    var item=fdjtDOM("LI","empty");
-                    item.setAttribute(
-                        "style",
-                        "visibility: hidden !important; width: 0px !important; height: 0px !important; pointer-events: none; margin: 0px !important;");
-                    frag.appendChild(item);
-                    count--;}
-                if (root.firstChild) root.insertBefore(frag,root.firstChild);
-                else root.appendChild(frag);}
             function countListItems(root,count){
                 if (!(count)) count=0;
                 var children=root.childNodes;
@@ -2365,8 +2355,11 @@ fdjt.CodexLayout=
                     var child=children[i++];
                     if (child.nodeType===1) {
                         if ((child.tagName==="OL")||
-                            (child.tagName==="UL")) return count;
-                        else if (child.tagName==="LI") count++;
+                            (child.tagName==="UL")) 
+                            return count;
+                        else if (child.tagName==="LI") {
+                            if (!(hasClass(child,/\bcodexdup(end)?\b/)))
+                                count++;}
                         else count=countListItems(child,count);}}
                 return count;}
 
