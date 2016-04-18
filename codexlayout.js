@@ -2340,7 +2340,9 @@ fdjt.CodexLayout=
                     if (x.pageno>y.pageno) return 1;
                     else if (x.pageno<y.pageno) return -1;
                     else return 0;});
-                var start_at=olpage[0].list.getAttribute("start")||0;
+                var start_at=olpage[0].list.getAttribute("start");
+                if (start_at) start_at=parseInt(start_at);
+                else start_at=0;
                 i=0; lim=olpage.length; while (i<lim) {
                     var olist=olpage[i++].list;
                     var new_items=countListItems(olist);
