@@ -384,7 +384,7 @@ fdjt.State=
 
         function urlBase(href){
             if (!(href)) href=location.href;
-            var qmark=href.search('?'), hash=href.search('#');
+            var qmark=href.indexOf('?'), hash=href.indexOf('#');
             if ((qmark<0)&&(hash<0))
                 return href;
             else if (qmark<0)
@@ -602,7 +602,7 @@ fdjt.State=
 
 fdjt.iDB=(function(){
     "use strict";
-    var iDB={}, device=fdjt.device;
+    var iDB={};
     if ((idbModules)&&
         ((!(window.indexedDB)))) { // ||((device.ios)&&(device.standalone))
         iDB.indexedDB = idbModules.shimIndexedDB;
