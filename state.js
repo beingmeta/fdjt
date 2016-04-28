@@ -382,6 +382,20 @@ fdjt.State=
             else return false;}
         fdjtState.getParam=getParam;
 
+        function urlBase(href){
+            if (!(href)) href=location.href;
+            var qmark=href.search('?'), hash=href.search('#');
+            if ((qmark<0)&&(hash<0))
+                return href;
+            else if (qmark<0)
+                return href.slice(0,hash);
+            else if (hash<0) 
+                return href.slice(0,hash);
+            else if (qmark<hash)
+                return href.slice(qmark);
+            else return href.slice(hash);}
+        fdjtState.urlBase=urlBase;
+
         function getQuery(name,multiple,matchcase,verbatim){
             if (!(location.search))
                 if (multiple) return [];
@@ -391,6 +405,34 @@ fdjt.State=
             return getParam(from,name,multiple,matchcase,verbatim);}
         fdjtState.getQuery=getQuery;
         
+        function setQuery(name,value){
+            if (typeof value !== 'string') value=value.toString();
+            var newq=false;
+            var ename=encodeURIComponent(name);
+            var evalue=encodeURIComponent(value);
+            if (!(location.search)) {
+                newq="?"+ename+"="+evalue;}
+            else {
+                var qstring=location.search;
+                var exists=qstring.search("&"+ename+"=");
+                if (exists<0) exists=qstring.search("?"+ename+"=");
+                if (exists>=0) {
+                    var vstart=exists+2+ename.length;
+                    var before=qstring.slice(0,vstart);
+                    var vend=qstring.indexOf('&',vstart);
+                    var after=(vend<0)?(""):(qstring.slice(vend));
+                    if (qstring.slice(vstart,vend)!==evalue) {
+                        newq=before+evalue+after;}}
+                else {
+                    var sep=(qstring.search(/[&]$/)<0)?("&"):("");
+                    newq=qstring+sep+ename+"="+evalue;}}
+            if (history) {
+                var base=urlBase();
+                history.replaceState(history.state,window.title,
+                                     base+newq+location.hash);}
+            else location.search=newq;}
+        fdjtState.setQuery=setQuery;
+
         function getHash(name,multiple,matchcase,verbatim){
             if (!(location.hash))
                 if (multiple) return [];
@@ -561,8 +603,8 @@ fdjt.State=
 fdjt.iDB=(function(){
     "use strict";
     var iDB={}, device=fdjt.device;
-    if ((!(window.indexedDB))||
-        ((device.ios)&&(device.standalone))) {
+    if ((idbModules)&&
+        ((!(window.indexedDB)))) { // ||((device.ios)&&(device.standalone))
         iDB.indexedDB = idbModules.shimIndexedDB;
         iDB.IDBDatabase = idbModules.IDBDatabase;
         iDB.IDBTransaction = idbModules.IDBTransaction;
