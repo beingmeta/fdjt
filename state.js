@@ -600,7 +600,7 @@ fdjt.State=
 
         return fdjtState;})();
 
-fdjt.iDB=(function(){
+fdjt.iDB=(function(idbModules){
     "use strict";
     var iDB={}, device=fdjt.device;
     if ((idbModules)&&
@@ -618,7 +618,7 @@ fdjt.iDB=(function(){
         iDB.IDBKeyRange=window.IDBKeyRange;
         iDB.IDBTransaction=window.IDBTransaction;
         iDB.IDBTransaction=window.IDBTransaction;}
-    return iDB;})();
+    return iDB;})(window.idbModules);
 
 /* Emacs local variables
    ;;;  Local variables: ***
