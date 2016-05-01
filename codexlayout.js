@@ -395,7 +395,7 @@ fdjt.CodexLayout=
                 if ((baseclass)&&(typeof baseclass !== "string"))
                     weird=true;}
             else if (node.nodeType===3) {
-                if (node.nodeValue.search(/\w/g)>=0) {
+                if (node.nodeValue.search(/\S/g)>=0) {
                     // Wrap non-empty text nodes in elements before
                     // moving
                     var wrapnode=fdjtDOM(
