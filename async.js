@@ -83,8 +83,8 @@ fdjt.Async=fdjt.ASync=fdjt.async=
             var i=0; var lim=vec.length; var chunks=0;
             var used=0; var zerostart=getnow();
             var timer=false;
-            if (!(slice)) slice=100;
-            if (!(space)) space=slice;
+            if (!(slice)) slice=20;
+            if (!(space)) space=10;
             if (!(watch_slice)) watch_slice=0;
             function slowmap_stepfn(){
                 try {
