@@ -286,7 +286,7 @@ function makeChoice(spec,close_choice,i){
                     remove_dialog(box);
                     clearTimeout(timeout);
                     timeout=false;},
-                                       500);}}
+                                       50);}}
         if (typeof spec === "function") 
             choices=[{label: "Cancel"},
                      {label: "OK",handler: spec,isdefault: true}];
