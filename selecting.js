@@ -160,10 +160,10 @@ fdjt.TextSelect=fdjt.UI.Selecting=fdjt.UI.TextSelect=
         TextSelect.prototype.prefix=TextSelect.prototype.traced=0;
         TextSelect.prototype.nodes=TextSelect.prototype.orig=
             TextSelect.prototype.wrapped=TextSelect.prototype.wrappers=
-            TextSelect.prototype.words=TextSelect.prototype.tapholds=
-            TextSelect.prototype.loupe=[];
+            TextSelect.prototype.words=TextSelect.prototype.tapholds=[];
         TextSelect.prototype.onchange=TextSelect.prototype.wordnum=
-            TextSelect.prototype.startEvent=false;
+            TextSelect.prototype.startEvent=
+            TextSelect.prototype.loupe=false;
 
         TextSelect.prototype.toString=function(){
             var wrappers=this.wrappers; 
