@@ -328,6 +328,7 @@ fdjt.CodexLayout=
             var lastclass=((last_dup)&&(last_dup.className)&&
                            (last_dup.className.search)&&
                            (last_dup.className));
+            dropClass(copy,"codexrelocated");
             if (baseid) copy.codexbaseid=baseid;
             // Jigger the class name
             if (!(duplist)) {
@@ -345,9 +346,9 @@ fdjt.CodexLayout=
                 stripBottomStyles(last_dup,true);}
             // if (copy.getAttribute("style")) 
             // If the original had an ID, save it in various ways
-            if (id) {
-                copy.codexbaseid=id;
-                copy.setAttribute("data-baseid",id);
+            if (node.id) {
+                if (!(baseid))
+                    copy.setAttribute("data-baseid",id);
                 copy.removeAttribute("id");}
             // Record the copy you've made (to avoid recreation)
             if (duplist) duplist.push(copy);
@@ -577,9 +578,9 @@ fdjt.CodexLayout=
                 layout.logfn(
                     "Reverting layout of %d nodes and %d split texts",
                     moved.length,RefDB.countKeys(textsplits));
-                i=0; lim=moved.length;
-                while (i<lim) {
-                    restoreNode(moved[i++],layout,crumbs);}}
+                var j=moved.length;
+                while (j>0) {
+                    restoreNode(moved[--j],layout,crumbs);}}
             var restyled=fdjtDOM.$("[data-savedstyle]");
             i=0; lim=restyled.length;
             while (i<lim) {
@@ -1492,8 +1493,10 @@ fdjt.CodexLayout=
                         newPage(node);
                         return node;}
                     if ((node.id)&&(node.id.search("CODEXTMP")!==0)) {
-                        if (!(splits[node.id]))
-                            splits[node.id]=node.cloneNode(true);}
+                        if (!(splits[node.id])) {
+                            var clone=node.cloneNode(true);
+                            splits[node.id]=clone;
+                            clone.removeAttribute("id");}}
                     // Otherwise, we remove all of the node's children
                     // and then add back just enough to reach the
                     // edge, potentially splitting some children to
@@ -1770,13 +1773,15 @@ fdjt.CodexLayout=
                             text_parent=node;
                             pushnode=page_break.cloneNode(true);
                             addClass(page_break,"codexraggedsplit");
-                            pushnode.id="";}
+                            dropClass(pushnode,"codexrelocated");
+                            pushnode.removeAttribute("id");}
                         else {
                             keepnode=fdjtDOM("span.codexsplitstart");
                             pushnode=page_break.cloneNode(true);
                             if (!(keepnode.id))
                                 id=keepnode.id="CODEXTMPID"+(tmpid_count++);
-                            else pushnode.id="";}
+                            dropClass(pushnode,"codexrelocated");
+                            pushnode.removeAttribute("id");}
                         keepnode.appendChild(document.createTextNode(keeptext));
                         pushnode.innerHTML="";
                         pushnode.appendChild(document.createTextNode(pushtext));
