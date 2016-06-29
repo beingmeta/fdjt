@@ -212,6 +212,9 @@ fdjt.CodexLayout=
                     if (psv.length===2) {
                         psw=parseScale(psv[0]);
                         psh=parseScale(psv[1]);}
+                    else if (psv.length!==1) {
+                        fdjtLog.warn("Bad page scale value %s for %o",ps,elt);
+                        return;}
                     else psh=psw=parseScale(psv[0]);}
                 // Target width and height
                 var tw=width*psw, th=height*psh;
