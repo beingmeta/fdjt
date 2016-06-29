@@ -97,7 +97,8 @@ if (!(fdjt.UI)) fdjt.UI={};
     
     // The key is either stored as a DOM property, attribute, 
     function getKey(node){
-        return node.key||(node.getAttribute("data-key"))||(node.getAttribute("key"))||
+        return node.key||(node.getAttribute("data-key"))||
+            (node.getAttribute("key"))||
             ((hasClass(node,"variation"))&&(fdjtDOM.textify(node)))||
             ((hasClass(node,"completion"))&&(completionText(node,"")));}
     Completions.getKey=getKey;

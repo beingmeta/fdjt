@@ -496,7 +496,8 @@ fdjt.UI.ProgressBar=(function(){
         var target=fdjtDOM.T(evt);
         while (target)
             if ((target.nodeType===1) &&
-                ((target.tagName === 'INPUT') || (target.tagName === 'TEXTAREA')) &&
+                ((target.tagName === 'INPUT') || 
+                 (target.tagName === 'TEXTAREA')) &&
                 (target.getAttribute('HELPTEXT'))) {
                 var helptext=fdjtID(target.getAttribute('HELPTEXT'));
                 if (helptext) dropClass(helptext,"showhelp");

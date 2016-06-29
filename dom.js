@@ -377,7 +377,8 @@ fdjt.DOM=
                     elt.classList.add(classname);
                 return;}
             var classinfo=
-                (((attrib) ? (elt.getAttribute(attrib)||"") :(elt.className))||null);
+                (((attrib) ? (elt.getAttribute(attrib)||"") :
+                  (elt.className)) || null);
             if ((classinfo)&&(typeof classinfo !== "string")) {
                 fdjtLog.warn("Non string classname for %o",elt);
                 return false;}
@@ -420,7 +421,8 @@ fdjt.DOM=
                     elt.classList.remove(classname);
                 return;}
             var classinfo=
-                (((attrib) ? (elt.getAttribute(attrib)||"") :
+                (((attrib) ? 
+                  (elt.getAttribute(attrib)||"") :
                   (elt.className))||null);
             if ((typeof classinfo !== "string")||(classinfo===""))
                 return false;
@@ -483,7 +485,8 @@ fdjt.DOM=
                 elt.classList.toggle(classname);
                 return;}
             var classinfo=
-                (((attrib) ? (elt.getAttribute(attrib)||"") :
+                (((attrib) ? 
+                  (elt.getAttribute(attrib)||"") :
                   (elt.className))||null);
             if ((typeof classinfo !== "string")||(classinfo==="")) {
                 if (attrib) elt.setAttribute(attrib,classname);
