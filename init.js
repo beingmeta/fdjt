@@ -153,6 +153,7 @@
         var isTouch = iPhone || iPad || isAndroid || isTouchPad;
         var isIOS=((iPhone)||(iPad))&&
             ((getMatch(ua,/\bVersion\/(\d+\.\d+)\b/gi,1))||(true));
+        var isFixedFrame = iPhone || iPad || isAndroid || isTouchPad || isIOS;
         
         var opt_string=stdspace(
             ((isAndroid)?(" Android/"+isAndroid):(""))+
@@ -169,7 +170,8 @@
                 ((iPhone)?(" iPhone"):(""))+
                 ((iPad)?(" iPad"):(""))+
                 ((isTouchPad)?(" TouchPad"):(""))+
-                ((isTouch)?(" touch"):(" mouse")));
+                ((isTouch)?(" touch"):(" mouse"))+
+                ((isFixedFrame)?(" fixedframe"):("")));
         if (navigator.vendor) device.vendor=navigator.vendor;
         if (navigator.platform) device.platform=navigator.platform;
         if (navigator.oscpu) device.oscpu=navigator.oscpu;
@@ -213,8 +215,10 @@
         if (isLinux) device.linux=true;
         if (isTouch) device.touch=true;
         else device.mouse=true;
+        if (isFixedFrame) device.fixedframe=true;
         fdjtLog("Device: %j",device);}
     
+    // Run this right away
     (function(){
         /* global window: false */
         if ((typeof window !=="undefined")&&(window.navigator)&&
