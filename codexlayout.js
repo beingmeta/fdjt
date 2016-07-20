@@ -2694,15 +2694,19 @@ fdjt.CodexLayout=
                 if (ondone) ondone();};}
         function cacheLayout(layout_id,content){
             function caching(resolve,reject){
-                if (layoutDB)
-                    return cacheLayoutIDB(layoutDB,layout_id,content,resolve,reject);
+                if (layoutDB) {
+                    if (layoutDB === window.localStorage) {
+                        setLocal(layout_id,content);
+                        if (resolve) resolve(layoutDB);}
+                    else return cacheLayoutIDB(
+                        layoutDB,layout_id,content,resolve,reject);}
                 else {
                     return useIndexedDB()
                         .then(function layoutCached(db){
-                            layoutDB=CodexLayout.layoutDB=window.LocalStorage;
+                            layoutDB=CodexLayout.layoutDB=window.localStorage;
                             cacheLayoutIDB(db,layout_id,content,resolve,reject);})
                         .catch(function noLayoutIDB(){
-                            layoutDB=CodexLayout.layoutDB=window.LocalStorage;
+                            layoutDB=CodexLayout.layoutDB=window.localStorage;
                             setLocal(layout_id,content);
                             if (resolve) resolve(layoutDB);});}}
             return new Promise(caching);}
