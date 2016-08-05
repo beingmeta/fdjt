@@ -951,11 +951,10 @@ fdjt.CodexLayout=
                         // it's big enough and far down enough, we
                         // split the current block, making a slightly
                         // short page.
-                        ((next)&&(geom.height>3*lh)&&
+                        ((next)&&(lh)&&(!(info.avoidbreakinside))&&
+                         (geom.height>3*lh)&&
                          (((page_height-geom.bottom)/page_height)>0.9)&&
                          ((geom.bottom+(new Geometry(next).height))>page_height)&&
-                         (!(info.avoidbreakinside))&&
-                         (nextinfo.avoidbreakinside)&&
                          (nextinfo.avoidbreakinside))) {
                         var use_height=page_height;
                         if ((geom.bottom-padding_bottom)<=page_height)
