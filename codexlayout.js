@@ -1264,19 +1264,27 @@ fdjt.CodexLayout=
                     return edge;}
 
                 function findInfo(node,info){
-                    var i=info.length-1; while (i>=0) {
-                        var nodeinfo=info[i--];
-                        if (nodeinfo.node===node) return info;}
-                    return false;}
+                    var results=[];
+                    var nodes=(node.nodeType)?[node]:(node);
+                    var j=0, lim=nodes.length; while (j<lim) {
+                        node=nodes[j++];
+                        var i=info.length-1; while (i>=0) {
+                            var nodeinfo=info[i--];
+                            if (nodeinfo.node===node) results.push(info);}}
+                    return results;}
 
+                // checkTerminal propagates pagebreak constraints up
+                // or down the DOM.  An 'edge' of the DOM based on a
+                // node are all the parents (containers) for which the
+                // node is the first or last content-bearing child (or
+                // n-child).
                 function checkTerminal(node,root,info){
+                    // This means its been visited before
                     if (hasClass(node,"codexterminal")) return;
                     var front_edge=getFrontEdge(node,root);
                     var back_edge=getBackEdge(node,root);
                     var avoid_before=false, force_before=false;
                     var avoid_after=false, force_after=false;
-                    var front_info=(front_edge)&&(findInfo(front_edge,info));
-                    var back_info=(back_edge)&&(findInfo(back_edge,info));
                     var i=0, lim=front_edge.length; if (lim>1) {
                         while (i<lim) {
                             if (avoidBreakAfter(front_edge[i]))
@@ -1293,22 +1301,32 @@ fdjt.CodexLayout=
                             i++;}}
                     if ((avoid_after)&&(force_after)) {
                         /* Avoid brain exploding */}
-                    else if (avoid_after) {
-                        if (front_info) front_info.avoidbreakafter=true;
-                        addClass(front_edge,"AVOIDBREAKAFTER");}
-                    else if (force_after) {
-                        if (front_info) front_info.forcebreakafter=true;
-                        addClass(front_edge,"FORCEBREAKAFTER");}
-                    else {}
+                    else if (!((avoid_after)||(force_after))) {
+                        /* Nothing to see here */ }
+                    else {
+                        var front_info=findInfo(front_edge,info);
+                        var fi=0, fi_lim=front_info.length;
+                        if (avoid_after) {
+                            addClass(front_edge,"AVOIDBREAKAFTER");
+                            while (fi<fi_lim) {front_info[fi++].avoidbreakafter=true;}}
+                        else if (force_after) {
+                            addClass(front_edge,"FORCEBREAKAFTER");
+                            while (fi<fi_lim) {front_info[fi++].forcebreakafter=true;}}
+                        else {}}
                     if ((avoid_before)&&(force_before)) {
                         /* Avoid brain exploding */}
-                    else if (avoid_before) {
-                        if (back_info) back_info.avoidbreakbefore=true;
-                        addClass(back_edge,"AVOIDBREAKBEFORE");}
-                    else if (force_before) {
-                        if (back_info) back_info.forcebreakbefore=true;
-                        addClass(back_edge,"FORCEBREAKBEFORE");}
-                    else {}
+                    else if (!((avoid_before)||(force_before))) {
+                        /* Nothing to see here */ }
+                    else {
+                        var back_info=findInfo(back_edge,info);
+                        var bi=0, bi_lim=back_info.length;
+                        if (avoid_before) {
+                            addClass(back_edge,"AVOIDBREAKBEFORE");
+                            while (bi<bi_lim) back_info[bi++].avoidbreakbefore=true;}
+                        else if (force_before) {
+                            addClass(back_edge,"FORCEBREAKBEFORE");
+                            while (bi<bi_lim) back_info[bi++].forcebreakbefore=true;}
+                        else {}}
                     addClass(node,"codexterminal");}
                 
                 function emptyNode(node){
