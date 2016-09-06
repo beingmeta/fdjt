@@ -85,7 +85,7 @@ div.fdjtclearfloats {
 /* We use color, rather than bolding for inline(ish)
    checkspans to avoid distorting layouts too much. */
 span.checkspan, th.checkspan, td.checkspan,
-.inlinecheckspan, .flatcheckspan {
+.inlinecheckspan, .flatcheckspan, .checkspan.flatcheckspan {
     color: rgba(0,0,0,0.7);}
 
 .checkspan .alt { font-size: inherit; color: black;}
@@ -125,7 +125,8 @@ span.checkspan.longspan, a.checkspan.longspan {
 span.checkspan.ischecked,
 th.checkspan.ischecked, th.checkspan[checked],
 td.checkspan.ischecked, td.checkspan[checked],
-.inlinecheckspan.ischecked, .flatcheckspan.ischecked {
+.inlinecheckspan.ischecked, .flatcheckspan.ischecked,
+.checkspan.inlinecheckspan.ischecked, .checkspan.flatcheckspan.ischecked  {
     font-weight: normal; color: black;}
 
 .checkspan[checked] .alt { font-size: 80%; font-weight: normal;}
