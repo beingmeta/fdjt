@@ -1,7 +1,7 @@
 (function() {
     "use strict";
     /* For jshint */
-    /* global global: false, window: false, 
+    /* global global: false, window: false,
               module: false, setTimeout: false */
     var root;
 
@@ -103,7 +103,7 @@
         }
         this._deferreds = null;
     }
-    
+
     function Handler(onFulfilled, onRejected, resolve, reject){
         this.onFulfilled =
             typeof onFulfilled === 'function' ? onFulfilled : null;
@@ -151,7 +151,7 @@
                                    resolve, reject));
             });
         };
-    
+
     PromiseFillIn.all = function () {
         var args = Array.prototype.slice.call(
             arguments.length === 1 && isArray(arguments[0]) ?
