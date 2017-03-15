@@ -364,15 +364,11 @@ fdjt.Codex=
 
         function stripBottomStyles(node,keep){
             var style=node.style;
-            if ((keep)&&(!(node.hasAttribute("data-savedstyle")))) 
-                node.setAttribute("data-savedstyle",style.cssText);
             style.paddingBottom="0px";
             style.borderBottomWidth="0px";
             style.marginBottom="0px";}
         function stripTopStyles(node,keep){
             var style=node.style;
-            if ((keep)&&(!(node.hasAttribute("data-savedstyle"))))
-                node.setAttribute("data-savedstyle",style.cssText);
             style.textIndent="0px";
             style.paddingTop="0px";
             style.borderTopWidth="0px";
@@ -440,8 +436,6 @@ fdjt.Codex=
             var nodestyle=node.getAttribute("style")||"";
             var newstyle=nodestyle+((nodestyle)?("; "):(""))+
                 "margin-top: 0px !important;";
-            if (!(node.hasAttribute("data-savedstyle")))
-                node.setAttribute("data-savedstyle",nodestyle);
             node.setAttribute("style",newstyle);
             addClass(node,"codexpagetop");
             if (node.childNodes) {
@@ -1877,7 +1871,7 @@ fdjt.Codex=
                 function setting_layout(resolve,reject){
                     try {
                         var frag=document.createElement("div");
-                        var all_ids=[], saved_ids={};
+                        var all_ids=[];
                         var dupids=[], dupstarts={}, restoremap={};
                         var curnodes=[], newdups={}, pagescales=[];
                         if (trace)
@@ -1918,22 +1912,15 @@ fdjt.Codex=
                                 var oclass=original.className;
                                 var crumb=document.createTextNode("");
                                 classname=classname.replace(/\bcodexrestore\b/,"");
-                                replaceNode(original,crumb);
-                                crumbs[id]=crumb;
                                 replaceNode(restore,original);
                                 if ((classname)&&(classname!==oclass)) {
-                                    if ((oclass)&&(typeof oclass === "string"))
-                                        original.setAttribute("data-savedclass",oclass);
                                     original.className=classname;}
                                 if (style!==ostyle) {
-                                    if (ostyle) original.setAttribute(
-                                        "data-savedstyle",ostyle);
                                     original.setAttribute("style",style);}
-                                if ((classname.search)&&(classname.search(/\bcodexpagetop\b/)>=0)) {
-                                    markPageTop(original,true);}}
-                            else if (original) {
-                                saved_ids[id]=original;
-                                if (original.id) original.removeAttribute("id");}}
+                                if ((classname.search)&&
+                                    (classname.search(/\bcodexpagetop\b/)>=0)) {
+                                    markPageTop(original,true);}} 
+                            if (original.id) original.removeAttribute("id");}
                         if (trace) fdjtLog("Gathering lostids");
                         var lostids=layout.lostids={};
                         var really_lost=lostids._all_ids=[];
@@ -1958,8 +1945,6 @@ fdjt.Codex=
                             container.appendChild(addpage);}
                         layout.pages=addpages;
                         dups=layout.dups=newdups;
-                        saved_ids._all_ids=all_ids;
-                        layout.saved_ids=saved_ids;
                         layout.page=addpages[0];
                         layout.pagenum=parseInt(
                             layout.page.getAttribute("data-pagenum"),10);}
@@ -2179,10 +2164,6 @@ fdjt.Codex=
                             var dupi=0, ndups=alldups.length;
                             while (dupi<ndups) {
                                 var dup=alldups[dupi++];
-                                if (!(dup.hasAttribute(dup,"data-savedstyle"))) 
-                                    dup.setAttribute(
-                                        "data-savedstyle",
-                                        dup.getAttribute("style")||"");
                                 dup.style.listStyleType="none";}}
                         lastdup.className=lastdup.className.replace(
                                 /\bcodexdup\b/,"codexdupend");}
