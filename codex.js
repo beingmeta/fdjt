@@ -1920,7 +1920,8 @@ fdjt.Codex=
                                 if ((classname.search)&&
                                     (classname.search(/\bcodexpagetop\b/)>=0)) {
                                     markPageTop(original,true);}} 
-                            if (original.id) original.removeAttribute("id");}
+                            if ((original) && (original.id))
+                                original.removeAttribute("id");}
                         if (trace) fdjtLog("Gathering lostids");
                         var lostids=layout.lostids={};
                         var really_lost=lostids._all_ids=[];
