@@ -267,6 +267,7 @@ fdjt.UI.Highlight=(function(){
             fdjtDOM.appendArray(span,arguments,4);
         return span;}
     fdjtUI.CheckSpan=CheckSpan;
+    CheckSpan.useEvent = false;
 
     function checkable(elt){
         return (elt.nodeType===1)&&
@@ -400,9 +401,11 @@ fdjt.UI.Highlight=(function(){
             var j=0, jlim=inputs.length;
             while (j<jlim) {
                 var input=inputs[j++];
-                if ((input.type==='radio')||(input.type==='checkspan')) {
+                if ((input.type==='radio')||(input.type==='checkbox')) {
                     if (input.checked) addClass(checkspan,"ischecked");
                     if (input.disabled) addClass(checkspan,"isdisabled");
+                    if (fdjtDOM.hasParent(checkspan,".autosetup"))
+                        fdjtDOM.addListener(checkspan,"click",checkspan_onclick);
                     break;}}}}
     fdjtUI.CheckSpan.initCheckspans=initCheckspans;
 
